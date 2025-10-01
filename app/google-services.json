@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1040243223335",
+    "project_id": "seekr-b28cf",
+    "storage_bucket": "seekr-b28cf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1040243223335:android:90a92630d4c0d6e2e79702",
+        "android_client_info": {
+          "package_name": "com.android.sample"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA--DIXXpQUJtGXJ4TGa6MheNI8zIr4YnE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
