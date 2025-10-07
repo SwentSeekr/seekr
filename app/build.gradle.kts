@@ -93,6 +93,7 @@ android {
 }
 
 sonar {
+    //disable automatic analysis
     properties {
         property("sonar.projectKey", "SwentSeekr_seekr")
         property("sonar.projectName", "seekr")
