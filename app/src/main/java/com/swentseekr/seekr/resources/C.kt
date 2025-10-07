@@ -1,4 +1,4 @@
-package com.android.sample.resources
+package com.swentseekr.seekr.resources
 
 // Like R, but C
 object C {
