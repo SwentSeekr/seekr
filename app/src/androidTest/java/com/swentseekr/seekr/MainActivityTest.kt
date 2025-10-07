@@ -12,14 +12,14 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class MainActivityTest {
 
-    @get:Rule
-    val composeRule = createAndroidComposeRule<MainActivity>()
+  @get:Rule val composeRule = createAndroidComposeRule<MainActivity>()
 
-    @Test
-    fun mainSurface_isDisplayed() {
-        // Verifies the Surface with the expected test tag exists and is visible
-        composeRule.onNodeWithTag(C.Tag.main_screen_container, useUnmergedTree = true)
-            .assertExists()
-            .assertIsDisplayed()
-    }
+  @Test
+  fun mainSurface_isDisplayed() {
+    // Verifies the Surface with the expected test tag exists and is visible
+    composeRule
+        .onNodeWithTag(C.Tag.main_screen_container, useUnmergedTree = true)
+        .assertExists()
+        .assertIsDisplayed()
+  }
 }
