@@ -16,15 +16,17 @@ import com.swentseekr.seekr.resources.C
 class MainActivity : ComponentActivity() {
   public override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setContent {
-      // A surface container using the 'background' color from the theme
-      Surface(
-          modifier = Modifier.fillMaxSize().semantics { testTag = C.Tag.main_screen_container },
-          color = MaterialTheme.colorScheme.background) {
-            Greeting("Android")
-          }
-    }
+    setContent { MainScreen() }
   }
+}
+
+@Composable
+fun MainScreen() {
+  Surface(
+      modifier = Modifier.fillMaxSize().semantics { testTag = C.Tag.main_screen_container },
+      color = MaterialTheme.colorScheme.background) {
+        Greeting("Android")
+      }
 }
 
 @Composable
