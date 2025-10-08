@@ -1,7 +1,7 @@
-package com.android.sample.model.hunt
+package com.swentseekr.seekr.model.hunt
 
-import com.android.sample.model.author.Author
-import com.android.sample.model.map.Location
+import com.swentseekr.seekr.model.author.Author
+import com.swentseekr.seekr.model.map.Location
 
 data class Hunt(
     val start: Location,
