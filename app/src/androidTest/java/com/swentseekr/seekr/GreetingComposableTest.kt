@@ -22,4 +22,27 @@ class GreetingComposableTest {
         .assertIsDisplayed()
         .assertTextEquals("Hello Android!")
   }
+
+  // 🧩 Additional coverage improvement
+  @Test
+  fun greeting_rendersDifferentName() {
+    composeRule.setContent { Greeting(name = "World") }
+
+    composeRule
+        .onNodeWithTag(C.Tag.greeting, useUnmergedTree = true)
+        .assertExists()
+        .assertIsDisplayed()
+        .assertTextEquals("Hello World!")
+  }
+
+  @Test
+  fun greeting_rendersEmptyName() {
+    composeRule.setContent { Greeting(name = "") }
+
+    composeRule
+        .onNodeWithTag(C.Tag.greeting, useUnmergedTree = true)
+        .assertExists()
+        .assertIsDisplayed()
+        .assertTextEquals("Hello !")
+  }
 }
