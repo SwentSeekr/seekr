@@ -1,4 +1,4 @@
-package com.android.sample
+package com.swentseekr.seekr
 
 import org.junit.Assert.*
 import org.junit.Test

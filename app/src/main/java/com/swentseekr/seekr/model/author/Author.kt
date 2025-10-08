@@ -1,4 +1,4 @@
-package com.android.sample.model.author
+package com.swentseekr.seekr.model.author
 
 data class Author(
     val pseudonym: String,
