@@ -143,6 +143,8 @@ dependencies {
     implementation(libs.compose.ui.graphics)
     // Material Design 3
     implementation(libs.compose.material3)
+    // Jetpack Navigation for Compose
+    implementation("androidx.navigation:navigation-compose:2.7.7")
     // Integration with activities
     implementation(libs.compose.activity)
     // Integration with ViewModels
