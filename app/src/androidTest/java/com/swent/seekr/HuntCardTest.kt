@@ -33,8 +33,7 @@ class HuntCardTest {
           difficulty = Difficulty.DIFFICULT,
           author = Author("spike man", "", 1, 2.5, 3.0),
           image = R.drawable.ic_launcher_foreground, // ou une image de ton projet
-          reviewRate = 4.5
-      )
+          reviewRate = 4.5)
 
   @Test
   fun huntCard_displaysTitleAndAuthor() {
