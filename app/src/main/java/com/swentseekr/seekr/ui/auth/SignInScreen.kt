@@ -44,6 +44,13 @@ object SignInScreenTestTags {
 }
 
 @Composable
+/**
+ * Displays the Google sign-in screen.
+ *
+ * @param authViewModel ViewModel managing authentication state.
+ * @param credentialManager Google credentials manager.
+ * @param onSignedIn Callback called after successful sign-in.
+ */
 fun SignInScreen(
     authViewModel: AuthViewModel = viewModel(),
     credentialManager: CredentialManager = CredentialManager.create(LocalContext.current),
@@ -68,7 +75,7 @@ fun SignInScreen(
     }
   }
 
-  Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
+  Scaffold { padding ->
     Column(
         modifier = Modifier.fillMaxSize().background(Color(0xFF60BA37)).padding(padding),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -110,6 +117,14 @@ fun SignInScreen(
   }
 }
 
+/**
+ * Composable for a Google Sign-In button.
+ *
+ * Displays a button styled with the Google logo and text. Triggers the provided `onSignInClick`
+ * callback when pressed.
+ *
+ * @param onSignInClick Lambda called when the button is clicked.
+ */
 @Composable
 fun GoogleSignInButton(onSignInClick: () -> Unit) {
   Button(
