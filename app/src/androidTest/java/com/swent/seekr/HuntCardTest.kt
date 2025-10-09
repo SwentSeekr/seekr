@@ -4,16 +4,10 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.sample.ui.components.HuntCard
 import com.android.sample.ui.components.HuntCardPreview
-import com.swent.seekr.model.author.Author
-import com.swent.seekr.model.hunt.Difficulty
-import com.swent.seekr.model.hunt.Hunt
-import com.swent.seekr.model.hunt.HuntStatus
-import com.swent.seekr.model.map.Location
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import com.swent.seekr.R
-
 
 @RunWith(AndroidJUnit4::class)
 class HuntCardTest {
