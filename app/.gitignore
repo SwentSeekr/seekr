@@ -1,5 +1,33 @@
-./idea
-
-/build
-/app/build
+# Android Studio / IntelliJ
+.idea/
+*.iml
+.gradle/
 local.properties
+
+# Build directories
+/build/
+app/build/
+
+# Firebase / Google services
+google-services.json
+app/google-services.json
+
+# Signing keys
+*.keystore
+*.jks
+
+# Log and temporary files
+*.log
+*.tmp
+*.lock
+
+# Generated files
+captures/
+outputs/
+navigation.json
+*.apk
+*.aab
+
+# OS-specific
+.DS_Store
+Thumbs.db
