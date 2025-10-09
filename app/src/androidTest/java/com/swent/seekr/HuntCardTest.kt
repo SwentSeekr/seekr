@@ -4,9 +4,15 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.sample.ui.components.HuntCard
 import com.android.sample.ui.components.HuntCardPreview
+import com.swent.seekr.model.author.Author
+import com.swent.seekr.model.hunt.Difficulty
+import com.swent.seekr.model.hunt.Hunt
+import com.swent.seekr.model.hunt.HuntStatus
+import com.swent.seekr.model.map.Location
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.swent.seekr.R
 
 @RunWith(AndroidJUnit4::class)
 class HuntCardTest {
@@ -27,7 +33,8 @@ class HuntCardTest {
           difficulty = Difficulty.DIFFICULT,
           author = Author("spike man", "", 1, 2.5, 3.0),
           image = R.drawable.ic_launcher_foreground, // ou une image de ton projet
-          reviewRate = 4.5)
+          reviewRate = 4.5
+      )
 
   @Test
   fun huntCard_displaysTitleAndAuthor() {
