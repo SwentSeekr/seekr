@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.swentseekr.seekr.R
 
 /**
  * Displays a user's profile picture in a circular shape.
@@ -19,8 +20,11 @@ import androidx.compose.ui.unit.dp
 fun ProfilePicture(
     profilePicture: Int,
 ) {
+  val painter =
+      runCatching { painterResource(id = profilePicture) }
+          .getOrElse { painterResource(id = R.drawable.empty_user) }
   Image(
-      painter = painterResource(id = profilePicture),
+      painter = painter,
       contentDescription = "Profile Picture",
       modifier = Modifier.padding(horizontal = 4.dp).size(100.dp).clip(CircleShape))
 }

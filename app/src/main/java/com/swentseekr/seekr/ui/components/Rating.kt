@@ -15,8 +15,15 @@ import com.swentseekr.seekr.R
  * @param rating The numeric rating (0.0 - 5.0).
  * @param type The type of rating to display (STAR or SPORT).
  */
+val ICON_SIZE = 20.dp
+val MAX_RATING = 5
+val MIN_RATING = 0.0
+
 @Composable
 fun Rating(rating: Double, type: RatingType) {
+  if (rating > MAX_RATING || rating < MIN_RATING) {
+    throw IllegalArgumentException("Rating must be between 0.0 and 5.0")
+  }
 
   val image =
       if (type == RatingType.SPORT) {
@@ -27,20 +34,20 @@ fun Rating(rating: Double, type: RatingType) {
   Row {
     val fullStars = rating.toInt()
     val hasHalfStar = (rating - fullStars) >= 0.5
-    val emptyStars = 5 - fullStars - if (hasHalfStar) 1 else 0
+    val emptyStars = MAX_RATING - fullStars - if (hasHalfStar) 1 else 0
 
     repeat(fullStars) {
       Image(
           painter = painterResource(image),
           contentDescription = "Full Rating",
-          modifier = Modifier.size(20.dp))
+          modifier = Modifier.size(ICON_SIZE))
     }
     if (hasHalfStar) {
       Image(
           painter = painterResource(image), // I should change the image.
           // I will do this as soon as I have a half image in my resources
           contentDescription = "Half Rating",
-          modifier = Modifier.size(20.dp))
+          modifier = Modifier.size(ICON_SIZE))
     }
     repeat(emptyStars) {
       Image(
@@ -48,7 +55,7 @@ fun Rating(rating: Double, type: RatingType) {
           // I should change the image.
           // I will do this as soon as I have a half image in my resources
           contentDescription = "Empty Rating",
-          modifier = Modifier.size(20.dp))
+          modifier = Modifier.size(ICON_SIZE))
     }
   }
 }
