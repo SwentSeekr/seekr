@@ -38,7 +38,7 @@ fun Rating(rating: Double, type: RatingType) {
     if (hasHalfStar) {
       Image(
           painter = painterResource(image), // I should change the image.
-          //I will do this as soon as I have a half image in my resources
+          // I will do this as soon as I have a half image in my resources
           contentDescription = "Half Rating",
           modifier = Modifier.size(20.dp))
     }
@@ -46,7 +46,7 @@ fun Rating(rating: Double, type: RatingType) {
       Image(
           painter = painterResource(image),
           // I should change the image.
-          //I will do this as soon as I have a half image in my resources
+          // I will do this as soon as I have a half image in my resources
           contentDescription = "Empty Rating",
           modifier = Modifier.size(20.dp))
     }
