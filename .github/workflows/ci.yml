@@ -73,6 +73,11 @@ jobs:
         run: |
           chmod +x ./gradlew
 
+      - name: Decode google-services.json
+        run: echo "$GOOGLE_SERVICES" | base64 --decode > app/google-services.json
+        env:
+          GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES }}
+
       # Check formatting
       - name: KTFmt Check
         run: |
