@@ -12,11 +12,11 @@ jacoco {
 }
 
 android {
-    namespace = "com.swent.com.swent.seekr"
+    namespace = "com.swent.seekr"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.swent.com.swent.seekr"
+        applicationId = "com.swent.seekr"
         minSdk = 28
         targetSdk = 34
         versionCode = 1
