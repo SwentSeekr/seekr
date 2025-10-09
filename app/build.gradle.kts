@@ -5,12 +5,18 @@ plugins {
     alias(libs.plugins.sonar)
     id("jacoco")
     id("com.google.gms.google-services")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 jacoco {
     toolVersion = "0.8.12"
 }
 
+secrets {
+    propertiesFileName = "secrets.properties"
+
+    defaultPropertiesFileName = "local.defaults.properties"
+}
 
 android {
     namespace = "com.swentseekr.seekr"
@@ -131,6 +137,14 @@ dependencies {
 
     // Cloud Firestore
     implementation("com.google.firebase:firebase-firestore")
+
+    // Google Maps Compose library
+    val mapsComposeVersion = "4.4.1"
+    implementation("com.google.maps.android:maps-compose:$mapsComposeVersion")
+    // Google Maps Compose utility library
+    implementation("com.google.maps.android:maps-compose-utils:$mapsComposeVersion")
+    // Google Maps Compose widgets library
+    implementation("com.google.maps.android:maps-compose-widgets:$mapsComposeVersion")
 
     // ------------- Jetpack Compose ------------------
     val composeBom = platform(libs.compose.bom)
