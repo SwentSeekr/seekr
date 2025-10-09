@@ -1,4 +1,4 @@
-package com.android.sample.ui.components
+package com.swentseekr.seekr.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,6 +16,10 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,8 +38,20 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
 
+// The comment parts are for the like button feature,
+// it will be added as soon as the OverviewViewModel and Ui work together
+/**
+ * Displays a card representing a hunt with title, author, image, difficulty, distance, and time.
+ *
+ * @param hunt The object containing all hunt details to display.
+ */
 @Composable
-fun HuntCard(hunt: Hunt) {
+fun HuntCard(
+    // huntUiState: HuntUiState,
+    // onLikeClick: (String) -> Unit = {}
+    hunt: Hunt
+) {
+  // val hunt = huntUiState.hunt
   Card(modifier = Modifier.padding(8.dp).fillMaxWidth().height(150.dp)) {
     Column {
       Row {
@@ -48,8 +64,9 @@ fun HuntCard(hunt: Hunt) {
             imageVector = Icons.Filled.Favorite,
             contentDescription = "Like Button",
             modifier = Modifier.testTag("").padding(4.dp),
+            // .clickable { onLikeClick(hunt.uid) },
+            // tint = if(huntUiState.isLiked) Color.Red else Color.Gray)
             tint = Color.Red)
-        // if (/hunt.isLiked/) Color.Red else Color.Gray)
       }
       Text("by ${hunt.author.pseudonym}", modifier = Modifier.padding(horizontal = 4.dp))
       Row {
@@ -59,7 +76,7 @@ fun HuntCard(hunt: Hunt) {
             modifier = Modifier.padding(horizontal = 4.dp).size(100.dp).clip(RectangleShape))
         Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+            horizontalAlignment = Alignment.CenterHorizontally) {
               Box(
                   modifier =
                       Modifier.padding(4.dp)
@@ -102,10 +119,10 @@ fun HuntCard(hunt: Hunt) {
             }
       }
     }
-    // Rating(rating = hunt.review, RatingType.FUN)
   }
 }
 
+/** Preview of [HuntCard] composable for Android Studio. */
 @Preview
 @Composable
 fun HuntCardPreview() {
@@ -124,5 +141,10 @@ fun HuntCardPreview() {
           author = Author("spike man", "", 1, 2.5, 3.0),
           image = R.drawable.ic_launcher_foreground, // ou une image de ton projet
           reviewRate = 4.5)
-  HuntCard(hunt)
+  var isLiked by remember { mutableStateOf(false) }
+  HuntCard(
+      hunt
+      // HuntUiState(hunt, isLiked = isLiked),
+      // onLikeClick = { isLiked = !isLiked }
+      )
 }
