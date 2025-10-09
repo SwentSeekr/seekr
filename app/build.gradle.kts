@@ -7,6 +7,11 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+
 android {
     namespace = "com.swentseekr.seekr"
     compileSdk = 34
@@ -37,10 +42,6 @@ android {
             enableUnitTestCoverage = true
             enableAndroidTestCoverage = true
         }
-    }
-
-    testCoverage {
-        jacocoVersion = "0.8.8"
     }
 
     buildFeatures {
@@ -123,7 +124,13 @@ dependencies {
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
-    implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
+    implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
+
+    // Firebase Authentication
+    implementation("com.google.firebase:firebase-auth")
+
+    // Cloud Firestore
+    implementation("com.google.firebase:firebase-firestore")
 
     // ------------- Jetpack Compose ------------------
     val composeBom = platform(libs.compose.bom)
@@ -151,6 +158,7 @@ dependencies {
 
     // ----------       Robolectric     ------------
     testImplementation(libs.robolectric)
+    testImplementation("org.robolectric:robolectric:4.12.1")
 }
 
 tasks.withType<Test> {
@@ -189,4 +197,10 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
         include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
     })
+}
+
+tasks.withType<Test>().configureEach {
+    jacoco {
+        toolVersion = "0.8.12"
+    }
 }
