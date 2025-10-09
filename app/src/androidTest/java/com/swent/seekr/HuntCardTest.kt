@@ -14,6 +14,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import com.swent.seekr.R
 
+
 @RunWith(AndroidJUnit4::class)
 class HuntCardTest {
 
