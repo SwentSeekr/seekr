@@ -78,9 +78,8 @@ fun ProfileScreen(
     profile: Profile,
     currentUserId: String,
 ) {
-  val isMyProfile =
-      profile.uid ==
-          currentUserId // to impelement in the view model with auth (firebase authentication)
+  val isMyProfile = profile.uid == currentUserId // to impelement in the view model with auth
+  // (firebase authentication) when viewModel will be implemented
   var selectedTab by remember { mutableStateOf(ProfileTab.MY_HUNTS) }
   Scaffold(
       floatingActionButton = {
