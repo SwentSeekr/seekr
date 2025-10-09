@@ -37,12 +37,14 @@ class AuthViewModel() : ViewModel() {
   private fun checkAuthStatus() {
     val currentUser = auth.currentUser
     if (currentUser != null) {
-      _state.update { it.copy(
-              isLoading = false,
-              isAuthenticated = true,
-          )}
+      _state.update {
+        it.copy(
+            isLoading = false,
+            isAuthenticated = true,
+        )
+      }
     } else {
-      _state.update { it.copy(isLoading = false, isAuthenticated = false)}
+      _state.update { it.copy(isLoading = false, isAuthenticated = false) }
     }
   }
 
@@ -53,7 +55,7 @@ class AuthViewModel() : ViewModel() {
 
   // Clears error state and message
   fun cleanError() {
-    _state.update { it.copy(isError = false, errorMessage = null)}
+    _state.update { it.copy(isError = false, errorMessage = null) }
   }
 
   // Signs out the user and updates state
@@ -61,102 +63,93 @@ class AuthViewModel() : ViewModel() {
     viewModelScope.launch {
       try {
         auth.signOut()
-        _state.update { it.copy(isLoading = false, isAuthenticated = false)}
+        _state.update { it.copy(isLoading = false, isAuthenticated = false) }
         onSucess()
       } catch (e: Exception) {
-        _state.update { it.copy(
-                isLoading = false,
-                isError = true,
-                errorMessage = e.message,
-                isAuthenticated = false)}
+        _state.update {
+          it.copy(
+              isLoading = false, isError = true, errorMessage = e.message, isAuthenticated = false)
+        }
         onError(e.message ?: "Unknown error")
       }
     }
   }
 
-    // Signs in the user with Google credentials
-    fun signInWithGoogle(
-        context: Context,
-        credentialManager: CredentialManager,
-        onSucess: () -> Unit = {},
-        onError: (String) -> Unit = {},
-    ) {
-        if (_state.value.isLoading) return
-        viewModelScope.launch {
-            try {
-                _state.update { it.copy(isLoading = true, errorMessage = null) }
+  // Signs in the user with Google credentials
+  fun signInWithGoogle(
+      context: Context,
+      credentialManager: CredentialManager,
+      onSucess: () -> Unit = {},
+      onError: (String) -> Unit = {},
+  ) {
+    if (_state.value.isLoading) return
+    viewModelScope.launch {
+      try {
+        _state.update { it.copy(isLoading = true, errorMessage = null) }
 
-                // Create Google ID request option
-                val googleIdOption = getSignInOptions(context)
-
-                // Build credential request
-                val request = signInRequest(googleIdOption)
-
-                try {
-                    // Get credential from CredentialManager
-                    val response = getCredential(context, credentialManager, request)
-
-                    // Extract the Google ID token
-                    val googleIdTokenCredential =
-                        GoogleIdTokenCredential.createFrom(response.credential.data)
-                    val idToken = googleIdTokenCredential.idToken
-
-                    // Create Firebase credential and sign in
-                    val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
-                    val authResult = auth.signInWithCredential(firebaseCredential).await()
-
-                    // Update UI state based on authentication result
-                    if (authResult.user != null) {
-                        _state.update { it.copy(isLoading = false, isAuthenticated = true) }
-                        onSucess()
-                    } else {
-                        _state.update {
-                            it.copy(
-                                isLoading = false,
-                                errorMessage = "Authentication failed: No user returned"
-                            )
-                        }
-                        onError("Authentication failed: No user returned")
-                    }
-                } catch (e: GetCredentialCancellationException) {
-                    _state.update {
-                        it.copy(isLoading = false, errorMessage = "Failed to get credential: ${e.message}")
-                    }
-                    onError("Failed to get credential: ${e.message}")
-                }
-            } catch (e: Exception) {
-                _state.update {
-                    it.copy(isLoading = false, errorMessage = "Authentication failed: ${e.message}")
-                }
-                onError("Authentication failed: ${e.message}")
-            }
-        }
-    }
-
-    // Helper: builds the Google Sign-In option
-    private fun getSignInOptions(context: Context): GetSignInWithGoogleOption {
         // Create Google ID request option
-        return GetSignInWithGoogleOption
-            .Builder(context.getString(R.string.default_web_client_id))
-            .build()
-    }
+        val googleIdOption = getSignInOptions(context)
 
-    // Helper: builds the CredentialManager request
-    private fun signInRequest(googleIdOption: GetSignInWithGoogleOption): GetCredentialRequest {
         // Build credential request
-        return GetCredentialRequest
-            .Builder()
-            .addCredentialOption(googleIdOption)
-            .build()
-    }
+        val request = signInRequest(googleIdOption)
 
-    // Helper: invokes CredentialManager to fetch a credential
-    private suspend fun getCredential(
-        context: Context,
-        credentialManager: CredentialManager,
-        request: GetCredentialRequest
-    ): GetCredentialResponse {
-        // Get credential from CredentialManager
-        return credentialManager.getCredential(request = request, context = context)
+        try {
+          // Get credential from CredentialManager
+          val response = getCredential(context, credentialManager, request)
+
+          // Extract the Google ID token
+          val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(response.credential.data)
+          val idToken = googleIdTokenCredential.idToken
+
+          // Create Firebase credential and sign in
+          val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
+          val authResult = auth.signInWithCredential(firebaseCredential).await()
+
+          // Update UI state based on authentication result
+          if (authResult.user != null) {
+            _state.update { it.copy(isLoading = false, isAuthenticated = true) }
+            onSucess()
+          } else {
+            _state.update {
+              it.copy(isLoading = false, errorMessage = "Authentication failed: No user returned")
+            }
+            onError("Authentication failed: No user returned")
+          }
+        } catch (e: GetCredentialCancellationException) {
+          _state.update {
+            it.copy(isLoading = false, errorMessage = "Failed to get credential: ${e.message}")
+          }
+          onError("Failed to get credential: ${e.message}")
+        }
+      } catch (e: Exception) {
+        _state.update {
+          it.copy(isLoading = false, errorMessage = "Authentication failed: ${e.message}")
+        }
+        onError("Authentication failed: ${e.message}")
+      }
     }
+  }
+
+  // Helper: builds the Google Sign-In option
+  private fun getSignInOptions(context: Context): GetSignInWithGoogleOption {
+    // Create Google ID request option
+    return GetSignInWithGoogleOption.Builder(context.getString(R.string.default_web_client_id))
+        .build()
+  }
+
+  // Helper: builds the CredentialManager request
+  private fun signInRequest(googleIdOption: GetSignInWithGoogleOption): GetCredentialRequest {
+    // Build credential request
+    return GetCredentialRequest.Builder().addCredentialOption(googleIdOption).build()
+  }
+
+  // Helper: invokes CredentialManager to fetch a credential
+  private suspend fun getCredential(
+      context: Context,
+      credentialManager: CredentialManager,
+      request: GetCredentialRequest
+  ): GetCredentialResponse {
+    // Get credential from CredentialManager
+    return credentialManager.getCredential(request = request, context = context)
+  }
 }
