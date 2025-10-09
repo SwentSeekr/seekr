@@ -79,7 +79,7 @@ class AuthViewModel() : ViewModel() {
   fun signInWithGoogle(
       context: Context,
       credentialManager: CredentialManager,
-      onSucess: () -> Unit = {},
+      onSuccess: () -> Unit = {},
       onError: (String) -> Unit = {},
   ) {
     if (_state.value.isLoading) return
@@ -108,7 +108,7 @@ class AuthViewModel() : ViewModel() {
           // Update UI state based on authentication result
           if (authResult.user != null) {
             _state.update { it.copy(isLoading = false, isAuthenticated = true) }
-            onSucess()
+            onSuccess()
           } else {
             _state.update {
               it.copy(isLoading = false, errorMessage = "Authentication failed: No user returned")
