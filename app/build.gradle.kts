@@ -123,29 +123,34 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
 
-    // Compose
+    // ------------- Jetpack Compose ------------------
     val composeBom = platform(libs.compose.bom)
     implementation(composeBom)
     globalTestImplementation(composeBom)
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.material3)
+    // Integration with activities
     implementation(libs.compose.activity)
+    // Integration with ViewModels
     implementation(libs.compose.viewmodel)
+    // Android Studio Preview support
     implementation(libs.compose.preview)
     debugImplementation(libs.compose.tooling)
+    // UI Tests
     globalTestImplementation(libs.compose.test.junit)
     debugImplementation(libs.compose.test.manifest)
 
-    // Kaspresso
+    // --------- Kaspresso test framework ----------
     globalTestImplementation(libs.kaspresso)
     globalTestImplementation(libs.kaspresso.compose)
 
-    // Robolectric
+    // ----------       Robolectric     ------------
     testImplementation(libs.robolectric)
 }
 
 tasks.withType<Test> {
+    // Configure Jacoco for each tests
     configure<JacocoTaskExtension> {
         isIncludeNoLocationClasses = true
         excludes = listOf("jdk.internal.*")
@@ -180,4 +185,10 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
         include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
     })
+}
+
+tasks.withType<Test>().configureEach {
+    jacoco {
+        toolVersion = "0.8.12"
+    }
 }
