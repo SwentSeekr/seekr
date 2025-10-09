@@ -111,6 +111,7 @@ fun HuntCard(hunt: Hunt) {
 fun HuntCardPreview() {
   val hunt =
       Hunt(
+          uid = "hunt123",
           start = Location(40.7128, -74.0060, "New York"),
           end = Location(40.730610, -73.935242, "Brooklyn"),
           middlePoints = emptyList(),
@@ -121,7 +122,7 @@ fun HuntCardPreview() {
           distance = 5.0,
           difficulty = Difficulty.DIFFICULT,
           author = Author("spike man", "", 1, 2.5, 3.0),
-          image = R.drawable.ic_launcher_foreground // ou une image de ton projet
-          )
+          image = R.drawable.ic_launcher_foreground, // ou une image de ton projet
+          reviewRate = 4.5)
   HuntCard(hunt)
 }

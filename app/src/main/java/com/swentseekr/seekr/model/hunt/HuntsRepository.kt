@@ -1,7 +1,5 @@
 package com.swentseekr.seekr.model.hunt
 
-import com.android.sample.model.hunt.Hunt
-
 /** Represents a repository that manages Hunt items. */
 interface HuntsRepository {
   /** Generates and returns a new unique identifier for a Hunt item. */
