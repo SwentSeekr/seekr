@@ -29,6 +29,7 @@ object HuntRepositoryProvider {
                     image = 0,
                     reviewRate = 4.5),
             )
+        // sampleHunts.forEach { hunt -> GlobalScope.launch { addHunt(hunt) } }
 
         sampleHunts.forEach { hunt -> GlobalScope.launch { addHunt(hunt) } }
       }
