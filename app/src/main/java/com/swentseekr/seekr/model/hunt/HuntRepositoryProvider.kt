@@ -1,8 +1,5 @@
 package com.swentseekr.seekr.model.hunt
 
-import com.android.sample.model.hunt.Difficulty
-import com.android.sample.model.hunt.Hunt
-import com.android.sample.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.map.Location
 

@@ -1,7 +1,5 @@
 package com.swentseekr.seekr.model.hunt
 
-import com.android.sample.model.hunt.Hunt
-
 /** Represents a repository that manages a local list of hunts. */
 class HuntsRepositoryLocal : HuntsRepository {
   private val hunts = mutableListOf<Hunt>()

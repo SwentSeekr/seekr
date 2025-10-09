@@ -1,4 +1,4 @@
-package com.android.sample.model.hunt
+package com.swentseekr.seekr.model.hunt
 
 import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.map.Location
