@@ -2,4 +2,5 @@
     <string name="app_name">Seekr</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_second">SecondActivity</string>
+    <string name="default_web_client_id">test</string>
 </resources>
