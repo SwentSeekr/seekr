@@ -20,7 +20,9 @@ class SeekrNavigationTest {
     composeTestRule.setContent { SeekrApp() }
   }
 
+  // -------------------------------------------------
   // Tag existence tests
+  // -------------------------------------------------
   @Test
   fun allNavigationTagsAreDisplayed() {
     composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
@@ -29,7 +31,9 @@ class SeekrNavigationTest {
     composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_TAB).assertIsDisplayed()
   }
 
+  // -------------------------------------------------
   // Bottom bar visibility
+  // -------------------------------------------------
   @Test
   fun bottomNavigationIsAlwaysVisible() {
     composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
@@ -43,7 +47,9 @@ class SeekrNavigationTest {
     composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
   }
 
+  // -------------------------------------------------
   // Navigation actions
+  // -------------------------------------------------
   @Test
   fun canNavigateBetweenTabs() {
     // Start on Overview
@@ -83,8 +89,9 @@ class SeekrNavigationTest {
     composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
   }
 
-  // Extra tests for conditional coverage
-
+  // -------------------------------------------------
+  // Additional tests for better conditional coverage
+  // -------------------------------------------------
   @Test
   fun switchingTabsTriggersAllWhenBranches() {
     // Overview branch
@@ -108,27 +115,21 @@ class SeekrNavigationTest {
     composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
   }
 
+  // Explicit recomposition test to hit all branches
   @Test
-  fun verifySelectionStateChangesBetweenTabs() {
-    // Navigate to Map
-    composeTestRule.onNodeWithTag(NavigationTestTags.MAP_TAB).performClick()
-    // Then navigate to Profile
-    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_TAB).performClick()
-    // Then back to Overview — ensures both selected and unselected states evaluated
-    composeTestRule.onNodeWithTag(NavigationTestTags.OVERVIEW_TAB).performClick()
+  fun recomposesSeekrAppForEachRoute() {
+    val routes = listOf("overview", "map", "profile", "unknown")
 
-    // Navigation bar should remain visible
-    composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
-  }
+    routes.forEach { route ->
+      composeTestRule.setContent {
+        val navController = androidx.navigation.compose.rememberNavController()
+        // Navigate manually to each route to trigger all 'when' branches
+        navController.navigate(route)
+        SeekrApp(navController = navController)
+      }
 
-  @Test
-  fun triggersAllRoutesNavigationBlock() {
-    // This ensures all route cases in `onTabSelected` lambda are executed
-    composeTestRule.onNodeWithTag(NavigationTestTags.OVERVIEW_TAB).performClick()
-    composeTestRule.onNodeWithTag(NavigationTestTags.MAP_TAB).performClick()
-    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_TAB).performClick()
-
-    // Re-click overview to trigger `launchSingleTop = true` behavior
-    composeTestRule.onNodeWithTag(NavigationTestTags.OVERVIEW_TAB).performClick()
+      // The navigation bar should always appear, regardless of route
+      composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
+    }
   }
 }
