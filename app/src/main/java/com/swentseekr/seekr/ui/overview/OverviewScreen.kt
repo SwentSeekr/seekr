@@ -14,12 +14,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.swentseekr.seekr.hunt.HuntCard
 import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.ui.components.HuntCard
 
 object OverviewScreenTestTags {}
 

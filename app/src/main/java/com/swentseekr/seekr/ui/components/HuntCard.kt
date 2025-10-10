@@ -1,4 +1,4 @@
-package com.swentseekr.seekr.hunt
+package com.swentseekr.seekr.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
