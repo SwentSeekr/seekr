@@ -223,7 +223,7 @@ tasks.withType<Test>().configureEach {
         toolVersion = "0.8.12"
     }
 }
-configurations.all {
+configurations.matching { it.name.contains("test", ignoreCase = true) }.all {
     resolutionStrategy {
         force("org.jacoco:org.jacoco.agent:0.8.12")
         force("org.jacoco:org.jacoco.core:0.8.12")
