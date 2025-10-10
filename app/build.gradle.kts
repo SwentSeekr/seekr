@@ -137,6 +137,9 @@ dependencies {
     // Firebase Authentication
     implementation("com.google.firebase:firebase-auth")
 
+    // MockK for mocking in tests
+    testImplementation("io.mockk:mockk:1.13.5")
+
     // Cloud Firestore
     implementation("com.google.firebase:firebase-firestore")
 
@@ -218,5 +221,13 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
 tasks.withType<Test>().configureEach {
     jacoco {
         toolVersion = "0.8.12"
+    }
+}
+configurations.all {
+    resolutionStrategy {
+        force("org.jacoco:org.jacoco.agent:0.8.12")
+        force("org.jacoco:org.jacoco.core:0.8.12")
+        force("org.jacoco:org.jacoco.report:0.8.12")
+        force("org.jacoco:org.jacoco.ant:0.8.12")
     }
 }
