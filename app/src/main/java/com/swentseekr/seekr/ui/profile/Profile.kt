@@ -51,6 +51,23 @@ import com.swentseekr.seekr.ui.components.RatingType
  * @property doneHunts Hunts completed by the user.
  * @property likedHunts Hunts liked by the user.
  */
+object ProfileTestTags {
+  const val PROFILE_HUNTS_LIST = "PROFILE_HUNTS_LIST"
+
+  const val TAB_MY_HUNTS = "TAB_MY_HUNTS"
+  const val TAB_DONE_HUNTS = "TAB_DONE_HUNTS"
+  const val TAB_LIKED_HUNTS = "TAB_LIKED_HUNTS"
+
+  const val ADD_HUNT = "ADD_HUNT"
+
+  const val PROFILE_PSEUDONYM = "PROFILE_PSEUDONYM"
+  const val PROFILE_BIO = "PROFILE_BIO"
+  const val PROFILE_REVIEW_RATING = "PROFILE_REVIEW_RATING"
+  const val PROFILE_SPORT_RATING = "PROFILE_SPORT_RATING"
+
+  fun getTestTagForHuntCard(hunt: Hunt, index: Int): String = "HUNT_CARD_$index"
+}
+
 data class Profile(
     val uid: String,
     val author: Author,
@@ -84,9 +101,10 @@ fun ProfileScreen(
   Scaffold(
       floatingActionButton = {
         if (isMyProfile) {
-          FloatingActionButton(onClick = {}, modifier = Modifier.testTag("")) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = "Add")
-          }
+          FloatingActionButton(
+              onClick = {}, modifier = Modifier.testTag(ProfileTestTags.ADD_HUNT)) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Add")
+              }
         }
       }
 
@@ -107,13 +125,19 @@ fun ProfileScreen(
                       text = profile.author.pseudonym,
                       fontSize = 20.sp,
                       fontWeight = FontWeight.Bold,
-                      modifier = Modifier.padding(4.dp))
+                      modifier = Modifier.padding(4.dp).testTag(ProfileTestTags.PROFILE_PSEUDONYM))
                   Row {
-                    Text(text = "${profile.author.reviewRate}/5", modifier = Modifier.padding(4.dp))
+                    Text(
+                        text = "${profile.author.reviewRate}/5",
+                        modifier =
+                            Modifier.padding(4.dp).testTag(ProfileTestTags.PROFILE_REVIEW_RATING))
                     Rating(rating = profile.author.reviewRate, RatingType.STAR)
                   }
                   Row {
-                    Text(text = "${profile.author.sportRate}/5", modifier = Modifier.padding(4.dp))
+                    Text(
+                        text = "${profile.author.sportRate}/5",
+                        modifier =
+                            Modifier.padding(4.dp).testTag(ProfileTestTags.PROFILE_SPORT_RATING))
                     Rating(rating = profile.author.sportRate, RatingType.SPORT)
                   }
                 }
@@ -122,10 +146,16 @@ fun ProfileScreen(
           Text(
               text = profile.author.bio,
               fontSize = 16.sp,
-              modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp))
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .padding(horizontal = 16.dp, vertical = 8.dp)
+                      .testTag(ProfileTestTags.PROFILE_BIO))
 
           LazyColumn(
-              modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+              modifier =
+                  Modifier.fillMaxSize()
+                      .padding(horizontal = 16.dp)
+                      .testTag(ProfileTestTags.PROFILE_HUNTS_LIST),
               horizontalAlignment = Alignment.CenterHorizontally) {
                 item { CustomToolbar(selectedTab, onTabSelected = { selectedTab = it }) }
                 val huntsToDisplay =
@@ -139,7 +169,10 @@ fun ProfileScreen(
                   // val huntUiState = HuntUiState(hunt = hunt, isLiked = false, isAchived = false)
                   // // until I implement the ViewModel
                   // HuntCard(//huntUiState)
-                  HuntCard(hunt)
+                  HuntCard(
+                      hunt,
+                      modifier =
+                          Modifier.testTag(ProfileTestTags.getTestTagForHuntCard(hunt, index)))
                 }
               }
         }
@@ -197,28 +230,31 @@ fun CustomToolbar(selectedTab: ProfileTab, onTabSelected: (ProfileTab) -> Unit =
         imageVector = Icons.Filled.Menu,
         contentDescription = "My Hunts",
         modifier =
-            Modifier.testTag("")
-                .background(if (selectedTab == ProfileTab.MY_HUNTS) Color.Green else Color.White)
+            Modifier.background(
+                    if (selectedTab == ProfileTab.MY_HUNTS) Color.Green else Color.White)
                 .padding(horizontal = 40.dp, vertical = 10.dp)
-                .clickable { onTabSelected(ProfileTab.MY_HUNTS) },
+                .clickable { onTabSelected(ProfileTab.MY_HUNTS) }
+                .testTag(ProfileTestTags.TAB_MY_HUNTS),
     )
     Icon(
         imageVector = Icons.Filled.Check,
         contentDescription = "Done Hunts",
         modifier =
-            Modifier.testTag("")
-                .background(if (selectedTab == ProfileTab.DONE_HUNTS) Color.Green else Color.White)
+            Modifier.background(
+                    if (selectedTab == ProfileTab.DONE_HUNTS) Color.Green else Color.White)
                 .padding(horizontal = 60.dp, vertical = 10.dp)
-                .clickable { onTabSelected(ProfileTab.DONE_HUNTS) },
+                .clickable { onTabSelected(ProfileTab.DONE_HUNTS) }
+                .testTag(ProfileTestTags.TAB_DONE_HUNTS),
     )
     Icon(
         imageVector = Icons.Filled.Favorite,
         contentDescription = "Liked Hunts",
         modifier =
-            Modifier.testTag("")
-                .background(if (selectedTab == ProfileTab.LIKED_HUNTS) Color.Green else Color.White)
+            Modifier.background(
+                    if (selectedTab == ProfileTab.LIKED_HUNTS) Color.Green else Color.White)
                 .padding(horizontal = 40.dp, vertical = 10.dp)
-                .clickable { onTabSelected(ProfileTab.LIKED_HUNTS) },
+                .clickable { onTabSelected(ProfileTab.LIKED_HUNTS) }
+                .testTag(ProfileTestTags.TAB_LIKED_HUNTS),
     )
   }
 }

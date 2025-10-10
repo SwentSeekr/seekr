@@ -1,8 +1,11 @@
 package com.swentseekr.seekr
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.hunt.Difficulty
@@ -39,7 +42,7 @@ class HuntCardTest {
   @Test
   fun huntCard_displaysTitleAndAuthor() {
     val hunt = createFakeHunt()
-    composeTestRule.setContent { HuntCard(hunt) }
+    composeTestRule.setContent { HuntCard(hunt, modifier = Modifier.padding(2.dp)) }
 
     composeTestRule.onNodeWithText(hunt.title).assertIsDisplayed()
     composeTestRule.onNodeWithText("by ${hunt.author.pseudonym}").assertIsDisplayed()
@@ -48,7 +51,7 @@ class HuntCardTest {
   @Test
   fun huntCard_displaysDistanceDifficultyAndTime() {
     val hunt = createFakeHunt()
-    composeTestRule.setContent { HuntCard(hunt) }
+    composeTestRule.setContent { HuntCard(hunt, modifier = Modifier.padding(2.dp)) }
 
     composeTestRule.onNodeWithText(hunt.difficulty.toString()).assertIsDisplayed()
     composeTestRule.onNodeWithText("${hunt.distance} km").assertIsDisplayed()
@@ -58,7 +61,7 @@ class HuntCardTest {
   @Test
   fun huntCard_displaysFavoriteIcon() {
     val hunt = createFakeHunt()
-    composeTestRule.setContent { HuntCard(hunt) }
+    composeTestRule.setContent { HuntCard(hunt, modifier = Modifier.padding(2.dp)) }
 
     // On recherche l’icône favorite par son contentDescription
     composeTestRule.onNodeWithContentDescription("Like Button").assertIsDisplayed()
