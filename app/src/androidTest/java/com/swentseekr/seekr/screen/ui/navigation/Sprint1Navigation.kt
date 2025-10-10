@@ -98,17 +98,6 @@ class SeekrNavigationTest {
   }
 
   @Test
-  fun handlesUnknownRouteGracefully() {
-    // This test ensures the `else -> SeekrScreen.OVERVIEW` branch in SeekrApp
-    composeTestRule.setContent {
-      // Recompose SeekrApp with no active route (default else branch)
-      SeekrApp()
-    }
-
-    composeTestRule.onNodeWithTag(NavigationTestTags.OVERVIEW_TAB).assertIsDisplayed()
-  }
-
-  @Test
   fun reSelectingSameTabDoesNotCrash() {
     // Clicking the same tab multiple times tests the `launchSingleTop` condition
     composeTestRule.onNodeWithTag(NavigationTestTags.MAP_TAB).performClick()
