@@ -48,9 +48,9 @@ class SeekrNavigationTest {
   fun canNavigateBetweenTabs() {
     // Start on Overview
     composeTestRule
-      .onNodeWithTag(NavigationTestTags.OVERVIEW_TAB)
-      .assertIsDisplayed()
-      .performClick()
+        .onNodeWithTag(NavigationTestTags.OVERVIEW_TAB)
+        .assertIsDisplayed()
+        .performClick()
 
     // Navigate to Map
     composeTestRule.onNodeWithTag(NavigationTestTags.MAP_TAB).assertIsDisplayed().performClick()
