@@ -49,10 +49,11 @@ import com.swentseekr.seekr.model.map.Location
 fun HuntCard(
     // huntUiState: HuntUiState,
     // onLikeClick: (String) -> Unit = {}
-    hunt: Hunt
+    hunt: Hunt,
+    modifier: Modifier
 ) {
   // val hunt = huntUiState.hunt
-  Card(modifier = Modifier.padding(8.dp).fillMaxWidth().height(150.dp)) {
+  Card(modifier = modifier.padding(8.dp).fillMaxWidth().height(150.dp)) {
     Column {
       Row {
         Text(
@@ -143,7 +144,7 @@ fun HuntCardPreview() {
           reviewRate = 4.5)
   var isLiked by remember { mutableStateOf(false) }
   HuntCard(
-      hunt
+      hunt, Modifier.padding(2.dp)
       // HuntUiState(hunt, isLiked = isLiked),
       // onLikeClick = { isLiked = !isLiked }
       )
