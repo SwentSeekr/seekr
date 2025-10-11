@@ -47,6 +47,8 @@ android {
         debug {
             enableUnitTestCoverage = true
             enableAndroidTestCoverage = true
+            isMinifyEnabled = false         // ✅ prevent code shrinking for tests
+            isShrinkResources = false       // ✅ keep all images (logo_seekr, etc.)
         }
     }
 
@@ -157,8 +159,6 @@ dependencies {
     implementation(libs.compose.ui.graphics)
     // Material Design 3
     implementation(libs.compose.material3)
-    // Jetpack Navigation for Compose
-    implementation("androidx.navigation:navigation-compose:2.7.7")
     // Integration with activities
     implementation(libs.compose.activity)
     // Integration with ViewModels
