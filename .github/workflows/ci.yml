@@ -26,7 +26,6 @@ jobs:
           submodules: recursive
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of Sonar analysis (if we use Sonar Later)
 
-
       # Kernel-based Virtual Machine (KVM) is an open source virtualization technology built into Linux. Enabling it allows the Android emulator to run faster.
       - name: Enable KVM group perms
         run: |
@@ -105,7 +104,8 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew connectedCheck --parallel --build-cache
+          # ✅ Updated to use managed virtual device tests (Compose-compatible)
+          script: ./gradlew pixel6api34DebugAndroidTest --no-daemon --stacktrace
 
       # This step generates the coverage report which will be uploaded to sonar
       - name: Generate Coverage Report
