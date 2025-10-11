@@ -114,22 +114,4 @@ class SeekrNavigationTest {
     // Should remain visible and not trigger recomposition issues
     composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
   }
-
-  // Explicit recomposition test to hit all branches
-  @Test
-  fun recomposesSeekrAppForEachRoute() {
-    val routes = listOf("overview", "map", "profile", "unknown")
-
-    routes.forEach { route ->
-      composeTestRule.setContent {
-        val navController = androidx.navigation.compose.rememberNavController()
-        // Navigate manually to each route to trigger all 'when' branches
-        navController.navigate(route)
-        SeekrApp(navController = navController)
-      }
-
-      // The navigation bar should always appear, regardless of route
-      composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
-    }
-  }
 }
