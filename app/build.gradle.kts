@@ -135,6 +135,7 @@ dependencies {
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
     implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
+    implementation("androidx.navigation:navigation-compose:2.8.0")
 
     // Firebase Authentication
     implementation("com.google.firebase:firebase-auth")
