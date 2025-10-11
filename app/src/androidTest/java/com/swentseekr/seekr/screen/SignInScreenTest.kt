@@ -18,8 +18,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class SignInScreenTest {
 
-  @get:Rule
-  val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
   @Before
   fun setUp() {
@@ -38,12 +37,8 @@ class SignInScreenTest {
     // Wait for the logo and button to be present in the composition tree
     // fetchSemanticsNodes() to ensure the nodes are actually in the tree
     composeTestRule.waitUntil(timeoutMillis = 5_000) {
-      composeTestRule
-        .onAllNodesWithTag(APP_LOGO)
-        .fetchSemanticsNodes().isNotEmpty() &&
-              composeTestRule
-                .onAllNodesWithTag(LOGIN_BUTTON)
-                .fetchSemanticsNodes().isNotEmpty()
+      composeTestRule.onAllNodesWithTag(APP_LOGO).fetchSemanticsNodes().isNotEmpty() &&
+          composeTestRule.onAllNodesWithTag(LOGIN_BUTTON).fetchSemanticsNodes().isNotEmpty()
     }
 
     // Check that both components are visible
@@ -57,12 +52,9 @@ class SignInScreenTest {
 
     // Wait for the button to be displayed before interacting
     composeTestRule.waitUntil(timeoutMillis = 5_000) {
-      composeTestRule
-        .onAllNodesWithTag(LOGIN_BUTTON)
-        .fetchSemanticsNodes().isNotEmpty()
+      composeTestRule.onAllNodesWithTag(LOGIN_BUTTON).fetchSemanticsNodes().isNotEmpty()
     }
 
     composeTestRule.onNodeWithTag(LOGIN_BUTTON).assertIsDisplayed().performClick()
-
   }
 }
