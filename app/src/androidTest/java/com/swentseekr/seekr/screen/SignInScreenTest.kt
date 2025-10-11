@@ -17,26 +17,25 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class SignInScreenTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
-    @Before
-    fun setUp() {
-        FirebaseAuth.getInstance().signOut()
-    }
+  @Before
+  fun setUp() {
+    FirebaseAuth.getInstance().signOut()
+  }
 
-    @Test
-    fun signInScreen_componentsAreDisplayed() {
-        composeTestRule.setContent { SignInScreen() }
+  @Test
+  fun signInScreen_componentsAreDisplayed() {
+    composeTestRule.setContent { SignInScreen() }
 
-        composeTestRule.onNodeWithTag(APP_LOGO).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(LOGIN_BUTTON).assertIsDisplayed()
-    }
+    composeTestRule.onNodeWithTag(APP_LOGO).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(LOGIN_BUTTON).assertIsDisplayed()
+  }
 
-    @Test
-    fun clickingLoginButton_triggersSignInAttempt() {
-        composeTestRule.setContent { SignInScreen() }
+  @Test
+  fun clickingLoginButton_triggersSignInAttempt() {
+    composeTestRule.setContent { SignInScreen() }
 
-        composeTestRule.onNodeWithTag(LOGIN_BUTTON).assertIsDisplayed().performClick()
-    }
+    composeTestRule.onNodeWithTag(LOGIN_BUTTON).assertIsDisplayed().performClick()
+  }
 }
