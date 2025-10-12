@@ -47,8 +47,6 @@ android {
         debug {
             enableUnitTestCoverage = true
             enableAndroidTestCoverage = true
-            isMinifyEnabled = false         // ✅ prevent code shrinking for tests
-            isShrinkResources = false       // ✅ keep all images (logo_seekr, etc.)
         }
     }
 
