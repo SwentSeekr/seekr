@@ -35,7 +35,6 @@ class HuntsRepositoryLocalTest {
   @Before
   fun setUp() {
     MockitoAnnotations.openMocks(this)
-
     huntsRepositoryLocal = HuntsRepositoryLocal()
   }
   /**
@@ -62,8 +61,8 @@ class HuntsRepositoryLocalTest {
   }
 
   /**
-   * This test verifies that addToDo successfully adds a ToDo item to the local repository It also
-   * tests that getAllTodos and getTodo successfully retrieve the todos.
+   * This test verifies that addHunt successfully adds a Hunt item to the local repository It also
+   * tests that getAllTodos and getTodo successfully retrieve the hunts.
    */
   @Test
   fun addHunt_succeeds() = runTest {
@@ -75,20 +74,6 @@ class HuntsRepositoryLocalTest {
 
     val retrievedTodo = huntsRepositoryLocal.getHunt(sampleHunt.uid)
     assertEquals(sampleHunt, retrievedTodo)
-  }
-
-  /**
-   * This test verifies that a Hunt can be added to the repository and then retrieved successfully
-   * by its ID and from the list of all hunts.
-   */
-  @Test
-  fun addAndRetrieveHuntSuccessfully() = runBlocking {
-    huntsRepositoryLocal.addHunt(sampleHunt)
-    val hunts = huntsRepositoryLocal.getAllHunts()
-    assertTrue(hunts.contains(sampleHunt))
-    assertEquals(1, hunts.size)
-    val retrieved = huntsRepositoryLocal.getHunt(sampleHunt.uid)
-    assertEquals(sampleHunt, retrieved)
   }
 
   /**
@@ -127,6 +112,10 @@ class HuntsRepositoryLocalTest {
     assertEquals(1, hunts.size)
   }
 
+  /**
+   * This test verifies that attempting to edit a non-existent Hunt throws an
+   * IllegalArgumentException.
+   */
   @Test(expected = IllegalArgumentException::class)
   fun editHuntThrowsWhenNotFound() = runBlocking {
     huntsRepositoryLocal.editHunt("nonexistent-id", sampleHunt)

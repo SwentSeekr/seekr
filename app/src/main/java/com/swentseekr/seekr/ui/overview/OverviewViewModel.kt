@@ -33,7 +33,6 @@ data class OverviewUIState(
  * @param isLiked A boolean indicating whether the hunt is liked by the user.
  * @param isAchived A boolean indicating whether the hunt has been achieved by the user.
  */
-
 data class HuntUiState(
     val hunt: Hunt,
     val isLiked: Boolean = false,
