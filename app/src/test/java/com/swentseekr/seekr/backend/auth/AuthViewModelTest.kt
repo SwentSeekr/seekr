@@ -17,6 +17,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.swentseekr.seekr.ui.auth.AuthViewModel
 import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
@@ -135,7 +136,7 @@ class AuthViewModelTest {
         val vm = AuthViewModel()
 
         var successCalled = false
-        vm.signOut(onSucess = { successCalled = true })
+        vm.signOut(onSuccess = { successCalled = true })
         advanceUntilIdle()
 
         assertTrue(successCalled)
@@ -185,8 +186,8 @@ class AuthViewModelTest {
         every { authResult.user } returns mockk<FirebaseUser>()
         every { firebaseAuth.signInWithCredential(authCred) } returns Tasks.forResult(authResult)
 
-        every {
-          runBlocking { credentialManager.getCredential(context, any<GetCredentialRequest>()) }
+        coEvery {
+           credentialManager.getCredential(context, any<GetCredentialRequest>())
         } returns response
 
         var successCalled = false
@@ -231,8 +232,8 @@ class AuthViewModelTest {
         every { authResult.user } returns null
         every { firebaseAuth.signInWithCredential(authCred) } returns Tasks.forResult(authResult)
 
-        every {
-          runBlocking { credentialManager.getCredential(context, any<GetCredentialRequest>()) }
+        coEvery {
+           credentialManager.getCredential(context, any<GetCredentialRequest>())
         } returns response
 
         var errorCalled = false
@@ -254,8 +255,8 @@ class AuthViewModelTest {
         every { firebaseAuth.currentUser } returns null
         val vm = AuthViewModel()
 
-        every {
-          runBlocking { credentialManager.getCredential(context, any<GetCredentialRequest>()) }
+        coEvery {
+          credentialManager.getCredential(context, any<GetCredentialRequest>())
         } throws GetCredentialCancellationException("cancelled")
 
         var errorCalled = false
@@ -284,8 +285,8 @@ class AuthViewModelTest {
         val cred = mockk<Credential>()
         every { response.credential } returns cred
         every { cred.data } returns Bundle()
-        every {
-          runBlocking { credentialManager.getCredential(context, any<GetCredentialRequest>()) }
+        coEvery {
+           credentialManager.getCredential(context, any<GetCredentialRequest>())
         } returns response
 
         var errorCalled = false
