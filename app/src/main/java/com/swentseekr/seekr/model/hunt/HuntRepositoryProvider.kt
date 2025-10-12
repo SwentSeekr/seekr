@@ -2,7 +2,8 @@ package com.swentseekr.seekr.model.hunt
 
 import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.map.Location
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * Provides a single instance of the repository in the app. `repository` is mutable for testing
@@ -42,8 +43,7 @@ object HuntRepositoryProvider {
                     image = 1,
                     reviewRate = 4.0),
             )
-        runBlocking { sampleHunts.forEach { hunt -> addHunt(hunt) } }
-        // sampleHunts.forEach { hunt -> GlobalScope.launch { addHunt(hunt) } }
+        sampleHunts.forEach { hunt -> GlobalScope.launch { addHunt(hunt) } }
       }
   var repository: HuntsRepository = HuntRepositoryProvider._repository
 }
