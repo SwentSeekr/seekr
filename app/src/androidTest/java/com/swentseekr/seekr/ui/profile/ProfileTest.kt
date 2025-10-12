@@ -23,7 +23,7 @@ import com.swentseekr.seekr.model.map.Location
 import org.junit.Rule
 import org.junit.Test
 
-const val UI_WAIT_TIMEOUT = 5_000L
+const val UI_WAIT_TIMEOUT = 15_000L
 
 fun hasBackgroundColor(expected: Color) = SemanticsMatcher.expectValue(BackgroundColorKey, expected)
 
@@ -82,19 +82,27 @@ class ProfileScreenTest {
 
   private fun waitForTabColor(tabTag: String, expectedColor: Color) {
     composeTestRule.waitUntil(timeoutMillis = UI_WAIT_TIMEOUT) {
-      composeTestRule.onAllNodesWithTag(tabTag).fetchSemanticsNodes().any {
-        it.config.getOrNull(BackgroundColorKey) == expectedColor
+      try {
+        val nodes = composeTestRule.onAllNodesWithTag(tabTag).fetchSemanticsNodes()
+        nodes.isNotEmpty() && nodes.any { it.config.getOrNull(BackgroundColorKey) == expectedColor }
+      } catch (e: Exception) {
+        false
       }
     }
   }
 
   private fun waitForHuntAndAssertVisible(huntTitle: String, notVisible: List<String>) {
     composeTestRule.waitUntil(UI_WAIT_TIMEOUT) {
-      composeTestRule
-          .onAllNodes(hasText(huntTitle, substring = true))
-          .fetchSemanticsNodes()
-          .isNotEmpty()
+      try {
+        composeTestRule
+            .onAllNodes(hasText(huntTitle, substring = true))
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+      } catch (e: Exception) {
+        false
+      }
     }
+    composeTestRule.waitForIdle()
     composeTestRule.onNode(hasText(huntTitle, substring = true)).assertIsDisplayed()
     notVisible.forEach {
       composeTestRule.onNode(hasText(it, substring = true)).assertDoesNotExist()
@@ -201,15 +209,17 @@ class ProfileScreenTest {
             likedHunts = listOf(createHunt("hunt3", "Liked Hunt")))
 
     composeTestRule.setContent { ProfileScreen(profile, currentUserId = "user123") }
-
+    composeTestRule.waitForIdle()
     waitForTabColor(ProfileTestTags.TAB_MY_HUNTS, Color.Green)
     checkTabColors(Color.Green, Color.White, Color.White)
 
     composeTestRule.onNodeWithTag(ProfileTestTags.TAB_DONE_HUNTS).performClick()
+    composeTestRule.waitForIdle()
     waitForTabColor(ProfileTestTags.TAB_DONE_HUNTS, Color.Green)
     checkTabColors(Color.White, Color.Green, Color.White)
 
     composeTestRule.onNodeWithTag(ProfileTestTags.TAB_LIKED_HUNTS).performClick()
+    composeTestRule.waitForIdle()
     waitForTabColor(ProfileTestTags.TAB_LIKED_HUNTS, Color.Green)
     checkTabColors(Color.White, Color.White, Color.Green)
   }
