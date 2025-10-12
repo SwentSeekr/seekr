@@ -27,7 +27,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -41,6 +43,9 @@ import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.components.HuntCard
 import com.swentseekr.seekr.ui.components.Rating
 import com.swentseekr.seekr.ui.components.RatingType
+import androidx.compose.ui.semantics.SemanticsPropertyReceiver
+import androidx.compose.ui.semantics.semantics
+
 
 /**
  * Data class representing a user's profile.
@@ -53,12 +58,14 @@ import com.swentseekr.seekr.ui.components.RatingType
  */
 object ProfileTestTags {
   const val PROFILE_HUNTS_LIST = "PROFILE_HUNTS_LIST"
-
   const val TAB_MY_HUNTS = "TAB_MY_HUNTS"
   const val TAB_DONE_HUNTS = "TAB_DONE_HUNTS"
   const val TAB_LIKED_HUNTS = "TAB_LIKED_HUNTS"
 
   const val ADD_HUNT = "ADD_HUNT"
+
+    const val PROFILE_PICTURE = "PROFILE_PICTURE"
+    const val EMPTY_PROFILE_PICTURE = "EMPTY PROFILE_PICTURE"
 
   const val PROFILE_PSEUDONYM = "PROFILE_PSEUDONYM"
   const val PROFILE_BIO = "PROFILE_BIO"
@@ -67,6 +74,12 @@ object ProfileTestTags {
 
   fun getTestTagForHuntCard(hunt: Hunt, index: Int): String = "HUNT_CARD_$index"
 }
+
+val BackgroundColorKey = SemanticsPropertyKey<Color>("BackgroundColor")
+var SemanticsPropertyReceiver.backgroundColor by BackgroundColorKey
+
+data class TabItem(val tab: ProfileTab, val testTag: String, val icon: ImageVector)
+
 
 data class Profile(
     val uid: String,
@@ -82,6 +95,8 @@ enum class ProfileTab {
   DONE_HUNTS,
   LIKED_HUNTS
 }
+
+
 
 /**
  * Displays the profile screen of a user with their info, ratings, bio, and hunts.
@@ -119,7 +134,7 @@ fun ProfileScreen(
               verticalAlignment =
                   Alignment.CenterVertically // centers text vertically next to the image
               ) {
-                ProfilePicture(profilePicture = R.drawable.empty_user)
+                ProfilePicture(profilePicture = R.drawable.profile_picture)
                 Column {
                   Text(
                       text = profile.author.pseudonym,
@@ -226,35 +241,24 @@ fun ProfileScreenPreview() {
 @Composable
 fun CustomToolbar(selectedTab: ProfileTab, onTabSelected: (ProfileTab) -> Unit = {}) {
   Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-    Icon(
-        imageVector = Icons.Filled.Menu,
-        contentDescription = "My Hunts",
-        modifier =
-            Modifier.background(
-                    if (selectedTab == ProfileTab.MY_HUNTS) Color.Green else Color.White)
-                .padding(horizontal = 40.dp, vertical = 10.dp)
-                .clickable { onTabSelected(ProfileTab.MY_HUNTS) }
-                .testTag(ProfileTestTags.TAB_MY_HUNTS),
-    )
-    Icon(
-        imageVector = Icons.Filled.Check,
-        contentDescription = "Done Hunts",
-        modifier =
-            Modifier.background(
-                    if (selectedTab == ProfileTab.DONE_HUNTS) Color.Green else Color.White)
-                .padding(horizontal = 60.dp, vertical = 10.dp)
-                .clickable { onTabSelected(ProfileTab.DONE_HUNTS) }
-                .testTag(ProfileTestTags.TAB_DONE_HUNTS),
-    )
-    Icon(
-        imageVector = Icons.Filled.Favorite,
-        contentDescription = "Liked Hunts",
-        modifier =
-            Modifier.background(
-                    if (selectedTab == ProfileTab.LIKED_HUNTS) Color.Green else Color.White)
-                .padding(horizontal = 40.dp, vertical = 10.dp)
-                .clickable { onTabSelected(ProfileTab.LIKED_HUNTS) }
-                .testTag(ProfileTestTags.TAB_LIKED_HUNTS),
-    )
+      val tabs = listOf(
+          TabItem(ProfileTab.MY_HUNTS, ProfileTestTags.TAB_MY_HUNTS, Icons.Filled.Menu),
+          TabItem(ProfileTab.DONE_HUNTS, ProfileTestTags.TAB_DONE_HUNTS, Icons.Filled.Check),
+          TabItem(ProfileTab.LIKED_HUNTS, ProfileTestTags.TAB_LIKED_HUNTS, Icons.Filled.Favorite)
+      )
+
+      tabs.forEach { item ->
+          val color = if (selectedTab == item.tab) Color.Green else Color.White
+          Icon(
+              imageVector = item.icon,
+              contentDescription = item.tab.name,
+              modifier = Modifier
+                  .background(color)
+                  .padding(horizontal = 40.dp, vertical = 10.dp)
+                  .clickable { onTabSelected(item.tab) }
+                  .semantics { this[BackgroundColorKey] = color }
+                  .testTag(item.testTag)
+          )
+      }
   }
 }
