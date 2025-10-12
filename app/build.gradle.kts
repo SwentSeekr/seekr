@@ -47,8 +47,6 @@ android {
         debug {
             enableUnitTestCoverage = true
             enableAndroidTestCoverage = true
-            isMinifyEnabled = false         // ✅ prevent code shrinking for tests
-            isShrinkResources = false       // ✅ keep all images (logo_seekr, etc.)
         }
     }
 
@@ -75,23 +73,10 @@ android {
         }
     }
 
-    // ✅ Add managed virtual device for reliable Compose tests
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
-        }
-
-        animationsDisabled = true // ✅ Disable system animations for UI test stability
-
-        managedDevices {
-            devices {
-                maybeCreate<com.android.build.api.dsl.ManagedVirtualDevice>("pixel6api34").apply {
-                    device = "Pixel 8"
-                    apiLevel = 34
-                    systemImageSource = "aosp"
-                }
-            }
         }
     }
 
@@ -101,6 +86,7 @@ android {
     // This prevent errors from occurring during unit tests
     sourceSets.getByName("testDebug") {
         val test = sourceSets.getByName("test")
+
         java.setSrcDirs(test.java.srcDirs)
         res.setSrcDirs(test.res.srcDirs)
         resources.setSrcDirs(test.resources.srcDirs)
@@ -114,17 +100,22 @@ android {
 }
 
 sonar {
+    //disable automatic analysis
     properties {
         property("sonar.projectKey", "SwentSeekr_seekr")
         property("sonar.projectName", "seekr")
         property("sonar.organization", "swentsonar")
         property("sonar.host.url", "https://sonarcloud.io")
+        // Comma-separated paths to the various directories containing the *.xml JUnit report files. Each path may be absolute or relative to the project base directory.
         property("sonar.junit.reportPaths", "${project.layout.buildDirectory.get()}/test-results/testDebugunitTest/")
+        // Paths to xml files with Android Lint issues. If the main flavor is changed, this file will have to be changed too.
         property("sonar.androidLint.reportPaths", "${project.layout.buildDirectory.get()}/reports/lint-results-debug.xml")
+        // Paths to JaCoCo XML coverage report files.
         property("sonar.coverage.jacoco.xmlReportPaths", "${project.layout.buildDirectory.get()}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
     }
 }
 
+// When a library is used both by robolectric and connected tests, use this function
 fun DependencyHandlerScope.globalTestImplementation(dep: Any) {
     androidTestImplementation(dep)
     testImplementation(dep)
@@ -143,37 +134,51 @@ dependencies {
     globalTestImplementation(libs.androidx.espresso.core)
     implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
 
+    // Firebase Authentication
     implementation("com.google.firebase:firebase-auth")
+
     // Cloud Firestore
     implementation("com.google.firebase:firebase-firestore")
 
+    // Google Maps Compose library
     val mapsComposeVersion = "4.4.1"
     implementation("com.google.maps.android:maps-compose:$mapsComposeVersion")
+    // Google Maps Compose utility library
     implementation("com.google.maps.android:maps-compose-utils:$mapsComposeVersion")
+    // Google Maps Compose widgets library
     implementation("com.google.maps.android:maps-compose-widgets:$mapsComposeVersion")
 
+    // ------------- Jetpack Compose ------------------
     val composeBom = platform(libs.compose.bom)
     implementation(composeBom)
     globalTestImplementation(composeBom)
 
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.graphics)
+    // Material Design 3
     implementation(libs.compose.material3)
+    // Integration with activities
     implementation(libs.compose.activity)
+    // Integration with ViewModels
     implementation(libs.compose.viewmodel)
+    // Android Studio Preview support
     implementation(libs.compose.preview)
     debugImplementation(libs.compose.tooling)
+    // UI Tests
     globalTestImplementation(libs.compose.test.junit)
     debugImplementation(libs.compose.test.manifest)
 
+    // --------- Kaspresso test framework ----------
     globalTestImplementation(libs.kaspresso)
     globalTestImplementation(libs.kaspresso.compose)
 
+    // ----------       Robolectric     ------------
     testImplementation(libs.robolectric)
     testImplementation("org.robolectric:robolectric:4.12.1")
 }
 
 tasks.withType<Test> {
+    // Configure Jacoco for each tests
     configure<JacocoTaskExtension> {
         isIncludeNoLocationClasses = true
         excludes = listOf("jdk.internal.*")
