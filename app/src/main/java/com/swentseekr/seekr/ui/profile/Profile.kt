@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsPropertyKey
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -43,19 +44,7 @@ import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.components.HuntCard
 import com.swentseekr.seekr.ui.components.Rating
 import com.swentseekr.seekr.ui.components.RatingType
-import androidx.compose.ui.semantics.SemanticsPropertyReceiver
-import androidx.compose.ui.semantics.semantics
 
-
-/**
- * Data class representing a user's profile.
- *
- * @property uid Unique identifier of the user.
- * @property author Author details of the user.
- * @property myHunts Hunts created by the user.
- * @property doneHunts Hunts completed by the user.
- * @property likedHunts Hunts liked by the user.
- */
 object ProfileTestTags {
   const val PROFILE_HUNTS_LIST = "PROFILE_HUNTS_LIST"
   const val TAB_MY_HUNTS = "TAB_MY_HUNTS"
@@ -64,8 +53,8 @@ object ProfileTestTags {
 
   const val ADD_HUNT = "ADD_HUNT"
 
-    const val PROFILE_PICTURE = "PROFILE_PICTURE"
-    const val EMPTY_PROFILE_PICTURE = "EMPTY PROFILE_PICTURE"
+  const val PROFILE_PICTURE = "PROFILE_PICTURE"
+  const val EMPTY_PROFILE_PICTURE = "EMPTY PROFILE_PICTURE"
 
   const val PROFILE_PSEUDONYM = "PROFILE_PSEUDONYM"
   const val PROFILE_BIO = "PROFILE_BIO"
@@ -76,11 +65,18 @@ object ProfileTestTags {
 }
 
 val BackgroundColorKey = SemanticsPropertyKey<Color>("BackgroundColor")
-var SemanticsPropertyReceiver.backgroundColor by BackgroundColorKey
 
 data class TabItem(val tab: ProfileTab, val testTag: String, val icon: ImageVector)
 
-
+/**
+ * Data class representing a user's profile.
+ *
+ * @property uid Unique identifier of the user.
+ * @property author Author details of the user.
+ * @property myHunts Hunts created by the user.
+ * @property doneHunts Hunts completed by the user.
+ * @property likedHunts Hunts liked by the user.
+ */
 data class Profile(
     val uid: String,
     val author: Author,
@@ -96,8 +92,6 @@ enum class ProfileTab {
   LIKED_HUNTS
 }
 
-
-
 /**
  * Displays the profile screen of a user with their info, ratings, bio, and hunts.
  *
@@ -110,7 +104,7 @@ fun ProfileScreen(
     profile: Profile,
     currentUserId: String,
 ) {
-  val isMyProfile = profile.uid == currentUserId // to impelement in the view model with auth
+  val isMyProfile = profile.uid == currentUserId // to implement in the view model with auth
   // (firebase authentication) when viewModel will be implemented
   var selectedTab by remember { mutableStateOf(ProfileTab.MY_HUNTS) }
   Scaffold(
@@ -134,7 +128,7 @@ fun ProfileScreen(
               verticalAlignment =
                   Alignment.CenterVertically // centers text vertically next to the image
               ) {
-                ProfilePicture(profilePicture = R.drawable.profile_picture)
+                ProfilePicture(profilePicture = profile.author.profilePicture)
                 Column {
                   Text(
                       text = profile.author.pseudonym,
@@ -181,7 +175,7 @@ fun ProfileScreen(
                     }
                 items(huntsToDisplay.size) { index ->
                   val hunt = huntsToDisplay[index]
-                  // val huntUiState = HuntUiState(hunt = hunt, isLiked = false, isAchived = false)
+                  // val huntUiState = HuntUiState(hunt = hunt, isLiked = false, isArchived = false)
                   // // until I implement the ViewModel
                   // HuntCard(//huntUiState)
                   HuntCard(
@@ -224,7 +218,7 @@ fun ProfileScreenPreview() {
                     distance = 5.0,
                     difficulty = Difficulty.DIFFICULT,
                     author = Author("spike man", "", 1, 2.5, 3.0),
-                    image = R.drawable.ic_launcher_foreground, // ou une image de ton projet
+                    image = R.drawable.ic_launcher_foreground,
                     reviewRate = 4.5)
               },
           doneHunts = mutableListOf(),
@@ -241,24 +235,23 @@ fun ProfileScreenPreview() {
 @Composable
 fun CustomToolbar(selectedTab: ProfileTab, onTabSelected: (ProfileTab) -> Unit = {}) {
   Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-      val tabs = listOf(
-          TabItem(ProfileTab.MY_HUNTS, ProfileTestTags.TAB_MY_HUNTS, Icons.Filled.Menu),
-          TabItem(ProfileTab.DONE_HUNTS, ProfileTestTags.TAB_DONE_HUNTS, Icons.Filled.Check),
-          TabItem(ProfileTab.LIKED_HUNTS, ProfileTestTags.TAB_LIKED_HUNTS, Icons.Filled.Favorite)
-      )
+    val tabs =
+        listOf(
+            TabItem(ProfileTab.MY_HUNTS, ProfileTestTags.TAB_MY_HUNTS, Icons.Filled.Menu),
+            TabItem(ProfileTab.DONE_HUNTS, ProfileTestTags.TAB_DONE_HUNTS, Icons.Filled.Check),
+            TabItem(ProfileTab.LIKED_HUNTS, ProfileTestTags.TAB_LIKED_HUNTS, Icons.Filled.Favorite))
 
-      tabs.forEach { item ->
-          val color = if (selectedTab == item.tab) Color.Green else Color.White
-          Icon(
-              imageVector = item.icon,
-              contentDescription = item.tab.name,
-              modifier = Modifier
-                  .background(color)
+    tabs.forEach { item ->
+      val color = if (selectedTab == item.tab) Color.Green else Color.White
+      Icon(
+          imageVector = item.icon,
+          contentDescription = item.tab.name,
+          modifier =
+              Modifier.background(color)
                   .padding(horizontal = 40.dp, vertical = 10.dp)
                   .clickable { onTabSelected(item.tab) }
                   .semantics { this[BackgroundColorKey] = color }
-                  .testTag(item.testTag)
-          )
-      }
+                  .testTag(item.testTag))
+    }
   }
 }
