@@ -12,6 +12,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * Data class representing the UI state for the Overview screen.
+ *
+ * @param hunts A list of hunts to be displayed.
+ * @param searchWord The current search word entered by the user.
+ * @param errorMsg An optional error message to be displayed to the user.
+ */
 data class OverviewUIState(
     val hunts: List<HuntUiState> = emptyList(),
     val searchWord: String = "",
@@ -19,6 +26,13 @@ data class OverviewUIState(
     val selectedStatus: HuntStatus? = null,
     val selectedDifficulty: Difficulty? = null
 )
+/**
+ * Data class representing the UI state for a single Hunt item in the Overview screen.
+ *
+ * @param hunt The Hunt item.
+ * @param isLiked A boolean indicating whether the hunt is liked by the user.
+ * @param isAchived A boolean indicating whether the hunt has been achieved by the user.
+ */
 
 data class HuntUiState(
     val hunt: Hunt,
@@ -26,17 +40,17 @@ data class HuntUiState(
     val isAchived: Boolean = false
 )
 
+/**
+ * ViewModel for the Overview screen.
+ *
+ * Responsible for managing the UI state, by fetching and providing Hunt items via the
+ * [HuntsRepository].
+ *
+ * @property huntRepository The repository used to fetch and manage Hunt items.
+ */
 class OverviewViewModel(
     private val repository: HuntsRepository = HuntRepositoryProvider.repository
 ) : ViewModel() {
-  /**
-   * ViewModel for the Overview screen.
-   *
-   * Responsible for managing the UI state, by fetching and providing Hunt items via the
-   * [HuntsRepository].
-   *
-   * @property huntRepository The repository used to fetch and manage Hunt items.
-   */
   private val _uiState = MutableStateFlow(OverviewUIState())
   val uiState: StateFlow<OverviewUIState> = _uiState.asStateFlow()
 
