@@ -186,9 +186,8 @@ class AuthViewModelTest {
         every { authResult.user } returns mockk<FirebaseUser>()
         every { firebaseAuth.signInWithCredential(authCred) } returns Tasks.forResult(authResult)
 
-        coEvery {
-           credentialManager.getCredential(context, any<GetCredentialRequest>())
-        } returns response
+        coEvery { credentialManager.getCredential(context, any<GetCredentialRequest>()) } returns
+            response
 
         var successCalled = false
         vm.signInWithGoogle(
@@ -232,9 +231,8 @@ class AuthViewModelTest {
         every { authResult.user } returns null
         every { firebaseAuth.signInWithCredential(authCred) } returns Tasks.forResult(authResult)
 
-        coEvery {
-           credentialManager.getCredential(context, any<GetCredentialRequest>())
-        } returns response
+        coEvery { credentialManager.getCredential(context, any<GetCredentialRequest>()) } returns
+            response
 
         var errorCalled = false
         vm.signInWithGoogle(
@@ -255,9 +253,8 @@ class AuthViewModelTest {
         every { firebaseAuth.currentUser } returns null
         val vm = AuthViewModel()
 
-        coEvery {
-          credentialManager.getCredential(context, any<GetCredentialRequest>())
-        } throws GetCredentialCancellationException("cancelled")
+        coEvery { credentialManager.getCredential(context, any<GetCredentialRequest>()) } throws
+            GetCredentialCancellationException("cancelled")
 
         var errorCalled = false
         vm.signInWithGoogle(
@@ -285,9 +282,8 @@ class AuthViewModelTest {
         val cred = mockk<Credential>()
         every { response.credential } returns cred
         every { cred.data } returns Bundle()
-        coEvery {
-           credentialManager.getCredential(context, any<GetCredentialRequest>())
-        } returns response
+        coEvery { credentialManager.getCredential(context, any<GetCredentialRequest>()) } returns
+            response
 
         var errorCalled = false
         vm.signInWithGoogle(
