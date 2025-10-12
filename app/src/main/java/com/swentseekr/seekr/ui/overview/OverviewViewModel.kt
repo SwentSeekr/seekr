@@ -33,7 +33,6 @@ data class OverviewUIState(
  * @param isLiked A boolean indicating whether the hunt is liked by the user.
  * @param isAchived A boolean indicating whether the hunt has been achieved by the user.
  */
-
 data class HuntUiState(
     val hunt: Hunt,
     val isLiked: Boolean = false,
@@ -160,6 +159,7 @@ class OverviewViewModel(
     _uiState.value = _uiState.value.copy(hunts = filteredHunts)
   }
 
+  /** Handles the click event on the icon marker to navigate to the map screen. */
   fun onIconMarkerClick() {
     // TODO: Navigate to Map Screen
   }

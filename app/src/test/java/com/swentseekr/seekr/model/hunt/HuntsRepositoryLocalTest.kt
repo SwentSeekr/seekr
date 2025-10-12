@@ -127,6 +127,7 @@ class HuntsRepositoryLocalTest {
     assertEquals(1, hunts.size)
   }
 
+  /** This test verifies that attempting to edit a non-existent Hunt throws an exception. */
   @Test(expected = IllegalArgumentException::class)
   fun editHuntThrowsWhenNotFound() = runBlocking {
     huntsRepositoryLocal.editHunt("nonexistent-id", sampleHunt)

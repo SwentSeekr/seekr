@@ -61,6 +61,7 @@ class OverviewViewModelTest {
     Dispatchers.resetMain() // reset main dispatcher to the original Main dispatcher
   }
 
+  /** * Test that the initial state of the ViewModel loads hunts from the repository correctly. */
   @Test
   fun initial_state_loads_hunts_from_repository() = runTest {
     advanceUntilIdle()
@@ -70,6 +71,7 @@ class OverviewViewModelTest {
     assertTrue(state.hunts.any { it.hunt.uid == "2" })
   }
 
+  /** Test that changing the search term filters the hunts correctly based on the search input. */
   @Test
   fun onSearchChange_filters_by_search() = runTest {
     viewModel = OverviewViewModel(fakeRepository)
@@ -81,6 +83,7 @@ class OverviewViewModelTest {
     assertEquals("Fun Hunt", state.hunts[0].hunt.title)
   }
 
+  /** Test that clicking the like button toggles the liked status of a hunt item. */
   @Test
   fun onLikeClick_toggles_liked_status() = runTest {
     val huntId = "1"
@@ -93,15 +96,17 @@ class OverviewViewModelTest {
     assertFalse(state.hunts.first { it.hunt.uid == huntId }.isLiked)
   }
 
+  /**
+   * Test that clicking on the "Achived" filter correctly filters the hunts to show only achieved
+   * hunts.
+   */
   @Test
   fun onAchivedClick_filters_achieved_hunts() = runTest {
-    // Simulate a hunt being achieved
     val updatedList =
         viewModel.uiState.value.hunts.map {
           if (it.hunt.uid == "2") it.copy(isAchived = true) else it
         }
 
-    // Directly update internal state (only for testing)
     val internalStateField = OverviewViewModel::class.java.getDeclaredField("huntItems")
     internalStateField.isAccessible = true
     internalStateField.set(viewModel, updatedList.toMutableList())
@@ -112,6 +117,7 @@ class OverviewViewModelTest {
     assertEquals("2", state.hunts[0].hunt.uid)
   }
 
+  /** Test that clearing the search resets the filtered list to show all hunts. */
   @Test
   fun onClearSearch_resets_filtered_list() = runTest {
     viewModel.onSearchChange("sport")
@@ -123,6 +129,7 @@ class OverviewViewModelTest {
     assertEquals(2, resetState.hunts.size)
   }
 
+  /** Test that selecting a status filter correctly filters the hunts by the selected status. */
   @Test
   fun onStatusFilterSelect_filters_by_status() = runTest {
     viewModel.onStatusFilterSelect(HuntStatus.SPORT)
@@ -131,11 +138,34 @@ class OverviewViewModelTest {
     assertEquals(HuntStatus.SPORT, state.hunts[0].hunt.status)
   }
 
+  /**
+   * Test that selecting a difficulty filter correctly filters the hunts by the selected difficulty.
+   */
   @Test
   fun onDifficultyFilterSelect_filters_by_difficulty() = runTest {
     viewModel.onDifficultyFilterSelect(Difficulty.DIFFICULT)
     val state = viewModel.uiState.value
     assertEquals(1, state.hunts.size)
     assertEquals(Difficulty.DIFFICULT, state.hunts[0].hunt.difficulty)
+  }
+
+  /**
+   * Test that clicking on a hunt does not throw an exception. Navigation is not implemented, so we
+   * just ensure no errors occur.
+   */
+  @Test
+  fun onHuntClick_doesNotThrow() {
+    viewModel.onHuntClick("some-id")
+    // Just ensure no exceptions are thrown
+  }
+
+  /**
+   * Test that clicking on the icon marker does not throw an exception. Actual navigation is not
+   * implemented, so we just ensure no errors occur.
+   */
+  @Test
+  fun onIconMarkerClick_doesNotThrow() {
+    viewModel.onIconMarkerClick()
+    // Just ensure no exceptions are thrown
   }
 }

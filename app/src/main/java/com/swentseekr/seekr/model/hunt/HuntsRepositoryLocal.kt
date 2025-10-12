@@ -19,7 +19,7 @@ class HuntsRepositoryLocal : HuntsRepository {
         return hunts[i]
       }
     }
-    throw IllegalArgumentException("Hunt with ID $huntID not found")
+    throw IllegalArgumentException("Hunt with ID $huntID is not found")
   }
 
   override suspend fun addHunt(hunt: Hunt) {
