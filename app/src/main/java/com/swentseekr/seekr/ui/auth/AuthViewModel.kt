@@ -59,12 +59,12 @@ class AuthViewModel() : ViewModel() {
   }
 
   // Signs out the user and updates state
-  fun signOut(onSucess: () -> Unit = {}, onError: (String) -> Unit = {}) {
+  fun signOut(onSuccess: () -> Unit = {}, onError: (String) -> Unit = {}) {
     viewModelScope.launch {
       try {
         auth.signOut()
         _state.update { it.copy(isLoading = false, isAuthenticated = false) }
-        onSucess()
+        onSuccess()
       } catch (e: Exception) {
         _state.update {
           it.copy(
