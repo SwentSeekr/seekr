@@ -11,7 +11,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Test
-import org.mockito.MockitoAnnotations
+
+// import org.mockito.MockitoAnnotations
 
 class HuntsRepositoryLocalTest {
   private lateinit var huntsRepositoryLocal: HuntsRepositoryLocal
@@ -34,7 +35,7 @@ class HuntsRepositoryLocalTest {
 
   @Before
   fun setUp() {
-    MockitoAnnotations.openMocks(this)
+    // MockitoAnnotations.openMocks(this)
 
     huntsRepositoryLocal = HuntsRepositoryLocal()
   }
