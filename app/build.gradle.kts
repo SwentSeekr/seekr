@@ -78,6 +78,7 @@ android {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
         }
+        execution = "ANDROIDX_TEST_ORCHESTRATOR"
     }
 
     // Robolectric needs to be run only in debug. But its tests are placed in the shared source set (test)
@@ -133,6 +134,7 @@ dependencies {
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
     implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
+    implementation("androidx.navigation:navigation-compose:2.8.0")
 
     // Firebase Authentication
     implementation("com.google.firebase:firebase-auth")
@@ -170,6 +172,9 @@ dependencies {
     // UI Tests
     globalTestImplementation(libs.compose.test.junit)
     debugImplementation(libs.compose.test.manifest)
+    // For createAndroidComposeRule in tests
+    androidTestUtil("androidx.test:orchestrator:1.4.2")
+
 
     // --------- Kaspresso test framework ----------
     globalTestImplementation(libs.kaspresso)
