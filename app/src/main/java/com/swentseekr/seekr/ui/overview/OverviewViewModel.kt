@@ -16,6 +16,8 @@ data class OverviewUIState(
     val hunts: List<HuntUiState> = emptyList(),
     val searchWord: String = "",
     val errorMsg: String? = null,
+    val selectedStatus: HuntStatus? = null,
+    val selectedDifficulty: Difficulty? = null
 )
 
 data class HuntUiState(
@@ -101,23 +103,41 @@ class OverviewViewModel(
     _uiState.value = _uiState.value.copy(searchWord = "", hunts = huntItems)
   }
 
+  private fun applyFilters() {
+    val currentState = _uiState.value
+    val filtered =
+        huntItems.filter { huntUiState ->
+          val statusMatches =
+              currentState.selectedStatus?.let { huntUiState.hunt.status == it } ?: true
+
+          val difficultyMatches =
+              currentState.selectedDifficulty?.let { huntUiState.hunt.difficulty == it } ?: true
+
+          statusMatches && difficultyMatches
+        }
+
+    _uiState.value = currentState.copy(hunts = filtered)
+  }
+
   /** Filters the hunts based on the selected [status]. */
-  fun onStatusFilterSelect(status: HuntStatus) {
+  fun onStatusFilterSelect(status: HuntStatus?) {
     // change color botton in the UI OverviewScreen use FilterBotton
     val filteredHunts =
         huntItems.filter {
           it.hunt.status.toString().contains(status.toString(), ignoreCase = true)
         }
     _uiState.value = _uiState.value.copy(hunts = filteredHunts)
+    applyFilters()
   }
   /** Filters the hunts based on the selected [difficulty]. */
-  fun onDifficultyFilterSelect(difficulty: Difficulty) {
+  fun onDifficultyFilterSelect(difficulty: Difficulty?) {
     // change color botton in the UI OverviewScreen use FilterBotton
     val filteredHunts =
         huntItems.filter {
           it.hunt.difficulty.toString().contains(difficulty.toString(), ignoreCase = true)
         }
     _uiState.value = _uiState.value.copy(hunts = filteredHunts)
+    applyFilters()
   }
   /** Filters the hunts to show only those that have been achieved by the user. */
   fun onAchivedClick() {
