@@ -4,7 +4,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.hasTestTag
@@ -14,12 +13,9 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
-import com.swentseekr.seekr.R
-import com.swentseekr.seekr.model.author.Author
-import com.swentseekr.seekr.model.hunt.Difficulty
-import com.swentseekr.seekr.model.hunt.Hunt
-import com.swentseekr.seekr.model.hunt.HuntStatus
-import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.model.profile.createHunt
+import com.swentseekr.seekr.model.profile.emptyProfile
+import com.swentseekr.seekr.model.profile.sampleProfile
 import org.junit.Rule
 import org.junit.Test
 
@@ -30,43 +26,10 @@ fun hasBackgroundColor(expected: Color) = SemanticsMatcher.expectValue(Backgroun
 class ProfileScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
-  private fun sampleAuthor() =
-      Author(
-          pseudonym = "Spike Man",
-          bio = "Adventurer",
-          profilePicture = R.drawable.profile_picture,
-          reviewRate = 4.5,
-          sportRate = 4.8)
-
-  private fun sampleProfile(
-      myHunts: List<Hunt> = emptyList(),
-      doneHunts: List<Hunt> = emptyList(),
-      likedHunts: List<Hunt> = emptyList(),
-      uid: String = "user123"
-  ): Profile {
-    return Profile(
-        uid = uid,
-        author = sampleAuthor(),
-        myHunts = myHunts.toMutableList(),
-        doneHunts = doneHunts.toMutableList(),
-        likedHunts = likedHunts.toMutableList())
+  private fun setProfileScreen(profile: Profile) {
+    val profile = profile
+    composeTestRule.setContent { ProfileScreen(profile, currentUserId = "user123") }
   }
-
-  private fun createHunt(uid: String, title: String) =
-      Hunt(
-          uid = uid,
-          start = Location(0.0, 0.0, "Start"),
-          end = Location(1.0, 1.0, "End"),
-          middlePoints = emptyList(),
-          status = HuntStatus.FUN,
-          title = title,
-          description = "Desc $title",
-          time = 1.0,
-          distance = 2.0,
-          difficulty = Difficulty.EASY,
-          author = sampleAuthor(),
-          image = R.drawable.empty_user,
-          reviewRate = 4.0)
 
   private fun checkTabColors(myHuntsColor: Color, doneHuntsColor: Color, likedHuntsColor: Color) {
     composeTestRule
@@ -111,8 +74,7 @@ class ProfileScreenTest {
 
   @Test
   fun profileScreen_displaysProfileInfo() {
-    val profile = sampleProfile()
-    composeTestRule.setContent { ProfileScreen(profile, currentUserId = "user123") }
+    setProfileScreen(sampleProfile())
 
     composeTestRule.onNodeWithTag(ProfileTestTags.PROFILE_PICTURE).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileTestTags.PROFILE_REVIEW_RATING).assertIsDisplayed()
@@ -134,25 +96,22 @@ class ProfileScreenTest {
 
   @Test
   fun profileScreen_addHuntButton_visibilityDependsOnProfile_notDisplayed() {
-    val otherProfile = sampleProfile(uid = "otherUser")
-    composeTestRule.setContent { ProfileScreen(otherProfile, currentUserId = "user123") }
+    setProfileScreen(sampleProfile(uid = "otherUser"))
     composeTestRule.onNodeWithTag(ProfileTestTags.ADD_HUNT).assertIsNotDisplayed()
   }
 
   @Test
   fun profileScreen_emptyHuntsShowsNothing() {
-    val profile =
-        sampleProfile(myHunts = emptyList(), doneHunts = emptyList(), likedHunts = emptyList())
-    composeTestRule.setContent { ProfileScreen(profile, currentUserId = "user123") }
+    setProfileScreen(
+        sampleProfile(myHunts = emptyList(), doneHunts = emptyList(), likedHunts = emptyList()))
     composeTestRule.onNodeWithTag(ProfileTestTags.PROFILE_HUNTS_LIST).assertIsDisplayed()
-    composeTestRule.onAllNodes(hasText("Hunt", substring = true)).assertCountEquals(0)
+    composeTestRule.onNodeWithTag(ProfileTestTags.EMPTY_HUNTS_MESSAGE).assertIsDisplayed()
   }
 
   @Test
   fun profileScreen_displaysHuntsInLazyColumn() {
     val myHunts = List(3) { createHunt("hunt$it", "My Hunt $it") }
-    val profile = sampleProfile(myHunts = myHunts)
-    composeTestRule.setContent { ProfileScreen(profile, currentUserId = "user123") }
+    setProfileScreen(sampleProfile(myHunts = myHunts))
     composeTestRule.onNodeWithTag(ProfileTestTags.PROFILE_HUNTS_LIST).assertIsDisplayed()
     myHunts.forEachIndexed { index, hunt ->
       composeTestRule
@@ -166,12 +125,9 @@ class ProfileScreenTest {
     val myHunt = createHunt("hunt1", "My Hunt")
     val doneHunt = createHunt("hunt2", "Done Hunt")
     val likedHunt = createHunt("hunt3", "Liked Hunt")
-
-    val profile =
+    setProfileScreen(
         sampleProfile(
-            myHunts = listOf(myHunt), doneHunts = listOf(doneHunt), likedHunts = listOf(likedHunt))
-
-    composeTestRule.setContent { ProfileScreen(profile, currentUserId = "user123") }
+            myHunts = listOf(myHunt), doneHunts = listOf(doneHunt), likedHunts = listOf(likedHunt)))
     waitForHuntAndAssertVisible("My Hunt", listOf("Done Hunt", "Liked Hunt"))
     composeTestRule.onNodeWithTag(ProfileTestTags.TAB_DONE_HUNTS).performClick()
     waitForHuntAndAssertVisible("Done Hunt", listOf("My Hunt", "Liked Hunt"))
@@ -183,9 +139,7 @@ class ProfileScreenTest {
   fun profileScreen_canScrollThroughManyHunts() {
     val sample = sampleProfile()
     val myHunts = List(20) { createHunt("hunt$it", "Hunt $it") }
-    val profile = sample.copy(myHunts = myHunts.toMutableList())
-
-    composeTestRule.setContent { ProfileScreen(profile, currentUserId = "user123") }
+    setProfileScreen(sample.copy(myHunts = myHunts.toMutableList()))
 
     val lastIndex = myHunts.lastIndex
     val lastHuntTag = ProfileTestTags.getTestTagForHuntCard(myHunts[lastIndex], lastIndex)
@@ -207,8 +161,7 @@ class ProfileScreenTest {
             myHunts = listOf(createHunt("hunt1", "My Hunt")),
             doneHunts = listOf(createHunt("hunt2", "Done Hunt")),
             likedHunts = listOf(createHunt("hunt3", "Liked Hunt")))
-
-    composeTestRule.setContent { ProfileScreen(profile, currentUserId = "user123") }
+    setProfileScreen(profile)
     composeTestRule.waitForIdle()
     waitForTabColor(ProfileTestTags.TAB_MY_HUNTS, Color.Green)
     checkTabColors(Color.Green, Color.White, Color.White)
@@ -222,5 +175,27 @@ class ProfileScreenTest {
     composeTestRule.waitForIdle()
     waitForTabColor(ProfileTestTags.TAB_LIKED_HUNTS, Color.Green)
     checkTabColors(Color.White, Color.White, Color.Green)
+  }
+
+  private fun assertEmptyStateForTab(tabTestTag: String? = null) {
+    setProfileScreen(emptyProfile())
+    tabTestTag?.let { composeTestRule.onNodeWithTag(it).performClick() }
+    composeTestRule.onNodeWithTag(ProfileTestTags.PROFILE_HUNTS_LIST).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(ProfileTestTags.EMPTY_HUNTS_MESSAGE).assertIsDisplayed()
+  }
+
+  @Test
+  fun profileScreen_displaysEmptyMessage_whenMyHuntsEmpty() {
+    assertEmptyStateForTab()
+  }
+
+  @Test
+  fun profileScreen_displaysEmptyMessage_whenDoneHuntsEmpty() {
+    assertEmptyStateForTab(ProfileTestTags.TAB_DONE_HUNTS)
+  }
+
+  @Test
+  fun profileScreen_displaysEmptyMessage_whenLikedHuntsEmpty() {
+    assertEmptyStateForTab(ProfileTestTags.TAB_LIKED_HUNTS)
   }
 }

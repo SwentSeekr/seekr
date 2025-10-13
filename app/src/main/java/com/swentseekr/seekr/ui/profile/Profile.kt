@@ -42,6 +42,7 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.components.HuntCard
+import com.swentseekr.seekr.ui.components.MAX_RATING
 import com.swentseekr.seekr.ui.components.Rating
 import com.swentseekr.seekr.ui.components.RatingType
 
@@ -60,10 +61,12 @@ object ProfileTestTags {
   const val PROFILE_BIO = "PROFILE_BIO"
   const val PROFILE_REVIEW_RATING = "PROFILE_REVIEW_RATING"
   const val PROFILE_SPORT_RATING = "PROFILE_SPORT_RATING"
+  const val EMPTY_HUNTS_MESSAGE = "EMPTY_HUNTS_MESSAGE"
 
   fun getTestTagForHuntCard(hunt: Hunt, index: Int): String = "HUNT_CARD_$index"
 }
 
+val TEXT_SIZE = 4.dp
 val BackgroundColorKey = SemanticsPropertyKey<Color>("BackgroundColor")
 
 data class TabItem(val tab: ProfileTab, val testTag: String, val icon: ImageVector)
@@ -134,19 +137,22 @@ fun ProfileScreen(
                       text = profile.author.pseudonym,
                       fontSize = 20.sp,
                       fontWeight = FontWeight.Bold,
-                      modifier = Modifier.padding(4.dp).testTag(ProfileTestTags.PROFILE_PSEUDONYM))
+                      modifier =
+                          Modifier.padding(TEXT_SIZE).testTag(ProfileTestTags.PROFILE_PSEUDONYM))
                   Row {
                     Text(
-                        text = "${profile.author.reviewRate}/5",
+                        text = "${profile.author.reviewRate}/${MAX_RATING}",
                         modifier =
-                            Modifier.padding(4.dp).testTag(ProfileTestTags.PROFILE_REVIEW_RATING))
+                            Modifier.padding(TEXT_SIZE)
+                                .testTag(ProfileTestTags.PROFILE_REVIEW_RATING))
                     Rating(rating = profile.author.reviewRate, RatingType.STAR)
                   }
                   Row {
                     Text(
-                        text = "${profile.author.sportRate}/5",
+                        text = "${profile.author.sportRate}/${MAX_RATING}",
                         modifier =
-                            Modifier.padding(4.dp).testTag(ProfileTestTags.PROFILE_SPORT_RATING))
+                            Modifier.padding(TEXT_SIZE)
+                                .testTag(ProfileTestTags.PROFILE_SPORT_RATING))
                     Rating(rating = profile.author.sportRate, RatingType.SPORT)
                   }
                 }
@@ -173,15 +179,29 @@ fun ProfileScreen(
                       ProfileTab.DONE_HUNTS -> profile.doneHunts
                       ProfileTab.LIKED_HUNTS -> profile.likedHunts
                     }
-                items(huntsToDisplay.size) { index ->
-                  val hunt = huntsToDisplay[index]
-                  // val huntUiState = HuntUiState(hunt = hunt, isLiked = false, isArchived = false)
-                  // // until I implement the ViewModel
-                  // HuntCard(//huntUiState)
-                  HuntCard(
-                      hunt,
-                      modifier =
-                          Modifier.testTag(ProfileTestTags.getTestTagForHuntCard(hunt, index)))
+                if (huntsToDisplay.isEmpty()) {
+                  item {
+                    Text(
+                        text = "No hunts yet",
+                        color = Color.Gray,
+                        fontSize = 16.sp,
+                        modifier =
+                            Modifier.padding(top = 32.dp)
+                                .align(Alignment.CenterHorizontally)
+                                .testTag(ProfileTestTags.EMPTY_HUNTS_MESSAGE))
+                  }
+                } else {
+                  items(huntsToDisplay.size) { index ->
+                    val hunt = huntsToDisplay[index]
+                    // val huntUiState = HuntUiState(hunt = hunt, isLiked = false, isArchived =
+                    // false)
+                    // // until I implement the ViewModel
+                    // HuntCard(//huntUiState)
+                    HuntCard(
+                        hunt,
+                        modifier =
+                            Modifier.testTag(ProfileTestTags.getTestTagForHuntCard(hunt, index)))
+                  }
                 }
               }
         }
