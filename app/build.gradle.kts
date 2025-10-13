@@ -78,6 +78,7 @@ android {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
         }
+        execution = "ANDROIDX_TEST_ORCHESTRATOR"
     }
 
     // Robolectric needs to be run only in debug. But its tests are placed in the shared source set (test)
@@ -133,6 +134,7 @@ dependencies {
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
     implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
+    implementation("androidx.navigation:navigation-compose:2.8.0")
 
     // Firebase Authentication
     implementation("com.google.firebase:firebase-auth")
@@ -170,6 +172,9 @@ dependencies {
     // UI Tests
     globalTestImplementation(libs.compose.test.junit)
     debugImplementation(libs.compose.test.manifest)
+    // For createAndroidComposeRule in tests
+    androidTestUtil("androidx.test:orchestrator:1.4.2")
+
 
     // --------- Kaspresso test framework ----------
     globalTestImplementation(libs.kaspresso)
@@ -192,8 +197,8 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
     mustRunAfter("testDebugUnitTest", "connectedDebugAndroidTest")
 
     reports {
-        xml.required = true
-        html.required = true
+        xml.required.set(true)
+        html.required.set(true)
     }
 
     val fileFilter = listOf(
@@ -202,20 +207,34 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         "**/BuildConfig.*",
         "**/Manifest*.*",
         "**/*Test*.*",
-        "android/**/*.*",
+        "android/**/*.*"
     )
 
-    val debugTree = fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
+    val debugTree = fileTree("${buildDir}/intermediates/javac/debug") {
         exclude(fileFilter)
     }
 
-    val mainSrc = "${project.layout.projectDirectory}/src/main/java"
+    val kotlinDebugTree = fileTree("${buildDir}/tmp/kotlin-classes/debug") {
+        exclude(fileFilter)
+    }
+
+    val mainSrc = "${projectDir}/src/main/java"
+
     sourceDirectories.setFrom(files(mainSrc))
-    classDirectories.setFrom(files(debugTree))
-    executionData.setFrom(fileTree(project.layout.buildDirectory.get()) {
-        include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
-        include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
-    })
+    classDirectories.setFrom(files(debugTree, kotlinDebugTree))
+    executionData.setFrom(
+        fileTree(buildDir) {
+            include(
+                "jacoco/testDebugUnitTest.exec",
+                "outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec",
+                "outputs/code_coverage/debugAndroidTest/connected/**/*.ec"
+            )
+        }
+    )
+
+    doLast {
+        println("✅ JaCoCo report generated at: ${reports.html.outputLocation.get().asFile.absolutePath}")
+    }
 }
 
 tasks.withType<Test>().configureEach {
