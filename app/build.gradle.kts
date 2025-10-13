@@ -183,18 +183,6 @@ dependencies {
     // ----------       Robolectric     ------------
     testImplementation(libs.robolectric)
     testImplementation("org.robolectric:robolectric:4.12.1")
-
-    // Testing Unit
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.mockk)
-    androidTestImplementation(libs.mockk.android)
-    androidTestImplementation(libs.mockk.agent)
-    testImplementation(libs.mockk)
-    testImplementation(libs.json)
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
-    testImplementation("org.mockito:mockito-core:5.13.0")
-
-
 }
 
 tasks.withType<Test> {

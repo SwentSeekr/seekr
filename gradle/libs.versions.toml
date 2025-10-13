@@ -17,7 +17,6 @@ robolectric = "4.11.1"
 sonar = "4.4.1.3373"
 firebaseAuthKtx = "22.0.0"
 googleid = "1.1.1"
-mockito = "5.5.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -45,7 +44,6 @@ kaspresso-compose = { group = "com.kaspersky.android-components", name = "kaspre
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
-mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

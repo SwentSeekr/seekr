@@ -2,13 +2,9 @@ package com.swentseekr.seekr.model.hunt
 
 import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.map.Location
-import java.lang.IllegalArgumentException
-import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertFalse
-import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertNotEquals
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
