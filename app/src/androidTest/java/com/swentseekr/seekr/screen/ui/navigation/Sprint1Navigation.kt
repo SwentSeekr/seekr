@@ -18,15 +18,12 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class SeekrNavigationTest {
 
-  @get:Rule
-  val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+  @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
   @Before
   fun setUp() {
     composeTestRule.activityRule.scenario.onActivity { activity ->
-      activity.setContent {
-        SeekrApp()
-      }
+      activity.setContent { SeekrApp() }
     }
 
     // Wait for Compose to settle before starting assertions
