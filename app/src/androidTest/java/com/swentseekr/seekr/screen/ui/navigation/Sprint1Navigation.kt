@@ -3,6 +3,7 @@ package com.swentseekr.seekr.screen.ui.navigation
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -22,15 +23,20 @@ class SeekrNavigationTest {
 
   @Before
   fun setUp() {
-    composeTestRule.activityRule.scenario.onActivity { activity ->
-      activity.setContent { SeekrApp() }
+    composeTestRule.runOnUiThread {
+      // Always start with a clean Compose hierarchy
+      composeTestRule.activity.setContent { SeekrApp() }
     }
 
-    // Wait for Compose to settle before starting assertions
-    composeTestRule.waitForIdle()
+    // Wait until the UI is actually rendered before proceeding
+    composeTestRule.waitUntil(timeoutMillis = 5_000) {
+      composeTestRule
+          .onAllNodes(hasTestTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU))
+          .fetchSemanticsNodes()
+          .isNotEmpty()
+    }
   }
 
-  // Tag existence tests
   @Test
   fun allNavigationTagsAreDisplayed() {
     composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
@@ -39,7 +45,6 @@ class SeekrNavigationTest {
     composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_TAB).assertIsDisplayed()
   }
 
-  // Bottom bar visibility and screen content
   @Test
   fun bottomNavigationIsAlwaysVisible() {
     composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()

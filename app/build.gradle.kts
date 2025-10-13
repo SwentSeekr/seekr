@@ -78,6 +78,7 @@ android {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
         }
+        execution = "ANDROIDX_TEST_ORCHESTRATOR"
     }
 
     // Robolectric needs to be run only in debug. But its tests are placed in the shared source set (test)
@@ -171,6 +172,9 @@ dependencies {
     // UI Tests
     globalTestImplementation(libs.compose.test.junit)
     debugImplementation(libs.compose.test.manifest)
+    // For createAndroidComposeRule in tests
+    androidTestUtil("androidx.test:orchestrator:1.4.2")
+
 
     // --------- Kaspresso test framework ----------
     globalTestImplementation(libs.kaspresso)
