@@ -109,7 +109,7 @@ jobs:
             echo "Firebase emulators not configured, skipping emulator startup..."
           fi
 
-      - name: Run instrumentation tests
+      - name: Run instrumentation tests + Generate Coverage Report
         timeout-minutes: 25
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -120,12 +120,9 @@ jobs:
           force-avd-creation: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -skin 1080x2400
           disable-animations: true
-          script: ./gradlew connectedDebugAndroidTest --parallel --build-cache
+          script: ./gradlew connectedDebugAndroidTest testDebugUnitTest jacocoTestReport --parallel --build-cache
+          # This step generates the coverage report which will be uploaded to sonar
 
-      # This step generates the coverage report which will be uploaded to sonar
-      - name: Generate Coverage Report
-        run: |
-          ./gradlew jacocoTestReport
 
       # Upload the various reports to sonar
       - name: Upload report to SonarCloud
