@@ -50,7 +50,7 @@ fun HuntCard(
     // huntUiState: HuntUiState,
     // onLikeClick: (String) -> Unit = {}
     hunt: Hunt,
-    modifier: Modifier
+    modifier: Modifier = Modifier
 ) {
   // val hunt = huntUiState.hunt
   Card(modifier = modifier.padding(8.dp).fillMaxWidth().height(150.dp)) {
