@@ -9,7 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.swentseekr.seekr.ui.auth.AuthNavHost
 import com.swentseekr.seekr.ui.auth.AuthViewModel
 
 @Composable

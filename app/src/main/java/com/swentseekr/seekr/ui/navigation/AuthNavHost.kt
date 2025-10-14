@@ -1,4 +1,4 @@
-package com.swentseekr.seekr.ui.auth
+package com.swentseekr.seekr.ui.navigation
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -8,6 +8,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.swentseekr.seekr.ui.auth.AuthViewModel
+import com.swentseekr.seekr.ui.auth.SignInScreen
 
 enum class AuthScreen {
   SIGN_IN
