@@ -30,6 +30,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        testInstrumentationRunnerArguments["coverage"] = "true"
+
+        testInstrumentationRunnerArguments["clearPackageData"] = "false"
+
         vectorDrawables {
             useSupportLibrary = true
         }
