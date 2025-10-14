@@ -16,7 +16,8 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme =
-    darkColorScheme(primary = Green,
+    darkColorScheme(
+        primary = Green,
         onPrimary = Black,
         secondary = Orange,
         onSecondary = GrayDislike,
@@ -27,8 +28,7 @@ private val DarkColorScheme =
         surface = GrayBackgound,
         onSurface = Black,
         error = DarkError,
-        onError = DarkOnError
-    )
+        onError = DarkOnError)
 
 private val LightColorScheme =
     lightColorScheme(
@@ -44,7 +44,7 @@ private val LightColorScheme =
         onSurface = Black,
         error = LightError,
         onError = LightOnError,
-        )
+    )
 
 @Composable
 fun SampleAppTheme(
