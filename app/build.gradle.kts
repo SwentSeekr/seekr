@@ -242,6 +242,25 @@ tasks.withType<Test>().configureEach {
         toolVersion = "0.8.12"
     }
 }
+// --- 🧹 Workaround: clean invalid JaCoCo XML lines (e.g., nr="65535") for SonarCloud ---
+tasks.named<JacocoReport>("jacocoTestReport").configure {
+    doLast {
+        val reportFile = reports.xml.outputLocation.get().asFile
+        if (reportFile.exists()) {
+            val original = reportFile.readText()
+            val cleaned = original.replace(Regex("""<line[^>]+nr="65535"[^>]*/>"""), "")
+            if (original != cleaned) {
+                reportFile.writeText(cleaned)
+                println("🧹 Cleaned JaCoCo XML: removed invalid line entries (e.g., nr=65535)")
+            } else {
+                println("✅ JaCoCo XML is clean — no invalid line entries found.")
+            }
+        } else {
+            println("⚠️ JaCoCo XML report not found: ${reportFile.absolutePath}")
+        }
+    }
+}
+
 configurations.matching { it.name.contains("test", ignoreCase = true) }.all {
     resolutionStrategy {
         force("org.jacoco:org.jacoco.agent:0.8.12")
