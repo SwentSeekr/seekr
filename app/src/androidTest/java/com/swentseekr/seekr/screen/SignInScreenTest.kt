@@ -4,7 +4,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.firebase.auth.FirebaseAuth
 import com.swentseekr.seekr.ui.auth.SignInScreen
 import com.swentseekr.seekr.ui.auth.SignInScreenTestTags.APP_LOGO
@@ -12,7 +11,6 @@ import com.swentseekr.seekr.ui.auth.SignInScreenTestTags.LOGIN_BUTTON
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-
 
 class SignInScreenTest {
 
