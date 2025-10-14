@@ -194,7 +194,7 @@ tasks.withType<Test> {
 }
 
 tasks.register("jacocoTestReport", JacocoReport::class) {
-    mustRunAfter("testDebugUnitTest", "connectedDebugAndroidTest")
+    dependsOn("testDebugUnitTest",  "connectedDebugAndroidTest") // tests are required to run before generating the report
 
     reports {
         xml.required.set(true)
