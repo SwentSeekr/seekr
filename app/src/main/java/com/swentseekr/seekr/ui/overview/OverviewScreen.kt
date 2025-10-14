@@ -46,6 +46,7 @@ object OverviewScreenTestTags {
 fun OverviewScreen(
     modifier: Modifier = Modifier,
     overviewViewModel: OverviewViewModel = viewModel(),
+    onActiveBar: (Boolean) -> Unit = {},
 ) {
 
   val uiState by overviewViewModel.uiState.collectAsState()
@@ -84,7 +85,7 @@ fun OverviewScreen(
         {overviewViewModel.onSearchChange(it)},
         {overviewViewModel.onSearchChange(it)},
         true,
-        {},
+        onActiveChange = onActiveBar,
         modifier =
         modifier
           .fillMaxWidth()
