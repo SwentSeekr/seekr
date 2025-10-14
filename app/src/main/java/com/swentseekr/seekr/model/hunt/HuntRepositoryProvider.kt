@@ -44,7 +44,6 @@ object HuntRepositoryProvider {
             )
 
         runBlocking { sampleHunts.forEach { hunt -> addHunt(hunt) } }
-        // sampleHunts.forEach { hunt -> GlobalScope.launch { addHunt(hunt) } }
       }
   var repository: HuntsRepository = HuntRepositoryProvider._repository
 }

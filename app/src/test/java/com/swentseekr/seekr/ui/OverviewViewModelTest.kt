@@ -53,13 +53,12 @@ class OverviewViewModelTest {
 
     viewModel = OverviewViewModel(fakeRepository)
 
-    // Wait briefly to ensure loadHunts completes
     advanceUntilIdle()
   }
 
   @After
   fun tearDown() {
-    Dispatchers.resetMain() // reset main dispatcher to the original Main dispatcher
+    Dispatchers.resetMain()
   }
 
   /** * Test that the initial state of the ViewModel loads hunts from the repository correctly. */
@@ -102,7 +101,7 @@ class OverviewViewModelTest {
    * hunts.
    */
   @Test
-  fun onAchivedClick_filters_achieved_hunts() = runTest {
+  fun onAchievedClick_filters_achieved_hunts() = runTest {
     val updatedList =
         viewModel.uiState.value.hunts.map {
           if (it.hunt.uid == "2") it.copy(isAchived = true) else it

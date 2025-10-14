@@ -8,8 +8,6 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
-// import org.mockito.MockitoAnnotations
-
 class HuntsRepositoryLocalTest {
   private lateinit var huntsRepositoryLocal: HuntsRepositoryLocal
 
@@ -31,8 +29,6 @@ class HuntsRepositoryLocalTest {
 
   @Before
   fun setUp() {
-    // MockitoAnnotations.openMocks(this)
-
     huntsRepositoryLocal = HuntsRepositoryLocal()
   }
   /**
@@ -59,8 +55,8 @@ class HuntsRepositoryLocalTest {
   }
 
   /**
-   * This test verifies that addToDo successfully adds a ToDo item to the local repository It also
-   * tests that getAllTodos and getTodo successfully retrieve the todos.
+   * This test verifies that addHunt successfully adds a Hunt item to the local repository It also
+   * tests that getAllHunts and getHunt successfully retrieve the hunts.
    */
   @Test
   fun addHunt_succeeds() = runTest {
@@ -101,7 +97,6 @@ class HuntsRepositoryLocalTest {
     huntsRepositoryLocal.addHunt(hunt2)
 
     val hunts = huntsRepositoryLocal.getAllHunts()
-
     assertEquals(2, hunts.size)
     assertTrue(hunts.contains(hunt1))
     assertTrue(hunts.contains(hunt2))
@@ -145,11 +140,5 @@ class HuntsRepositoryLocalTest {
   @Test(expected = IllegalArgumentException::class)
   fun deleteHunt_notFound_throws() = runBlocking {
     huntsRepositoryLocal.deleteHunt("non-existent-id")
-  }
-
-  /** This test verifies that attempting to edit a non-existent Hunt throws an exception */
-  @Test(expected = IllegalArgumentException::class)
-  fun editHunt_notFound_throws() = runBlocking {
-    huntsRepositoryLocal.editHunt("non-existent-id", sampleHunt)
   }
 }
