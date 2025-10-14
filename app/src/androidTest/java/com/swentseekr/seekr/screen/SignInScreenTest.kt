@@ -12,9 +12,8 @@ import com.swentseekr.seekr.ui.auth.SignInScreenTestTags.LOGIN_BUTTON
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
+
 class SignInScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
