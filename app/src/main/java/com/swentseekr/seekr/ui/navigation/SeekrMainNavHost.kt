@@ -93,7 +93,7 @@ fun SeekrNavigationBar(
 // Main App Scaffold
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SeekrApp(
+fun SeekrMainNavHost(
     navController: NavHostController = rememberNavController(),
     modifier: Modifier = Modifier
 ) {
@@ -133,5 +133,5 @@ fun SeekrApp(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun SeekrAppPreview() {
-  SampleAppTheme { SeekrApp() }
+  SampleAppTheme { SeekrMainNavHost() }
 }

@@ -23,7 +23,7 @@ fun SeekrRootApp(
   Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
     if (state.isAuthenticated) {
       // User is logged in → go to main app
-      SeekrApp(modifier = Modifier.padding(innerPadding))
+      SeekrMainNavHost(modifier = Modifier.padding(innerPadding))
     } else {
       // Not logged in → show auth flow
       AuthNavHost(
