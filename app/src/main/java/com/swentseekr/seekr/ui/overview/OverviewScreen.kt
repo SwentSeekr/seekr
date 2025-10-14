@@ -82,40 +82,36 @@ fun OverviewScreen(
   ) {
     SearchBar(
         query = "Search",
-        {overviewViewModel.onSearchChange(it)},
-        {overviewViewModel.onSearchChange(it)},
+        { overviewViewModel.onSearchChange(it) },
+        { overviewViewModel.onSearchChange(it) },
         true,
         onActiveChange = onActiveBar,
         modifier =
-        modifier
-          .fillMaxWidth()
-          .padding(horizontal = 8.dp, vertical = 3.dp)
-          .height(64.dp)
-          .testTag(OverviewScreenTestTags.SEARCH_BAR),
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 3.dp)
+                .height(64.dp)
+                .testTag(OverviewScreenTestTags.SEARCH_BAR),
         shape = RoundedCornerShape(50),
-        content = {}
-    )
+        content = {})
 
     FilterBar(
         uiState.selectedStatus,
         uiState.selectedDifficulty,
         { overviewViewModel.onStatusFilterSelect(it) },
-        { overviewViewModel.onDifficultyFilterSelect(it)}
-    )
+        { overviewViewModel.onDifficultyFilterSelect(it) })
 
-    LazyColumn (
-      modifier = modifier.testTag(OverviewScreenTestTags.HUNT_LIST)
-    ) {
+    LazyColumn(modifier = modifier.testTag(OverviewScreenTestTags.HUNT_LIST)) {
       items(hunts.size) { index ->
         val hunt = hunts[index]
-        HuntCard (
-          hunt.hunt,
-          modifier = modifier
-            .testTag
-            (
-            if (index == (hunts.size - 1)) OverviewScreenTestTags.LAST_HUNT_CARD
-            else OverviewScreenTestTags.HUNT_CARD)
-            .clickable { overviewViewModel.onHuntClick(hunt.hunt.uid) },
+        HuntCard(
+            hunt.hunt,
+            modifier =
+                modifier
+                    .testTag(
+                        if (index == (hunts.size - 1)) OverviewScreenTestTags.LAST_HUNT_CARD
+                        else OverviewScreenTestTags.HUNT_CARD)
+                    .clickable { overviewViewModel.onHuntClick(hunt.hunt.uid) },
         )
         Spacer(modifier = Modifier.height(8.dp))
       }
@@ -141,9 +137,7 @@ fun FilterBar(
       modifier = Modifier.fillMaxWidth().padding(8.dp),
       horizontalAlignment = Alignment.CenterHorizontally,
   ) {
-    LazyRow(modifier = modifier
-      .testTag(OverviewScreenTestTags.FILTER_BAR)
-    ) {
+    LazyRow(modifier = modifier.testTag(OverviewScreenTestTags.FILTER_BAR)) {
       val huntStatuses = HuntStatus.values()
       val difficulties = Difficulty.values()
       // FilterButton("All", selectedStatus == null) { onStatusSelected(null) }
@@ -151,20 +145,18 @@ fun FilterBar(
         FilterButton(
             text = huntStatuses[status].name,
             isSelected = (selectedStatus == huntStatuses[status]),
-          modifier = Modifier.testTag("FilterButton_${status}")
-        ) {
-          onStatusSelected(huntStatuses[status])
-        }
+            modifier = Modifier.testTag("FilterButton_${status}")) {
+              onStatusSelected(huntStatuses[status])
+            }
       }
 
       items(difficulties.size) { difficulty ->
         FilterButton(
             text = difficulties[difficulty].name,
             isSelected = (selectedDifficulty == difficulties[difficulty]),
-            modifier = modifier.testTag("FilterButton_${difficulty + 3}")
-        ) {
-          onDifficultySelected(difficulties[difficulty])
-        }
+            modifier = modifier.testTag("FilterButton_${difficulty + 3}")) {
+              onDifficultySelected(difficulties[difficulty])
+            }
       }
     }
     /*Row {
@@ -190,9 +182,7 @@ fun FilterButton(
       colors =
           ButtonDefaults.buttonColors(
               containerColor = if (isSelected) Color.Green else Color.LightGray),
-      modifier = modifier
-        .padding(4.dp)
-  ) {
+      modifier = modifier.padding(4.dp)) {
         Text(text)
       }
 }
