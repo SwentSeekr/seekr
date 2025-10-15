@@ -255,6 +255,7 @@ fun ProfileScreenPreview() {
 
   ProfileScreen(profile = profile, currentUserId = "user123")
 }
+
 /**
  * Displays a toolbar with tabs for switching between "My Hunts", "Done Hunts", and "Liked Hunts".
  *
