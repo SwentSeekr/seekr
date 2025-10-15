@@ -34,7 +34,7 @@ class ProfileRepositoryLocalTest {
   }
 
   @Test
-  fun `getProfile returns correct profile`() = runTest {
+  fun getProfile_returns_correct_profile() = runTest {
     val profile = repository.getProfile("user1")
     assertEquals("Alice", profile.author.pseudonym)
   }
@@ -45,7 +45,7 @@ class ProfileRepositoryLocalTest {
   }
 
   @Test
-  fun `updateProfile updates existing profile`() = runTest {
+  fun updateProfile_updates_existing_profile() = runTest {
     val updatedProfile = profileAlice.copy(author = profileAlice.author.copy(bio = "Updated bio"))
 
     repository.updateProfile(updatedProfile)
@@ -55,13 +55,13 @@ class ProfileRepositoryLocalTest {
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun `updateProfile throws for non-existent user`() = runTest {
+  fun updateProfile_throws_for_non_existent_user() = runTest {
     val fake = profileAlice.copy(uid = "ghost")
     repository.updateProfile(fake)
   }
 
   @Test
-  fun `getMyHunts returns correct list`() = runTest {
+  fun getMyHunts_returns_correct_list() = runTest {
     profileAlice.myHunts.add(sampleHunt)
 
     val hunts = repository.getMyHunts("user1")
@@ -70,7 +70,7 @@ class ProfileRepositoryLocalTest {
   }
 
   @Test
-  fun `getDoneHunts and getLikedHunts work correctly`() = runTest {
+  fun getDoneHunts_and_getLikedHunts_work_correctly() = runTest {
     profileAlice.doneHunts.add(done)
     profileAlice.likedHunts.add(liked)
 
@@ -79,7 +79,7 @@ class ProfileRepositoryLocalTest {
   }
 
   @Test
-  fun `addProfile increases repository size`() = runTest {
+  fun addProfile_increases_repository_size() = runTest {
     val initialSize = repository.size()
 
     val newProfile =
@@ -104,7 +104,7 @@ class ProfileRepositoryLocalTest {
   }
 
   @Test
-  fun `updateProfile replaces existing profile not duplicates`() = runTest {
+  fun updateProfile_replaces_existing_profile_not_duplicates() = runTest {
     val initialSize = repository.size()
 
     val updated = profileAlice.copy(author = profileAlice.author.copy(bio = "Replaced"))
@@ -116,7 +116,7 @@ class ProfileRepositoryLocalTest {
   }
 
   @Test
-  fun `getProfile is case sensitive`() = runTest {
+  fun getProfile_is_case_sensitive() = runTest {
     try {
       repository.getProfile("User1") // capital U
       throw AssertionError("Expected exception for mismatched case")
@@ -126,17 +126,16 @@ class ProfileRepositoryLocalTest {
   }
 
   @Test
-  fun `profiles are isolated between users`() = runTest {
+  fun profiles_are_isolated_between_users() = runTest {
     profileAlice.myHunts.add(sampleHunt)
     assertEquals(1, repository.getMyHunts("user1").size)
     assertEquals(0, repository.getMyHunts("user2").size)
   }
 
-  @Test
-  fun `repository size returns correct count`() = runTest { assertEquals(2, repository.size()) }
+  @Test fun repository_size_returns_correct_count() = runTest { assertEquals(2, repository.size()) }
 
   @Test
-  fun `addProfile can add multiple profiles without conflict`() = runTest {
+  fun addProfile_can_add_multiple_profiles_without_conflict() = runTest {
     val p4 =
         sampleProfileWithPseudonym(
             uid = "user4",
@@ -153,13 +152,13 @@ class ProfileRepositoryLocalTest {
   }
 
   @Test
-  fun `getMyHunts returns empty list for new profile`() = runTest {
+  fun getMyHunts_returns_empty_list_for_new_profile() = runTest {
     val hunts = repository.getMyHunts("user2")
     assertTrue(hunts.isEmpty())
   }
 
   @Test
-  fun `updateProfile preserves hunts`() = runTest {
+  fun updateProfile_preserves_hunts() = runTest {
     profileAlice.myHunts.add(sampleHunt)
     val updated = profileAlice.copy(author = profileAlice.author.copy(bio = "Preserve hunts"))
     repository.updateProfile(updated)
@@ -169,13 +168,13 @@ class ProfileRepositoryLocalTest {
   }
 
   @Test
-  fun `getDoneHunts returns empty list for user with no done hunts`() = runTest {
+  fun getDoneHunts_returns_empty_list_for_user_with_no_done_hunts() = runTest {
     val result = repository.getDoneHunts("user2")
     assertTrue(result.isEmpty())
   }
 
   @Test
-  fun `getLikedHunts returns empty list for user with no liked hunts`() = runTest {
+  fun getLikedHunts_returns_empty_list_for_user_with_no_liked_hunts() = runTest {
     val result = repository.getLikedHunts("user2")
     assertTrue(result.isEmpty())
   }
