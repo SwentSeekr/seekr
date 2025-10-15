@@ -59,7 +59,7 @@ object HuntRepositoryProvider {
                     time = 3.0,
                     distance = 6.0,
                     difficulty = Difficulty.INTERMEDIATE,
-                    author = Author("Holly Wood", "", 2, 3.5, 4.0),
+                    authorId = "2",
                     image = 1,
                     reviewRate = 4.0),
                 Hunt(
@@ -77,7 +77,7 @@ object HuntRepositoryProvider {
                     time = 2.0,
                     distance = 4.0,
                     difficulty = Difficulty.INTERMEDIATE,
-                    author = Author("Jean Dupont", "", 3, 3.0, 4.2),
+                    authorId = "3",
                     image = 2,
                     reviewRate = 4.7))
 

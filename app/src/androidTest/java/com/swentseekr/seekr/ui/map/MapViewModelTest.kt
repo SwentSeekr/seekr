@@ -1,6 +1,5 @@
 package com.swentseekr.seekr.ui.map
 
-import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.hunt.*
 import com.swentseekr.seekr.model.map.Location
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -70,7 +69,7 @@ class MapViewModelTest {
           time = 1.0,
           distance = 2.0,
           difficulty = Difficulty.EASY,
-          author = Author(author, "", 1, 1.0, 1.0),
+          authorId = "A",
           image = 0,
           reviewRate = 4.2)
 

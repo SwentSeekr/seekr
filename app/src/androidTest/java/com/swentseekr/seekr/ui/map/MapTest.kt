@@ -6,7 +6,6 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.hunt.*
 import com.swentseekr.seekr.model.map.Location
 import org.junit.Rule
@@ -28,7 +27,7 @@ class MapTest {
           time = 1.0,
           distance = 1.0,
           difficulty = Difficulty.EASY,
-          author = Author("A", "", 1, 1.0, 1.0),
+          authorId = "A",
           image = 0,
           reviewRate = 4.0)
 

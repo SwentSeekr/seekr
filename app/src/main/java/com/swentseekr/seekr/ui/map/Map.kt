@@ -48,7 +48,6 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.swentseekr.seekr.R
-import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
@@ -115,7 +114,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
           time = 2.5,
           distance = 5.0,
           difficulty = Difficulty.EASY,
-          author = Author("spike man", "", 1, 2.5, 3.0),
+          authorId = "0",
           image = 0,
           reviewRate = 4.5)
 
