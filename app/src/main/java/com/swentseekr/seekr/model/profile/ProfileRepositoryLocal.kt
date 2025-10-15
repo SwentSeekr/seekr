@@ -1,0 +1,45 @@
+package com.swentseekr.seekr.model.profile
+
+import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.ui.profile.Profile
+
+class ProfileRepositoryLocal : ProfileRepository {
+  private val profiles = mutableListOf<Profile>()
+
+  fun size() = profiles.size
+
+  fun addProfile(profile: Profile) {
+    profiles.add(profile)
+  }
+
+  override suspend fun getProfile(userId: String): Profile {
+    for (i in profiles.indices) {
+      if (profiles[i].uid == userId) {
+        return profiles[i]
+      }
+    }
+    throw IllegalArgumentException("Hunt with ID $userId not found")
+  }
+
+  override suspend fun updateProfile(profile: Profile) {
+    for (i in profiles.indices) {
+      if (profiles[i].uid == profile.uid) {
+        profiles[i] = profile
+        return
+      }
+    }
+    throw IllegalArgumentException("Hunt with ID ${profile.uid} is not found")
+  }
+
+  override suspend fun getMyHunts(userId: String): List<Hunt> {
+    return getProfile(userId).myHunts
+  }
+
+  override suspend fun getDoneHunts(userId: String): List<Hunt> {
+    return getProfile(userId).doneHunts
+  }
+
+  override suspend fun getLikedHunts(userId: String): List<Hunt> {
+    return getProfile(userId).likedHunts
+  }
+}

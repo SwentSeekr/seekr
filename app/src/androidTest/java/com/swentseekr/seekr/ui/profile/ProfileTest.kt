@@ -27,6 +27,7 @@ class ProfileScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private fun setProfileScreen(profile: Profile) {
+
     val profile = profile
     composeTestRule.setContent { ProfileScreen(profile, currentUserId = "user123") }
   }
