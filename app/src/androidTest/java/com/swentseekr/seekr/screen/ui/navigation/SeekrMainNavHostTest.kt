@@ -10,7 +10,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.swentseekr.seekr.ui.navigation.NavigationTestTags
-import com.swentseekr.seekr.ui.navigation.SeekrApp
+import com.swentseekr.seekr.ui.navigation.SeekrMainNavHost
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -25,7 +25,7 @@ class SeekrNavigationTest {
   fun setUp() {
     composeTestRule.runOnUiThread {
       // Always start with a clean Compose hierarchy
-      composeTestRule.activity.setContent { SeekrApp() }
+      composeTestRule.activity.setContent { SeekrMainNavHost() }
     }
 
     // Wait until the UI is actually rendered before proceeding

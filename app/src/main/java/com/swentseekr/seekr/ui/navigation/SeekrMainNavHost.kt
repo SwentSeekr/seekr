@@ -93,7 +93,10 @@ fun SeekrNavigationBar(
 // Main App Scaffold
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SeekrApp(navController: NavHostController = rememberNavController()) {
+fun SeekrMainNavHost(
+    navController: NavHostController = rememberNavController(),
+    modifier: Modifier = Modifier
+) {
   val navBackStackEntry by navController.currentBackStackEntryAsState()
   val currentRoute = navBackStackEntry?.destination?.route
   val currentDestination =
@@ -130,5 +133,5 @@ fun SeekrApp(navController: NavHostController = rememberNavController()) {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun SeekrAppPreview() {
-  SampleAppTheme { SeekrApp() }
+  SampleAppTheme { SeekrMainNavHost() }
 }
