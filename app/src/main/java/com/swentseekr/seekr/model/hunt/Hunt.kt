@@ -1,6 +1,5 @@
 package com.swentseekr.seekr.model.hunt
 
-import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.map.Location
 
 data class Hunt(
@@ -14,7 +13,7 @@ data class Hunt(
     val time: Double,
     val distance: Double,
     val difficulty: Difficulty,
-    val author: Author,
+    val authorId: String,
     val image: Int,
     val reviewRate: Double
 )

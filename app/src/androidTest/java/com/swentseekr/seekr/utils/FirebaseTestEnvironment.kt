@@ -5,7 +5,11 @@ import android.util.Log
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
 import java.net.Socket
+import java.net.URL
 
 /**
  * Centralized Firebase test environment configuration.
@@ -73,6 +77,43 @@ object FirebaseTestEnvironment {
       Socket(host, port).use { true }
     } catch (_: Exception) {
       false
+    }
+  }
+
+  val projectID by lazy { FirebaseApp.getInstance().options.projectId }
+
+  suspend fun clearEmulatorData() {
+    val host = HOST
+    val port = FIRESTORE_PORT
+    val urlString =
+        "http://$host:$port/emulator/v1/projects/$projectID/databases/(default)/documents"
+
+    try {
+      val url = URL(urlString)
+      val connection =
+          (url.openConnection() as HttpURLConnection).apply {
+            requestMethod = "DELETE"
+            connectTimeout = 2000
+            readTimeout = 2000
+          }
+
+      val responseCode = connection.responseCode
+      val responseText =
+          try {
+            BufferedReader(InputStreamReader(connection.inputStream)).use { it.readText() }
+          } catch (e: Exception) {
+            ""
+          }
+
+      if (responseCode in 200..299) {
+        Log.i("FirebaseTestEnv", "🔥 Firestore emulator cleared successfully.")
+      } else {
+        Log.w("FirebaseTestEnv", "⚠️ Failed to clear emulator (HTTP $responseCode): $responseText")
+      }
+
+      connection.disconnect()
+    } catch (e: Exception) {
+      Log.w("FirebaseTestEnv", "⚠️ Could not clear Firestore emulator data: ${e.message}")
     }
   }
 }
