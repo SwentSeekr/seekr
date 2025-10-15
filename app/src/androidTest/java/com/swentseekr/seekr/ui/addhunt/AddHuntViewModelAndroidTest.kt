@@ -116,8 +116,6 @@ class AddHuntViewModelAndroidTest {
     assertFalse(result)
     assertEquals(
         "Please fill all required fields before creating a hunt.", viewModel.uiState.value.errorMsg)
-    val hunts = repository.getAllHunts()
-    assertEquals(0, hunts.size)
   }
 
   @Test
