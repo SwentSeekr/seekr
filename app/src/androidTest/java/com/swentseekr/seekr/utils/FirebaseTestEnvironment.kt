@@ -25,7 +25,12 @@ object FirebaseTestEnvironment {
   private var initialized = false
   private var emulatorAvailable = false
 
-  /** Initialize Firebase emulator connections if available. Safe to call multiple times. */
+  /**
+   * Initialize Firebase emulator connections if available. Safe to call multiple times.
+   *
+   * @Synchronized ensures thread safety if multiple tests call setup() concurrently.
+   */
+  @Synchronized
   fun setup() {
     if (initialized) return
     initialized = true
