@@ -1,6 +1,7 @@
 package com.swentseekr.seekr.ui.auth
 
 import android.content.Context
+import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialCancellationException
@@ -96,3 +97,5 @@ class AuthViewModel(private val repository: AuthRepository = AuthRepositoryFireb
     }
   }
 }
+
+
