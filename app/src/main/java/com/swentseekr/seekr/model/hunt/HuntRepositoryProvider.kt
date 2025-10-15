@@ -1,6 +1,7 @@
 package com.swentseekr.seekr.model.hunt
 
-import com.swentseekr.seekr.model.author.Author
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import com.swentseekr.seekr.model.map.Location
 import kotlinx.coroutines.runBlocking
 
@@ -27,7 +28,7 @@ object HuntRepositoryProvider {
                     time = 2.5,
                     distance = 5.0,
                     difficulty = Difficulty.EASY,
-                    author = Author("spike man", "", 1, 2.5, 3.0),
+                    authorId = "0",
                     image = 0,
                     reviewRate = 4.5),
                 Hunt(
@@ -41,7 +42,7 @@ object HuntRepositoryProvider {
                     time = 3.0,
                     distance = 6.0,
                     difficulty = Difficulty.INTERMEDIATE,
-                    author = Author("holly wood", "", 2, 3.5, 4.0),
+                    authorId = "1",
                     image = 1,
                     reviewRate = 4.0),
                 Hunt(
@@ -82,5 +83,9 @@ object HuntRepositoryProvider {
 
         runBlocking { sampleHunts.forEach { hunt -> addHunt(hunt) } }
       }
-  var repository: HuntsRepository = HuntRepositoryProvider._repository
+
+  private val _repositoryFirestore: HuntsRepository by lazy {
+    HuntsRepositoryFirestore(Firebase.firestore)
+  }
+  var repository: HuntsRepository = _repositoryFirestore
 }
