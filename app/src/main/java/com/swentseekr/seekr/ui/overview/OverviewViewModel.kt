@@ -1,10 +1,9 @@
 package com.swentseekr.seekr.ui.overview
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.swentseekr.seekr.model.authentication.AuthRepository
+import com.swentseekr.seekr.model.authentication.AuthRepositoryFirebase
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
@@ -13,6 +12,7 @@ import com.swentseekr.seekr.model.hunt.HuntsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
@@ -27,7 +27,8 @@ data class OverviewUIState(
     val searchWord: String = "",
     val errorMsg: String? = null,
     val selectedStatus: HuntStatus? = null,
-    val selectedDifficulty: Difficulty? = null
+    val selectedDifficulty: Difficulty? = null,
+    val signedOut: Boolean = false
 )
 /**
  * Data class representing the UI state for a single Hunt item in the Overview screen.
@@ -51,7 +52,8 @@ data class HuntUiState(
  * @property huntRepository The repository used to fetch and manage Hunt items.
  */
 class OverviewViewModel(
-    private val repository: HuntsRepository = HuntRepositoryProvider.repository
+    private val repository: HuntsRepository = HuntRepositoryProvider.repository,
+    private val authRepository: AuthRepository = AuthRepositoryFirebase()
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(OverviewUIState())
   val uiState: StateFlow<OverviewUIState> = _uiState.asStateFlow()
@@ -91,12 +93,15 @@ class OverviewViewModel(
     }
   }
 
-  var searchQuery by mutableStateOf("")
-    private set
+  /**
+   * Handles the click event on a hunt item identified by [huntID]. Navigate to the card overview
+   */
+  fun onHuntClick(huntID: String) {
+    // TODO: Navigate to Hunt Detail Screen
+  }
 
   /** Updates the search word and filters the hunts based on the new search term [newSearch]. */
   fun onSearchChange(newSearch: String) {
-    searchQuery = newSearch
     if (newSearch != "") {
       _uiState.value = _uiState.value.copy(searchWord = newSearch)
       // filter the hunts based on the word searched
@@ -139,5 +144,17 @@ class OverviewViewModel(
           statusMatches && difficultyMatches
         }
     _uiState.value = currentState.copy(hunts = filtered)
+  }
+
+  /** Filters the hunts to show only those that have been achieved by the user. */
+  fun onAchivedClick() {
+    //
+    val filteredHunts = huntItems.filter { it.isAchived }
+    _uiState.value = _uiState.value.copy(hunts = filteredHunts)
+  }
+
+  /** Handles the click event on the icon marker to navigate to the map screen. */
+  fun onIconMarkerClick() {
+    // TODO: Navigate to Map Screen
   }
 }
