@@ -5,6 +5,7 @@ import com.swentseekr.seekr.ui.profile.Profile
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -129,5 +130,53 @@ class ProfileRepositoryLocalTest {
     profileAlice.myHunts.add(sampleHunt)
     assertEquals(1, repository.getMyHunts("user1").size)
     assertEquals(0, repository.getMyHunts("user2").size)
+  }
+
+  @Test
+  fun `repository size returns correct count`() = runTest { assertEquals(2, repository.size()) }
+
+  @Test
+  fun `addProfile can add multiple profiles without conflict`() = runTest {
+    val p4 =
+        sampleProfileWithPseudonym(
+            uid = "user4",
+            pseudonym = "Diana",
+        )
+    val p5 =
+        sampleProfileWithPseudonym(
+            uid = "user5",
+            pseudonym = "Eve",
+        )
+    repository.addProfile(p4)
+    repository.addProfile(p5)
+    assertEquals(4, repository.size())
+  }
+
+  @Test
+  fun `getMyHunts returns empty list for new profile`() = runTest {
+    val hunts = repository.getMyHunts("user2")
+    assertTrue(hunts.isEmpty())
+  }
+
+  @Test
+  fun `updateProfile preserves hunts`() = runTest {
+    profileAlice.myHunts.add(sampleHunt)
+    val updated = profileAlice.copy(author = profileAlice.author.copy(bio = "Preserve hunts"))
+    repository.updateProfile(updated)
+    val result = repository.getProfile("user1")
+    assertEquals(1, result.myHunts.size)
+    assertEquals("Preserve hunts", result.author.bio)
+  }
+
+  @Test
+  fun `getDoneHunts returns empty list for user with no done hunts`() = runTest {
+    val result = repository.getDoneHunts("user2")
+    assertTrue(result.isEmpty())
+  }
+
+  @Test
+  fun `getLikedHunts returns empty list for user with no liked hunts`() = runTest {
+    val result = repository.getLikedHunts("user2")
+    assertTrue(result.isEmpty())
   }
 }
