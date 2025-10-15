@@ -14,9 +14,11 @@ import com.swentseekr.seekr.ui.auth.AuthViewModel
 @Composable
 fun SeekrRootApp(
     context: Context = LocalContext.current,
-    credentialManager: CredentialManager = CredentialManager.create(context),
     authViewModel: AuthViewModel = viewModel()
 ) {
+  // Remember CredentialManager so it's not recreated on every recomposition
+  val credentialManager = remember { CredentialManager.create(context) }
+
   val state by authViewModel.state.collectAsState()
 
   Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
