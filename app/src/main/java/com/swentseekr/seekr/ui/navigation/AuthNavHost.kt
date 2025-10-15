@@ -12,7 +12,7 @@ import com.swentseekr.seekr.ui.auth.AuthViewModel
 import com.swentseekr.seekr.ui.auth.SignInScreen
 
 enum class AuthScreen {
-  SIGN_IN
+    SIGN_IN
 }
 
 @Composable
@@ -23,20 +23,26 @@ fun AuthNavHost(
     navController: NavHostController = rememberNavController(),
     modifier: Modifier = Modifier
 ) {
-  val state by viewModel.state.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
-  // Forward to onSignedIn if already authenticated
-  LaunchedEffect(state.isAuthenticated) { if (state.isAuthenticated) onSignedIn() }
-
-  NavHost(
-      navController = navController,
-      startDestination = AuthScreen.SIGN_IN.name,
-      modifier = modifier) {
-        composable(AuthScreen.SIGN_IN.name) {
-          SignInScreen(
-              authViewModel = viewModel,
-              credentialManager = credentialManager,
-              onSignedIn = onSignedIn)
+    // If already authenticated, go to next screen
+    LaunchedEffect(uiState.user) {
+        if (uiState.user != null) {
+            onSignedIn()
         }
-      }
+    }
+
+    NavHost(
+        navController = navController,
+        startDestination = AuthScreen.SIGN_IN.name,
+        modifier = modifier
+    ) {
+        composable(AuthScreen.SIGN_IN.name) {
+            SignInScreen(
+                viewModel = viewModel,
+                credentialManager = credentialManager,
+                onSignedIn = onSignedIn
+            )
+        }
+    }
 }
