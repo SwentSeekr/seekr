@@ -1,5 +1,7 @@
 package com.swentseekr.seekr.model.hunt
 
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.map.Location
 import kotlinx.coroutines.runBlocking
@@ -45,5 +47,7 @@ object HuntRepositoryProvider {
 
         runBlocking { sampleHunts.forEach { hunt -> addHunt(hunt) } }
       }
-  var repository: HuntsRepository = HuntRepositoryProvider._repository
+
+    private val _repositoryFirestore: HuntsRepository by lazy { HuntsRepositoryFirestore(Firebase.firestore)}
+  var repository: HuntsRepository = _repositoryFirestore
 }
