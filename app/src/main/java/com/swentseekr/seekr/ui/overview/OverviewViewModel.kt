@@ -1,5 +1,7 @@
 package com.swentseekr.seekr.ui.overview
 
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.CredentialManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.swentseekr.seekr.model.authentication.AuthRepository
@@ -156,5 +158,18 @@ class OverviewViewModel(
   /** Handles the click event on the icon marker to navigate to the map screen. */
   fun onIconMarkerClick() {
     // TODO: Navigate to Map Screen
+  }
+
+  fun signOut(credentialManager: CredentialManager): Unit {
+    viewModelScope.launch {
+      authRepository
+        .signOut()
+        .fold(
+          onSuccess = { _uiState.update { it.copy(signedOut = true) } },
+          onFailure = { throwable ->
+            _uiState.update { it.copy(errorMsg = throwable.localizedMessage) }
+          })
+      credentialManager.clearCredentialState(ClearCredentialStateRequest())
+    }
   }
 }
