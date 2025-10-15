@@ -41,6 +41,8 @@ object OverviewScreenTestTags {
   const val FILTER_BUTTON = "FilterButton"
 }
 
+const val FILTERS_SECOND = 3
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OverviewScreen(
@@ -140,7 +142,6 @@ fun FilterBar(
     LazyRow(modifier = modifier.testTag(OverviewScreenTestTags.FILTER_BAR)) {
       val huntStatuses = HuntStatus.values()
       val difficulties = Difficulty.values()
-      // FilterButton("All", selectedStatus == null) { onStatusSelected(null) }
       items(huntStatuses.size) { status ->
         FilterButton(
             text = huntStatuses[status].name,
@@ -154,19 +155,11 @@ fun FilterBar(
         FilterButton(
             text = difficulties[difficulty].name,
             isSelected = (selectedDifficulty == difficulties[difficulty]),
-            modifier = modifier.testTag("FilterButton_${difficulty + 3}")) {
+            modifier = modifier.testTag("FilterButton_${difficulty + FILTERS_SECOND}")) {
               onDifficultySelected(difficulties[difficulty])
             }
       }
     }
-    /*Row {
-      // FilterButton("All", selectedDifficulty == null) { onDifficultySelected(null) }
-      Difficulty.values().forEach { difficulty ->
-        FilterButton(difficulty.name, selectedDifficulty == difficulty) {
-          onDifficultySelected(difficulty)
-        }
-      }
-    }*/
   }
 }
 

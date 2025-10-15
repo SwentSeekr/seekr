@@ -81,30 +81,24 @@ class OverviewScreenTest {
 
       composeTestRule.onNodeWithTag("FilterButton_$index").assertIsDisplayed()
     }
-
-    // Vérifie le nombre total de boutons
-    val totalExpectedButtons = statuses.size + difficulties.size
-    /*
-    composeTestRule
-      .onAllNodes(hasTestTag(OverviewScreenTestTags.FILTER_BUTTON))
-      .assertCountEquals(totalExpectedButtons)*/
   }
 
   // test d’interaction avec un FilterButton
   @Test
   fun filterButton_click_triggersCallback() {
     var clicked = false
+    val index = 4 // Choisit un index pour le bouton à tester
 
     composeTestRule.setContent {
       FilterButton(
           text = "EASY",
           isSelected = false,
           modifier =
-              androidx.compose.ui.Modifier.testTag(OverviewScreenTestTags.FILTER_BUTTON + "_4"),
+              androidx.compose.ui.Modifier.testTag(OverviewScreenTestTags.FILTER_BUTTON + "_" + index),
           onClick = { clicked = true })
     }
 
-    composeTestRule.onNodeWithTag(OverviewScreenTestTags.FILTER_BUTTON + "_4").performClick()
+    composeTestRule.onNodeWithTag(OverviewScreenTestTags.FILTER_BUTTON + "_" + index).performClick()
 
     assert(clicked) // Le clic doit avoir déclenché le callback
   }
