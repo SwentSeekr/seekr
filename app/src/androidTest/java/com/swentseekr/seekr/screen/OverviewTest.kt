@@ -94,7 +94,8 @@ class OverviewScreenTest {
           text = "EASY",
           isSelected = false,
           modifier =
-              androidx.compose.ui.Modifier.testTag(OverviewScreenTestTags.FILTER_BUTTON + "_" + index),
+              androidx.compose.ui.Modifier.testTag(
+                  OverviewScreenTestTags.FILTER_BUTTON + "_" + index),
           onClick = { clicked = true })
     }
 
