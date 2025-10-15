@@ -32,7 +32,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.swentseekr.seekr.R
-import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
@@ -69,7 +68,7 @@ fun HuntCard(
             // tint = if(huntUiState.isLiked) Color.Red else Color.Gray)
             tint = Color.Red)
       }
-      Text("by ${hunt.author.pseudonym}", modifier = Modifier.padding(horizontal = 4.dp))
+      Text("by ${hunt.authorId}", modifier = Modifier.padding(horizontal = 4.dp))
       Row {
         Image(
             painter = painterResource(id = hunt.image),
@@ -139,7 +138,7 @@ fun HuntCardPreview() {
           time = 2.5,
           distance = 5.0,
           difficulty = Difficulty.DIFFICULT,
-          author = Author("spike man", "", 1, 2.5, 3.0),
+          authorId = "0",
           image = R.drawable.ic_launcher_foreground, // ou une image de ton projet
           reviewRate = 4.5)
   var isLiked by remember { mutableStateOf(false) }
