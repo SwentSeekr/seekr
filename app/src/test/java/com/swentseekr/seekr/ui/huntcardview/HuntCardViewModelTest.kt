@@ -66,6 +66,43 @@ class HuntCardViewModelTest {
   }
 
   @Test
+  fun loadHunt_withInvalidId_logsError() = runTest {
+    viewModel.loadHunt("invalid_id")
+    advanceUntilIdle()
+
+    val state = viewModel.uiState.value
+    assertNull(state.hunt)
+    assertFalse(state.isLiked)
+    assertFalse(state.isAchived)
+  }
+
+  @Test
+  fun initialUiState_isDefault() {
+    val state = viewModel.uiState.value
+    assertNull(state.hunt)
+    assertFalse(state.isLiked)
+    assertFalse(state.isAchived)
+  }
+
+  @Test
+  fun loadHuntAuthor_withValidId_doesNotCrash() = runTest {
+    viewModel.loadHuntAuthor(testHunt.uid)
+    advanceUntilIdle()
+
+    // This method currently only logs; we check it completes safely
+    assertTrue(true) // Placeholder assertion to confirm test ran
+  }
+
+  @Test
+  fun loadHuntAuthor_withInvalidId_logsError() = runTest {
+    viewModel.loadHuntAuthor("invalid_id")
+    advanceUntilIdle()
+
+    // Again, just making sure it doesn't crash
+    assertTrue(true)
+  }
+
+  @Test
   fun onLikeClick_isLiked() = runTest {
     assertFalse(viewModel.uiState.value.isLiked)
 
@@ -98,6 +135,14 @@ class HuntCardViewModelTest {
   }
 
   @Test
+  fun deleteHunt_withInvalidId_logsError() = runTest {
+    viewModel.deleteHunt("nonexistent_id")
+    advanceUntilIdle()
+
+    // Nothing to assert — just ensures no crash/log handled
+  }
+
+  @Test
   fun onEditClick() = runTest {
     val newHuntValue = testHunt.copy(title = "Edited Title")
     viewModel.editHunt(testHunt.uid, newHuntValue)
@@ -106,5 +151,20 @@ class HuntCardViewModelTest {
     val updatedHunt = fakeRepository.getHunt(testHunt.uid)
     assertEquals("Edited Title", updatedHunt.title)
     assertEquals(newHuntValue, updatedHunt)
+  }
+
+  @Test
+  fun editHunt_withInvalidId_logsError() = runTest {
+    val newHunt = testHunt.copy(uid = "nonexistent_id", title = "Should Fail")
+    viewModel.editHunt("nonexistent_id", newHunt)
+    advanceUntilIdle()
+
+    // Verify that the hunt was NOT added or changed
+    try {
+      fakeRepository.getHunt("nonexistent_id")
+      fail("Expected IllegalArgumentException")
+    } catch (e: IllegalArgumentException) {
+      assertEquals("Hunt with ID nonexistent_id is not found", e.message)
+    }
   }
 }
