@@ -7,7 +7,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
@@ -35,7 +34,7 @@ class HuntCardTest {
           time = 2.5,
           distance = 5.0,
           difficulty = Difficulty.DIFFICULT,
-          author = Author("spike man", "", 1, 2.5, 3.0),
+          authorId = "0",
           image = R.drawable.ic_launcher_foreground, // ou une image de ton projet
           reviewRate = 4.5)
 
@@ -45,7 +44,7 @@ class HuntCardTest {
     composeTestRule.setContent { HuntCard(hunt, modifier = Modifier.padding(2.dp)) }
 
     composeTestRule.onNodeWithText(hunt.title).assertIsDisplayed()
-    composeTestRule.onNodeWithText("by ${hunt.author.pseudonym}").assertIsDisplayed()
+    composeTestRule.onNodeWithText("by ${hunt.authorId}").assertIsDisplayed()
   }
 
   @Test

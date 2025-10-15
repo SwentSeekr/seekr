@@ -145,6 +145,10 @@ dependencies {
     // Cloud Firestore
     implementation("com.google.firebase:firebase-firestore")
 
+    implementation("com.google.protobuf:protobuf-javalite:3.21.12")
+    testImplementation("com.google.protobuf:protobuf-javalite:3.21.12")
+    androidTestImplementation("com.google.protobuf:protobuf-javalite:3.21.12")
+
     // Google Maps Compose library
     val mapsComposeVersion = "4.4.1"
     implementation("com.google.maps.android:maps-compose:$mapsComposeVersion")
@@ -268,4 +272,8 @@ configurations.matching { it.name.contains("test", ignoreCase = true) }.all {
         force("org.jacoco:org.jacoco.report:0.8.12")
         force("org.jacoco:org.jacoco.ant:0.8.12")
     }
+}
+
+configurations.configureEach {
+    exclude(group = "com.google.protobuf", module = "protobuf-lite")
 }

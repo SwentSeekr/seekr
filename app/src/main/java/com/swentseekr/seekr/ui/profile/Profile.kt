@@ -237,7 +237,7 @@ fun ProfileScreenPreview() {
                     time = 2.5,
                     distance = 5.0,
                     difficulty = Difficulty.DIFFICULT,
-                    author = Author("spike man", "", 1, 2.5, 3.0),
+                    authorId = "0",
                     image = R.drawable.ic_launcher_foreground,
                     reviewRate = 4.5)
               },

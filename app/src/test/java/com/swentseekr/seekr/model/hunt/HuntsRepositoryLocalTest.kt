@@ -1,6 +1,5 @@
 package com.swentseekr.seekr.model.hunt
 
-import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.map.Location
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
@@ -23,7 +22,7 @@ class HuntsRepositoryLocalTest {
           time = 2.5,
           distance = 5.0,
           difficulty = Difficulty.EASY,
-          author = Author("spike man", "", 1, 2.5, 3.0),
+          authorId = "0",
           image = 2,
           reviewRate = 4.5)
 

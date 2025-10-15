@@ -1,6 +1,5 @@
 package com.swentseekr.seekr.ui
 
-import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.hunt.*
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.overview.OverviewViewModel
@@ -32,7 +31,7 @@ class OverviewViewModelTest {
           time = 1.0,
           distance = 2.0,
           difficulty = Difficulty.EASY,
-          author = Author("Alice", "", 1, 1.0, 1.0),
+          authorId = "0",
           image = 1,
           reviewRate = 4.0)
 

@@ -105,8 +105,7 @@ class OverviewViewModel(
             it.hunt.title.contains(newSearch, ignoreCase = true) ||
                 it.hunt.description.contains(newSearch, ignoreCase = true) ||
                 it.hunt.status.toString().contains(newSearch, ignoreCase = true) ||
-                it.hunt.difficulty.toString().contains(newSearch, ignoreCase = true) ||
-                it.hunt.author.pseudonym.contains(newSearch, ignoreCase = true)
+                it.hunt.difficulty.toString().contains(newSearch, ignoreCase = true)
           }
       _uiState.value = _uiState.value.copy(hunts = filteredHunts)
     }

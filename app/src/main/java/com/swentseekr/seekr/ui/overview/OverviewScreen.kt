@@ -25,7 +25,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.swentseekr.seekr.R
-import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
@@ -65,7 +64,7 @@ fun OverviewScreen(
           time = 2.5,
           distance = 5.0,
           difficulty = Difficulty.EASY,
-          author = Author("spike man", "", 1, 2.5, 3.0),
+          authorId = "0",
           image = R.drawable.ic_launcher_foreground,
           reviewRate = 4.5)
   val hunts =

@@ -1,12 +1,11 @@
 package com.swentseekr.seekr.model.hunt
 
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment
+import com.swentseekr.seekr.utils.FirebaseTestEnvironment.clearEmulatorData
 import junit.framework.TestCase.assertEquals
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
@@ -15,7 +14,7 @@ import org.junit.Test
 class HuntsRepositoryFirestoreTest {
 
   private var repository: HuntsRepository = HuntRepositoryProvider.repository
-  val hunt1 =
+  var hunt1 =
       Hunt(
           uid = "hunt1",
           start = Location(40.7128, -74.0060, "New York"),
@@ -27,13 +26,21 @@ class HuntsRepositoryFirestoreTest {
           time = 2.5,
           distance = 5.0,
           difficulty = Difficulty.EASY,
-          author = Author("spike man", "", 1, 2.5, 3.0),
+          authorId = "0",
           image = 0,
           reviewRate = 4.5)
 
   @Before
   fun setUp() {
+
     FirebaseTestEnvironment.setup()
+    runTest {
+      if (FirebaseTestEnvironment.isEmulatorActive()) {
+        clearEmulatorData()
+      }
+      FirebaseAuth.getInstance().signInAnonymously().await()
+      hunt1 = hunt1.copy(authorId = FirebaseAuth.getInstance().currentUser?.uid ?: "0")
+    }
   }
 
   @Test
