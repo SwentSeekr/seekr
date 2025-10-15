@@ -19,10 +19,10 @@ fun SeekrRootApp(
   // Remember CredentialManager so it's not recreated on every recomposition
   val credentialManager = remember { CredentialManager.create(context) }
 
-  val state by authViewModel.state.collectAsState()
+  val state by authViewModel.uiState.collectAsState()
 
   Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-    if (state.isAuthenticated) {
+    if (state.user != null) {
       // User is logged in → go to main app
       SeekrMainNavHost(modifier = Modifier.padding(innerPadding))
     } else {
