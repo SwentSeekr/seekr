@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.swentseekr.seekr.R
@@ -17,14 +18,23 @@ import com.swentseekr.seekr.R
  * @param profilePicture The resource ID of the profile picture.
  */
 @Composable
-fun ProfilePicture(
-    profilePicture: Int,
-) {
+fun ProfilePicture(profilePicture: Int) {
+  val isFallback = profilePicture == 0
   val painter =
-      runCatching { painterResource(id = profilePicture) }
-          .getOrElse { painterResource(id = R.drawable.empty_user) }
+      if (isFallback) {
+        painterResource(R.drawable.empty_user)
+      } else {
+        painterResource(profilePicture)
+      }
+
   Image(
       painter = painter,
       contentDescription = "Profile Picture",
-      modifier = Modifier.padding(horizontal = 4.dp).size(100.dp).clip(CircleShape))
+      modifier =
+          Modifier.padding(horizontal = 4.dp)
+              .size(100.dp)
+              .clip(CircleShape)
+              .testTag(
+                  if (isFallback) ProfileTestTags.EMPTY_PROFILE_PICTURE
+                  else ProfileTestTags.PROFILE_PICTURE))
 }

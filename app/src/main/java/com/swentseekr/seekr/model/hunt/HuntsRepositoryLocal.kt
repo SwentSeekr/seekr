@@ -19,7 +19,7 @@ class HuntsRepositoryLocal : HuntsRepository {
         return hunts[i]
       }
     }
-    throw IllegalArgumentException("Hunt with ID $huntID not found")
+    throw IllegalArgumentException("Hunt with ID $huntID is not found")
   }
 
   override suspend fun addHunt(hunt: Hunt) {
@@ -33,13 +33,13 @@ class HuntsRepositoryLocal : HuntsRepository {
         return
       }
     }
-    throw IllegalArgumentException("Hunt with ID $huntID not found")
+    throw IllegalArgumentException("Hunt with ID $huntID is not found")
   }
 
   override suspend fun deleteHunt(huntID: String) {
     val wasRemoved = hunts.removeIf { it.uid == huntID }
     if (!wasRemoved) {
-      throw IllegalArgumentException("Hunt with ID $huntID not found")
+      throw IllegalArgumentException("Hunt with ID $huntID is not found")
     }
   }
 }
