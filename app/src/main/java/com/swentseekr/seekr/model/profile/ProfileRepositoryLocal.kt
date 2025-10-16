@@ -18,7 +18,7 @@ class ProfileRepositoryLocal : ProfileRepository {
         return profiles[i]
       }
     }
-    throw IllegalArgumentException("Hunt with ID $userId not found")
+    throw IllegalArgumentException("Profile with ID $userId not found")
   }
 
   override suspend fun updateProfile(profile: Profile) {
@@ -28,18 +28,18 @@ class ProfileRepositoryLocal : ProfileRepository {
         return
       }
     }
-    throw IllegalArgumentException("Hunt with ID ${profile.uid} is not found")
+    throw IllegalArgumentException("Profile with ID ${profile.uid} is not found")
   }
 
   override suspend fun getMyHunts(userId: String): List<Hunt> {
-    return getProfile(userId).myHunts
+    return getProfile(userId).myHunts.toList()
   }
 
   override suspend fun getDoneHunts(userId: String): List<Hunt> {
-    return getProfile(userId).doneHunts
+    return getProfile(userId).doneHunts.toList()
   }
 
   override suspend fun getLikedHunts(userId: String): List<Hunt> {
-    return getProfile(userId).likedHunts
+    return getProfile(userId).likedHunts.toList()
   }
 }

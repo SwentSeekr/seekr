@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.profile.ProfileRepository
 import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
-import com.swentseekr.seekr.ui.overview.HuntUiState
 import kotlin.String
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,9 +27,6 @@ class ProfileViewModel(
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(ProfileUIState())
   val uiState: StateFlow<ProfileUIState> = _uiState.asStateFlow()
-  private var myHunts: MutableList<HuntUiState> = mutableListOf()
-  private var doneHunts: MutableList<Hunt> = mutableListOf()
-  private var likedHunts: MutableList<Hunt> = mutableListOf()
 
   // val currentUid: String? = Firebase.auth.currentUser?.uid
   val currentUid: String? =
