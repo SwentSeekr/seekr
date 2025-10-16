@@ -121,7 +121,7 @@ class ProfileRepositoryLocalTest {
       repository.getProfile("User1") // capital U
       throw AssertionError("Expected exception for mismatched case")
     } catch (e: IllegalArgumentException) {
-      assertEquals("Hunt with ID User1 not found", e.message)
+      assertEquals("Profile with ID User1 not found", e.message)
     }
   }
 
