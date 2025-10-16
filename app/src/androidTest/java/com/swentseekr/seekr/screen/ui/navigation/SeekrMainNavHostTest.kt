@@ -62,17 +62,46 @@ class SeekrNavigationTest {
 
   @Test
   fun canNavigateBetweenTabs() {
-    composeTestRule.onNodeWithTag(NavigationTestTags.OVERVIEW_TAB).assertExists().performClick()
-    composeTestRule.onNodeWithTag(NavigationTestTags.MAP_TAB).assertExists().performClick()
-    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_TAB).assertExists().performClick()
-    composeTestRule.onNodeWithTag(NavigationTestTags.OVERVIEW_TAB).assertExists().performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags.OVERVIEW_TAB).performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags.MAP_TAB).performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_TAB).performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags.OVERVIEW_TAB).performClick()
   }
 
   @Test
   fun reSelectingSameTabDoesNotCrash() {
-    composeTestRule.onNodeWithTag(NavigationTestTags.MAP_TAB).assertExists().performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags.MAP_TAB).performClick()
     composeTestRule.onNodeWithTag(NavigationTestTags.MAP_TAB).performClick()
     composeTestRule.onNodeWithTag(NavigationTestTags.MAP_TAB).performClick()
     composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
   }
+
+  // NEW TESTS BELOW -------------------------------------------------------------
+  /**
+   * @Test fun navigateToHuntCardScreen_displaysHuntCard() { // Simulate navigation to HuntCard
+   *   manually composeTestRule.runOnUiThread { composeTestRule.activity.setContent { val
+   *   navController = rememberNavController() SeekrMainNavHost(navController = navController)
+   *   navController.navigate(SeekrDestination.HuntCard.createRoute("huntTest123")) } }
+   *
+   * composeTestRule.waitUntil(timeoutMillis = 5_000) { composeTestRule
+   * .onAllNodes(hasTestTag(NavigationTestTags.HUNTCARD_SCREEN)) .fetchSemanticsNodes()
+   * .isNotEmpty() }
+   *
+   * composeTestRule.onNodeWithTag(NavigationTestTags.HUNTCARD_SCREEN).assertIsDisplayed() }
+   *
+   * @Test fun huntCardScreen_goBack_returnsToPreviousTab() { composeTestRule.runOnUiThread {
+   *   composeTestRule.activity.setContent { val navController = rememberNavController()
+   *   SeekrMainNavHost(navController = navController)
+   *   navController.navigate(SeekrDestination.HuntCard.createRoute("huntTest123")) } }
+   *
+   * composeTestRule.waitUntil(timeoutMillis = 5_000) { composeTestRule
+   * .onAllNodes(hasTestTag(NavigationTestTags.HUNTCARD_SCREEN)) .fetchSemanticsNodes()
+   * .isNotEmpty() }
+   *
+   * // Go back (simulate back press) composeTestRule.activityRule.scenario.onActivity {
+   * it.onBackPressedDispatcher.onBackPressed() }
+   *
+   * // After going back, bottom nav should be visible again
+   * composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed() }*
+   */
 }
