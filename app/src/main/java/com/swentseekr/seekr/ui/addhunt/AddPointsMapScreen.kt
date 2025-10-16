@@ -35,6 +35,7 @@ fun AddPointsMapScreen(
     onCancel: () -> Unit
 ) {
   var points by remember { mutableStateOf(initPoints) }
+  val polylinePoints = remember(points) { points.map { LatLng(it.latitude, it.longitude) } }
   val cameraPositionState = rememberCameraPositionState()
 
   Scaffold(

@@ -15,6 +15,10 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
+private val title = "Select Hunt Points"
+private val confirmButtonText0 = "Confirm Points (0)"
+private val confirmButtonText2 = "Confirm Points (2)"
+
 class AddPointsMapScreenTest {
 
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()
@@ -37,13 +41,13 @@ class AddPointsMapScreenTest {
     setContent(onCancel = { canceled = true })
 
     // Title visible
-    composeRule.onNodeWithText("Select Hunt Points").assertExists()
+    composeRule.onNodeWithText(title).assertExists()
 
     // Confirm shows count 0 and disabled
     composeRule
         .onNodeWithTag(AddPointsMapScreenTestTags.CONFIRM_BUTTON)
         .assertExists()
-        .assertTextContains("Confirm Points (0)")
+        .assertTextContains(confirmButtonText0)
         .assertIsNotEnabled()
 
     // Map exists
@@ -65,7 +69,7 @@ class AddPointsMapScreenTest {
     // Confirm shows count 2 and enabled
     composeRule
         .onNodeWithTag(AddPointsMapScreenTestTags.CONFIRM_BUTTON)
-        .assertTextContains("Confirm Points (2)")
+        .assertTextContains(confirmButtonText2)
         .assertIsEnabled()
 
     // Confirm passes initial points through
