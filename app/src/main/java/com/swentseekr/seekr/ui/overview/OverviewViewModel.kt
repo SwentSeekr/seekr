@@ -1,6 +1,8 @@
 package com.swentseekr.seekr.ui.overview
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.ViewModel
@@ -96,8 +98,12 @@ class OverviewViewModel(
     }
   }
 
+  var searchQuery by mutableStateOf("")
+    private set
+
   /** Updates the search word and filters the hunts based on the new search term [newSearch]. */
   fun onSearchChange(newSearch: String) {
+    searchQuery = newSearch
     if (newSearch != "") {
       _uiState.value = _uiState.value.copy(searchWord = newSearch)
       // filter the hunts based on the word searched
@@ -145,14 +151,13 @@ class OverviewViewModel(
   fun signOut(credentialManager: CredentialManager): Unit {
     viewModelScope.launch {
       authRepository
-        .signOut()
-        .fold(
-          onSuccess = { _uiState.update { it.copy(signedOut = true) } },
-          onFailure = { throwable ->
-            _uiState.update { it.copy(errorMsg = throwable.localizedMessage) }
-          })
+          .signOut()
+          .fold(
+              onSuccess = { _uiState.update { it.copy(signedOut = true) } },
+              onFailure = { throwable ->
+                _uiState.update { it.copy(errorMsg = throwable.localizedMessage) }
+              })
       credentialManager.clearCredentialState(ClearCredentialStateRequest())
     }
   }
-
 }
