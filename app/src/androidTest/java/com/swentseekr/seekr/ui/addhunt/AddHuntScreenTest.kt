@@ -19,6 +19,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
+private val add_hunt_text = "Add your Hunt"
+
 class AddHuntScreenTest {
 
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()
@@ -41,7 +43,7 @@ class AddHuntScreenTest {
     var backCalled = false
     setContent(vm, onGoBack = { backCalled = true })
 
-    composeRule.onNodeWithText("Add your Hunt").assertExists()
+    composeRule.onNodeWithText(add_hunt_text).assertExists()
     composeRule.onNodeWithTag(AddHuntScreenTestTags.BUTTON_SELECT_LOCATION).assertExists()
     composeRule.onNodeWithContentDescription("Back").performClick()
     assertTrue(backCalled)

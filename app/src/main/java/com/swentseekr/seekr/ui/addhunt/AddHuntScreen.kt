@@ -16,9 +16,15 @@ fun AddHuntScreen(
     onGoBack: () -> Unit = {},
     onDone: () -> Unit = {}
 ) {
-  var isSelectingPoints by remember { mutableStateOf(false) }
   val uiState by addHuntViewModel.uiState.collectAsState()
   val context = LocalContext.current
+  // Handle successful addition
+  LaunchedEffect(uiState.saveSuccessful) {
+    if (uiState.saveSuccessful) {
+      Toast.makeText(context, "Hunt added successfully!", Toast.LENGTH_SHORT).show()
+      onDone()
+    }
+  }
 
   // Handle error toast
   LaunchedEffect(uiState.errorMsg) {
@@ -28,19 +34,19 @@ fun AddHuntScreen(
     }
   }
 
-  if (isSelectingPoints) {
+  if (uiState.isSelectingPoints) {
     AddPointsMapScreen(
         initPoints = uiState.points,
         onDone = { locations ->
           val points = locations.toMutableList()
-          if (points.size < 2) {
-            Toast.makeText(context, TOAST_MIN_POINTS, Toast.LENGTH_SHORT).show()
+          if (!addHuntViewModel.setPoints(points)) {
+            Toast.makeText(context, "Failed to set points. Please try again.", Toast.LENGTH_SHORT)
+                .show()
             return@AddPointsMapScreen
           }
-          addHuntViewModel.setPoints(points)
-          isSelectingPoints = false
+          addHuntViewModel.setIsSelectingPoints(false)
         },
-        onCancel = { isSelectingPoints = false })
+        onCancel = { addHuntViewModel.setIsSelectingPoints(false) })
   } else {
     AddHuntFieldsScreen(
         uiState = uiState,
@@ -50,8 +56,8 @@ fun AddHuntScreen(
         onDistanceChange = addHuntViewModel::setDistance,
         onDifficultySelect = addHuntViewModel::setDifficulty,
         onStatusSelect = addHuntViewModel::setStatus,
-        onSelectLocations = { isSelectingPoints = true },
-        onSave = { if (addHuntViewModel.addHunt()) onDone() },
+        onSelectLocations = { addHuntViewModel.setIsSelectingPoints(true) },
+        onSave = { addHuntViewModel.addHunt() },
         onGoBack = onGoBack)
   }
 }
