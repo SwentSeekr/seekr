@@ -42,7 +42,7 @@ import com.swentseekr.seekr.model.map.Location
 private val FALLBACK_IMAGE_RES: Int = R.drawable.ic_launcher_foreground
 
 // Helper to guarantee we never pass 0 to painterResource()
-private fun safeImageRes(id: Int?): Int = id?.takeIf { it != 0 } ?: FALLBACK_IMAGE_RES
+fun safeImageRes(id: Int?): Int = id?.takeIf { it != 0 } ?: FALLBACK_IMAGE_RES
 
 /**
  * Displays a card representing a hunt with title, author, image, difficulty, distance, and time.

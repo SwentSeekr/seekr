@@ -147,7 +147,7 @@ fun HuntCardScreen(
                               .testTag(HuntCardScreenTestTags.AUTHOR_TEXT))
                   Row {
                     Image(
-                        painter = painterResource(id = hunt.image),
+                        painter = painterResource(id = safeImageRes(hunt.image)),
                         contentDescription = "Hunt Picture",
                         modifier =
                             Modifier.padding(horizontal = 4.dp)
