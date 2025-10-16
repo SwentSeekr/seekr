@@ -31,6 +31,8 @@ data class AddHuntUIState(
     val invalidDescriptionMsg: String? = null,
     val invalidTimeMsg: String? = null,
     val invalidDistanceMsg: String? = null,
+    val isSelectingPoints: Boolean = false,
+    val saveSuccessful: Boolean = false
 ) {
   val isValid: Boolean
     get() =
@@ -146,7 +148,17 @@ class AddHuntViewModel(
     _uiState.value = _uiState.value.copy(image = image)
   }
 
-  fun setPoints(points: List<Location>) {
+  fun setPoints(points: List<Location>): Boolean {
+    if (points.size < 2) {
+      setErrorMsg("A hunt must have at least a start and end point.")
+      return false
+    }
     _uiState.value = _uiState.value.copy(points = points)
+    clearErrorMsg()
+    return true
+  }
+
+  fun setIsSelectingPoints(isSelecting: Boolean) {
+    _uiState.value = _uiState.value.copy(isSelectingPoints = isSelecting)
   }
 }
