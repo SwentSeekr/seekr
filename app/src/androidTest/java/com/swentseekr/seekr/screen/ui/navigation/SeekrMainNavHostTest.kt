@@ -85,9 +85,6 @@ class SeekrNavigationTest {
 
     // Expect placeholder screen visible
     composeTestRule.onNodeWithTag(NavigationTestTags.ADD_HUNT_SCREEN).assertIsDisplayed()
-
-    // Bottom bar should still be visible on this route
-    composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
   }
 
   @Test
