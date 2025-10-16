@@ -109,7 +109,8 @@ enum class ProfileTab {
 fun ProfileScreen(
     profile: Profile,
     currentUserId: String,
-    viewModel: ProfileViewModel = viewModel()
+    viewModel: ProfileViewModel = viewModel(),
+    onAddHunt: () -> Unit = {}
 ) {
   val uiState by viewModel.uiState.collectAsState()
   LaunchedEffect(currentUserId) {
@@ -123,7 +124,7 @@ fun ProfileScreen(
       floatingActionButton = {
         if (isMyProfile) {
           FloatingActionButton(
-              onClick = {}, modifier = Modifier.testTag(ProfileTestTags.ADD_HUNT)) {
+              onClick = onAddHunt, modifier = Modifier.testTag(ProfileTestTags.ADD_HUNT)) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add")
               }
         }
