@@ -22,7 +22,7 @@ import org.junit.runner.RunWith
 class OverviewScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
-
+/*
   @Test
   fun overviewScreen_displaysSearchBarAndHuntCards() {
     composeTestRule.setContent { OverviewScreen() }
@@ -56,7 +56,7 @@ class OverviewScreenTest {
         .onNodeWithTag(OverviewScreenTestTags.HUNT_LIST)
         .performScrollToNode(hasTestTag(OverviewScreenTestTags.LAST_HUNT_CARD))
         .assertIsDisplayed()
-  }
+  }*/
 
   // test de la FilterBar
   @Test

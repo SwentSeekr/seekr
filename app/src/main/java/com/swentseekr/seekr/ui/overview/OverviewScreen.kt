@@ -15,6 +15,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -24,6 +25,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
@@ -47,11 +50,17 @@ const val FILTERS_SECOND = 3
 fun OverviewScreen(
     modifier: Modifier = Modifier,
     overviewViewModel: OverviewViewModel = viewModel(),
+    navHostController: NavHostController = rememberNavController(),
     onActiveBar: (Boolean) -> Unit = {},
+    onhuntclick: (String) -> Unit = {},
 ) {
 
   val uiState by overviewViewModel.uiState.collectAsState()
-  // val hunts = uiState.hunts
+  val query = overviewViewModel.searchQuery
+  val hunts = uiState.hunts
+
+  LaunchedEffect(Unit) { overviewViewModel.refreshUIState() }
+
   val huntsample =
       Hunt(
           uid = "1",
@@ -67,6 +76,7 @@ fun OverviewScreen(
           authorId = "0",
           image = R.drawable.ic_launcher_foreground,
           reviewRate = 4.5)
+  /*
   val hunts =
       listOf(
           HuntUiState(huntsample, isLiked = true, isAchived = false),
@@ -76,17 +86,19 @@ fun OverviewScreen(
           HuntUiState(huntsample, isLiked = true, isAchived = false),
           HuntUiState(huntsample, isLiked = true, isAchived = false),
       )
+      */
 
   Column(
       modifier = modifier.fillMaxWidth(),
       horizontalAlignment = Alignment.CenterHorizontally,
   ) {
     SearchBar(
-        query = "Search",
+        query = query,
         { overviewViewModel.onSearchChange(it) },
         { overviewViewModel.onSearchChange(it) },
         true,
         onActiveChange = onActiveBar,
+        placeholder = { Text("Search hunts...") },
         modifier =
             modifier
                 .fillMaxWidth()
@@ -112,7 +124,7 @@ fun OverviewScreen(
                     .testTag(
                         if (index == (hunts.size - 1)) OverviewScreenTestTags.LAST_HUNT_CARD
                         else OverviewScreenTestTags.HUNT_CARD)
-                    .clickable { overviewViewModel.onHuntClick(hunt.hunt.uid) },
+                    .clickable { onhuntclick(hunt.hunt.uid) },
         )
         Spacer(modifier = Modifier.height(8.dp))
       }
