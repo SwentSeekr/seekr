@@ -91,10 +91,10 @@ fun HuntCardScreen(
           distance = 5.0,
           difficulty = Difficulty.DIFFICULT,
           authorId = "0",
-          image = R.drawable.ic_launcher_foreground, // ou une image de ton projet
+          image = R.drawable.ic_launcher_foreground,
           reviewRate = 4.5)
   Scaffold(
-      // BAR POUR FLECHE RETOUR ET TITRE
+      // BAR GOBACK ARROW
       topBar = {
         TopAppBar(
             title = { Text("") },
@@ -111,10 +111,10 @@ fun HuntCardScreen(
       },
       modifier = modifier.fillMaxSize()) { innerPadding ->
 
-        // COLONNE POUR INFORMATIONS
+        // COLUMN FOR INFORMATIONS
         Box(modifier = modifier.fillMaxWidth().padding(8.dp)) {
           LazyColumn(modifier.padding(innerPadding).fillMaxSize()) {
-            // ROW AVEC IMAGE + TITRE + AUTEUR + DIFFICULTE + DISTANCE
+            // ROW WITH IMAGE, TITLE, AUTHOR, DIFFICULTY, DISTANCE, TIME
             item {
               Column(modifier = modifier.padding(8.dp).fillMaxWidth().fillMaxSize()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -196,9 +196,9 @@ fun HuntCardScreen(
                   modifier =
                       Modifier.padding(8.dp).testTag(HuntCardScreenTestTags.DESCRIPTION_TEXT))
             }
-            // MAP AVEC TRAJET
+            // MAP WITH START POINT
             item {
-              var mapLoaded by remember { mutableStateOf(true) } // directement chargé
+              var mapLoaded by remember { mutableStateOf(true) }
 
               if (mapLoaded) {
                 val startPosition = LatLng(hunt.start.latitude, hunt.start.longitude)
@@ -223,7 +223,7 @@ fun HuntCardScreen(
                     }
               }
             }
-            // BOUTON COMMENCER LA CHASSE
+            // BOUTON BEGIN HUNT
             item {
               Row(
                   modifier = modifier.fillMaxWidth(),
@@ -239,7 +239,7 @@ fun HuntCardScreen(
             }
           }
         }
-        // (SI DEJA FAITE, POSSIBILITÉ DE REVIEW )
+        // POSSIBILITY OF REVIEW IF ALREADY DONE ?
       }
 }
 
