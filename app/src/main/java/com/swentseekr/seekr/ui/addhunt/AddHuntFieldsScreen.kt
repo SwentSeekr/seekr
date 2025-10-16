@@ -10,9 +10,12 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material3.*
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.swentseekr.seekr.model.hunt.Difficulty
@@ -70,6 +73,59 @@ object AddHuntScreenTestTags {
   const val ERROR_MESSAGE = "errorMessage"
 }
 
+// ----------------------
+// Reusable Validated Field
+// ----------------------
+@Composable
+fun ValidatedOutlinedField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    placeholder: String,
+    errorMsg: String?,
+    testTag: String
+) {
+  ValidatedOutlinedField(
+      value = value,
+      onValueChange = onValueChange,
+      label = label,
+      placeholder = placeholder,
+      errorMsg = errorMsg,
+      testTag = testTag,
+      modifier = Modifier.fillMaxWidth(),
+      shape = RoundedCornerShape(FIELD_CORNER_RADIUS.dp),
+      colors =
+          OutlinedTextFieldDefaults.colors(
+              unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+              focusedBorderColor = MaterialTheme.colorScheme.primary))
+}
+
+@Composable
+private fun ValidatedOutlinedField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    placeholder: String,
+    errorMsg: String?,
+    testTag: String,
+    modifier: Modifier,
+    shape: Shape,
+    colors: TextFieldColors
+) {
+  OutlinedTextField(
+      value = value,
+      onValueChange = onValueChange,
+      label = { Text(label) },
+      placeholder = { Text(placeholder) },
+      isError = errorMsg != null,
+      supportingText = {
+        errorMsg?.let { Text(it, modifier = Modifier.testTag(AddHuntScreenTestTags.ERROR_MESSAGE)) }
+      },
+      modifier = modifier.testTag(testTag),
+      shape = shape,
+      colors = colors)
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddHuntFieldsScreen(
@@ -84,8 +140,8 @@ fun AddHuntFieldsScreen(
     onSave: () -> Unit,
     onGoBack: () -> Unit,
 ) {
-  var showStatusDropdown by remember { mutableStateOf(false) }
-  var showDifficultyDropdown by remember { mutableStateOf(false) }
+  var showStatusDropdown by rememberSaveable { mutableStateOf(false) }
+  var showDifficultyDropdown by rememberSaveable { mutableStateOf(false) }
 
   val scrollState = rememberScrollState()
 
@@ -111,48 +167,31 @@ fun AddHuntFieldsScreen(
                     .verticalScroll(scrollState),
         ) {
           val fieldShape = RoundedCornerShape(FIELD_CORNER_RADIUS.dp)
+          val fieldColors =
+              OutlinedTextFieldDefaults.colors(
+                  unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                  focusedBorderColor = MaterialTheme.colorScheme.primary)
 
           // Title
-          OutlinedTextField(
+          ValidatedOutlinedField(
               value = uiState.title,
               onValueChange = onTitleChange,
-              label = { Text(LABEL_TITLE) },
-              placeholder = { Text(PLACEHOLDER_TITLE) },
-              isError = uiState.invalidTitleMsg != null,
-              supportingText = {
-                uiState.invalidTitleMsg?.let {
-                  Text(it, modifier = Modifier.testTag(AddHuntScreenTestTags.ERROR_MESSAGE))
-                }
-              },
-              modifier = Modifier.fillMaxWidth().testTag(AddHuntScreenTestTags.INPUT_HUNT_TITLE),
-              shape = fieldShape,
-              colors =
-                  OutlinedTextFieldDefaults.colors(
-                      unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                      focusedBorderColor = MaterialTheme.colorScheme.primary),
-          )
+              label = LABEL_TITLE,
+              placeholder = PLACEHOLDER_TITLE,
+              errorMsg = uiState.invalidTitleMsg,
+              testTag = AddHuntScreenTestTags.INPUT_HUNT_TITLE)
 
-          // Description
-          OutlinedTextField(
+          // Description (keeps fixed height)
+          ValidatedOutlinedField(
               value = uiState.description,
               onValueChange = onDescriptionChange,
-              label = { Text(LABEL_DESCRIPTION) },
-              placeholder = { Text(PLACEHOLDER_DESCRIPTION) },
-              isError = uiState.invalidDescriptionMsg != null,
-              supportingText = {
-                uiState.invalidDescriptionMsg?.let {
-                  Text(it, modifier = Modifier.testTag(AddHuntScreenTestTags.ERROR_MESSAGE))
-                }
-              },
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .height(DESCRIPTION_HEIGHT.dp)
-                      .testTag(AddHuntScreenTestTags.INPUT_HUNT_DESCRIPTION),
+              label = LABEL_DESCRIPTION,
+              placeholder = PLACEHOLDER_DESCRIPTION,
+              errorMsg = uiState.invalidDescriptionMsg,
+              testTag = AddHuntScreenTestTags.INPUT_HUNT_DESCRIPTION,
+              modifier = Modifier.fillMaxWidth().height(DESCRIPTION_HEIGHT.dp),
               shape = fieldShape,
-              colors =
-                  OutlinedTextFieldDefaults.colors(
-                      unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                      focusedBorderColor = MaterialTheme.colorScheme.primary))
+              colors = fieldColors)
 
           // Status Dropdown
           ExposedDropdownMenuBox(
@@ -174,10 +213,7 @@ fun AddHuntFieldsScreen(
                             .fillMaxWidth()
                             .testTag(AddHuntScreenTestTags.DROPDOWN_STATUS),
                     shape = fieldShape,
-                    colors =
-                        OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                            focusedBorderColor = MaterialTheme.colorScheme.primary))
+                    colors = fieldColors)
                 ExposedDropdownMenu(
                     expanded = showStatusDropdown,
                     onDismissRequest = { showStatusDropdown = false }) {
@@ -213,10 +249,7 @@ fun AddHuntFieldsScreen(
                             .fillMaxWidth()
                             .testTag(AddHuntScreenTestTags.DROPDOWN_DIFFICULTY),
                     shape = fieldShape,
-                    colors =
-                        OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                            focusedBorderColor = MaterialTheme.colorScheme.primary))
+                    colors = fieldColors)
                 ExposedDropdownMenu(
                     expanded = showDifficultyDropdown,
                     onDismissRequest = { showDifficultyDropdown = false }) {
@@ -232,42 +265,22 @@ fun AddHuntFieldsScreen(
               }
 
           // Time
-          OutlinedTextField(
+          ValidatedOutlinedField(
               value = uiState.time,
               onValueChange = onTimeChange,
-              label = { Text(LABEL_TIME) },
-              placeholder = { Text(PLACEHOLDER_TIME) },
-              modifier = Modifier.fillMaxWidth().testTag(AddHuntScreenTestTags.INPUT_HUNT_TIME),
-              isError = uiState.invalidTimeMsg != null,
-              supportingText = {
-                uiState.invalidTimeMsg?.let {
-                  Text(it, modifier = Modifier.testTag(AddHuntScreenTestTags.ERROR_MESSAGE))
-                }
-              },
-              shape = fieldShape,
-              colors =
-                  OutlinedTextFieldDefaults.colors(
-                      unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                      focusedBorderColor = MaterialTheme.colorScheme.primary))
+              label = LABEL_TIME,
+              placeholder = PLACEHOLDER_TIME,
+              errorMsg = uiState.invalidTimeMsg,
+              testTag = AddHuntScreenTestTags.INPUT_HUNT_TIME)
 
           // Distance
-          OutlinedTextField(
+          ValidatedOutlinedField(
               value = uiState.distance,
               onValueChange = onDistanceChange,
-              label = { Text(LABEL_DISTANCE) },
-              placeholder = { Text(PLACEHOLDER_DISTANCE) },
-              modifier = Modifier.fillMaxWidth().testTag(AddHuntScreenTestTags.INPUT_HUNT_DISTANCE),
-              isError = uiState.invalidDistanceMsg != null,
-              supportingText = {
-                uiState.invalidDistanceMsg?.let {
-                  Text(it, modifier = Modifier.testTag(AddHuntScreenTestTags.ERROR_MESSAGE))
-                }
-              },
-              shape = fieldShape,
-              colors =
-                  OutlinedTextFieldDefaults.colors(
-                      unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                      focusedBorderColor = MaterialTheme.colorScheme.primary))
+              label = LABEL_DISTANCE,
+              placeholder = PLACEHOLDER_DISTANCE,
+              errorMsg = uiState.invalidDistanceMsg,
+              testTag = AddHuntScreenTestTags.INPUT_HUNT_DISTANCE)
 
           // Map Location Button with count
           Button(

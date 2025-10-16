@@ -19,9 +19,12 @@ import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+
+private val add_hunt_text = "Add your Hunt"
 
 class AddHuntFieldsScreenTest {
 
@@ -84,7 +87,7 @@ class AddHuntFieldsScreenTest {
   fun renders_topBar_and_backButton_triggers() {
     setContent()
 
-    composeRule.onNodeWithText("Add your Hunt").assertExists()
+    composeRule.onNodeWithText(add_hunt_text).assertExists()
     composeRule.onNodeWithContentDescription("Back").performClick()
     assertTrue(onGoBackCalled)
   }
@@ -205,6 +208,8 @@ class AddHuntFieldsScreenTest {
     saveBtn.assertIsEnabled()
     assertFalse(onSaveCalled)
     saveBtn.performClick()
+    assertNull(state.value.invalidTitleMsg)
+    assertNull(state.value.invalidDistanceMsg)
     assertTrue(onSaveCalled)
   }
 }
