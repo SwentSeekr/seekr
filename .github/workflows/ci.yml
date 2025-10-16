@@ -1,11 +1,9 @@
 name: CI - Test Runner
 
-# Run the workflow when commits are pushed on main or when a PR is modified
 on:
   push:
     branches:
       - main
-
   pull_request:
     types:
       - opened
@@ -13,21 +11,18 @@ on:
       - reopened
 
 jobs:
-  ci:
-    name: CI
-    # Execute the CI on the course's runners
+  setup:
+    name: Setup Environment
     runs-on: ubuntu-latest
-
+    outputs:
+      gradle-cache-key: ${{ steps.gradle-cache-key.outputs.cache-key }}
     steps:
-      # First step : Checkout the repository on the runner
       - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of Sonar analysis (if we use Sonar Later)
+          fetch-depth: 0
 
-
-      # Kernel-based Virtual Machine (KVM) is an open source virtualization technology built into Linux. Enabling it allows the Android emulator to run faster.
       - name: Enable KVM group perms
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -40,38 +35,22 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
-      # Caching is a very useful part of a CI, as a workflow is executed in a clean environment every time,
-      # this means that one would need to re-download and re-process gradle files for every run. Which is very time consuming.
-      #
-      # To avoid that, we cache the the gradle folder to reuse it later.
-      - name: Gradle cache
-        uses: gradle/actions/setup-gradle@v3
-
-      # Cache the Emulator, if the cache does not hit, create the emulator
-      - name: AVD cache
+      - name: Cache Gradle and Android dependencies
         uses: actions/cache@v4
-        id: avd-cache
         with:
           path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: avd-34
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.android/build-cache
+          key: gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-
 
-      - name: create AVD and generate snapshot for caching
-        if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 34
-          target: google_apis
-          arch: x86_64
-          force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: false
-          script: echo "Generated AVD snapshot for caching."
+      - name: Gradle cache setup
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Grant execute permission for gradlew
-        run: |
-          chmod +x ./gradlew
+        run: chmod +x ./gradlew
 
       - name: Decode google-services.json
         run: echo "$GOOGLE_SERVICES" | base64 --decode > app/google-services.json
@@ -81,24 +60,57 @@ jobs:
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
 
-      # Check formatting
-      - name: KTFmt Check
-        run: |
-          ./gradlew ktfmtCheck
+  lint:
+    name: Lint Check
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gradle/actions/setup-gradle@v3
+      - name: Run ktfmt + lint
+        run: ./gradlew ktfmtCheck lint --parallel --build-cache --configuration-cache
 
-      # This step runs gradle commands to build the application
-      - name: Assemble
-        run: |
-          # To run the CI with debug information, add --info
-          ./gradlew assemble lint --parallel --build-cache
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gradle/actions/setup-gradle@v3
+      - name: Run unit tests
+        run: ./gradlew testDebugUnitTest --parallel --build-cache --configuration-cache
 
-      # Run Unit tests
-      - name: Run tests
-        run: |
-          # To run the CI with debug information, add --info
-          ./gradlew check --parallel --build-cache
+  instrumentation-tests:
+    name: Instrumentation Tests
+    runs-on: ubuntu-latest
+    needs: [setup, unit-tests]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gradle/actions/setup-gradle@v3
 
-      # Start Firebase emulators for instrumentation tests
+      - name: AVD cache
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-api34
+
+      - name: Create AVD snapshot if not cached
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          avd-name: avd-api34
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-animations: false
+          script: echo "Generated AVD snapshot for caching."
+
       - name: Start Firebase emulators
         run: |
           if [ -e "firebase.json" ] && jq -e '.emulators' firebase.json >/dev/null; then
@@ -109,24 +121,29 @@ jobs:
             echo "Firebase emulators not configured, skipping emulator startup..."
           fi
 
-      - name: Run instrumentation tests + Generate Coverage Report
+      - name: Run instrumentation tests + Coverage
         timeout-minutes: 25
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
           target: google_apis
           arch: x86_64
-          avd-name: github
-          force-avd-creation: true
+          avd-name: avd-api34
+          force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -skin 1080x2400
           disable-animations: true
-          script: ./gradlew connectedDebugAndroidTest testDebugUnitTest jacocoTestReport --parallel --build-cache
-          # This step generates the coverage report which will be uploaded to sonar
+          script: ./gradlew connectedDebugAndroidTest jacocoTestReport --parallel --build-cache --configuration-cache
 
-
-      # Upload the various reports to sonar
-      - name: Upload report to SonarCloud
+  sonar:
+    name: SonarCloud Analysis
+    runs-on: ubuntu-latest
+    needs: [unit-tests, instrumentation-tests]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gradle/actions/setup-gradle@v3
+      - name: Upload to SonarCloud
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew sonar --parallel --build-cache
+        run: ./gradlew sonar --parallel --build-cache --configuration-cache
