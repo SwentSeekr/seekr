@@ -11,6 +11,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.swentseekr.seekr.ui.navigation.NavigationTestTags
 import com.swentseekr.seekr.ui.navigation.SeekrMainNavHost
+import com.swentseekr.seekr.ui.profile.ProfileTestTags
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -24,16 +25,14 @@ class SeekrNavigationTest {
   @Before
   fun setUp() {
     composeTestRule.runOnUiThread {
-      // Always start with a clean Compose hierarchy
       composeTestRule.activity.setContent { SeekrMainNavHost() }
     }
 
-    // Wait until the UI is actually rendered before proceeding
     composeTestRule.waitUntil(timeoutMillis = 5_000) {
       composeTestRule
-          .onAllNodes(hasTestTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU))
-          .fetchSemanticsNodes()
-          .isNotEmpty()
+        .onAllNodes(hasTestTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU))
+        .fetchSemanticsNodes()
+        .isNotEmpty()
     }
   }
 
@@ -76,32 +75,44 @@ class SeekrNavigationTest {
     composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
   }
 
-  // NEW TESTS BELOW -------------------------------------------------------------
-  /**
-   * @Test fun navigateToHuntCardScreen_displaysHuntCard() { // Simulate navigation to HuntCard
-   *   manually composeTestRule.runOnUiThread { composeTestRule.activity.setContent { val
-   *   navController = rememberNavController() SeekrMainNavHost(navController = navController)
-   *   navController.navigate(SeekrDestination.HuntCard.createRoute("huntTest123")) } }
-   *
-   * composeTestRule.waitUntil(timeoutMillis = 5_000) { composeTestRule
-   * .onAllNodes(hasTestTag(NavigationTestTags.HUNTCARD_SCREEN)) .fetchSemanticsNodes()
-   * .isNotEmpty() }
-   *
-   * composeTestRule.onNodeWithTag(NavigationTestTags.HUNTCARD_SCREEN).assertIsDisplayed() }
-   *
-   * @Test fun huntCardScreen_goBack_returnsToPreviousTab() { composeTestRule.runOnUiThread {
-   *   composeTestRule.activity.setContent { val navController = rememberNavController()
-   *   SeekrMainNavHost(navController = navController)
-   *   navController.navigate(SeekrDestination.HuntCard.createRoute("huntTest123")) } }
-   *
-   * composeTestRule.waitUntil(timeoutMillis = 5_000) { composeTestRule
-   * .onAllNodes(hasTestTag(NavigationTestTags.HUNTCARD_SCREEN)) .fetchSemanticsNodes()
-   * .isNotEmpty() }
-   *
-   * // Go back (simulate back press) composeTestRule.activityRule.scenario.onActivity {
-   * it.onBackPressedDispatcher.onBackPressed() }
-   *
-   * // After going back, bottom nav should be visible again
-   * composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed() }*
-   */
+  // ---------------- NEW TESTS FOR ADD HUNT FLOW ----------------
+
+  @Test
+  fun profileFab_navigatesToAddHuntPlaceholder() {
+    // Go to Profile
+    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_TAB).performClick()
+
+    // Tap FAB with tag ADD_HUNT
+    composeTestRule.onNodeWithTag(ProfileTestTags.ADD_HUNT).assertIsDisplayed().performClick()
+
+    // Expect placeholder screen visible
+    composeTestRule
+      .onNodeWithTag(NavigationTestTags.ADD_HUNT_SCREEN)
+      .assertIsDisplayed()
+
+    // Bottom bar should still be visible on this route
+    composeTestRule
+      .onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU)
+      .assertIsDisplayed()
+  }
+
+  @Test
+  fun addHuntPlaceholder_backNavigatesToProfile() {
+    // Navigate to Add Hunt as above
+    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_TAB).performClick()
+    composeTestRule.onNodeWithTag(ProfileTestTags.ADD_HUNT).performClick()
+
+    // Press system back
+    composeTestRule.activityRule.scenario.onActivity {
+      it.onBackPressedDispatcher.onBackPressed()
+    }
+
+    // We should be back in Profile; bottom bar visible and Profile tab exists
+    composeTestRule
+      .onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU)
+      .assertIsDisplayed()
+    composeTestRule
+      .onNodeWithTag(NavigationTestTags.PROFILE_TAB)
+      .assertIsDisplayed()
+  }
 }
