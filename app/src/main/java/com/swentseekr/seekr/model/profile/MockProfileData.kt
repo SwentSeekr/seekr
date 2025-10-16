@@ -54,6 +54,21 @@ fun sampleProfile(
       likedHunts = likedHunts.toMutableList())
 }
 
+fun sampleProfileWithPseudonym(uid: String, pseudonym: String): Profile {
+  return Profile(
+      uid = uid,
+      author =
+          Author(
+              pseudonym = pseudonym,
+              bio = "Adventurer",
+              profilePicture = R.drawable.profile_picture,
+              reviewRate = 4.5,
+              sportRate = 4.8),
+      myHunts = mutableListOf(),
+      doneHunts = mutableListOf(),
+      likedHunts = mutableListOf())
+}
+
 fun createHunt(uid: String, title: String) =
     Hunt(
         uid = uid,
