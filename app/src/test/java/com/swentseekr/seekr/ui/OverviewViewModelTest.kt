@@ -95,27 +95,6 @@ class OverviewViewModelTest {
     assertFalse(state.hunts.first { it.hunt.uid == huntId }.isLiked)
   }
 
-  /**
-   * Test that clicking on the "Achived" filter correctly filters the hunts to show only achieved
-   * hunts.
-   */
-  @Test
-  fun onAchievedClick_filters_achieved_hunts() = runTest {
-    val updatedList =
-        viewModel.uiState.value.hunts.map {
-          if (it.hunt.uid == "2") it.copy(isAchived = true) else it
-        }
-
-    val internalStateField = OverviewViewModel::class.java.getDeclaredField("huntItems")
-    internalStateField.isAccessible = true
-    internalStateField.set(viewModel, updatedList.toMutableList())
-
-    viewModel.onAchivedClick()
-    val state = viewModel.uiState.value
-    assertEquals(1, state.hunts.size)
-    assertEquals("2", state.hunts[0].hunt.uid)
-  }
-
   /** Test that clearing the search resets the filtered list to show all hunts. */
   @Test
   fun onClearSearch_resets_filtered_list() = runTest {
@@ -146,25 +125,5 @@ class OverviewViewModelTest {
     val state = viewModel.uiState.value
     assertEquals(1, state.hunts.size)
     assertEquals(Difficulty.DIFFICULT, state.hunts[0].hunt.difficulty)
-  }
-
-  /**
-   * Test that clicking on a hunt does not throw an exception. Navigation is not implemented, so we
-   * just ensure no errors occur.
-   */
-  @Test
-  fun onHuntClick_doesNotThrow() {
-    viewModel.onHuntClick("some-id")
-    // Just ensure no exceptions are thrown
-  }
-
-  /**
-   * Test that clicking on the icon marker does not throw an exception. Actual navigation is not
-   * implemented, so we just ensure no errors occur.
-   */
-  @Test
-  fun onIconMarkerClick_doesNotThrow() {
-    viewModel.onIconMarkerClick()
-    // Just ensure no exceptions are thrown
   }
 }

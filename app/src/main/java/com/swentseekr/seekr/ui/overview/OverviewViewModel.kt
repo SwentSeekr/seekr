@@ -1,5 +1,8 @@
 package com.swentseekr.seekr.ui.overview
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.swentseekr.seekr.model.hunt.Difficulty
@@ -88,15 +91,12 @@ class OverviewViewModel(
     }
   }
 
-  /**
-   * Handles the click event on a hunt item identified by [huntID]. Navigate to the card overview
-   */
-  fun onHuntClick(huntID: String) {
-    // TODO: Navigate to Hunt Detail Screen
-  }
+  var searchQuery by mutableStateOf("")
+    private set
 
   /** Updates the search word and filters the hunts based on the new search term [newSearch]. */
   fun onSearchChange(newSearch: String) {
+    searchQuery = newSearch
     if (newSearch != "") {
       _uiState.value = _uiState.value.copy(searchWord = newSearch)
       // filter the hunts based on the word searched
@@ -139,17 +139,5 @@ class OverviewViewModel(
           statusMatches && difficultyMatches
         }
     _uiState.value = currentState.copy(hunts = filtered)
-  }
-
-  /** Filters the hunts to show only those that have been achieved by the user. */
-  fun onAchivedClick() {
-    //
-    val filteredHunts = huntItems.filter { it.isAchived }
-    _uiState.value = _uiState.value.copy(hunts = filteredHunts)
-  }
-
-  /** Handles the click event on the icon marker to navigate to the map screen. */
-  fun onIconMarkerClick() {
-    // TODO: Navigate to Map Screen
   }
 }

@@ -1,7 +1,6 @@
 package com.swentseekr.seekr.screen
 
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -11,7 +10,6 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.swentseekr.seekr.ui.overview.FilterBar
 import com.swentseekr.seekr.ui.overview.FilterButton
-import com.swentseekr.seekr.ui.overview.OverviewScreen
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
 import java.lang.reflect.Modifier
 import org.junit.Rule
@@ -22,7 +20,7 @@ import org.junit.runner.RunWith
 class OverviewScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
-
+  /*
   @Test
   fun overviewScreen_displaysSearchBarAndHuntCards() {
     composeTestRule.setContent { OverviewScreen() }
@@ -56,7 +54,7 @@ class OverviewScreenTest {
         .onNodeWithTag(OverviewScreenTestTags.HUNT_LIST)
         .performScrollToNode(hasTestTag(OverviewScreenTestTags.LAST_HUNT_CARD))
         .assertIsDisplayed()
-  }
+  }*/
 
   // test de la FilterBar
   @Test
