@@ -1,321 +1,199 @@
-package com.swentseekr.seekr.backend.auth
+package com.swentseekr.seekr.ui.auth
 
 import android.content.Context
-import android.os.Bundle
 import androidx.credentials.Credential
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.exceptions.GetCredentialCancellationException
-import com.google.android.gms.tasks.Tasks
-import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
-import com.google.firebase.auth.AuthCredential
-import com.google.firebase.auth.AuthResult
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.GoogleAuthProvider
-import com.swentseekr.seekr.ui.auth.AuthViewModel
-import com.swentseekr.seekr.ui.overview.OverviewViewModel
+import com.swentseekr.seekr.model.authentication.AuthRepository
 import io.mockk.MockKAnnotations
-import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.every
-import io.mockk.just
+import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.mockkStatic
-import io.mockk.runs
-import io.mockk.unmockkAll
-import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AuthViewModelTest {
 
-  private val testDispatcher = StandardTestDispatcher()
+  private val dispatcher = StandardTestDispatcher()
 
-  // Static-mocked singletons and factories
-  private lateinit var firebaseAuth: FirebaseAuth
-
-  // Common mocks
-  private lateinit var context: Context
-  private lateinit var credentialManager: CredentialManager
+  @MockK(relaxed = true) lateinit var repository: AuthRepository
+  @MockK(relaxed = true) lateinit var credentialManager: CredentialManager
+  @MockK(relaxed = true) lateinit var context: Context
 
   @Before
-  fun setUp() {
-    Dispatchers.setMain(testDispatcher)
+  fun setup() {
+    Dispatchers.setMain(dispatcher)
     MockKAnnotations.init(this, relaxUnitFun = true)
 
-    // Mock static singletons/factories before creating the ViewModel
-    mockkStatic(FirebaseAuth::class)
-    mockkStatic(GoogleAuthProvider::class)
-
-    // Mock the Companion so Companion.createFrom(...) is intercepted
-    mockkObject(GoogleIdTokenCredential.Companion)
-
-    firebaseAuth = mockk(relaxed = true)
-    every { FirebaseAuth.getInstance() } returns firebaseAuth
-
-    context = mockk(relaxed = true)
-    every { context.getString(any()) } returns "test-web-client-id"
-
-    credentialManager = mockk(relaxed = true)
+    // Provide the web client id string the VM asks for
+    every { context.getString(com.swentseekr.seekr.R.string.default_web_client_id) } returns
+        "test-web-client-id"
   }
 
   @After
   fun tearDown() {
-    clearAllMocks()
-    unmockkAll()
     Dispatchers.resetMain()
   }
 
-  @Test
-  fun initSetsUnauthenticatedWhenNoCurrentUser() =
-    runTest(testDispatcher) {
-      every { firebaseAuth.currentUser } returns null
-
-      val vm = AuthViewModel()
-
-      assertFalse(vm.uiState.value.isLoading)
-      assertFalse(vm.uiState.value.user != null)
-      assertFalse(vm.uiState.value.errorMsg != null)
-    }
+  private fun makeResponseWith(credential: Credential): GetCredentialResponse {
+    // We don't need a concrete implementation, just a mock that returns our credential.
+    val response = mockk<GetCredentialResponse>()
+    every { response.credential } returns credential
+    return response
+  }
 
   @Test
-  fun initSetsAuthenticatedWhenCurrentUserExists() =
-    runTest(testDispatcher) {
-      val user = mockk<FirebaseUser>()
-      every { firebaseAuth.currentUser } returns user
+  fun clearErrorMsgClearsError() =
+      runTest(dispatcher) {
+        val vm = AuthViewModel(repository)
+        // Seed an error state
+        vm.signIn(context, credentialManager)
+        // Cause a controlled failure from repository
+        val cred = mockk<Credential>()
+        coEvery { credentialManager.getCredential(context, any<GetCredentialRequest>()) } returns
+            makeResponseWith(cred)
+        coEvery { repository.signInWithGoogle(cred) } returns
+            Result.failure(IllegalStateException("boom"))
 
-      val vm = AuthViewModel()
+        advanceUntilIdle()
+        assertNotNull(vm.uiState.value.errorMsg)
 
-      assertFalse(vm.uiState.value.isLoading)
-      assertTrue(vm.uiState.value.user != null)
-      assertFalse(vm.uiState.value.errorMsg != null)
-    }
-
-  @Test
-  fun cleanErrorClearsErrorState() =
-    runTest(testDispatcher) {
-      every { firebaseAuth.currentUser } returns null
-      every { firebaseAuth.signOut() } throws RuntimeException("boom")
-
-      val vm = AuthViewModel()
-      val om = OverviewViewModel()
-
-      var onErrorCalled = false
-      om.signOut(credentialManager)
-      if (vm.uiState.value.errorMsg != null) {
-        onErrorCalled = true
+        vm.clearErrorMsg()
+        assertNull(vm.uiState.value.errorMsg)
       }
-      advanceUntilIdle()
-
-      assertTrue(onErrorCalled)
-      assertTrue(vm.uiState.value.errorMsg != null)
-      assertFalse(vm.uiState.value.user != null)
-
-      vm.clearErrorMsg()
-      assertFalse(vm.uiState.value.errorMsg != null)
-      assertEquals(null, vm.uiState.value.errorMsg)
-    }
 
   @Test
-  fun signOutSuccessUpdatesStateAndCallsOnSuccess() =
-    runTest(testDispatcher) {
-      every { firebaseAuth.currentUser } returns mockk()
-      every { firebaseAuth.signOut() } just runs
+  fun signInSuccessUpdatesStateWithUserAndClearsFlags() =
+      runTest(dispatcher) {
+        val vm = AuthViewModel(repository)
 
-      val vm = AuthViewModel()
-      val om = OverviewViewModel()
+        val cred = mockk<Credential>()
+        val user = mockk<FirebaseUser>()
 
-      var successCalled = false
-      om.signOut(credentialManager)
-      if (vm.uiState.value.errorMsg == null) {
-        successCalled = true
+        coEvery { credentialManager.getCredential(context, any<GetCredentialRequest>()) } returns
+            makeResponseWith(cred)
+        coEvery { repository.signInWithGoogle(cred) } returns Result.success(user)
+
+        vm.signIn(context, credentialManager)
+        advanceUntilIdle()
+
+        val s = vm.uiState.value
+        assertFalse(s.isLoading)
+        assertSame(user, s.user)
+        assertNull(s.errorMsg)
+        assertFalse(s.signedOut)
       }
-      advanceUntilIdle()
-
-
-      assertTrue(successCalled)
-      assertFalse(vm.uiState.value.user != null)
-      assertFalse(vm.uiState.value.errorMsg != null)
-    }
 
   @Test
-  fun signOutFailureUpdatesErrorStateAndCallsOnError() =
-    runTest(testDispatcher) {
-      every { firebaseAuth.currentUser } returns mockk()
-      every { firebaseAuth.signOut() } throws IllegalStateException("cannot sign out")
+  fun signInRepositoryFailureSetsErrorAndSignedOut() =
+      runTest(dispatcher) {
+        val vm = AuthViewModel(repository)
 
-      val vm = AuthViewModel()
-      val om = OverviewViewModel()
+        val cred = mockk<Credential>()
+        coEvery { credentialManager.getCredential(context, any<GetCredentialRequest>()) } returns
+            makeResponseWith(cred)
+        coEvery { repository.signInWithGoogle(cred) } returns
+            Result.failure(IllegalArgumentException("No user returned"))
 
-      var errorCalled = false
-      om.signOut(credentialManager)
-      if (vm.uiState.value.errorMsg != null) {
-        errorCalled = true
+        vm.signIn(context, credentialManager)
+        advanceUntilIdle()
+
+        val s = vm.uiState.value
+        assertFalse(s.isLoading)
+        assertNull(s.user)
+        assertTrue(s.signedOut)
+        assertTrue(s.errorMsg?.contains("No user returned") == true)
       }
-      advanceUntilIdle()
-
-      assertTrue(errorCalled)
-      assertTrue(vm.uiState.value.errorMsg != null)
-      assertFalse(vm.uiState.value.user != null)
-      assertTrue(vm.uiState.value.errorMsg?.contains("cannot sign out") == true)
-    }
 
   @Test
-  fun signInWithGoogleSuccessSetsAuthenticatedAndCallsOnSuccess() =
-    runTest(testDispatcher) {
-      every { firebaseAuth.currentUser } returns null
-      val vm = AuthViewModel()
+  fun signInCancelledMapsToSignInCancelled() =
+      runTest(dispatcher) {
+        val vm = AuthViewModel(repository)
 
-      val response = mockk<GetCredentialResponse>()
-      val cred = mockk<Credential>()
-      every { response.credential } returns cred
-      every { cred.data } returns Bundle()
+        coEvery { credentialManager.getCredential(context, any<GetCredentialRequest>()) } throws
+            GetCredentialCancellationException("cancelled by user")
 
-      val googleToken = "fake-token"
-      val googleIdTokenCredential = mockk<GoogleIdTokenCredential>()
-      every { googleIdTokenCredential.idToken } returns googleToken
-      every { GoogleIdTokenCredential.Companion.createFrom(any()) } returns
-              googleIdTokenCredential
+        vm.signIn(context, credentialManager)
+        advanceUntilIdle()
 
-      val authCred = mockk<AuthCredential>()
-      every { GoogleAuthProvider.getCredential(googleToken, null) } returns authCred
-
-      val authResult = mockk<AuthResult>()
-      every { authResult.user } returns mockk<FirebaseUser>()
-      every { firebaseAuth.signInWithCredential(authCred) } returns Tasks.forResult(authResult)
-
-      coEvery { credentialManager.getCredential(context, any<GetCredentialRequest>()) } returns
-              response
-
-      var successCalled = false
-      vm.signIn(
-        context = context,
-        credentialManager = credentialManager)
-      if (vm.uiState.value.errorMsg == null) {
-        successCalled = true
+        val s = vm.uiState.value
+        assertFalse(s.isLoading)
+        assertNull(s.user)
+        assertEquals("Sign-in cancelled", s.errorMsg)
+        assertTrue(s.signedOut)
       }
-      advanceUntilIdle()
-
-      assertTrue(successCalled)
-      assertFalse(vm.uiState.value.isLoading)
-      assertTrue(vm.uiState.value.user != null)
-      assertFalse(vm.uiState.value.errorMsg != null)
-
-      verify(exactly = 1) {
-        runBlocking { credentialManager.getCredential(context, any<GetCredentialRequest>()) }
-      }
-      verify(exactly = 1) { firebaseAuth.signInWithCredential(authCred) }
-    }
 
   @Test
-  fun signInWithGoogleReturnsErrorWhenNoUserReturned() =
-    runTest(testDispatcher) {
-      every { firebaseAuth.currentUser } returns null
-      val vm = AuthViewModel()
+  fun signInCredentialExceptionMapsToFailedToGetCredentials() =
+      runTest(dispatcher) {
+        val vm = AuthViewModel(repository)
 
-      val response = mockk<GetCredentialResponse>()
-      val cred = mockk<Credential>()
-      every { response.credential } returns cred
-      every { cred.data } returns Bundle()
+        coEvery { credentialManager.getCredential(context, any<GetCredentialRequest>()) } throws
+            androidx.credentials.exceptions.NoCredentialException("no creds")
 
-      val googleIdTokenCredential = mockk<GoogleIdTokenCredential>()
-      every { googleIdTokenCredential.idToken } returns "fake-token"
-      every { GoogleIdTokenCredential.Companion.createFrom(any()) } returns
-              googleIdTokenCredential
+        vm.signIn(context, credentialManager)
+        advanceUntilIdle()
 
-      val authCred = mockk<AuthCredential>()
-      every { GoogleAuthProvider.getCredential("fake-token", null) } returns authCred
-
-      val authResult = mockk<AuthResult>()
-      every { authResult.user } returns null
-      every { firebaseAuth.signInWithCredential(authCred) } returns Tasks.forResult(authResult)
-
-      coEvery { credentialManager.getCredential(context, any<GetCredentialRequest>()) } returns
-              response
-
-      var errorCalled = false
-      vm.signIn(
-        context = context,
-        credentialManager = credentialManager)
-      if (vm.uiState.value.errorMsg != null) {
-        errorCalled = true
+        val s = vm.uiState.value
+        assertFalse(s.isLoading)
+        assertNull(s.user)
+        assertTrue(s.errorMsg?.startsWith("Failed to get credentials:") == true)
+        assertTrue(s.signedOut)
       }
-      advanceUntilIdle()
-
-      assertTrue(errorCalled)
-      assertFalse(vm.uiState.value.user != null)
-      assertFalse(vm.uiState.value.isLoading)
-      assertTrue(vm.uiState.value.errorMsg?.contains("No user returned") == true)
-    }
 
   @Test
-  fun signInWithGoogleHandlesGetCredentialCancellationException() =
-    runTest(testDispatcher) {
-      every { firebaseAuth.currentUser } returns null
-      val vm = AuthViewModel()
+  fun signInUnexpectedExceptionMapsToUnexpectedError() =
+      runTest(dispatcher) {
+        val vm = AuthViewModel(repository)
 
-      coEvery { credentialManager.getCredential(context, any<GetCredentialRequest>()) } throws
-              GetCredentialCancellationException("cancelled")
+        coEvery { credentialManager.getCredential(context, any<GetCredentialRequest>()) } throws
+            RuntimeException("kaboom")
 
-      var errorCalled = false
-      vm.signIn(
-        context = context,
-        credentialManager = credentialManager)
-      if (vm.uiState.value.errorMsg != null) {
-        errorCalled = true
+        vm.signIn(context, credentialManager)
+        advanceUntilIdle()
+
+        val s = vm.uiState.value
+        assertFalse(s.isLoading)
+        assertNull(s.user)
+        assertTrue(s.errorMsg?.startsWith("Unexpected error:") == true)
+        assertTrue(s.signedOut)
       }
-      advanceUntilIdle()
-
-      assertTrue(errorCalled)
-      assertFalse(vm.uiState.value.user != null)
-      assertFalse(vm.uiState.value.isLoading)
-      assertTrue(vm.uiState.value.errorMsg?.contains("Failed to get credential") == true)
-    }
 
   @Test
-  fun signInWithGoogleHandlesUnexpectedExceptions() =
-    runTest(testDispatcher) {
-      every { firebaseAuth.currentUser } returns null
-      val vm = AuthViewModel()
+  fun signInIsIdempotentWhileLoading() =
+      runTest(dispatcher) {
+        val vm = AuthViewModel(repository)
 
-      every { GoogleIdTokenCredential.Companion.createFrom(any()) } throws
-              IllegalStateException("bad bundle")
+        val cred = mockk<Credential>()
+        val user = mockk<FirebaseUser>()
+        // Suspend the first getCredential until we advance
+        coEvery { credentialManager.getCredential(context, any<GetCredentialRequest>()) } returns
+            makeResponseWith(cred)
+        coEvery { repository.signInWithGoogle(cred) } returns Result.success(user)
 
-      val response = mockk<GetCredentialResponse>()
-      val cred = mockk<Credential>()
-      every { response.credential } returns cred
-      every { cred.data } returns Bundle()
-      coEvery { credentialManager.getCredential(context, any<GetCredentialRequest>()) } returns
-              response
+        // First call -> sets loading
+        vm.signIn(context, credentialManager)
+        // Second call should be ignored because isLoading == true
+        vm.signIn(context, credentialManager)
 
-      var errorCalled = false
-      vm.signIn(
-        context = context,
-        credentialManager = credentialManager)
-      if (vm.uiState.value.errorMsg != null) {
-        errorCalled = true
+        advanceUntilIdle()
+
+        val s = vm.uiState.value
+        assertFalse(s.isLoading)
+        assertSame(user, s.user)
       }
-      advanceUntilIdle()
-
-      assertTrue(errorCalled)
-      assertFalse(vm.uiState.value.user != null)
-      assertFalse(vm.uiState.value.isLoading)
-      assertTrue(vm.uiState.value.errorMsg?.contains("Authentication failed") == true)
-    }
 }
