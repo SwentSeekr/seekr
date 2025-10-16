@@ -73,10 +73,6 @@ class AddHuntViewModel(
       return false
     }
 
-    if (state.points.size < 2) {
-      setErrorMsg("Please select at least a start and an end point for the hunt.")
-      return false
-    }
     if (FirebaseAuth.getInstance().currentUser?.uid == null) {
       setErrorMsg("You must be logged in to create a hunt.")
       return false
