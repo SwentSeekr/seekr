@@ -31,14 +31,12 @@ class AddHuntViewModelAndroidTest {
   private lateinit var viewModel: AddHuntViewModel
 
   @Before
-  fun setUp() {
+  fun setUp() = runTest {
     FirebaseTestEnvironment.setup()
-    runTest {
-      if (FirebaseTestEnvironment.isEmulatorActive()) {
-        clearEmulatorData()
-      }
-      FirebaseAuth.getInstance().signInAnonymously().await()
+    if (FirebaseTestEnvironment.isEmulatorActive()) {
+      clearEmulatorData()
     }
+    FirebaseAuth.getInstance().signInAnonymously().await()
     repository = HuntRepositoryProvider.repository
     viewModel = AddHuntViewModel(repository)
   }
