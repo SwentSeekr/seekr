@@ -163,12 +163,12 @@ class OverviewViewModel(
   fun signOut(credentialManager: CredentialManager): Unit {
     viewModelScope.launch {
       authRepository
-        .signOut()
-        .fold(
-          onSuccess = { _uiState.update { it.copy(signedOut = true) } },
-          onFailure = { throwable ->
-            _uiState.update { it.copy(errorMsg = throwable.localizedMessage) }
-          })
+          .signOut()
+          .fold(
+              onSuccess = { _uiState.update { it.copy(signedOut = true) } },
+              onFailure = { throwable ->
+                _uiState.update { it.copy(errorMsg = throwable.localizedMessage) }
+              })
       credentialManager.clearCredentialState(ClearCredentialStateRequest())
     }
   }
