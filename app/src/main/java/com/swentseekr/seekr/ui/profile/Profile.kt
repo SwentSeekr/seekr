@@ -20,6 +20,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.hunt.Difficulty
@@ -106,7 +109,13 @@ enum class ProfileTab {
 fun ProfileScreen(
     profile: Profile,
     currentUserId: String,
+    viewModel: ProfileViewModel = viewModel()
 ) {
+  val uiState by viewModel.uiState.collectAsState()
+  LaunchedEffect(currentUserId) {
+    viewModel.loadProfile(currentUserId)
+    viewModel.loadHunts(currentUserId)
+  }
   val isMyProfile = profile.uid == currentUserId // to implement in the view model with auth
   // (firebase authentication) when viewModel will be implemented
   var selectedTab by remember { mutableStateOf(ProfileTab.MY_HUNTS) }
@@ -246,6 +255,7 @@ fun ProfileScreenPreview() {
 
   ProfileScreen(profile = profile, currentUserId = "user123")
 }
+
 /**
  * Displays a toolbar with tabs for switching between "My Hunts", "Done Hunts", and "Liked Hunts".
  *
