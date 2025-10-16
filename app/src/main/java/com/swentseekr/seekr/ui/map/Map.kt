@@ -16,7 +16,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -48,11 +47,9 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.swentseekr.seekr.R
-import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
-import com.swentseekr.seekr.model.hunt.HuntStatus
-import com.swentseekr.seekr.model.map.Location
-import com.swentseekr.seekr.ui.theme.GrassGreen
+import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
+import com.swentseekr.seekr.ui.theme.Green
 import kotlinx.coroutines.launch
 
 /**
@@ -90,10 +87,8 @@ object MapScreenTestTags {
  *
  * @param viewModel the screen view model providing [MapUIState] and user intents.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(viewModel: MapViewModel = viewModel()) {
-  val context = LocalContext.current
   val uiState by viewModel.uiState.collectAsState()
   val cameraPositionState = rememberCameraPositionState {
     position = CameraPosition.fromLatLngZoom(LatLng(20.0, 0.0), 2f)
@@ -102,74 +97,55 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
   var mapLoaded by remember { mutableStateOf(false) }
   var previousCameraPosition by remember { mutableStateOf<CameraPosition?>(null) }
 
-  val defaultHunt =
-      Hunt(
-          uid = "",
-          start = Location(40.7128, -74.0060, "New York"),
-          end = Location(40.730610, -73.935242, "Brooklyn"),
-          middlePoints = emptyList(),
-          status = HuntStatus.FUN,
-          title = "City Exploration",
-          description = "Discover hidden gems in the city",
-          time = 2.5,
-          distance = 5.0,
-          difficulty = Difficulty.EASY,
-          authorId = "0",
-          image = 0,
-          reviewRate = 4.5)
+  val selectedHunt = uiState.selectedHunt
 
   Box(Modifier.fillMaxSize()) {
     GoogleMap(
         modifier = Modifier.matchParentSize().testTag(MapScreenTestTags.GOOGLE_MAP_SCREEN),
         cameraPositionState = cameraPositionState,
         onMapLoaded = { mapLoaded = true }) {
-          LaunchedEffect(mapLoaded, uiState.selectedHunt, uiState.isFocused) {
+        LaunchedEffect(mapLoaded, selectedHunt, uiState.isFocused) {
             if (!mapLoaded) return@LaunchedEffect
-            val hunt = uiState.selectedHunt
-            if (hunt != null && !uiState.isFocused) {
-              if (previousCameraPosition == null) {
-                previousCameraPosition = cameraPositionState.position
-              }
-              val target = LatLng(hunt.start.latitude, hunt.start.longitude)
-              cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(target, 15f))
+            val hunt = selectedHunt ?: return@LaunchedEffect
+
+            if (!uiState.isFocused) {
+                if (previousCameraPosition == null) {
+                    previousCameraPosition = cameraPositionState.position
+                }
+                val target = LatLng(hunt.start.latitude, hunt.start.longitude)
+                cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(target, 15f))
+            } else {
+                val points = buildList {
+                    add(LatLng(hunt.start.latitude, hunt.start.longitude))
+                    hunt.middlePoints.forEach { add(LatLng(it.latitude, it.longitude)) }
+                    add(LatLng(hunt.end.latitude, hunt.end.longitude))
+                }
+
+                if (points.size == 1) {
+                    cameraPositionState.animate(
+                        CameraUpdateFactory.newLatLngZoom(points.first(), 15f)
+                    )
+                } else {
+                    val bounds = LatLngBounds.Builder().apply { points.forEach { include(it) } }.build()
+                    cameraPositionState.animate(
+                        CameraUpdateFactory.newLatLngBounds(bounds, 100)
+                    )
+                }
             }
-          }
+        }
 
-          LaunchedEffect(mapLoaded, uiState.isFocused, uiState.selectedHunt) {
-            if (!mapLoaded) return@LaunchedEffect
-            val hunt = uiState.selectedHunt
-            if (uiState.isFocused && hunt != null) {
-              val points = buildList {
-                add(LatLng(hunt.start.latitude, hunt.start.longitude))
-                hunt.middlePoints.forEach { add(LatLng(it.latitude, it.longitude)) }
-                add(LatLng(hunt.end.latitude, hunt.end.longitude))
-              }
-
-              if (points.size == 1) {
-                cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(points.first(), 15f))
-              } else {
-                val builder = LatLngBounds.Builder()
-                points.forEach { builder.include(it) }
-                val bounds = builder.build()
-                val padding = 100
-                cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(bounds, padding))
-              }
-            }
-          }
-
-          if (uiState.isFocused && uiState.selectedHunt != null) {
-            val hunt = uiState.selectedHunt ?: defaultHunt
+          if (uiState.isFocused && selectedHunt != null) {
             Marker(
-                state = MarkerState(LatLng(hunt.start.latitude, hunt.start.longitude)),
-                title = "Start: ${hunt.title}",
+                state = MarkerState(LatLng(selectedHunt.start.latitude, selectedHunt.start.longitude)),
+                title = "Start: ${selectedHunt.title}",
                 icon = bitmapDescriptorFromVector(LocalContext.current, R.drawable.ic_start_marker))
-            hunt.middlePoints.forEachIndexed { idx, point ->
+              selectedHunt.middlePoints.forEachIndexed { idx, point ->
               Marker(
                   state = MarkerState(LatLng(point.latitude, point.longitude)), title = point.name)
             }
             Marker(
-                state = MarkerState(LatLng(hunt.end.latitude, hunt.end.longitude)),
-                title = "End: ${hunt.title}",
+                state = MarkerState(LatLng(selectedHunt.end.latitude, selectedHunt.end.longitude)),
+                title = "End: ${selectedHunt.title}",
                 icon = bitmapDescriptorFromVector(LocalContext.current, R.drawable.ic_end_marker))
           } else {
             uiState.hunts.forEach { hunt ->
@@ -185,9 +161,9 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
           }
         }
 
-    if (uiState.selectedHunt != null && !uiState.isFocused) {
+    if (selectedHunt != null && !uiState.isFocused) {
       HuntPopup(
-          hunt = uiState.selectedHunt!!,
+          hunt = selectedHunt,
           onViewClick = { viewModel.onViewHuntClick() },
           onDismiss = {
             scope.launch {
@@ -206,7 +182,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
           onClick = { viewModel.onBackToAllHunts() },
           colors =
               ButtonDefaults.textButtonColors(
-                  containerColor = GrassGreen, contentColor = Color.White),
+                  containerColor = Green, contentColor = Color.White),
           modifier =
               Modifier.align(Alignment.TopStart)
                   .padding(12.dp)
@@ -248,7 +224,7 @@ fun HuntPopup(hunt: Hunt, onViewClick: () -> Unit, onDismiss: () -> Unit) {
           Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
             TextButton(
                 onClick = onDismiss,
-                colors = ButtonDefaults.textButtonColors(contentColor = GrassGreen),
+                colors = ButtonDefaults.textButtonColors(contentColor = Green),
                 modifier = Modifier.testTag(MapScreenTestTags.BUTTON_CANCEL)) {
                   Text("Cancel")
                 }
@@ -256,7 +232,7 @@ fun HuntPopup(hunt: Hunt, onViewClick: () -> Unit, onDismiss: () -> Unit) {
                 onClick = onViewClick,
                 colors =
                     ButtonDefaults.textButtonColors(
-                        containerColor = GrassGreen, contentColor = Color.White),
+                        containerColor = Green, contentColor = Color.White),
                 modifier = Modifier.testTag(MapScreenTestTags.BUTTON_VIEW)) {
                   Text("View Hunt")
                 }

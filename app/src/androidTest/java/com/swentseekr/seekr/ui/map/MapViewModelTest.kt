@@ -2,57 +2,15 @@ package com.swentseekr.seekr.ui.map
 
 import com.swentseekr.seekr.model.hunt.*
 import com.swentseekr.seekr.model.map.Location
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.swentseekr.seekr.utils.FakeRepoEmpty
+import com.swentseekr.seekr.utils.FakeRepoSuccess
+import com.swentseekr.seekr.utils.FakeRepoThrows
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Test
 
-private class FakeRepoSuccess(private val hunts: List<Hunt>) : HuntsRepository {
-  override suspend fun addHunt(hunt: Hunt) = Unit
-
-  override suspend fun getAllHunts(): List<Hunt> = hunts
-
-  override suspend fun getHunt(uid: String): Hunt = hunts.first { it.uid == uid }
-
-  override suspend fun editHunt(uid: String, updatedHunt: Hunt) = Unit
-
-  override suspend fun deleteHunt(uid: String) = Unit
-
-  override fun getNewUid(): String = "fake"
-}
-
-private class FakeRepoEmpty : HuntsRepository {
-  override suspend fun addHunt(hunt: Hunt) = Unit
-
-  override suspend fun getAllHunts(): List<Hunt> = emptyList()
-
-  override suspend fun getHunt(uid: String): Hunt = error("nope")
-
-  override suspend fun editHunt(uid: String, updatedHunt: Hunt) = Unit
-
-  override suspend fun deleteHunt(uid: String) = Unit
-
-  override fun getNewUid(): String = "fake"
-}
-
-private class FakeRepoThrows(private val message: String) : HuntsRepository {
-  override suspend fun addHunt(hunt: Hunt) = Unit
-
-  override suspend fun getAllHunts(): List<Hunt> = throw IllegalStateException(message)
-
-  override suspend fun getHunt(uid: String): Hunt = throw IllegalStateException(message)
-
-  override suspend fun editHunt(uid: String, updatedHunt: Hunt) = Unit
-
-  override suspend fun deleteHunt(uid: String) = Unit
-
-  override fun getNewUid(): String = "fake"
-}
-
-@OptIn(ExperimentalCoroutinesApi::class)
 class MapViewModelTest {
   private fun sample(
-      author: String = "A",
       uid: String = "1",
       lat: Double = 10.0,
       lng: Double = 20.0
@@ -60,9 +18,9 @@ class MapViewModelTest {
       Hunt(
           uid = uid,
           start = Location(lat, lng, "Start"),
-          end = Location(lat + 0.5, lng + 0.5, "End"),
+          end = Location(lat, lng, "End"),
           middlePoints =
-              listOf(Location(lat + 0.1, lng + 0.1, "M1"), Location(lat + 0.2, lng + 0.2, "M2")),
+              listOf(Location(lat, lng, "M1"), Location(lat, lng, "M2")),
           status = HuntStatus.FUN,
           title = "Hunt $uid",
           description = "desc",
