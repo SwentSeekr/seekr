@@ -10,23 +10,23 @@ import kotlinx.coroutines.runBlocking
  * purposes.
  */
 object HuntRepositoryProvider {
-  val defaultHunt = Hunt(
-    uid = "",
-    start = Location(40.7128, -74.0060, "New York"),
-    end = Location(40.730610, -73.935242, "Brooklyn"),
-    middlePoints =
-    listOf(
-    Location(40.718, -73.999, "Chinatown"),
-    Location(40.725, -73.98, "East Village")),
-    status = HuntStatus.FUN,
-    title = "City Exploration",
-    description = "Discover hidden gems in the city",
-    time = 2.5,
-    distance = 5.0,
-    difficulty = Difficulty.EASY,
-    authorId = "0",
-    image = 0,
-    reviewRate = 4.5)
+  val defaultHunt =
+      Hunt(
+          uid = "",
+          start = Location(40.7128, -74.0060, "New York"),
+          end = Location(40.730610, -73.935242, "Brooklyn"),
+          middlePoints =
+              listOf(
+                  Location(40.718, -73.999, "Chinatown"), Location(40.725, -73.98, "East Village")),
+          status = HuntStatus.FUN,
+          title = "City Exploration",
+          description = "Discover hidden gems in the city",
+          time = 2.5,
+          distance = 5.0,
+          difficulty = Difficulty.EASY,
+          authorId = "0",
+          image = 0,
+          reviewRate = 4.5)
 
   private val _repository: HuntsRepository =
       HuntsRepositoryLocal().apply {

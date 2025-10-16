@@ -48,7 +48,6 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Hunt
-import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
 import com.swentseekr.seekr.ui.theme.Green
 import kotlinx.coroutines.launch
 
@@ -104,42 +103,39 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
         modifier = Modifier.matchParentSize().testTag(MapScreenTestTags.GOOGLE_MAP_SCREEN),
         cameraPositionState = cameraPositionState,
         onMapLoaded = { mapLoaded = true }) {
-        LaunchedEffect(mapLoaded, selectedHunt, uiState.isFocused) {
+          LaunchedEffect(mapLoaded, selectedHunt, uiState.isFocused) {
             if (!mapLoaded) return@LaunchedEffect
             val hunt = selectedHunt ?: return@LaunchedEffect
 
             if (!uiState.isFocused) {
-                if (previousCameraPosition == null) {
-                    previousCameraPosition = cameraPositionState.position
-                }
-                val target = LatLng(hunt.start.latitude, hunt.start.longitude)
-                cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(target, 15f))
+              if (previousCameraPosition == null) {
+                previousCameraPosition = cameraPositionState.position
+              }
+              val target = LatLng(hunt.start.latitude, hunt.start.longitude)
+              cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(target, 15f))
             } else {
-                val points = buildList {
-                    add(LatLng(hunt.start.latitude, hunt.start.longitude))
-                    hunt.middlePoints.forEach { add(LatLng(it.latitude, it.longitude)) }
-                    add(LatLng(hunt.end.latitude, hunt.end.longitude))
-                }
+              val points = buildList {
+                add(LatLng(hunt.start.latitude, hunt.start.longitude))
+                hunt.middlePoints.forEach { add(LatLng(it.latitude, it.longitude)) }
+                add(LatLng(hunt.end.latitude, hunt.end.longitude))
+              }
 
-                if (points.size == 1) {
-                    cameraPositionState.animate(
-                        CameraUpdateFactory.newLatLngZoom(points.first(), 15f)
-                    )
-                } else {
-                    val bounds = LatLngBounds.Builder().apply { points.forEach { include(it) } }.build()
-                    cameraPositionState.animate(
-                        CameraUpdateFactory.newLatLngBounds(bounds, 100)
-                    )
-                }
+              if (points.size == 1) {
+                cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(points.first(), 15f))
+              } else {
+                val bounds = LatLngBounds.Builder().apply { points.forEach { include(it) } }.build()
+                cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(bounds, 100))
+              }
             }
-        }
+          }
 
           if (uiState.isFocused && selectedHunt != null) {
             Marker(
-                state = MarkerState(LatLng(selectedHunt.start.latitude, selectedHunt.start.longitude)),
+                state =
+                    MarkerState(LatLng(selectedHunt.start.latitude, selectedHunt.start.longitude)),
                 title = "Start: ${selectedHunt.title}",
                 icon = bitmapDescriptorFromVector(LocalContext.current, R.drawable.ic_start_marker))
-              selectedHunt.middlePoints.forEachIndexed { idx, point ->
+            selectedHunt.middlePoints.forEachIndexed { idx, point ->
               Marker(
                   state = MarkerState(LatLng(point.latitude, point.longitude)), title = point.name)
             }
@@ -181,8 +177,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
       Button(
           onClick = { viewModel.onBackToAllHunts() },
           colors =
-              ButtonDefaults.textButtonColors(
-                  containerColor = Green, contentColor = Color.White),
+              ButtonDefaults.textButtonColors(containerColor = Green, contentColor = Color.White),
           modifier =
               Modifier.align(Alignment.TopStart)
                   .padding(12.dp)

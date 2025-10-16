@@ -10,17 +10,12 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class MapViewModelTest {
-  private fun sample(
-      uid: String = "1",
-      lat: Double = 10.0,
-      lng: Double = 20.0
-  ) =
+  private fun sample(uid: String = "1", lat: Double = 10.0, lng: Double = 20.0) =
       Hunt(
           uid = uid,
           start = Location(lat, lng, "Start"),
           end = Location(lat, lng, "End"),
-          middlePoints =
-              listOf(Location(lat, lng, "M1"), Location(lat, lng, "M2")),
+          middlePoints = listOf(Location(lat, lng, "M1"), Location(lat, lng, "M2")),
           status = HuntStatus.FUN,
           title = "Hunt $uid",
           description = "desc",
