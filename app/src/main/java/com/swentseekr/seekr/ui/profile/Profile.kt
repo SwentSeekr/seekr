@@ -124,9 +124,7 @@ fun ProfileScreen(
       floatingActionButton = {
         if (isMyProfile) {
           FloatingActionButton(
-              onClick = onAddHunt,
-              modifier = Modifier.testTag(ProfileTestTags.ADD_HUNT)
-          ) {
+              onClick = onAddHunt, modifier = Modifier.testTag(ProfileTestTags.ADD_HUNT)) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add")
               }
         }

@@ -1,7 +1,5 @@
 package com.swentseekr.seekr.ui.navigation
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -14,13 +12,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.swentseekr.seekr.model.profile.mockProfileData
+import com.swentseekr.seekr.ui.addhunt.AddHuntScreen
 import com.swentseekr.seekr.ui.components.HuntCardScreen
 import com.swentseekr.seekr.ui.map.MapScreen
 import com.swentseekr.seekr.ui.overview.OverviewScreen
@@ -34,7 +32,7 @@ object NavigationTestTags {
   const val MAP_TAB = "MAP_TAB"
   const val PROFILE_TAB = "PROFILE_TAB"
   const val HUNTCARD_SCREEN = "HUNTCARD_SCREEN"
-    const val ADD_HUNT_SCREEN = "ADD_HUNT_SCREEN"
+  const val ADD_HUNT_SCREEN = "ADD_HUNT_SCREEN"
 }
 
 // Destinations as sealed class
@@ -55,7 +53,7 @@ sealed class SeekrDestination(
     const val ARG_HUNT_ID = "huntId"
   }
 
-    object AddHunt : SeekrDestination("add_hunt", "Add Hunt", Icons.Filled.List)
+  object AddHunt : SeekrDestination("add_hunt", "Add Hunt", Icons.Filled.List)
 
   companion object {
     val all = listOf(Overview, Map, Profile)
@@ -112,19 +110,22 @@ fun SeekrMainNavHost(
   val currentRoute = navBackStackEntry?.destination?.route
   val currentDestination =
       SeekrDestination.all.find { it.route == currentRoute } ?: SeekrDestination.Overview
+  val showBottomBar = SeekrDestination.all.any { it.route == currentRoute }
 
   Scaffold(
       modifier = Modifier.fillMaxSize(),
       containerColor = White,
       bottomBar = {
-        SeekrNavigationBar(
-            currentDestination = currentDestination,
-            onTabSelected = { destination ->
-              navController.navigate(destination.route) {
-                launchSingleTop = true
-                popUpTo(SeekrDestination.Overview.route)
-              }
-            })
+        if (showBottomBar) {
+          SeekrNavigationBar(
+              currentDestination = currentDestination,
+              onTabSelected = { destination ->
+                navController.navigate(destination.route) {
+                  launchSingleTop = true
+                  popUpTo(SeekrDestination.Overview.route)
+                }
+              })
+        }
       }) { innerPadding ->
         NavHost(
             navController = navController,
@@ -145,9 +146,7 @@ fun SeekrMainNavHost(
                 ProfileScreen(
                     profile = profile,
                     currentUserId = profile.uid,
-                    onAddHunt = {
-                        navController.navigate(SeekrDestination.AddHunt.route)
-                    })
+                    onAddHunt = { navController.navigate(SeekrDestination.AddHunt.route) })
               }
               composable(
                   route = SeekrDestination.HuntCard.route,
@@ -165,29 +164,28 @@ fun SeekrMainNavHost(
                         onGoBack = { navController.popBackStack() },
                         modifier = Modifier.testTag(NavigationTestTags.HUNTCARD_SCREEN))
                   }
-            composable(SeekrDestination.AddHunt.route) {
-                AddHuntPlaceholderScreen(
-                    onClose = { navController.popBackStack() }
-                )
+              composable(SeekrDestination.AddHunt.route) {
+                // wrapper purely to expose a testTag for UI tests
+                Surface(
+                    modifier = Modifier.fillMaxSize().testTag(NavigationTestTags.ADD_HUNT_SCREEN)) {
+                      AddHuntScreen(
+                          onGoBack = { navController.popBackStack() },
+                          onDone = {
+                            // After successful save (toast is shown inside the screen),
+                            // just go back to the previous screen; optionally jump to Overview.
+                            val popped = navController.popBackStack()
+                            if (!popped) {
+                              // Fallback if there's nothing to pop (unlikely)
+                              navController.navigate(SeekrDestination.Overview.route) {
+                                launchSingleTop = true
+                                popUpTo(SeekrDestination.Overview.route)
+                              }
+                            }
+                          })
+                    }
+              }
             }
-            }
-        }
-
       }
-
-// Simple placeholder you can replace later with the real screen
-@Composable
-private fun AddHuntPlaceholderScreen(onClose: () -> Unit) {
-    Surface(modifier = Modifier.fillMaxSize().testTag(NavigationTestTags.ADD_HUNT_SCREEN)) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Text(text = "Add Hunt (placeholder)", style = MaterialTheme.typography.headlineSmall)
-            Text(text = "This screen will let you create a new hunt.")
-            Button(onClick = onClose) { Text("Back") }
-        }
-    }
 }
 
 // Preview

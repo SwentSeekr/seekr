@@ -24,15 +24,13 @@ class SeekrNavigationTest {
 
   @Before
   fun setUp() {
-    composeTestRule.runOnUiThread {
-      composeTestRule.activity.setContent { SeekrMainNavHost() }
-    }
+    composeTestRule.runOnUiThread { composeTestRule.activity.setContent { SeekrMainNavHost() } }
 
     composeTestRule.waitUntil(timeoutMillis = 5_000) {
       composeTestRule
-        .onAllNodes(hasTestTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU))
-        .fetchSemanticsNodes()
-        .isNotEmpty()
+          .onAllNodes(hasTestTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU))
+          .fetchSemanticsNodes()
+          .isNotEmpty()
     }
   }
 
@@ -86,14 +84,10 @@ class SeekrNavigationTest {
     composeTestRule.onNodeWithTag(ProfileTestTags.ADD_HUNT).assertIsDisplayed().performClick()
 
     // Expect placeholder screen visible
-    composeTestRule
-      .onNodeWithTag(NavigationTestTags.ADD_HUNT_SCREEN)
-      .assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags.ADD_HUNT_SCREEN).assertIsDisplayed()
 
     // Bottom bar should still be visible on this route
-    composeTestRule
-      .onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU)
-      .assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
   }
 
   @Test
@@ -103,16 +97,10 @@ class SeekrNavigationTest {
     composeTestRule.onNodeWithTag(ProfileTestTags.ADD_HUNT).performClick()
 
     // Press system back
-    composeTestRule.activityRule.scenario.onActivity {
-      it.onBackPressedDispatcher.onBackPressed()
-    }
+    composeTestRule.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
 
     // We should be back in Profile; bottom bar visible and Profile tab exists
-    composeTestRule
-      .onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU)
-      .assertIsDisplayed()
-    composeTestRule
-      .onNodeWithTag(NavigationTestTags.PROFILE_TAB)
-      .assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_TAB).assertIsDisplayed()
   }
 }

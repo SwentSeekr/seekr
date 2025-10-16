@@ -81,7 +81,8 @@ fun HuntCardScreen(
 
   // Load when arriving / when id changes
   LaunchedEffect(huntId) { huntCardViewModel.loadHunt(huntId) }
-  // val hunt = huntCardViewModel.loadHunt(huntId)
+  // val hunt1 = huntCardViewModel.loadHunt(huntId)
+  val hunt2 = uiState.hunt
   val author = "SpikeMan" // huntCardViewModel.loadAuthor(hunt.authorId)
   val hunt =
       Hunt(
@@ -116,7 +117,7 @@ fun HuntCardScreen(
             modifier = Modifier.background(Color.LightGray))
       },
       modifier = modifier.fillMaxSize()) { innerPadding ->
-        val hunt = uiState.hunt
+        val hunt = hunt2
         if (hunt == null) {
           Box(Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()

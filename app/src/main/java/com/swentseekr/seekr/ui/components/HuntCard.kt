@@ -37,8 +37,13 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
 
-// The comment parts are for the like button feature,
-// it will be added as soon as the OverviewViewModel and Ui work together
+// Fallback used when hunt.image is 0 or otherwise unset.
+// Prefer a project drawable that always exists.
+private val FALLBACK_IMAGE_RES: Int = R.drawable.ic_launcher_foreground
+
+// Helper to guarantee we never pass 0 to painterResource()
+private fun safeImageRes(id: Int?): Int = id?.takeIf { it != 0 } ?: FALLBACK_IMAGE_RES
+
 /**
  * Displays a card representing a hunt with title, author, image, difficulty, distance, and time.
  *
@@ -71,7 +76,7 @@ fun HuntCard(
       Text("by ${hunt.authorId}", modifier = Modifier.padding(horizontal = 4.dp))
       Row {
         Image(
-            painter = painterResource(id = hunt.image),
+            painter = painterResource(id = safeImageRes(hunt.image)),
             contentDescription = "Hunt Picture",
             modifier = Modifier.padding(horizontal = 4.dp).size(100.dp).clip(RectangleShape))
         Column(
@@ -139,7 +144,7 @@ fun HuntCardPreview() {
           distance = 5.0,
           difficulty = Difficulty.DIFFICULT,
           authorId = "0",
-          image = R.drawable.ic_launcher_foreground, // ou une image de ton projet
+          image = R.drawable.ic_launcher_foreground, // or any drawable in your project
           reviewRate = 4.5)
   var isLiked by remember { mutableStateOf(false) }
   HuntCard(
