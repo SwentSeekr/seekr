@@ -8,17 +8,20 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.swentseekr.seekr.model.profile.mockProfileData
+import com.swentseekr.seekr.ui.addhunt.AddHuntScreen
+import com.swentseekr.seekr.ui.components.HuntCardScreen
 import com.swentseekr.seekr.ui.map.MapScreen
+import com.swentseekr.seekr.ui.overview.OverviewScreen
 import com.swentseekr.seekr.ui.profile.ProfileScreen
 import com.swentseekr.seekr.ui.theme.*
 
@@ -28,6 +31,8 @@ object NavigationTestTags {
   const val OVERVIEW_TAB = "OVERVIEW_TAB"
   const val MAP_TAB = "MAP_TAB"
   const val PROFILE_TAB = "PROFILE_TAB"
+  const val HUNTCARD_SCREEN = "HUNTCARD_SCREEN"
+  const val ADD_HUNT_SCREEN = "ADD_HUNT_SCREEN"
 }
 
 // Destinations as sealed class
@@ -42,15 +47,17 @@ sealed class SeekrDestination(
 
   object Profile : SeekrDestination("profile", "Profile", Icons.Filled.Person)
 
+  object HuntCard : SeekrDestination("hunt/{huntId}", "Hunt", Icons.Filled.List) {
+    fun createRoute(huntId: String) = "hunt/$huntId"
+
+    const val ARG_HUNT_ID = "huntId"
+  }
+
+  object AddHunt : SeekrDestination("add_hunt", "Add Hunt", Icons.Filled.List)
+
   companion object {
     val all = listOf(Overview, Map, Profile)
   }
-}
-
-// Placeholder screen
-@Composable
-fun OverviewScreen() {
-  Surface { Text("Overview Screen", modifier = Modifier.padding(32.dp)) }
 }
 
 // Bottom Navigation Bar
@@ -71,6 +78,7 @@ fun SeekrNavigationBar(
                 is SeekrDestination.Overview -> NavigationTestTags.OVERVIEW_TAB
                 is SeekrDestination.Map -> NavigationTestTags.MAP_TAB
                 is SeekrDestination.Profile -> NavigationTestTags.PROFILE_TAB
+                else -> "IGNORED" // HuntCard or any non-bottom-bar destination
               }
 
           NavigationBarItem(
@@ -97,33 +105,84 @@ fun SeekrMainNavHost(
     navController: NavHostController = rememberNavController(),
     modifier: Modifier = Modifier
 ) {
+  var lastHuntId by rememberSaveable { mutableStateOf<String?>(null) }
   val navBackStackEntry by navController.currentBackStackEntryAsState()
   val currentRoute = navBackStackEntry?.destination?.route
   val currentDestination =
       SeekrDestination.all.find { it.route == currentRoute } ?: SeekrDestination.Overview
+  val showBottomBar = SeekrDestination.all.any { it.route == currentRoute }
 
   Scaffold(
       modifier = Modifier.fillMaxSize(),
       containerColor = White,
       bottomBar = {
-        SeekrNavigationBar(
-            currentDestination = currentDestination,
-            onTabSelected = { destination ->
-              navController.navigate(destination.route) {
-                launchSingleTop = true
-                popUpTo(SeekrDestination.Overview.route)
-              }
-            })
+        if (showBottomBar) {
+          SeekrNavigationBar(
+              currentDestination = currentDestination,
+              onTabSelected = { destination ->
+                navController.navigate(destination.route) {
+                  launchSingleTop = true
+                  popUpTo(SeekrDestination.Overview.route)
+                }
+              })
+        }
       }) { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = SeekrDestination.Overview.route,
             modifier = Modifier.padding(innerPadding)) {
-              composable(SeekrDestination.Overview.route) { OverviewScreen() }
+              composable(SeekrDestination.Overview.route) {
+                OverviewScreen(
+                    onhuntclick = { huntId ->
+                      lastHuntId = huntId
+                      navController.navigate(SeekrDestination.HuntCard.createRoute(huntId)) {
+                        launchSingleTop = true
+                      }
+                    })
+              }
               composable(SeekrDestination.Map.route) { MapScreen() }
               composable(SeekrDestination.Profile.route) {
                 val profile = mockProfileData()
-                ProfileScreen(profile = profile, currentUserId = profile.uid)
+                ProfileScreen(
+                    profile = profile,
+                    currentUserId = profile.uid,
+                    onAddHunt = { navController.navigate(SeekrDestination.AddHunt.route) })
+              }
+              composable(
+                  route = SeekrDestination.HuntCard.route,
+                  arguments =
+                      listOf(
+                          androidx.navigation.navArgument(SeekrDestination.HuntCard.ARG_HUNT_ID) {
+                            type = androidx.navigation.NavType.StringType
+                          })) { backStackEntry ->
+                    val argId =
+                        backStackEntry.arguments?.getString(SeekrDestination.HuntCard.ARG_HUNT_ID)
+                    val huntId = argId ?: lastHuntId.orEmpty() // fallback if ever needed
+
+                    HuntCardScreen(
+                        huntId = huntId,
+                        onGoBack = { navController.popBackStack() },
+                        modifier = Modifier.testTag(NavigationTestTags.HUNTCARD_SCREEN))
+                  }
+              composable(SeekrDestination.AddHunt.route) {
+                // wrapper purely to expose a testTag for UI tests
+                Surface(
+                    modifier = Modifier.fillMaxSize().testTag(NavigationTestTags.ADD_HUNT_SCREEN)) {
+                      AddHuntScreen(
+                          onGoBack = { navController.popBackStack() },
+                          onDone = {
+                            // After successful save (toast is shown inside the screen),
+                            // just go back to the previous screen; optionally jump to Overview.
+                            val popped = navController.popBackStack()
+                            if (!popped) {
+                              // Fallback if there's nothing to pop (unlikely)
+                              navController.navigate(SeekrDestination.Overview.route) {
+                                launchSingleTop = true
+                                popUpTo(SeekrDestination.Overview.route)
+                              }
+                            }
+                          })
+                    }
               }
             }
       }

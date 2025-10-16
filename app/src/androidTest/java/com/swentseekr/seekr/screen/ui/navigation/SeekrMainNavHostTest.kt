@@ -11,6 +11,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.swentseekr.seekr.ui.navigation.NavigationTestTags
 import com.swentseekr.seekr.ui.navigation.SeekrMainNavHost
+import com.swentseekr.seekr.ui.profile.ProfileTestTags
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -23,12 +24,8 @@ class SeekrNavigationTest {
 
   @Before
   fun setUp() {
-    composeTestRule.runOnUiThread {
-      // Always start with a clean Compose hierarchy
-      composeTestRule.activity.setContent { SeekrMainNavHost() }
-    }
+    composeTestRule.runOnUiThread { composeTestRule.activity.setContent { SeekrMainNavHost() } }
 
-    // Wait until the UI is actually rendered before proceeding
     composeTestRule.waitUntil(timeoutMillis = 5_000) {
       composeTestRule
           .onAllNodes(hasTestTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU))
@@ -62,17 +59,45 @@ class SeekrNavigationTest {
 
   @Test
   fun canNavigateBetweenTabs() {
-    composeTestRule.onNodeWithTag(NavigationTestTags.OVERVIEW_TAB).assertExists().performClick()
-    composeTestRule.onNodeWithTag(NavigationTestTags.MAP_TAB).assertExists().performClick()
-    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_TAB).assertExists().performClick()
-    composeTestRule.onNodeWithTag(NavigationTestTags.OVERVIEW_TAB).assertExists().performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags.OVERVIEW_TAB).performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags.MAP_TAB).performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_TAB).performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags.OVERVIEW_TAB).performClick()
   }
 
   @Test
   fun reSelectingSameTabDoesNotCrash() {
-    composeTestRule.onNodeWithTag(NavigationTestTags.MAP_TAB).assertExists().performClick()
+    composeTestRule.onNodeWithTag(NavigationTestTags.MAP_TAB).performClick()
     composeTestRule.onNodeWithTag(NavigationTestTags.MAP_TAB).performClick()
     composeTestRule.onNodeWithTag(NavigationTestTags.MAP_TAB).performClick()
     composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
+  }
+
+  // ---------------- NEW TESTS FOR ADD HUNT FLOW ----------------
+
+  @Test
+  fun profileFab_navigatesToAddHuntPlaceholder() {
+    // Go to Profile
+    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_TAB).performClick()
+
+    // Tap FAB with tag ADD_HUNT
+    composeTestRule.onNodeWithTag(ProfileTestTags.ADD_HUNT).assertIsDisplayed().performClick()
+
+    // Expect placeholder screen visible
+    composeTestRule.onNodeWithTag(NavigationTestTags.ADD_HUNT_SCREEN).assertIsDisplayed()
+  }
+
+  @Test
+  fun addHuntPlaceholder_backNavigatesToProfile() {
+    // Navigate to Add Hunt as above
+    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_TAB).performClick()
+    composeTestRule.onNodeWithTag(ProfileTestTags.ADD_HUNT).performClick()
+
+    // Press system back
+    composeTestRule.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
+
+    // We should be back in Profile; bottom bar visible and Profile tab exists
+    composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(NavigationTestTags.PROFILE_TAB).assertIsDisplayed()
   }
 }
