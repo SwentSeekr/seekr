@@ -53,6 +53,7 @@ class HuntCardViewModelTest {
     Dispatchers.resetMain()
   }
 
+  /** Test that the hunt is correctly loaded */
   @Test
   fun loadHunt_correctly() = runTest {
     viewModel.loadHunt(testHunt.uid)
@@ -62,9 +63,10 @@ class HuntCardViewModelTest {
     assertNotNull(state.hunt)
     assertEquals(testHunt.uid, state.hunt?.uid)
     assertFalse(state.isLiked)
-    assertFalse(state.isAchived)
+    assertFalse(state.isAchieved)
   }
 
+  /** Test in case of non existing hunt laoded */
   @Test
   fun loadHunt_withInvalidId_logsError() = runTest {
     viewModel.loadHunt("invalid_id")
@@ -73,35 +75,37 @@ class HuntCardViewModelTest {
     val state = viewModel.uiState.value
     assertNull(state.hunt)
     assertFalse(state.isLiked)
-    assertFalse(state.isAchived)
+    assertFalse(state.isAchieved)
   }
 
+  /** Test that the default state has a hunt not null, no like and not achieved */
   @Test
   fun initialUiState_isDefault() {
     val state = viewModel.uiState.value
     assertNull(state.hunt)
     assertFalse(state.isLiked)
-    assertFalse(state.isAchived)
+    assertFalse(state.isAchieved)
   }
 
+  /** Test that check that the load Author does not crash not really implemented yet */
   @Test
   fun loadHuntAuthor_withValidId_doesNotCrash() = runTest {
     viewModel.loadHuntAuthor(testHunt.uid)
     advanceUntilIdle()
 
-    // This method currently only logs; we check it completes safely
-    assertTrue(true) // Placeholder assertion to confirm test ran
+    assertTrue(true)
   }
 
+  /** est that check that the load Author does not crash not really implemented yet */
   @Test
   fun loadHuntAuthor_withInvalidId_logsError() = runTest {
     viewModel.loadHuntAuthor("invalid_id")
     advanceUntilIdle()
 
-    // Again, just making sure it doesn't crash
     assertTrue(true)
   }
 
+  /** Test that check the change of the hunt state from dislike to like and from like to dislike */
   @Test
   fun onLikeClick_isLiked() = runTest {
     assertFalse(viewModel.uiState.value.isLiked)
@@ -113,13 +117,15 @@ class HuntCardViewModelTest {
     assertEquals(false, viewModel.uiState.value.isLiked)
   }
 
+  /** Test that check the change of the hunt state form not achieved to achieved */
   @Test
-  fun onDoneClick_sets_isAchived_to_true() = runTest {
-    assertFalse(viewModel.uiState.value.isAchived)
+  fun onDoneClick_sets_isAchieved_to_true() = runTest {
+    assertFalse(viewModel.uiState.value.isAchieved)
     viewModel.onDoneClick()
-    assertEquals(true, viewModel.uiState.value.isAchived)
+    assertEquals(true, viewModel.uiState.value.isAchieved)
   }
 
+  /** Test that check that the hunt is deleted */
   @Test
   fun onDeleteClick_deletesHunt() = runTest {
     viewModel.deleteHunt(testHunt.uid)
@@ -134,6 +140,7 @@ class HuntCardViewModelTest {
     }
   }
 
+  /** Test that check no delete if not valid hunt id */
   @Test
   fun deleteHunt_withInvalidId_logsError() = runTest {
     viewModel.deleteHunt("nonexistent_id")
@@ -142,6 +149,7 @@ class HuntCardViewModelTest {
     // Nothing to assert — just ensures no crash/log handled
   }
 
+  /** Test that check the edit change correctly the hunt */
   @Test
   fun onEditClick() = runTest {
     val newHuntValue = testHunt.copy(title = "Edited Title")
@@ -153,6 +161,7 @@ class HuntCardViewModelTest {
     assertEquals(newHuntValue, updatedHunt)
   }
 
+  /** Test that check that there is an error with not a valid hunt */
   @Test
   fun editHunt_withInvalidId_logsError() = runTest {
     val newHunt = testHunt.copy(uid = "nonexistent_id", title = "Should Fail")

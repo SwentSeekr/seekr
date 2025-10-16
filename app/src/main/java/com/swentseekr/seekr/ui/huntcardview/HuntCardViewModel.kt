@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 data class HuntCardUiState(
     val hunt: Hunt? = null,
     val isLiked: Boolean = false,
-    val isAchived: Boolean = false
+    val isAchieved: Boolean = false
 )
 
 class HuntCardViewModel(
@@ -33,7 +33,7 @@ class HuntCardViewModel(
     viewModelScope.launch {
       try {
         val hunt = repository.getHunt(huntID)
-        _uiState.value = HuntCardUiState(hunt = hunt, isLiked = false, isAchived = false)
+        _uiState.value = HuntCardUiState(hunt = hunt, isLiked = false, isAchieved = false)
       } catch (e: Exception) {
         Log.e("HuntCardViewModel", "Error loading Hunt by ID: $huntID", e)
       }
@@ -91,6 +91,6 @@ class HuntCardViewModel(
   fun onDoneClick() {
     val currentHuntUiState = _uiState.value
     // This will be added to the AchivedList in the profile
-    _uiState.value = currentHuntUiState.copy(isAchived = true)
+    _uiState.value = currentHuntUiState.copy(isAchieved = true)
   }
 }
