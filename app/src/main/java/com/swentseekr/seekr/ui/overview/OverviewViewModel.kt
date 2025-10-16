@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.overview
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.ViewModel
@@ -95,13 +96,6 @@ class OverviewViewModel(
     }
   }
 
-  /**
-   * Handles the click event on a hunt item identified by [huntID]. Navigate to the card overview
-   */
-  fun onHuntClick(huntID: String) {
-    // TODO: Navigate to Hunt Detail Screen
-  }
-
   /** Updates the search word and filters the hunts based on the new search term [newSearch]. */
   fun onSearchChange(newSearch: String) {
     if (newSearch != "") {
@@ -148,28 +142,17 @@ class OverviewViewModel(
     _uiState.value = currentState.copy(hunts = filtered)
   }
 
-  /** Filters the hunts to show only those that have been achieved by the user. */
-  fun onAchivedClick() {
-    //
-    val filteredHunts = huntItems.filter { it.isAchived }
-    _uiState.value = _uiState.value.copy(hunts = filteredHunts)
-  }
-
-  /** Handles the click event on the icon marker to navigate to the map screen. */
-  fun onIconMarkerClick() {
-    // TODO: Navigate to Map Screen
-  }
-
   fun signOut(credentialManager: CredentialManager): Unit {
     viewModelScope.launch {
       authRepository
-          .signOut()
-          .fold(
-              onSuccess = { _uiState.update { it.copy(signedOut = true) } },
-              onFailure = { throwable ->
-                _uiState.update { it.copy(errorMsg = throwable.localizedMessage) }
-              })
+        .signOut()
+        .fold(
+          onSuccess = { _uiState.update { it.copy(signedOut = true) } },
+          onFailure = { throwable ->
+            _uiState.update { it.copy(errorMsg = throwable.localizedMessage) }
+          })
       credentialManager.clearCredentialState(ClearCredentialStateRequest())
     }
   }
+
 }
