@@ -14,10 +14,17 @@ private const val TOAST_MIN_POINTS = "Please select at least a start and end poi
 fun AddHuntScreen(
     addHuntViewModel: AddHuntViewModel = viewModel(),
     onGoBack: () -> Unit = {},
-    onDone: () -> Unit = {}
+    onDone: () -> Unit = {},
+    testMode: Boolean = false
 ) {
   val uiState by addHuntViewModel.uiState.collectAsState()
   val context = LocalContext.current
+
+  if (testMode) {
+    // Active le mode test sur le ViewModel si possible
+    LaunchedEffect(Unit) { addHuntViewModel.setTestMode(true) }
+  }
+
   // Handle successful addition
   LaunchedEffect(uiState.saveSuccessful) {
     if (uiState.saveSuccessful) {
@@ -46,7 +53,8 @@ fun AddHuntScreen(
           }
           addHuntViewModel.setIsSelectingPoints(false)
         },
-        onCancel = { addHuntViewModel.setIsSelectingPoints(false) })
+        onCancel = { addHuntViewModel.setIsSelectingPoints(false) },
+        testMode = testMode)
   } else {
     AddHuntFieldsScreen(
         uiState = uiState,

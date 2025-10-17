@@ -71,6 +71,7 @@ object AddHuntScreenTestTags {
   const val BUTTON_SELECT_LOCATION = "buttonSelectLocation"
   const val HUNT_SAVE = "huntSave"
   const val ERROR_MESSAGE = "errorMessage"
+  const val ADD_HUNT_SCREEN = "AddHuntScreen"
 }
 
 // ----------------------
@@ -319,5 +320,6 @@ fun AddHuntFieldsScreen(
                 Text(BUTTON_SAVE_HUNT, style = MaterialTheme.typography.titleMedium)
               }
         }
-      })
+      },
+      modifier = Modifier.testTag(AddHuntScreenTestTags.ADD_HUNT_SCREEN))
 }

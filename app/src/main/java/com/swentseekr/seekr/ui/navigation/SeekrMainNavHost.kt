@@ -103,6 +103,7 @@ fun SeekrNavigationBar(
 @Composable
 fun SeekrMainNavHost(
     navController: NavHostController = rememberNavController(),
+    testMode: Boolean = false,
     modifier: Modifier = Modifier
 ) {
   var lastHuntId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -171,17 +172,14 @@ fun SeekrMainNavHost(
                       AddHuntScreen(
                           onGoBack = { navController.popBackStack() },
                           onDone = {
-                            // After successful save (toast is shown inside the screen),
-                            // just go back to the previous screen; optionally jump to Overview.
-                            val popped = navController.popBackStack()
-                            if (!popped) {
-                              // Fallback if there's nothing to pop (unlikely)
-                              navController.navigate(SeekrDestination.Overview.route) {
-                                launchSingleTop = true
-                                popUpTo(SeekrDestination.Overview.route)
-                              }
+                            // go back to overview because no view model for profile to refresh the
+                            // list yet
+                            navController.navigate(SeekrDestination.Overview.route) {
+                              launchSingleTop = true
+                              popUpTo(SeekrDestination.Overview.route)
                             }
-                          })
+                          },
+                          testMode = testMode)
                     }
               }
             }

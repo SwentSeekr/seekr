@@ -69,6 +69,7 @@ object MapScreenTestTags {
   const val BUTTON_CANCEL = "huntPopupCancel"
   const val BUTTON_VIEW = "huntPopupView"
   const val BUTTON_BACK = "backToAllHunts"
+  const val MAP_SCREEN = "MapScreen"
 }
 
 /**
@@ -98,7 +99,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
 
   val selectedHunt = uiState.selectedHunt
 
-  Box(Modifier.fillMaxSize()) {
+  Box(Modifier.fillMaxSize().testTag(MapScreenTestTags.MAP_SCREEN)) {
     GoogleMap(
         modifier = Modifier.matchParentSize().testTag(MapScreenTestTags.GOOGLE_MAP_SCREEN),
         cameraPositionState = cameraPositionState,

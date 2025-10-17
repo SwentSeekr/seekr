@@ -32,11 +32,19 @@ object AddPointsMapScreenTestTags {
 fun AddPointsMapScreen(
     onDone: (List<Location>) -> Unit,
     initPoints: List<Location> = emptyList(),
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
+    testMode: Boolean = false,
 ) {
   var points by remember { mutableStateOf(initPoints) }
   val polylinePoints = remember(points) { points.map { LatLng(it.latitude, it.longitude) } }
   val cameraPositionState = rememberCameraPositionState()
+
+  if (testMode) {
+    LaunchedEffect(Unit) {
+      // Simule 2 points automatiquement
+      points = listOf(Location(0.0, 0.0, "P1"), Location(1.0, 1.0, "P2"))
+    }
+  }
 
   Scaffold(
       topBar = {
