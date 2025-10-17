@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui
 
+import com.swentseekr.seekr.model.authentication.FakeAuthRepository
 import com.swentseekr.seekr.model.hunt.*
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.overview.OverviewViewModel
@@ -17,6 +18,7 @@ class OverviewViewModelTest {
 
   private lateinit var viewModel: OverviewViewModel
   private lateinit var fakeRepository: HuntsRepositoryLocal
+  private lateinit var fakeAuthRepository: FakeAuthRepository
   private val testDispatcher = StandardTestDispatcher()
 
   private val hunt1 =
@@ -49,8 +51,9 @@ class OverviewViewModelTest {
     fakeRepository = HuntsRepositoryLocal()
     fakeRepository.addHunt(hunt1)
     fakeRepository.addHunt(hunt2)
+    fakeAuthRepository = FakeAuthRepository()
 
-    viewModel = OverviewViewModel(fakeRepository)
+    viewModel = OverviewViewModel(fakeRepository, fakeAuthRepository)
 
     advanceUntilIdle()
   }
@@ -73,7 +76,7 @@ class OverviewViewModelTest {
   /** Test that changing the search term filters the hunts correctly based on the search input. */
   @Test
   fun onSearchChange_filters_by_search() = runTest {
-    viewModel = OverviewViewModel(fakeRepository)
+    viewModel = OverviewViewModel(fakeRepository, fakeAuthRepository)
 
     advanceUntilIdle()
     viewModel.onSearchChange("fun")

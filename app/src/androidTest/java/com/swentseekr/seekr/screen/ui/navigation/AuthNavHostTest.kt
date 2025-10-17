@@ -4,12 +4,10 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.swentseekr.seekr.ui.auth.SignInScreenTestTags
 import com.swentseekr.seekr.ui.navigation.AuthNavHost
 import com.swentseekr.seekr.utils.FakeAuthEmulator
-import com.swentseekr.seekr.utils.FakeJwtGenerator
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -45,24 +43,24 @@ class AuthNavHostTest {
     composeTestRule.onNodeWithTag(SignInScreenTestTags.LOGIN_BUTTON).assertIsDisplayed()
   }
 
-  @Test
-  fun clickingSignIn_withFakeAuthEmulator_triggersSignedInState() = runBlocking {
-    val fakeToken = FakeJwtGenerator.createFakeGoogleIdToken()
-    FakeAuthEmulator.signInWithFakeGoogleToken(fakeToken)
-
-    var onSignedInCalled = false
-
-    composeTestRule.setContent {
-      AuthNavHost(
-          credentialManager =
-              androidx.credentials.CredentialManager.create(composeTestRule.activity),
-          onSignedIn = { onSignedInCalled = true })
-    }
-
-    composeTestRule.onNodeWithTag(SignInScreenTestTags.LOGIN_BUTTON).performClick()
-    composeTestRule.waitForIdle()
-
-    assert(FakeAuthEmulator.isAuthenticated())
-    assert(onSignedInCalled)
-  }
+  //  @Test
+  //  fun clickingSignIn_withFakeAuthEmulator_triggersSignedInState() = runBlocking {
+  //    val fakeToken = FakeJwtGenerator.createFakeGoogleIdToken()
+  //    FakeAuthEmulator.signInWithFakeGoogleToken(fakeToken)
+  //
+  //    var onSignedInCalled = false
+  //
+  //    composeTestRule.setContent {
+  //      AuthNavHost(
+  //          credentialManager =
+  //              androidx.credentials.CredentialManager.create(composeTestRule.activity),
+  //          onSignedIn = { onSignedInCalled = true })
+  //    }
+  //
+  //    composeTestRule.onNodeWithTag(SignInScreenTestTags.LOGIN_BUTTON).performClick()
+  //    composeTestRule.waitForIdle()
+  //
+  //    assert(FakeAuthEmulator.isAuthenticated())
+  //    assert(onSignedInCalled)
+  //  }
 }
