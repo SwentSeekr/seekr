@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -43,6 +42,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -129,138 +129,147 @@ fun HuntCardScreen(
 
           // COLUMN FOR INFORMATIONS
           Card(
-              modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp).heightIn(max = 780.dp)
-                  .border(2.dp, Color(0xFF60BA37), RoundedCornerShape(12.dp)),
+              modifier =
+                  modifier
+                      .fillMaxWidth()
+                      .padding(innerPadding)
+                      .padding(horizontal = 16.dp)
+                      .padding(top = 8.dp, bottom = 16.dp)
+                      .border(2.dp, Color(0xFF60BA37), RoundedCornerShape(12.dp)),
               colors = CardDefaults.cardColors(containerColor = Color(0xFFF8DEB6)),
-              elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-              shape = RoundedCornerShape(12.dp)
-          ) {
-            LazyColumn(modifier.padding(innerPadding).fillMaxSize()) {
-              // ROW WITH IMAGE, TITLE, AUTHOR, DIFFICULTY, DISTANCE, TIME
-              item {
-                Column(modifier = modifier.padding(8.dp).fillMaxWidth().fillMaxSize()) {
-                  Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        hunt.title,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier =
-                            Modifier.weight(1f)
-                                .padding(4.dp)
-                                .testTag(HuntCardScreenTestTags.TITLE_TEXT))
-                  }
-                  Text(
-                      "by $author",
-                      modifier =
-                          Modifier.padding(horizontal = 4.dp)
-                              .testTag(HuntCardScreenTestTags.AUTHOR_TEXT))
-                  Row {
-                    Image(
-                        painter = painterResource(id = safeImageRes(hunt.image)),
-                        contentDescription = "Hunt Picture",
-                        modifier =
-                            Modifier.padding(horizontal = 4.dp)
-                                .size(100.dp)
-                                .clip(RectangleShape)
-                                .testTag(HuntCardScreenTestTags.IMAGE))
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally) {
-                          Box(
-                              modifier =
-                                  Modifier.padding(4.dp)
-                                      .background(Color.Green)
-                                      .height(20.dp)
-                                      .width(80.dp)
-                                      .clip(RectangleShape)
-                                      .testTag(HuntCardScreenTestTags.DIFFICULTY_BOX),
-                          ) {
+              shape = RoundedCornerShape(12.dp)) {
+                LazyColumn(
+                    modifier = Modifier.padding(12.dp).fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                      // ROW WITH IMAGE, TITLE, AUTHOR, DIFFICULTY, DISTANCE, TIME
+                      item {
+                        Column(modifier = modifier.padding(8.dp).fillMaxWidth().fillMaxSize()) {
+                          Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                hunt.difficulty.toString(),
-                                modifier = Modifier.align(Alignment.Center).padding(2.dp))
+                                hunt.title,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                modifier =
+                                    Modifier.weight(1f)
+                                        .padding(4.dp)
+                                        .testTag(HuntCardScreenTestTags.TITLE_TEXT))
                           }
+                          Text(
+                              "by $author",
+                              modifier =
+                                  Modifier.padding(horizontal = 4.dp)
+                                      .testTag(HuntCardScreenTestTags.AUTHOR_TEXT))
+                          Row {
+                            Image(
+                                painter = painterResource(id = safeImageRes(hunt.image)),
+                                contentDescription = "Hunt Picture",
+                                modifier =
+                                    Modifier.padding(horizontal = 4.dp)
+                                        .size(100.dp)
+                                        .clip(RectangleShape)
+                                        .testTag(HuntCardScreenTestTags.IMAGE))
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally) {
+                                  Box(
+                                      modifier =
+                                          Modifier.padding(4.dp)
+                                              .background(Color.Green)
+                                              .height(20.dp)
+                                              .width(80.dp)
+                                              .clip(RectangleShape)
+                                              .testTag(HuntCardScreenTestTags.DIFFICULTY_BOX),
+                                  ) {
+                                    Text(
+                                        hunt.difficulty.toString(),
+                                        modifier = Modifier.align(Alignment.Center).padding(2.dp))
+                                  }
 
-                          Box(
-                              modifier =
-                                  Modifier.padding(4.dp)
-                                      .background(Color.White)
-                                      .height(20.dp)
-                                      .width(80.dp)
-                                      .clip(RectangleShape)
-                                      .testTag(HuntCardScreenTestTags.DISTANCE_BOX),
-                          ) {
-                            Text(
-                                "${hunt.distance} km",
-                                modifier = Modifier.align(Alignment.Center).padding(2.dp))
-                          }
-                          Box(
-                              modifier =
-                                  Modifier.padding(4.dp)
-                                      .background(Color.White)
-                                      .height(20.dp)
-                                      .width(80.dp)
-                                      .clip(RectangleShape)
-                                      .testTag(HuntCardScreenTestTags.TIME_BOX),
-                          ) {
-                            Text(
-                                "${hunt.time} min",
-                                modifier = Modifier.align(Alignment.Center).padding(2.dp))
+                                  Box(
+                                      modifier =
+                                          Modifier.padding(4.dp)
+                                              .background(Color.White)
+                                              .height(20.dp)
+                                              .width(80.dp)
+                                              .clip(RectangleShape)
+                                              .testTag(HuntCardScreenTestTags.DISTANCE_BOX),
+                                  ) {
+                                    Text(
+                                        "${hunt.distance} km",
+                                        modifier = Modifier.align(Alignment.Center).padding(2.dp))
+                                  }
+                                  Box(
+                                      modifier =
+                                          Modifier.padding(4.dp)
+                                              .background(Color.White)
+                                              .height(20.dp)
+                                              .width(80.dp)
+                                              .clip(RectangleShape)
+                                              .testTag(HuntCardScreenTestTags.TIME_BOX),
+                                  ) {
+                                    Text(
+                                        "${hunt.time} min",
+                                        modifier = Modifier.align(Alignment.Center).padding(2.dp))
+                                  }
+                                }
                           }
                         }
-                  }
-                }
-              }
-
-              // DESCRIPTION
-              item {
-                Text(
-                    hunt.description,
-                    modifier =
-                        Modifier.padding(8.dp).testTag(HuntCardScreenTestTags.DESCRIPTION_TEXT))
-              }
-              // MAP WITH START POINT
-              item {
-                var mapLoaded by remember { mutableStateOf(true) }
-
-                if (mapLoaded) {
-                  val startPosition = LatLng(hunt.start.latitude, hunt.start.longitude)
-                  val cameraPositionState = rememberCameraPositionState {
-                    position = CameraPosition.fromLatLngZoom(startPosition, 12f)
-                  }
-
-                  Box(
-                      modifier =
-                          Modifier.fillMaxWidth()
-                              .height(400.dp)
-                              .padding(8.dp)
-                              .testTag(HuntCardScreenTestTags.MAP_CONTAINER)) {
-                        GoogleMap(
-                            modifier = Modifier.matchParentSize(),
-                            cameraPositionState = cameraPositionState) {
-                              Marker(
-                                  state = MarkerState(position = startPosition),
-                                  title = "Départ : ${hunt.start.name}",
-                                  snippet = "Point de départ de la chasse")
-                            }
                       }
-                }
-              }
-              // BOUTON BEGIN HUNT
-              item {
-                Row(
-                    modifier = modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                ) {
-                  Button(
-                      {},
-                      modifier =
-                          modifier.width(120.dp).testTag(HuntCardScreenTestTags.BEGIN_BUTTON)) {
-                        Text("Begin Hunt")
+
+                      // DESCRIPTION
+                      item {
+                        Text(
+                            hunt.description,
+                            modifier =
+                                Modifier.padding(8.dp)
+                                    .testTag(HuntCardScreenTestTags.DESCRIPTION_TEXT))
                       }
-                }
+                      // MAP WITH START POINT
+                      item {
+                        var mapLoaded by remember { mutableStateOf(true) }
+
+                        if (mapLoaded) {
+                          val startPosition = LatLng(hunt.start.latitude, hunt.start.longitude)
+                          val cameraPositionState = rememberCameraPositionState {
+                            position = CameraPosition.fromLatLngZoom(startPosition, 12f)
+                          }
+
+                          Box(
+                              modifier =
+                                  Modifier.fillMaxWidth()
+                                      .height(400.dp)
+                                      .padding(8.dp)
+                                      .testTag(HuntCardScreenTestTags.MAP_CONTAINER)) {
+                                GoogleMap(
+                                    modifier = Modifier.matchParentSize(),
+                                    cameraPositionState = cameraPositionState) {
+                                      Marker(
+                                          state = MarkerState(position = startPosition),
+                                          title = "Départ : ${hunt.start.name}",
+                                          snippet = "Point de départ de la chasse")
+                                    }
+                              }
+                        }
+                      }
+                      // BOUTON BEGIN HUNT
+                      item {
+                        Row(
+                            modifier = modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                        ) {
+                          Button(
+                              {},
+                              modifier =
+                                  modifier
+                                      .width(120.dp)
+                                      .testTag(HuntCardScreenTestTags.BEGIN_BUTTON)) {
+                                Text("Begin Hunt")
+                              }
+                        }
+                      }
+                    }
               }
-            }
-          }
           // POSSIBILITY OF REVIEW IF ALREADY DONE ?
         }
       }

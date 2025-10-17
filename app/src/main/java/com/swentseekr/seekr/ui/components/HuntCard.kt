@@ -61,78 +61,87 @@ fun HuntCard(
 ) {
   // val hunt = huntUiState.hunt
   Card(
-      modifier = modifier.padding(8.dp).fillMaxWidth().height(150.dp).border(2.dp, Color(0xFF60BA37), RoundedCornerShape(12.dp)),
+      modifier =
+          modifier
+              .padding(8.dp)
+              .fillMaxWidth(0.85f)
+              .border(2.dp, Color(0xFF60BA37), RoundedCornerShape(12.dp)),
       colors = CardDefaults.cardColors(containerColor = Color(0xFFF8DEB6)),
       elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-      shape = RoundedCornerShape(12.dp)
-      ) {
-    Column {
-      Row {
-        Text(
-            hunt.title,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.weight(1f).padding(4.dp))
-        Icon(
-            imageVector = Icons.Filled.Favorite,
-            contentDescription = "Like Button",
-            modifier = Modifier.testTag("").padding(4.dp),
-            // .clickable { onLikeClick(hunt.uid) },
-            // tint = if(huntUiState.isLiked) Color.Red else Color.Gray)
-            tint = Color.Red)
-      }
-      Text("by ${hunt.authorId}", modifier = Modifier.padding(horizontal = 4.dp))
-      Row {
-        Image(
-            painter = painterResource(id = safeImageRes(hunt.image)),
-            contentDescription = "Hunt Picture",
-            modifier = Modifier.padding(horizontal = 4.dp).size(100.dp).clip(RectangleShape))
+      shape = RoundedCornerShape(12.dp)) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally) {
-              Box(
-                  modifier =
-                      Modifier.padding(4.dp)
-                          .background(Color.Green)
-                          .height(20.dp)
-                          .width(80.dp)
-                          .clip(RectangleShape),
-              ) {
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 8.dp)) {
+              Row {
                 Text(
-                    hunt.difficulty.toString(),
-                    modifier = Modifier.align(Alignment.Center).padding(2.dp))
+                    hunt.title,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f).padding(4.dp))
+                Icon(
+                    imageVector = Icons.Filled.Favorite,
+                    contentDescription = "Like Button",
+                    modifier = Modifier.testTag("").padding(4.dp),
+                    // .clickable { onLikeClick(hunt.uid) },
+                    // tint = if(huntUiState.isLiked) Color.Red else Color.Gray)
+                    tint = Color.Red)
               }
+              Text("by ${hunt.authorId}", modifier = Modifier.padding(horizontal = 4.dp))
+              Row {
+                Image(
+                    painter = painterResource(id = safeImageRes(hunt.image)),
+                    contentDescription = "Hunt Picture",
+                    modifier =
+                        Modifier.padding(horizontal = 4.dp).size(100.dp).clip(RectangleShape))
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally) {
+                      Box(
+                          modifier =
+                              Modifier.padding(4.dp)
+                                  .background(Color.Green)
+                                  .height(20.dp)
+                                  .width(80.dp)
+                                  .clip(RectangleShape),
+                      ) {
+                        Text(
+                            hunt.difficulty.toString(),
+                            modifier = Modifier.align(Alignment.Center).padding(2.dp))
+                      }
 
-              Box(
-                  modifier =
-                      Modifier.padding(4.dp)
-                          .background(Color.White)
-                          .height(20.dp)
-                          .width(80.dp)
-                          .clip(RectangleShape)) {
-                    Text(
-                        "${hunt.distance} km",
-                        modifier = Modifier.align(Alignment.Center).padding(2.dp))
-                  }
-              Box(
-                  modifier =
-                      Modifier.padding(4.dp)
-                          .background(Color.White)
-                          .height(20.dp)
-                          .width(80.dp)
-                          .clip(RectangleShape),
-              ) {
-                /*Icon(
-                    imageVector = Icons.Filled.Schedule ,
-                    contentDescription = "Time Icon",
-                    modifier = Modifier.testTag("")
-                ),*/
-                Text("${hunt.time} min", modifier = Modifier.align(Alignment.Center).padding(2.dp))
+                      Box(
+                          modifier =
+                              Modifier.padding(4.dp)
+                                  .background(Color.White)
+                                  .height(20.dp)
+                                  .width(80.dp)
+                                  .clip(RectangleShape)) {
+                            Text(
+                                "${hunt.distance} km",
+                                modifier = Modifier.align(Alignment.Center).padding(2.dp))
+                          }
+                      Box(
+                          modifier =
+                              Modifier.padding(4.dp)
+                                  .background(Color.White)
+                                  .height(20.dp)
+                                  .width(80.dp)
+                                  .clip(RectangleShape),
+                      ) {
+                        /*Icon(
+                            imageVector = Icons.Filled.Schedule ,
+                            contentDescription = "Time Icon",
+                            modifier = Modifier.testTag("")
+                        ),*/
+                        Text(
+                            "${hunt.time} min",
+                            modifier = Modifier.align(Alignment.Center).padding(2.dp))
+                      }
+                    }
               }
             }
       }
-    }
-  }
 }
 
 /** Preview of [HuntCard] composable for Android Studio. */
