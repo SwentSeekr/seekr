@@ -1,4 +1,4 @@
-package com.swentseekr.seekr.ui.addhunt
+package com.swentseekr.seekr.ui.hunt.add
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

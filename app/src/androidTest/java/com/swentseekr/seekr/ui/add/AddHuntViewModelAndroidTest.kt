@@ -1,4 +1,4 @@
-package com.swentseekr.seekr.ui.addhunt
+package com.swentseekr.seekr.ui.add
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.firebase.auth.FirebaseAuth
@@ -8,6 +8,7 @@ import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.hunt.HuntsRepository
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.testing.MainDispatcherRule
+import com.swentseekr.seekr.ui.hunt.add.AddHuntViewModel
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment.clearEmulatorData
 import junit.framework.TestCase.assertEquals

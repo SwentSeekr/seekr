@@ -1,4 +1,4 @@
-package com.swentseekr.seekr.ui.addhunt
+package com.swentseekr.seekr.ui.add
 
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
@@ -18,6 +18,9 @@ import androidx.compose.ui.test.performTextInput
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.ui.hunt.add.AddHuntFieldsScreen
+import com.swentseekr.seekr.ui.hunt.add.AddHuntScreenTestTags
+import com.swentseekr.seekr.ui.hunt.add.AddHuntUIState
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
