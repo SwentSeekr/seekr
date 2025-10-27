@@ -166,7 +166,7 @@ abstract class BaseHuntViewModel(
     testMode = enabled
   }
 
-  protected abstract fun buildHunt(state: HuntUIState): Hunt
+  abstract fun buildHunt(state: HuntUIState): Hunt
 
   protected abstract suspend fun persist(hunt: Hunt)
 }
