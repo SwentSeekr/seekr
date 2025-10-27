@@ -65,7 +65,7 @@ fun AddHuntScreen(
         onDifficultySelect = addHuntViewModel::setDifficulty,
         onStatusSelect = addHuntViewModel::setStatus,
         onSelectLocations = { addHuntViewModel.setIsSelectingPoints(true) },
-        onSave = { addHuntViewModel.addHunt() },
+        onSave = { addHuntViewModel.submit() },
         onGoBack = onGoBack)
   }
 }

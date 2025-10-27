@@ -99,7 +99,7 @@ class AddHuntScreenTest {
     // Ensure invalid state (default)
     // Calling addHunt() directly sets error in VM; effect should clear it
     composeRule.runOnUiThread {
-      val result = vm.addHunt()
+      val result = vm.submit()
       assertFalse(result)
     }
 

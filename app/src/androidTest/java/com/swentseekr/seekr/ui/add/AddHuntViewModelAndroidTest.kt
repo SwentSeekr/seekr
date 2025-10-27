@@ -111,10 +111,10 @@ class AddHuntViewModelAndroidTest {
 
   @Test
   fun addHunt_returnsFalse_andSetsError_whenStateInvalid() = runTest {
-    val result = viewModel.addHunt()
+    val result = viewModel.submit()
     assertFalse(result)
     assertEquals(
-        "Please fill all required fields before creating a hunt.", viewModel.uiState.value.errorMsg)
+        "Please fill all required fields before saving the hunt.", viewModel.uiState.value.errorMsg)
   }
 
   @Test
@@ -122,9 +122,9 @@ class AddHuntViewModelAndroidTest {
     setValidState(points = listOf(Location(0.0, 0.0, "A"), Location(1.0, 1.0, "B")))
     FirebaseAuth.getInstance().signOut()
 
-    val result = viewModel.addHunt()
+    val result = viewModel.submit()
     assertFalse(result)
-    assertEquals("You must be logged in to create a hunt.", viewModel.uiState.value.errorMsg)
+    assertEquals("You must be logged in to perform this action.", viewModel.uiState.value.errorMsg)
   }
 
   @Test
@@ -134,7 +134,7 @@ class AddHuntViewModelAndroidTest {
     val b = Location(1.0, 1.0, "End")
     setValidState(points = listOf(a, m, b))
 
-    val result = viewModel.addHunt()
+    val result = viewModel.submit()
     assertTrue(result)
 
     advanceUntilIdle()
@@ -159,7 +159,7 @@ class AddHuntViewModelAndroidTest {
 
   @Test
   fun clearErrorMsg_setsNull() {
-    viewModel.addHunt()
+    viewModel.submit()
     assertNotNull(viewModel.uiState.value.errorMsg)
     viewModel.clearErrorMsg()
     assertNull(viewModel.uiState.value.errorMsg)
