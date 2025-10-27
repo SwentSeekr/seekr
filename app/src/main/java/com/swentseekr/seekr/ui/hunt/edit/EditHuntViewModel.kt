@@ -9,53 +9,52 @@ import com.swentseekr.seekr.ui.hunt.BaseHuntViewModel
 import com.swentseekr.seekr.ui.hunt.HuntUIState
 import kotlinx.coroutines.launch
 
-class EditHuntViewModel(
-    repository: HuntsRepository = HuntRepositoryProvider.repository
-) : BaseHuntViewModel(repository) {
+class EditHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.repository) :
+    BaseHuntViewModel(repository) {
 
-    private var huntId: String? = null
+  private var huntId: String? = null
 
-    fun load(id: String) = viewModelScope.launch {
+  fun load(id: String) =
+      viewModelScope.launch {
         try {
-            val hunt = repository.getHunt(id)
-            _uiState.value = _uiState.value.copy(
-                title = hunt.title,
-                description = hunt.description,
-                points = listOf(hunt.start) + hunt.middlePoints + listOf(hunt.end),
-                time = hunt.time.toString(),
-                distance = hunt.distance.toString(),
-                difficulty = hunt.difficulty,
-                status = hunt.status,
-                image = hunt.image,
-                reviewRate = hunt.reviewRate
-            )
-            huntId=id
+          val hunt = repository.getHunt(id)
+          _uiState.value =
+              _uiState.value.copy(
+                  title = hunt.title,
+                  description = hunt.description,
+                  points = listOf(hunt.start) + hunt.middlePoints + listOf(hunt.end),
+                  time = hunt.time.toString(),
+                  distance = hunt.distance.toString(),
+                  difficulty = hunt.difficulty,
+                  status = hunt.status,
+                  image = hunt.image,
+                  reviewRate = hunt.reviewRate)
+          huntId = id
         } catch (e: Exception) {
-            setErrorMsg("Failed to load hunt: ${e.message}")
+          setErrorMsg("Failed to load hunt: ${e.message}")
         }
-    }
+      }
 
-    override fun buildHunt(state: HuntUIState): Hunt {
-        val id = requireNotNull(huntId) { "No hunt loaded to edit." }
-        val authorId = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown"
-        return Hunt(
-            uid = id,
-            start = state.points.first(),
-            end = state.points.last(),
-            middlePoints = state.points.drop(1).dropLast(1),
-            status = state.status!!,
-            title = state.title,
-            description = state.description,
-            time = state.time.toDouble(),
-            distance = state.distance.toDouble(),
-            difficulty = state.difficulty!!,
-            authorId = authorId,
-            image = state.image,
-            reviewRate = state.reviewRate
-        )
-    }
+  override fun buildHunt(state: HuntUIState): Hunt {
+    val id = requireNotNull(huntId) { "No hunt loaded to edit." }
+    val authorId = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown"
+    return Hunt(
+        uid = id,
+        start = state.points.first(),
+        end = state.points.last(),
+        middlePoints = state.points.drop(1).dropLast(1),
+        status = state.status!!,
+        title = state.title,
+        description = state.description,
+        time = state.time.toDouble(),
+        distance = state.distance.toDouble(),
+        difficulty = state.difficulty!!,
+        authorId = authorId,
+        image = state.image,
+        reviewRate = state.reviewRate)
+  }
 
-    override suspend fun persist(hunt: Hunt) {
-        repository.editHunt(hunt.uid,hunt)
-    }
+  override suspend fun persist(hunt: Hunt) {
+    repository.editHunt(hunt.uid, hunt)
+  }
 }
