@@ -27,7 +27,8 @@ data class OverviewUIState(
     val searchWord: String = "",
     val errorMsg: String? = null,
     val selectedStatus: HuntStatus? = null,
-    val selectedDifficulty: Difficulty? = null
+    val selectedDifficulty: Difficulty? = null,
+    val signedOut: Boolean = false
 )
 /**
  * Data class representing the UI state for a single Hunt item in the Overview screen.
