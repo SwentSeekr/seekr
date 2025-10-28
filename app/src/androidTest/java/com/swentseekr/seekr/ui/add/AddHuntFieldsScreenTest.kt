@@ -18,7 +18,7 @@ import androidx.compose.ui.test.performTextInput
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
-import com.swentseekr.seekr.ui.hunt.AddHuntFieldsScreen
+import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsScreen
 import com.swentseekr.seekr.ui.hunt.HuntScreenTestTags
 import com.swentseekr.seekr.ui.hunt.HuntUIState
 import org.junit.Assert.assertFalse
@@ -46,7 +46,7 @@ class AddHuntFieldsScreenTest {
     composeRule.setContent {
       MaterialTheme {
         state = remember { mutableStateOf(HuntUIState()) }
-        AddHuntFieldsScreen(
+        BaseHuntFieldsScreen(
             uiState = state.value,
             onTitleChange = { title ->
               state.value =

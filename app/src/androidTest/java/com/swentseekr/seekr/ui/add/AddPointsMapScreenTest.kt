@@ -10,8 +10,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.swentseekr.seekr.model.map.Location
-import com.swentseekr.seekr.ui.hunt.AddPointsMapScreen
 import com.swentseekr.seekr.ui.hunt.AddPointsMapScreenTestTags
+import com.swentseekr.seekr.ui.hunt.BaseAddPointsMapScreen
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -32,7 +32,7 @@ class AddPointsMapScreenTest {
   ) {
     composeRule.setContent {
       MaterialTheme {
-        AddPointsMapScreen(onDone = onDone, initPoints = initPoints, onCancel = onCancel)
+        BaseAddPointsMapScreen(onDone = onDone, initPoints = initPoints, onCancel = onCancel)
       }
     }
   }
