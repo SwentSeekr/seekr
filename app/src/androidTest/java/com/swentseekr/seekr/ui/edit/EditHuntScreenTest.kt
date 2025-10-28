@@ -196,7 +196,8 @@ class EditHuntScreenTest {
         assertEquals(2.5, updated.time, 0.0)
         assertEquals(4.2, updated.distance, 0.0)
         assertEquals(FirebaseAuth.getInstance().currentUser?.uid, updated.authorId)
-        advanceUntilIdle()
+
+        composeRule.waitUntil(timeoutMillis = 5_000) { doneCalled }
         assertTrue(doneCalled)
         assertNull(vm.uiState.value.errorMsg)
       }
