@@ -72,6 +72,7 @@ class ProfileViewModel(
                 loadProfile(uid)
             }
         }
+    }
 
         fun updateProfile(profile: Profile) {
             viewModelScope.launch {
@@ -114,4 +115,4 @@ class ProfileViewModel(
             }
         }
     }
-}
+
