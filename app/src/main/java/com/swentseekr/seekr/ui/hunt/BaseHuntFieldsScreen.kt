@@ -1,4 +1,4 @@
-package com.swentseekr.seekr.ui.hunt.add
+package com.swentseekr.seekr.ui.hunt
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -20,11 +20,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
-import com.swentseekr.seekr.ui.hunt.HuntUIState
 
-// ----------------------
-// Constants
-// ----------------------
 private const val TITLE_TEXT = "Add your Hunt"
 private const val BACK_CONTENT_DESC = "Back"
 
@@ -59,10 +55,7 @@ private const val SAVE_BUTTON_RADIUS = 16
 private const val SCREEN_PADDING = 16
 private const val SPACER_HEIGHT = 24
 
-// ----------------------
-// Test Tags
-// ----------------------
-object AddHuntScreenTestTags {
+object HuntScreenTestTags {
   const val INPUT_HUNT_TITLE = "inputHuntTitle"
   const val INPUT_HUNT_DESCRIPTION = "inputHuntDescription"
   const val INPUT_HUNT_TIME = "inputHuntTime"
@@ -75,9 +68,6 @@ object AddHuntScreenTestTags {
   const val ADD_HUNT_SCREEN = "AddHuntScreen"
 }
 
-// ----------------------
-// Reusable Validated Field
-// ----------------------
 @Composable
 fun ValidatedOutlinedField(
     value: String,
@@ -121,7 +111,7 @@ private fun ValidatedOutlinedField(
       placeholder = { Text(placeholder) },
       isError = errorMsg != null,
       supportingText = {
-        errorMsg?.let { Text(it, modifier = Modifier.testTag(AddHuntScreenTestTags.ERROR_MESSAGE)) }
+        errorMsg?.let { Text(it, modifier = Modifier.testTag(HuntScreenTestTags.ERROR_MESSAGE)) }
       },
       modifier = modifier.testTag(testTag),
       shape = shape,
@@ -174,28 +164,25 @@ fun AddHuntFieldsScreen(
                   unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                   focusedBorderColor = MaterialTheme.colorScheme.primary)
 
-          // Title
           ValidatedOutlinedField(
               value = uiState.title,
               onValueChange = onTitleChange,
               label = LABEL_TITLE,
               placeholder = PLACEHOLDER_TITLE,
               errorMsg = uiState.invalidTitleMsg,
-              testTag = AddHuntScreenTestTags.INPUT_HUNT_TITLE)
+              testTag = HuntScreenTestTags.INPUT_HUNT_TITLE)
 
-          // Description (keeps fixed height)
           ValidatedOutlinedField(
               value = uiState.description,
               onValueChange = onDescriptionChange,
               label = LABEL_DESCRIPTION,
               placeholder = PLACEHOLDER_DESCRIPTION,
               errorMsg = uiState.invalidDescriptionMsg,
-              testTag = AddHuntScreenTestTags.INPUT_HUNT_DESCRIPTION,
+              testTag = HuntScreenTestTags.INPUT_HUNT_DESCRIPTION,
               modifier = Modifier.fillMaxWidth().height(DESCRIPTION_HEIGHT.dp),
               shape = fieldShape,
               colors = fieldColors)
 
-          // Status Dropdown
           ExposedDropdownMenuBox(
               expanded = showStatusDropdown, onExpandedChange = { showStatusDropdown = it }) {
                 OutlinedTextField(
@@ -213,7 +200,7 @@ fun AddHuntFieldsScreen(
                     modifier =
                         Modifier.menuAnchor()
                             .fillMaxWidth()
-                            .testTag(AddHuntScreenTestTags.DROPDOWN_STATUS),
+                            .testTag(HuntScreenTestTags.DROPDOWN_STATUS),
                     shape = fieldShape,
                     colors = fieldColors)
                 ExposedDropdownMenu(
@@ -230,7 +217,6 @@ fun AddHuntFieldsScreen(
                     }
               }
 
-          // Difficulty Dropdown
           ExposedDropdownMenuBox(
               expanded = showDifficultyDropdown,
               onExpandedChange = { showDifficultyDropdown = it }) {
@@ -249,7 +235,7 @@ fun AddHuntFieldsScreen(
                     modifier =
                         Modifier.menuAnchor()
                             .fillMaxWidth()
-                            .testTag(AddHuntScreenTestTags.DROPDOWN_DIFFICULTY),
+                            .testTag(HuntScreenTestTags.DROPDOWN_DIFFICULTY),
                     shape = fieldShape,
                     colors = fieldColors)
                 ExposedDropdownMenu(
@@ -266,29 +252,25 @@ fun AddHuntFieldsScreen(
                     }
               }
 
-          // Time
           ValidatedOutlinedField(
               value = uiState.time,
               onValueChange = onTimeChange,
               label = LABEL_TIME,
               placeholder = PLACEHOLDER_TIME,
               errorMsg = uiState.invalidTimeMsg,
-              testTag = AddHuntScreenTestTags.INPUT_HUNT_TIME)
+              testTag = HuntScreenTestTags.INPUT_HUNT_TIME)
 
-          // Distance
           ValidatedOutlinedField(
               value = uiState.distance,
               onValueChange = onDistanceChange,
               label = LABEL_DISTANCE,
               placeholder = PLACEHOLDER_DISTANCE,
               errorMsg = uiState.invalidDistanceMsg,
-              testTag = AddHuntScreenTestTags.INPUT_HUNT_DISTANCE)
+              testTag = HuntScreenTestTags.INPUT_HUNT_DISTANCE)
 
-          // Map Location Button with count
           Button(
               onClick = onSelectLocations,
-              modifier =
-                  Modifier.fillMaxWidth().testTag(AddHuntScreenTestTags.BUTTON_SELECT_LOCATION),
+              modifier = Modifier.fillMaxWidth().testTag(HuntScreenTestTags.BUTTON_SELECT_LOCATION),
               colors =
                   ButtonDefaults.buttonColors(
                       containerColor = MaterialTheme.colorScheme.secondary,
@@ -305,14 +287,13 @@ fun AddHuntFieldsScreen(
 
           Spacer(modifier = Modifier.height(SPACER_HEIGHT.dp))
 
-          // Save Button
           Button(
               onClick = onSave,
               modifier =
                   Modifier.fillMaxWidth()
                       .height(SAVE_BUTTON_HEIGHT.dp)
                       .clip(RoundedCornerShape(SAVE_BUTTON_RADIUS.dp))
-                      .testTag(AddHuntScreenTestTags.HUNT_SAVE),
+                      .testTag(HuntScreenTestTags.HUNT_SAVE),
               enabled = uiState.isValid,
               colors =
                   ButtonDefaults.buttonColors(
@@ -322,5 +303,5 @@ fun AddHuntFieldsScreen(
               }
         }
       },
-      modifier = Modifier.testTag(AddHuntScreenTestTags.ADD_HUNT_SCREEN))
+      modifier = Modifier.testTag(HuntScreenTestTags.ADD_HUNT_SCREEN))
 }
