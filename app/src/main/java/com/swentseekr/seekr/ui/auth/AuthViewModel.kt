@@ -14,6 +14,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
+
+
 
 data class AuthUIState(
     val isLoading: Boolean = false,
@@ -22,12 +27,30 @@ data class AuthUIState(
     val signedOut: Boolean = false
 )
 
-class AuthViewModel(private val repository: AuthRepository = AuthRepositoryFirebase()) :
+class AuthViewModel(private val repository: AuthRepository = AuthRepositoryFirebase(),
+                    private val auth: FirebaseAuth = Firebase.auth) :
     ViewModel() {
 
   private val _uiState = MutableStateFlow(AuthUIState())
   val uiState: StateFlow<AuthUIState> = _uiState
 
+    private val authListener =
+        FirebaseAuth.AuthStateListener { firebaseAuth ->
+            val current = firebaseAuth.currentUser
+            _uiState.update { it.copy(user = current, signedOut = (current == null)) }
+        }
+
+    init {
+    // Seed from current session in case user is already signed in
+        _uiState.update { it.copy(user = auth.currentUser, signedOut = (auth.currentUser == null)) }
+        auth.addAuthStateListener(authListener)
+    }
+
+    override fun onCleared() {
+        auth.removeAuthStateListener(authListener)
+        super.onCleared()
+    }
+    
   fun clearErrorMsg() {
     _uiState.update { it.copy(errorMsg = null) }
   }
