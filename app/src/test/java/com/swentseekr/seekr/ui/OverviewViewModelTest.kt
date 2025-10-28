@@ -1,6 +1,5 @@
 package com.swentseekr.seekr.ui
 
-import com.swentseekr.seekr.model.authentication.FakeAuthRepository
 import com.swentseekr.seekr.model.hunt.*
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.overview.OverviewViewModel

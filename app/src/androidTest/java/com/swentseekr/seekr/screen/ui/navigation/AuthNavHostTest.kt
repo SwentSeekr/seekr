@@ -45,24 +45,24 @@ class AuthNavHostTest {
     composeTestRule.onNodeWithTag(SignInScreenTestTags.LOGIN_BUTTON).assertIsDisplayed()
   }
 
-    @Test
-    fun clickingSignIn_withFakeAuthEmulator_triggersSignedInState() = runBlocking {
-      val fakeToken = FakeJwtGenerator.createFakeGoogleIdToken()
-      FakeAuthEmulator.signInWithFakeGoogleToken(fakeToken)
+  @Test
+  fun clickingSignIn_withFakeAuthEmulator_triggersSignedInState() = runBlocking {
+    val fakeToken = FakeJwtGenerator.createFakeGoogleIdToken()
+    FakeAuthEmulator.signInWithFakeGoogleToken(fakeToken)
 
-      var onSignedInCalled = false
+    var onSignedInCalled = false
 
-      composeTestRule.setContent {
-        AuthNavHost(
-            credentialManager =
-                androidx.credentials.CredentialManager.create(composeTestRule.activity),
-            onSignedIn = { onSignedInCalled = true })
-      }
-
-      composeTestRule.onNodeWithTag(SignInScreenTestTags.LOGIN_BUTTON).performClick()
-      composeTestRule.waitForIdle()
-
-      assert(FakeAuthEmulator.isAuthenticated())
-      assert(onSignedInCalled)
+    composeTestRule.setContent {
+      AuthNavHost(
+          credentialManager =
+              androidx.credentials.CredentialManager.create(composeTestRule.activity),
+          onSignedIn = { onSignedInCalled = true })
     }
+
+    composeTestRule.onNodeWithTag(SignInScreenTestTags.LOGIN_BUTTON).performClick()
+    composeTestRule.waitForIdle()
+
+    assert(FakeAuthEmulator.isAuthenticated())
+    assert(onSignedInCalled)
+  }
 }
