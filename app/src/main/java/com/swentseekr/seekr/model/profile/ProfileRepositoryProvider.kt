@@ -1,7 +1,13 @@
 package com.swentseekr.seekr.model.profile
 
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
+import com.swentseekr.seekr.model.hunt.HuntsRepository
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestore
+
 object ProfileRepositoryProvider {
-  // var profileRepository: ProfileRepository = ProfileRepositoryFirestore(db = Firebase.firestore)
-  var _repository: ProfileRepository = ProfileRepositoryLocal()
-  var repository: ProfileRepository = ProfileRepositoryProvider._repository
+  private val _repositoryFirestore: ProfileRepository by lazy {
+    ProfileRepositoryFirestore(Firebase.firestore)
+  }
+  var repository: ProfileRepository = _repositoryFirestore
 }

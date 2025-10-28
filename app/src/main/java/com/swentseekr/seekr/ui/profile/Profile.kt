@@ -103,23 +103,35 @@ enum class ProfileTab {
  * Displays the profile screen of a user with their info, ratings, bio, and hunts.
  *
  * @param profile The profile data to display.
- * @param currentUserId The ID of the currently logged-in user.
+ * @param userId The ID of the user's profile visited.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    profile: Profile,
-    currentUserId: String,
+    userId: String? = null,
     viewModel: ProfileViewModel = viewModel(),
     onAddHunt: () -> Unit = {}
 ) {
   val uiState by viewModel.uiState.collectAsState()
-  LaunchedEffect(currentUserId) {
-    viewModel.loadProfile(currentUserId)
-    viewModel.loadHunts(currentUserId)
+
+  LaunchedEffect( userId) {
+    viewModel.loadProfile( userId)
+    //viewModel.loadHunts( userId)
   }
-  val isMyProfile = profile.uid == currentUserId // to implement in the view model with auth
-  // (firebase authentication) when viewModel will be implemented
+    val profile = uiState.profile
+
+    if (uiState.errorMsg != null) {
+        Text("Error: ${uiState.errorMsg}", color = Color.Red)
+        return
+    }
+
+    if (profile == null) {
+        Text("No profile found", color = Color.Gray)
+        return
+    }
+
+    val isMyProfile = uiState.isMyProfile
+
   var selectedTab by remember { mutableStateOf(ProfileTab.MY_HUNTS) }
   Scaffold(
       floatingActionButton = {
@@ -221,7 +233,7 @@ fun ProfileScreen(
 }
 
 /** Preview for the profile screen in Android Studio. */
-@Preview
+/*@Preview
 @Composable
 fun ProfileScreenPreview() {
   val sampleAuthor =
@@ -256,8 +268,8 @@ fun ProfileScreenPreview() {
           doneHunts = mutableListOf(),
           likedHunts = mutableListOf())
 
-  ProfileScreen(profile = profile, currentUserId = "user123")
-}
+  ProfileScreen(profile = profile, userId = "user123")
+}*/
 
 /**
  * Displays a toolbar with tabs for switching between "My Hunts", "Done Hunts", and "Liked Hunts".

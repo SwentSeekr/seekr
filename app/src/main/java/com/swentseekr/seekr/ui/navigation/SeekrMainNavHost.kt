@@ -111,7 +111,7 @@ fun SeekrMainNavHost(
   val currentRoute = navBackStackEntry?.destination?.route
   val currentDestination =
       SeekrDestination.all.find { it.route == currentRoute } ?: SeekrDestination.Overview
-  val showBottomBar = SeekrDestination.all.any { it.route == currentRoute }
+    val showBottomBar = SeekrDestination.all.any { it.route == currentRoute }
 
   Scaffold(
       modifier = Modifier.fillMaxSize(),
@@ -145,8 +145,7 @@ fun SeekrMainNavHost(
               composable(SeekrDestination.Profile.route) {
                 val profile = mockProfileData()
                 ProfileScreen(
-                    profile = profile,
-                    currentUserId = profile.uid,
+                    userId = profile.uid,
                     onAddHunt = { navController.navigate(SeekrDestination.AddHunt.route) })
               }
               composable(
