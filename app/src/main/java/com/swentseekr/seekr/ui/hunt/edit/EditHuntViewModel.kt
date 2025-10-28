@@ -28,6 +28,7 @@ class EditHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.rep
               reviewRate = hunt.reviewRate)
       huntId = id
     } catch (e: Exception) {
+      huntId = null
       setErrorMsg("Failed to load hunt: ${e.message}")
     }
   }
