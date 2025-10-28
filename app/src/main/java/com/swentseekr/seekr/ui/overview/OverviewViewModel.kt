@@ -57,8 +57,7 @@ data class HuntUiState(
  * @property huntRepository The repository used to fetch and manage Hunt items.
  */
 class OverviewViewModel(
-    private val repository: HuntsRepository = HuntRepositoryProvider.repository,
-    private val authRepository: AuthRepository = AuthRepositoryFirebase()
+    private val repository: HuntsRepository = HuntRepositoryProvider.repository
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(OverviewUIState())
   val uiState: StateFlow<OverviewUIState> = _uiState.asStateFlow()
@@ -146,18 +145,5 @@ class OverviewViewModel(
           statusMatches && difficultyMatches
         }
     _uiState.value = currentState.copy(hunts = filtered)
-  }
-
-  fun signOut(credentialManager: CredentialManager): Unit {
-    viewModelScope.launch {
-      authRepository
-          .signOut()
-          .fold(
-              onSuccess = { _uiState.update { it.copy(signedOut = true) } },
-              onFailure = { throwable ->
-                _uiState.update { it.copy(errorMsg = throwable.localizedMessage) }
-              })
-      credentialManager.clearCredentialState(ClearCredentialStateRequest())
-    }
   }
 }

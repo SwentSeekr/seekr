@@ -50,7 +50,7 @@ class AuthViewModel(private val repository: AuthRepository = AuthRepositoryFireb
         auth.removeAuthStateListener(authListener)
         super.onCleared()
     }
-    
+
   fun clearErrorMsg() {
     _uiState.update { it.copy(errorMsg = null) }
   }
