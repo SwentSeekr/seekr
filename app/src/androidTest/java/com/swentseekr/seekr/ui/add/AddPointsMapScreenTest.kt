@@ -10,8 +10,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.swentseekr.seekr.model.map.Location
-import com.swentseekr.seekr.ui.hunt.add.AddPointsMapScreen
-import com.swentseekr.seekr.ui.hunt.add.AddPointsMapScreenTestTags
+import com.swentseekr.seekr.ui.hunt.AddPointsMapScreen
+import com.swentseekr.seekr.ui.hunt.AddPointsMapScreenTestTags
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
