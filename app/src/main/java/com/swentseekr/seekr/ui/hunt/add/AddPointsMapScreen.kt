@@ -1,4 +1,4 @@
-package com.swentseekr.seekr.ui.addhunt
+package com.swentseekr.seekr.ui.hunt.add
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons

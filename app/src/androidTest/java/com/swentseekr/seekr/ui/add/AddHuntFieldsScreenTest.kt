@@ -1,4 +1,4 @@
-package com.swentseekr.seekr.ui.addhunt
+package com.swentseekr.seekr.ui.add
 
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
@@ -18,6 +18,9 @@ import androidx.compose.ui.test.performTextInput
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.ui.hunt.HuntUIState
+import com.swentseekr.seekr.ui.hunt.add.AddHuntFieldsScreen
+import com.swentseekr.seekr.ui.hunt.add.AddHuntScreenTestTags
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -30,7 +33,7 @@ class AddHuntFieldsScreenTest {
 
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()
 
-  private lateinit var state: MutableState<AddHuntUIState>
+  private lateinit var state: MutableState<HuntUIState>
   private var onSaveCalled = false
   private var onSelectLocationsCalled = false
   private var onGoBackCalled = false
@@ -42,7 +45,7 @@ class AddHuntFieldsScreenTest {
 
     composeRule.setContent {
       MaterialTheme {
-        state = remember { mutableStateOf(AddHuntUIState()) }
+        state = remember { mutableStateOf(HuntUIState()) }
         AddHuntFieldsScreen(
             uiState = state.value,
             onTitleChange = { title ->

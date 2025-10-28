@@ -1,4 +1,4 @@
-package com.swentseekr.seekr.ui.addhunt
+package com.swentseekr.seekr.ui.hunt.add
 
 import android.widget.Toast
 import androidx.compose.runtime.*
@@ -65,7 +65,7 @@ fun AddHuntScreen(
         onDifficultySelect = addHuntViewModel::setDifficulty,
         onStatusSelect = addHuntViewModel::setStatus,
         onSelectLocations = { addHuntViewModel.setIsSelectingPoints(true) },
-        onSave = { addHuntViewModel.addHunt() },
+        onSave = { addHuntViewModel.submit() },
         onGoBack = onGoBack)
   }
 }

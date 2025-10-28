@@ -1,4 +1,4 @@
-package com.swentseekr.seekr.ui.addhunt
+package com.swentseekr.seekr.ui.hunt.add
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
+import com.swentseekr.seekr.ui.hunt.HuntUIState
 
 // ----------------------
 // Constants
@@ -130,7 +131,7 @@ private fun ValidatedOutlinedField(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddHuntFieldsScreen(
-    uiState: AddHuntUIState,
+    uiState: HuntUIState,
     onTitleChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
     onTimeChange: (String) -> Unit,

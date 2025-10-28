@@ -1,4 +1,4 @@
-package com.swentseekr.seekr.ui.addhunt
+package com.swentseekr.seekr.ui.add
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.firebase.auth.FirebaseAuth
@@ -8,6 +8,7 @@ import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.hunt.HuntsRepository
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.testing.MainDispatcherRule
+import com.swentseekr.seekr.ui.hunt.add.AddHuntViewModel
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment.clearEmulatorData
 import junit.framework.TestCase.assertEquals
@@ -110,10 +111,10 @@ class AddHuntViewModelAndroidTest {
 
   @Test
   fun addHunt_returnsFalse_andSetsError_whenStateInvalid() = runTest {
-    val result = viewModel.addHunt()
+    val result = viewModel.submit()
     assertFalse(result)
     assertEquals(
-        "Please fill all required fields before creating a hunt.", viewModel.uiState.value.errorMsg)
+        "Please fill all required fields before saving the hunt.", viewModel.uiState.value.errorMsg)
   }
 
   @Test
@@ -121,9 +122,9 @@ class AddHuntViewModelAndroidTest {
     setValidState(points = listOf(Location(0.0, 0.0, "A"), Location(1.0, 1.0, "B")))
     FirebaseAuth.getInstance().signOut()
 
-    val result = viewModel.addHunt()
+    val result = viewModel.submit()
     assertFalse(result)
-    assertEquals("You must be logged in to create a hunt.", viewModel.uiState.value.errorMsg)
+    assertEquals("You must be logged in to perform this action.", viewModel.uiState.value.errorMsg)
   }
 
   @Test
@@ -133,7 +134,7 @@ class AddHuntViewModelAndroidTest {
     val b = Location(1.0, 1.0, "End")
     setValidState(points = listOf(a, m, b))
 
-    val result = viewModel.addHunt()
+    val result = viewModel.submit()
     assertTrue(result)
 
     advanceUntilIdle()
@@ -158,7 +159,7 @@ class AddHuntViewModelAndroidTest {
 
   @Test
   fun clearErrorMsg_setsNull() {
-    viewModel.addHunt()
+    viewModel.submit()
     assertNotNull(viewModel.uiState.value.errorMsg)
     viewModel.clearErrorMsg()
     assertNull(viewModel.uiState.value.errorMsg)

@@ -9,8 +9,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.firebase.FirebaseApp
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
-import com.swentseekr.seekr.ui.addhunt.AddHuntScreenTestTags
-import com.swentseekr.seekr.ui.addhunt.AddPointsMapScreenTestTags
+import com.swentseekr.seekr.ui.hunt.add.AddHuntScreenTestTags
+import com.swentseekr.seekr.ui.hunt.add.AddPointsMapScreenTestTags
 import com.swentseekr.seekr.ui.navigation.NavigationTestTags
 import com.swentseekr.seekr.ui.navigation.SeekrMainNavHost
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
