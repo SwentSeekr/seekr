@@ -6,6 +6,7 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.exceptions.GetCredentialCancellationException
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.swentseekr.seekr.model.authentication.AuthRepository
 import io.mockk.MockKAnnotations
@@ -33,6 +34,7 @@ class AuthViewModelTest {
   @MockK(relaxed = true) lateinit var repository: AuthRepository
   @MockK(relaxed = true) lateinit var credentialManager: CredentialManager
   @MockK(relaxed = true) lateinit var context: Context
+  @MockK(relaxed = true) lateinit var auth: FirebaseAuth
 
   @Before
   fun setup() {
@@ -42,6 +44,11 @@ class AuthViewModelTest {
     // Provide the web client id string the VM asks for
     every { context.getString(com.swentseekr.seekr.R.string.default_web_client_id) } returns
         "test-web-client-id"
+
+    // Prevent Firebase from crashing in JVM tests
+    every { auth.currentUser } returns null
+    every { auth.addAuthStateListener(any()) } answers { /* no-op */}
+    every { auth.removeAuthStateListener(any()) } answers { /* no-op */}
   }
 
   @After
@@ -59,16 +66,16 @@ class AuthViewModelTest {
   @Test
   fun clearErrorMsgClearsError() =
       runTest(dispatcher) {
-        val vm = AuthViewModel(repository)
-        // Seed an error state
-        vm.signIn(context, credentialManager)
-        // Cause a controlled failure from repository
+        val vm = AuthViewModel(repository, auth)
+
+        // Cause a controlled failure from repository so we get an error in state
         val cred = mockk<Credential>()
         coEvery { credentialManager.getCredential(context, any<GetCredentialRequest>()) } returns
             makeResponseWith(cred)
         coEvery { repository.signInWithGoogle(cred) } returns
             Result.failure(IllegalStateException("boom"))
 
+        vm.signIn(context, credentialManager)
         advanceUntilIdle()
         assertNotNull(vm.uiState.value.errorMsg)
 
@@ -79,7 +86,7 @@ class AuthViewModelTest {
   @Test
   fun signInSuccessUpdatesStateWithUserAndClearsFlags() =
       runTest(dispatcher) {
-        val vm = AuthViewModel(repository)
+        val vm = AuthViewModel(repository, auth)
 
         val cred = mockk<Credential>()
         val user = mockk<FirebaseUser>()
@@ -101,7 +108,7 @@ class AuthViewModelTest {
   @Test
   fun signInRepositoryFailureSetsErrorAndSignedOut() =
       runTest(dispatcher) {
-        val vm = AuthViewModel(repository)
+        val vm = AuthViewModel(repository, auth)
 
         val cred = mockk<Credential>()
         coEvery { credentialManager.getCredential(context, any<GetCredentialRequest>()) } returns
@@ -122,7 +129,7 @@ class AuthViewModelTest {
   @Test
   fun signInCancelledMapsToSignInCancelled() =
       runTest(dispatcher) {
-        val vm = AuthViewModel(repository)
+        val vm = AuthViewModel(repository, auth)
 
         coEvery { credentialManager.getCredential(context, any<GetCredentialRequest>()) } throws
             GetCredentialCancellationException("cancelled by user")
@@ -140,7 +147,7 @@ class AuthViewModelTest {
   @Test
   fun signInCredentialExceptionMapsToFailedToGetCredentials() =
       runTest(dispatcher) {
-        val vm = AuthViewModel(repository)
+        val vm = AuthViewModel(repository, auth)
 
         coEvery { credentialManager.getCredential(context, any<GetCredentialRequest>()) } throws
             androidx.credentials.exceptions.NoCredentialException("no creds")
@@ -158,7 +165,7 @@ class AuthViewModelTest {
   @Test
   fun signInUnexpectedExceptionMapsToUnexpectedError() =
       runTest(dispatcher) {
-        val vm = AuthViewModel(repository)
+        val vm = AuthViewModel(repository, auth)
 
         coEvery { credentialManager.getCredential(context, any<GetCredentialRequest>()) } throws
             RuntimeException("kaboom")
@@ -176,11 +183,10 @@ class AuthViewModelTest {
   @Test
   fun signInIsIdempotentWhileLoading() =
       runTest(dispatcher) {
-        val vm = AuthViewModel(repository)
+        val vm = AuthViewModel(repository, auth)
 
         val cred = mockk<Credential>()
         val user = mockk<FirebaseUser>()
-        // Suspend the first getCredential until we advance
         coEvery { credentialManager.getCredential(context, any<GetCredentialRequest>()) } returns
             makeResponseWith(cred)
         coEvery { repository.signInWithGoogle(cred) } returns Result.success(user)
