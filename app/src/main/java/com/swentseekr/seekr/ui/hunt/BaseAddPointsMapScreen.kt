@@ -26,7 +26,7 @@ object AddPointsMapScreenTestTags {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddPointsMapScreen(
+fun BaseAddPointsMapScreen(
     onDone: (List<Location>) -> Unit,
     initPoints: List<Location> = emptyList(),
     onCancel: () -> Unit,

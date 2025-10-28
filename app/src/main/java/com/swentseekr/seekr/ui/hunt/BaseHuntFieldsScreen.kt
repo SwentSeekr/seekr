@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
 
-private const val TITLE_TEXT = "Add your Hunt"
 private const val BACK_CONTENT_DESC = "Back"
 
 private const val LABEL_TITLE = "Title"
@@ -70,7 +69,7 @@ object HuntScreenTestTags {
 
 @Composable
 fun ValidatedOutlinedField(
-    value: String,
+    value: String = "Add your Hunt",
     onValueChange: (String) -> Unit,
     label: String,
     placeholder: String,
@@ -120,7 +119,8 @@ private fun ValidatedOutlinedField(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddHuntFieldsScreen(
+fun BaseHuntFieldsScreen(
+    title: String = "Add your Hunt",
     uiState: HuntUIState,
     onTitleChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
@@ -140,7 +140,7 @@ fun AddHuntFieldsScreen(
   Scaffold(
       topBar = {
         TopAppBar(
-            title = { Text(TITLE_TEXT) },
+            title = { Text(title) },
             navigationIcon = {
               IconButton(onClick = onGoBack) {
                 Icon(

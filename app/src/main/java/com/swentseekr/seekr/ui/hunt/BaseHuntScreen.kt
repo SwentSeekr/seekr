@@ -9,6 +9,7 @@ private const val TOAST_HUNT_SAVED = "Hunt saved successfully!"
 
 @Composable
 fun BaseHuntScreen(
+    title: String = "Add your Hunt",
     vm: BaseHuntViewModel,
     onGoBack: () -> Unit = {},
     onDone: () -> Unit = {},
@@ -37,7 +38,7 @@ fun BaseHuntScreen(
   }
 
   if (uiState.isSelectingPoints) {
-    AddPointsMapScreen(
+    BaseAddPointsMapScreen(
         initPoints = uiState.points,
         onDone = { locations: List<Location> ->
           val ok = vm.setPoints(locations)
@@ -47,7 +48,8 @@ fun BaseHuntScreen(
         testMode = testMode,
     )
   } else {
-    AddHuntFieldsScreen(
+    BaseHuntFieldsScreen(
+        title = title,
         uiState = uiState,
         onTitleChange = vm::setTitle,
         onDescriptionChange = vm::setDescription,

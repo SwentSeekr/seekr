@@ -16,6 +16,7 @@ fun EditHuntScreen(
   LaunchedEffect(huntId) { editHuntViewModel.load(huntId) }
 
   BaseHuntScreen(
+      title = "Edit your Hunt",
       vm = editHuntViewModel,
       onGoBack = onGoBack,
       onDone = onDone,
