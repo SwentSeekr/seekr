@@ -7,5 +7,6 @@ object ProfileRepositoryProvider {
   private val _repositoryFirestore: ProfileRepository by lazy {
     ProfileRepositoryFirestore(Firebase.firestore)
   }
+
   var repository: ProfileRepository = _repositoryFirestore
 }
