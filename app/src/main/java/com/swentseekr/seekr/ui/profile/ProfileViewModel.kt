@@ -25,13 +25,22 @@ data class ProfileUIState(
  */
 class ProfileViewModel(
     private val repository: ProfileRepository = ProfileRepositoryProvider.repository,
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val auth: FirebaseAuth? = null,
+    private val injectedCurrentUid: String? = null // forUnitTests
 ) : ViewModel() {
+  private val firebaseAuth: FirebaseAuth? by lazy {
+    try {
+      auth ?: FirebaseAuth.getInstance()
+    } catch (_: IllegalStateException) {
+      null // Firebase not initialized (e.g., during unit tests)
+    }
+  }
+
   private val _uiState = MutableStateFlow(ProfileUIState())
   val uiState: StateFlow<ProfileUIState> = _uiState.asStateFlow()
 
   val currentUid: String?
-    get() = auth.currentUser?.uid
+    get() = injectedCurrentUid ?: firebaseAuth?.currentUser?.uid
 
   fun loadProfile(userId: String? = null) {
     val uidToLoad = userId ?: currentUid
@@ -42,24 +51,24 @@ class ProfileViewModel(
     viewModelScope.launch {
       try {
         val profile = repository.getProfile(uidToLoad)
-        if (profile != null) {
-          val myHunts = repository.getMyHunts(uidToLoad)
-          val doneHunts = repository.getDoneHunts(uidToLoad)
-          val likedHunts = repository.getLikedHunts(uidToLoad)
+        val myHunts = repository.getMyHunts(uidToLoad)
+        val doneHunts = repository.getDoneHunts(uidToLoad)
+        val likedHunts = repository.getLikedHunts(uidToLoad)
 
-          _uiState.value =
-              ProfileUIState(
-                  profile =
-                      profile.copy(
-                          myHunts = myHunts.toMutableList(),
-                          doneHunts = doneHunts.toMutableList(),
-                          likedHunts = likedHunts.toMutableList()),
-                  isMyProfile = uidToLoad == currentUid)
-        } else {
-          _uiState.value = ProfileUIState(errorMsg = "Profile not found")
-        }
+        _uiState.value =
+            ProfileUIState(
+                profile =
+                    profile?.copy(
+                        myHunts = myHunts.toMutableList(),
+                        doneHunts = doneHunts.toMutableList(),
+                        likedHunts = likedHunts.toMutableList()),
+                isMyProfile = uidToLoad == currentUid)
       } catch (e: Exception) {
-        _uiState.value = ProfileUIState(errorMsg = e.message ?: "Failed to load profile")
+        val msg =
+            if (e.message?.contains("not found", ignoreCase = true) == true) "Profile not found"
+            else e.message ?: "Failed to load profile"
+
+        _uiState.value = ProfileUIState(errorMsg = msg)
       }
     }
   }
@@ -71,43 +80,43 @@ class ProfileViewModel(
         loadProfile(uid)
       }
     }
+  }
 
-    fun updateProfile(profile: Profile) {
-      viewModelScope.launch {
-        val uid = currentUid
-        if (uid == null) {
-          _uiState.value = _uiState.value.copy(errorMsg = "User not logged in")
-          return@launch
-        }
+  fun updateProfile(profile: Profile) {
+    viewModelScope.launch {
+      val uid = currentUid
+      if (uid == null) {
+        _uiState.value = _uiState.value.copy(errorMsg = "User not logged in")
+        return@launch
+      }
 
-        try {
-          repository.updateProfile(profile.copy(uid = uid))
-          loadProfile(uid)
-        } catch (e: Exception) {
-          _uiState.value = _uiState.value.copy(errorMsg = "Failed to update profile")
-        }
+      try {
+        repository.updateProfile(profile.copy(uid = uid))
+        loadProfile(uid)
+      } catch (e: Exception) {
+        _uiState.value = _uiState.value.copy(errorMsg = "Failed to update profile")
       }
     }
+  }
 
-    fun loadHunts(userId: String) {
-      viewModelScope.launch {
-        try {
-          val myHunts = repository.getMyHunts(userId)
-          val doneHunts = repository.getDoneHunts(userId)
-          val likedHunts = repository.getLikedHunts(userId)
-          val currentProfile = _uiState.value.profile
-          if (currentProfile != null) {
-            _uiState.value =
-                _uiState.value.copy(
-                    profile =
-                        currentProfile.copy(
-                            myHunts = myHunts as MutableList<Hunt>,
-                            doneHunts = doneHunts as MutableList<Hunt>,
-                            likedHunts = likedHunts as MutableList<Hunt>))
-          }
-        } catch (e: Exception) {
-          _uiState.value = _uiState.value.copy(errorMsg = "Failed to load hunts")
+  fun loadHunts(userId: String) {
+    viewModelScope.launch {
+      try {
+        val myHunts = repository.getMyHunts(userId)
+        val doneHunts = repository.getDoneHunts(userId)
+        val likedHunts = repository.getLikedHunts(userId)
+        val currentProfile = _uiState.value.profile
+        if (currentProfile != null) {
+          _uiState.value =
+              _uiState.value.copy(
+                  profile =
+                      currentProfile.copy(
+                          myHunts = myHunts as MutableList<Hunt>,
+                          doneHunts = doneHunts as MutableList<Hunt>,
+                          likedHunts = likedHunts as MutableList<Hunt>))
         }
+      } catch (e: Exception) {
+        _uiState.value = _uiState.value.copy(errorMsg = "Failed to load hunts")
       }
     }
   }

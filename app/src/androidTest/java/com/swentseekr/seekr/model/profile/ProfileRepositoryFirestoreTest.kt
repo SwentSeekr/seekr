@@ -1,6 +1,7 @@
 package com.swentseekr.seekr.model.profile
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.ui.profile.Profile
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment
@@ -14,7 +15,7 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileRepositoryFirestoreTest {
-  private val repository = ProfileRepositoryProvider.repository
+  private var repository = ProfileRepositoryProvider.repository
   private lateinit var auth: FirebaseAuth
 
   @Before
@@ -26,6 +27,9 @@ class ProfileRepositoryFirestoreTest {
 
     auth = FirebaseAuth.getInstance()
     auth.signInAnonymously().await()
+
+    val repo = ProfileRepositoryFirestore(FirebaseFirestore.getInstance())
+    ProfileRepositoryProvider.repository = repo
   }
 
   @Test

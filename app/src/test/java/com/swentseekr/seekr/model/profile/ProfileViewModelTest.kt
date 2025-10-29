@@ -34,7 +34,7 @@ class ProfileViewModelTest {
     Dispatchers.setMain(testDispatcher)
     repository = ProfileRepositoryLocal()
     repository.addProfile(profileAlice)
-    viewModel = ProfileViewModel(repository)
+    viewModel = ProfileViewModel(repository, injectedCurrentUid = "user1")
   }
 
   @After
@@ -75,12 +75,13 @@ class ProfileViewModelTest {
   }
 
   @Test
-  fun updateProfile_sets_error_for_non_existent_profile() = runTest {
+  fun updateProfile_sets_error_when_user_not_logged_in() = runTest {
+    val viewModelWithoutUid = ProfileViewModel(repository)
     val fake = profileAlice.copy(uid = "ghost")
-    viewModel.updateProfile(fake)
+    viewModelWithoutUid.updateProfile(fake)
     advanceUntilIdle()
-    val state = viewModel.uiState.value
-    assertEquals("Failed to update profile", state.errorMsg)
+    val state = viewModelWithoutUid.uiState.value
+    assertEquals("User not logged in", state.errorMsg)
   }
 
   @Test
