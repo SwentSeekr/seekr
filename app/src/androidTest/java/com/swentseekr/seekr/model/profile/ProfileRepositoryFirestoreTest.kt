@@ -1,7 +1,6 @@
 package com.swentseekr.seekr.model.profile
 
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.ui.profile.Profile
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment
@@ -15,25 +14,18 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileRepositoryFirestoreTest {
-  private var repository: ProfileRepository = ProfileRepositoryProvider.repository
+  private val repository = ProfileRepositoryProvider.repository
   private lateinit var auth: FirebaseAuth
-  private lateinit var firestore: FirebaseFirestore
 
   @Before
-  fun setUp() {
+  fun setup() = runTest {
     FirebaseTestEnvironment.setup()
-    runTest {
-      if (FirebaseTestEnvironment.isEmulatorActive()) {
-        clearEmulatorData()
-      }
-
-      auth = FirebaseAuth.getInstance()
-      firestore = FirebaseFirestore.getInstance()
-      repository = ProfileRepositoryProvider.repository
-
-      FirebaseAuth.getInstance().signInAnonymously().await()
-      assertNotNull(auth.currentUser)
+    if (FirebaseTestEnvironment.isEmulatorActive()) {
+      clearEmulatorData()
     }
+
+    auth = FirebaseAuth.getInstance()
+    auth.signInAnonymously().await()
   }
 
   @Test
