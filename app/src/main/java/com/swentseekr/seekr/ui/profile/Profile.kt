@@ -34,16 +34,11 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.author.Author
-import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
-import com.swentseekr.seekr.model.hunt.HuntStatus
-import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.components.HuntCard
 import com.swentseekr.seekr.ui.components.MAX_RATING
 import com.swentseekr.seekr.ui.components.Rating
@@ -114,23 +109,23 @@ fun ProfileScreen(
 ) {
   val uiState by viewModel.uiState.collectAsState()
 
-  LaunchedEffect( userId) {
-    viewModel.loadProfile( userId)
-    //viewModel.loadHunts( userId)
+  LaunchedEffect(userId) {
+    viewModel.loadProfile(userId)
+    // viewModel.loadHunts( userId)
   }
-    val profile = uiState.profile
+  val profile = uiState.profile
 
-    if (uiState.errorMsg != null) {
-        Text("Error: ${uiState.errorMsg}", color = Color.Red)
-        return
-    }
+  if (uiState.errorMsg != null) {
+    Text("Error: ${uiState.errorMsg}", color = Color.Red)
+    return
+  }
 
-    if (profile == null) {
-        Text("No profile found", color = Color.Gray)
-        return
-    }
+  if (profile == null) {
+    Text("No profile found", color = Color.Gray)
+    return
+  }
 
-    val isMyProfile = uiState.isMyProfile
+  val isMyProfile = uiState.isMyProfile
 
   var selectedTab by remember { mutableStateOf(ProfileTab.MY_HUNTS) }
   Scaffold(

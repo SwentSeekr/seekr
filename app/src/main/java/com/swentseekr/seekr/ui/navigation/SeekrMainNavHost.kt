@@ -111,7 +111,7 @@ fun SeekrMainNavHost(
   val currentRoute = navBackStackEntry?.destination?.route
   val currentDestination =
       SeekrDestination.all.find { it.route == currentRoute } ?: SeekrDestination.Overview
-    val showBottomBar = SeekrDestination.all.any { it.route == currentRoute }
+  val showBottomBar = SeekrDestination.all.any { it.route == currentRoute }
 
   Scaffold(
       modifier = Modifier.fillMaxSize(),

@@ -15,20 +15,20 @@ class HuntsRepositoryFirestoreTest {
 
   private var repository: HuntsRepository = HuntRepositoryProvider.repository
   var hunt1 =
-    Hunt(
-      uid = "hunt1",
-      start = Location(40.7128, -74.0060, "New York"),
-      end = Location(40.730610, -73.935242, "Brooklyn"),
-      middlePoints = emptyList(),
-      status = HuntStatus.FUN,
-      title = "City Exploration",
-      description = "Discover hidden gems in the city",
-      time = 2.5,
-      distance = 5.0,
-      difficulty = Difficulty.EASY,
-      authorId = "0",
-      image = 0,
-      reviewRate = 4.5)
+      Hunt(
+          uid = "hunt1",
+          start = Location(40.7128, -74.0060, "New York"),
+          end = Location(40.730610, -73.935242, "Brooklyn"),
+          middlePoints = emptyList(),
+          status = HuntStatus.FUN,
+          title = "City Exploration",
+          description = "Discover hidden gems in the city",
+          time = 2.5,
+          distance = 5.0,
+          difficulty = Difficulty.EASY,
+          authorId = "0",
+          image = 0,
+          reviewRate = 4.5)
 
   @Before
   fun setUp() {

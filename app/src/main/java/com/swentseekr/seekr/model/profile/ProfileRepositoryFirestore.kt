@@ -11,7 +11,7 @@ import com.swentseekr.seekr.ui.profile.Profile
 import kotlinx.coroutines.tasks.await
 
 class ProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRepository {
-    private val profilesCollection = db.collection("profiles")
+  private val profilesCollection = db.collection("profiles")
 
   override suspend fun getProfile(userId: String): Profile? {
     val document = profilesCollection.document(userId).get().await()
@@ -24,20 +24,19 @@ class ProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRep
         author = author,
         myHunts = getMyHunts(userId).toMutableList(),
         doneHunts = getDoneHunts(userId).toMutableList(),
-        likedHunts = getLikedHunts(userId).toMutableList()
-    )
+        likedHunts = getLikedHunts(userId).toMutableList())
   }
 
   override suspend fun updateProfile(profile: Profile) {
-      val authorMap = mapOf(
-          "pseudonym" to profile.author.pseudonym,
-          "bio" to profile.author.bio,
-          "profilePicture" to profile.author.profilePicture,
-          "reviewRate" to profile.author.reviewRate,
-          "sportRate" to profile.author.sportRate
-      )
-      profilesCollection.document(profile.uid).set(mapOf("author" to authorMap)).await()
-    //profilesCollection.document(profile.uid).set(profile).await()
+    val authorMap =
+        mapOf(
+            "pseudonym" to profile.author.pseudonym,
+            "bio" to profile.author.bio,
+            "profilePicture" to profile.author.profilePicture,
+            "reviewRate" to profile.author.reviewRate,
+            "sportRate" to profile.author.sportRate)
+    profilesCollection.document(profile.uid).set(mapOf("author" to authorMap)).await()
+    // profilesCollection.document(profile.uid).set(profile).await()
   }
 
   override suspend fun getMyHunts(userId: String): List<Hunt> {
@@ -73,7 +72,7 @@ class ProfileRepositoryFirestore(private val db: FirebaseFirestore) : ProfileRep
 
       val difficulty = Difficulty.valueOf(document.getString("difficulty") ?: Difficulty.EASY.name)
       val status = HuntStatus.valueOf(document.getString("status") ?: return null)
-        val authorId = document.getString("authorId") ?: ""
+      val authorId = document.getString("authorId") ?: ""
 
       Hunt(
           uid = uid,
