@@ -19,7 +19,7 @@ class HuntReviewRepositoryFirestore(private val db: FirebaseFirestore) : HuntRev
   }
 
   override suspend fun addReviewHunt(review: HuntReview) {
-    db.collection(HUNTS_COLLECTION_PATH).document(review.reviewID).set(review).await()
+    db.collection(HUNT_REVIEW_COLLECTION_PATH).document(review.reviewID).set(review).await()
   }
 
   override suspend fun updateReviewHunt(reviewID: String, newReview: HuntReview) {
@@ -36,7 +36,7 @@ class HuntReviewRepositoryFirestore(private val db: FirebaseFirestore) : HuntRev
     //    FirebaseAuth.getInstance().currentUser?.uid
     //       ?: throw IllegalStateException("User not logged in")
     val snapshot =
-        db.collection(HUNT_REVIEW_COLLECTION_PATH).whereEqualTo("huntId", huntID).get().await()
+        db.collection(HUNT_REVIEW_COLLECTION_PATH).whereEqualTo("huntID", huntID).get().await()
     return snapshot.mapNotNull { documentToHuntReview(it) }
   }
 
