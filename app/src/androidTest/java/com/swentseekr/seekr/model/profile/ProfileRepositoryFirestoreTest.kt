@@ -55,6 +55,10 @@ class ProfileRepositoryFirestoreTest {
     assertNotNull("Profile should be retrieved after creation", retrieved)
     assertEquals(uid, retrieved?.uid)
     assertEquals("Tester", retrieved?.author?.pseudonym)
+    assertEquals("This is a bio", retrieved?.author?.bio)
+    assertEquals("4.5", retrieved?.author?.reviewRate.toString())
+    assertEquals("4.0", retrieved?.author?.sportRate.toString())
+    assertEquals("0", retrieved?.author?.profilePicture.toString())
   }
 
   @Test
@@ -83,25 +87,6 @@ class ProfileRepositoryFirestoreTest {
     assertNotNull("Default profile should be auto-created if missing", profile)
     assertEquals(missingUid, profile!!.uid)
     assertEquals("New User", profile.author.pseudonym)
-  }
-
-  @Test
-  fun createProfile_throws_exception_on_firestore_error() = runTest {
-    val uid = auth.currentUser!!.uid
-    val profile =
-        Profile(
-            uid = uid,
-            author = Author("Test", "Bio", 0, 4.0, 3.0),
-            myHunts = mutableListOf(),
-            doneHunts = mutableListOf(),
-            likedHunts = mutableListOf())
-
-    try {
-      repository.createProfile(profile)
-      assertTrue(true)
-    } catch (e: Exception) {
-      assertNotNull(e)
-    }
   }
 
   @Test
