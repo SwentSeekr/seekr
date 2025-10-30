@@ -91,7 +91,7 @@ class SettingsViewModelTest {
   /** Test that displayAppVersion properly updates the UI state */
   @Test
   fun displayAppVersion_updates_appVersion() = runTest {
-    viewModel.displayAppVersion("9.9.9")
+    viewModel.setAppVersion("9.9.9")
     advanceUntilIdle()
 
     val state = viewModel.uiState.first()
