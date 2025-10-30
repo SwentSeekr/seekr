@@ -1,10 +1,22 @@
 package com.swentseekr.seekr.ui.map
 
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.PolyUtil
 import com.swentseekr.seekr.model.hunt.*
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.utils.FakeRepoEmpty
 import com.swentseekr.seekr.utils.FakeRepoSuccess
 import com.swentseekr.seekr.utils.FakeRepoThrows
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
+import java.io.OutputStream
+import java.lang.reflect.InvocationTargetException
+import java.net.HttpURLConnection
+import java.net.URL
+import java.net.URLConnection
+import java.net.URLStreamHandler
+import java.net.URLStreamHandlerFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Test
@@ -111,5 +123,196 @@ class MapViewModelTest {
     vm.refreshUIState()
     val after = vm.uiState.value.hunts.size
     assertEquals(before, after)
+  }
+
+  companion object {
+    object FakeDirections {
+      @Volatile
+      var nextBody: String =
+          """{"status":"OK","routes":[{"legs":[{"steps":[]}],"overview_polyline":{"points":""}}]}"""
+    }
+
+    private object HttpsFactory : URLStreamHandlerFactory {
+      override fun createURLStreamHandler(protocol: String?): URLStreamHandler? {
+        return if (protocol == "https") {
+          object : URLStreamHandler() {
+            override fun openConnection(u: URL): URLConnection {
+              return object : HttpURLConnection(u) {
+                override fun getInputStream(): InputStream =
+                    ByteArrayInputStream(FakeDirections.nextBody.toByteArray(Charsets.UTF_8))
+
+                override fun getOutputStream(): OutputStream = ByteArrayOutputStream()
+
+                override fun usingProxy(): Boolean = false
+
+                override fun disconnect() {}
+
+                override fun connect() {}
+              }
+            }
+          }
+        } else null
+      }
+    }
+
+    init {
+      try {
+        URL.setURLStreamHandlerFactory(HttpsFactory)
+      } catch (_: Error) {}
+    }
+  }
+
+  private fun MapViewModel.callRequestDirectionsPolylineSync(): List<LatLng> {
+    val m =
+        MapViewModel::class
+            .java
+            .getDeclaredMethod(
+                "requestDirectionsPolyline",
+                Double::class.javaPrimitiveType,
+                Double::class.javaPrimitiveType,
+                Double::class.javaPrimitiveType,
+                Double::class.javaPrimitiveType,
+                List::class.java,
+                String::class.java)
+    m.isAccessible = true
+    @Suppress("UNCHECKED_CAST")
+    return m.invoke(this, 46.52, 6.63, 46.53, 6.64, emptyList<Pair<Double, Double>>(), "walking")
+        as List<LatLng>
+  }
+
+  @Test
+  fun onViewHuntClickWithNoSelectedHuntKeepsRouteEmpty() = runTest {
+    val hunts = listOf(sample(uid = "1"))
+    val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
+
+    vm.onViewHuntClick()
+
+    val state = vm.uiState.value
+    assertTrue(state.isFocused)
+    assertTrue(state.route.isEmpty())
+    assertFalse(state.isRouteLoading)
+  }
+
+  @Test
+  fun requestDirectionsPolylineParsesStepPolylinesAndDeduplicates() {
+    val vm = MapViewModel(repository = FakeRepoEmpty())
+
+    val step1 = listOf(LatLng(0.0, 0.0), LatLng(0.0, 1.0))
+    val step2 = listOf(LatLng(0.0, 1.0), LatLng(1.0, 1.0))
+    val step1Enc = PolyUtil.encode(step1)
+    val step2Enc = PolyUtil.encode(step2)
+
+    val overviewEnc = PolyUtil.encode(listOf(step1[0], step1[1], step2[1]))
+
+    FakeDirections.nextBody =
+        """
+        {
+          "status": "OK",
+          "routes": [
+            {
+              "legs": [
+                {
+                  "steps": [
+                    { "polyline": { "points": "$step1Enc" } },
+                    { "polyline": { "points": "$step2Enc" } }
+                  ]
+                }
+              ],
+              "overview_polyline": { "points": "$overviewEnc" }
+            }
+          ]
+        }
+        """
+            .trimIndent()
+
+    val points = vm.callRequestDirectionsPolylineSync()
+
+    assertEquals(3, points.size)
+    assertEquals(0.0, points[0].latitude, 1e-6)
+    assertEquals(0.0, points[0].longitude, 1e-6)
+    assertEquals(0.0, points[1].latitude, 1e-6)
+    assertEquals(1.0, points[1].longitude, 1e-6)
+    assertEquals(1.0, points[2].latitude, 1e-6)
+    assertEquals(1.0, points[2].longitude, 1e-6)
+  }
+
+  @Test
+  fun requestDirectionsPolylineFallsBackToOverviewWhenStepsEmpty() {
+    val vm = MapViewModel(repository = FakeRepoEmpty())
+
+    val overviewEnc = PolyUtil.encode(listOf(LatLng(2.0, 2.0), LatLng(3.0, 3.0)))
+
+    FakeDirections.nextBody =
+        """
+        {
+          "status": "OK",
+          "routes": [
+            {
+              "legs": [ { "steps": [] } ],
+              "overview_polyline": { "points": "$overviewEnc" }
+            }
+          ]
+        }
+        """
+            .trimIndent()
+
+    val points = vm.callRequestDirectionsPolylineSync()
+
+    assertEquals(2, points.size)
+    assertEquals(2.0, points[0].latitude, 1e-6)
+    assertEquals(2.0, points[0].longitude, 1e-6)
+    assertEquals(3.0, points[1].latitude, 1e-6)
+    assertEquals(3.0, points[1].longitude, 1e-6)
+  }
+
+  @Test
+  fun requestDirectionsPolylineErrorResponseIsWrappedAndHasCorrectMessage() {
+    val vm = MapViewModel(repository = FakeRepoEmpty())
+
+    FakeDirections.nextBody =
+        """
+        {
+          "status": "REQUEST_DENIED",
+          "error_message": "Key is invalid"
+        }
+        """
+            .trimIndent()
+
+    try {
+      vm.callRequestDirectionsPolylineSync()
+      fail("Expected the reflected call to fail with an InvocationTargetException")
+    } catch (e: InvocationTargetException) {
+      val cause = e.cause
+      assertNotNull(cause)
+      assertTrue(cause is IllegalStateException)
+      if (cause != null) {
+        assertTrue(
+            cause.message?.contains("Directions API error") == true ||
+                cause.message?.contains("REQUEST_DENIED") == true)
+      }
+    }
+  }
+
+  @Test
+  fun onBackToAllHuntsClearsRoute() = runTest {
+    val hunts = listOf(sample(uid = "1"))
+    val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
+
+    val s =
+        vm.uiState.value.copy(route = listOf(LatLng(1.0, 1.0), LatLng(2.0, 2.0)), isFocused = true)
+    val field = MapViewModel::class.java.getDeclaredField("_uiState")
+    field.isAccessible = true
+    @Suppress("UNCHECKED_CAST")
+    val mutable = field.get(vm) as kotlinx.coroutines.flow.MutableStateFlow<*>
+    @Suppress("UNCHECKED_CAST")
+    (mutable as kotlinx.coroutines.flow.MutableStateFlow<com.swentseekr.seekr.ui.map.MapUIState>)
+        .value = s
+
+    vm.onBackToAllHunts()
+
+    val after = vm.uiState.value
+    assertFalse(after.isFocused)
+    assertTrue(after.route.isEmpty())
+    assertNull(after.selectedHunt)
   }
 }
