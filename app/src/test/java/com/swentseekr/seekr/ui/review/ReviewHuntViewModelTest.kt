@@ -170,4 +170,63 @@ class ReviewHuntViewModelTest {
     assertEquals(
         "Cannot clear form, review not submitted successfully.", viewModel.uiState.value.errorMsg)
   }
+  @Test
+  fun onSaveClick_withInvalidData_setsErrorMsg() = runTest {
+    viewModel.onSaveClick()
+    advanceUntilIdle()
+
+    val state = viewModel.uiState.value
+    assertEquals("At least one field is not valid", state.errorMsg)
+    assertFalse(state.isSubmitted)
+  }
+
+  @Test
+  fun onSaveClick_withValidData_setsIsSubmittedTrue() = runTest {
+    viewModel.setReviewText("Nice and challenging hunt!")
+    viewModel.setRating(4.5)
+
+    viewModel.onSaveClick()
+    advanceUntilIdle()
+
+    val state = viewModel.uiState.value
+    assertNull(state.errorMsg)
+    assertTrue(state.isSubmitted)
+  }
+
+  @Test
+  fun deleteReview_whenUserIsAuthor_deletesReviewSuccessfully() = runTest {
+    viewModel.setReviewText("Great hunt!")
+    viewModel.setRating(5.0)
+    viewModel.submitReviewHunt("user123", testHunt)
+    advanceUntilIdle()
+
+    val createdReview = fakeReviewRepository.getHuntReviews(testHunt.uid).first()
+    assertEquals("user123", createdReview.authorId)
+
+    // Inject currentUserId manually
+    viewModel.deleteReview(createdReview.reviewId, "user123", currentUserId = "user123")
+    advanceUntilIdle()
+
+    val reviewsAfterDelete = fakeReviewRepository.getHuntReviews(testHunt.uid)
+    assertTrue(reviewsAfterDelete.isEmpty())
+  }
+  @Test
+  fun deleteReview_whenUserIsNotAuthor_setsErrorMessage() = runTest {
+    viewModel.setReviewText("Nice!")
+    viewModel.setRating(4.0)
+    viewModel.submitReviewHunt("user123", testHunt)
+    advanceUntilIdle()
+
+    val createdReview = fakeReviewRepository.getHuntReviews(testHunt.uid).first()
+
+    // Inject currentUserId manually
+    viewModel.deleteReview(createdReview.reviewId, "user123", currentUserId = "otherUser456")
+    advanceUntilIdle()
+
+    val state = viewModel.uiState.value
+    assertEquals("You can only delete your own review.", state.errorMsg)
+
+    val reviewsAfterAttempt = fakeReviewRepository.getHuntReviews(testHunt.uid)
+    assertEquals(1, reviewsAfterAttempt.size)
+  }
 }
