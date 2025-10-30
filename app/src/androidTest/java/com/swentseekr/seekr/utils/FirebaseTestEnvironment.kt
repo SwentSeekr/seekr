@@ -108,12 +108,12 @@ object FirebaseTestEnvironment {
       if (responseCode in 200..299) {
         Log.i("FirebaseTestEnv", "🔥 Firestore emulator cleared successfully.")
       } else {
-        Log.w("FirebaseTestEnv", "⚠️ Failed to clear emulator (HTTP $responseCode): $responseText")
+        Log.w("FirebaseTestEnv", "⚠ Failed to clear emulator (HTTP $responseCode): $responseText")
       }
 
       connection.disconnect()
     } catch (e: Exception) {
-      Log.w("FirebaseTestEnv", "⚠️ Could not clear Firestore emulator data: ${e.message}")
+      Log.w("FirebaseTestEnv", "⚠ Could not clear Firestore emulator data: ${e.message}")
     }
   }
 }

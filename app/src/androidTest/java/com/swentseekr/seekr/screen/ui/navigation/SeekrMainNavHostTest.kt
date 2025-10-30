@@ -24,7 +24,9 @@ class SeekrNavigationTest {
 
   @Before
   fun setUp() {
-    composeTestRule.runOnUiThread { composeTestRule.activity.setContent { SeekrMainNavHost() } }
+    composeTestRule.runOnUiThread {
+      composeTestRule.activity.setContent { SeekrMainNavHost(testMode = true) }
+    }
 
     composeTestRule.waitUntil(timeoutMillis = 5_000) {
       composeTestRule

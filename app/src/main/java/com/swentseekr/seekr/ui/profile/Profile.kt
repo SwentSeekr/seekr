@@ -34,16 +34,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.author.Author
-import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
-import com.swentseekr.seekr.model.hunt.HuntStatus
-import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.model.profile.mockProfileData
 import com.swentseekr.seekr.ui.components.HuntCard
 import com.swentseekr.seekr.ui.components.MAX_RATING
 import com.swentseekr.seekr.ui.components.Rating
@@ -85,11 +81,11 @@ data class TabItem(val tab: ProfileTab, val testTag: String, val icon: ImageVect
  * @property likedHunts Hunts liked by the user.
  */
 data class Profile(
-    val uid: String,
-    val author: Author,
-    val myHunts: MutableList<Hunt>,
-    val doneHunts: MutableList<Hunt>,
-    val likedHunts: MutableList<Hunt>,
+    val uid: String = "",
+    val author: Author = Author(),
+    val myHunts: MutableList<Hunt> = mutableListOf(),
+    val doneHunts: MutableList<Hunt> = mutableListOf(),
+    val likedHunts: MutableList<Hunt> = mutableListOf(),
 )
 
 /** Enum representing the different tabs in the profile screen. */
@@ -103,23 +99,38 @@ enum class ProfileTab {
  * Displays the profile screen of a user with their info, ratings, bio, and hunts.
  *
  * @param profile The profile data to display.
- * @param currentUserId The ID of the currently logged-in user.
+ * @param userId The ID of the user's profile visited.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    profile: Profile,
-    currentUserId: String,
+    userId: String? = null,
     viewModel: ProfileViewModel = viewModel(),
-    onAddHunt: () -> Unit = {}
+    onAddHunt: () -> Unit = {},
+    testMode: Boolean = false,
+    testProfile: Profile? = null,
 ) {
-  val uiState by viewModel.uiState.collectAsState()
-  LaunchedEffect(currentUserId) {
-    viewModel.loadProfile(currentUserId)
-    viewModel.loadHunts(currentUserId)
+  val profile =
+      if (testMode) {
+        testProfile ?: mockProfileData()
+      } else {
+        val uiState by viewModel.uiState.collectAsState()
+
+        LaunchedEffect(userId) { viewModel.loadProfile(userId) }
+        if (uiState.errorMsg != null) {
+          Text("Error: ${uiState.errorMsg}", color = Color.Red)
+          return
+        }
+        uiState.profile
+      }
+
+  if (profile == null) {
+    Text("No profile found", color = Color.Gray)
+    return
   }
-  val isMyProfile = profile.uid == currentUserId // to implement in the view model with auth
-  // (firebase authentication) when viewModel will be implemented
+
+  val isMyProfile = testMode || viewModel.uiState.collectAsState().value.isMyProfile
+
   var selectedTab by remember { mutableStateOf(ProfileTab.MY_HUNTS) }
   Scaffold(
       floatingActionButton = {
@@ -140,9 +151,7 @@ fun ProfileScreen(
         ) {
           Row(
               modifier = Modifier.fillMaxWidth().padding(16.dp),
-              verticalAlignment =
-                  Alignment.CenterVertically // centers text vertically next to the image
-              ) {
+              verticalAlignment = Alignment.CenterVertically) {
                 ProfilePicture(profilePicture = profile.author.profilePicture)
                 Column {
                   Text(
@@ -205,10 +214,6 @@ fun ProfileScreen(
                 } else {
                   items(huntsToDisplay.size) { index ->
                     val hunt = huntsToDisplay[index]
-                    // val huntUiState = HuntUiState(hunt = hunt, isLiked = false, isArchived =
-                    // false)
-                    // // until I implement the ViewModel
-                    // HuntCard(//huntUiState)
                     HuntCard(
                         hunt,
                         modifier =
@@ -218,45 +223,6 @@ fun ProfileScreen(
               }
         }
       }
-}
-
-/** Preview for the profile screen in Android Studio. */
-@Preview
-@Composable
-fun ProfileScreenPreview() {
-  val sampleAuthor =
-      Author(
-          pseudonym = "Spike Man",
-          bio = "Avid adventurer and puzzle solver.",
-          profilePicture = 0,
-          reviewRate = 4.5,
-          sportRate = 4.8)
-
-  val profile =
-      Profile(
-          uid = "user123",
-          author = sampleAuthor,
-          myHunts =
-              MutableList(1) {
-                Hunt(
-                    uid = "hunt123",
-                    start = Location(40.7128, -74.0060, "New York"),
-                    end = Location(40.730610, -73.935242, "Brooklyn"),
-                    middlePoints = emptyList(),
-                    status = HuntStatus.FUN,
-                    title = "City Exploration",
-                    description = "Discover hidden gems in the city",
-                    time = 2.5,
-                    distance = 5.0,
-                    difficulty = Difficulty.DIFFICULT,
-                    authorId = "0",
-                    image = R.drawable.ic_launcher_foreground,
-                    reviewRate = 4.5)
-              },
-          doneHunts = mutableListOf(),
-          likedHunts = mutableListOf())
-
-  ProfileScreen(profile = profile, currentUserId = "user123")
 }
 
 /**
