@@ -92,6 +92,9 @@ class MapViewModelTest {
   fun onViewHuntClickSetsFocusedTrue() = runTest {
     val hunts = listOf(sample(uid = "1"))
     val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
+
+    awaitInitialLoad(vm, expectedCount = hunts.size)
+
     vm.onMarkerClick(hunts[0])
     vm.onViewHuntClick()
 
@@ -180,10 +183,21 @@ class MapViewModelTest {
         as List<LatLng>
   }
 
+  private fun awaitInitialLoad(vm: MapViewModel, expectedCount: Int, timeoutMs: Long = 2000) {
+    val start = System.currentTimeMillis()
+    while (System.currentTimeMillis() - start < timeoutMs) {
+      if (vm.uiState.value.hunts.size == expectedCount) return
+      Thread.sleep(10)
+    }
+    fail("Timed out waiting for initial hunts load to reach $expectedCount")
+  }
+
   @Test
   fun onViewHuntClickWithNoSelectedHuntKeepsRouteEmpty() = runTest {
     val hunts = listOf(sample(uid = "1"))
     val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
+
+    awaitInitialLoad(vm, expectedCount = hunts.size)
 
     vm.onViewHuntClick()
 
