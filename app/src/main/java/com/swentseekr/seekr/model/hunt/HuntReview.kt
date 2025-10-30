@@ -1,10 +1,10 @@
 package com.swentseekr.seekr.model.hunt
 
 data class HuntReview(
-    val reviewID: String,
-    val authorID: String,
-    val huntID: String,
-    val rating: Double,
-    val comment: String,
-    val photos: List<PhotoFile>
+    val reviewId: String = "",
+    val authorId: String = "",
+    val huntId: String = "",
+    val rating: Double = 0.0,
+    val comment: String = "",
+    val photos: List<PhotoFile> = emptyList()
 )

@@ -1,6 +1,7 @@
 package com.swentseekr.seekr.model.hunt
 
 import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -12,39 +13,39 @@ class HuntReviewRepositoryFirestore(private val db: FirebaseFirestore) : HuntRev
     return db.collection(HUNT_REVIEW_COLLECTION_PATH).document().id
   }
 
-  override suspend fun getReviewHunt(reviewID: String): HuntReview? {
-    val document = db.collection(HUNT_REVIEW_COLLECTION_PATH).document(reviewID).get().await()
+  override suspend fun getReviewHunt(reviewId: String): HuntReview {
+    val document = db.collection(HUNT_REVIEW_COLLECTION_PATH).document(reviewId).get().await()
     return documentToHuntReview(document)
-        ?: throw IllegalArgumentException("Hunt with ID ${reviewID} is not found")
+        ?: throw IllegalArgumentException("Hunt with Id ${reviewId} is not found")
   }
 
   override suspend fun addReviewHunt(review: HuntReview) {
-    db.collection(HUNT_REVIEW_COLLECTION_PATH).document(review.reviewID).set(review).await()
+    require(review.reviewId.isNotBlank()) { "Review ID cannot be blank." }
+    db.collection(HUNT_REVIEW_COLLECTION_PATH).document(review.reviewId).set(review).await()
   }
 
-  override suspend fun updateReviewHunt(reviewID: String, newReview: HuntReview) {
-    db.collection(HUNT_REVIEW_COLLECTION_PATH).document(reviewID).set(newReview).await()
+  override suspend fun updateReviewHunt(reviewId: String, newReview: HuntReview) {
+    db.collection(HUNT_REVIEW_COLLECTION_PATH).document(reviewId).set(newReview).await()
   }
 
-  override suspend fun deleteReviewHunt(reviewID: String) {
-    db.collection(HUNT_REVIEW_COLLECTION_PATH).document(reviewID).delete().await()
+  override suspend fun deleteReviewHunt(reviewId: String) {
+    db.collection(HUNT_REVIEW_COLLECTION_PATH).document(reviewId).delete().await()
   }
 
-  override suspend fun getHuntReviews(huntID: String): List<HuntReview> {
-    // Implementation for fetching hunt reviews
-    // val currentUserId =
-    //    FirebaseAuth.getInstance().currentUser?.uid
-    //       ?: throw IllegalStateException("User not logged in")
+  override suspend fun getHuntReviews(huntId: String): List<HuntReview> {
+    val currentUserId =
+        FirebaseAuth.getInstance().currentUser?.uid
+            ?: throw IllegalStateException("User not logged in")
     val snapshot =
-        db.collection(HUNT_REVIEW_COLLECTION_PATH).whereEqualTo("huntID", huntID).get().await()
+        db.collection(HUNT_REVIEW_COLLECTION_PATH).whereEqualTo("huntId", huntId).get().await()
     return snapshot.mapNotNull { documentToHuntReview(it) }
   }
 
   private fun documentToHuntReview(document: DocumentSnapshot): HuntReview? {
     return try {
       val reviewID = document.id
-      val authorID = document.getString("authorID") ?: return null
-      val huntID = document.getString("huntID") ?: return null
+      val authorID = document.getString("authorId") ?: return null
+      val huntID = document.getString("huntId") ?: return null
       val rating = document.getDouble("rating") ?: return null
       val comment = document.getString("comment") ?: return null
       val photosData = document.get("photos") as? List<Map<String, Any>> ?: emptyList()
@@ -54,9 +55,9 @@ class HuntReviewRepositoryFirestore(private val db: FirebaseFirestore) : HuntRev
                 url = it["url"] as? String ?: "", description = it["description"] as? String ?: "")
           }
       HuntReview(
-          reviewID = reviewID,
-          authorID = authorID,
-          huntID = huntID,
+          reviewId = reviewID,
+          authorId = authorID,
+          huntId = huntID,
           rating = rating,
           comment = comment,
           photos = photos)
