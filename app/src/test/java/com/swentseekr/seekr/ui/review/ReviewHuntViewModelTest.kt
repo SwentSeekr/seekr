@@ -60,7 +60,7 @@ class ReviewHuntViewModelTest {
     advanceUntilIdle()
 
     val state = viewModel.uiState.value
-    assertEquals(testHunt.uid, state.huntId)
+    assertEquals(testHunt, state.hunt)
   }
 
   @Test
@@ -160,7 +160,7 @@ class ReviewHuntViewModelTest {
 
     viewModel.clearForm()
     val state = viewModel.uiState.value
-    assertEquals(testHunt.uid, state.huntId)
+    assertEquals(testHunt, state.hunt)
     assertEquals("", state.reviewText)
   }
 
@@ -169,29 +169,6 @@ class ReviewHuntViewModelTest {
     viewModel.clearForm()
     assertEquals(
         "Cannot clear form, review not submitted successfully.", viewModel.uiState.value.errorMsg)
-  }
-
-  @Test
-  fun onSaveClick_withInvalidData_setsErrorMsg() = runTest {
-    viewModel.onSaveClick()
-    advanceUntilIdle()
-
-    val state = viewModel.uiState.value
-    assertEquals("At least one field is not valid", state.errorMsg)
-    assertFalse(state.isSubmitted)
-  }
-
-  @Test
-  fun onSaveClick_withValidData_setsIsSubmittedTrue() = runTest {
-    viewModel.setReviewText("Nice and challenging hunt!")
-    viewModel.setRating(4.5)
-
-    viewModel.onSaveClick()
-    advanceUntilIdle()
-
-    val state = viewModel.uiState.value
-    assertNull(state.errorMsg)
-    assertTrue(state.isSubmitted)
   }
 
   @Test

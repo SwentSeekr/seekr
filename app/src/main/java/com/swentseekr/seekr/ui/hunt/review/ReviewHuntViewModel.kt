@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 data class ReviewHuntUIState(
+    val hunt: Hunt? = null,
     val huntId: String = "",
     val userId: String = "",
     val reviewText: String = "",
@@ -54,7 +55,7 @@ class ReviewHuntViewModel(
     viewModelScope.launch {
       try {
         val hunt = repositoryHunt.getHunt(huntID)
-        _uiState.value = ReviewHuntUIState(huntId = hunt.uid)
+        _uiState.value = ReviewHuntUIState(hunt = hunt)
       } catch (e: Exception) {
         Log.e("ReviewHuntViewModel", "Error loading Hunt by ID: $huntID", e)
       }
@@ -128,7 +129,7 @@ class ReviewHuntViewModel(
         _uiState.value.copy(
             rating = rating,
             invalidRating =
-                if (rating < 0.0 || rating > 5.0) "Rating must be between 1 and 5" else null)
+                if (rating <= 0.0 || rating > 5.0) "Rating must be between 1 and 5" else null)
   }
 
   /**
@@ -143,16 +144,6 @@ class ReviewHuntViewModel(
     }
     _uiState.value = _uiState.value.copy(isSubmitted = true)
     reviewHuntToRepository(userID, hunt)
-  }
-
-  /** Handles the save button click event. Validates the input and updates the UI state. */
-  fun onSaveClick() {
-    val state = _uiState.value
-    if (!state.isValid) {
-      setErrorMsg("At least one field is not valid")
-      return
-    }
-    _uiState.value = _uiState.value.copy(isSubmitted = true)
   }
 
   /** Adds a photo to the current list of photos in the UI state. */
