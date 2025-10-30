@@ -31,6 +31,9 @@ import org.json.JSONObject
  * @property selectedHunt The hunt selected in overview mode (null when none is selected).
  * @property isFocused Whether the UI shows only the selected hunt’s route (start/middle/end).
  * @property errorMsg Optional human-readable error for transient failures (e.g., loading).
+ * @property route Decoded list of [LatLng] points forming the street-following path returned by
+ * the Google Directions API.
+ * @property isRouteLoading Whether the Directions API request is in progress for the selected hunt.
  */
 data class MapUIState(
     val target: LatLng = LatLng(46.519962, 6.633597),
@@ -150,6 +153,18 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
     }
   }
 
+  /**
+   * Computes the street-following route for the currently selected hunt using the Google Directions API.
+   *
+   * - Builds a request based on the hunt’s start, middle checkpoints, and end coordinates.
+   * - Launches the network call on [Dispatchers.IO] to avoid blocking the main thread.
+   * - On success, updates [MapUIState.route] with a decoded polyline following real roads and
+   *   sets [MapUIState.isRouteLoading] to false.
+   * - On failure, catches the exception, sets [MapUIState.errorMsg], clears any existing route, and
+   *   resets the loading flag.
+   *
+   * @param travelMode Travel mode for the route (e.g., "walking" or "driving").
+   */
   private suspend fun computeRouteForSelectedHunt(travelMode: String = "walking") {
     val hunt = _uiState.value.selectedHunt ?: return
     _uiState.value = _uiState.value.copy(isRouteLoading = true)
@@ -171,6 +186,26 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
       _uiState.value = _uiState.value.copy(isRouteLoading = false, route = emptyList())
     }
   }
+
+    /**
+     * Performs a synchronous call to the Google Directions REST API and decodes the resulting route polyline.
+     *
+     * - Constructs the API request URL with origin, destination, waypoints, and travel mode.
+     * - Executes an HTTP GET request via [HttpURLConnection].
+     * - Parses the JSON response and handles API error statuses.
+     * - Decodes detailed step-level polylines from each leg for high-precision paths.
+     * - Falls back to the overview polyline if step data is unavailable.
+     * - Returns a list of [LatLng] points representing the route in map order.
+     *
+     * @param originLat Latitude of the route start.
+     * @param originLng Longitude of the route start.
+     * @param destLat Latitude of the route end.
+     * @param destLng Longitude of the route end.
+     * @param waypoints Ordered list of intermediate checkpoint coordinates (may be empty).
+     * @param travelMode Travel mode to request from Directions API (e.g., "walking", "driving").
+     * @return List of [LatLng] points forming the decoded route polyline.
+     * @throws IllegalStateException if the API response contains an error status.
+     */
 
   private fun requestDirectionsPolyline(
       originLat: Double,
