@@ -93,4 +93,59 @@ class ProfileViewModelTest {
     val state = viewModel.uiState.value
     assertEquals("Alice", state.profile?.author?.pseudonym)
   }
+
+  @Test
+  fun loadProfile_with_null_userId_uses_currentUid() = runTest {
+    viewModel.loadProfile(null)
+    advanceUntilIdle()
+    val state = viewModel.uiState.value
+    assertEquals("Alice", state.profile?.author?.pseudonym)
+    assertTrue(state.isMyProfile)
+  }
+
+  @Test
+  fun loadProfile_sets_isMyProfile_correctly() = runTest {
+    viewModel.loadProfile("user1")
+    advanceUntilIdle()
+    assertTrue(viewModel.uiState.value.isMyProfile)
+
+    val profileBob =
+        Profile(
+            uid = "user2",
+            author = Author("Bob", "Bio", 0, 4.0, 3.5),
+            myHunts = mutableListOf(),
+            doneHunts = mutableListOf(),
+            likedHunts = mutableListOf())
+    repository.addProfile(profileBob)
+
+    viewModel.loadProfile("user2")
+    advanceUntilIdle()
+    assertFalse(viewModel.uiState.value.isMyProfile)
+  }
+
+  @Test
+  fun loadHunts_sets_error_on_failure() = runTest {
+    viewModel.loadProfile("user1")
+    advanceUntilIdle()
+
+    viewModel.loadHunts("nonexistent")
+    advanceUntilIdle()
+
+    val state = viewModel.uiState.value
+    assertNotNull(state)
+  }
+
+  @Test
+  fun currentUid_returns_injected_uid() {
+    assertEquals("user1", viewModel.currentUid)
+  }
+
+  @Test
+  fun loadProfile_without_logged_in_user_shows_error() = runTest {
+    val viewModelNoUid = ProfileViewModel(repository)
+    viewModelNoUid.loadProfile(null)
+    advanceUntilIdle()
+
+    assertEquals("User not logged in", viewModelNoUid.uiState.value.errorMsg)
+  }
 }

@@ -13,8 +13,8 @@ class ProfileRepositoryLocal : ProfileRepository {
   }
 
   override suspend fun createProfile(profile: Profile) {
-    if (profiles.any { it.uid == profile.uid }) {
-      throw IllegalArgumentException("Profile with ID ${profile.uid} already exists")
+    require(!(profiles.any { it.uid == profile.uid })) {
+      "Profile with ID ${profile.uid} already exists"
     }
     profiles.add(profile)
   }

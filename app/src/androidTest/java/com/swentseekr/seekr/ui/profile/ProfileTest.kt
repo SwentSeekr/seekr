@@ -1,5 +1,5 @@
 package com.swentseekr.seekr.ui.profile
-/*
+
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
@@ -27,8 +27,9 @@ class ProfileScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private fun setProfileScreen(profile: Profile) {
-    val profile = profile
-    composeTestRule.setContent { ProfileScreen(profile, currentUserId = "user123") }
+    composeTestRule.setContent {
+      ProfileScreen(userId = "user123", testMode = true, testProfile = profile)
+    }
   }
 
   private fun checkTabColors(myHuntsColor: Color, doneHuntsColor: Color, likedHuntsColor: Color) {
@@ -89,14 +90,17 @@ class ProfileScreenTest {
     val profile = sampleProfile()
     composeTestRule.setContent {
       ProfileScreen(
-          profile.copy(author = profile.author.copy(profilePicture = 0)), currentUserId = "user123")
+          userId = "user123",
+          testMode = true,
+          testProfile = profile.copy(author = profile.author.copy(profilePicture = 0)))
     }
     composeTestRule.onNodeWithTag(ProfileTestTags.EMPTY_PROFILE_PICTURE).assertIsDisplayed()
   }
 
   @Test
   fun profileScreen_addHuntButton_visibilityDependsOnProfile_notDisplayed() {
-    setProfileScreen(sampleProfile(uid = "otherUser"))
+    composeTestRule.setContent { ProfileScreen(userId = "otherUser", testMode = false) }
+
     composeTestRule.onNodeWithTag(ProfileTestTags.ADD_HUNT).assertIsNotDisplayed()
   }
 
@@ -198,4 +202,4 @@ class ProfileScreenTest {
   fun profileScreen_displaysEmptyMessage_whenLikedHuntsEmpty() {
     assertEmptyStateForTab(ProfileTestTags.TAB_LIKED_HUNTS)
   }
-}*/
+}

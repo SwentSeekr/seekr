@@ -107,18 +107,16 @@ fun ProfileScreen(
     userId: String? = null,
     viewModel: ProfileViewModel = viewModel(),
     onAddHunt: () -> Unit = {},
-    testMode: Boolean = false
+    testMode: Boolean = false,
+    testProfile: Profile? = null,
 ) {
   val profile =
       if (testMode) {
-        mockProfileData()
+        testProfile ?: mockProfileData()
       } else {
         val uiState by viewModel.uiState.collectAsState()
 
-        LaunchedEffect(userId) {
-          viewModel.loadProfile(userId)
-          // viewModel.loadHunts( userId)
-        }
+        LaunchedEffect(userId) { viewModel.loadProfile(userId) }
         if (uiState.errorMsg != null) {
           Text("Error: ${uiState.errorMsg}", color = Color.Red)
           return
@@ -153,9 +151,7 @@ fun ProfileScreen(
         ) {
           Row(
               modifier = Modifier.fillMaxWidth().padding(16.dp),
-              verticalAlignment =
-                  Alignment.CenterVertically // centers text vertically next to the image
-              ) {
+              verticalAlignment = Alignment.CenterVertically) {
                 ProfilePicture(profilePicture = profile.author.profilePicture)
                 Column {
                   Text(
@@ -218,10 +214,6 @@ fun ProfileScreen(
                 } else {
                   items(huntsToDisplay.size) { index ->
                     val hunt = huntsToDisplay[index]
-                    // val huntUiState = HuntUiState(hunt = hunt, isLiked = false, isArchived =
-                    // false)
-                    // // until I implement the ViewModel
-                    // HuntCard(//huntUiState)
                     HuntCard(
                         hunt,
                         modifier =
@@ -232,45 +224,6 @@ fun ProfileScreen(
         }
       }
 }
-
-/** Preview for the profile screen in Android Studio. */
-/*@Preview
-@Composable
-fun ProfileScreenPreview() {
-  val sampleAuthor =
-      Author(
-          pseudonym = "Spike Man",
-          bio = "Avid adventurer and puzzle solver.",
-          profilePicture = 0,
-          reviewRate = 4.5,
-          sportRate = 4.8)
-
-  val profile =
-      Profile(
-          uid = "user123",
-          author = sampleAuthor,
-          myHunts =
-              MutableList(1) {
-                Hunt(
-                    uid = "hunt123",
-                    start = Location(40.7128, -74.0060, "New York"),
-                    end = Location(40.730610, -73.935242, "Brooklyn"),
-                    middlePoints = emptyList(),
-                    status = HuntStatus.FUN,
-                    title = "City Exploration",
-                    description = "Discover hidden gems in the city",
-                    time = 2.5,
-                    distance = 5.0,
-                    difficulty = Difficulty.DIFFICULT,
-                    authorId = "0",
-                    image = R.drawable.ic_launcher_foreground,
-                    reviewRate = 4.5)
-              },
-          doneHunts = mutableListOf(),
-          likedHunts = mutableListOf())
-
-  ProfileScreen(profile = profile, userId = "user123")
-}*/
 
 /**
  * Displays a toolbar with tabs for switching between "My Hunts", "Done Hunts", and "Liked Hunts".
