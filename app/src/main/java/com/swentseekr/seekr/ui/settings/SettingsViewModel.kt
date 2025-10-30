@@ -26,7 +26,7 @@ class SettingsViewModel(private val authRepository: AuthRepository = AuthReposit
   val uiState: StateFlow<SettingsUIState> = _uiState.asStateFlow()
 
   init {
-    displayAppVersion(BuildConfig.VERSION_NAME)
+    setAppVersion(BuildConfig.VERSION_NAME)
   }
 
   fun signOut(credentialManager: CredentialManager): Unit {
@@ -47,7 +47,7 @@ class SettingsViewModel(private val authRepository: AuthRepository = AuthReposit
   }
 
   // We could have used BuildConfig directly in the UI, but this way it's easier to test
-  fun displayAppVersion(version: String) {
+  fun setAppVersion(version: String) {
     _uiState.update { it.copy(appVersion = version) }
   }
 }
