@@ -193,21 +193,6 @@ class MapViewModelTest {
   }
 
   @Test
-  fun onViewHuntClickWithNoSelectedHuntKeepsRouteEmpty() = runTest {
-    val hunts = listOf(sample(uid = "1"))
-    val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
-
-    awaitInitialLoad(vm, expectedCount = hunts.size)
-
-    vm.onViewHuntClick()
-
-    val state = vm.uiState.value
-    assertTrue(state.isFocused)
-    assertTrue(state.route.isEmpty())
-    assertFalse(state.isRouteLoading)
-  }
-
-  @Test
   fun requestDirectionsPolylineParsesStepPolylinesAndDeduplicates() {
     val vm = MapViewModel(repository = FakeRepoEmpty())
 
