@@ -13,6 +13,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import com.google.maps.android.PolyUtil
+import com.swentseekr.seekr.BuildConfig
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 /**
  * Immutable UI model for the Map screen.
@@ -28,7 +37,9 @@ data class MapUIState(
     val hunts: List<Hunt> = emptyList(),
     val selectedHunt: Hunt? = null,
     val isFocused: Boolean = false,
-    val errorMsg: String? = null
+    val errorMsg: String? = null,
+    val route: List<LatLng> = emptyList(),
+    val isRouteLoading: Boolean = false
 )
 
 /**
@@ -102,7 +113,10 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
    * camera fits all checkpoints.
    */
   fun onViewHuntClick() {
-    _uiState.value = _uiState.value.copy(isFocused = true)
+    _uiState.value = _uiState.value.copy(isFocused = true, route = emptyList())
+    viewModelScope.launch {
+      computeRouteForSelectedHunt(travelMode = "walking")
+    }
   }
 
   /**
@@ -112,7 +126,7 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
    * movement is controlled by the composable (e.g., no forced reset).
    */
   fun onBackToAllHunts() {
-    _uiState.value = _uiState.value.copy(isFocused = false, selectedHunt = null)
+    _uiState.value = _uiState.value.copy(isFocused = false, selectedHunt = null, route = emptyList())
   }
 
   /**
@@ -134,6 +148,82 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
       } catch (e: Exception) {
         setErrorMsg("Failed to load hunts: ${e.message}")
       }
+    }
+  }
+
+  private suspend fun computeRouteForSelectedHunt(travelMode: String = "walking") {
+    val hunt = _uiState.value.selectedHunt ?: return
+    _uiState.value = _uiState.value.copy(isRouteLoading = true)
+
+    try {
+      val points = withContext(Dispatchers.IO) {
+        requestDirectionsPolyline(
+          originLat = hunt.start.latitude,
+          originLng = hunt.start.longitude,
+          destLat = hunt.end.latitude,
+          destLng = hunt.end.longitude,
+          waypoints = hunt.middlePoints.map { it.latitude to it.longitude },
+          travelMode = travelMode
+        )
+      }
+      _uiState.value = _uiState.value.copy(route = points, isRouteLoading = false)
+    } catch (e: Exception) {
+      setErrorMsg("Failed to get route: ${e.message}")
+      _uiState.value = _uiState.value.copy(isRouteLoading = false, route = emptyList())
+    }
+  }
+
+  private fun requestDirectionsPolyline(
+    originLat: Double,
+    originLng: Double,
+    destLat: Double,
+    destLng: Double,
+    waypoints: List<Pair<Double, Double>>,
+    travelMode: String
+  ): List<LatLng> {
+
+    val origin = "${originLat},${originLng}"
+    val destination = "${destLat},${destLng}"
+
+    val waypointParam = if (waypoints.isNotEmpty()) {
+      waypoints.joinToString(separator = "|") { (lat, lng) -> "via:$lat,$lng" }
+    } else null
+
+    val base = "https://maps.googleapis.com/maps/api/directions/json"
+    val params = buildList {
+      add("origin=" + URLEncoder.encode(origin, StandardCharsets.UTF_8.name()))
+      add("destination=" + URLEncoder.encode(destination, StandardCharsets.UTF_8.name()))
+      add("mode=" + URLEncoder.encode(travelMode, StandardCharsets.UTF_8.name()))
+      waypointParam?.let {
+        add("waypoints=" + URLEncoder.encode(it, StandardCharsets.UTF_8.name()))
+      }
+      add("key=" + URLEncoder.encode(BuildConfig.MAPS_API_KEY, StandardCharsets.UTF_8.name()))
+    }.joinToString("&")
+
+    val url = URL("$base?$params")
+    val conn = (url.openConnection() as HttpURLConnection).apply {
+      requestMethod = "GET"
+      connectTimeout = 15000
+      readTimeout = 15000
+      doInput = true
+    }
+
+    conn.inputStream.use { stream ->
+      val body = stream.bufferedReader().readText()
+      val json = JSONObject(body)
+
+      val status = json.optString("status")
+      if (status != "OK") {
+        val message = json.optString("error_message", status)
+        throw IllegalStateException("Directions API error: $message")
+      }
+
+      val routes = json.getJSONArray("routes")
+      if (routes.length() == 0) return emptyList()
+
+      val overview = routes.getJSONObject(0).getJSONObject("overview_polyline").getString("points")
+      val decoded = PolyUtil.decode(overview)
+      return decoded
     }
   }
 }

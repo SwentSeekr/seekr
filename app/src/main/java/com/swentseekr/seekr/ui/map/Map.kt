@@ -50,6 +50,7 @@ import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.ui.theme.Green
 import kotlinx.coroutines.launch
+import com.google.maps.android.compose.Polyline
 
 /**
  * Test tags used by instrumented tests to target key UI elements on the Map screen.
@@ -144,6 +145,13 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
                 state = MarkerState(LatLng(selectedHunt.end.latitude, selectedHunt.end.longitude)),
                 title = "End: ${selectedHunt.title}",
                 icon = bitmapDescriptorFromVector(LocalContext.current, R.drawable.ic_end_marker))
+              if (uiState.route.isNotEmpty()) {
+                  Polyline(
+                      points = uiState.route,
+                      width = 12f,
+                      color = Color(0xFF2196F3)
+                  )
+              }
           } else {
             uiState.hunts.forEach { hunt ->
               Marker(
