@@ -3,7 +3,7 @@ package com.swentseekr.seekr.model.hunt
 interface HuntReviewRepository {
   fun getNewUid(): String
 
-  suspend fun getReviewHunt(reviewId: String): HuntReview?
+  suspend fun getReviewHunt(reviewId: String): HuntReview
 
   suspend fun addReviewHunt(review: HuntReview)
 
