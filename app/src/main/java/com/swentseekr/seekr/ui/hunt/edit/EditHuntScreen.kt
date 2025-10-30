@@ -13,7 +13,9 @@ fun EditHuntScreen(
     onDone: () -> Unit = {},
     testMode: Boolean = false,
 ) {
-  LaunchedEffect(huntId) { editHuntViewModel.load(huntId) }
+  LaunchedEffect(huntId) {
+    if (huntId.isNotBlank() && huntId.isNotEmpty()) editHuntViewModel.load(huntId)
+  }
 
   BaseHuntScreen(
       title = "Edit your Hunt",
