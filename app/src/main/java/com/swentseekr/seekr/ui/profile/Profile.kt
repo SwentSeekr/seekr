@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.model.profile.mockProfileData
 import com.swentseekr.seekr.ui.components.HuntCard
 import com.swentseekr.seekr.ui.components.MAX_RATING
 import com.swentseekr.seekr.ui.components.Rating
@@ -105,27 +106,32 @@ enum class ProfileTab {
 fun ProfileScreen(
     userId: String? = null,
     viewModel: ProfileViewModel = viewModel(),
-    onAddHunt: () -> Unit = {}
+    onAddHunt: () -> Unit = {},
+    testMode: Boolean = false
 ) {
-  val uiState by viewModel.uiState.collectAsState()
+  val profile =
+      if (testMode) {
+        mockProfileData()
+      } else {
+        val uiState by viewModel.uiState.collectAsState()
 
-  LaunchedEffect(userId) {
-    viewModel.loadProfile(userId)
-    // viewModel.loadHunts( userId)
-  }
-  val profile = uiState.profile
-
-  if (uiState.errorMsg != null) {
-    Text("Error: ${uiState.errorMsg}", color = Color.Red)
-    return
-  }
+        LaunchedEffect(userId) {
+          viewModel.loadProfile(userId)
+          // viewModel.loadHunts( userId)
+        }
+        if (uiState.errorMsg != null) {
+          Text("Error: ${uiState.errorMsg}", color = Color.Red)
+          return
+        }
+        uiState.profile
+      }
 
   if (profile == null) {
     Text("No profile found", color = Color.Gray)
     return
   }
 
-  val isMyProfile = uiState.isMyProfile
+  val isMyProfile = testMode || viewModel.uiState.collectAsState().value.isMyProfile
 
   var selectedTab by remember { mutableStateOf(ProfileTab.MY_HUNTS) }
   Scaffold(

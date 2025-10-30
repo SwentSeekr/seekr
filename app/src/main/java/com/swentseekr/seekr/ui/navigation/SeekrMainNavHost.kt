@@ -146,7 +146,8 @@ fun SeekrMainNavHost(
                 val profile = mockProfileData()
                 ProfileScreen(
                     userId = profile.uid,
-                    onAddHunt = { navController.navigate(SeekrDestination.AddHunt.route) })
+                    onAddHunt = { navController.navigate(SeekrDestination.AddHunt.route) },
+                    testMode = testMode)
               }
               composable(
                   route = SeekrDestination.HuntCard.route,

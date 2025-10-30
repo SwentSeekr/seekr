@@ -1,7 +1,6 @@
 package com.swentseekr.seekr.model.profile
 
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.ui.profile.Profile
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment
@@ -15,50 +14,59 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileRepositoryFirestoreTest {
-  private var repository = ProfileRepositoryProvider.repository
+  private lateinit var repository: ProfileRepository
   private lateinit var auth: FirebaseAuth
 
   @Before
-  fun setup() = runTest {
+  fun setup() {
     FirebaseTestEnvironment.setup()
-    if (FirebaseTestEnvironment.isEmulatorActive()) {
-      clearEmulatorData()
+    runTest {
+      if (FirebaseTestEnvironment.isEmulatorActive()) {
+        clearEmulatorData()
+      }
+      auth = FirebaseAuth.getInstance()
+      auth.signInAnonymously().await()
+
+      repository = ProfileRepositoryProvider.repository
     }
-
-    auth = FirebaseAuth.getInstance()
-    auth.signInAnonymously().await()
-
-    val repo = ProfileRepositoryFirestore(FirebaseFirestore.getInstance())
-    ProfileRepositoryProvider.repository = repo
   }
 
   @Test
-  fun current_user_not_null() {
+  fun current_user_not_null() = runTest {
     val currentUser = auth.currentUser
     assertNotNull("FirebaseAuth currentUser should not be null", currentUser)
   }
 
   @Test
   fun canRetrieveProfile() = runTest {
-    val uid = auth.currentUser?.uid!!
-    val retrieved = repository.getProfile(uid)
+    val uid = auth.currentUser!!.uid
+    val profile =
+        Profile(
+            uid = uid,
+            author = Author("Tester", "This is a bio", 0, 4.5, 4.0),
+            myHunts = mutableListOf(),
+            doneHunts = mutableListOf(),
+            likedHunts = mutableListOf())
 
-    assertNotNull("Profile should be retrieved", retrieved)
+    repository.createProfile(profile)
+
+    val retrieved = repository.getProfile(uid)
+    assertNotNull("Profile should be retrieved after creation", retrieved)
     assertEquals(uid, retrieved?.uid)
     assertEquals("Tester", retrieved?.author?.pseudonym)
   }
 
   @Test
-  fun canUpdateOwnProfile() = runTest {
+  fun updateProfile_reflectsChanges() = runTest {
     val uid = auth.currentUser!!.uid
     val profile =
         Profile(
             uid = uid,
-            author = Author("Tester", "Bio", 0, 4.5, 4.0),
+            author = Author("OldName", "Old bio", 0, 3.0, 3.0),
             myHunts = mutableListOf(),
             doneHunts = mutableListOf(),
             likedHunts = mutableListOf())
-    repository.updateProfile(profile)
+    repository.createProfile(profile)
 
     val updated = profile.copy(author = profile.author.copy(pseudonym = "NewName"))
     repository.updateProfile(updated)
@@ -68,8 +76,11 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun getNonExistentProfileReturnsNull() = runTest {
-    val profile = repository.getProfile("unknown")
-    assertNull("Non-existent profile should return null", profile)
+  fun getProfile_autoCreatesDefault_whenMissing() = runTest {
+    val missingUid = "unknown_user"
+    val profile = repository.getProfile(missingUid)
+    assertNotNull("Default profile should be auto-created if missing", profile)
+    assertEquals(missingUid, profile!!.uid)
+    assertEquals("New User", profile.author.pseudonym)
   }
 }
