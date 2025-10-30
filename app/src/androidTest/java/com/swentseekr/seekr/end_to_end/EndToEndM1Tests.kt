@@ -9,8 +9,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.firebase.FirebaseApp
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
-import com.swentseekr.seekr.ui.hunt.add.AddHuntScreenTestTags
-import com.swentseekr.seekr.ui.hunt.add.AddPointsMapScreenTestTags
+import com.swentseekr.seekr.ui.hunt.AddPointsMapScreenTestTags
+import com.swentseekr.seekr.ui.hunt.HuntScreenTestTags
 import com.swentseekr.seekr.ui.navigation.NavigationTestTags
 import com.swentseekr.seekr.ui.navigation.SeekrMainNavHost
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
@@ -63,30 +63,30 @@ class EndToEndM1Tests {
     // Step 4 – Click on the "Add Hunt" button in the Profile screen
     composeTestRule.onNodeWithTag(ProfileTestTags.ADD_HUNT).performClick()
     composeTestRule.waitForIdle()
-    composeTestRule.onNodeWithTag(AddHuntScreenTestTags.ADD_HUNT_SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(HuntScreenTestTags.ADD_HUNT_SCREEN).assertIsDisplayed()
 
     // Step 5 – Fill in the required Add Hunt form fields
     composeTestRule
-        .onNodeWithTag(AddHuntScreenTestTags.INPUT_HUNT_TITLE)
+        .onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_TITLE)
         .performTextInput("E2E Test Hunt")
 
     composeTestRule
-        .onNodeWithTag(AddHuntScreenTestTags.INPUT_HUNT_DESCRIPTION)
+        .onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_DESCRIPTION)
         .performTextInput("This hunt is added during an end-to-end test.")
 
-    composeTestRule.onNodeWithTag(AddHuntScreenTestTags.INPUT_HUNT_TIME).performTextInput("2.0")
+    composeTestRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_TIME).performTextInput("2.0")
 
-    composeTestRule.onNodeWithTag(AddHuntScreenTestTags.INPUT_HUNT_DISTANCE).performTextInput("5.5")
+    composeTestRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_DISTANCE).performTextInput("5.5")
 
     // Select hunt status and difficulty
-    composeTestRule.onNodeWithTag(AddHuntScreenTestTags.DROPDOWN_STATUS).performClick()
+    composeTestRule.onNodeWithTag(HuntScreenTestTags.DROPDOWN_STATUS).performClick()
     composeTestRule.onAllNodes(hasText(HuntStatus.FUN.name)).onFirst().performClick()
 
-    composeTestRule.onNodeWithTag(AddHuntScreenTestTags.DROPDOWN_DIFFICULTY).performClick()
+    composeTestRule.onNodeWithTag(HuntScreenTestTags.DROPDOWN_DIFFICULTY).performClick()
     composeTestRule.onAllNodes(hasText(Difficulty.EASY.name)).onFirst().performClick()
 
     // Step 6 – Click the “Select Locations” button to open the map screen
-    composeTestRule.onNodeWithTag(AddHuntScreenTestTags.BUTTON_SELECT_LOCATION).performClick()
+    composeTestRule.onNodeWithTag(HuntScreenTestTags.BUTTON_SELECT_LOCATION).performClick()
 
     // Wait until the map screen is displayed
     composeTestRule.waitUntil(timeoutMillis = 5_000) {
@@ -105,7 +105,7 @@ class EndToEndM1Tests {
     composeTestRule.waitForIdle()
 
     // Step 8 – Click “Save Hunt”
-    composeTestRule.onNodeWithTag(AddHuntScreenTestTags.HUNT_SAVE).performClick()
+    composeTestRule.onNodeWithTag(HuntScreenTestTags.HUNT_SAVE).performClick()
 
     // Step 9 – Wait until the Overview screen becomes visible again
     composeTestRule.waitUntil(timeoutMillis = 10_000) {

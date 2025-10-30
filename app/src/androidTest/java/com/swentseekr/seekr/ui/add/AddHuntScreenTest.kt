@@ -13,8 +13,8 @@ import androidx.compose.ui.test.performTextInput
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.ui.hunt.HuntScreenTestTags
 import com.swentseekr.seekr.ui.hunt.add.AddHuntScreen
-import com.swentseekr.seekr.ui.hunt.add.AddHuntScreenTestTags
 import com.swentseekr.seekr.ui.hunt.add.AddHuntViewModel
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -47,7 +47,7 @@ class AddHuntScreenTest {
     setContent(vm, onGoBack = { backCalled = true })
 
     composeRule.onNodeWithText(add_hunt_text).assertExists()
-    composeRule.onNodeWithTag(AddHuntScreenTestTags.BUTTON_SELECT_LOCATION).assertExists()
+    composeRule.onNodeWithTag(HuntScreenTestTags.BUTTON_SELECT_LOCATION).assertExists()
     composeRule.onNodeWithContentDescription("Back").performClick()
     assertTrue(backCalled)
   }
@@ -64,23 +64,23 @@ class AddHuntScreenTest {
     }
 
     // Fill required fields
-    composeRule.onNodeWithTag(AddHuntScreenTestTags.INPUT_HUNT_TITLE).performTextInput("Title")
-    composeRule.onNodeWithTag(AddHuntScreenTestTags.INPUT_HUNT_DESCRIPTION).performTextInput("Desc")
-    composeRule.onNodeWithTag(AddHuntScreenTestTags.INPUT_HUNT_TIME).performTextInput("1.25")
-    composeRule.onNodeWithTag(AddHuntScreenTestTags.INPUT_HUNT_DISTANCE).performTextInput("3.4")
+    composeRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_TITLE).performTextInput("Title")
+    composeRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_DESCRIPTION).performTextInput("Desc")
+    composeRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_TIME).performTextInput("1.25")
+    composeRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_DISTANCE).performTextInput("3.4")
 
     // Select status
-    val statusField = composeRule.onNodeWithTag(AddHuntScreenTestTags.DROPDOWN_STATUS)
+    val statusField = composeRule.onNodeWithTag(HuntScreenTestTags.DROPDOWN_STATUS)
     statusField.performClick()
     composeRule.onNodeWithText(HuntStatus.values().first().name).performClick()
 
     // Select difficulty
-    val diffField = composeRule.onNodeWithTag(AddHuntScreenTestTags.DROPDOWN_DIFFICULTY)
+    val diffField = composeRule.onNodeWithTag(HuntScreenTestTags.DROPDOWN_DIFFICULTY)
     diffField.performClick()
     composeRule.onNodeWithText(Difficulty.values().first().name).performClick()
 
     // Save should be enabled
-    val save = composeRule.onNodeWithTag(AddHuntScreenTestTags.HUNT_SAVE)
+    val save = composeRule.onNodeWithTag(HuntScreenTestTags.HUNT_SAVE)
     save.assertIsEnabled()
 
     // Not logged in -> addHunt returns false, error is emitted then cleared by effect
@@ -108,11 +108,11 @@ class AddHuntScreenTest {
     assertNull(vm.uiState.value.errorMsg)
 
     // Fix title validation message path and ensure UI updates don’t crash
-    val title = composeRule.onNodeWithTag(AddHuntScreenTestTags.INPUT_HUNT_TITLE)
+    val title = composeRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_TITLE)
     title.performTextInput("A")
     title.performTextClearance()
     composeRule
-        .onNodeWithTag(AddHuntScreenTestTags.ERROR_MESSAGE, useUnmergedTree = true)
+        .onNodeWithTag(HuntScreenTestTags.ERROR_MESSAGE, useUnmergedTree = true)
         .assertExists()
   }
 }
