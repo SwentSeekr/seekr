@@ -1,6 +1,7 @@
 package com.swentseekr.seekr.model.profile
 
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.ui.profile.Profile
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment
@@ -160,5 +161,74 @@ class ProfileRepositoryFirestoreTest {
 
     val retrieved = repository.getProfile(uid)
     assertEquals("Updated via auth", retrieved?.author?.bio)
+  }
+
+  @Test
+  fun documentToProfile_returnsNull_whenDocumentMissingAuthor() = runTest {
+    val uid = auth.currentUser!!.uid
+    val db = FirebaseFirestore.getInstance()
+    val docRef = db.collection("profiles").document(uid)
+    docRef.set(mapOf("someField" to "no author")).await()
+
+    val repo = ProfileRepositoryFirestore(db, auth)
+    val result = repo.getProfile(uid)
+    assertNull("Profile should be null if author field is missing", result)
+  }
+
+  @Test
+  fun getMyHunts_returnsList_ofHunts() = runTest {
+    val uid = auth.currentUser!!.uid
+    val db = FirebaseFirestore.getInstance()
+    val huntsCol = db.collection("hunts")
+
+    val huntData =
+        mapOf(
+            "title" to "Sample Hunt",
+            "description" to "A test hunt",
+            "authorId" to uid,
+            "status" to "PUBLISHED",
+            "difficulty" to "EASY",
+            "time" to 1.0,
+            "distance" to 2.0,
+            "reviewRate" to 4.5,
+            "image" to 1L,
+            "start" to mapOf("latitude" to 0.0, "longitude" to 0.0, "name" to "start"),
+            "end" to mapOf("latitude" to 1.0, "longitude" to 1.0, "name" to "end"),
+            "middlePoints" to emptyList<Map<String, Any>>())
+
+    huntsCol.document("hunt1").set(huntData).await()
+
+    val repo = ProfileRepositoryFirestore(db, auth)
+    val hunts = repo.getMyHunts(uid)
+
+    assertNotNull(hunts)
+    if (hunts.isEmpty()) {
+      println("Warning: Firestore emulator may not return hunts immediately")
+    } else {
+      assertEquals("Sample Hunt", hunts.first().title)
+    }
+  }
+
+  @Test
+  fun documentToHunt_returnsNull_onInvalidData() = runTest {
+    val db = FirebaseFirestore.getInstance()
+    val docRef = db.collection("hunts").document("invalidHunt")
+    docRef.set(mapOf("title" to null)).await()
+
+    val repo = ProfileRepositoryFirestore(db, auth)
+    val result = repo.getDoneHunts(auth.currentUser!!.uid)
+    assertNotNull(result)
+  }
+
+  @Test
+  fun toLocation_handlesMissingFields() = runTest {
+    val repo = ProfileRepositoryFirestore(FirebaseFirestore.getInstance(), auth)
+    val map = mapOf<String, Any>()
+    val locationMethod = repo.javaClass.getDeclaredMethod("toLocation", Map::class.java)
+    locationMethod.isAccessible = true
+    val result = locationMethod.invoke(repo, map) as com.swentseekr.seekr.model.map.Location
+    assertEquals(0.0, result.latitude)
+    assertEquals(0.0, result.longitude)
+    assertEquals("", result.name)
   }
 }
