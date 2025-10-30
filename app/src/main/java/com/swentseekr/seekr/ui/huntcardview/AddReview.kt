@@ -39,6 +39,10 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
 
+val SPACEPADDING = 16.dp
+val TITLEFONTSIZE = 24.sp
+val SUBTITLEFONTSIZE = 14.sp
+
 object AddReviewScreenTestTags {
   const val GO_BACK_BUTTON = "HuntCardReview_GoBackButton"
   const val INFO_COLLUMN = "HuntCardReview_InfoCollumn"
@@ -80,15 +84,17 @@ fun AddReviewScreen(
           reviewRate = 4.5)
   var rating by remember { mutableStateOf("") }
   var comment by remember { mutableStateOf("") }
+  val isRatingValid = rating.toDoubleOrNull()?.let { it in 1.0..5.0 } == true
+
   Scaffold(
       topBar = {
         TopAppBar(
             title = {
               Text(
                   text = "Add Review Hunt",
-                  fontSize = 24.sp,
+                  fontSize = TITLEFONTSIZE,
                   fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                  modifier = modifier.padding(vertical = 16.dp))
+                  modifier = modifier.padding(vertical = SPACEPADDING))
             },
             navigationIcon = {
               IconButton(
@@ -110,17 +116,17 @@ fun AddReviewScreen(
                     .testTag(AddReviewScreenTestTags.INFO_COLLUMN),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top) {
-              Spacer(modifier = modifier.height(16.dp))
+              Spacer(modifier = modifier.height(SPACEPADDING))
               Text(
                   text = hunt.title,
-                  fontSize = 24.sp,
+                  fontSize = TITLEFONTSIZE,
                   fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                   modifier = modifier.padding(vertical = 4.dp))
               Text(
                   text = hunt.uid,
-                  fontSize = 14.sp,
+                  fontSize = SUBTITLEFONTSIZE,
               )
-              Spacer(modifier = modifier.height(16.dp))
+              Spacer(modifier = modifier.height(SPACEPADDING))
 
               OutlinedTextField(
                   value = rating,
@@ -166,6 +172,7 @@ fun AddReviewScreen(
                         }
                     Button(
                         onClick = onDone,
+                        enabled = isRatingValid,
                         modifier = modifier.testTag(AddReviewScreenTestTags.DONE_BUTTON)) {
                           Text("Done")
                         }

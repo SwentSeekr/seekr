@@ -59,6 +59,9 @@ class HuntCardReviewScreenTest {
 
     composeRule.onNodeWithTag(AddReviewScreenTestTags.GO_BACK_BUTTON).performClick()
     composeRule.onNodeWithTag(AddReviewScreenTestTags.CANCEL_BUTTON).performClick()
+
+    composeRule.onNodeWithTag(AddReviewScreenTestTags.RATE_TEXTFIELD).performTextInput("4")
+
     composeRule.onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON).performClick()
 
     assertTrue(backCalled)
