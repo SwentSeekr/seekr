@@ -170,6 +170,7 @@ class ReviewHuntViewModelTest {
     assertEquals(
         "Cannot clear form, review not submitted successfully.", viewModel.uiState.value.errorMsg)
   }
+
   @Test
   fun onSaveClick_withInvalidData_setsErrorMsg() = runTest {
     viewModel.onSaveClick()
@@ -210,6 +211,7 @@ class ReviewHuntViewModelTest {
     val reviewsAfterDelete = fakeReviewRepository.getHuntReviews(testHunt.uid)
     assertTrue(reviewsAfterDelete.isEmpty())
   }
+
   @Test
   fun deleteReview_whenUserIsNotAuthor_setsErrorMessage() = runTest {
     viewModel.setReviewText("Nice!")

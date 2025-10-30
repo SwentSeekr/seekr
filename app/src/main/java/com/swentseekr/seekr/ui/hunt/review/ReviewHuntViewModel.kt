@@ -94,21 +94,25 @@ class ReviewHuntViewModel(
     }
   }
   /** Deletes a review if the user is the author. */
-    fun deleteReview(reviewID: String, userID: String, currentUserId: String? = Firebase.auth.currentUser?.uid) {
-        viewModelScope.launch {
-            try {
-                val currentUid = currentUserId ?: "None (B2)"
-                if (userID == currentUid) {
-                    repositoryReview.deleteReviewHunt(reviewId = reviewID)
-                } else {
-                    setErrorMsg("You can only delete your own review.")
-                }
-            } catch (e: Exception) {
-                Log.e("ReviewHuntViewModel", "Error deleting Review for hunt", e)
-                setErrorMsg("Failed to delete Hunt: ${e.message}")
-            }
+  fun deleteReview(
+      reviewID: String,
+      userID: String,
+      currentUserId: String? = Firebase.auth.currentUser?.uid
+  ) {
+    viewModelScope.launch {
+      try {
+        val currentUid = currentUserId ?: "None (B2)"
+        if (userID == currentUid) {
+          repositoryReview.deleteReviewHunt(reviewId = reviewID)
+        } else {
+          setErrorMsg("You can only delete your own review.")
         }
+      } catch (e: Exception) {
+        Log.e("ReviewHuntViewModel", "Error deleting Review for hunt", e)
+        setErrorMsg("Failed to delete Hunt: ${e.message}")
+      }
     }
+  }
 
   /** Sets the review text and validates it. */
   fun setReviewText(text: String) {
