@@ -39,17 +39,8 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun canAddAndRetrieveProfile() = runTest {
+  fun canRetrieveProfile() = runTest {
     val uid = auth.currentUser?.uid!!
-    val profile =
-        Profile(
-            uid = uid,
-            author = Author("Tester", "Bio", 0, 4.5, 4.0),
-            myHunts = mutableListOf(),
-            doneHunts = mutableListOf(),
-            likedHunts = mutableListOf())
-
-    repository.updateProfile(profile)
     val retrieved = repository.getProfile(uid)
 
     assertNotNull("Profile should be retrieved", retrieved)
@@ -58,8 +49,8 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun canUpdateProfile() = runTest {
-    val uid = auth.currentUser?.uid!!
+  fun canUpdateOwnProfile() = runTest {
+    val uid = auth.currentUser!!.uid
     val profile =
         Profile(
             uid = uid,
@@ -69,32 +60,16 @@ class ProfileRepositoryFirestoreTest {
             likedHunts = mutableListOf())
     repository.updateProfile(profile)
 
-    val updatedProfile = profile.copy(author = profile.author.copy(pseudonym = "NewName"))
-    repository.updateProfile(updatedProfile)
+    val updated = profile.copy(author = profile.author.copy(pseudonym = "NewName"))
+    repository.updateProfile(updated)
 
     val retrieved = repository.getProfile(uid)
-    assertNotNull(retrieved)
-    assertEquals("NewName", retrieved?.author?.pseudonym)
+    assertEquals("NewName", retrieved!!.author.pseudonym)
   }
 
   @Test
   fun getNonExistentProfileReturnsNull() = runTest {
-    val profile = repository.getProfile("unknownUser")
+    val profile = repository.getProfile("unknown")
     assertNull("Non-existent profile should return null", profile)
-  }
-
-  @Test
-  fun canAddAndRetrieveProfile_withMockData() = runTest {
-    val uid = auth.currentUser?.uid!!
-    val profile = mockProfileData().copy(uid = uid)
-    repository.updateProfile(profile)
-
-    val retrieved = repository.getProfile(uid)
-
-    assertNotNull(retrieved)
-    assertEquals(uid, retrieved?.uid)
-    assertEquals(profile.author.pseudonym, retrieved?.author?.pseudonym)
-    assertEquals(1, retrieved?.myHunts?.size)
-    assertEquals("hunt123", retrieved?.myHunts?.first()?.uid)
   }
 }

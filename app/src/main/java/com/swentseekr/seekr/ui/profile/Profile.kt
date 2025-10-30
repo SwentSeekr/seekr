@@ -80,11 +80,11 @@ data class TabItem(val tab: ProfileTab, val testTag: String, val icon: ImageVect
  * @property likedHunts Hunts liked by the user.
  */
 data class Profile(
-    val uid: String,
-    val author: Author,
-    val myHunts: MutableList<Hunt>,
-    val doneHunts: MutableList<Hunt>,
-    val likedHunts: MutableList<Hunt>,
+    val uid: String = "",
+    val author: Author = Author(),
+    val myHunts: MutableList<Hunt> = mutableListOf(),
+    val doneHunts: MutableList<Hunt> = mutableListOf(),
+    val likedHunts: MutableList<Hunt> = mutableListOf(),
 )
 
 /** Enum representing the different tabs in the profile screen. */
