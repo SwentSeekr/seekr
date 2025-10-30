@@ -23,8 +23,7 @@ data class ReviewHuntUIState(
     val reviewText: String = "",
     val rating: Double = 0.0,
     val isSubmitted: Boolean = false,
-    val photos: List<PhotoFile> =
-        emptyList<PhotoFile>(),
+    val photos: List<PhotoFile> = emptyList<PhotoFile>(),
     val errorMsg: String? = null,
     val saveSuccessful: Boolean = false,
     val invalidReviewText: String? = null,
@@ -41,16 +40,16 @@ class ReviewHuntViewModel(
 
   private val _uiState = MutableStateFlow(ReviewHuntUIState())
   val uiState: StateFlow<ReviewHuntUIState> = _uiState.asStateFlow()
-/** Clears any existing error message in the UI state. */
+  /** Clears any existing error message in the UI state. */
   fun clearErrorMsg() {
     _uiState.value = _uiState.value.copy(errorMsg = null)
   }
-/** Sets an error message in the UI state. */
+  /** Sets an error message in the UI state. */
   fun setErrorMsg(error: String) {
     _uiState.value = _uiState.value.copy(errorMsg = error)
   }
 
-    /** Loads a hunt by its ID and updates the UI state. */
+  /** Loads a hunt by its ID and updates the UI state. */
   fun loadHunt(huntID: String) {
     viewModelScope.launch {
       try {
@@ -61,7 +60,7 @@ class ReviewHuntViewModel(
       }
     }
   }
-/** Loads reviews for a specific hunt. */
+  /** Loads reviews for a specific hunt. */
   fun loadOtherReview(huntID: String) {
     viewModelScope.launch {
       try {
@@ -72,7 +71,7 @@ class ReviewHuntViewModel(
     }
   }
 
-/** Submits the review to the repository. */
+  /** Submits the review to the repository. */
   private fun reviewHuntToRepository(id: String, hunt: Hunt) {
     viewModelScope.launch {
       try {
@@ -94,7 +93,7 @@ class ReviewHuntViewModel(
       }
     }
   }
-/** Deletes a review if the user is the author. */
+  /** Deletes a review if the user is the author. */
   fun deleteReview(reviewID: String, userID: String) {
     viewModelScope.launch {
       try {
@@ -125,8 +124,10 @@ class ReviewHuntViewModel(
                 if (rating < 0.0 || rating > 5.0) "Rating must be between 1 and 5" else null)
   }
 
-    /** Handles the submit button click event. Validates the input and submits the review to the repository. */
-
+  /**
+   * Handles the submit button click event. Validates the input and submits the review to the
+   * repository.
+   */
   fun submitReviewHunt(userID: String, hunt: Hunt) {
     val state = _uiState.value
     if (!state.isValid) {
@@ -137,7 +138,7 @@ class ReviewHuntViewModel(
     reviewHuntToRepository(userID, hunt)
   }
 
- /** Handles the save button click event. Validates the input and updates the UI state. */
+  /** Handles the save button click event. Validates the input and updates the UI state. */
   fun onSaveClick() {
     val state = _uiState.value
     if (!state.isValid) {
@@ -147,25 +148,21 @@ class ReviewHuntViewModel(
     _uiState.value = _uiState.value.copy(isSubmitted = true)
   }
 
-    /**
-     * Adds a photo to the current list of photos in the UI state.
-     */
+  /** Adds a photo to the current list of photos in the UI state. */
   fun addPhoto(myPhoto: PhotoFile) {
     val currentPhotos = _uiState.value.photos.toMutableList()
     currentPhotos.add(myPhoto)
     _uiState.value = _uiState.value.copy(photos = currentPhotos)
   }
 
-    /**
-     * Removes a photo from the current list of photos in the UI state.
-     */
+  /** Removes a photo from the current list of photos in the UI state. */
   fun removePhoto(myPhoto: PhotoFile) {
     val currentPhotos = _uiState.value.photos.toMutableList()
     currentPhotos.remove(myPhoto)
     _uiState.value = _uiState.value.copy(photos = currentPhotos)
   }
 
- /** Clears the review form if the review was submitted successfully. */
+  /** Clears the review form if the review was submitted successfully. */
   fun clearForm() {
     if (_uiState.value.saveSuccessful) {
       _uiState.value =
