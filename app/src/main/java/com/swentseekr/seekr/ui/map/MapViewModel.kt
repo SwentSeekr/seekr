@@ -5,23 +5,23 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.maps.android.PolyUtil
+import com.swentseekr.seekr.BuildConfig
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
 import com.swentseekr.seekr.model.hunt.HuntsRepository
 import com.swentseekr.seekr.model.map.Location
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import com.google.maps.android.PolyUtil
-import com.swentseekr.seekr.BuildConfig
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
 
 /**
  * Immutable UI model for the Map screen.
@@ -114,9 +114,7 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
    */
   fun onViewHuntClick() {
     _uiState.value = _uiState.value.copy(isFocused = true, route = emptyList())
-    viewModelScope.launch {
-      computeRouteForSelectedHunt(travelMode = "walking")
-    }
+    viewModelScope.launch { computeRouteForSelectedHunt(travelMode = "walking") }
   }
 
   /**
@@ -126,7 +124,8 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
    * movement is controlled by the composable (e.g., no forced reset).
    */
   fun onBackToAllHunts() {
-    _uiState.value = _uiState.value.copy(isFocused = false, selectedHunt = null, route = emptyList())
+    _uiState.value =
+        _uiState.value.copy(isFocused = false, selectedHunt = null, route = emptyList())
   }
 
   /**
@@ -156,16 +155,16 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
     _uiState.value = _uiState.value.copy(isRouteLoading = true)
 
     try {
-      val points = withContext(Dispatchers.IO) {
-        requestDirectionsPolyline(
-          originLat = hunt.start.latitude,
-          originLng = hunt.start.longitude,
-          destLat = hunt.end.latitude,
-          destLng = hunt.end.longitude,
-          waypoints = hunt.middlePoints.map { it.latitude to it.longitude },
-          travelMode = travelMode
-        )
-      }
+      val points =
+          withContext(Dispatchers.IO) {
+            requestDirectionsPolyline(
+                originLat = hunt.start.latitude,
+                originLng = hunt.start.longitude,
+                destLat = hunt.end.latitude,
+                destLng = hunt.end.longitude,
+                waypoints = hunt.middlePoints.map { it.latitude to it.longitude },
+                travelMode = travelMode)
+          }
       _uiState.value = _uiState.value.copy(route = points, isRouteLoading = false)
     } catch (e: Exception) {
       setErrorMsg("Failed to get route: ${e.message}")
@@ -174,39 +173,45 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
   }
 
   private fun requestDirectionsPolyline(
-    originLat: Double,
-    originLng: Double,
-    destLat: Double,
-    destLng: Double,
-    waypoints: List<Pair<Double, Double>>,
-    travelMode: String
+      originLat: Double,
+      originLng: Double,
+      destLat: Double,
+      destLng: Double,
+      waypoints: List<Pair<Double, Double>>,
+      travelMode: String
   ): List<LatLng> {
 
     val origin = "${originLat},${originLng}"
     val destination = "${destLat},${destLng}"
 
-    val waypointParam = if (waypoints.isNotEmpty()) {
-      waypoints.joinToString(separator = "|") { (lat, lng) -> "via:$lat,$lng" }
-    } else null
+    val waypointParam =
+        if (waypoints.isNotEmpty()) {
+          waypoints.joinToString(separator = "|") { (lat, lng) -> "via:$lat,$lng" }
+        } else null
 
     val base = "https://maps.googleapis.com/maps/api/directions/json"
-    val params = buildList {
-      add("origin=" + URLEncoder.encode(origin, StandardCharsets.UTF_8.name()))
-      add("destination=" + URLEncoder.encode(destination, StandardCharsets.UTF_8.name()))
-      add("mode=" + URLEncoder.encode(travelMode, StandardCharsets.UTF_8.name()))
-      waypointParam?.let {
-        add("waypoints=" + URLEncoder.encode(it, StandardCharsets.UTF_8.name()))
-      }
-      add("key=" + URLEncoder.encode(BuildConfig.MAPS_API_KEY, StandardCharsets.UTF_8.name()))
-    }.joinToString("&")
+    val params =
+        buildList {
+              add("origin=" + URLEncoder.encode(origin, StandardCharsets.UTF_8.name()))
+              add("destination=" + URLEncoder.encode(destination, StandardCharsets.UTF_8.name()))
+              add("mode=" + URLEncoder.encode(travelMode, StandardCharsets.UTF_8.name()))
+              waypointParam?.let {
+                add("waypoints=" + URLEncoder.encode(it, StandardCharsets.UTF_8.name()))
+              }
+              add(
+                  "key=" +
+                      URLEncoder.encode(BuildConfig.MAPS_API_KEY, StandardCharsets.UTF_8.name()))
+            }
+            .joinToString("&")
 
     val url = URL("$base?$params")
-    val conn = (url.openConnection() as HttpURLConnection).apply {
-      requestMethod = "GET"
-      connectTimeout = 15000
-      readTimeout = 15000
-      doInput = true
-    }
+    val conn =
+        (url.openConnection() as HttpURLConnection).apply {
+          requestMethod = "GET"
+          connectTimeout = 15000
+          readTimeout = 15000
+          doInput = true
+        }
 
     conn.inputStream.use { stream ->
       val body = stream.bufferedReader().readText()
@@ -221,9 +226,33 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
       val routes = json.getJSONArray("routes")
       if (routes.length() == 0) return emptyList()
 
-      val overview = routes.getJSONObject(0).getJSONObject("overview_polyline").getString("points")
-      val decoded = PolyUtil.decode(overview)
-      return decoded
+      val firstRoute = routes.getJSONObject(0)
+      val legs = firstRoute.getJSONArray("legs")
+
+      val fullPath = mutableListOf<LatLng>()
+
+      for (i in 0 until legs.length()) {
+        val leg = legs.getJSONObject(i)
+        val steps = leg.getJSONArray("steps")
+        for (j in 0 until steps.length()) {
+          val step = steps.getJSONObject(j)
+          val poly = step.getJSONObject("polyline").getString("points")
+          val stepPoints = PolyUtil.decode(poly)
+
+          if (fullPath.isNotEmpty()) {
+            fullPath.addAll(stepPoints.drop(1))
+          } else {
+            fullPath.addAll(stepPoints)
+          }
+        }
+      }
+
+      if (fullPath.isEmpty()) {
+        val overview = firstRoute.getJSONObject("overview_polyline").getString("points")
+        return PolyUtil.decode(overview)
+      }
+
+      return fullPath
     }
   }
 }
