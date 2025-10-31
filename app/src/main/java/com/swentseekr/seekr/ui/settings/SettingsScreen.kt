@@ -1,15 +1,19 @@
 package com.swentseekr.seekr.ui.settings
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.credentials.CredentialManager
+import com.swentseekr.seekr.ui.theme.Green
 import kotlinx.coroutines.launch
 
 object SettingsScreenTestTags {
@@ -18,12 +22,12 @@ object SettingsScreenTestTags {
     const val BACK_BUTTON = "backButton"
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(),
-    onSignedOut: () -> Unit = {}
+    onSignedOut: () -> Unit = {},
+    onGoBack: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -35,7 +39,27 @@ fun SettingsScreen(
     }
 
     Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = { Text("Settings") }) }
+        topBar = {
+            TopAppBar(
+                title = { Text("Settings") },
+                navigationIcon = {
+                    IconButton(
+                        onClick = onGoBack,
+                        modifier = Modifier.testTag(SettingsScreenTestTags.BACK_BUTTON)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Green,
+                    titleContentColor = MaterialTheme.typography.headlineSmall.color,
+                    navigationIconContentColor = MaterialTheme.typography.headlineSmall.color
+                )
+            )
+        }
     ) { padding ->
         SettingsContent(
             modifier = Modifier
@@ -69,18 +93,20 @@ fun SettingsContent(
         ) {
             SettingsItem(
                 title = "App Version",
-                value = appVersion ?: "Unknown"
+                value = appVersion ?: "Unknown",
+                modifier = Modifier.testTag(SettingsScreenTestTags.APP_VERSION_TEXT)
             )
         }
 
-        // Bouton logout en bas de l’écran
         Button(
             onClick = onLogoutClick,
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 32.dp)
+                .testTag(SettingsScreenTestTags.LOGOUT_BUTTON)
         ) {
-            Text("Log out")
+            Text("Log out", color = MaterialTheme.colorScheme.onError)
         }
     }
 }
@@ -100,5 +126,4 @@ fun SettingsItem(
         Text(text = value, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
-
 
