@@ -33,6 +33,14 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        buildConfigField(
+            "String",
+            "MAPS_API_KEY",
+            "\"${project.findProperty("MAPS_API_KEY") ?: System.getenv("MAPS_API_KEY") ?: ""}\""
+        )
+        manifestPlaceholders["MAPS_API_KEY"] =
+            project.findProperty("MAPS_API_KEY") ?: System.getenv("MAPS_API_KEY") ?: ""
     }
 
     buildTypes {
@@ -52,6 +60,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     composeOptions {
@@ -156,6 +165,7 @@ dependencies {
     implementation("com.google.maps.android:maps-compose-utils:$mapsComposeVersion")
     // Google Maps Compose widgets library
     implementation("com.google.maps.android:maps-compose-widgets:$mapsComposeVersion")
+    implementation("com.google.maps.android:android-maps-utils:3.8.2")
 
     // ------------- Jetpack Compose ------------------
     val composeBom = platform(libs.compose.bom)

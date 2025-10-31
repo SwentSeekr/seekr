@@ -41,6 +41,7 @@ object OverviewScreenTestTags {
   const val SEARCH_BAR = "SearchBar"
   const val FILTER_BAR = "FilterBar"
   const val FILTER_BUTTON = "FilterButton"
+  const val OVERVIEW_SCREEN = "OverviewScreen"
 }
 
 const val FILTERS_SECOND = 3
@@ -89,7 +90,7 @@ fun OverviewScreen(
       */
 
   Column(
-      modifier = modifier.fillMaxWidth(),
+      modifier = modifier.fillMaxWidth().testTag(OverviewScreenTestTags.OVERVIEW_SCREEN),
       horizontalAlignment = Alignment.CenterHorizontally,
   ) {
     SearchBar(

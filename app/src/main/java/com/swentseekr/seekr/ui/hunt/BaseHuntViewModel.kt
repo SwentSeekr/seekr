@@ -1,22 +1,17 @@
-package com.swentseekr.seekr.ui.addhunt
+package com.swentseekr.seekr.ui.hunt
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
-import com.swentseekr.seekr.model.hunt.Difficulty
-import com.swentseekr.seekr.model.hunt.Hunt
-import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
-import com.swentseekr.seekr.model.hunt.HuntStatus
-import com.swentseekr.seekr.model.hunt.HuntsRepository
+import com.swentseekr.seekr.model.hunt.*
 import com.swentseekr.seekr.model.map.Location
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-/** UI state for the AddHunt screen */
-data class AddHuntUIState(
+data class HuntUIState(
     val title: String = "",
     val description: String = "",
     val points: List<Location> = emptyList(),
@@ -49,59 +44,63 @@ data class AddHuntUIState(
             points.size >= 2
 }
 
-/** ViewModel for the AddHunt screen */
-class AddHuntViewModel(
-    private val repository: HuntsRepository = HuntRepositoryProvider.repository
+abstract class BaseHuntViewModel(
+    protected val repository: HuntsRepository = HuntRepositoryProvider.repository
 ) : ViewModel() {
 
-  private val _uiState = MutableStateFlow(AddHuntUIState())
-  val uiState: StateFlow<AddHuntUIState> = _uiState.asStateFlow()
+  protected val _uiState = MutableStateFlow(HuntUIState())
+  val uiState: StateFlow<HuntUIState> = _uiState.asStateFlow()
 
-  /** Clears error message */
+  private var testMode: Boolean = false
+
   fun clearErrorMsg() {
     _uiState.value = _uiState.value.copy(errorMsg = null)
   }
 
-  /** Sets error message */
-  private fun setErrorMsg(error: String) {
+  protected fun setErrorMsg(error: String) {
     _uiState.value = _uiState.value.copy(errorMsg = error)
   }
 
-  /** Adds a new Hunt */
-  fun addHunt(): Boolean {
+  fun resetSaveSuccess() {
+    _uiState.value = _uiState.value.copy(saveSuccessful = false)
+  }
+
+  fun submit(): Boolean {
     val state = _uiState.value
+
     if (!state.isValid) {
-      setErrorMsg("Please fill all required fields before creating a hunt.")
+      setErrorMsg("Please fill all required fields before saving the hunt.")
       return false
+    }
+
+    if (testMode) {
+      _uiState.value = _uiState.value.copy(errorMsg = null, saveSuccessful = true)
+      return true
     }
 
     if (FirebaseAuth.getInstance().currentUser?.uid == null) {
-      setErrorMsg("You must be logged in to create a hunt.")
+      setErrorMsg("You must be logged in to perform this action.")
       return false
     }
+
     val hunt =
-        Hunt(
-            uid = repository.getNewUid(),
-            start = state.points.first(),
-            end = state.points.last(),
-            middlePoints = state.points.drop(1).dropLast(1),
-            status = state.status!!,
-            title = state.title,
-            description = state.description,
-            time = state.time.toDouble(),
-            distance = state.distance.toDouble(),
-            difficulty = state.difficulty!!,
-            authorId = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown",
-            image = state.image,
-            reviewRate = state.reviewRate)
+        try {
+          buildHunt(state)
+        } catch (e: Exception) {
+          setErrorMsg(e.message ?: "Failed to build Hunt from UI state.")
+          return false
+        }
 
     viewModelScope.launch {
       try {
-        repository.addHunt(hunt)
-        clearErrorMsg()
+        persist(hunt)
+        _uiState.value = _uiState.value.copy(errorMsg = null, saveSuccessful = true)
       } catch (e: Exception) {
-        Log.e("AddHuntViewModel", "Error adding Hunt", e)
-        setErrorMsg("Failed to add Hunt: ${e.message}")
+        Log.e(
+            this@BaseHuntViewModel::class.simpleName ?: "BaseHuntViewModel", "Error saving Hunt", e)
+        _uiState.value =
+            _uiState.value.copy(
+                errorMsg = "Failed to save Hunt: ${e.message}", saveSuccessful = false)
       }
     }
     return true
@@ -161,4 +160,13 @@ class AddHuntViewModel(
   fun setIsSelectingPoints(isSelecting: Boolean) {
     _uiState.value = _uiState.value.copy(isSelectingPoints = isSelecting)
   }
+
+  // For testing purposes
+  fun setTestMode(enabled: Boolean) {
+    testMode = enabled
+  }
+
+  abstract fun buildHunt(state: HuntUIState): Hunt
+
+  protected abstract suspend fun persist(hunt: Hunt)
 }

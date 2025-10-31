@@ -3,12 +3,8 @@ package com.swentseekr.seekr.ui.overview
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.credentials.ClearCredentialStateRequest
-import androidx.credentials.CredentialManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.swentseekr.seekr.model.authentication.AuthRepository
-import com.swentseekr.seekr.model.authentication.AuthRepositoryFirebase
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
@@ -17,7 +13,6 @@ import com.swentseekr.seekr.model.hunt.HuntsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
@@ -57,8 +52,7 @@ data class HuntUiState(
  * @property huntRepository The repository used to fetch and manage Hunt items.
  */
 class OverviewViewModel(
-    private val repository: HuntsRepository = HuntRepositoryProvider.repository,
-    private val authRepository: AuthRepository = AuthRepositoryFirebase()
+    private val repository: HuntsRepository = HuntRepositoryProvider.repository
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(OverviewUIState())
   val uiState: StateFlow<OverviewUIState> = _uiState.asStateFlow()
@@ -146,18 +140,5 @@ class OverviewViewModel(
           statusMatches && difficultyMatches
         }
     _uiState.value = currentState.copy(hunts = filtered)
-  }
-
-  fun signOut(credentialManager: CredentialManager): Unit {
-    viewModelScope.launch {
-      authRepository
-          .signOut()
-          .fold(
-              onSuccess = { _uiState.update { it.copy(signedOut = true) } },
-              onFailure = { throwable ->
-                _uiState.update { it.copy(errorMsg = throwable.localizedMessage) }
-              })
-      credentialManager.clearCredentialState(ClearCredentialStateRequest())
-    }
   }
 }

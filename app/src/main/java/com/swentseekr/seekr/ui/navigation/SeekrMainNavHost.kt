@@ -18,8 +18,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.swentseekr.seekr.model.profile.mockProfileData
-import com.swentseekr.seekr.ui.addhunt.AddHuntScreen
 import com.swentseekr.seekr.ui.components.HuntCardScreen
+import com.swentseekr.seekr.ui.hunt.add.AddHuntScreen
 import com.swentseekr.seekr.ui.map.MapScreen
 import com.swentseekr.seekr.ui.overview.OverviewScreen
 import com.swentseekr.seekr.ui.profile.ProfileScreen
@@ -103,6 +103,7 @@ fun SeekrNavigationBar(
 @Composable
 fun SeekrMainNavHost(
     navController: NavHostController = rememberNavController(),
+    testMode: Boolean = false,
     modifier: Modifier = Modifier
 ) {
   var lastHuntId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -144,9 +145,9 @@ fun SeekrMainNavHost(
               composable(SeekrDestination.Profile.route) {
                 val profile = mockProfileData()
                 ProfileScreen(
-                    profile = profile,
-                    currentUserId = profile.uid,
-                    onAddHunt = { navController.navigate(SeekrDestination.AddHunt.route) })
+                    userId = profile.uid,
+                    onAddHunt = { navController.navigate(SeekrDestination.AddHunt.route) },
+                    testMode = testMode)
               }
               composable(
                   route = SeekrDestination.HuntCard.route,
@@ -171,17 +172,14 @@ fun SeekrMainNavHost(
                       AddHuntScreen(
                           onGoBack = { navController.popBackStack() },
                           onDone = {
-                            // After successful save (toast is shown inside the screen),
-                            // just go back to the previous screen; optionally jump to Overview.
-                            val popped = navController.popBackStack()
-                            if (!popped) {
-                              // Fallback if there's nothing to pop (unlikely)
-                              navController.navigate(SeekrDestination.Overview.route) {
-                                launchSingleTop = true
-                                popUpTo(SeekrDestination.Overview.route)
-                              }
+                            // go back to overview because no view model for profile to refresh the
+                            // list yet
+                            navController.navigate(SeekrDestination.Overview.route) {
+                              launchSingleTop = true
+                              popUpTo(SeekrDestination.Overview.route)
                             }
-                          })
+                          },
+                          testMode = testMode)
                     }
               }
             }

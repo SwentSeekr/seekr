@@ -12,6 +12,13 @@ class ProfileRepositoryLocal : ProfileRepository {
     profiles.add(profile)
   }
 
+  override suspend fun createProfile(profile: Profile) {
+    require(!(profiles.any { it.uid == profile.uid })) {
+      "Profile with ID ${profile.uid} already exists"
+    }
+    profiles.add(profile)
+  }
+
   override suspend fun getProfile(userId: String): Profile {
     for (i in profiles.indices) {
       if (profiles[i].uid == userId) {

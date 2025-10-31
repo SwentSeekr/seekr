@@ -1,4 +1,4 @@
-package com.swentseekr.seekr.ui.addhunt
+package com.swentseekr.seekr.ui.hunt
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -12,9 +12,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
 import com.swentseekr.seekr.model.map.Location
 
-// ----------------------
-// Constants
-// ----------------------
 private const val TITLE_TEXT = "Select Hunt Points"
 private const val BACK_CONTENT_DESC = "Back"
 private const val BUTTON_CONFIRM_LABEL = "Confirm Points"
@@ -29,14 +26,21 @@ object AddPointsMapScreenTestTags {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddPointsMapScreen(
+fun BaseAddPointsMapScreen(
     onDone: (List<Location>) -> Unit,
     initPoints: List<Location> = emptyList(),
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
+    testMode: Boolean = false,
 ) {
   var points by remember { mutableStateOf(initPoints) }
-  val polylinePoints = remember(points) { points.map { LatLng(it.latitude, it.longitude) } }
   val cameraPositionState = rememberCameraPositionState()
+
+  if (testMode) {
+    LaunchedEffect(Unit) {
+      // Simule 2 points automatiquement
+      points = listOf(Location(0.0, 0.0, "P1"), Location(1.0, 1.0, "P2"))
+    }
+  }
 
   Scaffold(
       topBar = {

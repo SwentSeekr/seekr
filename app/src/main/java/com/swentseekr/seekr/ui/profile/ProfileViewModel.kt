@@ -2,6 +2,7 @@ package com.swentseekr.seekr.ui.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.profile.ProfileRepository
 import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
@@ -23,36 +24,75 @@ data class ProfileUIState(
  * providing Profile data via the .
  */
 class ProfileViewModel(
-    private val repository: ProfileRepository = ProfileRepositoryProvider.repository
+    private val repository: ProfileRepository = ProfileRepositoryProvider.repository,
+    private val auth: FirebaseAuth? = null,
+    private val injectedCurrentUid: String? = null // forUnitTests
 ) : ViewModel() {
+  private val firebaseAuth: FirebaseAuth? by lazy {
+    try {
+      auth ?: FirebaseAuth.getInstance()
+    } catch (_: IllegalStateException) {
+      null // Firebase not initialized (e.g., during unit tests)
+    }
+  }
+
   private val _uiState = MutableStateFlow(ProfileUIState())
   val uiState: StateFlow<ProfileUIState> = _uiState.asStateFlow()
 
-  // val currentUid: String? = Firebase.auth.currentUser?.uid
-  val currentUid: String? =
-      "testUserId" // Will be remove as soon as Firestore Emulator will be working
+  val currentUid: String?
+    get() = injectedCurrentUid ?: firebaseAuth?.currentUser?.uid
 
-  fun loadProfile(userId: String) {
+  fun loadProfile(userId: String? = null) {
+    val uidToLoad = userId ?: currentUid
+    if (uidToLoad == null) {
+      _uiState.value = ProfileUIState(errorMsg = "User not logged in")
+      return
+    }
     viewModelScope.launch {
       try {
-        val profile = repository.getProfile(userId)
-        _uiState.value = ProfileUIState(profile = profile)
+        val profile = repository.getProfile(uidToLoad)
+        val myHunts = repository.getMyHunts(uidToLoad)
+        val doneHunts = repository.getDoneHunts(uidToLoad)
+        val likedHunts = repository.getLikedHunts(uidToLoad)
+
+        _uiState.value =
+            ProfileUIState(
+                profile =
+                    profile?.copy(
+                        myHunts = myHunts.toMutableList(),
+                        doneHunts = doneHunts.toMutableList(),
+                        likedHunts = likedHunts.toMutableList()),
+                isMyProfile = uidToLoad == currentUid)
       } catch (e: Exception) {
-        _uiState.value = _uiState.value.copy(errorMsg = "Profile not found")
+        val msg =
+            if (e.message?.contains("not found", ignoreCase = true) == true) "Profile not found"
+            else e.message ?: "Failed to load profile"
+
+        _uiState.value = ProfileUIState(errorMsg = msg)
       }
     }
   }
 
   fun refreshUIState() {
-    val userId = _uiState.value.profile?.uid ?: return
-    loadProfile(userId)
+    {
+      val uid = _uiState.value.profile?.uid ?: currentUid
+      if (uid != null) {
+        loadProfile(uid)
+      }
+    }
   }
 
   fun updateProfile(profile: Profile) {
     viewModelScope.launch {
+      val uid = currentUid
+      if (uid == null) {
+        _uiState.value = _uiState.value.copy(errorMsg = "User not logged in")
+        return@launch
+      }
+
       try {
-        repository.updateProfile(profile)
-        _uiState.value = _uiState.value.copy(profile = profile)
+        repository.updateProfile(profile.copy(uid = uid))
+        loadProfile(uid)
       } catch (e: Exception) {
         _uiState.value = _uiState.value.copy(errorMsg = "Failed to update profile")
       }

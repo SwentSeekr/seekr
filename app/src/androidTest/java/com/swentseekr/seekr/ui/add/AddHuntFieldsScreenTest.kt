@@ -1,4 +1,4 @@
-package com.swentseekr.seekr.ui.addhunt
+package com.swentseekr.seekr.ui.add
 
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
@@ -18,6 +18,9 @@ import androidx.compose.ui.test.performTextInput
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsScreen
+import com.swentseekr.seekr.ui.hunt.HuntScreenTestTags
+import com.swentseekr.seekr.ui.hunt.HuntUIState
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -30,7 +33,7 @@ class AddHuntFieldsScreenTest {
 
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()
 
-  private lateinit var state: MutableState<AddHuntUIState>
+  private lateinit var state: MutableState<HuntUIState>
   private var onSaveCalled = false
   private var onSelectLocationsCalled = false
   private var onGoBackCalled = false
@@ -42,8 +45,8 @@ class AddHuntFieldsScreenTest {
 
     composeRule.setContent {
       MaterialTheme {
-        state = remember { mutableStateOf(AddHuntUIState()) }
-        AddHuntFieldsScreen(
+        state = remember { mutableStateOf(HuntUIState()) }
+        BaseHuntFieldsScreen(
             uiState = state.value,
             onTitleChange = { title ->
               state.value =
@@ -97,11 +100,11 @@ class AddHuntFieldsScreenTest {
     setContent()
 
     // Title error when empty
-    val title = composeRule.onNodeWithTag(AddHuntScreenTestTags.INPUT_HUNT_TITLE)
+    val title = composeRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_TITLE)
     title.performTextInput("A")
     title.performTextClearance()
     composeRule
-        .onNodeWithTag(AddHuntScreenTestTags.ERROR_MESSAGE, useUnmergedTree = true)
+        .onNodeWithTag(HuntScreenTestTags.ERROR_MESSAGE, useUnmergedTree = true)
         .assertExists()
         .assertTextContains("Title cannot be empty")
 
@@ -110,7 +113,7 @@ class AddHuntFieldsScreenTest {
     composeRule.onNodeWithText("Title cannot be empty").assertDoesNotExist()
 
     // Description error when empty
-    val desc = composeRule.onNodeWithTag(AddHuntScreenTestTags.INPUT_HUNT_DESCRIPTION)
+    val desc = composeRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_DESCRIPTION)
     desc.performTextInput("x")
     desc.performTextClearance()
     composeRule.onNodeWithText("Description cannot be empty").assertExists()
@@ -120,7 +123,7 @@ class AddHuntFieldsScreenTest {
     composeRule.onNodeWithText("Description cannot be empty").assertDoesNotExist()
 
     // Time invalid then valid
-    val time = composeRule.onNodeWithTag(AddHuntScreenTestTags.INPUT_HUNT_TIME)
+    val time = composeRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_TIME)
     time.performTextInput("x")
     composeRule.onNodeWithText("Invalid time format").assertExists()
     time.performTextClearance()
@@ -128,7 +131,7 @@ class AddHuntFieldsScreenTest {
     composeRule.onNodeWithText("Invalid time format").assertDoesNotExist()
 
     // Distance invalid then valid
-    val distance = composeRule.onNodeWithTag(AddHuntScreenTestTags.INPUT_HUNT_DISTANCE)
+    val distance = composeRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_DISTANCE)
     distance.performTextInput("y")
     composeRule.onNodeWithText("Invalid distance format").assertExists()
     distance.performTextClearance()
@@ -141,14 +144,14 @@ class AddHuntFieldsScreenTest {
     setContent()
 
     // Open and pick first status
-    val statusField = composeRule.onNodeWithTag(AddHuntScreenTestTags.DROPDOWN_STATUS)
+    val statusField = composeRule.onNodeWithTag(HuntScreenTestTags.DROPDOWN_STATUS)
     statusField.performClick()
     val firstStatus = HuntStatus.values().first().name
     composeRule.onNodeWithText(firstStatus).performClick()
     statusField.assertTextContains(firstStatus)
 
     // Open and pick first difficulty
-    val diffField = composeRule.onNodeWithTag(AddHuntScreenTestTags.DROPDOWN_DIFFICULTY)
+    val diffField = composeRule.onNodeWithTag(HuntScreenTestTags.DROPDOWN_DIFFICULTY)
     diffField.performClick()
     val firstDiff = Difficulty.values().first().name
     composeRule.onNodeWithText(firstDiff).performClick()
@@ -159,7 +162,7 @@ class AddHuntFieldsScreenTest {
   fun selectLocations_button_updates_label_with_point_count_and_invokes_callback() {
     setContent()
 
-    val selectBtn = composeRule.onNodeWithTag(AddHuntScreenTestTags.BUTTON_SELECT_LOCATION)
+    val selectBtn = composeRule.onNodeWithTag(HuntScreenTestTags.BUTTON_SELECT_LOCATION)
     selectBtn.assertTextContains("Select Locations")
 
     // 1 point -> singular
@@ -185,7 +188,7 @@ class AddHuntFieldsScreenTest {
   fun saveButton_enabled_only_when_state_is_valid_and_invokes_onSave() {
     setContent()
 
-    val saveBtn = composeRule.onNodeWithTag(AddHuntScreenTestTags.HUNT_SAVE)
+    val saveBtn = composeRule.onNodeWithTag(HuntScreenTestTags.HUNT_SAVE)
     saveBtn.assertIsNotEnabled()
 
     // Make state valid
