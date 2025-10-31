@@ -49,6 +49,7 @@ import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.ui.theme.Blue
 import com.swentseekr.seekr.ui.theme.Green
 import kotlinx.coroutines.launch
 
@@ -146,7 +147,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
                 title = "End: ${selectedHunt.title}",
                 icon = bitmapDescriptorFromVector(LocalContext.current, R.drawable.ic_end_marker))
             if (uiState.route.isNotEmpty()) {
-              Polyline(points = uiState.route, width = 12f, color = Color(0xFF2196F3))
+              Polyline(points = uiState.route, width = 12f, color = Blue)
             }
           } else {
             uiState.hunts.forEach { hunt ->

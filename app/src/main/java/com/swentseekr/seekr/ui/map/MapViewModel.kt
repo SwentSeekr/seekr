@@ -180,6 +180,7 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
                 waypoints = hunt.middlePoints.map { it.latitude to it.longitude },
                 travelMode = travelMode)
           }
+      setErrorMsg("")
       _uiState.value = _uiState.value.copy(route = points, isRouteLoading = false)
     } catch (e: Exception) {
       setErrorMsg("Failed to get route: ${e.message}")

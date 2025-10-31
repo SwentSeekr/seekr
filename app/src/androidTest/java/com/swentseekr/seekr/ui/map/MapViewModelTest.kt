@@ -17,11 +17,35 @@ import java.net.URL
 import java.net.URLConnection
 import java.net.URLStreamHandler
 import java.net.URLStreamHandlerFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.Assert.*
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestWatcher
+import org.junit.runner.Description
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class MainDispatcherRule(val dispatcher: TestDispatcher = StandardTestDispatcher()) :
+    TestWatcher() {
+  override fun starting(description: Description) {
+    Dispatchers.setMain(dispatcher)
+  }
+
+  override fun finished(description: Description) {
+    Dispatchers.resetMain()
+  }
+}
 
 class MapViewModelTest {
+  @get:Rule val mainDispatcherRule = MainDispatcherRule()
+
   private fun sample(uid: String = "1", lat: Double = 10.0, lng: Double = 20.0) =
       Hunt(
           uid = uid,
@@ -38,18 +62,21 @@ class MapViewModelTest {
           image = 0,
           reviewRate = 4.2)
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
-  fun initialStateLoadsHuntsAndTargetsFirstStart() = runTest {
-    val hunts = listOf(sample(uid = "1", lat = 46.5, lng = 6.6), sample(uid = "2"))
-    val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
+  fun initialStateLoadsHuntsAndTargetsFirstStart() =
+      runTest(mainDispatcherRule.dispatcher) {
+        val hunts = listOf(sample(uid = "1", lat = 46.5, lng = 6.6), sample(uid = "2"))
+        val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
 
-    val state = vm.uiState.value
-    assertEquals(2, state.hunts.size)
-    // target must be the first hunt's start
-    assertEquals(46.5, state.target.latitude, 0.0001)
-    assertEquals(6.6, state.target.longitude, 0.0001)
-    assertNull(state.errorMsg)
-  }
+        advanceUntilIdle()
+
+        val state = vm.uiState.value
+        assertEquals(hunts.size, state.hunts.size)
+        assertEquals(46.5, state.target.latitude, 1e-6)
+        assertEquals(6.6, state.target.longitude, 1e-6)
+        assertNull(state.errorMsg)
+      }
 
   @Test
   fun initialStateWithEmptyRepoUsesLausanneFallback() = runTest {
@@ -61,21 +88,34 @@ class MapViewModelTest {
     assertTrue(state.hunts.isEmpty())
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
-  fun initialStateFailureSetsErrorMessage() = runTest {
-    val vm = MapViewModel(repository = FakeRepoThrows("boom"))
-    val state = vm.uiState.value
-    assertNotNull(state.errorMsg)
-    assertTrue(state.errorMsg!!.contains("Failed to load hunts"))
-  }
+  fun initialStateFailureSetsErrorMessage() =
+      runTest(mainDispatcherRule.dispatcher) {
+        val vm = MapViewModel(repository = FakeRepoThrows("boom"))
 
+        advanceUntilIdle()
+
+        val state = vm.uiState.value
+        assertNotNull(state.errorMsg)
+        assertTrue(state.errorMsg!!.contains("Failed to load hunts"))
+        assertTrue(state.hunts.isEmpty())
+      }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
-  fun clearErrorMsgRemovesError() = runTest {
-    val vm = MapViewModel(repository = FakeRepoThrows("boom"))
-    assertNotNull(vm.uiState.value.errorMsg)
-    vm.clearErrorMsg()
-    assertNull(vm.uiState.value.errorMsg)
-  }
+  fun clearErrorMsgRemovesError() =
+      runTest(mainDispatcherRule.dispatcher) {
+        val vm = MapViewModel(repository = FakeRepoThrows("boom"))
+
+        advanceUntilIdle()
+        assertNotNull(vm.uiState.value.errorMsg)
+
+        vm.clearErrorMsg()
+        advanceUntilIdle()
+
+        assertNull(vm.uiState.value.errorMsg)
+      }
 
   @Test
   fun onMarkerClickSelectsHuntAndIsNotFocused() = runTest {
@@ -88,12 +128,13 @@ class MapViewModelTest {
     assertFalse(state.isFocused)
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun onViewHuntClickSetsFocusedTrue() = runTest {
     val hunts = listOf(sample(uid = "1"))
     val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
 
-    awaitInitialLoad(vm, expectedCount = hunts.size)
+    advanceUntilIdle()
 
     vm.onMarkerClick(hunts[0])
     vm.onViewHuntClick()
@@ -183,13 +224,20 @@ class MapViewModelTest {
         as List<LatLng>
   }
 
-  private fun awaitInitialLoad(vm: MapViewModel, expectedCount: Int, timeoutMs: Long = 2000) {
-    val start = System.currentTimeMillis()
-    while (System.currentTimeMillis() - start < timeoutMs) {
-      if (vm.uiState.value.hunts.size == expectedCount) return
-      Thread.sleep(10)
-    }
-    fail("Timed out waiting for initial hunts load to reach $expectedCount")
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun onViewHuntClickWithNoSelectedHuntKeepsRouteEmpty() = runTest {
+    val hunts = listOf(sample(uid = "1"))
+    val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
+
+    advanceUntilIdle()
+
+    vm.onViewHuntClick()
+
+    val state = vm.uiState.value
+    assertTrue(state.isFocused)
+    assertTrue(state.route.isEmpty())
+    assertFalse(state.isRouteLoading)
   }
 
   @Test
