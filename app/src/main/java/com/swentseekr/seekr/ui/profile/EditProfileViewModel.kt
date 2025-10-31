@@ -31,6 +31,8 @@ class EditProfileViewModel(
 
   /** Keep track of last saved profile for undo/cancel */
   private var lastSavedProfile: EditProfileUIState? = null
+  private var lastSavedFullProfile: Profile? = null
+
   private var currentUserId: String? = null
 
   /** Load the profile for editing */
@@ -49,12 +51,17 @@ class EditProfileViewModel(
                   hasChanges = false,
                   canSave = false)
           lastSavedProfile = state
+          lastSavedFullProfile = profile
           _uiState.value = state
         } else {
-          _uiState.value = _uiState.value.copy(errorMsg = "Profile not found")
+          _uiState.value = EditProfileUIState(errorMsg = "Profile not found")
+          lastSavedProfile = null
+          lastSavedFullProfile = null
         }
       } catch (e: Exception) {
-        _uiState.value = _uiState.value.copy(errorMsg = e.message ?: "Failed to load profile")
+        _uiState.value = EditProfileUIState(errorMsg = e.message ?: "Failed to load profile")
+        lastSavedProfile = null
+        lastSavedFullProfile = null
       }
     }
   }
@@ -99,7 +106,10 @@ class EditProfileViewModel(
     viewModelScope.launch {
       _uiState.value = _uiState.value.copy(isSaving = true, errorMsg = null)
       try {
-        val currentProfile = repository.getProfile(userId) ?: throw Exception("Profile not found")
+        val currentProfile =
+            repository.getProfile(userId)
+                ?: lastSavedFullProfile
+                ?: throw Exception("Profile not found")
         val updatedProfile =
             currentProfile.copy(
                 author =
@@ -112,6 +122,8 @@ class EditProfileViewModel(
             _uiState.value.copy(
                 isSaving = false, success = true, hasChanges = false, canSave = false)
         lastSavedProfile = successState
+        lastSavedFullProfile = updatedProfile
+
         _uiState.value = successState
       } catch (e: Exception) {
         _uiState.value =
