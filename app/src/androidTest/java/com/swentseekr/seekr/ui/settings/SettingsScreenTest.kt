@@ -54,6 +54,17 @@ class SettingsScreenTest {
     composeRule.setContent {
       MaterialTheme { SettingsContent(appVersion = expectedVersion, onLogoutClick = {}) }
     }
+    composeRule.onNodeWithText("$VERSION_TEXT").assertExists()
     composeRule.onNodeWithText(expectedVersion).assertExists()
+  }
+
+  @Test
+  fun app_version_is_unknown_when_null() {
+    composeRule.setContent {
+      MaterialTheme { SettingsContent(appVersion = null, onLogoutClick = {}) }
+    }
+
+    composeRule.onNodeWithText(VERSION_TEXT).assertExists()
+    composeRule.onNodeWithText(UNKNOWN_VERSION_TEXT).assertExists()
   }
 }
