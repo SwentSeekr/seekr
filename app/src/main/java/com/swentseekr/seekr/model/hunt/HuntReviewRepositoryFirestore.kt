@@ -44,7 +44,7 @@ class HuntReviewRepositoryFirestore(private val db: FirebaseFirestore) : HuntRev
   private fun documentToHuntReview(document: DocumentSnapshot): HuntReview? {
     return try {
       val reviewID = document.id
-      val authorID = document.getString("authorId") ?: return null
+      val authorID = document.getString("userId") ?: return null
       val huntID = document.getString("huntId") ?: return null
       val rating = document.getDouble("rating") ?: return null
       val comment = document.getString("comment") ?: return null

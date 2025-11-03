@@ -13,7 +13,7 @@ data class Hunt(
     val time: Double,
     val distance: Double,
     val difficulty: Difficulty,
-    val authorId: String,
+    val userId: String,
     val image: Int,
     val reviewRate: Double
 )

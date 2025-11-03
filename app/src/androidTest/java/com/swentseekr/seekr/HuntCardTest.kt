@@ -34,7 +34,7 @@ class HuntCardTest {
           time = 2.5,
           distance = 5.0,
           difficulty = Difficulty.DIFFICULT,
-          authorId = "0",
+          userId = "0",
           image = R.drawable.ic_launcher_foreground, // ou une image de ton projet
           reviewRate = 4.5)
 
@@ -44,7 +44,7 @@ class HuntCardTest {
     composeTestRule.setContent { HuntCard(hunt, modifier = Modifier.padding(2.dp)) }
 
     composeTestRule.onNodeWithText(hunt.title).assertIsDisplayed()
-    composeTestRule.onNodeWithText("by ${hunt.authorId}").assertIsDisplayed()
+    composeTestRule.onNodeWithText("by ${hunt.userId}").assertIsDisplayed()
   }
 
   @Test

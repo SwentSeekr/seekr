@@ -20,7 +20,7 @@ class HuntsRepositoryFirestore(private val db: FirebaseFirestore) : HuntsReposit
         FirebaseAuth.getInstance().currentUser?.uid
             ?: throw IllegalStateException("User not logged in")
     val snapshot =
-        db.collection(HUNTS_COLLECTION_PATH).whereEqualTo("authorId", currentUserId).get().await()
+        db.collection(HUNTS_COLLECTION_PATH).whereEqualTo("userId", currentUserId).get().await()
     return snapshot.mapNotNull { documentToHunt(it) }
   }
 
@@ -85,7 +85,7 @@ class HuntsRepositoryFirestore(private val db: FirebaseFirestore) : HuntsReposit
       val distance = document.getDouble("distance") ?: return null
       val difficultyString = document.getString("difficulty") ?: return null
       val difficulty = Difficulty.valueOf(difficultyString)
-      val authorId = document.getString("authorId") ?: return null
+      val authorId = document.getString("userId") ?: return null
       val image = document.getDouble("image")?.toInt() ?: return null
       val reviewRate = document.getDouble("reviewRate") ?: return null
 
@@ -100,7 +100,7 @@ class HuntsRepositoryFirestore(private val db: FirebaseFirestore) : HuntsReposit
           time = time,
           distance = distance,
           difficulty = difficulty,
-          authorId = authorId,
+          userId = authorId,
           image = image,
           reviewRate = reviewRate)
     } catch (e: Exception) {

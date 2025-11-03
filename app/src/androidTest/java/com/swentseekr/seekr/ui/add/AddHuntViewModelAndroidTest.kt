@@ -152,7 +152,7 @@ class AddHuntViewModelAndroidTest {
     assertEquals(1.5, h.time, 0.0)
     assertEquals(2.0, h.distance, 0.0)
     assertEquals(Difficulty.EASY, h.difficulty)
-    assertEquals(FirebaseAuth.getInstance().currentUser?.uid, h.authorId)
+    assertEquals(FirebaseAuth.getInstance().currentUser?.uid, h.userId)
     assertEquals(7, h.image)
     assertNull(viewModel.uiState.value.errorMsg)
   }

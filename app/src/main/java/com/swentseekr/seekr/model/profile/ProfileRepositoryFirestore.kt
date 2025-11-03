@@ -53,7 +53,7 @@ class ProfileRepositoryFirestore(
   }
 
   override suspend fun getMyHunts(userId: String): List<Hunt> {
-    val snapshot = db.collection("hunts").whereEqualTo("authorId", userId).get().await()
+    val snapshot = db.collection("hunts").whereEqualTo("userId", userId).get().await()
     return snapshot.documents.mapNotNull { documentToHunt(it) }
   }
 
@@ -84,7 +84,7 @@ class ProfileRepositoryFirestore(
       val difficulty =
           document.getString("difficulty")?.let { Difficulty.valueOf(it) } ?: Difficulty.EASY
       val status = document.getString("status")?.let { HuntStatus.valueOf(it) } ?: return null
-      val authorId = document.getString("authorId") ?: ""
+      val authorId = document.getString("userId") ?: ""
 
       Hunt(
           uid = uid,
@@ -97,7 +97,7 @@ class ProfileRepositoryFirestore(
           time = time,
           distance = distance,
           difficulty = difficulty,
-          authorId = authorId,
+          userId = authorId,
           image = image,
           reviewRate = reviewRate)
     } catch (e: Exception) {
@@ -119,7 +119,7 @@ class ProfileRepositoryFirestore(
             sportRate = authorMap["sportRate"] as? Double ?: 0.0)
 
     // Fetch associated hunts only for this user
-    val myHunts = huntsRepository.getAllHunts().filter { it.authorId == uid }.toMutableList()
+    val myHunts = huntsRepository.getAllHunts().filter { it.userId == uid }.toMutableList()
     val doneHunts =
         db.collection("users")
             .document(uid)

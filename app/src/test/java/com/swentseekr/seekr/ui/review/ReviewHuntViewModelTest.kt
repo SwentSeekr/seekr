@@ -34,7 +34,7 @@ class ReviewHuntViewModelTest {
           time = 1.0,
           distance = 5.0,
           difficulty = Difficulty.EASY,
-          authorId = "author123",
+          userId = "author123",
           image = 1,
           reviewRate = 4.0)
 

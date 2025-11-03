@@ -27,7 +27,7 @@ class MapTest {
           time = 1.0,
           distance = 1.0,
           difficulty = Difficulty.EASY,
-          authorId = "A",
+          userId = "A",
           image = 0,
           reviewRate = 4.0)
 

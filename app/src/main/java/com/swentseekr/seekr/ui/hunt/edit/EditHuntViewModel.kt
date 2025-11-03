@@ -47,7 +47,7 @@ class EditHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.rep
         time = state.time.toDouble(),
         distance = state.distance.toDouble(),
         difficulty = state.difficulty!!,
-        authorId = authorId,
+        userId = authorId,
         image = state.image,
         reviewRate = state.reviewRate)
   }

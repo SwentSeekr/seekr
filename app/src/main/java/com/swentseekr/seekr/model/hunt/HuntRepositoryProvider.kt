@@ -24,7 +24,7 @@ object HuntRepositoryProvider {
           time = 2.5,
           distance = 5.0,
           difficulty = Difficulty.EASY,
-          authorId = "0",
+          userId = "0",
           image = 0,
           reviewRate = 4.5)
 
@@ -44,7 +44,7 @@ object HuntRepositoryProvider {
                     time = 3.0,
                     distance = 6.0,
                     difficulty = Difficulty.INTERMEDIATE,
-                    authorId = "1",
+                    userId = "1",
                     image = 1,
                     reviewRate = 4.0),
                 Hunt(
@@ -61,7 +61,7 @@ object HuntRepositoryProvider {
                     time = 3.0,
                     distance = 6.0,
                     difficulty = Difficulty.INTERMEDIATE,
-                    authorId = "2",
+                    userId = "2",
                     image = 1,
                     reviewRate = 4.0),
                 Hunt(
@@ -79,7 +79,7 @@ object HuntRepositoryProvider {
                     time = 2.0,
                     distance = 4.0,
                     difficulty = Difficulty.INTERMEDIATE,
-                    authorId = "3",
+                    userId = "3",
                     image = 2,
                     reviewRate = 4.7))
 

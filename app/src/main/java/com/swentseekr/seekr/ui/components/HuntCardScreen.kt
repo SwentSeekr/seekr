@@ -86,7 +86,7 @@ fun HuntCardScreen(
   LaunchedEffect(huntId) { huntCardViewModel.loadHunt(huntId) }
   // val hunt1 = huntCardViewModel.loadHunt(huntId)
   val hunt2 = uiState.hunt
-  val author = "SpikeMan" // huntCardViewModel.loadAuthor(hunt.authorId)
+  val author = "SpikeMan" // huntCardViewModel.loadAuthor(hunt.userId)
   val hunt =
       Hunt(
           uid = "hunt123",
@@ -100,7 +100,7 @@ fun HuntCardScreen(
           time = 2.5,
           distance = 5.0,
           difficulty = Difficulty.DIFFICULT,
-          authorId = "0",
+          userId = "0",
           image = R.drawable.ic_launcher_foreground,
           reviewRate = 4.5)
   Scaffold(

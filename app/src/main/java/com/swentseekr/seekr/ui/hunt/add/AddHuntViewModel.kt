@@ -23,7 +23,7 @@ class AddHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.repo
         time = state.time.toDouble(),
         distance = state.distance.toDouble(),
         difficulty = state.difficulty!!,
-        authorId = authorId,
+        userId = authorId,
         image = state.image,
         reviewRate = state.reviewRate)
   }

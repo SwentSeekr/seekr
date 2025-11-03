@@ -45,8 +45,8 @@ class HuntCardViewModel(
     viewModelScope.launch {
       try {
         val hunt = repository.getHunt(huntID)
-        val authorId = hunt.authorId
-        // repositoryAuthor.getPseudo(authorId)
+        val authorId = hunt.userId
+        // repositoryAuthor.getPseudo(userId)
       } catch (e: Exception) {
         Log.e("HuntCardViewModel", "Error loading Author by ID: $huntID", e)
       }

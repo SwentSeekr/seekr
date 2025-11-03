@@ -22,7 +22,7 @@ class HuntsRepositoryLocalTest {
           time = 2.5,
           distance = 5.0,
           difficulty = Difficulty.EASY,
-          authorId = "0",
+          userId = "0",
           image = 2,
           reviewRate = 4.5)
 

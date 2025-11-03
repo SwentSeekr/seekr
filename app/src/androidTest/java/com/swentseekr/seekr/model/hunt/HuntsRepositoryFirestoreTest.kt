@@ -26,7 +26,7 @@ class HuntsRepositoryFirestoreTest {
           time = 2.5,
           distance = 5.0,
           difficulty = Difficulty.EASY,
-          authorId = "0",
+          userId = "0",
           image = 0,
           reviewRate = 4.5)
 
@@ -39,7 +39,7 @@ class HuntsRepositoryFirestoreTest {
         clearEmulatorData()
       }
       FirebaseAuth.getInstance().signInAnonymously().await()
-      hunt1 = hunt1.copy(authorId = FirebaseAuth.getInstance().currentUser?.uid ?: "0")
+      hunt1 = hunt1.copy(userId = FirebaseAuth.getInstance().currentUser?.uid ?: "0")
     }
   }
 

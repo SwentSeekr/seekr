@@ -170,7 +170,7 @@ class ProfileRepositoryFirestoreTest {
         mapOf(
             "title" to "Sample Hunt",
             "description" to "A test hunt",
-            "authorId" to uid,
+            "userId" to uid,
             "status" to "PUBLISHED",
             "difficulty" to "EASY",
             "time" to 1.0,

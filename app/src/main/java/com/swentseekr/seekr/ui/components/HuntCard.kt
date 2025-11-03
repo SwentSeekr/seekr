@@ -87,7 +87,7 @@ fun HuntCard(
                     // tint = if(huntUiState.isLiked) Color.Red else Color.Gray)
                     tint = Color.Red)
               }
-              Text("by ${hunt.authorId}", modifier = Modifier.padding(horizontal = 4.dp))
+              Text("by ${hunt.userId}", modifier = Modifier.padding(horizontal = 4.dp))
               Row {
                 Image(
                     painter = painterResource(id = safeImageRes(hunt.image)),
@@ -160,7 +160,7 @@ fun HuntCardPreview() {
           time = 2.5,
           distance = 5.0,
           difficulty = Difficulty.DIFFICULT,
-          authorId = "0",
+          userId = "0",
           image = R.drawable.ic_launcher_foreground, // or any drawable in your project
           reviewRate = 4.5)
   var isLiked by remember { mutableStateOf(false) }

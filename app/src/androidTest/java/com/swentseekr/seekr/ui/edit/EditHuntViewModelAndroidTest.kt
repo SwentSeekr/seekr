@@ -175,7 +175,7 @@ class EditHuntViewModelAndroidTest {
     assertEquals(a, updated.start)
     assertEquals(b, updated.end)
     assertEquals(listOf(m1), updated.middlePoints)
-    assertEquals(FirebaseAuth.getInstance().currentUser?.uid, updated.authorId)
+    assertEquals(FirebaseAuth.getInstance().currentUser?.uid, updated.userId)
     assertNull(editVM.uiState.value.errorMsg)
   }
 

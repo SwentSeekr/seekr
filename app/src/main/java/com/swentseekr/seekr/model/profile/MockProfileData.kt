@@ -20,7 +20,7 @@ fun mockProfileData(): Profile {
           time = 2.5,
           distance = 5.0,
           difficulty = Difficulty.DIFFICULT,
-          authorId = "0",
+          userId = "0",
           image = R.drawable.ic_launcher_foreground,
           reviewRate = 4.5)
 
@@ -81,7 +81,7 @@ fun createHunt(uid: String, title: String) =
         time = 1.0,
         distance = 2.0,
         difficulty = Difficulty.EASY,
-        authorId = "0",
+        userId = "0",
         image = R.drawable.empty_user,
         reviewRate = 4.0)
 

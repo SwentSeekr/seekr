@@ -31,7 +31,7 @@ class OverviewViewModelTest {
           time = 1.0,
           distance = 2.0,
           difficulty = Difficulty.EASY,
-          authorId = "0",
+          userId = "0",
           image = 1,
           reviewRate = 4.0)
 
