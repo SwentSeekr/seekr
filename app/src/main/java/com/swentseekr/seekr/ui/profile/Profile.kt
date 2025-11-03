@@ -82,6 +82,7 @@ data class TabItem(val tab: ProfileTab, val testTag: String, val icon: ImageVect
  */
 data class Profile(
     val uid: String = "",
+    val userId : String = "",
     val author: Author = Author(),
     val myHunts: MutableList<Hunt> = mutableListOf(),
     val doneHunts: MutableList<Hunt> = mutableListOf(),

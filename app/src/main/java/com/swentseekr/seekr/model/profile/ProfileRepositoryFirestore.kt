@@ -20,6 +20,9 @@ class ProfileRepositoryFirestore(
 ) : ProfileRepository {
   private val profilesCollection = db.collection("profiles")
 
+    override fun getNewUid(): String {
+        return profilesCollection.document().id
+    }
   override suspend fun createProfile(profile: Profile) {
     try {
       profilesCollection.document(profile.uid).set(profile).await()
@@ -35,9 +38,11 @@ class ProfileRepositoryFirestore(
       return documentToProfile(doc)
     }
     // Auto-create a default profile if missing
+
     val defaultProfile =
         Profile(
-            uid = userId,
+            uid = getNewUid(),
+            userId = userId,
             author = Author("New User", "", 0, 0.0, 0.0),
             myHunts = mutableListOf(),
             doneHunts = mutableListOf(),
