@@ -74,7 +74,8 @@ data class TabItem(val tab: ProfileTab, val testTag: String, val icon: ImageVect
 /**
  * Data class representing a user's profile.
  *
- * @property uid Unique identifier of the user.
+ * @property uid Unique identifier of the profile.
+ * @property userId User ID of the profile.
  * @property author Author details of the user.
  * @property myHunts Hunts created by the user.
  * @property doneHunts Hunts completed by the user.
