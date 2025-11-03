@@ -35,7 +35,7 @@ class EditHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.rep
 
   override fun buildHunt(state: HuntUIState): Hunt {
     val id = requireNotNull(huntId) { "No hunt loaded to edit." }
-    val authorId = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown"
+    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown"
     return Hunt(
         uid = id,
         start = state.points.first(),
@@ -47,7 +47,7 @@ class EditHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.rep
         time = state.time.toDouble(),
         distance = state.distance.toDouble(),
         difficulty = state.difficulty!!,
-        userId = authorId,
+        userId = userId,
         image = state.image,
         reviewRate = state.reviewRate)
   }

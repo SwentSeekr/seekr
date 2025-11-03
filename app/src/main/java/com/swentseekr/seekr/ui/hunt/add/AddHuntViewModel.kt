@@ -11,7 +11,7 @@ class AddHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.repo
   override fun buildHunt(state: HuntUIState): Hunt {
 
     val uid = repository.getNewUid()
-    val authorId = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown"
+    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown"
     return Hunt(
         uid = uid,
         start = state.points.first(),
@@ -23,7 +23,7 @@ class AddHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.repo
         time = state.time.toDouble(),
         distance = state.distance.toDouble(),
         difficulty = state.difficulty!!,
-        userId = authorId,
+        userId = userId,
         image = state.image,
         reviewRate = state.reviewRate)
   }
