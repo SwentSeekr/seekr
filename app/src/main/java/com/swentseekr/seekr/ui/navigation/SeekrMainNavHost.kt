@@ -11,15 +11,12 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.swentseekr.seekr.model.profile.mockProfileData
 import com.swentseekr.seekr.ui.components.HuntCardScreen
 import com.swentseekr.seekr.ui.hunt.add.AddHuntScreen
 import com.swentseekr.seekr.ui.map.MapScreen
@@ -146,7 +143,6 @@ fun SeekrMainNavHost(
               }
               composable(SeekrDestination.Map.route) { MapScreen() }
               composable(SeekrDestination.Profile.route) {
-
                 ProfileScreen(
                     userId = user.uid,
                     onAddHunt = { navController.navigate(SeekrDestination.AddHunt.route) },

@@ -20,9 +20,10 @@ class ProfileRepositoryFirestore(
 ) : ProfileRepository {
   private val profilesCollection = db.collection("profiles")
 
-    override fun getNewUid(): String {
-        return profilesCollection.document().id
-    }
+  override fun getNewUid(): String {
+    return profilesCollection.document().id
+  }
+
   override suspend fun createProfile(profile: Profile) {
     try {
       profilesCollection.document(profile.uid).set(profile).await()
@@ -42,18 +43,18 @@ class ProfileRepositoryFirestore(
     return initDefaultProfile(userId)
   }
 
-    private suspend fun initDefaultProfile(userId: String): Profile {
-        val defaultProfile =
-            Profile(
-                uid = getNewUid(),
-                userId = userId,
-                author = Author("New User", "", 0, 0.0, 0.0),
-                myHunts = mutableListOf(),
-                doneHunts = mutableListOf(),
-                likedHunts = mutableListOf())
-        profilesCollection.document(userId).set(defaultProfile).await()
-        return defaultProfile
-    }
+  private suspend fun initDefaultProfile(userId: String): Profile {
+    val defaultProfile =
+        Profile(
+            uid = getNewUid(),
+            userId = userId,
+            author = Author("New User", "", 0, 0.0, 0.0),
+            myHunts = mutableListOf(),
+            doneHunts = mutableListOf(),
+            likedHunts = mutableListOf())
+    profilesCollection.document(userId).set(defaultProfile).await()
+    return defaultProfile
+  }
 
   override suspend fun updateProfile(profile: Profile) {
     val currentUser = auth.currentUser ?: return

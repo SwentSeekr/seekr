@@ -6,6 +6,7 @@ import com.swentseekr.seekr.ui.profile.Profile
 interface ProfileRepository {
 
   fun getNewUid(): String
+
   suspend fun createProfile(profile: Profile)
 
   suspend fun getProfile(userId: String): Profile?

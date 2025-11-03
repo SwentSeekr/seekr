@@ -8,9 +8,10 @@ class ProfileRepositoryLocal : ProfileRepository {
 
   fun size() = profiles.size
 
-    override fun getNewUid(): String {
-        return "user${profiles.size + 1}"
-    }
+  override fun getNewUid(): String {
+    return "user${profiles.size + 1}"
+  }
+
   fun addProfile(profile: Profile) {
     profiles.add(profile)
   }
