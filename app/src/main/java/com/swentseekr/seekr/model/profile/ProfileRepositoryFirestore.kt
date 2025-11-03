@@ -35,6 +35,11 @@ class ProfileRepositoryFirestore(
       return documentToProfile(doc)
     }
     // Auto-create a default profile if missing
+    val defaultProfile = createDefaultProfile(userId)
+    return defaultProfile
+  }
+
+    private suspend fun createDefaultProfile(userId: String): Profile {
     val defaultProfile =
         Profile(
             uid = userId,
@@ -44,7 +49,7 @@ class ProfileRepositoryFirestore(
             likedHunts = mutableListOf())
     profilesCollection.document(userId).set(defaultProfile).await()
     return defaultProfile
-  }
+    }
 
   override suspend fun updateProfile(profile: Profile) {
     val currentUser = auth.currentUser ?: return
