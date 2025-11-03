@@ -17,6 +17,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
 import com.swentseekr.seekr.model.profile.mockProfileData
 import com.swentseekr.seekr.ui.components.HuntCardScreen
 import com.swentseekr.seekr.ui.hunt.add.AddHuntScreen
@@ -143,9 +144,9 @@ fun SeekrMainNavHost(
               }
               composable(SeekrDestination.Map.route) { MapScreen() }
               composable(SeekrDestination.Profile.route) {
-                val profile = mockProfileData()
+                  val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown"
                 ProfileScreen(
-                    userId = profile.uid,
+                    userId = userId,
                     onAddHunt = { navController.navigate(SeekrDestination.AddHunt.route) },
                     testMode = testMode)
               }
