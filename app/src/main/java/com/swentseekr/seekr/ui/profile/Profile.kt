@@ -44,6 +44,8 @@ import com.swentseekr.seekr.ui.components.HuntCard
 import com.swentseekr.seekr.ui.components.MAX_RATING
 import com.swentseekr.seekr.ui.components.Rating
 import com.swentseekr.seekr.ui.components.RatingType
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.IconButton
 
 object ProfileTestTags {
   const val PROFILE_HUNTS_LIST = "PROFILE_HUNTS_LIST"
@@ -107,9 +109,13 @@ fun ProfileScreen(
     userId: String? = null,
     viewModel: ProfileViewModel = viewModel(),
     onAddHunt: () -> Unit = {},
+    onSettings: () -> Unit = {},
+    onMyHuntClick: (String) -> Unit = {},
     testMode: Boolean = false,
     testProfile: Profile? = null,
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
   val profile =
       if (testMode) {
         testProfile ?: mockProfileData()
@@ -129,7 +135,7 @@ fun ProfileScreen(
     return
   }
 
-  val isMyProfile = testMode || viewModel.uiState.collectAsState().value.isMyProfile
+    val isMyProfile = testMode || uiState.isMyProfile || (userId == null || profile.uid == userId)
 
   var selectedTab by remember { mutableStateOf(ProfileTab.MY_HUNTS) }
   Scaffold(
@@ -151,33 +157,36 @@ fun ProfileScreen(
         ) {
           Row(
               modifier = Modifier.fillMaxWidth().padding(16.dp),
-              verticalAlignment = Alignment.CenterVertically) {
-                ProfilePicture(profilePicture = profile.author.profilePicture)
-                Column {
+              verticalAlignment = Alignment.CenterVertically
+          ) {
+              ProfilePicture(profilePicture = profile.author.profilePicture)
+              Column(Modifier.weight(1f)) {
                   Text(
                       text = profile.author.pseudonym,
                       fontSize = 20.sp,
                       fontWeight = FontWeight.Bold,
-                      modifier =
-                          Modifier.padding(TEXT_SIZE).testTag(ProfileTestTags.PROFILE_PSEUDONYM))
+                      modifier = Modifier.padding(TEXT_SIZE).testTag(ProfileTestTags.PROFILE_PSEUDONYM)
+                  )
                   Row {
-                    Text(
-                        text = "${profile.author.reviewRate}/${MAX_RATING}",
-                        modifier =
-                            Modifier.padding(TEXT_SIZE)
-                                .testTag(ProfileTestTags.PROFILE_REVIEW_RATING))
-                    Rating(rating = profile.author.reviewRate, RatingType.STAR)
+                      Text(
+                          text = "${profile.author.reviewRate}/${MAX_RATING}",
+                          modifier = Modifier.padding(TEXT_SIZE).testTag(ProfileTestTags.PROFILE_REVIEW_RATING)
+                      )
+                      Rating(rating = profile.author.reviewRate, RatingType.STAR)
                   }
                   Row {
-                    Text(
-                        text = "${profile.author.sportRate}/${MAX_RATING}",
-                        modifier =
-                            Modifier.padding(TEXT_SIZE)
-                                .testTag(ProfileTestTags.PROFILE_SPORT_RATING))
-                    Rating(rating = profile.author.sportRate, RatingType.SPORT)
+                      Text(
+                          text = "${profile.author.sportRate}/${MAX_RATING}",
+                          modifier = Modifier.padding(TEXT_SIZE).testTag(ProfileTestTags.PROFILE_SPORT_RATING)
+                      )
+                      Rating(rating = profile.author.sportRate, RatingType.SPORT)
                   }
-                }
               }
+
+              IconButton(onClick = onSettings) {
+                  Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
+              }
+          }
 
           Text(
               text = profile.author.bio,
@@ -212,15 +221,17 @@ fun ProfileScreen(
                                 .testTag(ProfileTestTags.EMPTY_HUNTS_MESSAGE))
                   }
                 } else {
-                  items(huntsToDisplay.size) { index ->
-                    val hunt = huntsToDisplay[index]
-                    HuntCard(
-                        hunt,
-                        modifier =
-                            Modifier.testTag(ProfileTestTags.getTestTagForHuntCard(hunt, index)))
-                  }
+                    items(huntsToDisplay.size) { index ->
+                        val hunt = huntsToDisplay[index]
+                        val base = Modifier.testTag(ProfileTestTags.getTestTagForHuntCard(hunt, index))
+                        val clickable = if (selectedTab == ProfileTab.MY_HUNTS) {
+                            base.clickable { onMyHuntClick(hunt.uid) }
+                        } else base
+
+                        HuntCard(hunt, modifier = clickable)
+                    }
                 }
-              }
+          }
         }
       }
 }
