@@ -5,6 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
+import com.swentseekr.seekr.model.hunt.HuntReview
+import com.swentseekr.seekr.model.hunt.HuntReviewRepository
+import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryProvider
 import com.swentseekr.seekr.model.hunt.HuntsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,16 +16,30 @@ import kotlinx.coroutines.launch
 
 data class HuntCardUiState(
     val hunt: Hunt? = null,
+    val reviewList: List<HuntReview> = emptyList(),
     val isLiked: Boolean = false,
     val isAchieved: Boolean = false
 )
 
 class HuntCardViewModel(
-    private val repository: HuntsRepository = HuntRepositoryProvider.repository
+    private val repository: HuntsRepository = HuntRepositoryProvider.repository,
+    private val repositoryReview: HuntReviewRepository = HuntReviewRepositoryProvider.repository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(HuntCardUiState())
   val uiState: StateFlow<HuntCardUiState> = _uiState.asStateFlow()
+
+  /** Loads reviews for a specific hunt.* */
+  fun loadOtherReview(huntID: String) {
+    viewModelScope.launch {
+      try {
+        val reviews = repositoryReview.getHuntReviews(huntID)
+        _uiState.value = _uiState.value.copy(reviewList = reviews)
+      } catch (e: Exception) {
+        Log.e("ReviewHuntViewModel", "Error loading reviews for Hunt ID: $huntID", e)
+      }
+    }
+  }
 
   /**
    * Loads a Hunt by its ID and updates the UI state.
@@ -33,7 +50,7 @@ class HuntCardViewModel(
     viewModelScope.launch {
       try {
         val hunt = repository.getHunt(huntID)
-        _uiState.value = HuntCardUiState(hunt = hunt, isLiked = false, isAchieved = false)
+        _uiState.value = HuntCardUiState(hunt = hunt, isLiked = false, isAchieved = false, reviewList = emptyList())
       } catch (e: Exception) {
         Log.e("HuntCardViewModel", "Error loading Hunt by ID: $huntID", e)
       }

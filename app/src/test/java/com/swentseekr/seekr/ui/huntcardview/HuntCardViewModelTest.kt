@@ -2,6 +2,7 @@ package com.swentseekr.seekr.ui.huntcardview
 
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryLocal
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryLocal
 import com.swentseekr.seekr.model.map.Location
@@ -19,6 +20,7 @@ import org.junit.Test
 class HuntCardViewModelTest {
   private lateinit var viewModel: HuntCardViewModel
   private lateinit var fakeRepository: HuntsRepositoryLocal
+  private lateinit var fakeRevRepository: HuntReviewRepositoryLocal
   private val testDispatcher = StandardTestDispatcher()
 
   private val testHunt =
@@ -42,8 +44,9 @@ class HuntCardViewModelTest {
     Dispatchers.setMain(testDispatcher)
     fakeRepository = HuntsRepositoryLocal()
     fakeRepository.addHunt(testHunt)
+    fakeRevRepository = HuntReviewRepositoryLocal() // Not used in these tests
 
-    viewModel = HuntCardViewModel(fakeRepository)
+    viewModel = HuntCardViewModel(fakeRepository, fakeRevRepository)
 
     advanceUntilIdle()
   }
@@ -60,6 +63,7 @@ class HuntCardViewModelTest {
     advanceUntilIdle()
 
     val state = viewModel.uiState.value
+
     assertNotNull(state.hunt)
     assertEquals(testHunt.uid, state.hunt?.uid)
     assertFalse(state.isLiked)

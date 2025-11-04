@@ -55,6 +55,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
@@ -84,9 +85,11 @@ fun HuntCardScreen(
 
   // Load when arriving / when id changes
   LaunchedEffect(huntId) { huntCardViewModel.loadHunt(huntId) }
-  // val hunt1 = huntCardViewModel.loadHunt(huntId)
+  LaunchedEffect(huntId) { huntCardViewModel.loadOtherReview(huntId) }
+
   val hunt2 = uiState.hunt
-  val author = "SpikeMan" // huntCardViewModel.loadAuthor(hunt.authorId)
+  val reviews = uiState.reviewList
+  val author = "SpikeMan"
   val hunt =
       Hunt(
           uid = "hunt123",
@@ -270,9 +273,29 @@ fun HuntCardScreen(
                       }
                     }
               }
-          // POSSIBILITY OF REVIEW IF ALREADY DONE ?
+
+          LazyColumn(
+              modifier =
+                  modifier
+                      .fillMaxWidth()
+                      .padding(innerPadding)
+                      .padding(horizontal = 16.dp)
+                      .padding(top = 8.dp, bottom = 16.dp)
+          ) {
+            items(10) { reviewIndex -> ReviewCard(reviews[reviewIndex]) }
+          }
         }
       }
+}
+
+@Composable
+fun ReviewCard(review: HuntReview) {
+  Card {
+    Column(modifier = Modifier.padding(8.dp)) {
+      Text("Rating: ${review.rating}/5", fontWeight = FontWeight.Bold)
+      Text(review.comment)
+    }
+  }
 }
 
 /**
