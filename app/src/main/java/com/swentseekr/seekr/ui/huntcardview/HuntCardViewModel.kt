@@ -50,7 +50,9 @@ class HuntCardViewModel(
     viewModelScope.launch {
       try {
         val hunt = repository.getHunt(huntID)
-        _uiState.value = HuntCardUiState(hunt = hunt, isLiked = false, isAchieved = false, reviewList = emptyList())
+        _uiState.value =
+            HuntCardUiState(
+                hunt = hunt, isLiked = false, isAchieved = false, reviewList = emptyList())
       } catch (e: Exception) {
         Log.e("HuntCardViewModel", "Error loading Hunt by ID: $huntID", e)
       }

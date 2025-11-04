@@ -280,10 +280,9 @@ fun HuntCardScreen(
                       .fillMaxWidth()
                       .padding(innerPadding)
                       .padding(horizontal = 16.dp)
-                      .padding(top = 8.dp, bottom = 16.dp)
-          ) {
-            items(10) { reviewIndex -> ReviewCard(reviews[reviewIndex]) }
-          }
+                      .padding(top = 8.dp, bottom = 16.dp)) {
+                items(10) { reviewIndex -> ReviewCard(reviews[reviewIndex]) }
+              }
         }
       }
 }
