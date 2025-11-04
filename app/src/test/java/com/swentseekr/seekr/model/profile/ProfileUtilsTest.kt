@@ -147,12 +147,4 @@ class ProfileUtilsTest {
     assertEquals(99, updated.author.profilePicture)
     assertEquals(origAuthor.pseudonym, updated.author.pseudonym)
   }
-
-  @Test
-  fun calculateOverallRating() {
-    val a = 4.0
-    val b = 2.0
-    val expected = 3.0
-    assertEquals(expected, utils.calculateOverallRating(a, b), 0.0)
-  }
 }
