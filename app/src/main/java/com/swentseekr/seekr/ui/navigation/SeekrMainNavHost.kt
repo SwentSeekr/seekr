@@ -17,7 +17,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.swentseekr.seekr.model.profile.mockProfileData
+import com.google.firebase.auth.FirebaseUser
 import com.swentseekr.seekr.ui.components.HuntCardScreen
 import com.swentseekr.seekr.ui.hunt.add.AddHuntScreen
 import com.swentseekr.seekr.ui.map.MapScreen
@@ -102,6 +102,7 @@ fun SeekrNavigationBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SeekrMainNavHost(
+    user: FirebaseUser? = null,
     navController: NavHostController = rememberNavController(),
     testMode: Boolean = false,
     modifier: Modifier = Modifier
@@ -143,9 +144,8 @@ fun SeekrMainNavHost(
               }
               composable(SeekrDestination.Map.route) { MapScreen() }
               composable(SeekrDestination.Profile.route) {
-                val profile = mockProfileData()
                 ProfileScreen(
-                    userId = profile.uid,
+                    userId = user?.uid,
                     onAddHunt = { navController.navigate(SeekrDestination.AddHunt.route) },
                     testMode = testMode)
               }
