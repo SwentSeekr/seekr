@@ -71,6 +71,7 @@ object HuntCardScreenTestTags {
   const val DESCRIPTION_TEXT = "DescriptionText"
   const val MAP_CONTAINER = "MapContainer"
   const val BEGIN_BUTTON = "BeginButton"
+  const val REVIEW_CARD = "ReviewCard"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -289,7 +290,14 @@ fun HuntCardScreen(
 
 @Composable
 fun ReviewCard(review: HuntReview) {
-  Card {
+  Card(
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(vertical = 4.dp)
+              .border(2.dp, Color(0xFF60BA37), RoundedCornerShape(12.dp))
+              .testTag(HuntCardScreenTestTags.REVIEW_CARD),
+      colors = CardDefaults.cardColors(containerColor = Color(0xFFF8DEB6)),
+  ) {
     Column(modifier = Modifier.padding(8.dp)) {
       Text("Rating: ${review.rating}/5", fontWeight = FontWeight.Bold)
       Text(review.comment)
