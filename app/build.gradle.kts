@@ -166,6 +166,7 @@ dependencies {
     // Google Maps Compose widgets library
     implementation("com.google.maps.android:maps-compose-widgets:$mapsComposeVersion")
     implementation("com.google.maps.android:android-maps-utils:3.8.2")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
 
     // ------------- Jetpack Compose ------------------
     val composeBom = platform(libs.compose.bom)

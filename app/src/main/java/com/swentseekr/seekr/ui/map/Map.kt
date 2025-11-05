@@ -1,7 +1,10 @@
 package com.swentseekr.seekr.ui.map
 
+import android.Manifest
 import android.content.Context
 import android.graphics.Canvas
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -43,6 +47,8 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polyline
@@ -92,20 +98,50 @@ object MapScreenTestTags {
 @Composable
 fun MapScreen(viewModel: MapViewModel = viewModel()) {
   val uiState by viewModel.uiState.collectAsState()
-  val cameraPositionState = rememberCameraPositionState {
-    position = CameraPosition.fromLatLngZoom(LatLng(20.0, 0.0), 2f)
-  }
+  val cameraPositionState = rememberCameraPositionState()
   val scope = rememberCoroutineScope()
+
+  val context = LocalContext.current
+  val fused = remember { LocationServices.getFusedLocationProviderClient(context) }
+
   var mapLoaded by remember { mutableStateOf(false) }
   var previousCameraPosition by remember { mutableStateOf<CameraPosition?>(null) }
 
+  var hasLocationPermission by remember { mutableStateOf(false) }
+  val permissionLauncher =
+      rememberLauncherForActivityResult(
+          contract = ActivityResultContracts.RequestMultiplePermissions()) { grants ->
+            hasLocationPermission =
+                grants[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                    grants[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+          }
+
   val selectedHunt = uiState.selectedHunt
+
+  LaunchedEffect(Unit) {
+    permissionLauncher.launch(
+        arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+  }
+
+  LaunchedEffect(hasLocationPermission, mapLoaded) {
+    if (hasLocationPermission && mapLoaded) {
+      fused.lastLocation.addOnSuccessListener { location ->
+        location?.let {
+          val here = LatLng(it.latitude, it.longitude)
+          scope.launch { cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(here, 16f)) }
+        }
+      }
+    }
+  }
 
   Box(Modifier.fillMaxSize().testTag(MapScreenTestTags.MAP_SCREEN)) {
     GoogleMap(
         modifier = Modifier.matchParentSize().testTag(MapScreenTestTags.GOOGLE_MAP_SCREEN),
         cameraPositionState = cameraPositionState,
-        onMapLoaded = { mapLoaded = true }) {
+        onMapLoaded = { mapLoaded = true },
+        properties = MapProperties(isMyLocationEnabled = hasLocationPermission),
+        uiSettings = MapUiSettings(myLocationButtonEnabled = true)) {
           LaunchedEffect(mapLoaded, selectedHunt, uiState.isFocused) {
             if (!mapLoaded) return@LaunchedEffect
             val hunt = selectedHunt ?: return@LaunchedEffect
