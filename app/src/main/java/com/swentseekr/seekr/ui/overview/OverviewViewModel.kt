@@ -147,6 +147,7 @@ class OverviewViewModel(
           val difficultyMatches = selectedDifficulty?.let { hunt.difficulty == it } ?: true
           statusMatches && difficultyMatches && searchMatches
         }
+
     _uiState.value = currentState.copy(hunts = filtered)
   }
 }

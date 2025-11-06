@@ -155,7 +155,6 @@ fun FilterBar(
                   onStatusSelected(huntStatuses[status])
                 }
           }
-
           items(difficulties.size) { difficulty ->
             FilterButton(
                 text = difficulties[difficulty].name,
