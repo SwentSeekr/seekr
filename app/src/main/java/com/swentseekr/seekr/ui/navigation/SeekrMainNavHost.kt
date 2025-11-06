@@ -24,6 +24,10 @@ import com.swentseekr.seekr.ui.map.MapScreen
 import com.swentseekr.seekr.ui.overview.OverviewScreen
 import com.swentseekr.seekr.ui.profile.ProfileScreen
 import com.swentseekr.seekr.ui.theme.*
+import com.swentseekr.seekr.ui.hunt.edit.EditHuntScreen
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+
 
 // Test Tags
 object NavigationTestTags {
@@ -33,6 +37,9 @@ object NavigationTestTags {
   const val PROFILE_TAB = "PROFILE_TAB"
   const val HUNTCARD_SCREEN = "HUNTCARD_SCREEN"
   const val ADD_HUNT_SCREEN = "ADD_HUNT_SCREEN"
+    const val MAP_SCREEN = "MAP_SCREEN"
+    const val OVERVIEW_SCREEN = "OVERVIEW_SCREEN"
+    const val EDIT_HUNT_SCREEN = "EDIT_HUNT_SCREEN"
 }
 
 // Destinations as sealed class
@@ -53,7 +60,13 @@ sealed class SeekrDestination(
     const val ARG_HUNT_ID = "huntId"
   }
 
-  object AddHunt : SeekrDestination("add_hunt", "Add Hunt", Icons.Filled.List)
+    object EditHunt : SeekrDestination("edit_hunt/{huntId}", "Edit Hunt", Icons.Filled.List) {
+        fun createRoute(huntId: String) = "edit_hunt/$huntId"
+        const val ARG_HUNT_ID = "huntId"
+    }
+
+
+    object AddHunt : SeekrDestination("add_hunt", "Add Hunt", Icons.Filled.List)
 
   companion object {
     val all = listOf(Overview, Map, Profile)
@@ -133,23 +146,41 @@ fun SeekrMainNavHost(
             navController = navController,
             startDestination = SeekrDestination.Overview.route,
             modifier = Modifier.padding(innerPadding)) {
-              composable(SeekrDestination.Overview.route) {
-                OverviewScreen(
-                    onhuntclick = { huntId ->
-                      lastHuntId = huntId
-                      navController.navigate(SeekrDestination.HuntCard.createRoute(huntId)) {
-                        launchSingleTop = true
-                      }
-                    })
-              }
-              composable(SeekrDestination.Map.route) { MapScreen() }
-              composable(SeekrDestination.Profile.route) {
+            composable(SeekrDestination.Overview.route) {
+                Surface(modifier = Modifier
+                    .fillMaxSize()
+                    .testTag(NavigationTestTags.OVERVIEW_SCREEN)) {
+                    OverviewScreen(
+                        onhuntclick = { huntId ->
+                            lastHuntId = huntId
+                            navController.navigate(SeekrDestination.HuntCard.createRoute(huntId)) {
+                                launchSingleTop = true
+                            }
+                        }
+                    )
+                }
+            }
+            composable(SeekrDestination.Map.route) {
+                Surface(modifier = Modifier
+                    .fillMaxSize()
+                    .testTag(NavigationTestTags.MAP_SCREEN)) {
+                    MapScreen()
+                }
+            }
+            composable(SeekrDestination.Profile.route) {
                 ProfileScreen(
                     userId = user?.uid,
                     onAddHunt = { navController.navigate(SeekrDestination.AddHunt.route) },
-                    testMode = testMode)
-              }
-              composable(
+                    onMyHuntClick = { huntId ->
+                        navController.navigate(SeekrDestination.EditHunt.createRoute(huntId)) {
+                            launchSingleTop = true
+                        }
+                    },
+                    testMode = testMode
+                )
+            }
+
+            composable(
                   route = SeekrDestination.HuntCard.route,
                   arguments =
                       listOf(
@@ -182,7 +213,35 @@ fun SeekrMainNavHost(
                           testMode = testMode)
                     }
               }
+            composable(
+                route = SeekrDestination.EditHunt.route,
+                arguments = listOf(navArgument(SeekrDestination.EditHunt.ARG_HUNT_ID) {
+                    type = NavType.StringType
+                })
+            ) { backStackEntry ->
+                val huntId = backStackEntry.arguments
+                    ?.getString(SeekrDestination.EditHunt.ARG_HUNT_ID)
+                    .orEmpty()
+
+                Surface(modifier = Modifier
+                    .fillMaxSize()
+                    .testTag(NavigationTestTags.EDIT_HUNT_SCREEN)) {
+                    EditHuntScreen(
+                        huntId = huntId,
+                        onGoBack = { navController.popBackStack() },
+                        onDone = {
+                            navController.navigate(SeekrDestination.Profile.route) {
+                                launchSingleTop = true
+                                popUpTo(SeekrDestination.Profile.route)
+                            }
+                        },
+                        testMode = testMode
+                    )
+                }
             }
+
+
+        }
       }
 }
 
