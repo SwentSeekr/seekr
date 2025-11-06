@@ -13,6 +13,10 @@ class HuntsRepositoryLocal : HuntsRepository {
     return hunts.toList()
   }
 
+  override suspend fun getAllMyHunts(authorID: String): List<Hunt> {
+    return hunts.filter { hunts -> hunts.authorId == authorID }
+  }
+
   override suspend fun getHunt(huntID: String): Hunt {
     for (i in hunts.indices) {
       if (hunts[i].uid == huntID) {

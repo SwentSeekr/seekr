@@ -6,6 +6,7 @@ import com.swentseekr.seekr.utils.FirebaseTestEnvironment
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment.clearEmulatorData
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
@@ -76,6 +77,38 @@ class HuntsRepositoryFirestoreTest {
     assertEquals(2, hunts.size)
     assert(hunts.contains(hunt1))
     assert(hunts.contains(hunt2))
+  }
+
+  @Test
+  fun getAllHuntsReturnsEmptyListWhenNoHuntsAdded() = runTest {
+    val hunts = repository.getAllHunts()
+    assertTrue(hunts.isEmpty())
+  }
+
+  @Test
+  fun canGetAllHuntsToRepository() = runTest {
+    val hunt2 = hunt1.copy(uid = "hunt2", title = "Another Hunt")
+    val hunt3 = hunt1.copy(uid = "hunt3", title = "Third Hunt", authorId = "2")
+    repository.addHunt(hunt1)
+    repository.addHunt(hunt2)
+    repository.addHunt(hunt3)
+    val hunts = repository.getAllHunts()
+    assertEquals(3, hunts.size)
+    assert(hunts.contains(hunt1))
+    assert(hunts.contains(hunt2))
+    assert(hunts.contains(hunt3))
+  }
+
+  @Test
+  fun canGetAllMyHuntsToRepository() = runTest {
+    val hunt2 = hunt1.copy(uid = "hunt2", title = "Another Hunt")
+    val hunt3 = hunt1.copy(uid = "hunt3", title = "Third Hunt", authorId = "2")
+    repository.addHunt(hunt1)
+    repository.addHunt(hunt2)
+    repository.addHunt(hunt3)
+    advanceUntilIdle()
+    val hunts = repository.getAllMyHunts("3")
+    assertEquals(0, hunts.size)
   }
 
   @Test

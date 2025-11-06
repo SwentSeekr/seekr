@@ -1,7 +1,7 @@
 package com.swentseekr.seekr.ui.profile
 
+import android.net.Uri
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
@@ -10,28 +10,36 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
 import com.swentseekr.seekr.R
 
 /**
  * Displays a user's profile picture in a circular shape.
  *
- * @param profilePicture The resource ID of the profile picture.
+ * @param profilePictureRes The drawable resource ID of the profile picture (fallback if Uri is
+ *   null).
+ * @param profilePictureUri The URI of a picked image from gallery or camera (optional).
  */
 @Composable
-fun ProfilePicture(profilePicture: Int) {
-  val isFallback = profilePicture == 0
+fun ProfilePicture(
+    profilePictureRes: Int = 0,
+    profilePictureUri: Uri? = null,
+    modifier: Modifier = Modifier
+) {
+  val isFallback = profilePictureUri == null && profilePictureRes == 0
+
   val painter =
-      if (isFallback) {
-        painterResource(R.drawable.empty_user)
-      } else {
-        painterResource(profilePicture)
+      when {
+        profilePictureUri != null -> rememberAsyncImagePainter(profilePictureUri)
+        profilePictureRes != 0 -> painterResource(profilePictureRes)
+        else -> painterResource(R.drawable.empty_user)
       }
 
   Image(
       painter = painter,
       contentDescription = "Profile Picture",
       modifier =
-          Modifier.padding(horizontal = 4.dp)
+          modifier
               .size(100.dp)
               .clip(CircleShape)
               .testTag(
