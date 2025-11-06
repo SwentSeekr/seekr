@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.profile
 
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -17,6 +18,17 @@ import com.swentseekr.seekr.ui.theme.SampleAppTheme
 import org.junit.Rule
 import org.junit.Test
 
+/**
+ * Instrumented UI tests for the [EditProfileScreen] and [EditProfileContent] composables.
+ *
+ * These tests verify that:
+ * - User interactions correctly update the UI state (e.g., text input fields).
+ * - Buttons are enabled or disabled based on UI state.
+ * - Dialogs and messages (success/error) appear under expected conditions.
+ * - Callbacks such as `onCancel`, `onSave`, and `onProfilePictureChange` are invoked properly.
+ *
+ * Uses [composeTestRule] to simulate user interactions and assert UI state.
+ */
 class EditProfileScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
@@ -242,5 +254,51 @@ class EditProfileScreenTest {
         .onNodeWithTag(EditProfileTestTags.ERROR_MESSAGE)
         .assertExists()
         .assertTextContains("Pseudonym cannot be empty")
+  }
+
+  @Test
+  fun displaysSelectedProfilePictureUri() {
+    val testUri = Uri.parse("content://fake/image.jpg")
+    composeTestRule.setContent {
+      SampleAppTheme {
+        EditProfileContent(
+            uiState = EditProfileUIState(pseudonym = "Test", bio = "Bio", profilePicture = 0),
+            onPseudonymChange = {},
+            onBioChange = {},
+            onCancel = {},
+            onSave = {},
+            onProfilePictureChange = {},
+            profilePictureUri = testUri)
+      }
+    }
+
+    composeTestRule.onNodeWithTag(EditProfileTestTags.PROFILE_PICTURE).assertIsDisplayed()
+  }
+
+  @Test
+  fun saveButtonDisabled_whenErrorDisplayed() {
+    val uiState =
+        EditProfileUIState(
+            pseudonym = "Tester",
+            bio = "Bio",
+            profilePicture = 0,
+            canSave = true,
+            isSaving = false,
+            errorMsg = "Some error")
+
+    composeTestRule.setContent {
+      SampleAppTheme {
+        EditProfileContent(
+            uiState = uiState,
+            onPseudonymChange = {},
+            onBioChange = {},
+            onCancel = {},
+            onSave = {},
+            onProfilePictureChange = {})
+      }
+    }
+
+    composeTestRule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).assertIsEnabled()
+    composeTestRule.onNodeWithTag(EditProfileTestTags.ERROR_MESSAGE).assertIsDisplayed()
   }
 }

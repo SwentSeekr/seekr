@@ -15,10 +15,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,6 +36,11 @@ object EditProfileConstants {
   val ADD_ICON_FONT_SIZE = 24.sp
 }
 
+/**
+ * Centralized test tags for identifying composable nodes in tests.
+ *
+ * Used in instrumented and UI tests to find elements using `composeTestRule.onNodeWithTag(...)`.
+ */
 object EditProfileTestTags {
   const val SCREEN = "EDIT_PROFILE_SCREEN"
   const val PROFILE_PICTURE = "PROFILE_PICTURE"
@@ -52,6 +55,18 @@ object EditProfileTestTags {
   const val SUCCESS_MESSAGE = "SUCCESS_MESSAGE"
 }
 
+/**
+ * The main screen composable for editing a user’s profile.
+ *
+ * Displays editable fields for pseudonym and bio, allows changing the profile picture, and handles
+ * saving or canceling changes.
+ *
+ * @param userId The ID of the user whose profile is being edited.
+ * @param editProfileViewModel The [EditProfileViewModel] that holds UI state and logic.
+ * @param onGoBack Callback when the user cancels or navigates back.
+ * @param onDone Callback when saving completes successfully.
+ * @param testMode If true, disables loading user data and simplifies behavior for testing.
+ */
 @Composable
 fun EditProfileScreen(
     userId: String? = null,
@@ -86,6 +101,12 @@ fun EditProfileScreen(
 
   LaunchedEffect(userId) {
     if (!testMode && userId != null) editProfileViewModel.loadProfile(userId)
+  }
+
+  LaunchedEffect(uiState.success) {
+    if (uiState.success) {
+      onDone()
+    }
   }
 
   if (showDialog) {
@@ -143,6 +164,20 @@ fun EditProfileScreen(
       profilePictureUri = selectedImageUri)
 }
 
+/**
+ * Composable that displays the editable content of the Edit Profile screen.
+ *
+ * Handles text input for pseudonym and bio, shows error/success messages, and provides buttons for
+ * saving, canceling, or changing the profile picture.
+ *
+ * @param uiState The current UI state containing field values and flags.
+ * @param onPseudonymChange Callback when the pseudonym text changes.
+ * @param onBioChange Callback when the bio text changes.
+ * @param onCancel Callback when the cancel button is clicked.
+ * @param onSave Callback when the save button is clicked.
+ * @param onProfilePictureChange Callback when the profile picture is clicked.
+ * @param profilePictureUri Optional [Uri] for a locally selected image preview.
+ */
 @Composable
 fun EditProfileContent(
     uiState: EditProfileUIState,
@@ -171,8 +206,9 @@ fun EditProfileContent(
                   modifier = Modifier.fillMaxSize())
               Text(
                   text = "+",
-                  fontWeight = FontWeight.Bold,
-                  color = Color.White,
+                  style =
+                      MaterialTheme.typography.titleLarge.copy(
+                          color = MaterialTheme.colorScheme.onPrimary),
                   fontSize = EditProfileConstants.ADD_ICON_FONT_SIZE,
                   modifier =
                       Modifier.align(Alignment.BottomEnd)
@@ -240,6 +276,11 @@ fun EditProfileContent(
       }
 }
 
+/**
+ * A preview version of [EditProfileContent] for use in Android Studio's Compose preview.
+ *
+ * Displays a sample user profile with mock data to visualize the layout and styling.
+ */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun EditProfileScreenPreview() {
