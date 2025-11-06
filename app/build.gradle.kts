@@ -167,6 +167,9 @@ dependencies {
     implementation("com.google.maps.android:maps-compose-widgets:$mapsComposeVersion")
     implementation("com.google.maps.android:android-maps-utils:3.8.2")
 
+    //Coil Compose for loading images from camera/gallery
+    implementation("io.coil-kt:coil-compose:2.4.0")
+
     // ------------- Jetpack Compose ------------------
     val composeBom = platform(libs.compose.bom)
     implementation(composeBom)

@@ -152,7 +152,7 @@ fun ProfileScreen(
           Row(
               modifier = Modifier.fillMaxWidth().padding(16.dp),
               verticalAlignment = Alignment.CenterVertically) {
-                ProfilePicture(profilePicture = profile.author.profilePicture)
+                ProfilePicture(profilePictureRes = profile.author.profilePicture)
                 Column {
                   Text(
                       text = profile.author.pseudonym,
