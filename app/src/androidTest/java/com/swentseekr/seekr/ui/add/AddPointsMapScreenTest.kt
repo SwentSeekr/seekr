@@ -9,9 +9,12 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextClearance
+import androidx.compose.ui.test.performTextInput
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.hunt.AddPointsMapScreenTestTags
 import com.swentseekr.seekr.ui.hunt.BaseAddPointsMapScreen
+import com.swentseekr.seekr.ui.hunt.PointNameDialog
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -82,5 +85,35 @@ class AddPointsMapScreenTest {
     assertEquals(2, result.size)
     assertEquals(p1, result[0])
     assertEquals(p2, result[1])
+  }
+
+  @Test
+  fun pointNameDialog_validationLogic_works() {
+    var confirmedName: String? = null
+
+    composeRule.setContent {
+      MaterialTheme {
+        PointNameDialog(show = true, onDismiss = {}, onConfirm = { confirmedName = it })
+      }
+    }
+
+    // Initially disabled
+    composeRule.onNodeWithText("Ajouter").assertIsNotEnabled()
+
+    // Enter valid name should enable
+    composeRule.onNodeWithTag("PointNameField").performTextInput("Tour Eiffel")
+    composeRule.onNodeWithText("Ajouter").assertIsEnabled()
+
+    // Clear name should show error and disable
+    composeRule.onNodeWithTag("PointNameField").performTextClearance()
+    composeRule.onNodeWithText("Le nom ne peut pas être vide").assertExists()
+    composeRule.onNodeWithText("Ajouter").assertIsNotEnabled()
+
+    // Enter another valid name and confirm
+    composeRule.onNodeWithTag("PointNameField").performTextInput("Musée d'Orsay")
+    composeRule.onNodeWithText("Ajouter").performClick()
+
+    composeRule.waitForIdle()
+    assertEquals("Musée d'Orsay", confirmedName)
   }
 }
