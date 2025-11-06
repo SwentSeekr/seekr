@@ -39,6 +39,9 @@ class MapTest {
 
         override suspend fun getAllHunts(): List<Hunt> = list
 
+        override suspend fun getAllMyHunts(authorID: String): List<Hunt> =
+            list.filter { it.authorId == authorID }
+
         override suspend fun getHunt(uid: String): Hunt = list.first { it.uid == uid }
 
         override suspend fun editHunt(uid: String, updatedHunt: Hunt) {}

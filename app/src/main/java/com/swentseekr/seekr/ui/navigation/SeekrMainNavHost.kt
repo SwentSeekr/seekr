@@ -135,7 +135,7 @@ fun SeekrMainNavHost(
             modifier = Modifier.padding(innerPadding)) {
               composable(SeekrDestination.Overview.route) {
                 OverviewScreen(
-                    onhuntclick = { huntId ->
+                    onHuntClick = { huntId ->
                       lastHuntId = huntId
                       navController.navigate(SeekrDestination.HuntCard.createRoute(huntId)) {
                         launchSingleTop = true

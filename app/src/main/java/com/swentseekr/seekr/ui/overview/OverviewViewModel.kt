@@ -35,12 +35,12 @@ data class OverviewUIState(
  *
  * @param hunt The Hunt item.
  * @param isLiked A boolean indicating whether the hunt is liked by the user.
- * @param isAchived A boolean indicating whether the hunt has been achieved by the user.
+ * @param isAchieved A boolean indicating whether the hunt has been achieved by the user.
  */
 data class HuntUiState(
     val hunt: Hunt,
     val isLiked: Boolean = false,
-    val isAchived: Boolean = false
+    val isAchieved: Boolean = false
 )
 
 /**
@@ -74,7 +74,6 @@ class OverviewViewModel(
         val hunts = repository.getAllHunts()
         huntItems = hunts.map { HuntUiState(it) }.toMutableList()
         _uiState.value = _uiState.value.copy(hunts = huntItems)
-        // _uiState.value = hunts
       } catch (e: Exception) {
         _uiState.value = _uiState.value.copy(errorMsg = e.message)
       }
@@ -100,37 +99,38 @@ class OverviewViewModel(
     searchQuery = newSearch
     if (newSearch != "") {
       _uiState.value = _uiState.value.copy(searchWord = newSearch)
-      // filter the hunts based on the word searched
-      val filteredHunts =
-          huntItems.filter {
-            it.hunt.title.contains(newSearch, ignoreCase = true) ||
-                it.hunt.description.contains(newSearch, ignoreCase = true) ||
-                it.hunt.status.toString().contains(newSearch, ignoreCase = true) ||
-                it.hunt.difficulty.toString().contains(newSearch, ignoreCase = true)
-          }
+      val filteredHunts = huntItems.filter { it.hunt.title.contains(newSearch, ignoreCase = true) }
       _uiState.value = _uiState.value.copy(hunts = filteredHunts)
     }
   }
   /** Clears the current search term and resets the hunt list to show all hunts. */
   fun onClearSearch() {
+    searchQuery = ""
     _uiState.value = _uiState.value.copy(searchWord = "", hunts = huntItems)
   }
 
   /** Updates the selected status filter and applies the filter to the hunt list. */
   fun onStatusFilterSelect(status: HuntStatus?) {
-    _uiState.value = _uiState.value.copy(selectedStatus = status)
+    val newStatus = if (_uiState.value.selectedStatus == status) null else status
+    _uiState.value = _uiState.value.copy(selectedStatus = newStatus)
     applyFilters()
   }
 
   /** Updates the selected difficulty filter and applies the filter to the hunt list. */
   fun onDifficultyFilterSelect(difficulty: Difficulty?) {
-    _uiState.value = _uiState.value.copy(selectedDifficulty = difficulty)
+    val newDifficulty = if (_uiState.value.selectedDifficulty == difficulty) null else difficulty
+    _uiState.value = _uiState.value.copy(selectedDifficulty = newDifficulty)
     applyFilters()
   }
 
   /** Applies the selected status and difficulty filters to the hunt list. */
   private fun applyFilters() {
     val currentState = _uiState.value
+
+    if (currentState.selectedStatus == null && currentState.selectedDifficulty == null) {
+      _uiState.value = currentState.copy(hunts = huntItems)
+      return
+    }
     val filtered =
         huntItems.filter { huntUiState ->
           val statusMatches =

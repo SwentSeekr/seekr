@@ -13,6 +13,14 @@ interface HuntsRepository {
   suspend fun getAllHunts(): List<Hunt>
 
   /**
+   * Retrieves all Hunt items created by a specific author.
+   *
+   * @param authorID The unique identifier of the author whose hunts are to be retrieved.
+   * @return A list of Hunt items created by the specified author.
+   */
+  suspend fun getAllMyHunts(authorID: String): List<Hunt>
+
+  /**
    * Retrieves a specific Hunt item by its unique identifier.
    *
    * @param huntID The unique identifier of the Hunt item to retrieve.
