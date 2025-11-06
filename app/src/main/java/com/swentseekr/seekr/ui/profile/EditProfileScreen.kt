@@ -17,12 +17,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.swentseekr.seekr.ui.theme.SampleAppTheme
 import java.io.File
 
 /** Centralized constants for UI dimensions. */
@@ -274,35 +272,4 @@ fun EditProfileContent(
                   modifier = Modifier.testTag(EditProfileTestTags.SUCCESS_MESSAGE))
         }
       }
-}
-
-/**
- * A preview version of [EditProfileContent] for use in Android Studio's Compose preview.
- *
- * Displays a sample user profile with mock data to visualize the layout and styling.
- */
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun EditProfileScreenPreview() {
-  val fakeState =
-      EditProfileUIState(
-          pseudonym = "Explorer42",
-          bio = "Adventurer and puzzle lover.",
-          profilePicture = 0,
-          canSave = true,
-          hasChanges = true,
-          isSaving = false,
-          success = false,
-          errorMsg = null)
-
-  SampleAppTheme {
-    EditProfileContent(
-        uiState = fakeState,
-        onPseudonymChange = {},
-        onBioChange = {},
-        onCancel = {},
-        onSave = {},
-        onProfilePictureChange = {},
-        profilePictureUri = null)
-  }
 }
