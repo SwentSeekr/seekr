@@ -27,20 +27,22 @@ import com.swentseekr.seekr.ui.huntcardview.AddReviewScreen
 import com.swentseekr.seekr.ui.map.MapScreen
 import com.swentseekr.seekr.ui.overview.OverviewScreen
 import com.swentseekr.seekr.ui.profile.ProfileScreen
+import com.swentseekr.seekr.ui.settings.SettingsScreen
 import com.swentseekr.seekr.ui.theme.*
-import com.swentseekr.seekr.resources.FakeHunts
+
 // Test Tags
 object NavigationTestTags {
-    const val BOTTOM_NAVIGATION_MENU = "BOTTOM_NAVIGATION_MENU"
-    const val OVERVIEW_TAB = "OVERVIEW_TAB"
-    const val MAP_TAB = "MAP_TAB"
-    const val PROFILE_TAB = "PROFILE_TAB"
-    const val HUNTCARD_SCREEN = "HUNTCARD_SCREEN"
-    const val ADD_HUNT_SCREEN = "ADD_HUNT_SCREEN"
-    const val MAP_SCREEN = "MAP_SCREEN"
-    const val OVERVIEW_SCREEN = "OVERVIEW_SCREEN"
-    const val EDIT_HUNT_SCREEN = "EDIT_HUNT_SCREEN"
-    const val REVIEW_HUNT_SCREEN = "REVIEW_HUNT_SCREEN"
+  const val BOTTOM_NAVIGATION_MENU = "BOTTOM_NAVIGATION_MENU"
+  const val OVERVIEW_TAB = "OVERVIEW_TAB"
+  const val MAP_TAB = "MAP_TAB"
+  const val PROFILE_TAB = "PROFILE_TAB"
+  const val HUNTCARD_SCREEN = "HUNTCARD_SCREEN"
+  const val ADD_HUNT_SCREEN = "ADD_HUNT_SCREEN"
+  const val MAP_SCREEN = "MAP_SCREEN"
+  const val OVERVIEW_SCREEN = "OVERVIEW_SCREEN"
+  const val EDIT_HUNT_SCREEN = "EDIT_HUNT_SCREEN"
+  const val REVIEW_HUNT_SCREEN = "REVIEW_HUNT_SCREEN"
+  const val SETTINGS_SCREEN = "SETTINGS_SCREEN"
 }
 
 // Destinations as sealed class
@@ -49,29 +51,38 @@ sealed class SeekrDestination(
     val label: String,
     val icon: androidx.compose.ui.graphics.vector.ImageVector
 ) {
-    object Overview : SeekrDestination("overview", "Overview", Icons.Filled.List)
-    object Map : SeekrDestination("map", "Map", Icons.Filled.Place)
-    object Profile : SeekrDestination("profile", "Profile", Icons.Filled.Person)
+  object Overview : SeekrDestination("overview", "Overview", Icons.Filled.List)
 
-    object HuntCard : SeekrDestination("hunt/{huntId}", "Hunt", Icons.Filled.List) {
-        fun createRoute(huntId: String) = "hunt/$huntId"
-        const val ARG_HUNT_ID = "huntId"
-    }
+  object Map : SeekrDestination("map", "Map", Icons.Filled.Place)
 
-    object EditHunt : SeekrDestination("edit_hunt/{huntId}", "Edit Hunt", Icons.Filled.List) {
-        fun createRoute(huntId: String) = "edit_hunt/$huntId"
-        const val ARG_HUNT_ID = "huntId"
-    }
+  object Profile : SeekrDestination("profile", "Profile", Icons.Filled.Person)
 
-    object AddHunt : SeekrDestination("add_hunt", "Add Hunt", Icons.Filled.List)
+  object HuntCard : SeekrDestination("hunt/{huntId}", "Hunt", Icons.Filled.List) {
+    fun createRoute(huntId: String) = "hunt/$huntId"
 
-    // NEW: reviewHunt destination
-    object ReviewHunt : SeekrDestination("review_hunt/{huntId}", "Review Hunt", Icons.Filled.List) {
-        fun createRoute(huntId: String) = "review_hunt/$huntId"
-        const val ARG_HUNT_ID = "huntId"
-    }
+    const val ARG_HUNT_ID = "huntId"
+  }
 
-    companion object { val all = listOf(Overview, Map, Profile) }
+  object EditHunt : SeekrDestination("edit_hunt/{huntId}", "Edit Hunt", Icons.Filled.List) {
+    fun createRoute(huntId: String) = "edit_hunt/$huntId"
+
+    const val ARG_HUNT_ID = "huntId"
+  }
+
+  object AddHunt : SeekrDestination("add_hunt", "Add Hunt", Icons.Filled.List)
+
+  // NEW: reviewHunt destination
+  object ReviewHunt : SeekrDestination("review_hunt/{huntId}", "Review Hunt", Icons.Filled.List) {
+    fun createRoute(huntId: String) = "review_hunt/$huntId"
+
+    const val ARG_HUNT_ID = "huntId"
+  }
+
+  object Settings : SeekrDestination("settings", "Settings", Icons.Filled.List)
+
+  companion object {
+    val all = listOf(Overview, Map, Profile)
+  }
 }
 
 // Bottom Navigation Bar
@@ -80,37 +91,36 @@ fun SeekrNavigationBar(
     currentDestination: SeekrDestination,
     onTabSelected: (SeekrDestination) -> Unit
 ) {
-    val containerColor = GrassGreen
-    val iconColor = Black
+  val containerColor = GrassGreen
+  val iconColor = Black
 
-    NavigationBar(
-        containerColor = containerColor,
-        modifier = Modifier.testTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU)) {
+  NavigationBar(
+      containerColor = containerColor,
+      modifier = Modifier.testTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU)) {
         SeekrDestination.all.forEach { dest ->
-            val testTag =
-                when (dest) {
-                    is SeekrDestination.Overview -> NavigationTestTags.OVERVIEW_TAB
-                    is SeekrDestination.Map -> NavigationTestTags.MAP_TAB
-                    is SeekrDestination.Profile -> NavigationTestTags.PROFILE_TAB
-                    else -> "IGNORED"
-                }
+          val testTag =
+              when (dest) {
+                is SeekrDestination.Overview -> NavigationTestTags.OVERVIEW_TAB
+                is SeekrDestination.Map -> NavigationTestTags.MAP_TAB
+                is SeekrDestination.Profile -> NavigationTestTags.PROFILE_TAB
+                else -> "IGNORED"
+              }
 
-            NavigationBarItem(
-                selected = currentDestination.route == dest.route,
-                onClick = { onTabSelected(dest) },
-                icon = { Icon(dest.icon, contentDescription = dest.label, tint = iconColor) },
-                label = { Text(dest.label, color = iconColor) },
-                modifier = Modifier.testTag(testTag),
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = iconColor,
-                    unselectedIconColor = iconColor,
-                    selectedTextColor = iconColor,
-                    unselectedTextColor = iconColor,
-                    indicatorColor = containerColor
-                )
-            )
+          NavigationBarItem(
+              selected = currentDestination.route == dest.route,
+              onClick = { onTabSelected(dest) },
+              icon = { Icon(dest.icon, contentDescription = dest.label, tint = iconColor) },
+              label = { Text(dest.label, color = iconColor) },
+              modifier = Modifier.testTag(testTag),
+              colors =
+                  NavigationBarItemDefaults.colors(
+                      selectedIconColor = iconColor,
+                      unselectedIconColor = iconColor,
+                      selectedTextColor = iconColor,
+                      unselectedTextColor = iconColor,
+                      indicatorColor = containerColor))
         }
-    }
+      }
 }
 
 // Main App Scaffold
@@ -121,159 +131,165 @@ fun SeekrMainNavHost(
     navController: NavHostController = rememberNavController(),
     testMode: Boolean = false
 ) {
-    var lastHuntId by rememberSaveable { mutableStateOf<String?>(null) }
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
-    val currentDestination =
-        SeekrDestination.all.find { it.route == currentRoute } ?: SeekrDestination.Overview
-    val showBottomBar = SeekrDestination.all.any { it.route == currentRoute }
+  var lastHuntId by rememberSaveable { mutableStateOf<String?>(null) }
+  val navBackStackEntry by navController.currentBackStackEntryAsState()
+  val currentRoute = navBackStackEntry?.destination?.route
+  val currentDestination =
+      SeekrDestination.all.find { it.route == currentRoute } ?: SeekrDestination.Overview
+  val showBottomBar = SeekrDestination.all.any { it.route == currentRoute }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        containerColor = White,
-        bottomBar = {
-            if (showBottomBar) {
-                SeekrNavigationBar(
-                    currentDestination = currentDestination,
-                    onTabSelected = { destination ->
-                        navController.navigate(destination.route) {
-                            launchSingleTop = true
-                            popUpTo(SeekrDestination.Overview.route)
-                        }
-                    })
-            }
-        }) { innerPadding ->
+  Scaffold(
+      modifier = Modifier.fillMaxSize(),
+      containerColor = White,
+      bottomBar = {
+        if (showBottomBar) {
+          SeekrNavigationBar(
+              currentDestination = currentDestination,
+              onTabSelected = { destination ->
+                navController.navigate(destination.route) {
+                  launchSingleTop = true
+                  popUpTo(SeekrDestination.Overview.route)
+                }
+              })
+        }
+      }) { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = SeekrDestination.Overview.route,
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            composable(SeekrDestination.Overview.route) {
+            modifier = Modifier.padding(innerPadding)) {
+              composable(SeekrDestination.Overview.route) {
                 Surface(
-                    modifier = Modifier.fillMaxSize().testTag(NavigationTestTags.OVERVIEW_SCREEN)
-                ) {
-                    OverviewScreen(
-                        onhuntclick = { huntId ->
+                    modifier = Modifier.fillMaxSize().testTag(NavigationTestTags.OVERVIEW_SCREEN)) {
+                      OverviewScreen(
+                          onhuntclick = { huntId ->
                             lastHuntId = huntId
                             navController.navigate(SeekrDestination.HuntCard.createRoute(huntId)) {
-                                launchSingleTop = true
+                              launchSingleTop = true
                             }
-                        }
-                    )
-                }
-            }
+                          })
+                    }
+              }
 
-            composable(SeekrDestination.Map.route) {
+              composable(SeekrDestination.Map.route) {
                 Surface(modifier = Modifier.fillMaxSize().testTag(NavigationTestTags.MAP_SCREEN)) {
-                    MapScreen()
+                  MapScreen()
                 }
-            }
+              }
 
-            composable(SeekrDestination.Profile.route) {
+              composable(SeekrDestination.Profile.route) {
                 ProfileScreen(
                     userId = user?.uid,
                     onAddHunt = { navController.navigate(SeekrDestination.AddHunt.route) },
                     onMyHuntClick = { huntId ->
-                        navController.navigate(SeekrDestination.EditHunt.createRoute(huntId)) {
-                            launchSingleTop = true
-                        }
+                      navController.navigate(SeekrDestination.EditHunt.createRoute(huntId)) {
+                        launchSingleTop = true
+                      }
                     },
-                    testMode = testMode
-                )
-            }
+                    onSettings = { navController.navigate(SeekrDestination.Settings.route) },
+                    testMode = testMode)
+              }
 
-            composable(
-                route = SeekrDestination.HuntCard.route,
-                arguments = listOf(
-                    navArgument(SeekrDestination.HuntCard.ARG_HUNT_ID) { type = NavType.StringType }
-                )
-            ) { backStackEntry ->
-                val argId = backStackEntry.arguments?.getString(SeekrDestination.HuntCard.ARG_HUNT_ID)
-                val huntId = argId ?: lastHuntId.orEmpty()
+              composable(
+                  route = SeekrDestination.HuntCard.route,
+                  arguments =
+                      listOf(
+                          navArgument(SeekrDestination.HuntCard.ARG_HUNT_ID) {
+                            type = NavType.StringType
+                          })) { backStackEntry ->
+                    val argId =
+                        backStackEntry.arguments?.getString(SeekrDestination.HuntCard.ARG_HUNT_ID)
+                    val huntId = argId ?: lastHuntId.orEmpty()
 
-                HuntCardScreen(
-                    huntId = huntId,
-                    onGoBack = { navController.popBackStack() },
-                    onAddReview = { id ->
-                        navController.navigate(SeekrDestination.ReviewHunt.createRoute(id)) {
-                            launchSingleTop = true
-                        }
-                    },
-                    modifier = Modifier.testTag(NavigationTestTags.HUNTCARD_SCREEN)
-                )
-            }
-
-            composable(SeekrDestination.AddHunt.route) {
-                Surface(
-                    modifier = Modifier.fillMaxSize().testTag(NavigationTestTags.ADD_HUNT_SCREEN)
-                ) {
-                    AddHuntScreen(
+                    HuntCardScreen(
+                        huntId = huntId,
                         onGoBack = { navController.popBackStack() },
-                        onDone = {
+                        onAddReview = { id ->
+                          navController.navigate(SeekrDestination.ReviewHunt.createRoute(id)) {
+                            launchSingleTop = true
+                          }
+                        },
+                        modifier = Modifier.testTag(NavigationTestTags.HUNTCARD_SCREEN))
+                  }
+
+              composable(SeekrDestination.AddHunt.route) {
+                Surface(
+                    modifier = Modifier.fillMaxSize().testTag(NavigationTestTags.ADD_HUNT_SCREEN)) {
+                      AddHuntScreen(
+                          onGoBack = { navController.popBackStack() },
+                          onDone = {
                             navController.navigate(SeekrDestination.Overview.route) {
-                                launchSingleTop = true
-                                popUpTo(SeekrDestination.Overview.route)
+                              launchSingleTop = true
+                              popUpTo(SeekrDestination.Overview.route)
                             }
-                        },
-                        testMode = testMode
-                    )
-                }
-            }
+                          },
+                          testMode = testMode)
+                    }
+              }
 
-            composable(
-                route = SeekrDestination.EditHunt.route,
-                arguments = listOf(
-                    navArgument(SeekrDestination.EditHunt.ARG_HUNT_ID) { type = NavType.StringType }
-                )
-            ) { backStackEntry ->
-                val huntId = backStackEntry.arguments
-                    ?.getString(SeekrDestination.EditHunt.ARG_HUNT_ID)
-                    .orEmpty()
+              composable(
+                  route = SeekrDestination.EditHunt.route,
+                  arguments =
+                      listOf(
+                          navArgument(SeekrDestination.EditHunt.ARG_HUNT_ID) {
+                            type = NavType.StringType
+                          })) { backStackEntry ->
+                    val huntId =
+                        backStackEntry.arguments
+                            ?.getString(SeekrDestination.EditHunt.ARG_HUNT_ID)
+                            .orEmpty()
 
+                    Surface(
+                        modifier =
+                            Modifier.fillMaxSize().testTag(NavigationTestTags.EDIT_HUNT_SCREEN)) {
+                          EditHuntScreen(
+                              huntId = huntId,
+                              onGoBack = { navController.popBackStack() },
+                              onDone = {
+                                navController.navigate(SeekrDestination.Profile.route) {
+                                  launchSingleTop = true
+                                  popUpTo(SeekrDestination.Profile.route)
+                                }
+                              },
+                              testMode = testMode)
+                        }
+                  }
+
+              composable(
+                  route = SeekrDestination.ReviewHunt.route,
+                  arguments =
+                      listOf(
+                          navArgument(SeekrDestination.ReviewHunt.ARG_HUNT_ID) {
+                            type = NavType.StringType
+                          })) { backStackEntry ->
+                    val huntId =
+                        backStackEntry.arguments
+                            ?.getString(SeekrDestination.ReviewHunt.ARG_HUNT_ID)
+                            .orEmpty()
+
+                    Surface(
+                        modifier =
+                            Modifier.fillMaxSize().testTag(NavigationTestTags.REVIEW_HUNT_SCREEN)) {
+                          AddReviewScreen(
+                              huntId = huntId,
+                              onGoBack = { navController.popBackStack() },
+                              onDone = { navController.popBackStack() },
+                              onCancel = { navController.popBackStack() })
+                        }
+                  }
+              composable(SeekrDestination.Settings.route) {
                 Surface(
-                    modifier = Modifier.fillMaxSize().testTag(NavigationTestTags.EDIT_HUNT_SCREEN)
-                ) {
-                    EditHuntScreen(
-                        huntId = huntId,
-                        onGoBack = { navController.popBackStack() },
-                        onDone = {
-                            navController.navigate(SeekrDestination.Profile.route) {
-                                launchSingleTop = true
-                                popUpTo(SeekrDestination.Profile.route)
-                            }
-                        },
-                        testMode = testMode
-                    )
-                }
+                    modifier = Modifier.fillMaxSize().testTag(NavigationTestTags.SETTINGS_SCREEN)) {
+                      SettingsScreen(
+                          onGoBack = { navController.popBackStack() },
+                      )
+                    }
+              }
             }
-
-            composable(
-                route = SeekrDestination.ReviewHunt.route,
-                arguments = listOf(
-                    navArgument(SeekrDestination.ReviewHunt.ARG_HUNT_ID) { type = NavType.StringType }
-                )
-            ) { backStackEntry ->
-                val huntId = backStackEntry.arguments
-                    ?.getString(SeekrDestination.ReviewHunt.ARG_HUNT_ID)
-                    .orEmpty()
-
-                Surface(
-                    modifier = Modifier.fillMaxSize().testTag(NavigationTestTags.REVIEW_HUNT_SCREEN)
-                ) {
-                    AddReviewScreen(
-                        huntId = huntId,
-                        onGoBack = { navController.popBackStack() },
-                        onDone = { navController.popBackStack() },
-                        onCancel = { navController.popBackStack() }
-                    )
-                }
-            }
-        }
-    }
+      }
 }
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun SeekrAppPreview() {
-    SampleAppTheme { SeekrMainNavHost() }
+  SampleAppTheme { SeekrMainNavHost() }
 }
