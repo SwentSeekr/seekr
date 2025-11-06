@@ -1,4 +1,4 @@
-package com.swentseekr.seekr.screen.ui.navigation
+package com.swentseekr.seekr.ui.navigation
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed

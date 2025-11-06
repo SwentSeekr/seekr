@@ -1,10 +1,11 @@
-package com.swentseekr.seekr.screen.ui.navigation
+package com.swentseekr.seekr.ui.navigation
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.credentials.CredentialManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.swentseekr.seekr.ui.auth.SignInScreenTestTags
 import com.swentseekr.seekr.ui.navigation.AuthNavHost
@@ -37,7 +38,7 @@ class AuthNavHostTest {
     composeTestRule.setContent {
       AuthNavHost(
           credentialManager =
-              androidx.credentials.CredentialManager.create(composeTestRule.activity),
+              CredentialManager.create(composeTestRule.activity),
           onSignedIn = {})
     }
 
@@ -55,7 +56,7 @@ class AuthNavHostTest {
     composeTestRule.setContent {
       AuthNavHost(
           credentialManager =
-              androidx.credentials.CredentialManager.create(composeTestRule.activity),
+              CredentialManager.create(composeTestRule.activity),
           onSignedIn = { onSignedInCalled = true })
     }
 
