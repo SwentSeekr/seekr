@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Canvas
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -141,7 +142,13 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
         cameraPositionState = cameraPositionState,
         onMapLoaded = { mapLoaded = true },
         properties = MapProperties(isMyLocationEnabled = hasLocationPermission),
-        uiSettings = MapUiSettings(myLocationButtonEnabled = true)) {
+        uiSettings =
+            MapUiSettings(
+                myLocationButtonEnabled = true,
+                scrollGesturesEnabled = hasLocationPermission,
+                zoomGesturesEnabled = hasLocationPermission,
+                tiltGesturesEnabled = hasLocationPermission,
+                rotationGesturesEnabled = hasLocationPermission)) {
           LaunchedEffect(mapLoaded, selectedHunt, uiState.isFocused) {
             if (!mapLoaded) return@LaunchedEffect
             val hunt = selectedHunt ?: return@LaunchedEffect
@@ -199,6 +206,16 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
           }
         }
 
+    if (!hasLocationPermission) {
+      PermissionRequestPopup(
+          onRequestPermission = {
+            permissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION))
+          })
+    }
+
     if (selectedHunt != null && !uiState.isFocused) {
       HuntPopup(
           hunt = selectedHunt,
@@ -228,6 +245,39 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
           }
     }
   }
+}
+
+/**
+ * Displays a popup requesting location permission from the user.
+ *
+ * @param onRequestPermission callback invoked when the user opts to grant location permission.
+ */
+@Composable
+fun PermissionRequestPopup(onRequestPermission: () -> Unit) {
+  Box(
+      modifier = Modifier.fillMaxSize().background(Color(0x80000000)).padding(32.dp),
+      contentAlignment = Alignment.Center) {
+        Card(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(8.dp)) {
+              Column(
+                  modifier = Modifier.padding(24.dp).fillMaxWidth(),
+                  horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "We need access to your location to show the map.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.Black,
+                        modifier = Modifier.padding(bottom = 16.dp))
+                    Button(
+                        onClick = { onRequestPermission() },
+                        colors = ButtonDefaults.buttonColors(containerColor = Green),
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+                          Text("Grant Location Permission", color = Color.White)
+                        }
+                  }
+            }
+      }
 }
 
 /**
