@@ -1,7 +1,6 @@
 package com.swentseekr.seekr.model.hunt
 
 import android.util.Log
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.swentseekr.seekr.model.map.Location
@@ -16,11 +15,13 @@ class HuntsRepositoryFirestore(private val db: FirebaseFirestore) : HuntsReposit
   }
 
   override suspend fun getAllHunts(): List<Hunt> {
-    val currentUserId =
-        FirebaseAuth.getInstance().currentUser?.uid
-            ?: throw IllegalStateException("User not logged in")
+    val snapshot = db.collection(HUNTS_COLLECTION_PATH).get().await()
+    return snapshot.mapNotNull { documentToHunt(it) }
+  }
+
+  override suspend fun getAllMyHunts(authorID: String): List<Hunt> {
     val snapshot =
-        db.collection(HUNTS_COLLECTION_PATH).whereEqualTo("authorId", currentUserId).get().await()
+        db.collection(HUNTS_COLLECTION_PATH).whereEqualTo("authorId", authorID).get().await()
     return snapshot.mapNotNull { documentToHunt(it) }
   }
 
