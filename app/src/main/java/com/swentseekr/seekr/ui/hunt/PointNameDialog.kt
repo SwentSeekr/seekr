@@ -23,9 +23,11 @@ fun PointNameDialog(show: Boolean, onDismiss: () -> Unit, onConfirm: (String) ->
   var pointName by remember { mutableStateOf("") }
   var hasTypedBefore by remember { mutableStateOf(false) }
 
+  val isError = hasTypedBefore && pointName.isBlank()
+
   AlertDialog(
       onDismissRequest = onDismiss,
-      title = { Text("Nom du point") },
+      title = { Text("Enter new point's name") },
       text = {
         Column {
           OutlinedTextField(
@@ -34,13 +36,13 @@ fun PointNameDialog(show: Boolean, onDismiss: () -> Unit, onConfirm: (String) ->
                 if (it.isNotBlank()) hasTypedBefore = true
                 pointName = it
               },
-              placeholder = { Text("e.g. Musée de l’automobile") },
+              placeholder = { Text("e.g. Louvre museum") },
               singleLine = true,
-              isError = hasTypedBefore && pointName.isBlank(),
-              label = { Text("Nom du point") },
+              isError = isError,
+              label = { Text("Point's name") },
               supportingText = {
-                if (hasTypedBefore && pointName.isBlank()) {
-                  Text("Le nom ne peut pas être vide", color = MaterialTheme.colorScheme.error)
+                if (isError) {
+                  Text("The name cannot be empty", color = MaterialTheme.colorScheme.error)
                 }
               },
               modifier =
@@ -48,9 +50,10 @@ fun PointNameDialog(show: Boolean, onDismiss: () -> Unit, onConfirm: (String) ->
         }
       },
       confirmButton = {
-        TextButton(onClick = { onConfirm(pointName.trim()) }, enabled = pointName.isNotBlank()) {
-          Text("Ajouter")
-        }
+        TextButton(
+            onClick = { onConfirm(pointName.trim()) }, enabled = pointName.trim().isNotBlank()) {
+              Text("Add")
+            }
       },
-      dismissButton = { TextButton(onClick = onDismiss) { Text("Annuler") } })
+      dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } })
 }
