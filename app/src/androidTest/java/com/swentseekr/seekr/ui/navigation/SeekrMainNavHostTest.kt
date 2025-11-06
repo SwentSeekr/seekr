@@ -8,7 +8,6 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
 import com.swentseekr.seekr.ui.profile.ProfileTestTags
 import org.junit.Before
 import org.junit.Rule
@@ -25,13 +24,12 @@ class SeekrNavigationTest {
 
   @Before
   fun setUp() {
-    compose.runOnUiThread {
-      compose.activity.setContent { SeekrMainNavHost(testMode = true) }
-    }
+    compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
     compose.waitUntil(timeoutMillis = 5_000) {
-      compose.onAllNodes(hasTestTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU), useUnmergedTree = true)
-        .fetchSemanticsNodes()
-        .isNotEmpty()
+      compose
+          .onAllNodes(hasTestTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU), useUnmergedTree = true)
+          .fetchSemanticsNodes()
+          .isNotEmpty()
     }
   }
 
@@ -67,11 +65,14 @@ class SeekrNavigationTest {
   fun map_tab_shows_tagged_map_screen() {
     node(NavigationTestTags.MAP_TAB).performClick()
     compose.waitUntil(3_000) {
-      runCatching { node(NavigationTestTags.MAP_SCREEN).assertIsDisplayed(); true }.getOrNull() == true
+      runCatching {
+            node(NavigationTestTags.MAP_SCREEN).assertIsDisplayed()
+            true
+          }
+          .getOrNull() == true
     }
     node(NavigationTestTags.MAP_SCREEN).assertIsDisplayed()
   }
-
 
   @Test
   fun profile_fab_navigates_to_add_hunt_then_back_restores_bar() {
@@ -83,14 +84,22 @@ class SeekrNavigationTest {
 
     // wait for AddHunt wrapper tag
     compose.waitUntil(3_000) {
-      runCatching { node(NavigationTestTags.ADD_HUNT_SCREEN).assertIsDisplayed(); true }.getOrNull() == true
+      runCatching {
+            node(NavigationTestTags.ADD_HUNT_SCREEN).assertIsDisplayed()
+            true
+          }
+          .getOrNull() == true
     }
     node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
 
     // system back
     compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
     compose.waitUntil(3_000) {
-      runCatching { node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed(); true }.getOrNull() == true
+      runCatching {
+            node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
+            true
+          }
+          .getOrNull() == true
     }
   }
 
@@ -104,7 +113,11 @@ class SeekrNavigationTest {
 
     // wait for EditHunt wrapper tag
     compose.waitUntil(3_000) {
-      runCatching { node(NavigationTestTags.EDIT_HUNT_SCREEN).assertIsDisplayed(); true }.getOrNull() == true
+      runCatching {
+            node(NavigationTestTags.EDIT_HUNT_SCREEN).assertIsDisplayed()
+            true
+          }
+          .getOrNull() == true
     }
     node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
   }
@@ -123,12 +136,14 @@ class SeekrNavigationTest {
 
     // We should be back on any tab destination (Profile/Overview/etc.) → bottom bar visible
     compose.waitUntil(3_000) {
-      runCatching { node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed(); true }
-        .getOrNull() == true
+      runCatching {
+            node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
+            true
+          }
+          .getOrNull() == true
     }
 
     // And we are no longer on AddHunt
     node(NavigationTestTags.ADD_HUNT_SCREEN).assertDoesNotExist()
   }
-
 }
