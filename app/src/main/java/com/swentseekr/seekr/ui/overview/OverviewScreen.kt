@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -140,12 +141,12 @@ fun FilterBar(
       modifier = Modifier.fillMaxWidth().padding(8.dp),
       horizontalAlignment = Alignment.CenterHorizontally,
   ) {
+    val huntStatuses = remember { HuntStatus.values() }
+    val difficulties = remember { Difficulty.values() }
     LazyRow(
         modifier = modifier.fillMaxWidth().testTag(OverviewScreenTestTags.FILTER_BAR),
         horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp)) {
-          val huntStatuses = HuntStatus.values()
-          val difficulties = Difficulty.values()
           items(huntStatuses.size) { status ->
             FilterButton(
                 text = huntStatuses[status].name,

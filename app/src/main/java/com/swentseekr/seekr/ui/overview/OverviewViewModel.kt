@@ -99,14 +99,14 @@ class OverviewViewModel(
     searchQuery = newSearch
     if (newSearch != "") {
       _uiState.value = _uiState.value.copy(searchWord = newSearch)
-      val filteredHunts = huntItems.filter { it.hunt.title.contains(newSearch, ignoreCase = true) }
-      _uiState.value = _uiState.value.copy(hunts = filteredHunts)
+      applyFilters()
     }
   }
   /** Clears the current search term and resets the hunt list to show all hunts. */
   fun onClearSearch() {
     searchQuery = ""
     _uiState.value = _uiState.value.copy(searchWord = "", hunts = huntItems)
+    applyFilters()
   }
 
   /** Updates the selected status filter and applies the filter to the hunt list. */
@@ -126,18 +126,26 @@ class OverviewViewModel(
   /** Applies the selected status and difficulty filters to the hunt list. */
   private fun applyFilters() {
     val currentState = _uiState.value
+    val searchQuery = currentState.searchWord
+    val selectedStatus = currentState.selectedStatus
+    val selectedDifficulty = currentState.selectedDifficulty
 
-    if (currentState.selectedStatus == null && currentState.selectedDifficulty == null) {
+    if (selectedStatus == null && selectedDifficulty == null && searchQuery.isEmpty()) {
       _uiState.value = currentState.copy(hunts = huntItems)
       return
     }
     val filtered =
         huntItems.filter { huntUiState ->
-          val statusMatches =
-              currentState.selectedStatus?.let { huntUiState.hunt.status == it } ?: true
-          val difficultyMatches =
-              currentState.selectedDifficulty?.let { huntUiState.hunt.difficulty == it } ?: true
-          statusMatches && difficultyMatches
+          val hunt = huntUiState.hunt
+          val searchMatches =
+              if (searchQuery.isNotEmpty()) {
+                hunt.title.contains(searchQuery, ignoreCase = true)
+              } else {
+                true
+              }
+          val statusMatches = selectedStatus?.let { hunt.status == it } ?: true
+          val difficultyMatches = selectedDifficulty?.let { hunt.difficulty == it } ?: true
+          statusMatches && difficultyMatches && searchMatches
         }
     _uiState.value = currentState.copy(hunts = filtered)
   }
