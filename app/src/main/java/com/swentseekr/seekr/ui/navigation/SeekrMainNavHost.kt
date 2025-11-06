@@ -161,7 +161,7 @@ fun SeekrMainNavHost(
                 Surface(
                     modifier = Modifier.fillMaxSize().testTag(NavigationTestTags.OVERVIEW_SCREEN)) {
                       OverviewScreen(
-                          onhuntclick = { huntId ->
+                          onHuntClick = { huntId ->
                             lastHuntId = huntId
                             navController.navigate(SeekrDestination.HuntCard.createRoute(huntId)) {
                               launchSingleTop = true
