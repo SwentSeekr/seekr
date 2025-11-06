@@ -301,4 +301,82 @@ class EditProfileScreenTest {
     composeTestRule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).assertIsEnabled()
     composeTestRule.onNodeWithTag(EditProfileTestTags.ERROR_MESSAGE).assertIsDisplayed()
   }
+
+  @Test
+  fun editProfileContent_localError_overridesUiStateError_andSuccess() {
+    var pseudonymChanged = ""
+    composeTestRule.setContent {
+      EditProfileContent(
+          uiState =
+              EditProfileUIState(
+                  pseudonym = "",
+                  bio = "",
+                  profilePicture = 0,
+                  canSave = true,
+                  isSaving = false,
+                  success = true,
+                  errorMsg = "Repo error"),
+          onPseudonymChange = { pseudonymChanged = it },
+          onBioChange = {},
+          onCancel = {},
+          onSave = {},
+          onProfilePictureChange = {})
+    }
+
+    composeTestRule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).performClick()
+
+    composeTestRule
+        .onNodeWithTag(EditProfileTestTags.ERROR_MESSAGE)
+        .assertTextContains("Pseudonym cannot be empty")
+  }
+
+  @Test
+  fun editProfileContent_saveButton_disabled_whenIsSaving() {
+    val uiState = EditProfileUIState(canSave = true, isSaving = true)
+    composeTestRule.setContent {
+      EditProfileContent(
+          uiState = uiState,
+          onPseudonymChange = {},
+          onBioChange = {},
+          onCancel = {},
+          onSave = {},
+          onProfilePictureChange = {})
+    }
+
+    composeTestRule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).assertIsNotEnabled()
+  }
+
+  @Test
+  fun editProfileContent_showsSuccessMessage_whenUiStateSuccessTrue() {
+    val state = EditProfileUIState(success = true)
+
+    composeTestRule.setContent {
+      EditProfileContent(
+          uiState = state,
+          onPseudonymChange = {},
+          onBioChange = {},
+          onCancel = {},
+          onSave = {},
+          onProfilePictureChange = {})
+    }
+
+    composeTestRule
+        .onNodeWithTag(EditProfileTestTags.SUCCESS_MESSAGE)
+        .assertTextContains("Profile updated!")
+  }
+
+  @Test
+  fun editProfileContent_saveButton_disabled_whenIsSavingOrCannotSave() {
+    val state = EditProfileUIState(canSave = false, isSaving = false)
+    composeTestRule.setContent {
+      EditProfileContent(
+          uiState = state,
+          onPseudonymChange = {},
+          onBioChange = {},
+          onCancel = {},
+          onSave = {},
+          onProfilePictureChange = {})
+    }
+    composeTestRule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).assertIsNotEnabled()
+  }
 }
