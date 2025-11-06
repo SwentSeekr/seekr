@@ -15,13 +15,13 @@ import com.swentseekr.seekr.model.map.Location
 private const val TITLE_TEXT = "Select Hunt Points"
 private const val BACK_CONTENT_DESC = "Back"
 private const val BUTTON_CONFIRM_LABEL = "Confirm Points"
-private const val POINT_NAME_PREFIX = "Point "
 private const val BOTTOM_PADDING = 16
 
 object AddPointsMapScreenTestTags {
   const val CONFIRM_BUTTON = "ConfirmButton"
   const val MAP_VIEW = "MapView"
   const val CANCEL_BUTTON = "CancelButton"
+  const val POINT_NAME_FIELD = "PointNameField"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,11 +35,11 @@ fun BaseAddPointsMapScreen(
   var points by remember { mutableStateOf(initPoints) }
   val cameraPositionState = rememberCameraPositionState()
 
+  var showNameDialog by remember { mutableStateOf(false) }
+  var tempLatLng by remember { mutableStateOf<LatLng?>(null) }
+
   if (testMode) {
-    LaunchedEffect(Unit) {
-      // Simule 2 points automatiquement
-      points = listOf(Location(0.0, 0.0, "P1"), Location(1.0, 1.0, "P2"))
-    }
+    LaunchedEffect(Unit) { points = listOf(Location(0.0, 0.0, "P1"), Location(1.0, 1.0, "P2")) }
   }
 
   Scaffold(
@@ -72,16 +72,15 @@ fun BaseAddPointsMapScreen(
                     .testTag(AddPointsMapScreenTestTags.MAP_VIEW),
             cameraPositionState = cameraPositionState,
             onMapClick = { latLng ->
-              points =
-                  points +
-                      Location(
-                          latLng.latitude, latLng.longitude, "$POINT_NAME_PREFIX${points.size + 1}")
+              tempLatLng = latLng
+              showNameDialog = true
             }) {
               points.forEach { point ->
                 Marker(
                     state = MarkerState(position = LatLng(point.latitude, point.longitude)),
                     title = point.name)
               }
+
               if (points.size >= 2) {
                 Polyline(
                     points = points.map { LatLng(it.latitude, it.longitude) },
@@ -89,4 +88,12 @@ fun BaseAddPointsMapScreen(
               }
             }
       }
+
+  PointNameDialog(
+      show = showNameDialog && tempLatLng != null,
+      onDismiss = { showNameDialog = false },
+      onConfirm = { name ->
+        tempLatLng?.let { points = points + Location(it.latitude, it.longitude, name) }
+        showNameDialog = false
+      })
 }
