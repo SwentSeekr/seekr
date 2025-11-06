@@ -1,9 +1,7 @@
 package com.swentseekr.seekr.ui.navigation
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
@@ -14,24 +12,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.swentseekr.seekr.model.profile.mockProfileData
+import com.google.firebase.auth.FirebaseUser
 import com.swentseekr.seekr.ui.components.HuntCardScreen
 import com.swentseekr.seekr.ui.hunt.add.AddHuntScreen
 import com.swentseekr.seekr.ui.map.MapScreen
 import com.swentseekr.seekr.ui.overview.OverviewScreen
 import com.swentseekr.seekr.ui.profile.ProfileScreen
 import com.swentseekr.seekr.ui.theme.*
-import androidx.navigation.navArgument
-import androidx.navigation.NavType
-import com.swentseekr.seekr.ui.hunt.edit.EditHuntScreen
-import com.swentseekr.seekr.ui.settings.SettingsScreen
-import com.swentseekr.seekr.ui.huntcardview.AddReviewScreen
 
 // Test Tags
 object NavigationTestTags {
@@ -62,18 +54,6 @@ sealed class SeekrDestination(
   }
 
   object AddHunt : SeekrDestination("add_hunt", "Add Hunt", Icons.Filled.List)
-
-    object Settings : SeekrDestination("settings", "Settings", Icons.Filled.List)
-
-    object EditHunt : SeekrDestination("edit_hunt/{huntId}", "Edit Hunt", Icons.Filled.List) {
-        fun createRoute(huntId: String) = "edit_hunt/$huntId"
-        const val ARG_HUNT_ID = "huntId"
-    }
-
-    object AddReview : SeekrDestination("add_review/{huntId}", "Add Review", Icons.Filled.List) {
-        fun createRoute(huntId: String) = "add_review/$huntId"
-        const val ARG_HUNT_ID = "huntId"
-    }
 
   companion object {
     val all = listOf(Overview, Map, Profile)
@@ -122,9 +102,10 @@ fun SeekrNavigationBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SeekrMainNavHost(
+    user: FirebaseUser? = null,
     navController: NavHostController = rememberNavController(),
     testMode: Boolean = false,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
   var lastHuntId by rememberSaveable { mutableStateOf<String?>(null) }
   val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -152,53 +133,38 @@ fun SeekrMainNavHost(
             navController = navController,
             startDestination = SeekrDestination.Overview.route,
             modifier = Modifier.padding(innerPadding)) {
-            composable(SeekrDestination.Overview.route) {
+              composable(SeekrDestination.Overview.route) {
                 OverviewScreen(
                     onhuntclick = { huntId ->
-                        lastHuntId = huntId
-                        navController.navigate(SeekrDestination.HuntCard.createRoute(huntId)) {
-                            launchSingleTop = true
-                        }
+                      lastHuntId = huntId
+                      navController.navigate(SeekrDestination.HuntCard.createRoute(huntId)) {
+                        launchSingleTop = true
+                      }
                     })
-            }
-            composable(SeekrDestination.Map.route) { MapScreen() }
-            composable(SeekrDestination.Profile.route) {
-                val profile = mockProfileData()
+              }
+              composable(SeekrDestination.Map.route) { MapScreen() }
+              composable(SeekrDestination.Profile.route) {
                 ProfileScreen(
-                    userId = profile.uid,
+                    userId = user?.uid,
                     onAddHunt = { navController.navigate(SeekrDestination.AddHunt.route) },
-                    onSettings = { navController.navigate(SeekrDestination.Settings.route) },
-                    onMyHuntClick = { huntId ->
-                        navController.navigate(SeekrDestination.EditHunt.createRoute(huntId)) {
-                            launchSingleTop = true
-                        }
-                    },
-                    testMode = testMode
-                )
-            }
-            composable(
-                route = SeekrDestination.HuntCard.route,
-                arguments = listOf(navArgument(SeekrDestination.HuntCard.ARG_HUNT_ID) {
-                    type = NavType.StringType
-                })
-            ) { backStackEntry ->
-                val argId =
-                    backStackEntry.arguments?.getString(SeekrDestination.HuntCard.ARG_HUNT_ID)
-                val huntId = argId ?: lastHuntId.orEmpty()
+                    testMode = testMode)
+              }
+              composable(
+                  route = SeekrDestination.HuntCard.route,
+                  arguments =
+                      listOf(
+                          androidx.navigation.navArgument(SeekrDestination.HuntCard.ARG_HUNT_ID) {
+                            type = androidx.navigation.NavType.StringType
+                          })) { backStackEntry ->
+                    val argId =
+                        backStackEntry.arguments?.getString(SeekrDestination.HuntCard.ARG_HUNT_ID)
+                    val huntId = argId ?: lastHuntId.orEmpty() // fallback if ever needed
 
-                HuntCardScreen(
-                    huntId = huntId,
-                    onGoBack = { navController.popBackStack() },
-                    onAddReview = { id ->
-                        navController.navigate(SeekrDestination.AddReview.createRoute(id)) {
-                            launchSingleTop = true
-                        }
-                    },
-                    modifier = Modifier.testTag(NavigationTestTags.HUNTCARD_SCREEN)
-                )
-
-
-        }
+                    HuntCardScreen(
+                        huntId = huntId,
+                        onGoBack = { navController.popBackStack() },
+                        modifier = Modifier.testTag(NavigationTestTags.HUNTCARD_SCREEN))
+                  }
               composable(SeekrDestination.AddHunt.route) {
                 // wrapper purely to expose a testTag for UI tests
                 Surface(
@@ -216,52 +182,6 @@ fun SeekrMainNavHost(
                           testMode = testMode)
                     }
               }
-            composable(SeekrDestination.Settings.route) {
-                SettingsScreen(
-                    onSignedOut = {
-                        // After logout, go to Overview
-                        navController.navigate(SeekrDestination.Overview.route) {
-                            launchSingleTop = true
-                            popUpTo(SeekrDestination.Overview.route)
-                        }
-                    },
-                    onGoBack = { navController.popBackStack() }
-                )
-            }
-            composable(
-                route = SeekrDestination.AddReview.route,
-                arguments = listOf(navArgument(SeekrDestination.AddReview.ARG_HUNT_ID) {
-                    type = NavType.StringType
-                })
-            ) { backStackEntry ->
-                val huntId = backStackEntry.arguments?.getString(SeekrDestination.AddReview.ARG_HUNT_ID).orEmpty()
-                AddReviewScreen(
-                    huntId = huntId,
-                    onGoBack = { navController.popBackStack() },
-                    onDone = { navController.popBackStack() },
-                    onCancel = { navController.popBackStack() }
-                )
-            }
-            composable(
-                route = SeekrDestination.EditHunt.route,
-                arguments = listOf(navArgument(SeekrDestination.EditHunt.ARG_HUNT_ID) {
-                    type = NavType.StringType
-                })
-            ) { backStackEntry ->
-                val huntId = backStackEntry.arguments?.getString(SeekrDestination.EditHunt.ARG_HUNT_ID).orEmpty()
-                EditHuntScreen(
-                    huntId = huntId,
-                    onGoBack = { navController.popBackStack() },
-                    onDone = {
-                        // After saving edits, go back to Profile to see updates
-                        navController.navigate(SeekrDestination.Profile.route) {
-                            launchSingleTop = true
-                            popUpTo(SeekrDestination.Profile.route)
-                        }
-                    },
-                    testMode = testMode
-                )
-            }
             }
       }
 }
