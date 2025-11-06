@@ -98,22 +98,26 @@ class AddPointsMapScreenTest {
     }
 
     // Initially disabled
-    composeRule.onNodeWithText("Ajouter").assertIsNotEnabled()
+    composeRule.onNodeWithText("Add").assertIsNotEnabled()
 
     // Enter valid name should enable
-    composeRule.onNodeWithTag("PointNameField").performTextInput("Tour Eiffel")
-    composeRule.onNodeWithText("Ajouter").assertIsEnabled()
+    composeRule
+        .onNodeWithTag(AddPointsMapScreenTestTags.POINT_NAME_FIELD)
+        .performTextInput("Eiffel Tower")
+    composeRule.onNodeWithText("Add").assertIsEnabled()
 
     // Clear name should show error and disable
-    composeRule.onNodeWithTag("PointNameField").performTextClearance()
-    composeRule.onNodeWithText("Le nom ne peut pas être vide").assertExists()
-    composeRule.onNodeWithText("Ajouter").assertIsNotEnabled()
+    composeRule.onNodeWithTag(AddPointsMapScreenTestTags.POINT_NAME_FIELD).performTextClearance()
+    composeRule.onNodeWithText("The name cannot be empty").assertExists()
+    composeRule.onNodeWithText("Add").assertIsNotEnabled()
 
     // Enter another valid name and confirm
-    composeRule.onNodeWithTag("PointNameField").performTextInput("Musée d'Orsay")
-    composeRule.onNodeWithText("Ajouter").performClick()
+    composeRule
+        .onNodeWithTag(AddPointsMapScreenTestTags.POINT_NAME_FIELD)
+        .performTextInput("Louvre Museum")
+    composeRule.onNodeWithText("Add").performClick()
 
     composeRule.waitForIdle()
-    assertEquals("Musée d'Orsay", confirmedName)
+    assertEquals("Louvre Museum", confirmedName)
   }
 }
