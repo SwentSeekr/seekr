@@ -79,6 +79,9 @@ object MapScreenTestTags {
   const val BUTTON_VIEW = "huntPopupView"
   const val BUTTON_BACK = "backToAllHunts"
   const val MAP_SCREEN = "MapScreen"
+  const val PERMISSION_POPUP = "permissionPopup"
+  const val GRANT_LOCATION_PERMISSION = "grantLocationPermission"
+  const val EXPLAIN = "explain"
 }
 
 /**
@@ -97,7 +100,7 @@ object MapScreenTestTags {
  * @param viewModel the screen view model providing [MapUIState] and user intents.
  */
 @Composable
-fun MapScreen(viewModel: MapViewModel = viewModel()) {
+fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) {
   val uiState by viewModel.uiState.collectAsState()
   val cameraPositionState = rememberCameraPositionState()
   val scope = rememberCoroutineScope()
@@ -119,10 +122,12 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
 
   val selectedHunt = uiState.selectedHunt
 
-  LaunchedEffect(Unit) {
-    permissionLauncher.launch(
-        arrayOf(
-            Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+  if (!testMode) {
+    LaunchedEffect(Unit) {
+      permissionLauncher.launch(
+          arrayOf(
+              Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+    }
   }
 
   LaunchedEffect(hasLocationPermission, mapLoaded) {
@@ -255,7 +260,11 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
 @Composable
 fun PermissionRequestPopup(onRequestPermission: () -> Unit) {
   Box(
-      modifier = Modifier.fillMaxSize().background(Color(0x80000000)).padding(32.dp),
+      modifier =
+          Modifier.fillMaxSize()
+              .background(Color(0x80000000))
+              .padding(32.dp)
+              .testTag(MapScreenTestTags.PERMISSION_POPUP),
       contentAlignment = Alignment.Center) {
         Card(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -268,11 +277,15 @@ fun PermissionRequestPopup(onRequestPermission: () -> Unit) {
                         text = "We need access to your location to show the map.",
                         style = MaterialTheme.typography.bodyLarge,
                         color = Color.Black,
-                        modifier = Modifier.padding(bottom = 16.dp))
-                    Button(
+                        modifier =
+                            Modifier.padding(bottom = 16.dp).testTag(MapScreenTestTags.EXPLAIN))
+                    TextButton(
                         onClick = { onRequestPermission() },
                         colors = ButtonDefaults.buttonColors(containerColor = Green),
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .padding(top = 8.dp)
+                                .testTag(MapScreenTestTags.GRANT_LOCATION_PERMISSION)) {
                           Text("Grant Location Permission", color = Color.White)
                         }
                   }
