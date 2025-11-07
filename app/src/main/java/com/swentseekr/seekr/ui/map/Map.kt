@@ -2,6 +2,7 @@ package com.swentseekr.seekr.ui.map
 
 import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Canvas
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -131,12 +132,22 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
   }
 
   LaunchedEffect(hasLocationPermission, mapLoaded) {
-    if (hasLocationPermission && mapLoaded) {
-      fused.lastLocation.addOnSuccessListener { location ->
-        location?.let {
-          val here = LatLng(it.latitude, it.longitude)
-          scope.launch { cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(here, 16f)) }
-        }
+    if (!mapLoaded) return@LaunchedEffect
+    val fineGranted =
+        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED
+    val coarseGranted =
+        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED
+
+    if (!(fineGranted || coarseGranted)) {
+      return@LaunchedEffect
+    }
+
+    fused.lastLocation.addOnSuccessListener { location ->
+      location?.let {
+        val here = LatLng(it.latitude, it.longitude)
+        scope.launch { cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(here, 16f)) }
       }
     }
   }
