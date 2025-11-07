@@ -147,13 +147,13 @@ class SeekrNavigationTest {
     node(NavigationTestTags.ADD_HUNT_SCREEN).assertDoesNotExist()
   }
 
-    @Test
-    fun profile_settings_hides_bar_and_back_restores() {
-        node(NavigationTestTags.PROFILE_TAB).performClick()
-        node(ProfileTestTags.SETTINGS).performClick()
-        node(NavigationTestTags.SETTINGS_SCREEN).assertIsDisplayed()
-        node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
-        compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
-        node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
-    }
+  @Test
+  fun profile_settings_hides_bar_and_back_restores() {
+    node(NavigationTestTags.PROFILE_TAB).performClick()
+    node(ProfileTestTags.SETTINGS).performClick()
+    node(NavigationTestTags.SETTINGS_SCREEN).assertIsDisplayed()
+    node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
+    compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
+    node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
+  }
 }
