@@ -64,6 +64,7 @@ object ProfileTestTags {
   const val PROFILE_SPORT_RATING = "PROFILE_SPORT_RATING"
   const val EMPTY_HUNTS_MESSAGE = "EMPTY_HUNTS_MESSAGE"
   const val PROFILE_SCREEN = "PROFILE_SCREEN"
+    const val SETTINGS = "SETTINGS"
 
   fun getTestTagForHuntCard(hunt: Hunt, index: Int): String = "HUNT_CARD_$index"
 }
@@ -184,7 +185,8 @@ fun ProfileScreen(
                   }
                 }
 
-                IconButton(onClick = onSettings) {
+                IconButton(onClick = onSettings,
+                    modifier = Modifier.testTag(ProfileTestTags.SETTINGS)) {
                   Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
                 }
               }
