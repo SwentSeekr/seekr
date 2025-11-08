@@ -152,14 +152,14 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
     }
   }
 
-    val mapUiSettings = MapUiSettings(
-        myLocationButtonEnabled = true,
-        scrollGesturesEnabled = hasLocationPermission,
-        zoomGesturesEnabled = hasLocationPermission,
-        tiltGesturesEnabled = hasLocationPermission,
-        rotationGesturesEnabled = hasLocationPermission
-    )
-    val mapProperties = MapProperties(isMyLocationEnabled = hasLocationPermission)
+  val mapUiSettings =
+      MapUiSettings(
+          myLocationButtonEnabled = true,
+          scrollGesturesEnabled = hasLocationPermission,
+          zoomGesturesEnabled = hasLocationPermission,
+          tiltGesturesEnabled = hasLocationPermission,
+          rotationGesturesEnabled = hasLocationPermission)
+  val mapProperties = MapProperties(isMyLocationEnabled = hasLocationPermission)
 
   Box(Modifier.fillMaxSize().testTag(MapScreenTestTags.MAP_SCREEN)) {
     GoogleMap(
@@ -167,9 +167,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
         cameraPositionState = cameraPositionState,
         onMapLoaded = { mapLoaded = true },
         properties = mapProperties,
-        uiSettings =
-            mapUiSettings
-    ) {
+        uiSettings = mapUiSettings) {
           LaunchedEffect(mapLoaded, selectedHunt, uiState.isFocused) {
             if (!mapLoaded) return@LaunchedEffect
             val hunt = selectedHunt ?: return@LaunchedEffect
