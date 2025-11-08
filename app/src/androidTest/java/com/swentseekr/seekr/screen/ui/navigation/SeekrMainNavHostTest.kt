@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.rule.GrantPermissionRule
 import com.swentseekr.seekr.ui.navigation.NavigationTestTags
 import com.swentseekr.seekr.ui.navigation.SeekrMainNavHost
 import com.swentseekr.seekr.ui.profile.ProfileTestTags
@@ -21,6 +22,11 @@ import org.junit.runner.RunWith
 class SeekrNavigationTest {
 
   @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+  @get:Rule
+  val permissionRule: GrantPermissionRule =
+      GrantPermissionRule.grant(
+          android.Manifest.permission.ACCESS_FINE_LOCATION,
+          android.Manifest.permission.ACCESS_COARSE_LOCATION)
 
   @Before
   fun setUp() {

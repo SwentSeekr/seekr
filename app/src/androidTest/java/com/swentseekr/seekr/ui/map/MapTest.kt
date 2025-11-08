@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.test.rule.GrantPermissionRule
 import com.swentseekr.seekr.model.hunt.*
 import com.swentseekr.seekr.model.map.Location
 import org.junit.Rule
@@ -14,6 +15,11 @@ import org.junit.Test
 class MapTest {
 
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()
+  @get:Rule
+  val permissionRule: GrantPermissionRule =
+      GrantPermissionRule.grant(
+          android.Manifest.permission.ACCESS_FINE_LOCATION,
+          android.Manifest.permission.ACCESS_COARSE_LOCATION)
 
   private fun hunt(uid: String, title: String = "Hunt $uid") =
       Hunt(
@@ -121,5 +127,37 @@ class MapTest {
     composeRule.onNodeWithTag(MapScreenTestTags.POPUP_CARD).assertDoesNotExist()
     composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_BACK).assertDoesNotExist()
     composeRule.onNodeWithTag(MapScreenTestTags.GOOGLE_MAP_SCREEN).assertIsDisplayed()
+  }
+
+  @Test
+  fun mapIsDisplayedOnLocationGranted() {
+    val vm = MapViewModel(repository = repo(hunt("1")))
+    composeRule.setContent { MapScreen(viewModel = vm, true) }
+    composeRule.onNodeWithTag(MapScreenTestTags.GOOGLE_MAP_SCREEN).assertIsDisplayed()
+  }
+
+  @Test
+  fun permissionRequestPopupIsShownWhenPermissionDenied() {
+    val vm = MapViewModel(repository = repo(hunt("1")))
+    composeRule.setContent { MapScreen(viewModel = vm, true) }
+    composeRule.onNodeWithTag(MapScreenTestTags.PERMISSION_POPUP).assertIsDisplayed()
+  }
+
+  @Test
+  fun locationPermissionRequestIsRetriggeredOnButtonClick() {
+    val vm = MapViewModel(repository = repo(hunt("1")))
+    composeRule.setContent { MapScreen(viewModel = vm, true) }
+    composeRule.onNodeWithTag(MapScreenTestTags.PERMISSION_POPUP).assertIsDisplayed()
+    composeRule.onNodeWithTag(MapScreenTestTags.GRANT_LOCATION_PERMISSION).performClick()
+    composeRule.onNodeWithTag(MapScreenTestTags.GOOGLE_MAP_SCREEN).assertIsDisplayed()
+  }
+
+  @Test
+  fun permissionPopupNotShownWhenPermissionGranted() {
+    val vm = MapViewModel(repository = repo(hunt("1")))
+    composeRule.setContent { MapScreen(viewModel = vm) }
+    composeRule.waitForIdle()
+    composeRule.onNodeWithTag(MapScreenTestTags.GOOGLE_MAP_SCREEN).assertIsDisplayed()
+    composeRule.onNodeWithTag(MapScreenTestTags.PERMISSION_POPUP).assertDoesNotExist()
   }
 }
