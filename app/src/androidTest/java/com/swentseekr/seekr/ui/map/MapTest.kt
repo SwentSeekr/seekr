@@ -127,7 +127,7 @@ class MapTest {
   }
 
   @Test
-  fun mapIsNonInteractiveWhenPermissionDenied() {
+  fun mapIsDisplayedOnLocationGranted() {
     val vm = MapViewModel(repository = repo(hunt("1")))
     composeRule.setContent { MapScreen(viewModel = vm, true) }
     composeRule.onNodeWithTag(MapScreenTestTags.GOOGLE_MAP_SCREEN).assertIsDisplayed()
@@ -150,7 +150,7 @@ class MapTest {
   }
 
   @Test
-  fun whenLocationPermissionGrantedPermissionPopupNotShown() {
+  fun permissionPopupNotShownWhenPermissionGranted() {
     val vm = MapViewModel(repository = repo(hunt("1")))
     composeRule.setContent { MapScreen(viewModel = vm) }
     composeRule.waitForIdle()

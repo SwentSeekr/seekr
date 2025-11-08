@@ -152,19 +152,24 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
     }
   }
 
+    val mapUiSettings = MapUiSettings(
+        myLocationButtonEnabled = true,
+        scrollGesturesEnabled = hasLocationPermission,
+        zoomGesturesEnabled = hasLocationPermission,
+        tiltGesturesEnabled = hasLocationPermission,
+        rotationGesturesEnabled = hasLocationPermission
+    )
+    val mapProperties = MapProperties(isMyLocationEnabled = hasLocationPermission)
+
   Box(Modifier.fillMaxSize().testTag(MapScreenTestTags.MAP_SCREEN)) {
     GoogleMap(
         modifier = Modifier.matchParentSize().testTag(MapScreenTestTags.GOOGLE_MAP_SCREEN),
         cameraPositionState = cameraPositionState,
         onMapLoaded = { mapLoaded = true },
-        properties = MapProperties(isMyLocationEnabled = hasLocationPermission),
+        properties = mapProperties,
         uiSettings =
-            MapUiSettings(
-                myLocationButtonEnabled = true,
-                scrollGesturesEnabled = hasLocationPermission,
-                zoomGesturesEnabled = hasLocationPermission,
-                tiltGesturesEnabled = hasLocationPermission,
-                rotationGesturesEnabled = hasLocationPermission)) {
+            mapUiSettings
+    ) {
           LaunchedEffect(mapLoaded, selectedHunt, uiState.isFocused) {
             if (!mapLoaded) return@LaunchedEffect
             val hunt = selectedHunt ?: return@LaunchedEffect
@@ -285,7 +290,8 @@ fun PermissionRequestPopup(onRequestPermission: () -> Unit) {
                   modifier = Modifier.padding(24.dp).fillMaxWidth(),
                   horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "We need access to your location to show the map.",
+                        text =
+                            "Seekr needs access to your location to display hunts near you on the map!",
                         style = MaterialTheme.typography.bodyLarge,
                         color = Color.Black,
                         modifier =
