@@ -5,13 +5,22 @@ import androidx.activity.compose.setContent
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.swentseekr.seekr.model.hunt.Difficulty
+import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
+import com.swentseekr.seekr.model.hunt.HuntStatus
+import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.ui.components.HuntCardScreenTestTags
+import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
 import com.swentseekr.seekr.ui.profile.ProfileTestTags
+import com.swentseekr.seekr.utils.FakeRepoSuccess
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -223,5 +232,66 @@ class SeekrNavigationTest {
     node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
   }
 
-  // need test for edit hunt, overview, huntcard and review.
+    @Test
+    fun overview_click_navigates_to_huntcard_with_passed_id_using_fake_repo() {
+        // 1) Swap in a fake repo BEFORE composing, so VMs resolve it at construction time.
+        val hunt = Hunt(
+            uid = "fake-123",
+            start = Location(48.8566, 2.3522, "Paris Center"),
+            end = Location(48.8606, 2.3376, "Louvre"),
+            middlePoints = emptyList(),
+            status = HuntStatus.FUN,
+            title = "Paris Discovery",
+            description = "Walk to the Louvre.",
+            time = 1.5,
+            distance = 3.2,
+            difficulty = Difficulty.EASY,
+            authorId = "author-1",
+            image = 0,
+            reviewRate = 4.7
+        )
+        val previousRepo = HuntRepositoryProvider.repository
+        HuntRepositoryProvider.repository = FakeRepoSuccess(listOf(hunt))
+
+        try {
+            // 2) Compose the real NavHost (no Firebase involved).
+            compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
+
+            // Wait for Overview to draw with list content.
+            compose.waitUntil(timeoutMillis = 5_000) {
+                runCatching {
+                    compose.onNodeWithTag(OverviewScreenTestTags.HUNT_LIST, useUnmergedTree = true).assertExists()
+                    true
+                }.getOrNull() == true
+            }
+
+            // 3) Click a card in the Overview list.
+            // Overview tags each card; the last one is "LAST_HUNT_CARD" — safe to click.
+            compose.onNodeWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
+                .assertExists()
+                .performClick()
+
+            // 4) Assert we navigated to HuntCard screen.
+            compose.waitUntil(timeoutMillis = 10_000) {
+                runCatching {
+                    compose
+                        .onAllNodes(hasTestTag(NavigationTestTags.HUNTCARD_SCREEN), useUnmergedTree = true)
+                        .fetchSemanticsNodes()
+                        .isNotEmpty()
+                }.getOrNull() == true
+            }
+
+            compose
+                .onAllNodes(hasTestTag(NavigationTestTags.HUNTCARD_SCREEN), useUnmergedTree = true)
+                .onFirst()
+                .assertExists()
+
+        } finally {
+            // 5) Restore the real repo (important for isolation from other tests).
+            HuntRepositoryProvider.repository = previousRepo
+        }
+    }
+
+
+    // need test for edit hunt, overview, huntcard and review.
 }
