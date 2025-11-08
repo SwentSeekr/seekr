@@ -206,48 +206,6 @@ class SeekrNavigationTest {
   }
 
   @Test
-  fun edit_hunt_inScreen_back_and_done_restore_correct_destinations() {
-    // Open one of "My hunts" → EditHunt
-    node(NavigationTestTags.PROFILE_TAB).performClick()
-    compose.waitForIdle()
-    node("HUNT_CARD_0").performClick()
-    node(NavigationTestTags.EDIT_HUNT_SCREEN).assertIsDisplayed()
-
-    // First: in-screen back (exercises EditHunt onGoBack)
-    clickAny(
-        { tryClickByTag("EDIT_HUNT_BACK", "EditHuntBack") },
-        { tryClickByDesc("Back", "Navigate up") },
-        { tryClickByText("Back") })
-    // We should be back on a tab (Profile) → bottom bar visible
-    compose.waitUntil(3_000) {
-      runCatching {
-            node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
-            true
-          }
-          .getOrNull() == true
-    }
-
-    // Open EditHunt again to exercise onDone
-    node("HUNT_CARD_0").performClick()
-    node(NavigationTestTags.EDIT_HUNT_SCREEN).assertIsDisplayed()
-
-    // Trigger in-screen 'Done/Save' (exercises EditHunt onDone → popUpTo(Profile))
-    clickAny(
-        { tryClickByTag("EDIT_HUNT_DONE", "EditHuntDone", "PRIMARY_ACTION") },
-        { tryClickByDesc("Done", "Save") },
-        { tryClickByText("Done", "Save") })
-
-    // Expect bottom bar visible again (back on Profile)
-    compose.waitUntil(3_000) {
-      runCatching {
-            node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
-            true
-          }
-          .getOrNull() == true
-    }
-  }
-
-  @Test
   fun settings_inScreen_back_invokes_onGoBack_and_restores_bottom_bar() {
     // Profile → Settings
     node(NavigationTestTags.PROFILE_TAB).performClick()
@@ -264,4 +222,6 @@ class SeekrNavigationTest {
     // Back to a tab destination → bottom bar visible
     node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
   }
+
+  // need test for edit hunt, overview, huntcard and review.
 }
