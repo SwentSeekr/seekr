@@ -11,7 +11,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -286,10 +285,4 @@ fun SeekrMainNavHost(
               }
             }
       }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun SeekrAppPreview() {
-  SampleAppTheme { SeekrMainNavHost() }
 }
