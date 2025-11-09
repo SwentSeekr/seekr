@@ -3,6 +3,8 @@ package com.swentseekr.seekr.ui.navigation
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onFirst
@@ -10,6 +12,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.swentseekr.seekr.model.hunt.Difficulty
@@ -18,6 +21,7 @@ import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.hunt.HuntScreenTestTags
+import com.swentseekr.seekr.ui.huntcardview.AddReviewScreenTestTags
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
 import com.swentseekr.seekr.ui.profile.ProfileTestTags
 import com.swentseekr.seekr.utils.FakeRepoSuccess
@@ -516,6 +520,212 @@ class SeekrNavigationTest {
       assert(editGone)
     } finally {
       HuntRepositoryProvider.repository = prev
+    }
+  }
+
+  @Test
+  fun overview_to_huntcard_addReview_opens_review_done_returns_to_huntcard() {
+    // Seed a hunt so Overview → HuntCard resolves a real id.
+    val hunt =
+        Hunt(
+            uid = "fake-123",
+            start = Location(48.8566, 2.3522, "Paris Center"),
+            end = Location(48.8606, 2.3376, "Louvre"),
+            middlePoints = emptyList(),
+            status = HuntStatus.FUN,
+            title = "Paris Discovery",
+            description = "Walk to the Louvre.",
+            time = 1.5,
+            distance = 3.2,
+            difficulty = Difficulty.EASY,
+            authorId = "author-1",
+            image = 0,
+            reviewRate = 4.7)
+    val previousRepo = HuntRepositoryProvider.repository
+    HuntRepositoryProvider.repository = FakeRepoSuccess(listOf(hunt))
+
+    try {
+      // Compose fresh with the fake repo in place.
+      compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
+
+      // Wait for Overview list, then open the last card → HuntCard.
+      compose.waitUntil(5_000) {
+        runCatching {
+              compose
+                  .onNodeWithTag(OverviewScreenTestTags.HUNT_LIST, useUnmergedTree = true)
+                  .assertExists()
+              true
+            }
+            .getOrNull() == true
+      }
+      compose
+          .onNodeWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
+          .assertExists()
+          .performClick()
+
+      // We should now be on the HuntCard screen.
+      compose.waitUntil(10_000) {
+        runCatching {
+              compose
+                  .onAllNodes(
+                      hasTestTag(NavigationTestTags.HUNTCARD_SCREEN), useUnmergedTree = true)
+                  .fetchSemanticsNodes()
+                  .isNotEmpty()
+            }
+            .getOrNull() == true
+      }
+
+      // Tap the "Add review" entry in HuntCard (tag/desc/text fallbacks).
+      clickAny(
+          { tryClickByTag("HuntCard_AddReview", "ADD_REVIEW_BUTTON", "HuntCard_AddReviewButton") },
+          { tryClickByDesc("Add review", "Add Review") },
+          { tryClickByText("Add review", "Add Review") })
+
+      // Review screen wrapper should appear.
+      compose.waitUntil(10_000) {
+        runCatching {
+              node(NavigationTestTags.REVIEW_HUNT_SCREEN).assertIsDisplayed()
+              true
+            }
+            .getOrNull() == true
+      }
+
+      // Done is disabled until rating is valid.
+      compose
+          .onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON, useUnmergedTree = true)
+          .assertIsNotEnabled()
+
+      // Type a valid rating and a comment.
+      compose
+          .onNodeWithTag(AddReviewScreenTestTags.RATE_TEXTFIELD, useUnmergedTree = true)
+          .performTextInput("4.5")
+      compose
+          .onNodeWithTag(AddReviewScreenTestTags.COMMENT_TEXTFIELD, useUnmergedTree = true)
+          .performTextInput("Great hunt!")
+
+      // Now Done should be enabled → click it.
+      compose
+          .onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON, useUnmergedTree = true)
+          .assertIsEnabled()
+          .performClick()
+
+      // After onDone() the nav pops back to HuntCard; review wrapper gone.
+      compose.waitUntil(10_000) {
+        val backOnHuntCard =
+            runCatching {
+                  compose
+                      .onAllNodes(
+                          hasTestTag(NavigationTestTags.HUNTCARD_SCREEN), useUnmergedTree = true)
+                      .fetchSemanticsNodes()
+                      .isNotEmpty()
+                }
+                .getOrNull() == true
+        val reviewGone =
+            compose
+                .onAllNodes(
+                    hasTestTag(NavigationTestTags.REVIEW_HUNT_SCREEN), useUnmergedTree = true)
+                .fetchSemanticsNodes()
+                .isEmpty()
+        backOnHuntCard && reviewGone
+      }
+    } finally {
+      HuntRepositoryProvider.repository = previousRepo
+    }
+  }
+
+  @Test
+  fun huntcard_addReview_toolbarBack_and_cancel_both_return_to_huntcard() {
+    // Seed same as above so HuntCard appears with a real hunt.
+    val hunt =
+        Hunt(
+            uid = "fake-123",
+            start = Location(48.8566, 2.3522, "Paris Center"),
+            end = Location(48.8606, 2.3376, "Louvre"),
+            middlePoints = emptyList(),
+            status = HuntStatus.FUN,
+            title = "Paris Discovery",
+            description = "Walk to the Louvre.",
+            time = 1.5,
+            distance = 3.2,
+            difficulty = Difficulty.EASY,
+            authorId = "author-1",
+            image = 0,
+            reviewRate = 4.7)
+    val previousRepo = HuntRepositoryProvider.repository
+    HuntRepositoryProvider.repository = FakeRepoSuccess(listOf(hunt))
+
+    try {
+      compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
+
+      // Overview → HuntCard
+      compose.waitUntil(5_000) {
+        runCatching {
+              compose
+                  .onNodeWithTag(OverviewScreenTestTags.HUNT_LIST, useUnmergedTree = true)
+                  .assertExists()
+              true
+            }
+            .getOrNull() == true
+      }
+      compose
+          .onNodeWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
+          .performClick()
+      compose.waitUntil(5_000) {
+        runCatching {
+              compose
+                  .onAllNodes(
+                      hasTestTag(NavigationTestTags.HUNTCARD_SCREEN), useUnmergedTree = true)
+                  .fetchSemanticsNodes()
+                  .isNotEmpty()
+            }
+            .getOrNull() == true
+      }
+
+      // Open Add Review
+      clickAny(
+          { tryClickByTag("HuntCard_AddReview", "ADD_REVIEW_BUTTON", "HuntCard_AddReviewButton") },
+          { tryClickByDesc("Add review", "Add Review") },
+          { tryClickByText("Add review", "Add Review") })
+      node(NavigationTestTags.REVIEW_HUNT_SCREEN).assertIsDisplayed()
+
+      // 1) Top app bar back returns to HuntCard
+      compose
+          .onNodeWithTag(AddReviewScreenTestTags.GO_BACK_BUTTON, useUnmergedTree = true)
+          .performClick()
+      compose.waitUntil(5_000) {
+        runCatching {
+              compose
+                  .onAllNodes(
+                      hasTestTag(NavigationTestTags.HUNTCARD_SCREEN), useUnmergedTree = true)
+                  .fetchSemanticsNodes()
+                  .isNotEmpty()
+            }
+            .getOrNull() == true
+      }
+
+      // Open Add Review again to test Cancel button.
+      clickAny(
+          { tryClickByTag("HuntCard_AddReview", "ADD_REVIEW_BUTTON", "HuntCard_AddReviewButton") },
+          { tryClickByDesc("Add review", "Add Review") },
+          { tryClickByText("Add review", "Add Review") })
+      node(NavigationTestTags.REVIEW_HUNT_SCREEN).assertIsDisplayed()
+
+      // 2) In-screen Cancel returns to HuntCard
+      compose
+          .onNodeWithTag(AddReviewScreenTestTags.CANCEL_BUTTON, useUnmergedTree = true)
+          .performClick()
+      compose.waitUntil(5_000) {
+        runCatching {
+              compose
+                  .onAllNodes(
+                      hasTestTag(NavigationTestTags.HUNTCARD_SCREEN), useUnmergedTree = true)
+                  .fetchSemanticsNodes()
+                  .isNotEmpty()
+            }
+            .getOrNull() == true
+      }
+    } finally {
+      HuntRepositoryProvider.repository = previousRepo
     }
   }
 }
