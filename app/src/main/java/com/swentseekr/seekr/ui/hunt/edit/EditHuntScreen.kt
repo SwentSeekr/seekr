@@ -13,20 +13,17 @@ fun EditHuntScreen(
     onDone: () -> Unit = {},
     testMode: Boolean = false,
 ) {
-    LaunchedEffect(huntId) {
-        if (huntId.isNotBlank()) {
-            editHuntViewModel.load(huntId)
-        }
+  LaunchedEffect(huntId) {
+    if (huntId.isNotBlank()) {
+      editHuntViewModel.load(huntId)
     }
+  }
 
-    BaseHuntScreen(
-        title = "Edit your Hunt",
-        vm = editHuntViewModel,
-        onGoBack = onGoBack,
-        onDone = onDone,
-        testMode = testMode,
-        onSelectImage = { uri ->
-            editHuntViewModel.mainImageUri = uri
-        }
-    )
+  BaseHuntScreen(
+      title = "Edit your Hunt",
+      vm = editHuntViewModel,
+      onGoBack = onGoBack,
+      onDone = onDone,
+      testMode = testMode,
+      onSelectImage = { uri -> editHuntViewModel.mainImageUri = uri })
 }

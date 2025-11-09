@@ -8,31 +8,29 @@ import com.swentseekr.seekr.ui.profile.Profile
 
 fun mockProfileData(): Profile {
 
-    val sampleHunt =
-        Hunt(
-            uid = "hunt123",
-            start = Location(40.7128, -74.0060, "New York"),
-            end = Location(40.730610, -73.935242, "Brooklyn"),
-            middlePoints = emptyList(),
-            status = HuntStatus.FUN,
-            title = "City Exploration",
-            description = "Discover hidden gems in the city",
-            time = 2.5,
-            distance = 5.0,
-            difficulty = Difficulty.DIFFICULT,
-            authorId = "0",
-            mainImageUrl = R.drawable.ic_launcher_foreground.toString(),
-            otherImagesUrls = emptyList(),
-            reviewRate = 4.5
-        )
+  val sampleHunt =
+      Hunt(
+          uid = "hunt123",
+          start = Location(40.7128, -74.0060, "New York"),
+          end = Location(40.730610, -73.935242, "Brooklyn"),
+          middlePoints = emptyList(),
+          status = HuntStatus.FUN,
+          title = "City Exploration",
+          description = "Discover hidden gems in the city",
+          time = 2.5,
+          distance = 5.0,
+          difficulty = Difficulty.DIFFICULT,
+          authorId = "0",
+          mainImageUrl = R.drawable.ic_launcher_foreground.toString(),
+          otherImagesUrls = emptyList(),
+          reviewRate = 4.5)
 
-    return Profile(
-        uid = "user123",
-        author = sampleAuthor(),
-        myHunts = mutableListOf(sampleHunt),
-        doneHunts = mutableListOf(),
-        likedHunts = mutableListOf()
-    )
+  return Profile(
+      uid = "user123",
+      author = sampleAuthor(),
+      myHunts = mutableListOf(sampleHunt),
+      doneHunts = mutableListOf(),
+      likedHunts = mutableListOf())
 }
 
 fun sampleAuthor() =
@@ -41,8 +39,7 @@ fun sampleAuthor() =
         bio = "Adventurer",
         profilePicture = R.drawable.profile_picture,
         reviewRate = 4.5,
-        sportRate = 4.8
-    )
+        sportRate = 4.8)
 
 fun sampleProfile(
     myHunts: List<Hunt> = emptyList(),
@@ -50,29 +47,27 @@ fun sampleProfile(
     likedHunts: List<Hunt> = emptyList(),
     uid: String = "user123"
 ): Profile {
-    return Profile(
-        uid = uid,
-        author = sampleAuthor(),
-        myHunts = myHunts.toMutableList(),
-        doneHunts = doneHunts.toMutableList(),
-        likedHunts = likedHunts.toMutableList()
-    )
+  return Profile(
+      uid = uid,
+      author = sampleAuthor(),
+      myHunts = myHunts.toMutableList(),
+      doneHunts = doneHunts.toMutableList(),
+      likedHunts = likedHunts.toMutableList())
 }
 
 fun sampleProfileWithPseudonym(uid: String, pseudonym: String): Profile {
-    return Profile(
-        uid = uid,
-        author = Author(
-            pseudonym = pseudonym,
-            bio = "Adventurer",
-            profilePicture = R.drawable.profile_picture,
-            reviewRate = 4.5,
-            sportRate = 4.8
-        ),
-        myHunts = mutableListOf(),
-        doneHunts = mutableListOf(),
-        likedHunts = mutableListOf()
-    )
+  return Profile(
+      uid = uid,
+      author =
+          Author(
+              pseudonym = pseudonym,
+              bio = "Adventurer",
+              profilePicture = R.drawable.profile_picture,
+              reviewRate = 4.5,
+              sportRate = 4.8),
+      myHunts = mutableListOf(),
+      doneHunts = mutableListOf(),
+      likedHunts = mutableListOf())
 }
 
 fun createHunt(uid: String, title: String) =
@@ -90,9 +85,8 @@ fun createHunt(uid: String, title: String) =
         authorId = "0",
         mainImageUrl = R.drawable.empty_user.toString(),
         otherImagesUrls = emptyList(),
-        reviewRate = 4.0
-    )
+        reviewRate = 4.0)
 
 fun emptyProfile(): Profile {
-    return sampleProfile(myHunts = emptyList(), doneHunts = emptyList(), likedHunts = emptyList())
+  return sampleProfile(myHunts = emptyList(), doneHunts = emptyList(), likedHunts = emptyList())
 }

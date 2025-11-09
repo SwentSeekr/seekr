@@ -11,13 +11,10 @@ fun AddHuntScreen(
     onDone: () -> Unit = {},
     testMode: Boolean = false,
 ) {
-    BaseHuntScreen(
-        vm = addHuntViewModel,
-        onGoBack = onGoBack,
-        onDone = onDone,
-        testMode = testMode,
-        onSelectImage = { uri ->
-            addHuntViewModel.mainImageUri = uri
-        }
-    )
+  BaseHuntScreen(
+      vm = addHuntViewModel,
+      onGoBack = onGoBack,
+      onDone = onDone,
+      testMode = testMode,
+      onSelectImage = { uri -> addHuntViewModel.mainImageUri = uri })
 }

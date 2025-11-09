@@ -122,18 +122,15 @@ fun AddReviewScreen(
             verticalArrangement = Arrangement.Top) {
               Spacer(modifier = modifier.height(SPACEPADDING))
 
-            AsyncImage(
-                model = hunt.mainImageUrl.ifBlank { null },
-                contentDescription = "Hunt image",
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                placeholder = painterResource(R.drawable.empty_image),
-                error = painterResource(R.drawable.empty_image)
-            )
+              AsyncImage(
+                  model = hunt.mainImageUrl.ifBlank { null },
+                  contentDescription = "Hunt image",
+                  modifier =
+                      Modifier.fillMaxWidth(0.9f).height(200.dp).clip(RoundedCornerShape(12.dp)),
+                  placeholder = painterResource(R.drawable.empty_image),
+                  error = painterResource(R.drawable.empty_image))
 
-            Spacer(modifier = modifier.height(SPACEPADDING))
+              Spacer(modifier = modifier.height(SPACEPADDING))
               Text(
                   text = hunt.title,
                   fontSize = TITLEFONTSIZE,

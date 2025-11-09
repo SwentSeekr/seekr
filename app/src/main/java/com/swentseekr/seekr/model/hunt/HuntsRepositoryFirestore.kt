@@ -4,7 +4,6 @@ import android.net.Uri
 import android.util.Log
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.map.Location
 import kotlin.String
 import kotlinx.coroutines.tasks.await
@@ -36,29 +35,27 @@ class HuntsRepositoryFirestore(
         ?: throw IllegalArgumentException("Hunt with ID $huntID is not found")
   }
 
-    override suspend fun addHunt(hunt: Hunt, mainImageUri: Uri?, otherImageUris: List<Uri>) {
-        val mainImageUrl = when {
-            mainImageUri != null -> imageRepo.uploadMainImage(hunt.uid, mainImageUri)
-            else -> ""
+  override suspend fun addHunt(hunt: Hunt, mainImageUri: Uri?, otherImageUris: List<Uri>) {
+    val mainImageUrl =
+        when {
+          mainImageUri != null -> imageRepo.uploadMainImage(hunt.uid, mainImageUri)
+          else -> ""
         }
-        val otherImagesUrls = if (otherImageUris.isNotEmpty())
-            imageRepo.uploadOtherImages(hunt.uid, otherImageUris)
+    val otherImagesUrls =
+        if (otherImageUris.isNotEmpty()) imageRepo.uploadOtherImages(hunt.uid, otherImageUris)
         else emptyList()
 
-        val huntWithImages = hunt.copy(
-            mainImageUrl = mainImageUrl,
-            otherImagesUrls = otherImagesUrls
-        )
+    val huntWithImages = hunt.copy(mainImageUrl = mainImageUrl, otherImagesUrls = otherImagesUrls)
 
-        db.collection(HUNTS_COLLECTION_PATH).document(hunt.uid).set(huntWithImages).await()
-    }
+    db.collection(HUNTS_COLLECTION_PATH).document(hunt.uid).set(huntWithImages).await()
+  }
 
   override suspend fun editHunt(huntID: String, newValue: Hunt) {
     db.collection(HUNTS_COLLECTION_PATH).document(huntID).set(newValue).await()
   }
 
   override suspend fun deleteHunt(huntID: String) {
-      imageRepo.deleteAllHuntImages(huntID)
+    imageRepo.deleteAllHuntImages(huntID)
     db.collection(HUNTS_COLLECTION_PATH).document(huntID).delete().await()
   }
 
@@ -106,8 +103,9 @@ class HuntsRepositoryFirestore(
       val difficultyString = document.getString("difficulty") ?: return null
       val difficulty = Difficulty.valueOf(difficultyString)
       val authorId = document.getString("authorId") ?: return null
-        val mainImageUrl = document.getString("mainImageUrl") ?: ""
-        val otherImagesUrls = (document.get("otherImagesUrls") as? List<*>)?.filterIsInstance<String>() ?: emptyList()
+      val mainImageUrl = document.getString("mainImageUrl") ?: ""
+      val otherImagesUrls =
+          (document.get("otherImagesUrls") as? List<*>)?.filterIsInstance<String>() ?: emptyList()
       val reviewRate = document.getDouble("reviewRate") ?: return null
 
       Hunt(
@@ -123,7 +121,7 @@ class HuntsRepositoryFirestore(
           difficulty = difficulty,
           authorId = authorId,
           mainImageUrl = mainImageUrl,
-            otherImagesUrls = otherImagesUrls,
+          otherImagesUrls = otherImagesUrls,
           reviewRate = reviewRate)
     } catch (e: Exception) {
       Log.e("HuntsRepositoryFirestore", "Error converting document to Hunt", e)

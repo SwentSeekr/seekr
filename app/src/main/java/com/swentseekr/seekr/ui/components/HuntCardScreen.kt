@@ -1,6 +1,5 @@
 package com.swentseekr.seekr.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -162,17 +161,16 @@ fun HuntCardScreen(
                                   Modifier.padding(horizontal = 4.dp)
                                       .testTag(HuntCardScreenTestTags.AUTHOR_TEXT))
                           Row {
-                              AsyncImage(
-                                  model = hunt.mainImageUrl.ifEmpty { R.drawable.empty_image },
-                                  contentDescription = "Hunt Picture",
-                                  modifier = Modifier
-                                      .padding(horizontal = 4.dp)
-                                      .size(100.dp)
-                                      .clip(RectangleShape)
-                                      .testTag(HuntCardScreenTestTags.IMAGE),
-                                  placeholder = painterResource(R.drawable.empty_image),
-                                  error = painterResource(R.drawable.empty_image)
-                              )
+                            AsyncImage(
+                                model = hunt.mainImageUrl.ifEmpty { R.drawable.empty_image },
+                                contentDescription = "Hunt Picture",
+                                modifier =
+                                    Modifier.padding(horizontal = 4.dp)
+                                        .size(100.dp)
+                                        .clip(RectangleShape)
+                                        .testTag(HuntCardScreenTestTags.IMAGE),
+                                placeholder = painterResource(R.drawable.empty_image),
+                                error = painterResource(R.drawable.empty_image))
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally) {
