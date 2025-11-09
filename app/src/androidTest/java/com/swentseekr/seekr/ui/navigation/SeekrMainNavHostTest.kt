@@ -17,6 +17,7 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.ui.hunt.HuntScreenTestTags
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
 import com.swentseekr.seekr.ui.profile.ProfileTestTags
 import com.swentseekr.seekr.utils.FakeRepoSuccess
@@ -298,71 +299,7 @@ class SeekrNavigationTest {
       HuntRepositoryProvider.repository = previousRepo
     }
   }
-  /**
-   * @Test fun huntcard_addReview_navigates_to_review_then_toolbarBack_returns_to_huntcard() { //
-   *   Seed a fake hunt before composing so VMs read from fake repo. val hunt = Hunt( uid =
-   *   "fake-123", start = Location(48.8566, 2.3522, "Paris Center"), end = Location(48.8606,
-   *   2.3376, "Louvre"), middlePoints = emptyList(), status = HuntStatus.FUN, title = "Paris
-   *   Discovery", description = "Walk to the Louvre.", time = 1.5, distance = 3.2, difficulty =
-   *   Difficulty.EASY, authorId = "author-1", image = 0, reviewRate = 4.7 ) val previousRepo =
-   *   HuntRepositoryProvider.repository HuntRepositoryProvider.repository =
-   *   FakeRepoSuccess(listOf(hunt))
-   *
-   * try { // Compose fresh after swapping repo. compose.runOnUiThread { compose.activity.setContent
-   * { SeekrMainNavHost(testMode = true) } }
-   *
-   * // Wait for the list and click a card to open HuntCard. compose.waitUntil(5_000) { runCatching
-   * { compose.onNodeWithTag(OverviewScreenTestTags.HUNT_LIST, useUnmergedTree =
-   * true).assertExists() true }.getOrNull() == true }
-   * compose.onNodeWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
-   * .assertExists() .performClick()
-   *
-   * // Wait for HuntCard to exist (handle duplicate tag nodes). compose.waitUntil(10_000) {
-   * runCatching { compose.onAllNodes(hasTestTag(NavigationTestTags.HUNTCARD_SCREEN),
-   * useUnmergedTree = true) .fetchSemanticsNodes().isNotEmpty() }.getOrNull() == true }
-   * compose.onAllNodes(hasTestTag(NavigationTestTags.HUNTCARD_SCREEN), useUnmergedTree = true)
-   * .onFirst().assertExists()
-   *
-   * // ✅ Ensure VM finished loading HuntCard content before we scroll/click.
-   * compose.waitUntil(10_000) { runCatching {
-   * compose.onNodeWithTag(HuntCardScreenTestTags.TITLE_TEXT, useUnmergedTree = true).assertExists()
-   * true }.getOrNull() == true }
-   *
-   * // Now click it. val huntDetailsList = compose.onNode(
-   * hasScrollAction().and(hasAnyChild(hasTestTag(HuntCardScreenTestTags.TITLE_TEXT))),
-   * useUnmergedTree = true )
-   *
-   * // 2) Ensure the button is actually composed (will no-op if already visible). runCatching {
-   * huntDetailsList.performScrollToNode(hasTestTag(HuntCardScreenTestTags.ADD_REVIEW_BUTTON)) }
-   *
-   * // 3) Query the *merged* tree first (usually best with Material3). // Fallback to unmerged if
-   * needed. Also allow a text+click selector if the tag isn't surfaced. val addReview = runCatching
-   * { compose.onNode( hasTestTag(HuntCardScreenTestTags.ADD_REVIEW_BUTTON), useUnmergedTree = false
-   * ) }.getOrElse { // Fallback #1: by visible label + click action (merged semantics)
-   * compose.onNode( hasText("Add Review") and hasClickAction(), useUnmergedTree = false ) }
-   *
-   * // Optional: if you still hit flakiness, probe unmerged as last resort. // val addReview =
-   * addReview.orElse { // compose.onNode(hasTestTag(HuntCardScreenTestTags.ADD_REVIEW_BUTTON),
-   * useUnmergedTree = true) // }
-   *
-   * addReview.assertExists().performClick()
-   *
-   * // We should be on the Review screen now. compose.waitUntil(10_000) { runCatching {
-   * compose.onAllNodes(hasTestTag(NavigationTestTags.REVIEW_HUNT_SCREEN), useUnmergedTree = true)
-   * .fetchSemanticsNodes().isNotEmpty() }.getOrNull() == true }
-   * compose.onAllNodes(hasTestTag(NavigationTestTags.REVIEW_HUNT_SCREEN), useUnmergedTree = true)
-   * .onFirst().assertExists()
-   *
-   * // Hit toolbar back on Review (exercises onGoBack → popBackStack)
-   * compose.onNodeWithTag(AddReviewScreenTestTags.GO_BACK_BUTTON, useUnmergedTree = true)
-   * .assertExists() .performClick()
-   *
-   * // Back on HuntCard again. compose.waitUntil(10_000) { runCatching {
-   * compose.onAllNodes(hasTestTag(NavigationTestTags.HUNTCARD_SCREEN), useUnmergedTree = true)
-   * .fetchSemanticsNodes().isNotEmpty() }.getOrNull() == true }
-   * compose.onAllNodes(hasTestTag(NavigationTestTags.HUNTCARD_SCREEN), useUnmergedTree = true)
-   * .onFirst().assertExists() } finally { HuntRepositoryProvider.repository = previousRepo } }
-   */
+
   @Test
   fun profile_myHunt_edit_flow_uses_mockProfileData_and_onDone_returns_to_profile() {
     // --- Seed repo so EditHuntViewModel.load("hunt123") succeeds (matches mockProfileData). ---
@@ -530,6 +467,55 @@ class SeekrNavigationTest {
       }
     } finally {
       HuntRepositoryProvider.repository = previousRepo
+    }
+  }
+
+  @Test
+  fun edit_hunt_test_done_navigates_back_to_profile_and_restores_bottom_bar() {
+    // Seed matching hunt and navigate to Edit
+    val seeded =
+        Hunt(
+            uid = "hunt123",
+            start = Location(0.0, 0.0, ""),
+            end = Location(0.0, 0.0, ""),
+            middlePoints = emptyList(),
+            status = HuntStatus.FUN,
+            title = "t",
+            description = "d",
+            time = 1.0,
+            distance = 1.0,
+            difficulty = Difficulty.EASY,
+            authorId = "0",
+            image = 0,
+            reviewRate = 4.0)
+    val prev = HuntRepositoryProvider.repository
+    HuntRepositoryProvider.repository = FakeRepoSuccess(listOf(seeded))
+    try {
+      compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
+      node(NavigationTestTags.PROFILE_TAB).performClick()
+      node("HUNT_CARD_0").performClick()
+      node(NavigationTestTags.EDIT_HUNT_SCREEN).assertIsDisplayed()
+      node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
+
+      compose.onNodeWithTag(HuntScreenTestTags.HUNT_SAVE).performClick()
+      compose.waitForIdle()
+
+      // We should now be on the Profile tab; bottom bar visible; Edit wrapper gone.
+      compose.waitUntil(5_000) {
+        runCatching {
+              node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
+              true
+            }
+            .getOrNull() == true
+      }
+      val editGone =
+          compose
+              .onAllNodes(hasTestTag(NavigationTestTags.EDIT_HUNT_SCREEN), useUnmergedTree = true)
+              .fetchSemanticsNodes()
+              .isEmpty()
+      assert(editGone)
+    } finally {
+      HuntRepositoryProvider.repository = prev
     }
   }
 }
