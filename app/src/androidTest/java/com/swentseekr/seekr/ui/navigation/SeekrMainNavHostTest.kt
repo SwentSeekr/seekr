@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.rule.GrantPermissionRule
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
@@ -29,6 +30,11 @@ import org.junit.runner.RunWith
 class SeekrNavigationTest {
 
   @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
+    @get:Rule
+    val permissionRule: GrantPermissionRule =
+        GrantPermissionRule.grant(
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION)
 
   // convenience helpers (unmerged tree = true fixes “button not pressed” symptoms)
   private fun node(tag: String) = compose.onNodeWithTag(tag, useUnmergedTree = true)
