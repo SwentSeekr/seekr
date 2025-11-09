@@ -30,11 +30,11 @@ import org.junit.runner.RunWith
 class SeekrNavigationTest {
 
   @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
-    @get:Rule
-    val permissionRule: GrantPermissionRule =
-        GrantPermissionRule.grant(
-            android.Manifest.permission.ACCESS_FINE_LOCATION,
-            android.Manifest.permission.ACCESS_COARSE_LOCATION)
+  @get:Rule
+  val permissionRule: GrantPermissionRule =
+      GrantPermissionRule.grant(
+          android.Manifest.permission.ACCESS_FINE_LOCATION,
+          android.Manifest.permission.ACCESS_COARSE_LOCATION)
 
   // convenience helpers (unmerged tree = true fixes “button not pressed” symptoms)
   private fun node(tag: String) = compose.onNodeWithTag(tag, useUnmergedTree = true)
