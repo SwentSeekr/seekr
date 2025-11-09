@@ -1,5 +1,8 @@
 package com.swentseekr.seekr.ui.hunt
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -17,9 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
+import com.swentseekr.seekr.R
 
 private const val BACK_CONTENT_DESC = "Back"
 
@@ -129,15 +135,26 @@ fun BaseHuntFieldsScreen(
     onDifficultySelect: (Difficulty) -> Unit,
     onStatusSelect: (HuntStatus) -> Unit,
     onSelectLocations: () -> Unit,
+    onSelectImage: (Uri?) -> Unit,
     onSave: () -> Unit,
     onGoBack: () -> Unit,
 ) {
   var showStatusDropdown by rememberSaveable { mutableStateOf(false) }
   var showDifficultyDropdown by rememberSaveable { mutableStateOf(false) }
+    var selectedImageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
 
   val scrollState = rememberScrollState()
 
-  Scaffold(
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            selectedImageUri = uri
+            onSelectImage(uri)
+        }
+    )
+
+
+    Scaffold(
       topBar = {
         TopAppBar(
             title = { Text(title) },
@@ -163,6 +180,35 @@ fun BaseHuntFieldsScreen(
               OutlinedTextFieldDefaults.colors(
                   unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                   focusedBorderColor = MaterialTheme.colorScheme.primary)
+
+            // IMAGE PICKER + PREVIEW
+            Text("Main Image", style = MaterialTheme.typography.titleMedium)
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Bouton de sélection d’image
+            Button(
+                onClick = { imagePickerLauncher.launch("image/*") },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Choose Image")
+            }
+
+            // Preview de l’image (si sélectionnée)
+            if (selectedImageUri != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                AsyncImage(
+                    model = selectedImageUri,
+                    contentDescription = "Selected Hunt Image",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .clip(RoundedCornerShape(12.dp)),
+                    placeholder = painterResource(R.drawable.empty_image),
+                    error = painterResource(R.drawable.empty_image)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(SPACER_HEIGHT.dp))
 
           ValidatedOutlinedField(
               value = uiState.title,

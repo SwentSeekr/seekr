@@ -103,7 +103,7 @@ class ProfileRepositoryFirestore(
           distance = distance,
           difficulty = difficulty,
           authorId = authorId,
-          image = image,
+          mainImageUrl = image.toString(),
           reviewRate = reviewRate)
     } catch (e: Exception) {
       null

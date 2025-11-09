@@ -90,7 +90,7 @@ fun HuntCard(
               Text("by ${hunt.authorId}", modifier = Modifier.padding(horizontal = 4.dp))
               Row {
                 Image(
-                    painter = painterResource(id = safeImageRes(hunt.image)),
+                    painter = painterResource(id = safeImageRes(hunt.mainImageUrl.toIntOrNull())),
                     contentDescription = "Hunt Picture",
                     modifier =
                         Modifier.padding(horizontal = 4.dp).size(100.dp).clip(RectangleShape))
@@ -161,7 +161,7 @@ fun HuntCardPreview() {
           distance = 5.0,
           difficulty = Difficulty.DIFFICULT,
           authorId = "0",
-          image = R.drawable.ic_launcher_foreground, // or any drawable in your project
+          mainImageUrl = R.drawable.ic_launcher_foreground.toString(), // or any drawable in your project
           reviewRate = 4.5)
   var isLiked by remember { mutableStateOf(false) }
   HuntCard(

@@ -46,6 +46,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -101,7 +102,7 @@ fun HuntCardScreen(
           distance = 5.0,
           difficulty = Difficulty.DIFFICULT,
           authorId = "0",
-          image = R.drawable.ic_launcher_foreground,
+          mainImageUrl = R.drawable.ic_launcher_foreground.toString(),
           reviewRate = 4.5)
   Scaffold(
       // BAR GOBACK ARROW
@@ -161,14 +162,17 @@ fun HuntCardScreen(
                                   Modifier.padding(horizontal = 4.dp)
                                       .testTag(HuntCardScreenTestTags.AUTHOR_TEXT))
                           Row {
-                            Image(
-                                painter = painterResource(id = safeImageRes(hunt.image)),
-                                contentDescription = "Hunt Picture",
-                                modifier =
-                                    Modifier.padding(horizontal = 4.dp)
-                                        .size(100.dp)
-                                        .clip(RectangleShape)
-                                        .testTag(HuntCardScreenTestTags.IMAGE))
+                              AsyncImage(
+                                  model = hunt.mainImageUrl.ifEmpty { R.drawable.empty_image },
+                                  contentDescription = "Hunt Picture",
+                                  modifier = Modifier
+                                      .padding(horizontal = 4.dp)
+                                      .size(100.dp)
+                                      .clip(RectangleShape)
+                                      .testTag(HuntCardScreenTestTags.IMAGE),
+                                  placeholder = painterResource(R.drawable.empty_image),
+                                  error = painterResource(R.drawable.empty_image)
+                              )
                             Column(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalAlignment = Alignment.CenterHorizontally) {

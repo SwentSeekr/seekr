@@ -34,7 +34,7 @@ class MapTest {
           distance = 1.0,
           difficulty = Difficulty.EASY,
           authorId = "A",
-          image = 0,
+          mainImageUrl = 0.toString(),
           reviewRate = 4.0)
 
   private fun repo(vararg hunts: Hunt) =

@@ -30,11 +30,18 @@ interface HuntsRepository {
   suspend fun getHunt(huntID: String): Hunt
 
   /**
-   * Adds a new Hunt item to the repository.
+   * Adds a Hunt by managing its images.
    *
-   * @param hunt The Hunt item to add.
+   * @param hunt the hunt to retrieve.
+   * @param mainImageUri URI optional of principal images (can be `null`).
+   * @param otherImageUris List of secondary image URIs (may be empty).
+   *
+   * The function is suspended: it must upload/associate the images
+   * then persist the Hunt. May raise exceptions in case of upload or storage errors.
    */
-  suspend fun addHunt(hunt: Hunt)
+  suspend fun addHunt(hunt: Hunt, mainImageUri: android.net.Uri? = null,
+                      otherImageUris: List<android.net.Uri> = emptyList())
+
 
   /**
    * Edits an existing Hunt item in the repository.

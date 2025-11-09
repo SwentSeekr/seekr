@@ -1,9 +1,11 @@
 package com.swentseekr.seekr.ui.hunt
 
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.ui.hunt.add.AddHuntViewModel
 
 private const val TOAST_HUNT_SAVED = "Hunt saved successfully!"
 
@@ -15,51 +17,57 @@ fun BaseHuntScreen(
     onDone: () -> Unit = {},
     testMode: Boolean = false,
 ) {
-  val uiState by vm.uiState.collectAsState()
-  val context = LocalContext.current
+    val uiState by vm.uiState.collectAsState()
+    val context = LocalContext.current
 
-  if (testMode) {
-    LaunchedEffect(Unit) { vm.setTestMode(true) }
-  }
-
-  LaunchedEffect(uiState.saveSuccessful) {
-    if (uiState.saveSuccessful) {
-      Toast.makeText(context, TOAST_HUNT_SAVED, Toast.LENGTH_SHORT).show()
-      onDone()
-      vm.resetSaveSuccess()
+    if (testMode) {
+        LaunchedEffect(Unit) { vm.setTestMode(true) }
     }
-  }
 
-  LaunchedEffect(uiState.errorMsg) {
-    uiState.errorMsg?.let {
-      Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-      vm.clearErrorMsg()
+    LaunchedEffect(uiState.saveSuccessful) {
+        if (uiState.saveSuccessful) {
+            Toast.makeText(context, TOAST_HUNT_SAVED, Toast.LENGTH_SHORT).show()
+            onDone()
+            vm.resetSaveSuccess()
+        }
     }
-  }
 
-  if (uiState.isSelectingPoints) {
-    BaseAddPointsMapScreen(
-        initPoints = uiState.points,
-        onDone = { locations: List<Location> ->
-          val ok = vm.setPoints(locations)
-          if (ok) vm.setIsSelectingPoints(false)
-        },
-        onCancel = { vm.setIsSelectingPoints(false) },
-        testMode = testMode,
-    )
-  } else {
-    BaseHuntFieldsScreen(
-        title = title,
-        uiState = uiState,
-        onTitleChange = vm::setTitle,
-        onDescriptionChange = vm::setDescription,
-        onTimeChange = vm::setTime,
-        onDistanceChange = vm::setDistance,
-        onDifficultySelect = vm::setDifficulty,
-        onStatusSelect = vm::setStatus,
-        onSelectLocations = { vm.setIsSelectingPoints(true) },
-        onSave = { vm.submit() },
-        onGoBack = onGoBack,
-    )
-  }
+    LaunchedEffect(uiState.errorMsg) {
+        uiState.errorMsg?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            vm.clearErrorMsg()
+        }
+    }
+
+    if (uiState.isSelectingPoints) {
+        BaseAddPointsMapScreen(
+            initPoints = uiState.points,
+            onDone = { locations: List<Location> ->
+                val ok = vm.setPoints(locations)
+                if (ok) vm.setIsSelectingPoints(false)
+            },
+            onCancel = { vm.setIsSelectingPoints(false) },
+            testMode = testMode,
+        )
+    } else {
+        BaseHuntFieldsScreen(
+            title = title,
+            uiState = uiState,
+            onTitleChange = vm::setTitle,
+            onDescriptionChange = vm::setDescription,
+            onTimeChange = vm::setTime,
+            onDistanceChange = vm::setDistance,
+            onDifficultySelect = vm::setDifficulty,
+            onStatusSelect = vm::setStatus,
+            onSelectLocations = { vm.setIsSelectingPoints(true) },
+            onSelectImage = { uri: Uri? ->
+                if (vm is AddHuntViewModel) {
+                    vm.mainImageUri = uri
+                }
+            },
+
+            onSave = { vm.submit() },
+            onGoBack = onGoBack,
+        )
+    }
 }
