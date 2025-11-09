@@ -10,7 +10,6 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.swentseekr.seekr.model.hunt.Difficulty
@@ -181,9 +180,7 @@ class SeekrNavigationTest {
     // Ensure we're on AddHunt
     node(NavigationTestTags.ADD_HUNT_SCREEN).assertIsDisplayed()
 
-    pressBack()
-
-    // Let Compose settle
+    compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
     compose.waitForIdle()
 
     // Wait until: bottom bar is visible AND AddHunt wrapper no longer exists
