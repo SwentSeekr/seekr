@@ -139,12 +139,13 @@ fun BaseHuntFieldsScreen(
     onSave: () -> Unit,
     onGoBack: () -> Unit,
 ) {
-  var showStatusDropdown by rememberSaveable { mutableStateOf(false) }
-  var showDifficultyDropdown by rememberSaveable { mutableStateOf(false) }
+    var showStatusDropdown by rememberSaveable { mutableStateOf(false) }
+    var showDifficultyDropdown by rememberSaveable { mutableStateOf(false) }
     var selectedImageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
 
-  val scrollState = rememberScrollState()
+    val scrollState = rememberScrollState()
 
+    // ✅ Sélecteur d’image
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri ->
@@ -153,39 +154,40 @@ fun BaseHuntFieldsScreen(
         }
     )
 
-
     Scaffold(
-      topBar = {
-        TopAppBar(
-            title = { Text(title) },
-            navigationIcon = {
-              IconButton(onClick = onGoBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                    contentDescription = BACK_CONTENT_DESC)
-              }
-            })
-      },
-      content = { paddingValues ->
+        topBar = {
+            TopAppBar(
+                title = { Text(title) },
+                navigationIcon = {
+                    IconButton(onClick = onGoBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                            contentDescription = BACK_CONTENT_DESC
+                        )
+                    }
+                })
+        },
+        modifier = Modifier.testTag(HuntScreenTestTags.ADD_HUNT_SCREEN)
+    ) { paddingValues ->
         Column(
-            modifier =
-                Modifier.fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(SCREEN_PADDING.dp)
-                    .padding(paddingValues)
-                    .verticalScroll(scrollState),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(SCREEN_PADDING.dp)
+                .padding(paddingValues)
+                .verticalScroll(scrollState),
         ) {
-          val fieldShape = RoundedCornerShape(FIELD_CORNER_RADIUS.dp)
-          val fieldColors =
-              OutlinedTextFieldDefaults.colors(
-                  unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                  focusedBorderColor = MaterialTheme.colorScheme.primary)
+            val fieldShape = RoundedCornerShape(FIELD_CORNER_RADIUS.dp)
+            val fieldColors =
+                OutlinedTextFieldDefaults.colors(
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                )
 
-            // IMAGE PICKER + PREVIEW
+            // ✅ IMAGE PICKER + PREVIEW
             Text("Main Image", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Bouton de sélection d’image
             Button(
                 onClick = { imagePickerLauncher.launch("image/*") },
                 modifier = Modifier.fillMaxWidth()
@@ -193,11 +195,15 @@ fun BaseHuntFieldsScreen(
                 Text("Choose Image")
             }
 
-            // Preview de l’image (si sélectionnée)
-            if (selectedImageUri != null) {
+            // ✅ Prévisualisation intelligente :
+            // si une nouvelle image est choisie, on la montre
+            // sinon on affiche celle du Hunt déjà existant (Edit mode)
+            val imageToDisplay = selectedImageUri?.toString() ?: uiState.mainImageUrl
+
+            if (!imageToDisplay.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(12.dp))
                 AsyncImage(
-                    model = selectedImageUri,
+                    model = imageToDisplay,
                     contentDescription = "Selected Hunt Image",
                     modifier = Modifier
                         .fillMaxWidth()
@@ -210,144 +216,168 @@ fun BaseHuntFieldsScreen(
 
             Spacer(modifier = Modifier.height(SPACER_HEIGHT.dp))
 
-          ValidatedOutlinedField(
-              value = uiState.title,
-              onValueChange = onTitleChange,
-              label = LABEL_TITLE,
-              placeholder = PLACEHOLDER_TITLE,
-              errorMsg = uiState.invalidTitleMsg,
-              testTag = HuntScreenTestTags.INPUT_HUNT_TITLE)
+            // === FORMULAIRE ===
+            ValidatedOutlinedField(
+                value = uiState.title,
+                onValueChange = onTitleChange,
+                label = LABEL_TITLE,
+                placeholder = PLACEHOLDER_TITLE,
+                errorMsg = uiState.invalidTitleMsg,
+                testTag = HuntScreenTestTags.INPUT_HUNT_TITLE
+            )
 
-          ValidatedOutlinedField(
-              value = uiState.description,
-              onValueChange = onDescriptionChange,
-              label = LABEL_DESCRIPTION,
-              placeholder = PLACEHOLDER_DESCRIPTION,
-              errorMsg = uiState.invalidDescriptionMsg,
-              testTag = HuntScreenTestTags.INPUT_HUNT_DESCRIPTION,
-              modifier = Modifier.fillMaxWidth().height(DESCRIPTION_HEIGHT.dp),
-              shape = fieldShape,
-              colors = fieldColors)
+            ValidatedOutlinedField(
+                value = uiState.description,
+                onValueChange = onDescriptionChange,
+                label = LABEL_DESCRIPTION,
+                placeholder = PLACEHOLDER_DESCRIPTION,
+                errorMsg = uiState.invalidDescriptionMsg,
+                testTag = HuntScreenTestTags.INPUT_HUNT_DESCRIPTION,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(DESCRIPTION_HEIGHT.dp),
+                shape = fieldShape,
+                colors = fieldColors
+            )
 
-          ExposedDropdownMenuBox(
-              expanded = showStatusDropdown, onExpandedChange = { showStatusDropdown = it }) {
+            // === STATUS ===
+            ExposedDropdownMenuBox(
+                expanded = showStatusDropdown,
+                onExpandedChange = { showStatusDropdown = it }
+            ) {
                 OutlinedTextField(
                     value = uiState.status?.name ?: "",
                     onValueChange = {},
                     label = { Text(LABEL_STATUS) },
                     readOnly = true,
                     trailingIcon = {
-                      Icon(
-                          imageVector =
-                              if (showStatusDropdown) Icons.Outlined.KeyboardArrowUp
-                              else Icons.Outlined.KeyboardArrowDown,
-                          contentDescription = EXPAND_STATUS_DESC)
+                        Icon(
+                            imageVector =
+                                if (showStatusDropdown) Icons.Outlined.KeyboardArrowUp
+                                else Icons.Outlined.KeyboardArrowDown,
+                            contentDescription = EXPAND_STATUS_DESC
+                        )
                     },
-                    modifier =
-                        Modifier.menuAnchor()
-                            .fillMaxWidth()
-                            .testTag(HuntScreenTestTags.DROPDOWN_STATUS),
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth()
+                        .testTag(HuntScreenTestTags.DROPDOWN_STATUS),
                     shape = fieldShape,
-                    colors = fieldColors)
+                    colors = fieldColors
+                )
                 ExposedDropdownMenu(
                     expanded = showStatusDropdown,
-                    onDismissRequest = { showStatusDropdown = false }) {
-                      HuntStatus.values().forEach { status ->
+                    onDismissRequest = { showStatusDropdown = false }
+                ) {
+                    HuntStatus.values().forEach { status ->
                         DropdownMenuItem(
                             text = { Text(status.name) },
                             onClick = {
-                              onStatusSelect(status)
-                              showStatusDropdown = false
-                            })
-                      }
+                                onStatusSelect(status)
+                                showStatusDropdown = false
+                            }
+                        )
                     }
-              }
+                }
+            }
 
-          ExposedDropdownMenuBox(
-              expanded = showDifficultyDropdown,
-              onExpandedChange = { showDifficultyDropdown = it }) {
+            // === DIFFICULTY ===
+            ExposedDropdownMenuBox(
+                expanded = showDifficultyDropdown,
+                onExpandedChange = { showDifficultyDropdown = it }
+            ) {
                 OutlinedTextField(
                     value = uiState.difficulty?.name ?: "",
                     onValueChange = {},
                     label = { Text(LABEL_DIFFICULTY) },
                     readOnly = true,
                     trailingIcon = {
-                      Icon(
-                          imageVector =
-                              if (showDifficultyDropdown) Icons.Outlined.KeyboardArrowUp
-                              else Icons.Outlined.KeyboardArrowDown,
-                          contentDescription = EXPAND_DIFFICULTY_DESC)
+                        Icon(
+                            imageVector =
+                                if (showDifficultyDropdown) Icons.Outlined.KeyboardArrowUp
+                                else Icons.Outlined.KeyboardArrowDown,
+                            contentDescription = EXPAND_DIFFICULTY_DESC
+                        )
                     },
-                    modifier =
-                        Modifier.menuAnchor()
-                            .fillMaxWidth()
-                            .testTag(HuntScreenTestTags.DROPDOWN_DIFFICULTY),
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth()
+                        .testTag(HuntScreenTestTags.DROPDOWN_DIFFICULTY),
                     shape = fieldShape,
-                    colors = fieldColors)
+                    colors = fieldColors
+                )
                 ExposedDropdownMenu(
                     expanded = showDifficultyDropdown,
-                    onDismissRequest = { showDifficultyDropdown = false }) {
-                      Difficulty.values().forEach { diff ->
+                    onDismissRequest = { showDifficultyDropdown = false }
+                ) {
+                    Difficulty.values().forEach { diff ->
                         DropdownMenuItem(
                             text = { Text(diff.name) },
                             onClick = {
-                              onDifficultySelect(diff)
-                              showDifficultyDropdown = false
-                            })
-                      }
+                                onDifficultySelect(diff)
+                                showDifficultyDropdown = false
+                            }
+                        )
                     }
-              }
+                }
+            }
 
-          ValidatedOutlinedField(
-              value = uiState.time,
-              onValueChange = onTimeChange,
-              label = LABEL_TIME,
-              placeholder = PLACEHOLDER_TIME,
-              errorMsg = uiState.invalidTimeMsg,
-              testTag = HuntScreenTestTags.INPUT_HUNT_TIME)
+            ValidatedOutlinedField(
+                value = uiState.time,
+                onValueChange = onTimeChange,
+                label = LABEL_TIME,
+                placeholder = PLACEHOLDER_TIME,
+                errorMsg = uiState.invalidTimeMsg,
+                testTag = HuntScreenTestTags.INPUT_HUNT_TIME
+            )
 
-          ValidatedOutlinedField(
-              value = uiState.distance,
-              onValueChange = onDistanceChange,
-              label = LABEL_DISTANCE,
-              placeholder = PLACEHOLDER_DISTANCE,
-              errorMsg = uiState.invalidDistanceMsg,
-              testTag = HuntScreenTestTags.INPUT_HUNT_DISTANCE)
+            ValidatedOutlinedField(
+                value = uiState.distance,
+                onValueChange = onDistanceChange,
+                label = LABEL_DISTANCE,
+                placeholder = PLACEHOLDER_DISTANCE,
+                errorMsg = uiState.invalidDistanceMsg,
+                testTag = HuntScreenTestTags.INPUT_HUNT_DISTANCE
+            )
 
-          Button(
-              onClick = onSelectLocations,
-              modifier = Modifier.fillMaxWidth().testTag(HuntScreenTestTags.BUTTON_SELECT_LOCATION),
-              colors =
-                  ButtonDefaults.buttonColors(
-                      containerColor = MaterialTheme.colorScheme.secondary,
-                      contentColor = MaterialTheme.colorScheme.onSecondary)) {
+            Button(
+                onClick = onSelectLocations,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(HuntScreenTestTags.BUTTON_SELECT_LOCATION),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
+                )
+            ) {
                 val pointCount = uiState.points.size
                 val label =
                     if (pointCount > 0) {
-                      "$BUTTON_SELECT_LOCATIONS ($pointCount ${if (pointCount == 1) UNIT_POINT else UNIT_POINTS})"
+                        "$BUTTON_SELECT_LOCATIONS ($pointCount ${if (pointCount == 1) UNIT_POINT else UNIT_POINTS})"
                     } else {
-                      BUTTON_SELECT_LOCATIONS
+                        BUTTON_SELECT_LOCATIONS
                     }
                 Text(label)
-              }
+            }
 
-          Spacer(modifier = Modifier.height(SPACER_HEIGHT.dp))
+            Spacer(modifier = Modifier.height(SPACER_HEIGHT.dp))
 
-          Button(
-              onClick = onSave,
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .height(SAVE_BUTTON_HEIGHT.dp)
-                      .clip(RoundedCornerShape(SAVE_BUTTON_RADIUS.dp))
-                      .testTag(HuntScreenTestTags.HUNT_SAVE),
-              enabled = uiState.isValid,
-              colors =
-                  ButtonDefaults.buttonColors(
-                      containerColor = MaterialTheme.colorScheme.primary,
-                      contentColor = MaterialTheme.colorScheme.onPrimary)) {
+            Button(
+                onClick = onSave,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(SAVE_BUTTON_HEIGHT.dp)
+                    .clip(RoundedCornerShape(SAVE_BUTTON_RADIUS.dp))
+                    .testTag(HuntScreenTestTags.HUNT_SAVE),
+                enabled = uiState.isValid,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
                 Text(BUTTON_SAVE_HUNT, style = MaterialTheme.typography.titleMedium)
-              }
+            }
         }
-      },
-      modifier = Modifier.testTag(HuntScreenTestTags.ADD_HUNT_SCREEN))
+    }
 }
+

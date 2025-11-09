@@ -5,7 +5,6 @@ import android.widget.Toast
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.swentseekr.seekr.model.map.Location
-import com.swentseekr.seekr.ui.hunt.add.AddHuntViewModel
 
 private const val TOAST_HUNT_SAVED = "Hunt saved successfully!"
 
@@ -16,14 +15,17 @@ fun BaseHuntScreen(
     onGoBack: () -> Unit = {},
     onDone: () -> Unit = {},
     testMode: Boolean = false,
+    onSelectImage: (Uri?) -> Unit = {},
 ) {
     val uiState by vm.uiState.collectAsState()
     val context = LocalContext.current
 
+    // Mode test
     if (testMode) {
         LaunchedEffect(Unit) { vm.setTestMode(true) }
     }
 
+    // Toast quand le Hunt est sauvegardé
     LaunchedEffect(uiState.saveSuccessful) {
         if (uiState.saveSuccessful) {
             Toast.makeText(context, TOAST_HUNT_SAVED, Toast.LENGTH_SHORT).show()
@@ -32,6 +34,7 @@ fun BaseHuntScreen(
         }
     }
 
+    // Toast pour erreurs
     LaunchedEffect(uiState.errorMsg) {
         uiState.errorMsg?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
@@ -39,6 +42,7 @@ fun BaseHuntScreen(
         }
     }
 
+    // Carte : ajout des points
     if (uiState.isSelectingPoints) {
         BaseAddPointsMapScreen(
             initPoints = uiState.points,
@@ -60,12 +64,7 @@ fun BaseHuntScreen(
             onDifficultySelect = vm::setDifficulty,
             onStatusSelect = vm::setStatus,
             onSelectLocations = { vm.setIsSelectingPoints(true) },
-            onSelectImage = { uri: Uri? ->
-                if (vm is AddHuntViewModel) {
-                    vm.mainImageUri = uri
-                }
-            },
-
+            onSelectImage = onSelectImage,
             onSave = { vm.submit() },
             onGoBack = onGoBack,
         )

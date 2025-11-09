@@ -13,7 +13,7 @@ class EditHuntViewModel(
 ) : BaseHuntViewModel(repository) {
 
     private var huntId: String? = null
-    
+
     var mainImageUri: Uri? = null
 
     suspend fun load(id: String) {
