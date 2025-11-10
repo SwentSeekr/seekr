@@ -42,8 +42,7 @@ class MapTest {
       object : HuntsRepository {
         private val list = hunts.toList()
 
-        override suspend fun addHunt(hunt: Hunt,  mainImageUri: Uri?,
-                                     otherImageUris: List<Uri>) {}
+        override suspend fun addHunt(hunt: Hunt, mainImageUri: Uri?, otherImageUris: List<Uri>) {}
 
         override suspend fun getAllHunts(): List<Hunt> = list
 

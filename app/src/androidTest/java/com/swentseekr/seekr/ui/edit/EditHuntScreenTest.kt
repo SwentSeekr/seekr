@@ -44,207 +44,181 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class EditHuntScreenTest {
 
-    @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()
+  @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()
 
-    private lateinit var repository: HuntsRepository
-    private lateinit var addVM: AddHuntViewModel
+  private lateinit var repository: HuntsRepository
+  private lateinit var addVM: AddHuntViewModel
 
-    @Before
-    fun setUp() = runBlocking {
-        FirebaseTestEnvironment.setup()
-        if (FirebaseTestEnvironment.isEmulatorActive()) {
-            clearEmulatorData()
-        }
-
-        FirebaseAuth.getInstance().signInAnonymously().await()
-
-//         Utilisation du fake pour éviter les appels Firebase Storage
-        val db = FirebaseFirestore.getInstance()
-        val fakeImageRepo = FakeHuntsImageRepository()
-        HuntRepositoryProvider.repository = HuntsRepositoryFirestore(db, fakeImageRepo)
-
-        repository = HuntRepositoryProvider.repository
-        addVM = AddHuntViewModel(repository)
+  @Before
+  fun setUp() = runBlocking {
+    FirebaseTestEnvironment.setup()
+    if (FirebaseTestEnvironment.isEmulatorActive()) {
+      clearEmulatorData()
     }
 
-    @After
-    fun tearDown() = runBlocking {
-        if (FirebaseTestEnvironment.isEmulatorActive()) {
-            clearEmulatorData()
-        }
-        FirebaseAuth.getInstance().signOut()
+    FirebaseAuth.getInstance().signInAnonymously().await()
+
+    //         Utilisation du fake pour éviter les appels Firebase Storage
+    val db = FirebaseFirestore.getInstance()
+    val fakeImageRepo = FakeHuntsImageRepository()
+    HuntRepositoryProvider.repository = HuntsRepositoryFirestore(db, fakeImageRepo)
+
+    repository = HuntRepositoryProvider.repository
+    addVM = AddHuntViewModel(repository)
+  }
+
+  @After
+  fun tearDown() = runBlocking {
+    if (FirebaseTestEnvironment.isEmulatorActive()) {
+      clearEmulatorData()
+    }
+    FirebaseAuth.getInstance().signOut()
+  }
+
+  private fun setContent(
+      huntId: String,
+      vm: EditHuntViewModel,
+      onGoBack: () -> Unit = {},
+      onDone: () -> Unit = {}
+  ) {
+    composeRule.setContent {
+      MaterialTheme {
+        EditHuntScreen(
+            huntId = huntId, editHuntViewModel = vm, onGoBack = onGoBack, onDone = onDone)
+      }
+    }
+  }
+
+  @Test
+  fun back_navigates_from_edit_screen() = runBlocking {
+    createHunt()
+    val all = repository.getAllHunts()
+    assertTrue(all.isNotEmpty())
+    val id = all.first().uid
+    val vm = EditHuntViewModel(repository)
+    var backCalled = false
+    setContent(id, vm, onGoBack = { backCalled = true })
+
+    // Attente que la chasse soit chargée
+    composeRule.waitUntil(timeoutMillis = 5_000) { vm.uiState.value.title.isNotEmpty() }
+
+    composeRule.onNodeWithContentDescription("Back").performClick()
+    assertTrue(backCalled)
+  }
+
+  @Test
+  fun load_populates_fields_from_firebase_and_enables_save() = runBlocking {
+    createHunt(
+        title = "T",
+        description = "D",
+        time = "1.5",
+        distance = "2.0",
+        difficulty = Difficulty.EASY,
+        status = HuntStatus.FUN)
+
+    val all = repository.getAllHunts()
+    assertTrue(all.isNotEmpty())
+    val id = all.first().uid
+    val vm = EditHuntViewModel(repository)
+    setContent(id, vm)
+
+    composeRule.waitUntil(timeoutMillis = 5_000) { vm.uiState.value.title == "T" }
+
+    composeRule
+        .onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_TITLE)
+        .assert(
+            SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString("T")))
+    composeRule
+        .onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_DESCRIPTION)
+        .assert(
+            SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString("D")))
+    composeRule
+        .onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_TIME)
+        .assert(
+            SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString("1.5")))
+    composeRule
+        .onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_DISTANCE)
+        .assert(
+            SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString("2.0")))
+
+    composeRule.onNodeWithTag(HuntScreenTestTags.HUNT_SAVE).assertIsEnabled()
+    assertNull(vm.uiState.value.errorMsg)
+  }
+
+  @Test
+  fun save_updates_repository_and_calls_onDone() = runBlocking {
+    createHunt(title = "Old", description = "Desc", time = "1.0", distance = "1.0")
+
+    val all = repository.getAllHunts()
+    assertTrue(all.isNotEmpty())
+    val id = all.first().uid
+
+    val vm = EditHuntViewModel(repository)
+    var doneCalled = false
+    setContent(id, vm, onDone = { doneCalled = true })
+
+    composeRule.waitUntil(timeoutMillis = 5_000) { vm.uiState.value.title == "Old" }
+
+    composeRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_TITLE).apply {
+      performTextClearance()
+      performTextInput("New Title")
+    }
+    composeRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_DESCRIPTION).apply {
+      performTextClearance()
+      performTextInput("New Desc")
+    }
+    composeRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_TIME).apply {
+      performTextClearance()
+      performTextInput("2.5")
+    }
+    composeRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_DISTANCE).apply {
+      performTextClearance()
+      performTextInput("4.2")
     }
 
-    private fun setContent(
-        huntId: String,
-        vm: EditHuntViewModel,
-        onGoBack: () -> Unit = {},
-        onDone: () -> Unit = {}
-    ) {
-        composeRule.setContent {
-            MaterialTheme {
-                EditHuntScreen(
-                    huntId = huntId,
-                    editHuntViewModel = vm,
-                    onGoBack = onGoBack,
-                    onDone = onDone
-                )
-            }
-        }
-    }
+    // click save
+    composeRule.onNodeWithTag(HuntScreenTestTags.HUNT_SAVE).performClick()
 
-    @Test
-    fun back_navigates_from_edit_screen() = runBlocking {
-        createHunt()
-        val all = repository.getAllHunts()
-        assertTrue(all.isNotEmpty())
-        val id = all.first().uid
-        val vm = EditHuntViewModel(repository)
-        var backCalled = false
-        setContent(id, vm, onGoBack = { backCalled = true })
+    composeRule.runOnIdle { runBlocking { vm.submit() } }
 
-        // Attente que la chasse soit chargée
-        composeRule.waitUntil(timeoutMillis = 5_000) { vm.uiState.value.title.isNotEmpty() }
+    // wait for UI to pick up saveSuccessful -> onDone() call
+    composeRule.waitUntil(timeoutMillis = 5_000) { doneCalled }
 
-        composeRule.onNodeWithContentDescription("Back").performClick()
-        assertTrue(backCalled)
-    }
+    val updated = repository.getHunt(id)
+    assertEquals("New Title", updated.title)
+    assertEquals("New Desc", updated.description)
+    assertEquals(2.5, updated.time, 0.0)
+    assertEquals(4.2, updated.distance, 0.0)
+    assertEquals(FirebaseAuth.getInstance().currentUser?.uid, updated.authorId)
 
-    @Test
-    fun load_populates_fields_from_firebase_and_enables_save() = runBlocking {
-        createHunt(
-            title = "T",
-            description = "D",
-            time = "1.5",
-            distance = "2.0",
-            difficulty = Difficulty.EASY,
-            status = HuntStatus.FUN
-        )
+    assertTrue(doneCalled)
+    assertNull(vm.uiState.value.errorMsg)
+  }
 
-        val all = repository.getAllHunts()
-        assertTrue(all.isNotEmpty())
-        val id = all.first().uid
-        val vm = EditHuntViewModel(repository)
-        setContent(id, vm)
+  // Helpers
 
-        composeRule.waitUntil(timeoutMillis = 5_000) { vm.uiState.value.title == "T" }
+  private fun createHunt(
+      title: String = "T",
+      description: String = "D",
+      time: String = "1.5",
+      distance: String = "2.0",
+      difficulty: Difficulty = Difficulty.EASY,
+      status: HuntStatus = HuntStatus.FUN,
+      imageUri: Uri = Uri.parse("file://test-image.jpg")
+  ) {
+    val a = Location(0.0, 0.0, "Start")
+    val m = Location(0.5, 0.5, "Mid")
+    val b = Location(1.0, 1.0, "End")
 
-        composeRule
-            .onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_TITLE)
-            .assert(
-                SemanticsMatcher.expectValue(
-                    SemanticsProperties.EditableText,
-                    AnnotatedString("T")
-                )
-            )
-        composeRule
-            .onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_DESCRIPTION)
-            .assert(
-                SemanticsMatcher.expectValue(
-                    SemanticsProperties.EditableText,
-                    AnnotatedString("D")
-                )
-            )
-        composeRule
-            .onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_TIME)
-            .assert(
-                SemanticsMatcher.expectValue(
-                    SemanticsProperties.EditableText,
-                    AnnotatedString("1.5")
-                )
-            )
-        composeRule
-            .onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_DISTANCE)
-            .assert(
-                SemanticsMatcher.expectValue(
-                    SemanticsProperties.EditableText,
-                    AnnotatedString("2.0")
-                )
-            )
-
-        composeRule.onNodeWithTag(HuntScreenTestTags.HUNT_SAVE).assertIsEnabled()
-        assertNull(vm.uiState.value.errorMsg)
-    }
-
-    @Test
-    fun save_updates_repository_and_calls_onDone() = runBlocking {
-        createHunt(title = "Old", description = "Desc", time = "1.0", distance = "1.0")
-
-        val all = repository.getAllHunts()
-        assertTrue(all.isNotEmpty())
-        val id = all.first().uid
-
-        val vm = EditHuntViewModel(repository)
-        var doneCalled = false
-        setContent(id, vm, onDone = { doneCalled = true })
-
-        composeRule.waitUntil(timeoutMillis = 5_000) { vm.uiState.value.title == "Old" }
-
-        composeRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_TITLE).apply {
-            performTextClearance()
-            performTextInput("New Title")
-        }
-        composeRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_DESCRIPTION).apply {
-            performTextClearance()
-            performTextInput("New Desc")
-        }
-        composeRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_TIME).apply {
-            performTextClearance()
-            performTextInput("2.5")
-        }
-        composeRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_DISTANCE).apply {
-            performTextClearance()
-            performTextInput("4.2")
-        }
-
-        // click save
-        composeRule.onNodeWithTag(HuntScreenTestTags.HUNT_SAVE).performClick()
-
-        composeRule.runOnIdle {
-            runBlocking {
-                vm.submit()
-            }
-        }
-
-        // wait for UI to pick up saveSuccessful -> onDone() call
-        composeRule.waitUntil(timeoutMillis = 5_000) { doneCalled }
-
-        val updated = repository.getHunt(id)
-        assertEquals("New Title", updated.title)
-        assertEquals("New Desc", updated.description)
-        assertEquals(2.5, updated.time, 0.0)
-        assertEquals(4.2, updated.distance, 0.0)
-        assertEquals(FirebaseAuth.getInstance().currentUser?.uid, updated.authorId)
-
-        assertTrue(doneCalled)
-        assertNull(vm.uiState.value.errorMsg)
-    }
-
-
-    // Helpers
-
-    private fun createHunt(
-        title: String = "T",
-        description: String = "D",
-        time: String = "1.5",
-        distance: String = "2.0",
-        difficulty: Difficulty = Difficulty.EASY,
-        status: HuntStatus = HuntStatus.FUN,
-        imageUri: Uri = Uri.parse("file://test-image.jpg")
-    ) {
-        val a = Location(0.0, 0.0, "Start")
-        val m = Location(0.5, 0.5, "Mid")
-        val b = Location(1.0, 1.0, "End")
-
-        addVM.setTitle(title)
-        addVM.setDescription(description)
-        addVM.setTime(time)
-        addVM.setDistance(distance)
-        addVM.setDifficulty(difficulty)
-        addVM.setStatus(status)
-        addVM.updateMainImageUri(imageUri)
-        addVM.setPoints(listOf(a, m, b))
-        val ok = addVM.submit()
-        assertTrue(ok)
-    }
+    addVM.setTitle(title)
+    addVM.setDescription(description)
+    addVM.setTime(time)
+    addVM.setDistance(distance)
+    addVM.setDifficulty(difficulty)
+    addVM.setStatus(status)
+    addVM.updateMainImageUri(imageUri)
+    addVM.setPoints(listOf(a, m, b))
+    val ok = addVM.submit()
+    assertTrue(ok)
+  }
 }

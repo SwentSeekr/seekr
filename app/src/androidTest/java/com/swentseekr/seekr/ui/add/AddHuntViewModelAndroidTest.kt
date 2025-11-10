@@ -1,6 +1,5 @@
 package com.swentseekr.seekr.ui.add
 
-import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.firebase.auth.FirebaseAuth
 import com.swentseekr.seekr.model.hunt.Difficulty
@@ -157,6 +156,7 @@ class AddHuntViewModelAndroidTest {
 
     assertNull(viewModel.uiState.value.errorMsg)
   }
+
   @Test
   fun clearErrorMsg_setsNull() {
     viewModel.submit()

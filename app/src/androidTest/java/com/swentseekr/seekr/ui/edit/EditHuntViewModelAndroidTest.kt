@@ -94,9 +94,9 @@ class EditHuntViewModelAndroidTest {
   @Test
   fun buildHunt_throws_if_no_hunt_loaded() {
     val ex =
-      assertThrows(IllegalArgumentException::class.java) {
-        editVM.buildHunt(editVM.uiState.value)
-      }
+        assertThrows(IllegalArgumentException::class.java) {
+          editVM.buildHunt(editVM.uiState.value)
+        }
     assertEquals("No hunt loaded to edit.", ex.message)
   }
 
@@ -118,9 +118,7 @@ class EditHuntViewModelAndroidTest {
 
     assertFalse(result)
     assertEquals(
-      "Please fill all required fields before saving the hunt.",
-      editVM.uiState.value.errorMsg
-    )
+        "Please fill all required fields before saving the hunt.", editVM.uiState.value.errorMsg)
   }
 
   @Test
@@ -141,10 +139,7 @@ class EditHuntViewModelAndroidTest {
     delay(200)
 
     assertFalse(result)
-    assertEquals(
-      "You must be logged in to perform this action.",
-      editVM.uiState.value.errorMsg
-    )
+    assertEquals("You must be logged in to perform this action.", editVM.uiState.value.errorMsg)
   }
 
   @Test

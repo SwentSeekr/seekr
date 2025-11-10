@@ -5,8 +5,7 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntsRepository
 
 class FakeRepoSuccess(private val hunts: List<Hunt>) : HuntsRepository {
-  override suspend fun addHunt(hunt: Hunt,  mainImageUri: Uri?,
-                               otherImageUris: List<Uri>) = Unit
+  override suspend fun addHunt(hunt: Hunt, mainImageUri: Uri?, otherImageUris: List<Uri>) = Unit
 
   override suspend fun getAllHunts(): List<Hunt> = hunts
 
@@ -24,8 +23,7 @@ class FakeRepoSuccess(private val hunts: List<Hunt>) : HuntsRepository {
 }
 
 class FakeRepoEmpty : HuntsRepository {
-  override suspend fun addHunt(hunt: Hunt, mainImageUri: Uri?,
-                               otherImageUris: List<Uri>) = Unit
+  override suspend fun addHunt(hunt: Hunt, mainImageUri: Uri?, otherImageUris: List<Uri>) = Unit
 
   override suspend fun getAllHunts(): List<Hunt> = emptyList()
 
@@ -43,8 +41,7 @@ class FakeRepoEmpty : HuntsRepository {
 }
 
 class FakeRepoThrows(private val message: String) : HuntsRepository {
-  override suspend fun addHunt(hunt: Hunt,  mainImageUri: Uri?,
-                               otherImageUris: List<Uri>) = Unit
+  override suspend fun addHunt(hunt: Hunt, mainImageUri: Uri?, otherImageUris: List<Uri>) = Unit
 
   override suspend fun getAllHunts(): List<Hunt> = throw IllegalStateException(message)
 
