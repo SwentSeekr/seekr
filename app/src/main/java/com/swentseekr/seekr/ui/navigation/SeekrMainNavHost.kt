@@ -70,13 +70,6 @@ sealed class SeekrDestination(
 
   object AddHunt : SeekrDestination("add_hunt", "Add Hunt", Icons.Filled.List)
 
-  // NEW: reviewHunt destination
-  object ReviewHunt : SeekrDestination("review_hunt/{huntId}", "Review Hunt", Icons.Filled.List) {
-    fun createRoute(huntId: String) = "review_hunt/$huntId"
-
-    const val ARG_HUNT_ID = "huntId"
-  }
-
   object Settings : SeekrDestination("settings", "Settings", Icons.Filled.List)
 
   companion object {
@@ -202,11 +195,6 @@ fun SeekrMainNavHost(
                     HuntCardScreen(
                         huntId = huntId,
                         onGoBack = { navController.popBackStack() },
-                        onAddReview = { id ->
-                          navController.navigate(SeekrDestination.ReviewHunt.createRoute(id)) {
-                            launchSingleTop = true
-                          }
-                        },
                         modifier = Modifier.testTag(NavigationTestTags.HUNTCARD_SCREEN))
                   }
 
@@ -250,29 +238,6 @@ fun SeekrMainNavHost(
                                 }
                               },
                               testMode = testMode)
-                        }
-                  }
-
-              composable(
-                  route = SeekrDestination.ReviewHunt.route,
-                  arguments =
-                      listOf(
-                          navArgument(SeekrDestination.ReviewHunt.ARG_HUNT_ID) {
-                            type = NavType.StringType
-                          })) { backStackEntry ->
-                    val huntId =
-                        backStackEntry.arguments
-                            ?.getString(SeekrDestination.ReviewHunt.ARG_HUNT_ID)
-                            .orEmpty()
-
-                    Surface(
-                        modifier =
-                            Modifier.fillMaxSize().testTag(NavigationTestTags.REVIEW_HUNT_SCREEN)) {
-                          AddReviewScreen(
-                              huntId = huntId,
-                              onGoBack = { navController.popBackStack() },
-                              onDone = { navController.popBackStack() },
-                              onCancel = { navController.popBackStack() })
                         }
                   }
               composable(SeekrDestination.Settings.route) {

@@ -70,7 +70,6 @@ object HuntCardScreenTestTags {
   const val DESCRIPTION_TEXT = "DescriptionText"
   const val MAP_CONTAINER = "MapContainer"
   const val BEGIN_BUTTON = "BeginButton"
-  const val ADD_REVIEW_BUTTON = "AddReviewButton"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,8 +78,7 @@ fun HuntCardScreen(
     huntId: String,
     modifier: Modifier = Modifier,
     huntCardViewModel: HuntCardViewModel = viewModel(),
-    onGoBack: () -> Unit = {},
-    onAddReview: (String) -> Unit = {}
+    onGoBack: () -> Unit = {}
 ) {
   val uiState by huntCardViewModel.uiState.collectAsState()
 
@@ -260,23 +258,15 @@ fun HuntCardScreen(
                             modifier = modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly,
                         ) {
-                          Button(
-                              {},
-                              modifier =
-                                  modifier
-                                      .width(120.dp)
-                                      .testTag(HuntCardScreenTestTags.BEGIN_BUTTON)) {
+                            Button(
+                                {},
+                                modifier =
+                                    modifier
+                                        .width(120.dp)
+                                        .testTag(HuntCardScreenTestTags.BEGIN_BUTTON)
+                            ) {
                                 Text("Begin Hunt")
-                              }
-                          Button(
-                              onClick = { hunt?.let { onAddReview(it.uid) } },
-                              enabled = hunt != null,
-                              modifier =
-                                  modifier
-                                      .width(140.dp)
-                                      .testTag(HuntCardScreenTestTags.ADD_REVIEW_BUTTON)) {
-                                Text("Add Review")
-                              }
+                            }
                         }
                       }
                     }
