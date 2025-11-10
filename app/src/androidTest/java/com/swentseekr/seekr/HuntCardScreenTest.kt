@@ -1,11 +1,13 @@
 package com.swentseekr.seekr
 
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.swentseekr.seekr.model.hunt.HuntReview
+import com.swentseekr.seekr.ui.components.HuntCardScreen
 import com.swentseekr.seekr.ui.components.HuntCardScreenTestTags
-import com.swentseekr.seekr.ui.components.ReviewCard
+import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -16,6 +18,14 @@ class HuntCardScreenTest {
 
   @Test
   fun reviewCards_areDisplayed() {
+
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = "hunt123",
+          modifier = Modifier,
+          huntCardViewModel = HuntCardViewModel(),
+          onGoBack = {})
+    }
     // Données factices pour les reviews
     val fakeReviews =
         List(10) { index ->
@@ -28,14 +38,41 @@ class HuntCardScreenTest {
               photos = emptyList())
         }
 
-    // On affiche directement les ReviewCard dans le composable HuntCardScreen
-    composeTestRule.setContent {
-      // On peut simuler un état où les reviews sont déjà chargées
-      fakeReviews.forEach { review -> ReviewCard(review) }
-    }
-
     // Vérifie que les 10 ReviewCards sont bien présentes
     composeTestRule.onAllNodesWithTag(HuntCardScreenTestTags.REVIEW_CARD).assertCountEquals(10)
+  }
+
+  @Test
+  fun allButtonsWork() {
+    var goBackClicked = false
+    var beginHuntClicked = false
+    var addReviewClicked = false
+
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = "hunt123",
+          modifier = Modifier,
+          huntCardViewModel = HuntCardViewModel(),
+          onGoBack = { goBackClicked = true },
+          beginHunt = { beginHuntClicked = true },
+          addReview = { addReviewClicked = true })
+    }
+
+    // Vérifie que le bouton de retour fonctionne
+    val goBackButton = composeTestRule.onNodeWithTag(HuntCardScreenTestTags.GO_BACK_BUTTON)
+    goBackButton.assertIsDisplayed()
+    goBackButton.performClick()
+    assert(goBackClicked)
+    // Vérifie que le bouton "Begin Hunt" fonctionne
+    val beginHuntButton = composeTestRule.onNodeWithTag(HuntCardScreenTestTags.BEGIN_BUTTON)
+    beginHuntButton.assertIsDisplayed()
+    beginHuntButton.performClick()
+    assert(beginHuntClicked)
+    // Vérifie que le bouton "Add Review" fonctionne
+    val addReviewButton = composeTestRule.onNodeWithTag(HuntCardScreenTestTags.REVIEW_BUTTON)
+    addReviewButton.assertIsDisplayed()
+    addReviewButton.performClick()
+    assert(addReviewClicked)
   }
 }
 

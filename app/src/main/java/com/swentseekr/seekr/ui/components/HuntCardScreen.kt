@@ -71,6 +71,7 @@ object HuntCardScreenTestTags {
   const val DESCRIPTION_TEXT = "DescriptionText"
   const val MAP_CONTAINER = "MapContainer"
   const val BEGIN_BUTTON = "BeginButton"
+  const val REVIEW_BUTTON = "ReviewButton"
   const val REVIEW_CARD = "ReviewCard"
 }
 
@@ -80,7 +81,10 @@ fun HuntCardScreen(
     huntId: String,
     modifier: Modifier = Modifier,
     huntCardViewModel: HuntCardViewModel = viewModel(),
-    onGoBack: () -> Unit = {}
+    onGoBack: () -> Unit = {},
+    beginHunt: () -> Unit = {},
+    addReview: () -> Unit = {},
+    testmode: Boolean = false,
 ) {
   val uiState by huntCardViewModel.uiState.collectAsState()
 
@@ -89,7 +93,18 @@ fun HuntCardScreen(
   LaunchedEffect(huntId) { huntCardViewModel.loadOtherReview(huntId) }
 
   val hunt2 = uiState.hunt
-  val reviews = uiState.reviewList
+  // val reviews = uiState.reviewList
+  val reviews =
+      List(10) { index ->
+        HuntReview(
+            reviewId = "review$index",
+            authorId = "author$index",
+            huntId = "hunt123",
+            rating = 4.0 + (index % 2),
+            comment = "This is review number $index",
+            photos = emptyList())
+      }
+
   val author = "SpikeMan"
   val hunt =
       Hunt(
@@ -263,12 +278,20 @@ fun HuntCardScreen(
                             horizontalArrangement = Arrangement.SpaceEvenly,
                         ) {
                           Button(
-                              {},
+                              beginHunt,
                               modifier =
                                   modifier
                                       .width(120.dp)
                                       .testTag(HuntCardScreenTestTags.BEGIN_BUTTON)) {
                                 Text("Begin Hunt")
+                              }
+                          Button(
+                              addReview,
+                              modifier =
+                                  modifier
+                                      .width(120.dp)
+                                      .testTag(HuntCardScreenTestTags.REVIEW_BUTTON)) {
+                                Text("Add Review")
                               }
                         }
                       }
