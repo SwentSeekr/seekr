@@ -22,7 +22,6 @@ import com.google.firebase.auth.FirebaseUser
 import com.swentseekr.seekr.ui.components.HuntCardScreen
 import com.swentseekr.seekr.ui.hunt.add.AddHuntScreen
 import com.swentseekr.seekr.ui.hunt.edit.EditHuntScreen
-import com.swentseekr.seekr.ui.huntcardview.AddReviewScreen
 import com.swentseekr.seekr.ui.map.MapScreen
 import com.swentseekr.seekr.ui.overview.OverviewScreen
 import com.swentseekr.seekr.ui.profile.ProfileScreen

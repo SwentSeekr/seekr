@@ -258,15 +258,14 @@ fun HuntCardScreen(
                             modifier = modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly,
                         ) {
-                            Button(
-                                {},
-                                modifier =
-                                    modifier
-                                        .width(120.dp)
-                                        .testTag(HuntCardScreenTestTags.BEGIN_BUTTON)
-                            ) {
+                          Button(
+                              {},
+                              modifier =
+                                  modifier
+                                      .width(120.dp)
+                                      .testTag(HuntCardScreenTestTags.BEGIN_BUTTON)) {
                                 Text("Begin Hunt")
-                            }
+                              }
                         }
                       }
                     }
