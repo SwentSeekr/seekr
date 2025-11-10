@@ -22,7 +22,7 @@ data class HuntUIState(
     val distance: String = "",
     val difficulty: Difficulty? = null,
     val status: HuntStatus? = null,
-    val mainImageUrl: String = "", // ✅ String, cohérent avec ton modèle Hunt
+    val mainImageUrl: String = "", // String, cohérent avec ton modèle Hunt
     val reviewRate: Double = 0.0,
     val errorMsg: String? = null,
     val invalidTitleMsg: String? = null,
