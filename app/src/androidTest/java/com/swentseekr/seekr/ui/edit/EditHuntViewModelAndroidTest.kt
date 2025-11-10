@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.edit
 
+import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.firebase.auth.FirebaseAuth
 import com.swentseekr.seekr.model.hunt.Difficulty
@@ -73,7 +74,7 @@ class EditHuntViewModelAndroidTest {
     assertEquals(created.distance.toString(), s.distance)
     assertEquals(created.difficulty, s.difficulty)
     assertEquals(created.status, s.status)
-    assertEquals(created.image, s.image)
+    assertEquals(created.mainImageUrl, s.mainImageUrl) 
     assertEquals(listOf(created.start) + created.middlePoints + listOf(created.end), s.points)
     assertNull(s.errorMsg)
 
@@ -85,10 +86,10 @@ class EditHuntViewModelAndroidTest {
   @Test
   fun buildHunt_throws_if_no_hunt_loaded() {
     val ex =
-        assertThrows(IllegalArgumentException::class.java) {
-          // Empty state is fine; error should be from missing huntId
-          editVM.buildHunt(editVM.uiState.value)
-        }
+      assertThrows(IllegalArgumentException::class.java) {
+        // Empty state is fine; error should be from missing huntId
+        editVM.buildHunt(editVM.uiState.value)
+      }
     assertEquals("No hunt loaded to edit.", ex.message)
   }
 
@@ -108,7 +109,7 @@ class EditHuntViewModelAndroidTest {
     val result = editVM.submit()
     assertFalse(result)
     assertEquals(
-        "Please fill all required fields before saving the hunt.", editVM.uiState.value.errorMsg)
+      "Please fill all required fields before saving the hunt.", editVM.uiState.value.errorMsg)
   }
 
   @Test
@@ -118,7 +119,6 @@ class EditHuntViewModelAndroidTest {
     val all = repository.getAllHunts()
     assertEquals(1, all.size)
     val created = all.first()
-
     val id = created.uid
     editVM.load(id)
     advanceUntilIdle()
@@ -154,7 +154,10 @@ class EditHuntViewModelAndroidTest {
     editVM.setDistance("4.2")
     editVM.setDifficulty(Difficulty.DIFFICULT)
     editVM.setStatus(HuntStatus.FUN)
-    editVM.setImage(9)
+
+    val newImageUri = Uri.parse("file://new-image.jpg")
+    editVM.updateMainImageUri(newImageUri)
+
     editVM.setPoints(listOf(a, m1, b))
 
     val result = editVM.submit()
@@ -171,11 +174,13 @@ class EditHuntViewModelAndroidTest {
     assertEquals(4.2, updated.distance, 0.0)
     assertEquals(Difficulty.DIFFICULT, updated.difficulty)
     assertEquals(HuntStatus.FUN, updated.status)
-    assertEquals(9, updated.image)
     assertEquals(a, updated.start)
     assertEquals(b, updated.end)
     assertEquals(listOf(m1), updated.middlePoints)
     assertEquals(FirebaseAuth.getInstance().currentUser?.uid, updated.authorId)
+
+    assertTrue(updated.mainImageUrl.isNotEmpty())
+
     assertNull(editVM.uiState.value.errorMsg)
   }
 
@@ -210,7 +215,10 @@ class EditHuntViewModelAndroidTest {
     addVM.setDistance("2.0")
     addVM.setDifficulty(Difficulty.EASY)
     addVM.setStatus(HuntStatus.FUN)
-    addVM.setImage(7)
+
+    val fakeUri = Uri.parse("file://test-image.jpg")
+    addVM.updateMainImageUri(fakeUri)
+
     addVM.setPoints(listOf(a, m, b))
 
     val ok = addVM.submit()

@@ -28,7 +28,7 @@ class HuntsRepositoryFirestoreTest {
           distance = 5.0,
           difficulty = Difficulty.EASY,
           authorId = "0",
-          image = 0,
+          mainImageUrl = "",
           reviewRate = 4.5)
 
   @Before
