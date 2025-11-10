@@ -1,11 +1,14 @@
 package com.swentseekr.seekr.ui.hunt
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.swentseekr.seekr.model.hunt.*
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.ui.hunt.add.AddHuntViewModel
+import com.swentseekr.seekr.ui.hunt.edit.EditHuntViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -151,6 +154,14 @@ abstract class BaseHuntViewModel(
     _uiState.value = _uiState.value.copy(points = points)
     clearErrorMsg()
     return true
+  }
+
+  fun updateMainImageUri(uri: Uri?) {
+    when (this) {
+      is AddHuntViewModel -> this.mainImageUri = uri
+      is EditHuntViewModel -> this.mainImageUri = uri
+    }
+    _uiState.value = _uiState.value.copy(mainImageUrl = uri?.toString() ?: "")
   }
 
   fun setIsSelectingPoints(isSelecting: Boolean) {

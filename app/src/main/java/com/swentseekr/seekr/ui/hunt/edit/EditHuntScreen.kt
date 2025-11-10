@@ -25,5 +25,5 @@ fun EditHuntScreen(
       onGoBack = onGoBack,
       onDone = onDone,
       testMode = testMode,
-      onSelectImage = { uri -> editHuntViewModel.mainImageUri = uri })
+      onSelectImage = { uri -> editHuntViewModel.updateMainImageUri(uri) })
 }

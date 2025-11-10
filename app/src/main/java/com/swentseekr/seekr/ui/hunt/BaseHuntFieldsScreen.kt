@@ -141,18 +141,13 @@ fun BaseHuntFieldsScreen(
 ) {
   var showStatusDropdown by rememberSaveable { mutableStateOf(false) }
   var showDifficultyDropdown by rememberSaveable { mutableStateOf(false) }
-  var selectedImageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
 
   val scrollState = rememberScrollState()
 
-  // ✅ Sélecteur d’image
+  // Sélecteur d’image
   val imagePickerLauncher =
       rememberLauncherForActivityResult(
-          contract = ActivityResultContracts.GetContent(),
-          onResult = { uri ->
-            selectedImageUri = uri
-            onSelectImage(uri)
-          })
+          contract = ActivityResultContracts.GetContent(), onResult = { uri -> onSelectImage(uri) })
 
   Scaffold(
       topBar = {
@@ -194,7 +189,7 @@ fun BaseHuntFieldsScreen(
           // ✅ Prévisualisation intelligente :
           // si une nouvelle image est choisie, on la montre
           // sinon on affiche celle du Hunt déjà existant (Edit mode)
-          val imageToDisplay = selectedImageUri?.toString() ?: uiState.mainImageUrl
+          val imageToDisplay = uiState.mainImageUrl
 
           if (!imageToDisplay.isNullOrBlank()) {
             Spacer(modifier = Modifier.height(12.dp))

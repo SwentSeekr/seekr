@@ -16,5 +16,5 @@ fun AddHuntScreen(
       onGoBack = onGoBack,
       onDone = onDone,
       testMode = testMode,
-      onSelectImage = { uri -> addHuntViewModel.mainImageUri = uri })
+      onSelectImage = { uri -> addHuntViewModel.updateMainImageUri(uri) })
 }
