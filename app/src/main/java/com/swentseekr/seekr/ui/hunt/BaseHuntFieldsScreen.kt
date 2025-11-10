@@ -176,7 +176,7 @@ fun BaseHuntFieldsScreen(
                   unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                   focusedBorderColor = MaterialTheme.colorScheme.primary)
 
-          // ✅ IMAGE PICKER + PREVIEW
+          // IMAGE PICKER + PREVIEW
           Text("Main Image", style = MaterialTheme.typography.titleMedium)
           Spacer(modifier = Modifier.height(8.dp))
 
@@ -186,7 +186,7 @@ fun BaseHuntFieldsScreen(
                 Text("Choose Image")
               }
 
-          // ✅ Prévisualisation intelligente :
+          // Prévisualisation intelligente :
           // si une nouvelle image est choisie, on la montre
           // sinon on affiche celle du Hunt déjà existant (Edit mode)
           val imageToDisplay = uiState.mainImageUrl

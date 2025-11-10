@@ -12,7 +12,7 @@ const val HUNTS_COLLECTION_PATH = "hunts"
 
 class HuntsRepositoryFirestore(
     private val db: FirebaseFirestore,
-    private val imageRepo: HuntsImageRepository = HuntsImageRepository()
+    private val imageRepo: IHuntsImageRepository = HuntsImageRepository()
 ) : HuntsRepository {
   override fun getNewUid(): String {
     return db.collection(HUNTS_COLLECTION_PATH).document().id

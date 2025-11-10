@@ -1,39 +1,21 @@
 package com.swentseekr.seekr.utils
 
 import android.net.Uri
-import com.google.firebase.storage.FirebaseStorage
 import com.swentseekr.seekr.model.hunt.IHuntsImageRepository
-import kotlinx.coroutines.tasks.await
 
-class FakeHuntsImageRepository(
-    private val storage: FirebaseStorage = FirebaseStorage.getInstance()
-) : IHuntsImageRepository {
-
-    private val rootRef = storage.reference.child("hunts_images")
+class FakeHuntsImageRepository : IHuntsImageRepository {
 
     override suspend fun uploadMainImage(huntId: String, imageUri: Uri): String {
-        val ref = rootRef.child("$huntId/main_${System.currentTimeMillis()}.jpg")
-        ref.putFile(imageUri).await()
-        return ref.downloadUrl.await().toString()
+        // Simule un upload instantané
+        return "fake://main_image_url_for_$huntId"
     }
 
     override suspend fun uploadOtherImages(huntId: String, imageUris: List<Uri>): List<String> {
-        val urls = mutableListOf<String>()
-        for (u in imageUris) {
-            val ref = rootRef.child("$huntId/other_${System.currentTimeMillis()}_${u.lastPathSegment ?: "img"}.jpg")
-            ref.putFile(u).await()
-            urls += ref.downloadUrl.await().toString()
-        }
-        return urls
+        // Simule plusieurs URLs
+        return imageUris.mapIndexed { i, _ -> "fake://other_image_${i}_for_$huntId" }
     }
 
     override suspend fun deleteAllHuntImages(huntId: String) {
-        try {
-            val folder = rootRef.child(huntId)
-            val list = folder.listAll().await()
-            list.items.forEach { it.delete().await() }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        // Ne fait rien
     }
 }

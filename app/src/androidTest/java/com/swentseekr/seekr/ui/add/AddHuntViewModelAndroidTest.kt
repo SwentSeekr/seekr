@@ -95,15 +95,11 @@ class AddHuntViewModelAndroidTest {
     viewModel.setDifficulty(Difficulty.EASY)
     viewModel.setStatus(HuntStatus.FUN)
 
-    val fakeUri = Uri.parse("file://test-image.jpg")
-    viewModel.updateMainImageUri(fakeUri)
-
     viewModel.setPoints(listOf(a, b, c))
 
     val s = viewModel.uiState.value
     assertEquals(Difficulty.EASY, s.difficulty)
     assertEquals(HuntStatus.FUN, s.status)
-    assertEquals("file://test-image.jpg", s.mainImageUrl)
     assertEquals(listOf(a, b, c), s.points)
   }
 
@@ -176,9 +172,6 @@ class AddHuntViewModelAndroidTest {
     viewModel.setDistance("2.0")
     viewModel.setDifficulty(Difficulty.EASY)
     viewModel.setStatus(HuntStatus.FUN)
-
-    val fakeUri = Uri.parse("file://test-image.jpg")
-    viewModel.updateMainImageUri(fakeUri)
 
     viewModel.setPoints(points)
   }
