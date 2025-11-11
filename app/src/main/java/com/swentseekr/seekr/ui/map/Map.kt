@@ -1,7 +1,12 @@
 package com.swentseekr.seekr.ui.map
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Canvas
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -43,11 +49,15 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.ui.theme.Blue
 import com.swentseekr.seekr.ui.theme.Green
 import kotlinx.coroutines.launch
 
@@ -70,6 +80,9 @@ object MapScreenTestTags {
   const val BUTTON_VIEW = "huntPopupView"
   const val BUTTON_BACK = "backToAllHunts"
   const val MAP_SCREEN = "MapScreen"
+  const val PERMISSION_POPUP = "permissionPopup"
+  const val GRANT_LOCATION_PERMISSION = "grantLocationPermission"
+  const val EXPLAIN = "explain"
 }
 
 /**
@@ -88,22 +101,73 @@ object MapScreenTestTags {
  * @param viewModel the screen view model providing [MapUIState] and user intents.
  */
 @Composable
-fun MapScreen(viewModel: MapViewModel = viewModel()) {
+fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) {
   val uiState by viewModel.uiState.collectAsState()
-  val cameraPositionState = rememberCameraPositionState {
-    position = CameraPosition.fromLatLngZoom(LatLng(20.0, 0.0), 2f)
-  }
+  val cameraPositionState = rememberCameraPositionState()
   val scope = rememberCoroutineScope()
+
+  val context = LocalContext.current
+  val fused = remember { LocationServices.getFusedLocationProviderClient(context) }
+
   var mapLoaded by remember { mutableStateOf(false) }
   var previousCameraPosition by remember { mutableStateOf<CameraPosition?>(null) }
 
+  var hasLocationPermission by remember { mutableStateOf(false) }
+  val permissionLauncher =
+      rememberLauncherForActivityResult(
+          contract = ActivityResultContracts.RequestMultiplePermissions()) { grants ->
+            hasLocationPermission =
+                grants[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                    grants[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+          }
+
   val selectedHunt = uiState.selectedHunt
+
+  if (!testMode) {
+    LaunchedEffect(Unit) {
+      permissionLauncher.launch(
+          arrayOf(
+              Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+    }
+  }
+
+  LaunchedEffect(hasLocationPermission, mapLoaded) {
+    if (!mapLoaded) return@LaunchedEffect
+    val fineGranted =
+        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED
+    val coarseGranted =
+        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED
+
+    if (!(fineGranted || coarseGranted)) {
+      return@LaunchedEffect
+    }
+
+    fused.lastLocation.addOnSuccessListener { location ->
+      location?.let {
+        val here = LatLng(it.latitude, it.longitude)
+        scope.launch { cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(here, 16f)) }
+      }
+    }
+  }
+
+  val mapUiSettings =
+      MapUiSettings(
+          myLocationButtonEnabled = true,
+          scrollGesturesEnabled = hasLocationPermission,
+          zoomGesturesEnabled = hasLocationPermission,
+          tiltGesturesEnabled = hasLocationPermission,
+          rotationGesturesEnabled = hasLocationPermission)
+  val mapProperties = MapProperties(isMyLocationEnabled = hasLocationPermission)
 
   Box(Modifier.fillMaxSize().testTag(MapScreenTestTags.MAP_SCREEN)) {
     GoogleMap(
         modifier = Modifier.matchParentSize().testTag(MapScreenTestTags.GOOGLE_MAP_SCREEN),
         cameraPositionState = cameraPositionState,
-        onMapLoaded = { mapLoaded = true }) {
+        onMapLoaded = { mapLoaded = true },
+        properties = mapProperties,
+        uiSettings = mapUiSettings) {
           LaunchedEffect(mapLoaded, selectedHunt, uiState.isFocused) {
             if (!mapLoaded) return@LaunchedEffect
             val hunt = selectedHunt ?: return@LaunchedEffect
@@ -144,6 +208,9 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
                 state = MarkerState(LatLng(selectedHunt.end.latitude, selectedHunt.end.longitude)),
                 title = "End: ${selectedHunt.title}",
                 icon = bitmapDescriptorFromVector(LocalContext.current, R.drawable.ic_end_marker))
+            if (uiState.route.isNotEmpty()) {
+              Polyline(points = uiState.route, width = 12f, color = Blue)
+            }
           } else {
             uiState.hunts.forEach { hunt ->
               Marker(
@@ -157,6 +224,16 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
             }
           }
         }
+
+    if (!hasLocationPermission) {
+      PermissionRequestPopup(
+          onRequestPermission = {
+            permissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION))
+          })
+    }
 
     if (selectedHunt != null && !uiState.isFocused) {
       HuntPopup(
@@ -187,6 +264,48 @@ fun MapScreen(viewModel: MapViewModel = viewModel()) {
           }
     }
   }
+}
+
+/**
+ * Displays a popup requesting location permission from the user.
+ *
+ * @param onRequestPermission callback invoked when the user opts to grant location permission.
+ */
+@Composable
+fun PermissionRequestPopup(onRequestPermission: () -> Unit) {
+  Box(
+      modifier =
+          Modifier.fillMaxSize()
+              .background(Color(0x80000000))
+              .padding(32.dp)
+              .testTag(MapScreenTestTags.PERMISSION_POPUP),
+      contentAlignment = Alignment.Center) {
+        Card(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(8.dp)) {
+              Column(
+                  modifier = Modifier.padding(24.dp).fillMaxWidth(),
+                  horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text =
+                            "Seekr needs access to your location to display hunts near you on the map!",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.Black,
+                        modifier =
+                            Modifier.padding(bottom = 16.dp).testTag(MapScreenTestTags.EXPLAIN))
+                    TextButton(
+                        onClick = { onRequestPermission() },
+                        colors = ButtonDefaults.buttonColors(containerColor = Green),
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .padding(top = 8.dp)
+                                .testTag(MapScreenTestTags.GRANT_LOCATION_PERMISSION)) {
+                          Text("Grant Location Permission", color = Color.White)
+                        }
+                  }
+            }
+      }
 }
 
 /**

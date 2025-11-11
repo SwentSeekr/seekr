@@ -1,5 +1,7 @@
 package com.swentseekr.seekr.model.hunt
 
+import android.net.Uri
+
 /** Represents a repository that manages a local list of hunts. */
 class HuntsRepositoryLocal : HuntsRepository {
   private val hunts = mutableListOf<Hunt>()
@@ -13,27 +15,27 @@ class HuntsRepositoryLocal : HuntsRepository {
     return hunts.toList()
   }
 
-  override suspend fun getHunt(huntID: String): Hunt {
-    for (i in hunts.indices) {
-      if (hunts[i].uid == huntID) {
-        return hunts[i]
-      }
-    }
-    throw IllegalArgumentException("Hunt with ID $huntID is not found")
+  override suspend fun getAllMyHunts(authorID: String): List<Hunt> {
+    return hunts.filter { it.authorId == authorID }
   }
 
-  override suspend fun addHunt(hunt: Hunt) {
+  override suspend fun getHunt(huntID: String): Hunt {
+    return hunts.find { it.uid == huntID }
+        ?: throw IllegalArgumentException("Hunt with ID $huntID is not found")
+  }
+
+  override suspend fun addHunt(hunt: Hunt, mainImageUri: Uri?, otherImageUris: List<Uri>) {
+    // Ici, comme c’est local, on ne gère pas les images.
     hunts.add(hunt)
   }
 
   override suspend fun editHunt(huntID: String, newValue: Hunt) {
-    for (i in hunts.indices) {
-      if (hunts[i].uid == huntID) {
-        hunts[i] = newValue
-        return
-      }
+    val index = hunts.indexOfFirst { it.uid == huntID }
+    if (index != -1) {
+      hunts[index] = newValue
+    } else {
+      throw IllegalArgumentException("Hunt with ID $huntID is not found")
     }
-    throw IllegalArgumentException("Hunt with ID $huntID is not found")
   }
 
   override suspend fun deleteHunt(huntID: String) {

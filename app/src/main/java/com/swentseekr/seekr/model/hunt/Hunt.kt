@@ -14,7 +14,8 @@ data class Hunt(
     val distance: Double,
     val difficulty: Difficulty,
     val authorId: String,
-    val image: Int,
+    val otherImagesUrls: List<String> = emptyList(),
+    val mainImageUrl: String,
     val reviewRate: Double
 )
 

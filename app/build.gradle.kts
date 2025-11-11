@@ -33,6 +33,14 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        buildConfigField(
+            "String",
+            "MAPS_API_KEY",
+            "\"${project.findProperty("MAPS_API_KEY") ?: System.getenv("MAPS_API_KEY") ?: ""}\""
+        )
+        manifestPlaceholders["MAPS_API_KEY"] =
+            project.findProperty("MAPS_API_KEY") ?: System.getenv("MAPS_API_KEY") ?: ""
     }
 
     buildTypes {
@@ -146,6 +154,9 @@ dependencies {
     // Cloud Firestore
     implementation("com.google.firebase:firebase-firestore")
 
+    //Firebase storage
+    implementation("com.google.firebase:firebase-storage-ktx")
+
     implementation("com.google.protobuf:protobuf-javalite:3.21.12")
     testImplementation("com.google.protobuf:protobuf-javalite:3.21.12")
     androidTestImplementation("com.google.protobuf:protobuf-javalite:3.21.12")
@@ -157,6 +168,11 @@ dependencies {
     implementation("com.google.maps.android:maps-compose-utils:$mapsComposeVersion")
     // Google Maps Compose widgets library
     implementation("com.google.maps.android:maps-compose-widgets:$mapsComposeVersion")
+    implementation("com.google.maps.android:android-maps-utils:3.8.2")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+
+    //Coil Compose for loading images from camera/gallery
+    implementation("io.coil-kt:coil-compose:2.4.0")
 
     // ------------- Jetpack Compose ------------------
     val composeBom = platform(libs.compose.bom)

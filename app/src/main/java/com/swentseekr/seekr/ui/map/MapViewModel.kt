@@ -5,14 +5,23 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.maps.android.PolyUtil
+import com.swentseekr.seekr.BuildConfig
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
 import com.swentseekr.seekr.model.hunt.HuntsRepository
 import com.swentseekr.seekr.model.map.Location
+import java.net.HttpURLConnection
+import java.net.URL
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
 
 /**
  * Immutable UI model for the Map screen.
@@ -22,13 +31,18 @@ import kotlinx.coroutines.launch
  * @property selectedHunt The hunt selected in overview mode (null when none is selected).
  * @property isFocused Whether the UI shows only the selected hunt’s route (start/middle/end).
  * @property errorMsg Optional human-readable error for transient failures (e.g., loading).
+ * @property route Decoded list of [LatLng] points forming the street-following path returned by the
+ *   Google Directions API.
+ * @property isRouteLoading Whether the Directions API request is in progress for the selected hunt.
  */
 data class MapUIState(
     val target: LatLng = LatLng(46.519962, 6.633597),
     val hunts: List<Hunt> = emptyList(),
     val selectedHunt: Hunt? = null,
     val isFocused: Boolean = false,
-    val errorMsg: String? = null
+    val errorMsg: String? = null,
+    val route: List<LatLng> = emptyList(),
+    val isRouteLoading: Boolean = false
 )
 
 /**
@@ -102,7 +116,8 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
    * camera fits all checkpoints.
    */
   fun onViewHuntClick() {
-    _uiState.value = _uiState.value.copy(isFocused = true)
+    _uiState.value = _uiState.value.copy(isFocused = true, route = emptyList())
+    viewModelScope.launch { computeRouteForSelectedHunt(travelMode = "walking") }
   }
 
   /**
@@ -112,7 +127,8 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
    * movement is controlled by the composable (e.g., no forced reset).
    */
   fun onBackToAllHunts() {
-    _uiState.value = _uiState.value.copy(isFocused = false, selectedHunt = null)
+    _uiState.value =
+        _uiState.value.copy(isFocused = false, selectedHunt = null, route = emptyList())
   }
 
   /**
@@ -134,6 +150,144 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
       } catch (e: Exception) {
         setErrorMsg("Failed to load hunts: ${e.message}")
       }
+    }
+  }
+
+  /**
+   * Computes the street-following route for the currently selected hunt using the Google Directions
+   * API.
+   * - Builds a request based on the hunt’s start, middle checkpoints, and end coordinates.
+   * - Launches the network call on [Dispatchers.IO] to avoid blocking the main thread.
+   * - On success, updates [MapUIState.route] with a decoded polyline following real roads and sets
+   *   [MapUIState.isRouteLoading] to false.
+   * - On failure, catches the exception, sets [MapUIState.errorMsg], clears any existing route, and
+   *   resets the loading flag.
+   *
+   * @param travelMode Travel mode for the route (e.g., "walking" or "driving").
+   */
+  private suspend fun computeRouteForSelectedHunt(travelMode: String = "walking") {
+    val hunt = _uiState.value.selectedHunt ?: return
+    _uiState.value = _uiState.value.copy(isRouteLoading = true)
+
+    try {
+      val points =
+          withContext(Dispatchers.IO) {
+            requestDirectionsPolyline(
+                originLat = hunt.start.latitude,
+                originLng = hunt.start.longitude,
+                destLat = hunt.end.latitude,
+                destLng = hunt.end.longitude,
+                waypoints = hunt.middlePoints.map { it.latitude to it.longitude },
+                travelMode = travelMode)
+          }
+      setErrorMsg("")
+      _uiState.value = _uiState.value.copy(route = points, isRouteLoading = false)
+    } catch (e: Exception) {
+      setErrorMsg("Failed to get route: ${e.message}")
+      _uiState.value = _uiState.value.copy(isRouteLoading = false, route = emptyList())
+    }
+  }
+
+  /**
+   * Performs a synchronous call to the Google Directions REST API and decodes the resulting route
+   * polyline.
+   * - Constructs the API request URL with origin, destination, waypoints, and travel mode.
+   * - Executes an HTTP GET request via [HttpURLConnection].
+   * - Parses the JSON response and handles API error statuses.
+   * - Decodes detailed step-level polylines from each leg for high-precision paths.
+   * - Falls back to the overview polyline if step data is unavailable.
+   * - Returns a list of [LatLng] points representing the route in map order.
+   *
+   * @param originLat Latitude of the route start.
+   * @param originLng Longitude of the route start.
+   * @param destLat Latitude of the route end.
+   * @param destLng Longitude of the route end.
+   * @param waypoints Ordered list of intermediate checkpoint coordinates (may be empty).
+   * @param travelMode Travel mode to request from Directions API (e.g., "walking", "driving").
+   * @return List of [LatLng] points forming the decoded route polyline.
+   * @throws IllegalStateException if the API response contains an error status.
+   */
+  private fun requestDirectionsPolyline(
+      originLat: Double,
+      originLng: Double,
+      destLat: Double,
+      destLng: Double,
+      waypoints: List<Pair<Double, Double>>,
+      travelMode: String
+  ): List<LatLng> {
+
+    val origin = "${originLat},${originLng}"
+    val destination = "${destLat},${destLng}"
+
+    val waypointParam =
+        if (waypoints.isNotEmpty()) {
+          waypoints.joinToString(separator = "|") { (lat, lng) -> "via:$lat,$lng" }
+        } else null
+
+    val base = "https://maps.googleapis.com/maps/api/directions/json"
+    val params =
+        buildList {
+              add("origin=" + URLEncoder.encode(origin, StandardCharsets.UTF_8.name()))
+              add("destination=" + URLEncoder.encode(destination, StandardCharsets.UTF_8.name()))
+              add("mode=" + URLEncoder.encode(travelMode, StandardCharsets.UTF_8.name()))
+              waypointParam?.let {
+                add("waypoints=" + URLEncoder.encode(it, StandardCharsets.UTF_8.name()))
+              }
+              add(
+                  "key=" +
+                      URLEncoder.encode(BuildConfig.MAPS_API_KEY, StandardCharsets.UTF_8.name()))
+            }
+            .joinToString("&")
+
+    val url = URL("$base?$params")
+    val conn =
+        (url.openConnection() as HttpURLConnection).apply {
+          requestMethod = "GET"
+          connectTimeout = 15000
+          readTimeout = 15000
+          doInput = true
+        }
+
+    conn.inputStream.use { stream ->
+      val body = stream.bufferedReader().readText()
+      val json = JSONObject(body)
+
+      val status = json.optString("status")
+      if (status != "OK") {
+        val message = json.optString("error_message", status)
+        throw IllegalStateException("Directions API error: $message")
+      }
+
+      val routes = json.getJSONArray("routes")
+      if (routes.length() == 0) return emptyList()
+
+      val firstRoute = routes.getJSONObject(0)
+      val legs = firstRoute.getJSONArray("legs")
+
+      val fullPath = mutableListOf<LatLng>()
+
+      for (i in 0 until legs.length()) {
+        val leg = legs.getJSONObject(i)
+        val steps = leg.getJSONArray("steps")
+        for (j in 0 until steps.length()) {
+          val step = steps.getJSONObject(j)
+          val poly = step.getJSONObject("polyline").getString("points")
+          val stepPoints = PolyUtil.decode(poly)
+
+          if (fullPath.isNotEmpty()) {
+            fullPath.addAll(stepPoints.drop(1))
+          } else {
+            fullPath.addAll(stepPoints)
+          }
+        }
+      }
+
+      if (fullPath.isEmpty()) {
+        val overview = firstRoute.getJSONObject("overview_polyline").getString("points")
+        return PolyUtil.decode(overview)
+      }
+
+      return fullPath
     }
   }
 }

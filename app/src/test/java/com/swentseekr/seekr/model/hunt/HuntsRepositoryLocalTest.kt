@@ -23,7 +23,7 @@ class HuntsRepositoryLocalTest {
           distance = 5.0,
           difficulty = Difficulty.EASY,
           authorId = "0",
-          image = 2,
+          mainImageUrl = "",
           reviewRate = 4.5)
 
   @Before
@@ -67,6 +67,38 @@ class HuntsRepositoryLocalTest {
 
     val retrievedTodo = huntsRepositoryLocal.getHunt(sampleHunt.uid)
     assertEquals(sampleHunt, retrievedTodo)
+  }
+
+  /** This test verifies that getAllHunts returns all hunts added to the repository. */
+  @Test
+  fun getAllHunts_returnAllHunts() = runTest {
+    huntsRepositoryLocal.addHunt(sampleHunt)
+    val hunt2 = sampleHunt.copy(uid = "1", title = "Hunt 2")
+    huntsRepositoryLocal.addHunt(hunt2)
+    val hunt3 = sampleHunt.copy(uid = "2", title = "Hunt 3", authorId = "1")
+    huntsRepositoryLocal.addHunt(hunt3)
+    val hunts = huntsRepositoryLocal.getAllHunts()
+    assertEquals(3, hunts.size)
+    assertTrue(hunts.contains(sampleHunt))
+    assertTrue(hunts.contains(hunt2))
+    assertTrue(hunts.contains(hunt3))
+  }
+
+  /**
+   * This test verifies that getAllMyHunts returns only the hunts created by the specified author.
+   */
+  @Test
+  fun getAllMyHunts_returnOnlyAuthorHunts() = runTest {
+    huntsRepositoryLocal.addHunt(sampleHunt)
+    val hunt2 = sampleHunt.copy(uid = "1", title = "Hunt 2")
+    huntsRepositoryLocal.addHunt(hunt2)
+    val hunt3 = sampleHunt.copy(uid = "2", title = "Hunt 3", authorId = "1")
+    huntsRepositoryLocal.addHunt(hunt3)
+    val hunts = huntsRepositoryLocal.getAllMyHunts("0")
+    assertEquals(2, hunts.size)
+    assertTrue(hunts.contains(sampleHunt))
+    assertTrue(hunts.contains(hunt2))
+    assertFalse(hunts.contains(hunt3))
   }
 
   /**

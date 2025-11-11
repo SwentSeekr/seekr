@@ -14,7 +14,9 @@ fun EditHuntScreen(
     testMode: Boolean = false,
 ) {
   LaunchedEffect(huntId) {
-    if (huntId.isNotBlank() && huntId.isNotEmpty()) editHuntViewModel.load(huntId)
+    if (huntId.isNotBlank()) {
+      editHuntViewModel.load(huntId)
+    }
   }
 
   BaseHuntScreen(
@@ -23,5 +25,5 @@ fun EditHuntScreen(
       onGoBack = onGoBack,
       onDone = onDone,
       testMode = testMode,
-  )
+      onSelectImage = { uri -> editHuntViewModel.updateMainImageUri(uri) })
 }

@@ -36,7 +36,7 @@ class HuntCardViewModelTest {
           distance = 5.0,
           difficulty = Difficulty.EASY,
           authorId = "author123",
-          image = 1,
+          mainImageUrl = "",
           reviewRate = 4.0)
 
   @Before

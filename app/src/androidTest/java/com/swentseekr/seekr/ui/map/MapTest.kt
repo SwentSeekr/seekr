@@ -1,11 +1,13 @@
 package com.swentseekr.seekr.ui.map
 
+import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.test.rule.GrantPermissionRule
 import com.swentseekr.seekr.model.hunt.*
 import com.swentseekr.seekr.model.map.Location
 import org.junit.Rule
@@ -14,6 +16,11 @@ import org.junit.Test
 class MapTest {
 
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()
+  @get:Rule
+  val permissionRule: GrantPermissionRule =
+      GrantPermissionRule.grant(
+          android.Manifest.permission.ACCESS_FINE_LOCATION,
+          android.Manifest.permission.ACCESS_COARSE_LOCATION)
 
   private fun hunt(uid: String, title: String = "Hunt $uid") =
       Hunt(
@@ -28,16 +35,19 @@ class MapTest {
           distance = 1.0,
           difficulty = Difficulty.EASY,
           authorId = "A",
-          image = 0,
+          mainImageUrl = 0.toString(),
           reviewRate = 4.0)
 
   private fun repo(vararg hunts: Hunt) =
       object : HuntsRepository {
         private val list = hunts.toList()
 
-        override suspend fun addHunt(hunt: Hunt) {}
+        override suspend fun addHunt(hunt: Hunt, mainImageUri: Uri?, otherImageUris: List<Uri>) {}
 
         override suspend fun getAllHunts(): List<Hunt> = list
+
+        override suspend fun getAllMyHunts(authorID: String): List<Hunt> =
+            list.filter { it.authorId == authorID }
 
         override suspend fun getHunt(uid: String): Hunt = list.first { it.uid == uid }
 
@@ -118,5 +128,37 @@ class MapTest {
     composeRule.onNodeWithTag(MapScreenTestTags.POPUP_CARD).assertDoesNotExist()
     composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_BACK).assertDoesNotExist()
     composeRule.onNodeWithTag(MapScreenTestTags.GOOGLE_MAP_SCREEN).assertIsDisplayed()
+  }
+
+  @Test
+  fun mapIsDisplayedOnLocationGranted() {
+    val vm = MapViewModel(repository = repo(hunt("1")))
+    composeRule.setContent { MapScreen(viewModel = vm, true) }
+    composeRule.onNodeWithTag(MapScreenTestTags.GOOGLE_MAP_SCREEN).assertIsDisplayed()
+  }
+
+  @Test
+  fun permissionRequestPopupIsShownWhenPermissionDenied() {
+    val vm = MapViewModel(repository = repo(hunt("1")))
+    composeRule.setContent { MapScreen(viewModel = vm, true) }
+    composeRule.onNodeWithTag(MapScreenTestTags.PERMISSION_POPUP).assertIsDisplayed()
+  }
+
+  @Test
+  fun locationPermissionRequestIsRetriggeredOnButtonClick() {
+    val vm = MapViewModel(repository = repo(hunt("1")))
+    composeRule.setContent { MapScreen(viewModel = vm, true) }
+    composeRule.onNodeWithTag(MapScreenTestTags.PERMISSION_POPUP).assertIsDisplayed()
+    composeRule.onNodeWithTag(MapScreenTestTags.GRANT_LOCATION_PERMISSION).performClick()
+    composeRule.onNodeWithTag(MapScreenTestTags.GOOGLE_MAP_SCREEN).assertIsDisplayed()
+  }
+
+  @Test
+  fun permissionPopupNotShownWhenPermissionGranted() {
+    val vm = MapViewModel(repository = repo(hunt("1")))
+    composeRule.setContent { MapScreen(viewModel = vm) }
+    composeRule.waitForIdle()
+    composeRule.onNodeWithTag(MapScreenTestTags.GOOGLE_MAP_SCREEN).assertIsDisplayed()
+    composeRule.onNodeWithTag(MapScreenTestTags.PERMISSION_POPUP).assertDoesNotExist()
   }
 }
