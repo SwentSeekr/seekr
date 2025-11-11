@@ -14,9 +14,11 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -62,6 +64,7 @@ object ProfileTestTags {
   const val PROFILE_SPORT_RATING = "PROFILE_SPORT_RATING"
   const val EMPTY_HUNTS_MESSAGE = "EMPTY_HUNTS_MESSAGE"
   const val PROFILE_SCREEN = "PROFILE_SCREEN"
+  const val SETTINGS = "SETTINGS"
 
   fun getTestTagForHuntCard(hunt: Hunt, index: Int): String = "HUNT_CARD_$index"
 }
@@ -107,9 +110,13 @@ fun ProfileScreen(
     userId: String? = null,
     viewModel: ProfileViewModel = viewModel(),
     onAddHunt: () -> Unit = {},
+    onSettings: () -> Unit = {},
+    onMyHuntClick: (String) -> Unit = {},
     testMode: Boolean = false,
     testProfile: Profile? = null,
 ) {
+  val uiState by viewModel.uiState.collectAsState()
+
   val profile =
       if (testMode) {
         testProfile ?: mockProfileData()
@@ -129,7 +136,7 @@ fun ProfileScreen(
     return
   }
 
-  val isMyProfile = testMode || viewModel.uiState.collectAsState().value.isMyProfile
+  val isMyProfile = testMode || uiState.isMyProfile
 
   var selectedTab by remember { mutableStateOf(ProfileTab.MY_HUNTS) }
   Scaffold(
@@ -153,7 +160,7 @@ fun ProfileScreen(
               modifier = Modifier.fillMaxWidth().padding(16.dp),
               verticalAlignment = Alignment.CenterVertically) {
                 ProfilePicture(profilePictureRes = profile.author.profilePicture)
-                Column {
+                Column(Modifier.weight(1f)) {
                   Text(
                       text = profile.author.pseudonym,
                       fontSize = 20.sp,
@@ -177,6 +184,11 @@ fun ProfileScreen(
                     Rating(rating = profile.author.sportRate, RatingType.SPORT)
                   }
                 }
+
+                IconButton(
+                    onClick = onSettings, modifier = Modifier.testTag(ProfileTestTags.SETTINGS)) {
+                      Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
+                    }
               }
 
           Text(
@@ -214,10 +226,13 @@ fun ProfileScreen(
                 } else {
                   items(huntsToDisplay.size) { index ->
                     val hunt = huntsToDisplay[index]
-                    HuntCard(
-                        hunt,
-                        modifier =
-                            Modifier.testTag(ProfileTestTags.getTestTagForHuntCard(hunt, index)))
+                    val base = Modifier.testTag(ProfileTestTags.getTestTagForHuntCard(hunt, index))
+                    val clickable =
+                        if (selectedTab == ProfileTab.MY_HUNTS) {
+                          base.clickable { onMyHuntClick(hunt.uid) }
+                        } else base
+
+                    HuntCard(hunt, modifier = clickable)
                   }
                 }
               }

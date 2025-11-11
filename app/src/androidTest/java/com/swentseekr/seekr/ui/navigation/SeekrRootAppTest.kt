@@ -1,4 +1,4 @@
-package com.swentseekr.seekr.screen.ui.navigation
+package com.swentseekr.seekr.ui.navigation
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
@@ -7,8 +7,6 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.swentseekr.seekr.ui.auth.SignInScreenTestTags
-import com.swentseekr.seekr.ui.navigation.NavigationTestTags
-import com.swentseekr.seekr.ui.navigation.SeekrRootApp
 import com.swentseekr.seekr.utils.FakeAuthEmulator
 import com.swentseekr.seekr.utils.FakeJwtGenerator
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment

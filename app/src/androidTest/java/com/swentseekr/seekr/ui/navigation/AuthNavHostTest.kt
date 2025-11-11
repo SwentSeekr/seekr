@@ -1,13 +1,13 @@
-package com.swentseekr.seekr.screen.ui.navigation
+package com.swentseekr.seekr.ui.navigation
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.credentials.CredentialManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.swentseekr.seekr.ui.auth.SignInScreenTestTags
-import com.swentseekr.seekr.ui.navigation.AuthNavHost
 import com.swentseekr.seekr.utils.FakeAuthEmulator
 import com.swentseekr.seekr.utils.FakeJwtGenerator
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment
@@ -36,9 +36,7 @@ class AuthNavHostTest {
   fun showsSignInScreenInitially() {
     composeTestRule.setContent {
       AuthNavHost(
-          credentialManager =
-              androidx.credentials.CredentialManager.create(composeTestRule.activity),
-          onSignedIn = {})
+          credentialManager = CredentialManager.create(composeTestRule.activity), onSignedIn = {})
     }
 
     composeTestRule.onNodeWithTag(SignInScreenTestTags.APP_LOGO).assertIsDisplayed()
@@ -54,8 +52,7 @@ class AuthNavHostTest {
 
     composeTestRule.setContent {
       AuthNavHost(
-          credentialManager =
-              androidx.credentials.CredentialManager.create(composeTestRule.activity),
+          credentialManager = CredentialManager.create(composeTestRule.activity),
           onSignedIn = { onSignedInCalled = true })
     }
 
