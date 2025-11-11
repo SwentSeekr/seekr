@@ -32,7 +32,7 @@ class OverviewViewModelTest {
           distance = 2.0,
           difficulty = Difficulty.EASY,
           authorId = "0",
-          image = 1,
+          mainImageUrl = "",
           reviewRate = 4.0)
 
   private val hunt2 =

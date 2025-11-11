@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.map
 
+import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -34,14 +35,14 @@ class MapTest {
           distance = 1.0,
           difficulty = Difficulty.EASY,
           authorId = "A",
-          image = 0,
+          mainImageUrl = 0.toString(),
           reviewRate = 4.0)
 
   private fun repo(vararg hunts: Hunt) =
       object : HuntsRepository {
         private val list = hunts.toList()
 
-        override suspend fun addHunt(hunt: Hunt) {}
+        override suspend fun addHunt(hunt: Hunt, mainImageUri: Uri?, otherImageUris: List<Uri>) {}
 
         override suspend fun getAllHunts(): List<Hunt> = list
 

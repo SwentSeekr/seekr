@@ -35,7 +35,7 @@ class HuntCardTest {
           distance = 5.0,
           difficulty = Difficulty.DIFFICULT,
           authorId = "0",
-          image = R.drawable.ic_launcher_foreground, // ou une image de ton projet
+          mainImageUrl = R.drawable.ic_launcher_foreground.toString(),
           reviewRate = 4.5)
 
   @Test

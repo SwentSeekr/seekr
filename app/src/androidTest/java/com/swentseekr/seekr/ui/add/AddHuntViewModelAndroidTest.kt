@@ -93,13 +93,12 @@ class AddHuntViewModelAndroidTest {
     val c = Location(2.0, 2.0, "C")
     viewModel.setDifficulty(Difficulty.EASY)
     viewModel.setStatus(HuntStatus.FUN)
-    viewModel.setImage(7)
+
     viewModel.setPoints(listOf(a, b, c))
 
     val s = viewModel.uiState.value
     assertEquals(Difficulty.EASY, s.difficulty)
     assertEquals(HuntStatus.FUN, s.status)
-    assertEquals(7, s.image)
     assertEquals(listOf(a, b, c), s.points)
   }
 
@@ -136,7 +135,6 @@ class AddHuntViewModelAndroidTest {
 
     val result = viewModel.submit()
     assertTrue(result)
-
     advanceUntilIdle()
 
     val hunts = repository.getAllHunts()
@@ -153,7 +151,9 @@ class AddHuntViewModelAndroidTest {
     assertEquals(2.0, h.distance, 0.0)
     assertEquals(Difficulty.EASY, h.difficulty)
     assertEquals(FirebaseAuth.getInstance().currentUser?.uid, h.authorId)
-    assertEquals(7, h.image)
+
+    assertNotNull(h.mainImageUrl)
+
     assertNull(viewModel.uiState.value.errorMsg)
   }
 
@@ -172,7 +172,7 @@ class AddHuntViewModelAndroidTest {
     viewModel.setDistance("2.0")
     viewModel.setDifficulty(Difficulty.EASY)
     viewModel.setStatus(HuntStatus.FUN)
-    viewModel.setImage(7)
+
     viewModel.setPoints(points)
   }
 }

@@ -59,7 +59,7 @@ class MapViewModelTest {
           distance = 2.0,
           difficulty = Difficulty.EASY,
           authorId = "A",
-          image = 0,
+          mainImageUrl = "",
           reviewRate = 4.2)
 
   @OptIn(ExperimentalCoroutinesApi::class)

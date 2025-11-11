@@ -1,6 +1,6 @@
 package com.swentseekr.seekr.ui.hunt.add
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.swentseekr.seekr.ui.hunt.BaseHuntScreen
 
@@ -16,5 +16,5 @@ fun AddHuntScreen(
       onGoBack = onGoBack,
       onDone = onDone,
       testMode = testMode,
-  )
+      onSelectImage = { uri -> addHuntViewModel.updateMainImageUri(uri) })
 }

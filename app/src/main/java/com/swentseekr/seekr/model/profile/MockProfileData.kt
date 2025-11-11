@@ -21,7 +21,8 @@ fun mockProfileData(): Profile {
           distance = 5.0,
           difficulty = Difficulty.DIFFICULT,
           authorId = "0",
-          image = R.drawable.ic_launcher_foreground,
+          mainImageUrl = R.drawable.ic_launcher_foreground.toString(),
+          otherImagesUrls = emptyList(),
           reviewRate = 4.5)
 
   return Profile(
@@ -82,7 +83,8 @@ fun createHunt(uid: String, title: String) =
         distance = 2.0,
         difficulty = Difficulty.EASY,
         authorId = "0",
-        image = R.drawable.empty_user,
+        mainImageUrl = R.drawable.empty_user.toString(),
+        otherImagesUrls = emptyList(),
         reviewRate = 4.0)
 
 fun emptyProfile(): Profile {

@@ -28,11 +28,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
@@ -80,7 +83,8 @@ fun AddReviewScreen(
           distance = 5.0,
           difficulty = Difficulty.DIFFICULT,
           authorId = "0",
-          image = R.drawable.ic_launcher_foreground,
+          mainImageUrl = "",
+          otherImagesUrls = emptyList(),
           reviewRate = 4.5)
   var rating by remember { mutableStateOf("") }
   var comment by remember { mutableStateOf("") }
@@ -116,6 +120,16 @@ fun AddReviewScreen(
                     .testTag(AddReviewScreenTestTags.INFO_COLLUMN),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top) {
+              Spacer(modifier = modifier.height(SPACEPADDING))
+
+              AsyncImage(
+                  model = hunt.mainImageUrl.ifBlank { null },
+                  contentDescription = "Hunt image",
+                  modifier =
+                      Modifier.fillMaxWidth(0.9f).height(200.dp).clip(RoundedCornerShape(12.dp)),
+                  placeholder = painterResource(R.drawable.empty_image),
+                  error = painterResource(R.drawable.empty_image))
+
               Spacer(modifier = modifier.height(SPACEPADDING))
               Text(
                   text = hunt.title,
