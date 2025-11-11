@@ -1,6 +1,8 @@
 package com.swentseekr.seekr.ui.edit
 
 import android.net.Uri
+import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -34,6 +36,7 @@ import org.junit.runner.RunWith
 class EditHuntViewModelAndroidTest {
 
   @get:Rule val mainDispatcherRule = MainDispatcherRule()
+  @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()
 
   private lateinit var repository: HuntsRepository
   private lateinit var addVM: AddHuntViewModel
@@ -67,6 +70,7 @@ class EditHuntViewModelAndroidTest {
   fun load_populates_state_and_buildHunt_uses_loaded_id() = runTest {
     createHunt()
     advanceUntilIdle()
+
     val all = repository.getAllHunts()
     assertEquals(1, all.size)
     val created = all.first()
@@ -74,7 +78,14 @@ class EditHuntViewModelAndroidTest {
 
     editVM.load(id)
     advanceUntilIdle()
-    delay(200) // ensure any async repo load completes
+
+    composeRule.waitUntil(timeoutMillis = 5_000) {
+      val s = editVM.uiState.value
+      s.title == created.title &&
+          s.description == created.description &&
+          s.time == created.time.toString() &&
+          s.distance == created.distance.toString()
+    }
 
     val s = editVM.uiState.value
     assertEquals(created.title, s.title)

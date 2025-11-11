@@ -2,6 +2,11 @@ package com.swentseekr.seekr.model.hunt
 
 import android.net.Uri
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.tasks.await
 
 class HuntsImageRepository(private val storage: FirebaseStorage = FirebaseStorage.getInstance()) :
@@ -15,17 +20,31 @@ class HuntsImageRepository(private val storage: FirebaseStorage = FirebaseStorag
     return ref.downloadUrl.await().toString()
   }
 
-  override suspend fun uploadOtherImages(huntId: String, imageUris: List<Uri>): List<String> {
-    val urls = mutableListOf<String>()
-    for (u in imageUris) {
-      val ref =
-          rootRef.child(
-              "$huntId/other_${System.currentTimeMillis()}_${u.lastPathSegment ?: "img"}.jpg")
-      ref.putFile(u).await()
-      urls += ref.downloadUrl.await().toString()
-    }
-    return urls
-  }
+  override suspend fun uploadOtherImages(huntId: String, imageUris: List<Uri>): List<String> =
+      coroutineScope {
+        // Limit to 5 parallel uploads at a time
+        val semaphore = Semaphore(5)
+
+        val uploadJobs =
+            imageUris.map { uri ->
+              async {
+                semaphore.withPermit {
+                  val ref =
+                      rootRef.child(
+                          "$huntId/other_${System.currentTimeMillis()}_${uri.lastPathSegment ?: "img"}.jpg")
+
+                  // Upload the file
+                  ref.putFile(uri).await()
+
+                  // Retrieve and return the download URL
+                  ref.downloadUrl.await().toString()
+                }
+              }
+            }
+
+        // Wait for all uploads to complete and return their URLs
+        uploadJobs.awaitAll()
+      }
 
   override suspend fun deleteAllHuntImages(huntId: String) {
     try {
@@ -33,7 +52,7 @@ class HuntsImageRepository(private val storage: FirebaseStorage = FirebaseStorag
       val list = folder.listAll().await()
       list.items.forEach { it.delete().await() }
     } catch (e: Exception) {
-      e.printStackTrace()
+      throw RuntimeException("Failed to upload main image for hunt $huntId", e)
     }
   }
 }

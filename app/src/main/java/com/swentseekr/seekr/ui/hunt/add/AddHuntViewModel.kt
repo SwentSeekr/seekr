@@ -28,13 +28,13 @@ class AddHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.repo
         distance = state.distance.toDouble(),
         difficulty = state.difficulty!!,
         authorId = authorId,
-        mainImageUrl = "", // L'URL sera mis à jour après l'upload de l'image
+        mainImageUrl = "", // The URL will be updated after the image is uploaded.
         otherImagesUrls = emptyList(),
         reviewRate = state.reviewRate)
   }
 
   override suspend fun persist(hunt: Hunt) {
-    // On envoie le Hunt + les images à Firebase
+    // We sent hunt + images to the repository to handle uploading
     repository.addHunt(hunt = hunt, mainImageUri = mainImageUri, otherImageUris = otherImagesUris)
   }
 }

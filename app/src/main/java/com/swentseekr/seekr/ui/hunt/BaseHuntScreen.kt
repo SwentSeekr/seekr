@@ -20,12 +20,12 @@ fun BaseHuntScreen(
   val uiState by vm.uiState.collectAsState()
   val context = LocalContext.current
 
-  // Mode test
+  // Test mode
   if (testMode) {
     LaunchedEffect(Unit) { vm.setTestMode(true) }
   }
 
-  // Toast quand le Hunt est sauvegardé
+  // Toast when then hunt is saved
   LaunchedEffect(uiState.saveSuccessful) {
     if (uiState.saveSuccessful) {
       Toast.makeText(context, TOAST_HUNT_SAVED, Toast.LENGTH_SHORT).show()
@@ -34,7 +34,7 @@ fun BaseHuntScreen(
     }
   }
 
-  // Toast pour erreurs
+  // Toast for errors
   LaunchedEffect(uiState.errorMsg) {
     uiState.errorMsg?.let {
       Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
@@ -42,7 +42,7 @@ fun BaseHuntScreen(
     }
   }
 
-  // Carte : ajout des points
+  // Map : point selection
   if (uiState.isSelectingPoints) {
     BaseAddPointsMapScreen(
         initPoints = uiState.points,

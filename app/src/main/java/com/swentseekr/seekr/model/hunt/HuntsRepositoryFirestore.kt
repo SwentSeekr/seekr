@@ -36,17 +36,35 @@ class HuntsRepositoryFirestore(
   }
 
   override suspend fun addHunt(hunt: Hunt, mainImageUri: Uri?, otherImageUris: List<Uri>) {
-    val mainImageUrl =
-        when {
-          mainImageUri != null -> imageRepo.uploadMainImage(hunt.uid, mainImageUri)
-          else -> ""
-        }
-    val otherImagesUrls =
-        if (otherImageUris.isNotEmpty()) imageRepo.uploadOtherImages(hunt.uid, otherImageUris)
-        else emptyList()
+    var mainImageUrl = ""
+    var otherImagesUrls: List<String> = emptyList()
 
+    try {
+      // Upload main image if provided
+      if (mainImageUri != null) {
+        mainImageUrl = imageRepo.uploadMainImage(hunt.uid, mainImageUri)
+      }
+
+      // Upload other images if provided
+      if (otherImageUris.isNotEmpty()) {
+        otherImagesUrls = imageRepo.uploadOtherImages(hunt.uid, otherImageUris)
+      }
+    } catch (e: Exception) {
+      Log.e("HuntsRepositoryFirestore", "Image upload failed for hunt ${hunt.uid}", e)
+
+      // Optionally clean up any uploaded images if partial success occurred
+      try {
+        imageRepo.deleteAllHuntImages(hunt.uid)
+      } catch (cleanupError: Exception) {
+        Log.w("HuntsRepositoryFirestore", "Cleanup after failed upload failed", cleanupError)
+      }
+
+      // Rethrow to signal failure to upper layers (so ViewModel can show an error)
+      throw e
+    }
+
+    // Only write to Firestore if uploads succeeded
     val huntWithImages = hunt.copy(mainImageUrl = mainImageUrl, otherImagesUrls = otherImagesUrls)
-
     db.collection(HUNTS_COLLECTION_PATH).document(hunt.uid).set(huntWithImages).await()
   }
 

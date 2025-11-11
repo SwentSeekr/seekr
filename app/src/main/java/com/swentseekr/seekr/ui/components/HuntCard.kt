@@ -75,45 +75,26 @@ fun HuntCard(hunt: Hunt, modifier: Modifier = Modifier) {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally) {
-                          Box(
-                              modifier =
-                                  Modifier.padding(4.dp)
-                                      .background(Color.Green)
-                                      .height(20.dp)
-                                      .width(80.dp)
-                                      .clip(RectangleShape),
-                          ) {
-                            Text(
-                                hunt.difficulty.toString(),
-                                modifier = Modifier.align(Alignment.Center).padding(2.dp))
-                          }
-
-                          Box(
-                              modifier =
-                                  Modifier.padding(4.dp)
-                                      .background(Color.White)
-                                      .height(20.dp)
-                                      .width(80.dp)
-                                      .clip(RectangleShape)) {
-                                Text(
-                                    "${hunt.distance} km",
-                                    modifier = Modifier.align(Alignment.Center).padding(2.dp))
-                              }
-
-                          Box(
-                              modifier =
-                                  Modifier.padding(4.dp)
-                                      .background(Color.White)
-                                      .height(20.dp)
-                                      .width(80.dp)
-                                      .clip(RectangleShape)) {
-                                Text(
-                                    "${hunt.time} min",
-                                    modifier = Modifier.align(Alignment.Center).padding(2.dp))
-                              }
+                          InfoBox(hunt.difficulty.toString(), Color.Green)
+                          InfoBox("${hunt.distance} km", Color.White)
+                          InfoBox("${hunt.time} min", Color.White)
                         }
                   }
             }
+      }
+}
+
+@Composable
+private fun InfoBox(text: String, backgroundColor: Color, modifier: Modifier = Modifier) {
+  Box(
+      modifier =
+          modifier
+              .padding(4.dp)
+              .background(backgroundColor)
+              .height(20.dp)
+              .width(80.dp)
+              .clip(RectangleShape)) {
+        Text(text, modifier = Modifier.align(Alignment.Center).padding(2.dp))
       }
 }
 

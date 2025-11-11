@@ -58,7 +58,7 @@ class EditHuntScreenTest {
 
     FirebaseAuth.getInstance().signInAnonymously().await()
 
-    //         Utilisation du fake pour éviter les appels Firebase Storage
+    // Using fake to avoid Firebase Storage calls
     val db = FirebaseFirestore.getInstance()
     val fakeImageRepo = FakeHuntsImageRepository()
     HuntRepositoryProvider.repository = HuntsRepositoryFirestore(db, fakeImageRepo)
@@ -99,7 +99,7 @@ class EditHuntScreenTest {
     var backCalled = false
     setContent(id, vm, onGoBack = { backCalled = true })
 
-    // Attente que la chasse soit chargée
+    // Wait for the hunt to be loaded
     composeRule.waitUntil(timeoutMillis = 5_000) { vm.uiState.value.title.isNotEmpty() }
 
     composeRule.onNodeWithContentDescription("Back").performClick()

@@ -144,7 +144,7 @@ fun BaseHuntFieldsScreen(
 
   val scrollState = rememberScrollState()
 
-  // Sélecteur d’image
+  // Image selector launcher
   val imagePickerLauncher =
       rememberLauncherForActivityResult(
           contract = ActivityResultContracts.GetContent(), onResult = { uri -> onSelectImage(uri) })
@@ -186,9 +186,7 @@ fun BaseHuntFieldsScreen(
                 Text("Choose Image")
               }
 
-          // Prévisualisation intelligente :
-          // si une nouvelle image est choisie, on la montre
-          // sinon on affiche celle du Hunt déjà existant (Edit mode)
+          // Intelligent display of the image
           val imageToDisplay = uiState.mainImageUrl
 
           if (!imageToDisplay.isNullOrBlank()) {
@@ -203,7 +201,7 @@ fun BaseHuntFieldsScreen(
 
           Spacer(modifier = Modifier.height(SPACER_HEIGHT.dp))
 
-          // === FORMULAIRE ===
+          // === Form ===
           ValidatedOutlinedField(
               value = uiState.title,
               onValueChange = onTitleChange,
