@@ -1,129 +1,94 @@
 package com.swentseekr.seekr
 
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.swentseekr.seekr.model.hunt.HuntReview
+import com.swentseekr.seekr.model.hunt.Difficulty
+import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.model.hunt.HuntStatus
+import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.components.HuntCardScreen
 import com.swentseekr.seekr.ui.components.HuntCardScreenTestTags
-import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class HuntCardScreenTest {
+
   @get:Rule val composeTestRule = createComposeRule()
 
-  @Test
-  fun reviewCards_areDisplayed() {
+  private fun createFakeHunt() =
+      Hunt(
+          uid = "hunt123",
+          start = Location(40.7128, -74.0060, "New York"),
+          end = Location(40.730610, -73.935242, "Brooklyn"),
+          middlePoints = emptyList(),
+          status = HuntStatus.FUN,
+          title = "City Exploration",
+          description = "Discover hidden gems in the city",
+          time = 2.5,
+          distance = 5.0,
+          difficulty = Difficulty.DIFFICULT,
+          authorId = "0",
+          image = R.drawable.ic_launcher_foreground,
+          reviewRate = 4.5)
 
+  @Test
+  fun testAllUIElementsAreDisplayed() {
     composeTestRule.setContent {
       HuntCardScreen(
           huntId = "hunt123",
-          modifier = Modifier,
-          huntCardViewModel = HuntCardViewModel(),
-          onGoBack = {})
+          huntCardViewModel = FakeHuntCardViewModel(createFakeHunt()),
+          onGoBack = {},
+          beginHunt = {},
+          addReview = {},
+          testmode = true)
     }
-    // Données factices pour les reviews
-    val fakeReviews =
-        List(10) { index ->
-          HuntReview(
-              reviewId = "review$index",
-              authorId = "author$index",
-              huntId = "hunt123",
-              rating = 4.0 + (index % 2),
-              comment = "This is review number $index",
-              photos = emptyList())
-        }
 
-    // Vérifie que les 10 ReviewCards sont bien présentes
+    // Vérifie la présence des éléments principaux
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.GO_BACK_BUTTON).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.TITLE_TEXT).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.AUTHOR_TEXT).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.IMAGE).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.DIFFICULTY_BOX).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.DISTANCE_BOX).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.TIME_BOX).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.DESCRIPTION_TEXT).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.MAP_CONTAINER).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.BEGIN_BUTTON).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.REVIEW_BUTTON).assertIsDisplayed()
     composeTestRule.onAllNodesWithTag(HuntCardScreenTestTags.REVIEW_CARD).assertCountEquals(10)
   }
 
   @Test
-  fun allButtonsWork() {
+  fun testButtonsTriggerCallbacks() {
     var goBackClicked = false
-    var beginHuntClicked = false
-    var addReviewClicked = false
+    var beginClicked = false
+    var reviewClicked = false
 
     composeTestRule.setContent {
       HuntCardScreen(
           huntId = "hunt123",
-          modifier = Modifier,
-          huntCardViewModel = HuntCardViewModel(),
+          huntCardViewModel = FakeHuntCardViewModel(createFakeHunt()),
           onGoBack = { goBackClicked = true },
-          beginHunt = { beginHuntClicked = true },
-          addReview = { addReviewClicked = true })
+          beginHunt = { beginClicked = true },
+          addReview = { reviewClicked = true },
+          testmode = true)
     }
 
-    // Vérifie que le bouton de retour fonctionne
-    val goBackButton = composeTestRule.onNodeWithTag(HuntCardScreenTestTags.GO_BACK_BUTTON)
-    goBackButton.assertIsDisplayed()
-    goBackButton.performClick()
+    // Clique sur les boutons
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.GO_BACK_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.BEGIN_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.REVIEW_BUTTON).performClick()
+
+    // Vérifie les callbacks
     assert(goBackClicked)
-    // Vérifie que le bouton "Begin Hunt" fonctionne
-    val beginHuntButton = composeTestRule.onNodeWithTag(HuntCardScreenTestTags.BEGIN_BUTTON)
-    beginHuntButton.assertIsDisplayed()
-    beginHuntButton.performClick()
-    assert(beginHuntClicked)
-    // Vérifie que le bouton "Add Review" fonctionne
-    val addReviewButton = composeTestRule.onNodeWithTag(HuntCardScreenTestTags.REVIEW_BUTTON)
-    addReviewButton.assertIsDisplayed()
-    addReviewButton.performClick()
-    assert(addReviewClicked)
+    assert(beginClicked)
+    assert(reviewClicked)
   }
 }
-
-/*
-@Test fun displaysAllHuntCardScreenElements() {
-  composeRule.setContent { HuntCardScreen(onGoBack = {}) }
-}*/
- /**
-  * // Vérifie la présence de tous les éléments
-  * composeRule.onNodeWithTag(HuntCardScreenTestTags.GO_BACK_BUTTON).assertIsDisplayed()
-  * composeRule.onNodeWithTag(HuntCardScreenTestTags.TITLE_TEXT).assertIsDisplayed()
-  * composeRule.onNodeWithTag(HuntCardScreenTestTags.AUTHOR_TEXT).assertIsDisplayed()
-  * composeRule.onNodeWithTag(HuntCardScreenTestTags.IMAGE).assertIsDisplayed()
-  * composeRule.onNodeWithTag(HuntCardScreenTestTags.DIFFICULTY_BOX).assertIsDisplayed()
-  * composeRule.onNodeWithTag(HuntCardScreenTestTags.DISTANCE_BOX).assertIsDisplayed()
-  * composeRule.onNodeWithTag(HuntCardScreenTestTags.TIME_BOX).assertIsDisplayed()
-  * composeRule.onNodeWithTag(HuntCardScreenTestTags.DESCRIPTION_TEXT).assertIsDisplayed()
-  * composeRule.onNodeWithTag(HuntCardScreenTestTags.MAP_CONTAINER).assertIsDisplayed()
-  * composeRule.onNodeWithTag(HuntCardScreenTestTags.BEGIN_BUTTON).assertIsDisplayed() }
-  *
-  * @Test fun backButton_isDisplayedAndClickable() { var clicked = false composeRule.setContent {
-  *   HuntCardScreen(onGoBack = { clicked = true }) }
-  *
-  * val backButton = composeRule.onNodeWithTag(HuntCardScreenTestTags.GO_BACK_BUTTON)
-  * backButton.assertIsDisplayed() backButton.performClick()
-  *
-  * assert(clicked) // Vérifie que le callback a été appelé }
-  *
-  * @Test fun beginHuntButton_isDisplayedAndClickable() { composeRule.setContent { HuntCardScreen()
-  *   }
-  *
-  * val beginButton = composeRule.onNodeWithTag(HuntCardScreenTestTags.BEGIN_BUTTON)
-  * beginButton.assertIsDisplayed() beginButton.performClick() // Pas de callback dans ton code,
-  * juste vérifier que ça clique }
-  *
-  * @Test fun mapContainer_isDisplayed() { composeRule.setContent { HuntCardScreen() }
-  *
-  * composeRule .onNodeWithTag(HuntCardScreenTestTags.MAP_CONTAINER) .assertExists()
-  * .assertIsDisplayed() }
-  *
-  * @Test fun titleAndAuthorAndDescription_areDisplayed() { composeRule.setContent {
-  *   HuntCardScreen() }
-  *
-  * composeRule.onNodeWithTag(HuntCardScreenTestTags.TITLE_TEXT).assertIsDisplayed()
-  * composeRule.onNodeWithTag(HuntCardScreenTestTags.AUTHOR_TEXT).assertIsDisplayed()
-  * composeRule.onNodeWithTag(HuntCardScreenTestTags.DESCRIPTION_TEXT).assertIsDisplayed() }
-  *
-  * @Test fun difficultyDistanceTimeBoxes_areDisplayed() { composeRule.setContent { HuntCardScreen()
-  *   }
-  *
-  * composeRule.onNodeWithTag(HuntCardScreenTestTags.DIFFICULTY_BOX).assertIsDisplayed()
-  * composeRule.onNodeWithTag(HuntCardScreenTestTags.DISTANCE_BOX).assertIsDisplayed()
-  * composeRule.onNodeWithTag(HuntCardScreenTestTags.TIME_BOX).assertIsDisplayed() } }
-  */

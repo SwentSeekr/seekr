@@ -21,13 +21,13 @@ data class HuntCardUiState(
     val isAchieved: Boolean = false
 )
 
-class HuntCardViewModel(
+open class HuntCardViewModel(
     private val repository: HuntsRepository = HuntRepositoryProvider.repository,
     private val repositoryReview: HuntReviewRepository = HuntReviewRepositoryProvider.repository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(HuntCardUiState())
-  val uiState: StateFlow<HuntCardUiState> = _uiState.asStateFlow()
+  open val uiState: StateFlow<HuntCardUiState> = _uiState.asStateFlow()
 
   /** Loads reviews for a specific hunt.* */
   fun loadOtherReview(huntID: String) {

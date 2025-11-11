@@ -90,4 +90,5 @@ object HuntRepositoryProvider {
     HuntsRepositoryFirestore(Firebase.firestore)
   }
   var repository: HuntsRepository = _repositoryFirestore
+  var repository2: HuntsRepository = _repository
 }
