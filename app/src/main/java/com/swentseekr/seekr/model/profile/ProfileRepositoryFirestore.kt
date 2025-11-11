@@ -80,7 +80,7 @@ class ProfileRepositoryFirestore(
       val time = document.getDouble("time") ?: 0.0
       val distance = document.getDouble("distance") ?: 0.0
       val reviewRate = document.getDouble("reviewRate") ?: 0.0
-      val image = (document.get("image") as? Long)?.toInt() ?: 0
+      val mainImageUrl = document.getString("mainImageUrl") ?: ""
 
       val start = (document.get("start") as? Map<*, *>)?.toLocation() ?: Location(0.0, 0.0, "")
       val end = (document.get("end") as? Map<*, *>)?.toLocation() ?: Location(0.0, 0.0, "")
@@ -103,7 +103,7 @@ class ProfileRepositoryFirestore(
           distance = distance,
           difficulty = difficulty,
           authorId = authorId,
-          image = image,
+          mainImageUrl = mainImageUrl,
           reviewRate = reviewRate)
     } catch (e: Exception) {
       null

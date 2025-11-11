@@ -25,7 +25,7 @@ object HuntRepositoryProvider {
           distance = 5.0,
           difficulty = Difficulty.EASY,
           authorId = "0",
-          image = 0,
+          mainImageUrl = 0.toString(),
           reviewRate = 4.5)
 
   private val _repository: HuntsRepository =
@@ -45,7 +45,7 @@ object HuntRepositoryProvider {
                     distance = 6.0,
                     difficulty = Difficulty.INTERMEDIATE,
                     authorId = "1",
-                    image = 1,
+                    mainImageUrl = 1.toString(),
                     reviewRate = 4.0),
                 Hunt(
                     uid = getNewUid(),
@@ -62,7 +62,7 @@ object HuntRepositoryProvider {
                     distance = 6.0,
                     difficulty = Difficulty.INTERMEDIATE,
                     authorId = "2",
-                    image = 1,
+                    mainImageUrl = 1.toString(),
                     reviewRate = 4.0),
                 Hunt(
                     uid = getNewUid(),
@@ -80,7 +80,7 @@ object HuntRepositoryProvider {
                     distance = 4.0,
                     difficulty = Difficulty.INTERMEDIATE,
                     authorId = "3",
-                    image = 2,
+                    mainImageUrl = 2.toString(),
                     reviewRate = 4.7))
 
         runBlocking { sampleHunts.forEach { hunt -> addHunt(hunt) } }

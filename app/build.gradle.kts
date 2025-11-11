@@ -154,6 +154,9 @@ dependencies {
     // Cloud Firestore
     implementation("com.google.firebase:firebase-firestore")
 
+    //Firebase storage
+    implementation("com.google.firebase:firebase-storage-ktx")
+
     implementation("com.google.protobuf:protobuf-javalite:3.21.12")
     testImplementation("com.google.protobuf:protobuf-javalite:3.21.12")
     androidTestImplementation("com.google.protobuf:protobuf-javalite:3.21.12")

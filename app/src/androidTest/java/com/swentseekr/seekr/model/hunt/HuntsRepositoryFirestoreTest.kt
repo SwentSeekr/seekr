@@ -5,6 +5,7 @@ import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment.clearEmulatorData
 import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -28,7 +29,7 @@ class HuntsRepositoryFirestoreTest {
           distance = 5.0,
           difficulty = Difficulty.EASY,
           authorId = "0",
-          image = 0,
+          mainImageUrl = "",
           reviewRate = 4.5)
 
   @Before
@@ -169,6 +170,7 @@ class HuntsRepositoryFirestoreTest {
     assertEquals(0, repository.getAllHunts().size)
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun canDeleteAHuntByIDWithMultipleHunts() = runTest {
     repository.addHunt(hunt1)
@@ -178,7 +180,9 @@ class HuntsRepositoryFirestoreTest {
     repository.addHunt(hunt3)
     assertEquals(3, repository.getAllHunts().size)
     repository.deleteHunt(hunt2.uid)
-    assertEquals(2, repository.getAllHunts().size)
+    advanceUntilIdle()
+    val hunts = repository.getAllHunts()
+    assertEquals(2, hunts.size)
     val expectedHunts = setOf(hunt1, hunt3)
     assertEquals(expectedHunts, repository.getAllHunts().toSet())
   }

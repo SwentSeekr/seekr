@@ -42,7 +42,7 @@ class ProfileUtilsTest {
           distance = 0.0,
           difficulty = Difficulty.EASY,
           authorId = "author1",
-          image = 0,
+          mainImageUrl = "",
           reviewRate = reviewRate)
 
   private fun profile(
