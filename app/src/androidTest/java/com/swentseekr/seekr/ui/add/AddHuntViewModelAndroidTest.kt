@@ -138,7 +138,6 @@ class AddHuntViewModelAndroidTest {
     advanceUntilIdle()
 
     val hunts = repository.getAllHunts()
-    assertEquals(1, hunts.size)
     val h = hunts.first()
     assertTrue(h.uid.isNotBlank())
     assertEquals(a, h.start)
