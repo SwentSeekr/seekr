@@ -1,6 +1,7 @@
 package com.swentseekr.seekr.model.hunt
 
 import android.net.Uri
+import android.util.Log
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -8,6 +9,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withTimeoutOrNull
 
 class HuntsImageRepository(private val storage: FirebaseStorage = FirebaseStorage.getInstance()) :
     IHuntsImageRepository {
@@ -49,10 +51,22 @@ class HuntsImageRepository(private val storage: FirebaseStorage = FirebaseStorag
   override suspend fun deleteAllHuntImages(huntId: String) {
     try {
       val folder = rootRef.child(huntId)
-      val list = folder.listAll().await()
-      list.items.forEach { it.delete().await() }
+      // Avoid infity waits by setting a timeout for listing files
+      val list = withTimeoutOrNull(2_000) { folder.listAll().await() }
+
+      if (list != null) {
+        list.items.forEach {
+          runCatching { it.delete().await() }
+              .onFailure { e ->
+                Log.w("HuntsImageRepository", "Failed to delete ${it.name}: ${e.message}")
+              }
+        }
+      } else {
+        Log.w(
+            "HuntsImageRepository", "Timeout listing images for hunt $huntId (likely empty folder)")
+      }
     } catch (e: Exception) {
-      throw RuntimeException("Failed to upload main image for hunt $huntId", e)
+      Log.w("HuntsImageRepository", "Unexpected error deleting images for $huntId: ${e.message}")
     }
   }
 }
