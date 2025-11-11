@@ -23,6 +23,7 @@ class HuntCardScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
 
+
   private fun createFakeHunt() =
       Hunt(
           uid = "hunt123",
