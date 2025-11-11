@@ -136,7 +136,7 @@ fun ProfileScreen(
     return
   }
 
-  val isMyProfile = testMode || uiState.isMyProfile || (userId == null || profile.uid == userId)
+  val isMyProfile = testMode || uiState.isMyProfile
 
   var selectedTab by remember { mutableStateOf(ProfileTab.MY_HUNTS) }
   Scaffold(
