@@ -3,11 +3,13 @@ package com.swentseekr.seekr.ui.profile
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -15,6 +17,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -48,23 +51,23 @@ import com.swentseekr.seekr.ui.components.Rating
 import com.swentseekr.seekr.ui.components.RatingType
 
 object ProfileTestTags {
-  const val PROFILE_HUNTS_LIST = "PROFILE_HUNTS_LIST"
-  const val TAB_MY_HUNTS = "TAB_MY_HUNTS"
-  const val TAB_DONE_HUNTS = "TAB_DONE_HUNTS"
-  const val TAB_LIKED_HUNTS = "TAB_LIKED_HUNTS"
-
-  const val ADD_HUNT = "ADD_HUNT"
-
+  const val PROFILE_SCREEN = "PROFILE_SCREEN"
+  const val PROFILE_LOADING = "PROFILE_LOADING"
   const val PROFILE_PICTURE = "PROFILE_PICTURE"
-  const val EMPTY_PROFILE_PICTURE = "EMPTY PROFILE_PICTURE"
-
+  const val EMPTY_PROFILE_PICTURE = "EMPTY_PROFILE_PICTURE"
   const val PROFILE_PSEUDONYM = "PROFILE_PSEUDONYM"
   const val PROFILE_BIO = "PROFILE_BIO"
   const val PROFILE_REVIEW_RATING = "PROFILE_REVIEW_RATING"
+  const val PROFILE_REVIEWS_COUNT = "PROFILE_REVIEWS_COUNT"
   const val PROFILE_SPORT_RATING = "PROFILE_SPORT_RATING"
-  const val EMPTY_HUNTS_MESSAGE = "EMPTY_HUNTS_MESSAGE"
-  const val PROFILE_SCREEN = "PROFILE_SCREEN"
+  const val PROFILE_HUNTS_DONE_COUNT = "PROFILE_HUNTS_DONE_COUNT"
+  const val PROFILE_HUNTS_LIST = "PROFILE_HUNTS_LIST"
+  const val EMPTY_HUNTS_MESSAGE = "PROFILE_EMPTY_HUNTS_MESSAGE"
   const val SETTINGS = "SETTINGS"
+  const val ADD_HUNT = "ADD_HUNT"
+  const val TAB_MY_HUNTS = "TAB_MY_HUNTS"
+  const val TAB_DONE_HUNTS = "TAB_DONE_HUNTS"
+  const val TAB_LIKED_HUNTS = "TAB_LIKED_HUNTS"
 
   fun getTestTagForHuntCard(hunt: Hunt, index: Int): String = "HUNT_CARD_$index"
 }
@@ -124,21 +127,46 @@ fun ProfileScreen(
         val uiState by viewModel.uiState.collectAsState()
 
         LaunchedEffect(userId) { viewModel.loadProfile(userId) }
+        if (uiState.isLoading) {
+          Box(
+              modifier = Modifier.fillMaxSize().testTag(ProfileTestTags.PROFILE_LOADING),
+              contentAlignment = Alignment.Center) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center) {
+                      CircularProgressIndicator(color = Color.Green)
+                      Text(
+                          text = "Loading profile...",
+                          color = Color.Gray,
+                          fontSize = 18.sp,
+                          modifier = Modifier.padding(top = 16.dp))
+                    }
+              }
+          return
+        }
+
         if (uiState.errorMsg != null) {
-          Text("Error: ${uiState.errorMsg}", color = Color.Red)
+          Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Error: ${uiState.errorMsg}", color = Color.Red)
+          }
           return
         }
         uiState.profile
       }
 
   if (profile == null) {
-    Text("No profile found", color = Color.Gray)
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+      Text("No profile found", color = Color.Gray)
+    }
     return
   }
 
   val isMyProfile = testMode || uiState.isMyProfile
 
   var selectedTab by remember { mutableStateOf(ProfileTab.MY_HUNTS) }
+  val reviewCount by viewModel.totalReviews.collectAsState()
+  LaunchedEffect(profile.myHunts) { viewModel.loadTotalReviewsForProfile(profile) }
+
   Scaffold(
       floatingActionButton = {
         if (isMyProfile) {
@@ -148,55 +176,81 @@ fun ProfileScreen(
               }
         }
       },
-      modifier = Modifier.testTag(ProfileTestTags.PROFILE_SCREEN)
-
-      // TODO settings
-
-      ) { padding ->
+      modifier = Modifier.testTag(ProfileTestTags.PROFILE_SCREEN)) { padding ->
         Column(
             modifier = Modifier.fillMaxSize().padding(padding),
         ) {
-          Row(
-              modifier = Modifier.fillMaxWidth().padding(16.dp),
-              verticalAlignment = Alignment.CenterVertically) {
-                ProfilePicture(profilePictureRes = profile.author.profilePicture)
-                Column(Modifier.weight(1f)) {
-                  Text(
-                      text = profile.author.pseudonym,
-                      fontSize = 20.sp,
-                      fontWeight = FontWeight.Bold,
-                      modifier =
-                          Modifier.padding(TEXT_SIZE).testTag(ProfileTestTags.PROFILE_PSEUDONYM))
-                  Row {
+          Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+            if (isMyProfile) {
+              IconButton(
+                  onClick = onSettings,
+                  modifier =
+                      Modifier.align(Alignment.TopEnd)
+                          .background(
+                              color = Color.White.copy(alpha = 0.9f),
+                              shape = androidx.compose.foundation.shape.CircleShape)
+                          .padding(4.dp)
+                          .testTag(ProfileTestTags.SETTINGS),
+              ) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "Settings Icon",
+                    tint = Color.Green,
+                    modifier = Modifier.padding(2.dp).size(40.dp))
+              }
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 24.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                  ProfilePicture(profilePictureRes = profile.author.profilePicture)
+                  Column(Modifier.weight(1f)) {
                     Text(
-                        text = "${profile.author.reviewRate}/${MAX_RATING}",
+                        text = profile.author.pseudonym,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
                         modifier =
-                            Modifier.padding(TEXT_SIZE)
-                                .testTag(ProfileTestTags.PROFILE_REVIEW_RATING))
-                    Rating(rating = profile.author.reviewRate, RatingType.STAR)
-                  }
-                  Row {
-                    Text(
-                        text = "${profile.author.sportRate}/${MAX_RATING}",
-                        modifier =
-                            Modifier.padding(TEXT_SIZE)
-                                .testTag(ProfileTestTags.PROFILE_SPORT_RATING))
-                    Rating(rating = profile.author.sportRate, RatingType.SPORT)
+                            Modifier.padding(TEXT_SIZE).testTag(ProfileTestTags.PROFILE_PSEUDONYM))
+                    Row {
+                      Text(
+                          text = "${profile.author.reviewRate}/${MAX_RATING}",
+                          modifier =
+                              Modifier.padding(TEXT_SIZE)
+                                  .testTag(ProfileTestTags.PROFILE_REVIEW_RATING))
+                      Rating(rating = profile.author.reviewRate, RatingType.STAR)
+                      Text(
+                          text = "- $reviewCount reviews",
+                          fontSize = 14.sp,
+                          color = Color.Gray,
+                          modifier =
+                              Modifier.padding(start = 4.dp)
+                                  .testTag(ProfileTestTags.PROFILE_REVIEWS_COUNT))
+                    }
+                    val doneHuntsCount = profile.doneHunts.size
+                    Row {
+                      Text(
+                          text = "${profile.author.sportRate}/${MAX_RATING}",
+                          modifier =
+                              Modifier.padding(TEXT_SIZE)
+                                  .testTag(ProfileTestTags.PROFILE_SPORT_RATING))
+                      Rating(rating = profile.author.sportRate, RatingType.SPORT)
+                      Text(
+                          text = "- $doneHuntsCount Hunts done",
+                          fontSize = 14.sp,
+                          color = Color.Gray,
+                          modifier =
+                              Modifier.padding(start = 4.dp)
+                                  .testTag(ProfileTestTags.PROFILE_HUNTS_DONE_COUNT))
+                    }
                   }
                 }
-
-                IconButton(
-                    onClick = onSettings, modifier = Modifier.testTag(ProfileTestTags.SETTINGS)) {
-                      Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
-                    }
-              }
+          }
 
           Text(
               text = profile.author.bio,
               fontSize = 16.sp,
               modifier =
                   Modifier.fillMaxWidth()
-                      .padding(horizontal = 16.dp, vertical = 8.dp)
+                      .padding(horizontal = 16.dp, vertical = 4.dp)
                       .testTag(ProfileTestTags.PROFILE_BIO))
 
           LazyColumn(
