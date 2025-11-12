@@ -64,6 +64,7 @@ object ProfileTestTags {
   const val PROFILE_SPORT_RATING = "PROFILE_SPORT_RATING"
   const val EMPTY_HUNTS_MESSAGE = "EMPTY_HUNTS_MESSAGE"
   const val PROFILE_SCREEN = "PROFILE_SCREEN"
+  const val SETTINGS = "SETTINGS"
 
   fun getTestTagForHuntCard(hunt: Hunt, index: Int): String = "HUNT_CARD_$index"
 }
@@ -135,7 +136,7 @@ fun ProfileScreen(
     return
   }
 
-  val isMyProfile = testMode || uiState.isMyProfile || (userId == null || profile.uid == userId)
+  val isMyProfile = testMode || uiState.isMyProfile
 
   var selectedTab by remember { mutableStateOf(ProfileTab.MY_HUNTS) }
   Scaffold(
@@ -184,9 +185,10 @@ fun ProfileScreen(
                   }
                 }
 
-                IconButton(onClick = onSettings) {
-                  Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
-                }
+                IconButton(
+                    onClick = onSettings, modifier = Modifier.testTag(ProfileTestTags.SETTINGS)) {
+                      Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
+                    }
               }
 
           Text(

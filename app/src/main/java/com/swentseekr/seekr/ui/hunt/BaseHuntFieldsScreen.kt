@@ -1,5 +1,8 @@
 package com.swentseekr.seekr.ui.hunt
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -17,7 +20,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
 
@@ -129,6 +135,7 @@ fun BaseHuntFieldsScreen(
     onDifficultySelect: (Difficulty) -> Unit,
     onStatusSelect: (HuntStatus) -> Unit,
     onSelectLocations: () -> Unit,
+    onSelectImage: (Uri?) -> Unit,
     onSave: () -> Unit,
     onGoBack: () -> Unit,
 ) {
@@ -136,6 +143,11 @@ fun BaseHuntFieldsScreen(
   var showDifficultyDropdown by rememberSaveable { mutableStateOf(false) }
 
   val scrollState = rememberScrollState()
+
+  // Image selector launcher
+  val imagePickerLauncher =
+      rememberLauncherForActivityResult(
+          contract = ActivityResultContracts.GetContent(), onResult = { uri -> onSelectImage(uri) })
 
   Scaffold(
       topBar = {
@@ -149,7 +161,7 @@ fun BaseHuntFieldsScreen(
               }
             })
       },
-      content = { paddingValues ->
+      modifier = Modifier.testTag(HuntScreenTestTags.ADD_HUNT_SCREEN)) { paddingValues ->
         Column(
             modifier =
                 Modifier.fillMaxSize()
@@ -164,6 +176,32 @@ fun BaseHuntFieldsScreen(
                   unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                   focusedBorderColor = MaterialTheme.colorScheme.primary)
 
+          // IMAGE PICKER + PREVIEW
+          Text("Main Image", style = MaterialTheme.typography.titleMedium)
+          Spacer(modifier = Modifier.height(8.dp))
+
+          Button(
+              onClick = { imagePickerLauncher.launch("image/*") },
+              modifier = Modifier.fillMaxWidth()) {
+                Text("Choose Image")
+              }
+
+          // Intelligent display of the image
+          val imageToDisplay = uiState.mainImageUrl
+
+          if (!imageToDisplay.isNullOrBlank()) {
+            Spacer(modifier = Modifier.height(12.dp))
+            AsyncImage(
+                model = imageToDisplay,
+                contentDescription = "Selected Hunt Image",
+                modifier = Modifier.fillMaxWidth().height(180.dp).clip(RoundedCornerShape(12.dp)),
+                placeholder = painterResource(R.drawable.empty_image),
+                error = painterResource(R.drawable.empty_image))
+          }
+
+          Spacer(modifier = Modifier.height(SPACER_HEIGHT.dp))
+
+          // === Form ===
           ValidatedOutlinedField(
               value = uiState.title,
               onValueChange = onTitleChange,
@@ -183,6 +221,7 @@ fun BaseHuntFieldsScreen(
               shape = fieldShape,
               colors = fieldColors)
 
+          // === STATUS ===
           ExposedDropdownMenuBox(
               expanded = showStatusDropdown, onExpandedChange = { showStatusDropdown = it }) {
                 OutlinedTextField(
@@ -217,6 +256,7 @@ fun BaseHuntFieldsScreen(
                     }
               }
 
+          // === DIFFICULTY ===
           ExposedDropdownMenuBox(
               expanded = showDifficultyDropdown,
               onExpandedChange = { showDifficultyDropdown = it }) {
@@ -302,6 +342,5 @@ fun BaseHuntFieldsScreen(
                 Text(BUTTON_SAVE_HUNT, style = MaterialTheme.typography.titleMedium)
               }
         }
-      },
-      modifier = Modifier.testTag(HuntScreenTestTags.ADD_HUNT_SCREEN))
+      }
 }

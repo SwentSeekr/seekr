@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.hunt
 
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
@@ -14,14 +15,17 @@ fun BaseHuntScreen(
     onGoBack: () -> Unit = {},
     onDone: () -> Unit = {},
     testMode: Boolean = false,
+    onSelectImage: (Uri?) -> Unit = {},
 ) {
   val uiState by vm.uiState.collectAsState()
   val context = LocalContext.current
 
+  // Test mode
   if (testMode) {
     LaunchedEffect(Unit) { vm.setTestMode(true) }
   }
 
+  // Toast when then hunt is saved
   LaunchedEffect(uiState.saveSuccessful) {
     if (uiState.saveSuccessful) {
       Toast.makeText(context, TOAST_HUNT_SAVED, Toast.LENGTH_SHORT).show()
@@ -30,6 +34,7 @@ fun BaseHuntScreen(
     }
   }
 
+  // Toast for errors
   LaunchedEffect(uiState.errorMsg) {
     uiState.errorMsg?.let {
       Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
@@ -37,6 +42,7 @@ fun BaseHuntScreen(
     }
   }
 
+  // Map : point selection
   if (uiState.isSelectingPoints) {
     BaseAddPointsMapScreen(
         initPoints = uiState.points,
@@ -58,6 +64,7 @@ fun BaseHuntScreen(
         onDifficultySelect = vm::setDifficulty,
         onStatusSelect = vm::setStatus,
         onSelectLocations = { vm.setIsSelectingPoints(true) },
+        onSelectImage = onSelectImage,
         onSave = { vm.submit() },
         onGoBack = onGoBack,
     )

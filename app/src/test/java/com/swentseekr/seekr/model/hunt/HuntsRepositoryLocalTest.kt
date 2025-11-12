@@ -23,7 +23,7 @@ class HuntsRepositoryLocalTest {
           distance = 5.0,
           difficulty = Difficulty.EASY,
           authorId = "0",
-          image = 2,
+          mainImageUrl = "",
           reviewRate = 4.5)
 
   @Before

@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.hunt.add
 
+import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
 import com.swentseekr.seekr.model.hunt.*
 import com.swentseekr.seekr.ui.hunt.BaseHuntViewModel
@@ -8,10 +9,13 @@ import com.swentseekr.seekr.ui.hunt.HuntUIState
 class AddHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.repository) :
     BaseHuntViewModel(repository) {
 
-  override fun buildHunt(state: HuntUIState): Hunt {
+  var mainImageUri: Uri? = null
+  var otherImagesUris: List<Uri> = emptyList()
 
+  override fun buildHunt(state: HuntUIState): Hunt {
     val uid = repository.getNewUid()
     val authorId = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown"
+
     return Hunt(
         uid = uid,
         start = state.points.first(),
@@ -24,11 +28,13 @@ class AddHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.repo
         distance = state.distance.toDouble(),
         difficulty = state.difficulty!!,
         authorId = authorId,
-        image = state.image,
+        mainImageUrl = "", // The URL will be updated after the image is uploaded.
+        otherImagesUrls = emptyList(),
         reviewRate = state.reviewRate)
   }
 
   override suspend fun persist(hunt: Hunt) {
-    repository.addHunt(hunt)
+    // We sent hunt + images to the repository to handle uploading
+    repository.addHunt(hunt = hunt, mainImageUri = mainImageUri, otherImageUris = otherImagesUris)
   }
 }

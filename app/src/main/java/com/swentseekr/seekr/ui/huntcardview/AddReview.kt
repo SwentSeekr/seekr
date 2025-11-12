@@ -22,6 +22,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,11 +35,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.swentseekr.seekr.R
-import com.swentseekr.seekr.model.hunt.Difficulty
-import com.swentseekr.seekr.model.hunt.Hunt
-import com.swentseekr.seekr.model.hunt.HuntStatus
-import com.swentseekr.seekr.model.map.Location
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
 
 val SPACEPADDING = 16.dp
 val TITLEFONTSIZE = 24.sp
@@ -58,30 +57,14 @@ object AddReviewScreenTestTags {
 fun AddReviewScreen(
     huntId: String,
     modifier: Modifier = Modifier,
-    // reviewViewModel: HuntCardReviewViewModel = viewModel(),
+    reviewViewModel: ReviewHuntViewModel = viewModel(),
     onGoBack: () -> Unit = {},
     onDone: () -> Unit = {},
     onCancel: () -> Unit = {},
 ) {
-  // val uiState by reviewViewModel.uiState.collectAsState()
-  // LaunchedEffect(huntId) { reviewViewModel.loadHunt(huntId) }
-  // val hunt = uiState.hunt
-  val hunt =
-      Hunt(
-          uid = "hunt123",
-          start = Location(40.7128, -74.0060, "New York"),
-          end = Location(40.730610, -73.935242, "Brooklyn"),
-          middlePoints = emptyList(),
-          status = HuntStatus.FUN,
-          title = "City Exploration",
-          description =
-              "Discover hidden gems in the city åß∂ƒ@ªº∆¬±“#Ç[]|{}≠¿´‘¶–…«¬∆øπ§¢æ‘¡°œ∑€®️†Ωn hello kitty",
-          time = 2.5,
-          distance = 5.0,
-          difficulty = Difficulty.DIFFICULT,
-          authorId = "0",
-          image = R.drawable.ic_launcher_foreground,
-          reviewRate = 4.5)
+  val uiState by reviewViewModel.uiState.collectAsState()
+  LaunchedEffect(huntId) { reviewViewModel.loadHunt(huntId) }
+  val hunt = uiState.hunt
   var rating by remember { mutableStateOf("") }
   var comment by remember { mutableStateOf("") }
   val isRatingValid = rating.toDoubleOrNull()?.let { it in 1.0..5.0 } == true
@@ -117,13 +100,15 @@ fun AddReviewScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top) {
               Spacer(modifier = modifier.height(SPACEPADDING))
+
+              Spacer(modifier = modifier.height(SPACEPADDING))
               Text(
-                  text = hunt.title,
+                  text = hunt?.title ?: "Loading...",
                   fontSize = TITLEFONTSIZE,
                   fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                   modifier = modifier.padding(vertical = 4.dp))
               Text(
-                  text = hunt.uid,
+                  text = hunt?.uid ?: "Loading...",
                   fontSize = SUBTITLEFONTSIZE,
               )
               Spacer(modifier = modifier.height(SPACEPADDING))

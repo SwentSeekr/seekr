@@ -11,7 +11,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -23,7 +22,6 @@ import com.google.firebase.auth.FirebaseUser
 import com.swentseekr.seekr.ui.components.HuntCardScreen
 import com.swentseekr.seekr.ui.hunt.add.AddHuntScreen
 import com.swentseekr.seekr.ui.hunt.edit.EditHuntScreen
-import com.swentseekr.seekr.ui.huntcardview.AddReviewScreen
 import com.swentseekr.seekr.ui.map.MapScreen
 import com.swentseekr.seekr.ui.overview.OverviewScreen
 import com.swentseekr.seekr.ui.profile.ProfileScreen
@@ -70,13 +68,6 @@ sealed class SeekrDestination(
   }
 
   object AddHunt : SeekrDestination("add_hunt", "Add Hunt", Icons.Filled.List)
-
-  // NEW: reviewHunt destination
-  object ReviewHunt : SeekrDestination("review_hunt/{huntId}", "Review Hunt", Icons.Filled.List) {
-    fun createRoute(huntId: String) = "review_hunt/$huntId"
-
-    const val ARG_HUNT_ID = "huntId"
-  }
 
   object Settings : SeekrDestination("settings", "Settings", Icons.Filled.List)
 
@@ -203,11 +194,6 @@ fun SeekrMainNavHost(
                     HuntCardScreen(
                         huntId = huntId,
                         onGoBack = { navController.popBackStack() },
-                        onAddReview = { id ->
-                          navController.navigate(SeekrDestination.ReviewHunt.createRoute(id)) {
-                            launchSingleTop = true
-                          }
-                        },
                         modifier = Modifier.testTag(NavigationTestTags.HUNTCARD_SCREEN))
                   }
 
@@ -253,29 +239,6 @@ fun SeekrMainNavHost(
                               testMode = testMode)
                         }
                   }
-
-              composable(
-                  route = SeekrDestination.ReviewHunt.route,
-                  arguments =
-                      listOf(
-                          navArgument(SeekrDestination.ReviewHunt.ARG_HUNT_ID) {
-                            type = NavType.StringType
-                          })) { backStackEntry ->
-                    val huntId =
-                        backStackEntry.arguments
-                            ?.getString(SeekrDestination.ReviewHunt.ARG_HUNT_ID)
-                            .orEmpty()
-
-                    Surface(
-                        modifier =
-                            Modifier.fillMaxSize().testTag(NavigationTestTags.REVIEW_HUNT_SCREEN)) {
-                          AddReviewScreen(
-                              huntId = huntId,
-                              onGoBack = { navController.popBackStack() },
-                              onDone = { navController.popBackStack() },
-                              onCancel = { navController.popBackStack() })
-                        }
-                  }
               composable(SeekrDestination.Settings.route) {
                 Surface(
                     modifier = Modifier.fillMaxSize().testTag(NavigationTestTags.SETTINGS_SCREEN)) {
@@ -286,10 +249,4 @@ fun SeekrMainNavHost(
               }
             }
       }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun SeekrAppPreview() {
-  SampleAppTheme { SeekrMainNavHost() }
 }
