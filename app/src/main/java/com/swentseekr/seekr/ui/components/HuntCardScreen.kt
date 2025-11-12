@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -59,6 +60,8 @@ import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
+
+const val MAX_STAR_NUMBER = 5
 
 object HuntCardScreenTestTags {
   const val GO_BACK_BUTTON = "GoBackButton"
@@ -307,7 +310,7 @@ fun HuntCardScreen(
                       .padding(innerPadding)
                       .padding(horizontal = 16.dp)
                       .padding(top = 8.dp, bottom = 16.dp)) {
-                items(10) { reviewIndex -> ReviewCard(reviews[reviewIndex]) }
+                items(reviews) { review -> ReviewCard(review) }
               }
         }
       }
@@ -324,7 +327,7 @@ fun ReviewCard(review: HuntReview) {
       colors = CardDefaults.cardColors(containerColor = Color(0xFFF8DEB6)),
   ) {
     Column(modifier = Modifier.padding(8.dp)) {
-      Text("Rating: ${review.rating}/5", fontWeight = FontWeight.Bold)
+      Text("Rating: ${review.rating}/${MAX_STAR_NUMBER}", fontWeight = FontWeight.Bold)
       Text(review.comment)
     }
   }

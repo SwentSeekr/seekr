@@ -103,12 +103,12 @@ fun AddReviewScreen(
 
               Spacer(modifier = modifier.height(SPACEPADDING))
               Text(
-                  text = if (hunt != null) hunt.title else "Loading...",
+                  text = hunt?.title ?: "Loading...",
                   fontSize = TITLEFONTSIZE,
                   fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                   modifier = modifier.padding(vertical = 4.dp))
               Text(
-                  text = if (hunt != null) hunt.uid else "Loading...",
+                  text = hunt?.uid ?: "Loading...",
                   fontSize = SUBTITLEFONTSIZE,
               )
               Spacer(modifier = modifier.height(SPACEPADDING))

@@ -7,7 +7,7 @@ import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class FakeHuntCardViewModel(hunt: Hunt) : HuntCardViewModel() { // Hérite de HuntCardViewModel
+class FakeHuntCardViewModel(hunt: Hunt) : HuntCardViewModel() { // Inherit from HuntCardViewModel
   private val _uiState =
       MutableStateFlow(
           HuntCardUiState(

@@ -44,7 +44,7 @@ class HuntCardViewModelTest {
     Dispatchers.setMain(testDispatcher)
     fakeRepository = HuntsRepositoryLocal()
     fakeRepository.addHunt(testHunt)
-    fakeRevRepository = HuntReviewRepositoryLocal() // Not used in these tests
+    fakeRevRepository = HuntReviewRepositoryLocal()
 
     viewModel = HuntCardViewModel(fakeRepository, fakeRevRepository)
 

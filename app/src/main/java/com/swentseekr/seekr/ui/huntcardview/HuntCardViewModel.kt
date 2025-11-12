@@ -18,12 +18,13 @@ data class HuntCardUiState(
     val hunt: Hunt? = null,
     val reviewList: List<HuntReview> = emptyList(),
     val isLiked: Boolean = false,
-    val isAchieved: Boolean = false
+    val isAchieved: Boolean = false,
+    val errorMsg: String? = null
 )
 
 open class HuntCardViewModel(
-    private val repository: HuntsRepository = HuntRepositoryProvider.repository,
-    private val repositoryReview: HuntReviewRepository = HuntReviewRepositoryProvider.repository
+    private val huntRepository: HuntsRepository = HuntRepositoryProvider.repository,
+    private val reviewRepository: HuntReviewRepository = HuntReviewRepositoryProvider.repository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(HuntCardUiState())
@@ -33,7 +34,7 @@ open class HuntCardViewModel(
   fun loadOtherReview(huntID: String) {
     viewModelScope.launch {
       try {
-        val reviews = repositoryReview.getHuntReviews(huntID)
+        val reviews = reviewRepository.getHuntReviews(huntID)
         _uiState.value = _uiState.value.copy(reviewList = reviews)
       } catch (e: Exception) {
         Log.e("ReviewHuntViewModel", "Error loading reviews for Hunt ID: $huntID", e)
@@ -49,7 +50,7 @@ open class HuntCardViewModel(
   fun loadHunt(huntID: String) {
     viewModelScope.launch {
       try {
-        val hunt = repository.getHunt(huntID)
+        val hunt = huntRepository.getHunt(huntID)
         _uiState.value =
             HuntCardUiState(
                 hunt = hunt, isLiked = false, isAchieved = false, reviewList = emptyList())
@@ -63,7 +64,7 @@ open class HuntCardViewModel(
   fun loadHuntAuthor(huntID: String) {
     viewModelScope.launch {
       try {
-        val hunt = repository.getHunt(huntID)
+        val hunt = huntRepository.getHunt(huntID)
         val authorId = hunt.authorId
         // repositoryAuthor.getPseudo(authorId)
       } catch (e: Exception) {
@@ -75,7 +76,7 @@ open class HuntCardViewModel(
   fun deleteHunt(huntID: String) {
     viewModelScope.launch {
       try {
-        repository.deleteHunt(huntID)
+        huntRepository.deleteHunt(huntID)
       } catch (e: Exception) {
         Log.e("HuntCardViewModel", "Error in deleting Hunt by ID: $huntID", e)
       }
@@ -85,7 +86,7 @@ open class HuntCardViewModel(
   fun editHunt(huntID: String, newValue: Hunt) {
     viewModelScope.launch {
       try {
-        repository.editHunt(huntID, newValue)
+        huntRepository.editHunt(huntID, newValue)
       } catch (e: Exception) {
         Log.e("HuntCardViewModel", "Error in editing Hunt by ID: $huntID", e)
       }

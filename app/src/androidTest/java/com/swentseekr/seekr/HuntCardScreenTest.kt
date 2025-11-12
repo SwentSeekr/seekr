@@ -13,6 +13,7 @@ import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.components.HuntCardScreen
 import com.swentseekr.seekr.ui.components.HuntCardScreenTestTags
+import junit.framework.TestCase.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,7 +52,7 @@ class HuntCardScreenTest {
           testmode = true)
     }
 
-    // Vérifie la présence des éléments principaux
+    // Verifies the presence of principal UI elements
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.GO_BACK_BUTTON).assertIsDisplayed()
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.TITLE_TEXT).assertIsDisplayed()
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.AUTHOR_TEXT).assertIsDisplayed()
@@ -82,14 +83,14 @@ class HuntCardScreenTest {
           testmode = true)
     }
 
-    // Clique sur les boutons
+    // Click on boutons
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.GO_BACK_BUTTON).performClick()
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.BEGIN_BUTTON).performClick()
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.REVIEW_BUTTON).performClick()
 
-    // Vérifie les callbacks
-    assert(goBackClicked)
-    assert(beginClicked)
-    assert(reviewClicked)
+    // Verifies callbacks
+    assertTrue(goBackClicked)
+    assertTrue(beginClicked)
+    assertTrue(reviewClicked)
   }
 }
