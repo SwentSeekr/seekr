@@ -43,8 +43,9 @@ class HuntCardReviewScreenTest {
   @Test
   fun star_rating_can_be_selected() {
     composeRule.setContent { MaterialTheme { AddReviewScreen(huntId = "hunt123") } }
-    composeRule.onNodeWithTag("Star_3").performClick()
-    composeRule.onNodeWithTag("Star_3").assertExists()
+    val starTag = AddReviewScreenTestTags.starTag(3)
+    composeRule.onNodeWithTag(starTag).performClick()
+    composeRule.onNodeWithTag(starTag).assertExists()
   }
 
   @Test
@@ -65,7 +66,8 @@ class HuntCardReviewScreenTest {
 
     composeRule.onNodeWithTag(AddReviewScreenTestTags.GO_BACK_BUTTON).performClick()
     composeRule.onNodeWithTag(AddReviewScreenTestTags.CANCEL_BUTTON).performClick()
-    composeRule.onNodeWithTag("Star_4").performClick()
+    val starTag = AddReviewScreenTestTags.starTag(4)
+    composeRule.onNodeWithTag(starTag).performClick()
     composeRule.onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON).performClick()
 
     assertTrue(backCalled)
@@ -84,8 +86,12 @@ class HuntCardReviewScreenTest {
   fun info_column_scrolls_to_bottom() {
     composeRule.setContent { MaterialTheme { AddReviewScreen(huntId = "hunt123") } }
 
-    val buttonsRow = composeRule.onNodeWithTag(AddReviewScreenTestTags.BUTTONS_ROW)
-    buttonsRow.assertExists()
-    buttonsRow.performScrollTo()
+    composeRule.onNodeWithTag(AddReviewScreenTestTags.INFO_COLUMN).assertExists()
+    composeRule.onNodeWithTag(AddReviewScreenTestTags.BUTTONS_ROW).performScrollTo()
+
+    composeRule.onNodeWithTag(AddReviewScreenTestTags.CANCEL_BUTTON).assertExists()
+    composeRule.onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON).assertExists()
+
+    composeRule.onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON).performClick()
   }
 }

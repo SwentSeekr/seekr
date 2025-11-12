@@ -104,14 +104,14 @@ class ReviewHuntViewModelTest {
 
   @Test
   fun addPhoto_addsToList() = runTest {
-    val photo = "url" // PhotoFile("url", "Start point")
+    val photo = "url"
     viewModel.addPhoto(photo)
     assertTrue(viewModel.uiState.value.photos.contains(photo))
   }
 
   @Test
   fun removePhoto_removesFromList() = runTest {
-    val photo = "" // PhotoFile("photo1", "uri1")
+    val photo = ""
     viewModel.addPhoto(photo)
     viewModel.removePhoto(photo)
     assertFalse(viewModel.uiState.value.photos.contains(photo))
@@ -229,7 +229,6 @@ class ReviewHuntViewModelTest {
 
     val createdReview = fakeReviewRepository.getHuntReviews(testHunt.uid).first()
 
-    // Inject currentUserId manually
     viewModel.deleteReview(createdReview.reviewId, "user123", currentUserId = "otherUser456")
     advanceUntilIdle()
 

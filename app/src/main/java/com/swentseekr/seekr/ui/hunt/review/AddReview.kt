@@ -54,7 +54,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.google.firebase.auth.FirebaseAuth
 import com.swentseekr.seekr.R
 
 val SPACE_PADDING = 16.dp
@@ -70,6 +69,8 @@ object AddReviewScreenTestTags {
   const val CANCEL_BUTTON = "HuntCardReview_CancelButton"
   const val DONE_BUTTON = "HuntCardReview_DoneButton"
   const val ERROR_MESSAGE = "HuntCardReview_ErrorMessage"
+
+  fun starTag(index: Int) = "Star_$index"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,35 +88,14 @@ fun AddReviewScreen(
   LaunchedEffect(huntId) { reviewViewModel.loadHunt(huntId) }
   val hunt = uiState.hunt
   val maxStar = 5
-  var rating by remember { mutableStateOf("") }
-  var ratingStar by remember { mutableStateOf(0) }
-
-  var comment by remember { mutableStateOf("") }
   var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
-  // val isRatingValid = rating.toDoubleOrNull()?.let { it in 1.0..5.0 } == true
   val imagePickerLauncher =
       rememberLauncherForActivityResult(
           contract = ActivityResultContracts.GetMultipleContents(),
           onResult = { uris ->
-            selectedImages = uris // store the selected images
-            uris.forEach { uri ->
-              reviewViewModel.addPhoto(uri.toString())
-            } // optional: sync with ViewModel
+            selectedImages = uris
+            uris.forEach { uri -> reviewViewModel.addPhoto(uri.toString()) }
           })
-
-  /*
-   var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-   val imagePickerLauncher =
-       rememberLauncherForActivityResult(
-           contract = ActivityResultContracts.GetMultipleContents(), onResult = { for (photoUrl in uiState.photos)
-               {
-                   reviewViewModel.addPhoto(photoUrl.toString())}
-               //uri -> selectedImageUri = uri // viewModel aussi apres
-          }
-       )
-
-
-  */
 
   Scaffold(
       topBar = {
@@ -207,16 +187,11 @@ fun AddReviewScreen(
                   modifier = Modifier.fillMaxWidth()) {
                     Icon(
                         imageVector = Icons.Default.AddCircle,
-                        // painter = painterResource(R.drawable.ic_add_photo), // Your custom vector
-                        // drawable
                         contentDescription = "Add Photo",
                         modifier = Modifier.size(20.dp))
                     Text("Add Pictures", modifier = Modifier.padding(start = 8.dp))
                   }
 
-              // Intelligent display of the image
-              // val imageToDisplay =  selectedImageUri?.toString() ?:
-              // uiState.hunt?.mainImageUrl//uiState.hunt?.mainImageUrl
               if (uiState.photos.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(12.dp))
                 LazyRow(
@@ -233,18 +208,6 @@ fun AddReviewScreen(
                     }
               }
 
-              /*
-              if (!imageToDisplay.isNullOrBlank()) {
-                  Spacer(modifier = Modifier.height(12.dp))
-                  AsyncImage(
-                      model = imageToDisplay,
-                      contentDescription = "Selected Hunt Image",
-                      modifier = Modifier.fillMaxWidth().height(180.dp).clip(RoundedCornerShape(12.dp)),
-                      placeholder = painterResource(R.drawable.empty_image),
-                      error = painterResource(R.drawable.empty_image))
-              }
-
-               */
               Row(
                   modifier =
                       modifier
@@ -263,13 +226,9 @@ fun AddReviewScreen(
                         }
                     Button(
                         onClick = {
-                          hunt?.let {
-                            reviewViewModel.submitReviewHunt(
-                                FirebaseAuth.getInstance().currentUser?.uid ?: "0", hunt = hunt)
-                          }
+                          hunt?.let { reviewViewModel.submitCurrentUserReview(it) }
                           onDone()
                         },
-                        // enabled = isRatingValid,
                         modifier = modifier.testTag(AddReviewScreenTestTags.DONE_BUTTON)) {
                           Text("Done")
                         }
@@ -296,7 +255,7 @@ fun StarRatingBar(maxStars: Int = 5, rating: Int = 0, onRatingChanged: (Int) -> 
                       onRatingChanged(i)
                     }
                   }
-                  .testTag("Star_$i"))
+                  .testTag(AddReviewScreenTestTags.starTag(i)))
     }
   }
 }
@@ -304,5 +263,5 @@ fun StarRatingBar(maxStars: Int = 5, rating: Int = 0, onRatingChanged: (Int) -> 
 @Preview
 @Composable
 fun AddReviewScreenPreview() {
-  // AddReviewScreen("hunt123")
+  AddReviewScreen("hunt123")
 }

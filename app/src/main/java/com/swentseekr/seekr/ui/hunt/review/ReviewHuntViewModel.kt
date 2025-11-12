@@ -3,6 +3,7 @@ package com.swentseekr.seekr.ui.hunt.review
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.swentseekr.seekr.model.hunt.Hunt
@@ -23,7 +24,6 @@ data class ReviewHuntUIState(
     val reviewText: String = "",
     val rating: Double = 0.0,
     val isSubmitted: Boolean = false,
-    // val photos: List<PhotoFile> = emptyList<PhotoFile>(),
     val photos: List<String> = emptyList(),
     val errorMsg: String? = null,
     val saveSuccessful: Boolean = false,
@@ -157,16 +157,7 @@ class ReviewHuntViewModel(
   /** Clears the review form if the review was submitted successfully. */
   fun clearForm() {
     if (_uiState.value.saveSuccessful) {
-      _uiState.value =
-          _uiState.value.copy(
-              reviewText = "",
-              rating = 0.0,
-              photos = emptyList(),
-              isSubmitted = false,
-              saveSuccessful = false,
-              invalidReviewText = null,
-              invalidRating = null,
-              errorMsg = null)
+      clearFormCancel()
     } else {
       setErrorMsg("Cannot clear form, review not submitted successfully.")
     }
@@ -183,5 +174,10 @@ class ReviewHuntViewModel(
             invalidReviewText = null,
             invalidRating = null,
             errorMsg = null)
+  }
+
+  fun submitCurrentUserReview(hunt: Hunt) {
+    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "0"
+    submitReviewHunt(userId, hunt)
   }
 }
