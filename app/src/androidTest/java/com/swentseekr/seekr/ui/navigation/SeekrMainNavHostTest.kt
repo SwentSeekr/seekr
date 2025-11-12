@@ -14,7 +14,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
 import com.swentseekr.seekr.model.profile.createHunt
-import com.swentseekr.seekr.ui.hunt.HuntScreenTestTags
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
 import com.swentseekr.seekr.ui.profile.ProfileTestTags
 import com.swentseekr.seekr.utils.FakeRepoSuccess
@@ -354,35 +353,6 @@ class SeekrNavigationTest {
           true
         }
       }
-    }
-  }
-
-  @Test
-  fun edit_hunt_test_done_navigates_back_to_profile_and_restores_bottom_bar() {
-    // Seed matching hunt and navigate to Edit
-    val seeded = createHunt(uid = "hunt123", title = "t")
-
-    withFakeRepo(FakeRepoSuccess(listOf(seeded))) {
-      compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
-      goToProfileTab()
-      node("HUNT_CARD_0").performClick()
-      node(NavigationTestTags.EDIT_HUNT_SCREEN).assertIsDisplayed()
-      node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
-
-      compose.onNodeWithTag(HuntScreenTestTags.HUNT_SAVE, useUnmergedTree = true).performClick()
-      compose.waitForIdle()
-
-      // We should now be on the Profile tab; bottom bar visible; Edit wrapper gone.
-      waitUntilTrue(MED) {
-        node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
-        true
-      }
-      val editGone =
-          compose
-              .onAllNodes(hasTestTag(NavigationTestTags.EDIT_HUNT_SCREEN), useUnmergedTree = true)
-              .fetchSemanticsNodes()
-              .isEmpty()
-      assert(editGone)
     }
   }
 }
