@@ -11,7 +11,6 @@ import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.model.hunt.HuntReviewRepository
 import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryProvider
 import com.swentseekr.seekr.model.hunt.HuntsRepository
-import com.swentseekr.seekr.model.hunt.PhotoFile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +23,8 @@ data class ReviewHuntUIState(
     val reviewText: String = "",
     val rating: Double = 0.0,
     val isSubmitted: Boolean = false,
-    val photos: List<PhotoFile> = emptyList<PhotoFile>(),
+    // val photos: List<PhotoFile> = emptyList<PhotoFile>(),
+    val photos: List<String> = emptyList(),
     val errorMsg: String? = null,
     val saveSuccessful: Boolean = false,
     val invalidReviewText: String? = null,
@@ -58,16 +58,6 @@ class ReviewHuntViewModel(
         _uiState.value = ReviewHuntUIState(hunt = hunt)
       } catch (e: Exception) {
         Log.e("ReviewHuntViewModel", "Error loading Hunt by ID: $huntID", e)
-      }
-    }
-  }
-  /** Loads reviews for a specific hunt. */
-  fun loadOtherReview(huntID: String) {
-    viewModelScope.launch {
-      try {
-        val reviews = repositoryReview.getHuntReviews(huntID)
-      } catch (e: Exception) {
-        Log.e("ReviewHuntViewModel", "Error loading reviews for Hunt ID: $huntID", e)
       }
     }
   }
@@ -120,7 +110,7 @@ class ReviewHuntViewModel(
     _uiState.value =
         _uiState.value.copy(
             reviewText = text,
-            invalidReviewText = if (text.isBlank()) "The review should not be empty" else null)
+            invalidReviewText = if (text.isBlank()) "The review cannot be empty" else null)
   }
 
   /** Sets the rating for the review and validates it. */
@@ -136,28 +126,32 @@ class ReviewHuntViewModel(
    * Handles the submit button click event. Validates the input and submits the review to the
    * repository.
    */
-  fun submitReviewHunt(userID: String, hunt: Hunt) {
+  fun submitReviewHunt(userId: String, hunt: Hunt) {
     val state = _uiState.value
     if (!state.isValid) {
       setErrorMsg("At least one field is not valid")
       return
     }
     _uiState.value = _uiState.value.copy(isSubmitted = true)
-    reviewHuntToRepository(userID, hunt)
+    reviewHuntToRepository(userId, hunt)
   }
 
   /** Adds a photo to the current list of photos in the UI state. */
-  fun addPhoto(myPhoto: PhotoFile) {
+  fun addPhoto(myPhoto: String) {
     val currentPhotos = _uiState.value.photos.toMutableList()
     currentPhotos.add(myPhoto)
     _uiState.value = _uiState.value.copy(photos = currentPhotos)
   }
 
   /** Removes a photo from the current list of photos in the UI state. */
-  fun removePhoto(myPhoto: PhotoFile) {
+  fun removePhoto(myPhoto: String) {
     val currentPhotos = _uiState.value.photos.toMutableList()
     currentPhotos.remove(myPhoto)
     _uiState.value = _uiState.value.copy(photos = currentPhotos)
+  }
+
+  fun updateRating(newRating: Double) {
+    _uiState.value = _uiState.value.copy(rating = newRating)
   }
 
   /** Clears the review form if the review was submitted successfully. */
@@ -176,5 +170,18 @@ class ReviewHuntViewModel(
     } else {
       setErrorMsg("Cannot clear form, review not submitted successfully.")
     }
+  }
+
+  fun clearFormCancel() {
+    _uiState.value =
+        _uiState.value.copy(
+            reviewText = "",
+            rating = 0.0,
+            photos = emptyList(),
+            isSubmitted = false,
+            saveSuccessful = false,
+            invalidReviewText = null,
+            invalidRating = null,
+            errorMsg = null)
   }
 }

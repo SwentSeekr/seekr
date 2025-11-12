@@ -5,10 +5,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.swentseekr.seekr.ui.huntcardview.AddReviewScreen
-import com.swentseekr.seekr.ui.huntcardview.AddReviewScreenTestTags
+import com.swentseekr.seekr.ui.hunt.review.AddReviewScreen
+import com.swentseekr.seekr.ui.hunt.review.AddReviewScreenTestTags
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -23,9 +24,9 @@ class HuntCardReviewScreenTest {
     composeRule.setContent { MaterialTheme { AddReviewScreen(huntId = "hunt123") } }
 
     composeRule.onNodeWithTag(AddReviewScreenTestTags.GO_BACK_BUTTON).assertExists()
-    composeRule.onNodeWithTag(AddReviewScreenTestTags.INFO_COLLUMN).assertExists()
-    composeRule.onNodeWithTag(AddReviewScreenTestTags.RATE_TEXTFIELD).assertExists()
-    composeRule.onNodeWithTag(AddReviewScreenTestTags.COMMENT_TEXTFIELD).assertExists()
+    composeRule.onNodeWithTag(AddReviewScreenTestTags.INFO_COLUMN).assertExists()
+    composeRule.onNodeWithTag(AddReviewScreenTestTags.RATING_BAR).assertExists()
+    composeRule.onNodeWithTag(AddReviewScreenTestTags.COMMENT_TEXT_FIELD).assertExists()
     composeRule.onNodeWithTag(AddReviewScreenTestTags.BUTTONS_ROW).assertExists()
     composeRule.onNodeWithTag(AddReviewScreenTestTags.CANCEL_BUTTON).assertExists()
     composeRule.onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON).assertExists()
@@ -34,11 +35,16 @@ class HuntCardReviewScreenTest {
   @Test
   fun typing_in_fields_updates_text() {
     composeRule.setContent { MaterialTheme { AddReviewScreen(huntId = "hunt123") } }
-
-    composeRule.onNodeWithTag(AddReviewScreenTestTags.RATE_TEXTFIELD).performTextInput("4.5")
     composeRule
-        .onNodeWithTag(AddReviewScreenTestTags.COMMENT_TEXTFIELD)
+        .onNodeWithTag(AddReviewScreenTestTags.COMMENT_TEXT_FIELD)
         .performTextInput("Great hunt!")
+  }
+
+  @Test
+  fun star_rating_can_be_selected() {
+    composeRule.setContent { MaterialTheme { AddReviewScreen(huntId = "hunt123") } }
+    composeRule.onNodeWithTag("Star_3").performClick()
+    composeRule.onNodeWithTag("Star_3").assertExists()
   }
 
   @Test
@@ -59,13 +65,27 @@ class HuntCardReviewScreenTest {
 
     composeRule.onNodeWithTag(AddReviewScreenTestTags.GO_BACK_BUTTON).performClick()
     composeRule.onNodeWithTag(AddReviewScreenTestTags.CANCEL_BUTTON).performClick()
-
-    composeRule.onNodeWithTag(AddReviewScreenTestTags.RATE_TEXTFIELD).performTextInput("4")
-
+    composeRule.onNodeWithTag("Star_4").performClick()
     composeRule.onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON).performClick()
 
     assertTrue(backCalled)
     assertTrue(cancelCalled)
     assertTrue(doneCalled)
+  }
+
+  @Test
+  fun topAppBar_displays_back_button() {
+    composeRule.setContent { MaterialTheme { AddReviewScreen(huntId = "hunt123") } }
+
+    composeRule.onNodeWithTag(AddReviewScreenTestTags.GO_BACK_BUTTON).assertExists()
+  }
+
+  @Test
+  fun info_column_scrolls_to_bottom() {
+    composeRule.setContent { MaterialTheme { AddReviewScreen(huntId = "hunt123") } }
+
+    val buttonsRow = composeRule.onNodeWithTag(AddReviewScreenTestTags.BUTTONS_ROW)
+    buttonsRow.assertExists()
+    buttonsRow.performScrollTo()
   }
 }

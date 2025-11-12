@@ -22,10 +22,9 @@ class HuntReviewRepositoryFirestoreTest {
           huntId = "testHuntID",
           rating = 4.5,
           comment = "Great hunt!",
-          photos =
-              listOf(
-                  PhotoFile(url = "http://example.com/photo1.jpg", description = "At the start"),
-                  PhotoFile(url = "http://example.com/photo2.jpg", description = "At the end")))
+          photos = listOf("http://example.com/photo1.jpg", "http://example.com/photo2.jpg"))
+  // PhotoFile(url = "http://example.com/photo1.jpg", description = "At the start"),
+  // PhotoFile(url = "http://example.com/photo2.jpg", description = "At the end")))
 
   @Before
   fun setUp() {

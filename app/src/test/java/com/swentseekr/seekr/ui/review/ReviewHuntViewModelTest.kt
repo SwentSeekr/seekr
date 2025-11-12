@@ -5,7 +5,6 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryLocal
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryLocal
-import com.swentseekr.seekr.model.hunt.PhotoFile
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
 import kotlinx.coroutines.Dispatchers
@@ -76,7 +75,7 @@ class ReviewHuntViewModelTest {
   fun setReviewText_blank_setsInvalidMessage() = runTest {
     viewModel.setReviewText("")
     val state = viewModel.uiState.value
-    assertEquals("The review should not be empty", state.invalidReviewText)
+    assertEquals("The review cannot be empty", state.invalidReviewText)
   }
 
   @Test
@@ -98,15 +97,21 @@ class ReviewHuntViewModelTest {
   }
 
   @Test
+  fun updateRating_updatesUiStateRating() = runTest {
+    viewModel.updateRating(3.5)
+    assertEquals(3.5, viewModel.uiState.value.rating, 0.0)
+  }
+
+  @Test
   fun addPhoto_addsToList() = runTest {
-    val photo = PhotoFile("url", "Start point")
+    val photo = "url" // PhotoFile("url", "Start point")
     viewModel.addPhoto(photo)
     assertTrue(viewModel.uiState.value.photos.contains(photo))
   }
 
   @Test
   fun removePhoto_removesFromList() = runTest {
-    val photo = PhotoFile("photo1", "uri1")
+    val photo = "" // PhotoFile("photo1", "uri1")
     viewModel.addPhoto(photo)
     viewModel.removePhoto(photo)
     assertFalse(viewModel.uiState.value.photos.contains(photo))
@@ -169,6 +174,32 @@ class ReviewHuntViewModelTest {
     viewModel.clearForm()
     assertEquals(
         "Cannot clear form, review not submitted successfully.", viewModel.uiState.value.errorMsg)
+  }
+
+  @Test
+  fun clearForm_afterCancel_resetsForm() = runTest {
+    viewModel.loadHunt(testHunt.uid)
+    advanceUntilIdle()
+    viewModel.setReviewText("Amazing!")
+    viewModel.setRating(5.0)
+    viewModel.submitReviewHunt("user123", testHunt)
+    advanceUntilIdle()
+
+    viewModel.clearFormCancel()
+    val state = viewModel.uiState.value
+    assertEquals(testHunt, state.hunt)
+    assertEquals("", state.reviewText)
+  }
+
+  @Test
+  fun clearForm_afterCancel_whenNothing_resetsForm() = runTest {
+    viewModel.loadHunt(testHunt.uid)
+    advanceUntilIdle()
+
+    viewModel.clearFormCancel()
+    val state = viewModel.uiState.value
+    assertEquals(testHunt, state.hunt)
+    assertEquals("", state.reviewText)
   }
 
   @Test
