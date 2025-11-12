@@ -48,12 +48,8 @@ class HuntReviewRepositoryFirestore(private val db: FirebaseFirestore) : HuntRev
       val huntID = document.getString("huntId") ?: return null
       val rating = document.getDouble("rating") ?: return null
       val comment = document.getString("comment") ?: return null
-      val photosData = document.get("photos") as? List<Map<String, Any>> ?: emptyList()
-      val photos =
-          photosData.map {
-            PhotoFile(
-                url = it["url"] as? String ?: "", description = it["description"] as? String ?: "")
-          }
+      val photos = document.get("photos") as? List<String> ?: emptyList()
+
       HuntReview(
           reviewId = reviewID,
           authorId = authorID,
