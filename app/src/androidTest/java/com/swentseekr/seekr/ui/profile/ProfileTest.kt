@@ -24,7 +24,7 @@ import com.swentseekr.seekr.ui.components.RatingType
 import org.junit.Rule
 import org.junit.Test
 
-const val UI_WAIT_TIMEOUT = 15_000L
+const val UI_WAIT_TIMEOUT = 3_000L
 
 fun hasBackgroundColor(expected: Color) = SemanticsMatcher.expectValue(BackgroundColorKey, expected)
 
