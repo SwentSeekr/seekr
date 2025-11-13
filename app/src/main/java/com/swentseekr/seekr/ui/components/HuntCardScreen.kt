@@ -192,20 +192,11 @@ fun HuntCardScreen(
                                     StatsBox(
                                         hunt.difficulty.toString(),
                                         DifficultyColor(hunt.difficulty),
-                                        HuntCardScreenTestTags.DIFFICULTY_BOX,
                                         modifier)
                                     Spacer(modifier = modifier.height(4.dp))
-                                    StatsBox(
-                                        "${hunt.distance} km",
-                                        Color.White,
-                                        HuntCardScreenTestTags.DISTANCE_BOX,
-                                        modifier)
+                                    StatsBox("${hunt.distance} km", Color.White, modifier)
                                     Spacer(modifier = modifier.height(4.dp))
-                                    StatsBox(
-                                        "${hunt.time} h",
-                                        Color.White,
-                                        HuntCardScreenTestTags.TIME_BOX,
-                                        modifier)
+                                    StatsBox("${hunt.time} h", Color.White, modifier)
                                   }
                             }
                           }

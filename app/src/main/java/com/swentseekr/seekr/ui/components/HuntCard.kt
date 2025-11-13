@@ -76,11 +76,11 @@ fun HuntCard(hunt: Hunt, modifier: Modifier = Modifier) {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally) {
-                          StatsBox(hunt.difficulty.toString(), DifficultyColor(hunt.difficulty), "")
+                          StatsBox(hunt.difficulty.toString(), DifficultyColor(hunt.difficulty))
                           Spacer(modifier = modifier.height(3.dp))
-                          StatsBox("${hunt.distance} km", Color.White, "")
+                          StatsBox("${hunt.distance} km", Color.White)
                           Spacer(modifier = modifier.height(3.dp))
-                          StatsBox("${hunt.time} min", Color.White, "")
+                          StatsBox("${hunt.time} min", Color.White)
                         }
                   }
             }
@@ -102,7 +102,7 @@ private fun InfoBox(text: String, backgroundColor: Color, modifier: Modifier = M
 }*/
 
 @Composable
-fun StatsBox(title: String, backColor: Color, testTag: String, modifier: Modifier = Modifier) {
+fun StatsBox(title: String, backColor: Color, modifier: Modifier = Modifier) {
   Box(
       modifier =
           modifier
@@ -110,8 +110,7 @@ fun StatsBox(title: String, backColor: Color, testTag: String, modifier: Modifie
               .height(25.dp)
               .width(90.dp)
               .clip(RoundedCornerShape(4.dp))
-              .padding(1.dp)
-              .testTag(testTag),
+              .padding(1.dp),
   ) {
     Text(
         title,
