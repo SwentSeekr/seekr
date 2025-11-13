@@ -4,7 +4,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onFirst
@@ -12,19 +11,12 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
-import com.swentseekr.seekr.model.profile.createAlienHunt
 import com.swentseekr.seekr.model.profile.createHunt
-import com.swentseekr.seekr.ui.components.HuntCardScreenTestTags
-import com.swentseekr.seekr.ui.hunt.HuntScreenTestTags
-import com.swentseekr.seekr.ui.hunt.review.AddReviewScreenTestTags
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
-import com.swentseekr.seekr.ui.profile.EditProfileTestTags
 import com.swentseekr.seekr.ui.profile.ProfileTestTags
-import com.swentseekr.seekr.ui.settings.SettingsScreenTestTags
 import com.swentseekr.seekr.utils.FakeRepoSuccess
 import org.junit.Before
 import org.junit.Rule
@@ -284,51 +276,52 @@ class SeekrNavigationTest {
     }
   }
 
-    @Test
-    fun profile_myHunt_edit_flow_uses_mockProfileData_and_onDone_returns_to_profile() {
-        // Seed repo so EditHuntViewModel.load("hunt123") succeeds (matches mockProfileData()).
-        val seeded = createHunt(uid = "hunt123", title = "City Exploration")
+  @Test
+  fun profile_myHunt_edit_flow_uses_mockProfileData_and_onDone_returns_to_profile() {
+    // Seed repo so EditHuntViewModel.load("hunt123") succeeds (matches mockProfileData()).
+    val seeded = createHunt(uid = "hunt123", title = "City Exploration")
 
-        withFakeRepo(FakeRepoSuccess(listOf(seeded))) {
-            // Compose with testMode so Profile uses mockProfileData() and exposes HUNT_CARD_0.
-            compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
+    withFakeRepo(FakeRepoSuccess(listOf(seeded))) {
+      // Compose with testMode so Profile uses mockProfileData() and exposes HUNT_CARD_0.
+      compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
 
-            // Go to Profile tab.
-            goToProfileTab()
+      // Go to Profile tab.
+      goToProfileTab()
 
-            // Open the first My Hunt card -> navigates to EditHunt(hunt123).
-            firstNode("HUNT_CARD_0").assertIsDisplayed().performClick()
-            waitUntilTrue(MED) {
-                node(NavigationTestTags.EDIT_HUNT_SCREEN).assertIsDisplayed()
-                true
-            }
+      // Open the first My Hunt card -> navigates to EditHunt(hunt123).
+      firstNode("HUNT_CARD_0").assertIsDisplayed().performClick()
+      waitUntilTrue(MED) {
+        node(NavigationTestTags.EDIT_HUNT_SCREEN).assertIsDisplayed()
+        true
+      }
 
-            // Bottom bar should be hidden on EditHunt.
-            node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
+      // Bottom bar should be hidden on EditHunt.
+      node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
 
-            // BEST EFFORT: try to go through the "select locations" branch, then cancel (no-ops if absent).
-            runCatching {
-                listOf(
+      // BEST EFFORT: try to go through the "select locations" branch, then cancel (no-ops if
+      // absent).
+      runCatching {
+            listOf(
                     { tryClickByTag("SELECT_LOCATIONS", "HUNT_SELECT_LOCATIONS", "POINTS_PICKER") },
                     { tryClickByDesc("Select locations", "Pick points", "Select points") },
                     { tryClickByText("Select locations", "Select points", "Add points") },
                 )
-                    .any { it() }
+                .any { it() }
 
-                listOf(
+            listOf(
                     { tryClickByTag("CANCEL", "MAP_CANCEL", "Back") },
                     { tryClickByDesc("Cancel", "Back") },
                     { tryClickByText("Cancel", "Back") },
                 )
-                    .any { it() }
-            }
-                .getOrNull()
+                .any { it() }
+          }
+          .getOrNull()
 
-            // Try to SAVE to trigger onDone() → back to Profile.
-            val didClickSave =
-                listOf<(Unit) -> Boolean>(
-                    {
-                        listOf(
+      // Try to SAVE to trigger onDone() → back to Profile.
+      val didClickSave =
+          listOf<(Unit) -> Boolean>(
+                  {
+                    listOf(
                             "SAVE",
                             "SAVE_BUTTON",
                             "HUNT_SAVE",
@@ -336,41 +329,41 @@ class SeekrNavigationTest {
                             "SAVE_HUNT",
                             "HUNT_SUBMIT",
                             "SUBMIT_BUTTON")
-                            .any { tag -> tryClickByTag(tag) }
-                    },
-                    { arrayOf("Save", "Done").any { d -> tryClickByDesc(d) } },
-                    {
-                        arrayOf("Save", "SAVE", "Save Hunt", "Done", "DONE").any { t ->
-                            tryClickByText(t)
-                        }
-                    },
-                )
-                    .any { it(Unit) }
+                        .any { tag -> tryClickByTag(tag) }
+                  },
+                  { arrayOf("Save", "Done").any { d -> tryClickByDesc(d) } },
+                  {
+                    arrayOf("Save", "SAVE", "Save Hunt", "Done", "DONE").any { t ->
+                      tryClickByText(t)
+                    }
+                  },
+              )
+              .any { it(Unit) }
 
-            if (didClickSave) {
-                // After save/onDone we expect to be back on Profile with bottom bar visible.
-                waitUntilTrue(LONG) {
-                    node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
-                    true
-                }
-                val editGone =
-                    compose
-                        .onAllNodes(hasTestTag(NavigationTestTags.EDIT_HUNT_SCREEN), useUnmergedTree = true)
-                        .fetchSemanticsNodes()
-                        .isEmpty()
-                assert(editGone) { "EditHunt wrapper should be dismissed after save/onDone." }
-            } else {
-                // If we couldn't find a Save control, at least exercise back navigation.
-                compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
-                waitUntilTrue(MED) {
-                    node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
-                    true
-                }
-            }
-
-            // Final sanity: we're back in a tab destination (Profile) and the bottom bar is visible.
-            node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
-            node(NavigationTestTags.PROFILE_TAB).assertIsDisplayed()
+      if (didClickSave) {
+        // After save/onDone we expect to be back on Profile with bottom bar visible.
+        waitUntilTrue(LONG) {
+          node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
+          true
         }
+        val editGone =
+            compose
+                .onAllNodes(hasTestTag(NavigationTestTags.EDIT_HUNT_SCREEN), useUnmergedTree = true)
+                .fetchSemanticsNodes()
+                .isEmpty()
+        assert(editGone) { "EditHunt wrapper should be dismissed after save/onDone." }
+      } else {
+        // If we couldn't find a Save control, at least exercise back navigation.
+        compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
+        waitUntilTrue(MED) {
+          node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
+          true
+        }
+      }
+
+      // Final sanity: we're back in a tab destination (Profile) and the bottom bar is visible.
+      node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
+      node(NavigationTestTags.PROFILE_TAB).assertIsDisplayed()
     }
+  }
 }

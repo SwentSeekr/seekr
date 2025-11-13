@@ -104,7 +104,6 @@ fun createAlienHunt(uid: String, title: String) =
         otherImagesUrls = emptyList(),
         reviewRate = 4.0)
 
-
 fun emptyProfile(): Profile {
   return sampleProfile(myHunts = emptyList(), doneHunts = emptyList(), likedHunts = emptyList())
 }
