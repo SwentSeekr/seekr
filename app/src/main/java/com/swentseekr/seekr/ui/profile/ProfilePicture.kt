@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.swentseekr.seekr.R
 
@@ -36,10 +37,10 @@ fun ProfilePicture(
 
   Image(
       painter = painter,
-      contentDescription = ProfileScreenStrings.ProfilePictureContentDescription,
+      contentDescription = "Profile Picture",
       modifier =
           modifier
-              .size(ProfileScreenDefaults.ProfilePictureSize)
+              .size(100.dp)
               .clip(CircleShape)
               .testTag(
                   if (isFallback) ProfileTestTags.EMPTY_PROFILE_PICTURE
