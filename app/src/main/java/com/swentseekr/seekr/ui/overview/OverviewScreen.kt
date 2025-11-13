@@ -29,25 +29,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.ui.components.HuntCard
-
-object OverviewScreenTestTags {
-  const val HUNT_LIST = "HuntList"
-  const val HUNT_CARD = "HuntCard"
-  const val LAST_HUNT_CARD = "LastHuntCard"
-  const val SEARCH_BAR = "SearchBar"
-  const val FILTER_BAR = "FilterBar"
-  const val FILTER_BUTTON = "FilterButton"
-  const val OVERVIEW_SCREEN = "OverviewScreen"
-}
-
-const val FILTERS_SECOND = 3
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,28 +62,32 @@ fun OverviewScreen(
         { overviewViewModel.onSearchChange(it) },
         true,
         onActiveChange = onActiveBar,
-        placeholder = { Text("Search hunts...") },
+        placeholder = { Text(OverviewScreenStrings.SearchPlaceholder) },
         leadingIcon = {
           if (query.isEmpty()) {
-            Icon(imageVector = Icons.Default.Search, contentDescription = "Search Icon")
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = OverviewScreenStrings.SearchIconDescription)
           } else null
         },
         trailingIcon = {
           if (query.isNotEmpty()) {
             Icon(
                 imageVector = Icons.Default.Clear,
-                contentDescription = "Clear Icon",
+                contentDescription = OverviewScreenStrings.ClearIconDescription,
                 modifier = Modifier.clickable { overviewViewModel.onClearSearch() })
           } else null
         },
         modifier =
             modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 3.dp)
-                .height(72.dp)
-                .clip(RoundedCornerShape(70))
+                .padding(
+                    horizontal = OverviewScreenDefaults.SearchBarHorizontalPadding,
+                    vertical = OverviewScreenDefaults.SearchBarVerticalPadding)
+                .height(OverviewScreenDefaults.SearchBarHeight)
+                .clip(RoundedCornerShape(OverviewScreenDefaults.SearchBarCornerRadius))
                 .testTag(OverviewScreenTestTags.SEARCH_BAR),
-        shape = RoundedCornerShape(70),
+        shape = RoundedCornerShape(OverviewScreenDefaults.SearchBarCornerRadius),
         content = {})
 
     FilterBar(
@@ -117,7 +108,7 @@ fun OverviewScreen(
                         else OverviewScreenTestTags.HUNT_CARD)
                     .clickable { onHuntClick(hunt.hunt.uid) },
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(OverviewScreenDefaults.ListItemSpacing))
       }
     }
   }
@@ -138,20 +129,24 @@ fun FilterBar(
     modifier: Modifier = Modifier,
 ) {
   Column(
-      modifier = Modifier.fillMaxWidth().padding(8.dp),
+      modifier = Modifier.fillMaxWidth().padding(OverviewScreenDefaults.FilterBarPadding),
       horizontalAlignment = Alignment.CenterHorizontally,
   ) {
     val huntStatuses = remember { HuntStatus.values() }
     val difficulties = remember { Difficulty.values() }
     LazyRow(
         modifier = modifier.fillMaxWidth().testTag(OverviewScreenTestTags.FILTER_BAR),
-        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp)) {
+        horizontalArrangement =
+            androidx.compose.foundation.layout.Arrangement.spacedBy(
+                OverviewScreenDefaults.FilterItemSpacing),
+        contentPadding =
+            androidx.compose.foundation.layout.PaddingValues(
+                horizontal = OverviewScreenDefaults.FilterBarPadding)) {
           items(huntStatuses.size) { status ->
             FilterButton(
                 text = huntStatuses[status].name,
                 isSelected = (selectedStatus == huntStatuses[status]),
-                modifier = Modifier.testTag("FilterButton_${status}")) {
+                modifier = Modifier.testTag("${OverviewScreenTestTags.FILTER_BUTTON}_${status}")) {
                   onStatusSelected(huntStatuses[status])
                 }
           }
@@ -159,7 +154,9 @@ fun FilterBar(
             FilterButton(
                 text = difficulties[difficulty].name,
                 isSelected = (selectedDifficulty == difficulties[difficulty]),
-                modifier = modifier.testTag("FilterButton_${difficulty + FILTERS_SECOND}")) {
+                modifier =
+                    modifier.testTag(
+                        "${OverviewScreenTestTags.FILTER_BUTTON}_${difficulty + OverviewScreenDefaults.DifficultyFilterOffset}")) {
                   onDifficultySelected(difficulties[difficulty])
                 }
           }
@@ -181,7 +178,7 @@ fun FilterButton(
               containerColor =
                   if (isSelected) MaterialTheme.colorScheme.primary
                   else MaterialTheme.colorScheme.onSecondary),
-      modifier = modifier.padding(4.dp)) {
+      modifier = modifier.padding(OverviewScreenDefaults.FilterItemPadding)) {
         Text(text)
       }
 }

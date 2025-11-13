@@ -42,7 +42,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -63,23 +62,6 @@ import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.DifficultyColor
 import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
-
-const val MAX_STAR_NUMBER = 5
-
-object HuntCardScreenTestTags {
-  const val GO_BACK_BUTTON = "GoBackButton"
-  const val TITLE_TEXT = "TitleText"
-  const val AUTHOR_TEXT = "AuthorText"
-  const val IMAGE = "HuntImage"
-  const val DIFFICULTY_BOX = "DifficultyBox"
-  const val DISTANCE_BOX = "DistanceBox"
-  const val TIME_BOX = "TimeBox"
-  const val DESCRIPTION_TEXT = "DescriptionText"
-  const val MAP_CONTAINER = "MapContainer"
-  const val BEGIN_BUTTON = "BeginButton"
-  const val REVIEW_BUTTON = "ReviewButton"
-  const val REVIEW_CARD = "ReviewCard"
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -139,10 +121,10 @@ fun HuntCardScreen(
                   onClick = onGoBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back")
+                        contentDescription = HuntCardScreenStrings.BackContentDescription)
                   }
             },
-            modifier = Modifier.background(Color.LightGray))
+            modifier = Modifier.background(HuntCardScreenDefaults.TopBarColor))
       },
       modifier = modifier.fillMaxSize()) { innerPadding ->
         val hunt = hunt2
@@ -321,14 +303,18 @@ fun ReviewCard(review: HuntReview) {
   Card(
       modifier =
           Modifier.fillMaxWidth()
-              .padding(horizontal = 16.dp)
-              .padding(vertical = 4.dp)
-              .border(2.dp, Color(0xFF60BA37), RoundedCornerShape(12.dp))
+              .padding(vertical = HuntCardScreenDefaults.ReviewCardVerticalPadding)
+              .border(
+                  HuntCardScreenDefaults.CardBorderWidth,
+                  HuntCardScreenDefaults.PrimaryBorderColor,
+                  RoundedCornerShape(HuntCardScreenDefaults.CornerRadius))
               .testTag(HuntCardScreenTestTags.REVIEW_CARD),
-      colors = CardDefaults.cardColors(containerColor = Color(0xFFF8DEB6)),
+      colors = CardDefaults.cardColors(containerColor = HuntCardScreenDefaults.CardBackgroundColor),
   ) {
-    Column(modifier = Modifier.padding(8.dp)) {
-      Text("Rating: ${review.rating}/${MAX_STAR_NUMBER}", fontWeight = FontWeight.Bold)
+    Column(modifier = Modifier.padding(HuntCardScreenDefaults.ReviewCardPadding)) {
+      Text(
+          "${HuntCardScreenStrings.ReviewTitlePrefix} ${review.rating}/${HuntCardScreenDefaults.MaxStarNumber}",
+          fontWeight = FontWeight.Bold)
       Text(review.comment)
     }
   }

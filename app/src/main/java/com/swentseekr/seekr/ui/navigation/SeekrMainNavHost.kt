@@ -26,22 +26,6 @@ import com.swentseekr.seekr.ui.map.MapScreen
 import com.swentseekr.seekr.ui.overview.OverviewScreen
 import com.swentseekr.seekr.ui.profile.ProfileScreen
 import com.swentseekr.seekr.ui.settings.SettingsScreen
-import com.swentseekr.seekr.ui.theme.*
-
-// Test Tags
-object NavigationTestTags {
-  const val BOTTOM_NAVIGATION_MENU = "BOTTOM_NAVIGATION_MENU"
-  const val OVERVIEW_TAB = "OVERVIEW_TAB"
-  const val MAP_TAB = "MAP_TAB"
-  const val PROFILE_TAB = "PROFILE_TAB"
-  const val HUNTCARD_SCREEN = "HUNTCARD_SCREEN"
-  const val ADD_HUNT_SCREEN = "ADD_HUNT_SCREEN"
-  const val MAP_SCREEN = "MAP_SCREEN"
-  const val OVERVIEW_SCREEN = "OVERVIEW_SCREEN"
-  const val EDIT_HUNT_SCREEN = "EDIT_HUNT_SCREEN"
-  const val REVIEW_HUNT_SCREEN = "REVIEW_HUNT_SCREEN"
-  const val SETTINGS_SCREEN = "SETTINGS_SCREEN"
-}
 
 // Destinations as sealed class
 sealed class SeekrDestination(
@@ -82,8 +66,8 @@ fun SeekrNavigationBar(
     currentDestination: SeekrDestination,
     onTabSelected: (SeekrDestination) -> Unit
 ) {
-  val containerColor = GrassGreen
-  val iconColor = Black
+  val containerColor = SeekrNavigationDefaults.BottomBarContainerColor
+  val iconColor = SeekrNavigationDefaults.BottomBarIconColor
 
   NavigationBar(
       containerColor = containerColor,
@@ -94,7 +78,7 @@ fun SeekrNavigationBar(
                 is SeekrDestination.Overview -> NavigationTestTags.OVERVIEW_TAB
                 is SeekrDestination.Map -> NavigationTestTags.MAP_TAB
                 is SeekrDestination.Profile -> NavigationTestTags.PROFILE_TAB
-                else -> "IGNORED"
+                else -> SeekrNavigationDefaults.IgnoredTestTag
               }
 
           NavigationBarItem(
@@ -131,7 +115,7 @@ fun SeekrMainNavHost(
 
   Scaffold(
       modifier = Modifier.fillMaxSize(),
-      containerColor = White,
+      containerColor = SeekrNavigationDefaults.ScaffoldContainerColor,
       bottomBar = {
         if (showBottomBar) {
           SeekrNavigationBar(
