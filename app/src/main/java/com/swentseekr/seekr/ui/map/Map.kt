@@ -174,7 +174,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
                 add(LatLng(hunt.end.latitude, hunt.end.longitude))
               }
 
-              if (points.size == 1) {
+              if (points.size == MapScreenDefaults.UnitPointSize) {
                 cameraPositionState.animate(
                     CameraUpdateFactory.newLatLngZoom(
                         points.first(), MapScreenDefaults.FocusedZoom))
@@ -329,7 +329,7 @@ fun HuntPopup(hunt: Hunt, onViewClick: () -> Unit, onDismiss: () -> Unit) {
           Text(
               hunt.description,
               style = MaterialTheme.typography.bodyMedium,
-              maxLines = 2,
+              maxLines = MapScreenDefaults.MaxLines,
               modifier = Modifier.testTag(MapScreenTestTags.POPUP_DESC))
           Spacer(Modifier.height(MapScreenDefaults.PopupSpacing))
           Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {

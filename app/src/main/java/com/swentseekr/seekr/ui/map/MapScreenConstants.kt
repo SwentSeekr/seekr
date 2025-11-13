@@ -5,6 +5,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 object MapScreenDefaults {
+
+  const val UnitPointSize = 1
+  const val MaxLines = 2
   const val UserLocationZoom = 16f
   const val FocusedZoom = 15f
   const val BoundsPadding = 100
