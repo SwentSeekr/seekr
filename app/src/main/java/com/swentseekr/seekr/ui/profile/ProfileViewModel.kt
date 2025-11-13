@@ -60,7 +60,7 @@ class ProfileViewModel(
           val reviews = HuntReviewRepositoryProvider.repository.getHuntReviews(hunt.uid)
           total += reviews.size
         } catch (e: Exception) {
-          updateUiState { it.copy(errorMsg = "Failed to load reviews for hunt ${hunt.uid}") }
+          // updateUiState { it.copy(errorMsg = "Failed to load reviews for hunt ${hunt.uid}") }
         }
       }
       _totalReviews.value = total

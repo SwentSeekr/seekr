@@ -21,10 +21,11 @@ import com.swentseekr.seekr.model.profile.emptyProfile
 import com.swentseekr.seekr.model.profile.sampleProfile
 import com.swentseekr.seekr.ui.components.RatingTestTags
 import com.swentseekr.seekr.ui.components.RatingType
+import com.swentseekr.seekr.ui.theme.*
 import org.junit.Rule
 import org.junit.Test
 
-const val UI_WAIT_TIMEOUT = 15_000L
+const val UI_WAIT_TIMEOUT = 3_000L
 
 fun hasBackgroundColor(expected: Color) = SemanticsMatcher.expectValue(BackgroundColorKey, expected)
 
@@ -155,7 +156,6 @@ class ProfileScreenTest {
     composeTestRule.onNodeWithTag(lastHuntTag).assertIsDisplayed()
   }
 
-  // colors will be refactored as soon as we implement the theme
   @Test
   fun profileScreen_tabBackgroundChanges() {
     val profile =
@@ -165,18 +165,18 @@ class ProfileScreenTest {
             likedHunts = listOf(createHunt("hunt3", "Liked Hunt")))
     setProfileScreen(profile)
     composeTestRule.waitForIdle()
-    waitForTabColor(ProfileTestTags.TAB_MY_HUNTS, Color.Green)
-    checkTabColors(Color.Green, Color.White, Color.White)
+    waitForTabColor(ProfileTestTags.TAB_MY_HUNTS, Green)
+    checkTabColors(Green, White, White)
 
     composeTestRule.onNodeWithTag(ProfileTestTags.TAB_DONE_HUNTS).performClick()
     composeTestRule.waitForIdle()
-    waitForTabColor(ProfileTestTags.TAB_DONE_HUNTS, Color.Green)
-    checkTabColors(Color.White, Color.Green, Color.White)
+    waitForTabColor(ProfileTestTags.TAB_DONE_HUNTS, Green)
+    checkTabColors(White, Green, White)
 
     composeTestRule.onNodeWithTag(ProfileTestTags.TAB_LIKED_HUNTS).performClick()
     composeTestRule.waitForIdle()
-    waitForTabColor(ProfileTestTags.TAB_LIKED_HUNTS, Color.Green)
-    checkTabColors(Color.White, Color.White, Color.Green)
+    waitForTabColor(ProfileTestTags.TAB_LIKED_HUNTS, Green)
+    checkTabColors(White, White, Green)
   }
 
   private fun assertEmptyStateForTab(tabTestTag: String? = null) {

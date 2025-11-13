@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsPropertyKey
+import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -97,6 +98,7 @@ object ProfileConstants {
 }
 
 val BackgroundColorKey = SemanticsPropertyKey<Color>("BackgroundColor")
+var SemanticsPropertyReceiver.backgroundColor by BackgroundColorKey
 
 data class TabItem(val tab: ProfileTab, val testTag: String, val icon: ImageVector)
 
@@ -149,6 +151,8 @@ fun ProfileScreen(
       } else {
 
         LaunchedEffect(userId) { viewModel.loadProfile(userId) }
+        uiState.profile
+
         AnimatedVisibility(visible = uiState.isLoading, enter = fadeIn(), exit = fadeOut()) {
           Box(
               modifier = Modifier.fillMaxSize().testTag(ProfileTestTags.PROFILE_LOADING),
@@ -176,8 +180,10 @@ fun ProfileScreen(
       }
 
   if (profile == null) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-      Text(ProfileConstants.NO_PROFILE_FOUND, color = GrayDislike)
+    AnimatedVisibility(visible = !uiState.isLoading, enter = fadeIn(), exit = fadeOut()) {
+      Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(ProfileConstants.NO_PROFILE_FOUND, color = GrayDislike)
+      }
     }
     return
   }
@@ -354,7 +360,7 @@ fun CustomToolbar(selectedTab: ProfileTab, onTabSelected: (ProfileTab) -> Unit =
               Modifier.background(color)
                   .padding(horizontal = ProfileConstants.SIZE_ICON, vertical = 10.dp)
                   .clickable { onTabSelected(item.tab) }
-                  .semantics { this[BackgroundColorKey] = color }
+                  .semantics { backgroundColor = color }
                   .testTag(item.testTag))
     }
   }
