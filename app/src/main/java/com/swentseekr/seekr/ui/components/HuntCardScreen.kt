@@ -37,14 +37,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.google.android.gms.maps.model.CameraPosition
@@ -60,23 +57,6 @@ import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
-
-const val MAX_STAR_NUMBER = 5
-
-object HuntCardScreenTestTags {
-  const val GO_BACK_BUTTON = "GoBackButton"
-  const val TITLE_TEXT = "TitleText"
-  const val AUTHOR_TEXT = "AuthorText"
-  const val IMAGE = "HuntImage"
-  const val DIFFICULTY_BOX = "DifficultyBox"
-  const val DISTANCE_BOX = "DistanceBox"
-  const val TIME_BOX = "TimeBox"
-  const val DESCRIPTION_TEXT = "DescriptionText"
-  const val MAP_CONTAINER = "MapContainer"
-  const val BEGIN_BUTTON = "BeginButton"
-  const val REVIEW_BUTTON = "ReviewButton"
-  const val REVIEW_CARD = "ReviewCard"
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -98,7 +78,7 @@ fun HuntCardScreen(
   val hunt2 = uiState.hunt
   // val reviews = uiState.reviewList
   val reviews =
-      List(10) { index ->
+      List(HuntCardScreenDefaults.SampleReviewCount) { index ->
         HuntReview(
             reviewId = "review$index",
             authorId = "author$index",
@@ -136,10 +116,10 @@ fun HuntCardScreen(
                   onClick = onGoBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back")
+                        contentDescription = HuntCardScreenStrings.BackContentDescription)
                   }
             },
-            modifier = Modifier.background(Color.LightGray))
+            modifier = Modifier.background(HuntCardScreenDefaults.TopBarColor))
       },
       modifier = modifier.fillMaxSize()) { innerPadding ->
         val hunt = hunt2
@@ -155,90 +135,119 @@ fun HuntCardScreen(
                   modifier
                       .fillMaxWidth()
                       .padding(innerPadding)
-                      .padding(horizontal = 16.dp)
-                      .padding(top = 8.dp, bottom = 16.dp)
-                      .border(2.dp, Color(0xFF60BA37), RoundedCornerShape(12.dp)),
-              colors = CardDefaults.cardColors(containerColor = Color(0xFFF8DEB6)),
-              shape = RoundedCornerShape(12.dp)) {
+                      .padding(horizontal = HuntCardScreenDefaults.ScreenPaddingHorizontal)
+                      .padding(
+                          top = HuntCardScreenDefaults.ScreenPaddingTop,
+                          bottom = HuntCardScreenDefaults.ScreenPaddingBottom)
+                      .border(
+                          HuntCardScreenDefaults.CardBorderWidth,
+                          HuntCardScreenDefaults.PrimaryBorderColor,
+                          RoundedCornerShape(HuntCardScreenDefaults.CornerRadius)),
+              colors =
+                  CardDefaults.cardColors(
+                      containerColor = HuntCardScreenDefaults.CardBackgroundColor),
+              shape = RoundedCornerShape(HuntCardScreenDefaults.CornerRadius)) {
                 LazyColumn(
-                    modifier = Modifier.padding(12.dp).fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    modifier =
+                        Modifier.padding(HuntCardScreenDefaults.CardInnerPadding).fillMaxWidth(),
+                    verticalArrangement =
+                        Arrangement.spacedBy(HuntCardScreenDefaults.SectionSpacing)) {
                       // ROW WITH IMAGE, TITLE, AUTHOR, DIFFICULTY, DISTANCE, TIME
                       item {
-                        Column(modifier = modifier.padding(8.dp).fillMaxWidth().fillMaxSize()) {
-                          Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                hunt.title,
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center,
-                                modifier =
-                                    Modifier.weight(1f)
-                                        .padding(4.dp)
-                                        .testTag(HuntCardScreenTestTags.TITLE_TEXT))
-                          }
-                          Text(
-                              "by $author",
-                              modifier =
-                                  Modifier.padding(horizontal = 4.dp)
-                                      .testTag(HuntCardScreenTestTags.AUTHOR_TEXT))
-                          Row {
-                            AsyncImage(
-                                model = hunt.mainImageUrl.ifEmpty { R.drawable.empty_image },
-                                contentDescription = "Hunt Picture",
-                                modifier =
-                                    Modifier.padding(horizontal = 4.dp)
-                                        .size(100.dp)
-                                        .clip(RectangleShape)
-                                        .testTag(HuntCardScreenTestTags.IMAGE),
-                                placeholder = painterResource(R.drawable.empty_image),
-                                error = painterResource(R.drawable.empty_image))
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally) {
-                                  Box(
-                                      modifier =
-                                          Modifier.padding(4.dp)
-                                              .background(Color.Green)
-                                              .height(20.dp)
-                                              .width(80.dp)
-                                              .clip(RectangleShape)
-                                              .testTag(HuntCardScreenTestTags.DIFFICULTY_BOX),
-                                  ) {
-                                    Text(
-                                        hunt.difficulty.toString(),
-                                        modifier = Modifier.align(Alignment.Center).padding(2.dp))
-                                  }
+                        Column(
+                            modifier =
+                                modifier
+                                    .padding(HuntCardScreenDefaults.InfoColumnPadding)
+                                    .fillMaxWidth()
+                                    .fillMaxSize()) {
+                              Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    hunt.title,
+                                    fontSize = HuntCardScreenDefaults.TitleFontSize,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center,
+                                    modifier =
+                                        Modifier.weight(1f)
+                                            .padding(HuntCardScreenDefaults.InfoTextPadding)
+                                            .testTag(HuntCardScreenTestTags.TITLE_TEXT))
+                              }
+                              Text(
+                                  "by $author",
+                                  modifier =
+                                      Modifier.padding(
+                                              horizontal = HuntCardScreenDefaults.InfoTextPadding)
+                                          .testTag(HuntCardScreenTestTags.AUTHOR_TEXT))
+                              Row {
+                                AsyncImage(
+                                    model = hunt.mainImageUrl.ifEmpty { R.drawable.empty_image },
+                                    contentDescription =
+                                        HuntCardScreenStrings.HuntPictureDescription,
+                                    modifier =
+                                        Modifier.padding(
+                                                horizontal = HuntCardScreenDefaults.InfoTextPadding)
+                                            .size(HuntCardScreenDefaults.ImageSize)
+                                            .clip(RectangleShape)
+                                            .testTag(HuntCardScreenTestTags.IMAGE),
+                                    placeholder = painterResource(R.drawable.empty_image),
+                                    error = painterResource(R.drawable.empty_image))
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalAlignment = Alignment.CenterHorizontally) {
+                                      Box(
+                                          modifier =
+                                              Modifier.padding(HuntCardScreenDefaults.BadgePadding)
+                                                  .background(
+                                                      HuntCardScreenDefaults.DifficultyBadgeColor)
+                                                  .height(HuntCardScreenDefaults.BadgeHeight)
+                                                  .width(HuntCardScreenDefaults.BadgeWidth)
+                                                  .clip(RectangleShape)
+                                                  .testTag(HuntCardScreenTestTags.DIFFICULTY_BOX),
+                                      ) {
+                                        Text(
+                                            hunt.difficulty.toString(),
+                                            modifier =
+                                                Modifier.align(Alignment.Center)
+                                                    .padding(
+                                                        HuntCardScreenDefaults.BadgeTextPadding))
+                                      }
 
-                                  Box(
-                                      modifier =
-                                          Modifier.padding(4.dp)
-                                              .background(Color.White)
-                                              .height(20.dp)
-                                              .width(80.dp)
-                                              .clip(RectangleShape)
-                                              .testTag(HuntCardScreenTestTags.DISTANCE_BOX),
-                                  ) {
-                                    Text(
-                                        "${hunt.distance} km",
-                                        modifier = Modifier.align(Alignment.Center).padding(2.dp))
-                                  }
-                                  Box(
-                                      modifier =
-                                          Modifier.padding(4.dp)
-                                              .background(Color.White)
-                                              .height(20.dp)
-                                              .width(80.dp)
-                                              .clip(RectangleShape)
-                                              .testTag(HuntCardScreenTestTags.TIME_BOX),
-                                  ) {
-                                    Text(
-                                        "${hunt.time} min",
-                                        modifier = Modifier.align(Alignment.Center).padding(2.dp))
-                                  }
-                                }
-                          }
-                        }
+                                      Box(
+                                          modifier =
+                                              Modifier.padding(HuntCardScreenDefaults.BadgePadding)
+                                                  .background(
+                                                      HuntCardScreenDefaults.NeutralBadgeColor)
+                                                  .height(HuntCardScreenDefaults.BadgeHeight)
+                                                  .width(HuntCardScreenDefaults.BadgeWidth)
+                                                  .clip(RectangleShape)
+                                                  .testTag(HuntCardScreenTestTags.DISTANCE_BOX),
+                                      ) {
+                                        Text(
+                                            "${hunt.distance} ${HuntCardScreenStrings.DistanceUnit}",
+                                            modifier =
+                                                Modifier.align(Alignment.Center)
+                                                    .padding(
+                                                        HuntCardScreenDefaults.BadgeTextPadding))
+                                      }
+                                      Box(
+                                          modifier =
+                                              Modifier.padding(HuntCardScreenDefaults.BadgePadding)
+                                                  .background(
+                                                      HuntCardScreenDefaults.NeutralBadgeColor)
+                                                  .height(HuntCardScreenDefaults.BadgeHeight)
+                                                  .width(HuntCardScreenDefaults.BadgeWidth)
+                                                  .clip(RectangleShape)
+                                                  .testTag(HuntCardScreenTestTags.TIME_BOX),
+                                      ) {
+                                        Text(
+                                            "${hunt.time} ${HuntCardScreenStrings.TimeUnit}",
+                                            modifier =
+                                                Modifier.align(Alignment.Center)
+                                                    .padding(
+                                                        HuntCardScreenDefaults.BadgeTextPadding))
+                                      }
+                                    }
+                              }
+                            }
                       }
 
                       // DESCRIPTION
@@ -246,7 +255,7 @@ fun HuntCardScreen(
                         Text(
                             hunt.description,
                             modifier =
-                                Modifier.padding(8.dp)
+                                Modifier.padding(HuntCardScreenDefaults.InfoColumnPadding)
                                     .testTag(HuntCardScreenTestTags.DESCRIPTION_TEXT))
                       }
                       // MAP WITH START POINT
@@ -256,22 +265,25 @@ fun HuntCardScreen(
                         if (mapLoaded) {
                           val startPosition = LatLng(hunt.start.latitude, hunt.start.longitude)
                           val cameraPositionState = rememberCameraPositionState {
-                            position = CameraPosition.fromLatLngZoom(startPosition, 12f)
+                            position =
+                                CameraPosition.fromLatLngZoom(
+                                    startPosition, HuntCardScreenDefaults.MapZoom)
                           }
 
                           Box(
                               modifier =
                                   Modifier.fillMaxWidth()
-                                      .height(400.dp)
-                                      .padding(8.dp)
+                                      .height(HuntCardScreenDefaults.MapHeight)
+                                      .padding(HuntCardScreenDefaults.MapPadding)
                                       .testTag(HuntCardScreenTestTags.MAP_CONTAINER)) {
                                 GoogleMap(
                                     modifier = Modifier.matchParentSize(),
                                     cameraPositionState = cameraPositionState) {
                                       Marker(
                                           state = MarkerState(position = startPosition),
-                                          title = "Départ : ${hunt.start.name}",
-                                          snippet = "Point de départ de la chasse")
+                                          title =
+                                              "${HuntCardScreenStrings.ReviewMarkerTitlePrefix}${hunt.start.name}",
+                                          snippet = HuntCardScreenStrings.ReviewHint)
                                     }
                               }
                         }
@@ -286,17 +298,17 @@ fun HuntCardScreen(
                               beginHunt,
                               modifier =
                                   modifier
-                                      .width(120.dp)
+                                      .width(HuntCardScreenDefaults.ButtonWidth)
                                       .testTag(HuntCardScreenTestTags.BEGIN_BUTTON)) {
-                                Text("Begin Hunt")
+                                Text(HuntCardScreenStrings.BeginHunt)
                               }
                           Button(
                               addReview,
                               modifier =
                                   modifier
-                                      .width(120.dp)
+                                      .width(HuntCardScreenDefaults.ButtonWidth)
                                       .testTag(HuntCardScreenTestTags.REVIEW_BUTTON)) {
-                                Text("Add Review")
+                                Text(HuntCardScreenStrings.AddReview)
                               }
                         }
                       }
@@ -308,8 +320,10 @@ fun HuntCardScreen(
                   modifier
                       .fillMaxWidth()
                       .padding(innerPadding)
-                      .padding(horizontal = 16.dp)
-                      .padding(top = 8.dp, bottom = 16.dp)) {
+                      .padding(horizontal = HuntCardScreenDefaults.ScreenPaddingHorizontal)
+                      .padding(
+                          top = HuntCardScreenDefaults.ScreenPaddingTop,
+                          bottom = HuntCardScreenDefaults.ScreenPaddingBottom)) {
                 items(reviews) { review -> ReviewCard(review) }
               }
         }
@@ -321,13 +335,18 @@ fun ReviewCard(review: HuntReview) {
   Card(
       modifier =
           Modifier.fillMaxWidth()
-              .padding(vertical = 4.dp)
-              .border(2.dp, Color(0xFF60BA37), RoundedCornerShape(12.dp))
+              .padding(vertical = HuntCardScreenDefaults.ReviewCardVerticalPadding)
+              .border(
+                  HuntCardScreenDefaults.CardBorderWidth,
+                  HuntCardScreenDefaults.PrimaryBorderColor,
+                  RoundedCornerShape(HuntCardScreenDefaults.CornerRadius))
               .testTag(HuntCardScreenTestTags.REVIEW_CARD),
-      colors = CardDefaults.cardColors(containerColor = Color(0xFFF8DEB6)),
+      colors = CardDefaults.cardColors(containerColor = HuntCardScreenDefaults.CardBackgroundColor),
   ) {
-    Column(modifier = Modifier.padding(8.dp)) {
-      Text("Rating: ${review.rating}/${MAX_STAR_NUMBER}", fontWeight = FontWeight.Bold)
+    Column(modifier = Modifier.padding(HuntCardScreenDefaults.ReviewCardPadding)) {
+      Text(
+          "${HuntCardScreenStrings.ReviewTitlePrefix} ${review.rating}/${HuntCardScreenDefaults.MaxStarNumber}",
+          fontWeight = FontWeight.Bold)
       Text(review.comment)
     }
   }
