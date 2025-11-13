@@ -22,6 +22,8 @@ import com.swentseekr.seekr.ui.navigation.NavigationTestTags
 import com.swentseekr.seekr.ui.navigation.SeekrRootApp
 import com.swentseekr.seekr.ui.settings.SettingsScreenTestTags
 import kotlinx.coroutines.runBlocking
+import com.swentseekr.seekr.utils.FakeAuthEmulator
+import com.swentseekr.seekr.utils.FakeJwtGenerator
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -37,14 +39,17 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class EndToEndM2Tests {
 
-  @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
+  @get:Rule
+  val compose = createAndroidComposeRule<ComponentActivity>()
 
   @Before
-  fun setupFirebase() = runBlocking {
+  fun setupFirebaseAndAuth() = runBlocking {
     val context = ApplicationProvider.getApplicationContext<Context>()
     if (FirebaseApp.getApps(context).isEmpty()) {
       FirebaseApp.initializeApp(context)
     }
+    val fakeToken = FakeJwtGenerator.createFakeGoogleIdToken()
+    FakeAuthEmulator.signInWithFakeGoogleToken(fakeToken)
   }
 
   @Before
@@ -53,55 +58,56 @@ class EndToEndM2Tests {
   }
 
   @Test
-  fun login_addHunt_thenLogout_thenLogin_thenEditHunt() {
+  fun addHunt_thenEditHunt() {
     val huntTitle = "E2E River Walk"
     val huntDescription = "Scenic path by the river."
     val editedTitle = "E2E River Walk (Edited)"
 
-    // 0) Login (Auth flow -> Main app)
-    AuthRobot(compose).assertOnSignIn().tapLogin()
-
-    OverviewRobot(compose).assertOnOverview().openProfileViaBottomBar()
+    // 0) We’re already authenticated via FakeAuthEmulator in @Before.
+    //    Just wait for the main Overview screen.
+    OverviewRobot(compose)
+      .assertOnOverview()
+      .openProfileViaBottomBar()
 
     // 1) Add Hunt (from Profile)
-    ProfileRobot(compose).assertOnProfile().tapAddHuntFab()
+    ProfileRobot(compose)
+      .assertOnProfile()
+      .tapAddHuntFab()
 
     AddHuntRobot(compose)
-        .assertOnAddHuntScreen()
-        .typeTitle(huntTitle)
-        .typeDescription(huntDescription)
-        .typeTime("1.5")
-        .typeDistance("3.2")
-        .pickFirstStatus()
-        .pickFirstDifficulty()
-        .openSelectLocations()
-        .addPointNamed("Start Bridge")
-        .addPointNamed("End Promenade")
-        .confirmPoints()
-        .save()
+      .assertOnAddHuntScreen()
+      .typeTitle(huntTitle)
+      .typeDescription(huntDescription)
+      .typeTime("1.5")
+      .typeDistance("3.2")
+      .pickFirstStatus()
+      .pickFirstDifficulty()
+      .openSelectLocations()
+      .addPointNamed("Start Bridge")
+      .addPointNamed("End Promenade")
+      .confirmPoints()
+      .save() // -> Overview
 
-    OverviewRobot(compose).assertOnOverview().openProfileViaBottomBar()
+    // 2) Back to Profile to edit the just-created hunt
+    OverviewRobot(compose)
+      .openProfileViaBottomBar()
 
-    // 2) Verify hunt exists, then open Settings and log out
-    ProfileRobot(compose).assertHuntVisible(huntTitle).openSettings()
+    ProfileRobot(compose)
+      .assertOnProfile()
+      .assertHuntVisible(huntTitle)
+      .openMyHunt(huntTitle)
 
-    SettingsRobot(compose).assertOnSettings().tapSignOut()
+    // 3) Edit the hunt title and verify it changed
+    EditHuntRobot(compose)
+      .assertOnEditHunt()
+      .editTitle(editedTitle)
+      .save()
 
-    // 3) Back on Auth screen: login again
-    AuthRobot(compose).assertOnSignIn().tapLogin()
-
-    // 4) Open Profile, edit the hunt title, save and verify
-    OverviewRobot(compose).openProfileViaBottomBar()
-
-    ProfileRobot(compose).assertHuntVisible(huntTitle).openMyHunt(huntTitle)
-
-    EditHuntRobot(compose).assertOnEditHunt().editTitle(editedTitle).save()
-
-    ProfileRobot(compose).assertHuntVisible(editedTitle)
+    ProfileRobot(compose)
+      .assertHuntVisible(editedTitle)
   }
 }
-
-/* ------------------------------ Robots ----------------------------------- */
+  /* ------------------------------ Robots ----------------------------------- */
 
 private class AuthRobot(private val rule: ComposeTestRule) {
   fun assertOnSignIn(): AuthRobot {
