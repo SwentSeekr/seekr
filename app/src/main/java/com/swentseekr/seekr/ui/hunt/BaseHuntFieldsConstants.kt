@@ -26,10 +26,16 @@ object BaseHuntFieldsStrings {
 object BaseHuntFieldsUi {
   val FieldCornerRadius: Dp = 12.dp
   val DescriptionHeight: Dp = 150.dp
+
+  val ImageHeight: Dp = 180.dp
   val SaveButtonHeight: Dp = 64.dp
   val SaveButtonCornerRadius: Dp = 16.dp
   val ScreenPadding: Dp = 16.dp
   val SpacerHeight: Dp = 24.dp
+
+  val SpacerHeightMedium: Dp = 12.dp
+
+    val SpacerHeightSmall: Dp = 8.dp
 }
 
 object HuntScreenTestTags {

@@ -132,7 +132,7 @@ fun BaseHuntFieldsScreen(
 
           // IMAGE PICKER + PREVIEW
           Text("Main Image", style = MaterialTheme.typography.titleMedium)
-          Spacer(modifier = Modifier.height(8.dp))
+          Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightSmall))
 
           Button(
               onClick = { imagePickerLauncher.launch("image/*") },
@@ -144,11 +144,11 @@ fun BaseHuntFieldsScreen(
           val imageToDisplay = uiState.mainImageUrl
 
           if (!imageToDisplay.isNullOrBlank()) {
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightMedium))
             AsyncImage(
                 model = imageToDisplay,
                 contentDescription = "Selected Hunt Image",
-                modifier = Modifier.fillMaxWidth().height(180.dp).clip(RoundedCornerShape(12.dp)),
+                modifier = Modifier.fillMaxWidth().height(BaseHuntFieldsUi.ImageHeight).clip(RoundedCornerShape(BaseHuntFieldsUi.FieldCornerRadius)),
                 placeholder = painterResource(R.drawable.empty_image),
                 error = painterResource(R.drawable.empty_image))
           }
