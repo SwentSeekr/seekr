@@ -8,6 +8,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
@@ -244,33 +245,38 @@ class SeekrNavigationTest {
 
     @Test
     fun profile_myHunt_edit_flow_uses_mockProfileData_and_onDone_returns_to_profile() {
-        // Seed repo so EditHuntViewModel.load("hunt123") succeeds (matches mockProfileData()).
         val seeded = createHunt(uid = "hunt123", title = "City Exploration")
 
         withFakeRepo(FakeRepoSuccess(listOf(seeded))) {
-            // Compose with testMode so Profile uses mockProfileData() and exposes HUNT_CARD_0.
-            compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
+            compose.runOnUiThread {
+                compose.activity.setContent { SeekrMainNavHost(testMode = true) }
+            }
 
-            // Go to Profile tab.
             goToProfileTab()
 
-            // Open the first My Hunt card -> navigates to EditHunt(hunt123).
             node("HUNT_CARD_0").assertIsDisplayed().performClick()
             waitUntilTrue(MED) {
                 node(NavigationTestTags.EDIT_HUNT_SCREEN).assertIsDisplayed()
                 true
             }
 
-            // Bottom bar should be hidden on EditHunt.
             node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
 
-            // Try to SAVE to trigger onDone() → back to Profile.
-            compose.onNodeWithTag(HuntScreenTestTags.HUNT_SAVE, useUnmergedTree = true).performClick()
+            // 👇 Scroll the edit screen until the save button is brought into view
+            compose
+                .onNodeWithTag(HuntScreenTestTags.HUNT_EDIT_SCROLLABLE, useUnmergedTree = true)
+                .performScrollToNode(hasTestTag(HuntScreenTestTags.HUNT_SAVE))
+
+            compose
+                .onNodeWithTag(HuntScreenTestTags.HUNT_SAVE, useUnmergedTree = true)
+                .assertIsDisplayed()
+                .performClick()
 
             waitUntilTrue(LONG) {
                 node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
                 true
             }
+
             val editGone =
                 compose
                     .onAllNodes(hasTestTag(NavigationTestTags.EDIT_HUNT_SCREEN), useUnmergedTree = true)
@@ -279,6 +285,7 @@ class SeekrNavigationTest {
             assert(editGone) { "EditHunt wrapper should be dismissed after save/onDone." }
         }
     }
+
 
 
     @Test

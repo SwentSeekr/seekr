@@ -49,4 +49,5 @@ object HuntScreenTestTags {
   const val HUNT_SAVE = "huntSave"
   const val ERROR_MESSAGE = "errorMessage"
   const val ADD_HUNT_SCREEN = "AddHuntScreen"
+  const val HUNT_EDIT_SCROLLABLE = "HuntEditScrollable"
 }

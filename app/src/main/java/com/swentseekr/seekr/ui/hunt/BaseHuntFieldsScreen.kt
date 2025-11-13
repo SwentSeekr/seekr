@@ -121,7 +121,9 @@ fun BaseHuntFieldsScreen(
                     .background(MaterialTheme.colorScheme.background)
                     .padding(BaseHuntFieldsUi.ScreenPadding)
                     .padding(paddingValues)
-                    .verticalScroll(scrollState),
+                    .verticalScroll(scrollState)
+                    .testTag(HuntScreenTestTags.HUNT_EDIT_SCROLLABLE),
+
         ) {
           val fieldShape = RoundedCornerShape(BaseHuntFieldsUi.FieldCornerRadius)
           val fieldColors =
