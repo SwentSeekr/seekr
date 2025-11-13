@@ -3,12 +3,16 @@ package com.swentseekr.seekr.ui.huntcardview
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
 import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.model.hunt.HuntReviewRepository
 import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryProvider
 import com.swentseekr.seekr.model.hunt.HuntsRepository
+import com.swentseekr.seekr.model.profile.ProfileRepository
+import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
+import com.swentseekr.seekr.ui.profile.Profile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,16 +23,43 @@ data class HuntCardUiState(
     val reviewList: List<HuntReview> = emptyList(),
     val isLiked: Boolean = false,
     val isAchieved: Boolean = false,
-    val errorMsg: String? = null
+    val errorMsg: String? = null,
+    val currentUserId: String? = null,
+    val authorProfile: Profile? = null
 )
 
 open class HuntCardViewModel(
     private val huntRepository: HuntsRepository = HuntRepositoryProvider.repository,
-    private val reviewRepository: HuntReviewRepository = HuntReviewRepositoryProvider.repository
+    private val reviewRepository: HuntReviewRepository = HuntReviewRepositoryProvider.repository,
+    private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(HuntCardUiState())
   open val uiState: StateFlow<HuntCardUiState> = _uiState.asStateFlow()
+
+  /** Loads the profile of the Maker of the hunt */
+  fun loadAuthorProfile(userID: String) {
+    viewModelScope.launch {
+      try {
+        val profile = profileRepository.getProfile(userID)
+        _uiState.value = _uiState.value.copy(authorProfile = profile)
+      } catch (e: Exception) {
+        Log.e("HuntCardViewModel", "Error loading user profile for User ID: $userID", e)
+      }
+    }
+  }
+
+  /** Loads current user ID in the UI state. */
+  fun loadCurrentUserID() {
+    viewModelScope.launch {
+      try {
+        val userID = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown"
+        _uiState.value = _uiState.value.copy(currentUserId = userID)
+      } catch (e: Exception) {
+        Log.e("HuntCardViewModel", "Error loading current user ID", e)
+      }
+    }
+  }
 
   /** Loads reviews for a specific hunt.* */
   fun loadOtherReview(huntID: String) {
@@ -52,7 +83,7 @@ open class HuntCardViewModel(
       try {
         val hunt = huntRepository.getHunt(huntID)
         _uiState.value =
-            HuntCardUiState(
+            _uiState.value.copy(
                 hunt = hunt, isLiked = false, isAchieved = false, reviewList = emptyList())
       } catch (e: Exception) {
         Log.e("HuntCardViewModel", "Error loading Hunt by ID: $huntID", e)

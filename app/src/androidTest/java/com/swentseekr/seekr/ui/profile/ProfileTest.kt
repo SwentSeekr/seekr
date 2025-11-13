@@ -11,6 +11,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
@@ -118,7 +119,8 @@ class ProfileScreenTest {
     composeTestRule.onNodeWithTag(ProfileTestTags.PROFILE_HUNTS_LIST).assertIsDisplayed()
     myHunts.forEachIndexed { index, hunt ->
       composeTestRule
-          .onNodeWithTag(ProfileTestTags.getTestTagForHuntCard(hunt, index))
+          .onAllNodesWithTag(ProfileTestTags.getTestTagForHuntCard(hunt, index))
+          .onFirst()
           .assertIsDisplayed()
     }
   }
@@ -147,13 +149,13 @@ class ProfileScreenTest {
     val lastIndex = myHunts.lastIndex
     val lastHuntTag = ProfileTestTags.getTestTagForHuntCard(myHunts[lastIndex], lastIndex)
 
-    composeTestRule.onNodeWithTag(lastHuntTag).assertIsNotDisplayed()
+    composeTestRule.onAllNodesWithTag(lastHuntTag).onFirst().assertIsNotDisplayed()
 
     composeTestRule
         .onNodeWithTag(ProfileTestTags.PROFILE_HUNTS_LIST)
         .performScrollToNode(hasTestTag(lastHuntTag))
 
-    composeTestRule.onNodeWithTag(lastHuntTag).assertIsDisplayed()
+    composeTestRule.onAllNodesWithTag(lastHuntTag).onFirst().assertIsDisplayed()
   }
 
   @Test
