@@ -2,8 +2,10 @@ package com.swentseekr.seekr.ui.settings
 
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -21,6 +23,7 @@ class SettingsScreenTest {
 
     composeRule.onNodeWithTag(SettingsScreenTestTags.BACK_BUTTON).assertExists()
     composeRule.onNodeWithTag(SettingsScreenTestTags.APP_VERSION_TEXT).assertExists()
+    composeRule.onNodeWithTag(SettingsScreenTestTags.EDIT_PROFILE_BUTTON).assertExists()
     composeRule.onNodeWithTag(SettingsScreenTestTags.LOGOUT_BUTTON).assertExists()
   }
 
@@ -28,10 +31,30 @@ class SettingsScreenTest {
   fun clicking_back_button_triggers_callback() {
     var backPressed = false
 
-    composeRule.setContent { MaterialTheme { SettingsScreen(onGoBack = { backPressed = true }) } }
+    composeRule.setContent {
+      MaterialTheme { SettingsScreen(onGoBack = { backPressed = true }) }
+    }
 
     composeRule.onNodeWithTag(SettingsScreenTestTags.BACK_BUTTON).performClick()
     assertTrue(backPressed)
+  }
+
+  @Test
+  fun clicking_edit_profile_button_triggers_callback() {
+    var editProfileTriggered = false
+
+    composeRule.setContent {
+      MaterialTheme {
+        SettingsContent(
+          appVersion = "1.0.0",
+          onEditProfileClick = { editProfileTriggered = true },
+          onLogoutClick = {}
+        )
+      }
+    }
+
+    composeRule.onNodeWithTag(SettingsScreenTestTags.EDIT_PROFILE_BUTTON).performClick()
+    assertTrue(editProfileTriggered)
   }
 
   @Test
@@ -40,7 +63,11 @@ class SettingsScreenTest {
 
     composeRule.setContent {
       MaterialTheme {
-        SettingsContent(appVersion = "1.0.0", onLogoutClick = { logoutTriggered = true })
+        SettingsContent(
+          appVersion = "1.0.0",
+          onEditProfileClick = {},
+          onLogoutClick = { logoutTriggered = true }
+        )
       }
     }
 
@@ -52,7 +79,13 @@ class SettingsScreenTest {
   fun app_version_is_displayed_correctly() {
     val expectedVersion = "1.2.3"
     composeRule.setContent {
-      MaterialTheme { SettingsContent(appVersion = expectedVersion, onLogoutClick = {}) }
+      MaterialTheme {
+        SettingsContent(
+          appVersion = expectedVersion,
+          onEditProfileClick = {},
+          onLogoutClick = {}
+        )
+      }
     }
     composeRule.onNodeWithText("$VERSION_TEXT").assertExists()
     composeRule.onNodeWithText(expectedVersion).assertExists()
@@ -61,7 +94,13 @@ class SettingsScreenTest {
   @Test
   fun app_version_is_unknown_when_null() {
     composeRule.setContent {
-      MaterialTheme { SettingsContent(appVersion = null, onLogoutClick = {}) }
+      MaterialTheme {
+        SettingsContent(
+          appVersion = null,
+          onEditProfileClick = {},
+          onLogoutClick = {}
+        )
+      }
     }
 
     composeRule.onNodeWithText(VERSION_TEXT).assertExists()
