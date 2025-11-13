@@ -36,8 +36,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.hunt.Hunt
@@ -47,29 +45,6 @@ import com.swentseekr.seekr.ui.components.MAX_RATING
 import com.swentseekr.seekr.ui.components.Rating
 import com.swentseekr.seekr.ui.components.RatingType
 
-object ProfileTestTags {
-  const val PROFILE_HUNTS_LIST = "PROFILE_HUNTS_LIST"
-  const val TAB_MY_HUNTS = "TAB_MY_HUNTS"
-  const val TAB_DONE_HUNTS = "TAB_DONE_HUNTS"
-  const val TAB_LIKED_HUNTS = "TAB_LIKED_HUNTS"
-
-  const val ADD_HUNT = "ADD_HUNT"
-
-  const val PROFILE_PICTURE = "PROFILE_PICTURE"
-  const val EMPTY_PROFILE_PICTURE = "EMPTY PROFILE_PICTURE"
-
-  const val PROFILE_PSEUDONYM = "PROFILE_PSEUDONYM"
-  const val PROFILE_BIO = "PROFILE_BIO"
-  const val PROFILE_REVIEW_RATING = "PROFILE_REVIEW_RATING"
-  const val PROFILE_SPORT_RATING = "PROFILE_SPORT_RATING"
-  const val EMPTY_HUNTS_MESSAGE = "EMPTY_HUNTS_MESSAGE"
-  const val PROFILE_SCREEN = "PROFILE_SCREEN"
-  const val SETTINGS = "SETTINGS"
-
-  fun getTestTagForHuntCard(hunt: Hunt, index: Int): String = "HUNT_CARD_$index"
-}
-
-val TEXT_SIZE = 4.dp
 val BackgroundColorKey = SemanticsPropertyKey<Color>("BackgroundColor")
 
 data class TabItem(val tab: ProfileTab, val testTag: String, val icon: ImageVector)
@@ -125,14 +100,16 @@ fun ProfileScreen(
 
         LaunchedEffect(userId) { viewModel.loadProfile(userId) }
         if (uiState.errorMsg != null) {
-          Text("Error: ${uiState.errorMsg}", color = Color.Red)
+          Text(
+              "${ProfileScreenStrings.ErrorPrefix}${uiState.errorMsg}",
+              color = ProfileScreenDefaults.ErrorTextColor)
           return
         }
         uiState.profile
       }
 
   if (profile == null) {
-    Text("No profile found", color = Color.Gray)
+    Text(ProfileScreenStrings.NoProfileFound, color = ProfileScreenDefaults.EmptyStateTextColor)
     return
   }
 
@@ -144,7 +121,9 @@ fun ProfileScreen(
         if (isMyProfile) {
           FloatingActionButton(
               onClick = onAddHunt, modifier = Modifier.testTag(ProfileTestTags.ADD_HUNT)) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add")
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = ProfileScreenStrings.AddHuntContentDescription)
               }
         }
       },
@@ -157,21 +136,22 @@ fun ProfileScreen(
             modifier = Modifier.fillMaxSize().padding(padding),
         ) {
           Row(
-              modifier = Modifier.fillMaxWidth().padding(16.dp),
+              modifier = Modifier.fillMaxWidth().padding(ProfileScreenDefaults.HeaderPadding),
               verticalAlignment = Alignment.CenterVertically) {
                 ProfilePicture(profilePictureRes = profile.author.profilePicture)
                 Column(Modifier.weight(1f)) {
                   Text(
                       text = profile.author.pseudonym,
-                      fontSize = 20.sp,
+                      fontSize = ProfileScreenDefaults.NameFontSize,
                       fontWeight = FontWeight.Bold,
                       modifier =
-                          Modifier.padding(TEXT_SIZE).testTag(ProfileTestTags.PROFILE_PSEUDONYM))
+                          Modifier.padding(ProfileScreenDefaults.InfoPadding)
+                              .testTag(ProfileTestTags.PROFILE_PSEUDONYM))
                   Row {
                     Text(
                         text = "${profile.author.reviewRate}/${MAX_RATING}",
                         modifier =
-                            Modifier.padding(TEXT_SIZE)
+                            Modifier.padding(ProfileScreenDefaults.InfoPadding)
                                 .testTag(ProfileTestTags.PROFILE_REVIEW_RATING))
                     Rating(rating = profile.author.reviewRate, RatingType.STAR)
                   }
@@ -179,7 +159,7 @@ fun ProfileScreen(
                     Text(
                         text = "${profile.author.sportRate}/${MAX_RATING}",
                         modifier =
-                            Modifier.padding(TEXT_SIZE)
+                            Modifier.padding(ProfileScreenDefaults.InfoPadding)
                                 .testTag(ProfileTestTags.PROFILE_SPORT_RATING))
                     Rating(rating = profile.author.sportRate, RatingType.SPORT)
                   }
@@ -187,22 +167,26 @@ fun ProfileScreen(
 
                 IconButton(
                     onClick = onSettings, modifier = Modifier.testTag(ProfileTestTags.SETTINGS)) {
-                      Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
+                      Icon(
+                          imageVector = Icons.Default.Settings,
+                          contentDescription = ProfileScreenStrings.SettingsContentDescription)
                     }
               }
 
           Text(
               text = profile.author.bio,
-              fontSize = 16.sp,
+              fontSize = ProfileScreenDefaults.BodyFontSize,
               modifier =
                   Modifier.fillMaxWidth()
-                      .padding(horizontal = 16.dp, vertical = 8.dp)
+                      .padding(
+                          horizontal = ProfileScreenDefaults.BioHorizontalPadding,
+                          vertical = ProfileScreenDefaults.BioVerticalPadding)
                       .testTag(ProfileTestTags.PROFILE_BIO))
 
           LazyColumn(
               modifier =
                   Modifier.fillMaxSize()
-                      .padding(horizontal = 16.dp)
+                      .padding(horizontal = ProfileScreenDefaults.HuntsListHorizontalPadding)
                       .testTag(ProfileTestTags.PROFILE_HUNTS_LIST),
               horizontalAlignment = Alignment.CenterHorizontally) {
                 item { CustomToolbar(selectedTab, onTabSelected = { selectedTab = it }) }
@@ -215,11 +199,11 @@ fun ProfileScreen(
                 if (huntsToDisplay.isEmpty()) {
                   item {
                     Text(
-                        text = "No hunts yet",
-                        color = Color.Gray,
-                        fontSize = 16.sp,
+                        text = ProfileScreenStrings.NoHuntsYet,
+                        color = ProfileScreenDefaults.EmptyStateTextColor,
+                        fontSize = ProfileScreenDefaults.BodyFontSize,
                         modifier =
-                            Modifier.padding(top = 32.dp)
+                            Modifier.padding(top = ProfileScreenDefaults.EmptyStateTopPadding)
                                 .align(Alignment.CenterHorizontally)
                                 .testTag(ProfileTestTags.EMPTY_HUNTS_MESSAGE))
                   }
@@ -256,13 +240,17 @@ fun CustomToolbar(selectedTab: ProfileTab, onTabSelected: (ProfileTab) -> Unit =
             TabItem(ProfileTab.LIKED_HUNTS, ProfileTestTags.TAB_LIKED_HUNTS, Icons.Filled.Favorite))
 
     tabs.forEach { item ->
-      val color = if (selectedTab == item.tab) Color.Green else Color.White
+      val color =
+          if (selectedTab == item.tab) ProfileScreenDefaults.SelectedTabColor
+          else ProfileScreenDefaults.UnselectedTabColor
       Icon(
           imageVector = item.icon,
           contentDescription = item.tab.name,
           modifier =
               Modifier.background(color)
-                  .padding(horizontal = 40.dp, vertical = 10.dp)
+                  .padding(
+                      horizontal = ProfileScreenDefaults.TabHorizontalPadding,
+                      vertical = ProfileScreenDefaults.TabVerticalPadding)
                   .clickable { onTabSelected(item.tab) }
                   .semantics { this[BackgroundColorKey] = color }
                   .testTag(item.testTag))
