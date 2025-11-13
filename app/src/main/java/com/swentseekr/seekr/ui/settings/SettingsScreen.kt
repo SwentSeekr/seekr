@@ -16,9 +16,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 
 object SettingsScreenTestTags {
-  const val LOGOUT_BUTTON = "logoutButton"
-  const val APP_VERSION_TEXT = "appVersionText"
-  const val BACK_BUTTON = "backButton"
+    const val LOGOUT_BUTTON = "logoutButton"
+    const val APP_VERSION_TEXT = "appVersionText"
+    const val BACK_BUTTON = "backButton"
+    const val EDIT_PROFILE_BUTTON = "editProfileButton"
 }
 
 // text constants
@@ -26,6 +27,7 @@ const val TOP_BAR_TEXT = "Settings"
 const val VERSION_TEXT = "App Version"
 const val UNKNOWN_VERSION_TEXT = "Unknown"
 const val LOGOUT_TEXT = "Log out"
+const val EDIT_PROFILE_TEXT = "Edit Profile"
 
 // layout constants
 private val SCREEN_PADDING = 24.dp
@@ -38,54 +40,70 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel(),
     onSignedOut: () -> Unit = {},
     onGoBack: () -> Unit = {},
+    onEditProfile: () -> Unit = {},
     credentialManager: CredentialManager = CredentialManager.create(LocalContext.current)
 ) {
-  val uiState by viewModel.uiState.collectAsState()
-  val scope = rememberCoroutineScope()
+    val uiState by viewModel.uiState.collectAsState()
+    val scope = rememberCoroutineScope()
 
-  LaunchedEffect(uiState.signedOut) { if (uiState.signedOut) onSignedOut() }
+    LaunchedEffect(uiState.signedOut) { if (uiState.signedOut) onSignedOut() }
 
-  Scaffold(
-      topBar = {
-        TopAppBar(
-            title = { Text(TOP_BAR_TEXT) },
-            navigationIcon = {
-              IconButton(
-                  onClick = onGoBack,
-                  modifier = Modifier.testTag(SettingsScreenTestTags.BACK_BUTTON)) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back")
-                  }
-            },
-            colors =
-                TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.typography.headlineSmall.color,
-                    navigationIconContentColor = MaterialTheme.typography.headlineSmall.color))
-      }) { padding ->
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(TOP_BAR_TEXT) },
+                navigationIcon = {
+                    IconButton(
+                        onClick = onGoBack,
+                        modifier = Modifier.testTag(SettingsScreenTestTags.BACK_BUTTON)) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back")
+                    }
+                },
+                colors =
+                    TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = MaterialTheme.typography.headlineSmall.color,
+                        navigationIconContentColor = MaterialTheme.typography.headlineSmall.color))
+        }) { padding ->
         SettingsContent(
             modifier = Modifier.padding(padding).fillMaxSize(),
             appVersion = uiState.appVersion,
+            onEditProfileClick = onEditProfile,
             onLogoutClick = { scope.launch { viewModel.signOut(credentialManager) } })
-      }
+    }
 }
 
 @Composable
-fun SettingsContent(modifier: Modifier = Modifier, appVersion: String?, onLogoutClick: () -> Unit) {
-  Column(
-      modifier = modifier.padding(SCREEN_PADDING).fillMaxSize(),
-      verticalArrangement = Arrangement.SpaceBetween,
-      horizontalAlignment = Alignment.CenterHorizontally) {
+fun SettingsContent(
+    modifier: Modifier = Modifier,
+    appVersion: String?,
+    onEditProfileClick: () -> Unit,
+    onLogoutClick: () -> Unit
+) {
+    Column(
+        modifier = modifier.padding(SCREEN_PADDING).fillMaxSize(),
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally) {
+
         Column(
             verticalArrangement = Arrangement.spacedBy(ITEM_SPACING),
             horizontalAlignment = Alignment.Start,
             modifier = Modifier.fillMaxWidth()) {
-              SettingsItem(
-                  title = VERSION_TEXT,
-                  value = appVersion ?: UNKNOWN_VERSION_TEXT,
-                  modifier = Modifier.testTag(SettingsScreenTestTags.APP_VERSION_TEXT))
+
+            SettingsItem(
+                title = VERSION_TEXT,
+                value = appVersion ?: UNKNOWN_VERSION_TEXT,
+                modifier = Modifier.testTag(SettingsScreenTestTags.APP_VERSION_TEXT))
+
+            Button(
+                onClick = onEditProfileClick,
+                modifier = Modifier.fillMaxWidth().testTag(SettingsScreenTestTags.EDIT_PROFILE_BUTTON)
+            ) {
+                Text(EDIT_PROFILE_TEXT)
             }
+        }
 
         Button(
             onClick = onLogoutClick,
@@ -94,18 +112,18 @@ fun SettingsContent(modifier: Modifier = Modifier, appVersion: String?, onLogout
                 Modifier.fillMaxWidth()
                     .padding(top = LOGOUT_TOP_PADDING)
                     .testTag(SettingsScreenTestTags.LOGOUT_BUTTON)) {
-              Text(LOGOUT_TEXT, color = MaterialTheme.colorScheme.onError)
-            }
-      }
+            Text(LOGOUT_TEXT, color = MaterialTheme.colorScheme.onError)
+        }
+    }
 }
 
 @Composable
 fun SettingsItem(title: String, value: String, modifier: Modifier = Modifier) {
-  Row(
-      modifier = modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically) {
         Text(text = title, fontWeight = FontWeight.Medium)
         Text(text = value, color = MaterialTheme.colorScheme.onSurfaceVariant)
-      }
+    }
 }
