@@ -16,7 +16,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.profile.createHunt
-import com.swentseekr.seekr.model.profile.createTestHunt
+import com.swentseekr.seekr.model.profile.createHuntWithRateAndDifficulty
 import com.swentseekr.seekr.model.profile.emptyProfile
 import com.swentseekr.seekr.model.profile.sampleProfile
 import com.swentseekr.seekr.ui.components.RatingTestTags
@@ -212,12 +212,12 @@ class ProfileScreenTest {
   fun profileScreen_displaysCorrectCalculatedRatings() {
     val myHunts =
         listOf(
-            createTestHunt("hunt1", "Hunt 1", reviewRate = 2.0),
-            createTestHunt("hunt2", "Hunt 2", reviewRate = 4.0))
+            createHuntWithRateAndDifficulty("hunt1", "Hunt 1", reviewRate = 2.0),
+            createHuntWithRateAndDifficulty("hunt2", "Hunt 2", reviewRate = 4.0))
     val doneHunts =
         listOf(
-            createTestHunt("done1", "Done 1", difficulty = Difficulty.EASY),
-            createTestHunt("done2", "Done 2", difficulty = Difficulty.DIFFICULT))
+            createHuntWithRateAndDifficulty("done1", "Done 1", difficulty = Difficulty.EASY),
+            createHuntWithRateAndDifficulty("done2", "Done 2", difficulty = Difficulty.DIFFICULT))
 
     val baseProfile = sampleProfile(myHunts = myHunts, doneHunts = doneHunts)
     val viewModel = ProfileViewModel()
@@ -246,12 +246,15 @@ class ProfileScreenTest {
 
   @Test
   fun profileScreen_displaysCorrectReviewCountAndHuntsDone_withoutRepository() {
-    val myHunts = listOf(createTestHunt("hunt1", "Hunt 1"), createTestHunt("hunt2", "Hunt 2"))
+    val myHunts =
+        listOf(
+            createHuntWithRateAndDifficulty("hunt1", "Hunt 1"),
+            createHuntWithRateAndDifficulty("hunt2", "Hunt 2"))
     val doneHunts =
         listOf(
-            createTestHunt("done1", "Done 1"),
-            createTestHunt("done2", "Done 2"),
-            createTestHunt("done3", "Done 3"))
+            createHuntWithRateAndDifficulty("done1", "Done 1"),
+            createHuntWithRateAndDifficulty("done2", "Done 2"),
+            createHuntWithRateAndDifficulty("done3", "Done 3"))
 
     val profile = sampleProfile(myHunts = myHunts, doneHunts = doneHunts)
 

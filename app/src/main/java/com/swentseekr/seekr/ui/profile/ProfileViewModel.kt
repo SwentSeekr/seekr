@@ -48,6 +48,10 @@ class ProfileViewModel(
   private val _totalReviews = MutableStateFlow(0)
   val totalReviews: StateFlow<Int> = _totalReviews.asStateFlow()
 
+  private fun updateUiState(transform: (ProfileUIState) -> ProfileUIState) {
+    _uiState.value = transform(_uiState.value)
+  }
+
   fun loadTotalReviewsForProfile(profile: Profile) {
     viewModelScope.launch {
       var total = 0
@@ -55,7 +59,9 @@ class ProfileViewModel(
         try {
           val reviews = HuntReviewRepositoryProvider.repository.getHuntReviews(hunt.uid)
           total += reviews.size
-        } catch (e: Exception) {}
+        } catch (e: Exception) {
+          updateUiState { it.copy(errorMsg = "Failed to load reviews for hunt ${hunt.uid}") }
+        }
       }
       _totalReviews.value = total
     }
@@ -64,7 +70,7 @@ class ProfileViewModel(
   fun loadProfile(userId: String? = null) {
     val uidToLoad = userId ?: currentUid
     if (uidToLoad == null) {
-      _uiState.value = ProfileUIState(errorMsg = "User not logged in")
+      updateUiState { it.copy(errorMsg = "User not logged in") }
       return
     }
     viewModelScope.launch {
@@ -76,7 +82,7 @@ class ProfileViewModel(
         val likedHunts = repository.getLikedHunts(uidToLoad)
 
         if (profile == null) {
-          _uiState.value = ProfileUIState(errorMsg = "Profile not found", isLoading = false)
+          updateUiState { it.copy(errorMsg = "Profile not found", isLoading = false) }
           return@launch
         }
 
@@ -87,15 +93,16 @@ class ProfileViewModel(
                 doneHunts = doneHunts,
                 likedHunts = likedHunts)
 
-        _uiState.value =
-            ProfileUIState(
-                profile = updatedProfile, isMyProfile = uidToLoad == currentUid, isLoading = false)
+        updateUiState {
+          it.copy(
+              profile = updatedProfile, isMyProfile = uidToLoad == currentUid, isLoading = false)
+        }
       } catch (e: Exception) {
         val msg =
             if (e.message?.contains("not found", ignoreCase = true) == true) "Profile not found"
             else e.message ?: "Failed to load profile"
 
-        _uiState.value = ProfileUIState(errorMsg = msg, isLoading = false)
+        updateUiState { it.copy(errorMsg = msg, isLoading = false) }
       }
     }
   }
@@ -147,7 +154,7 @@ class ProfileViewModel(
     viewModelScope.launch {
       val uid = currentUid
       if (uid == null) {
-        _uiState.value = _uiState.value.copy(errorMsg = "User not logged in")
+        updateUiState { it.copy(errorMsg = "User not logged in") }
         return@launch
       }
 
@@ -155,7 +162,7 @@ class ProfileViewModel(
         repository.updateProfile(profile.copy(uid = uid))
         loadProfile(uid)
       } catch (e: Exception) {
-        _uiState.value = _uiState.value.copy(errorMsg = "Failed to update profile")
+        updateUiState { it.copy(errorMsg = "User not logged in") }
       }
     }
   }
@@ -166,15 +173,17 @@ class ProfileViewModel(
         val myHunts = repository.getMyHunts(userId)
         val doneHunts = repository.getDoneHunts(userId)
         val likedHunts = repository.getLikedHunts(userId)
-        val currentProfile = _uiState.value.profile
-        if (currentProfile != null) {
-          val updatedProfile =
-              buildProfileWithComputedRatings(
-                  profile = currentProfile,
-                  myHunts = myHunts,
-                  doneHunts = doneHunts,
-                  likedHunts = likedHunts)
-          _uiState.value = _uiState.value.copy(profile = updatedProfile)
+        updateUiState { state ->
+          val currentProfile = state.profile
+          if (currentProfile != null) {
+            val updatedProfile =
+                buildProfileWithComputedRatings(
+                    profile = currentProfile,
+                    myHunts = myHunts,
+                    doneHunts = doneHunts,
+                    likedHunts = likedHunts)
+            state.copy(profile = updatedProfile)
+          } else state
         }
       } catch (e: Exception) {
         _uiState.value = _uiState.value.copy(errorMsg = "Failed to load hunts")

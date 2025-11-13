@@ -91,7 +91,7 @@ fun emptyProfile(): Profile {
   return sampleProfile(myHunts = emptyList(), doneHunts = emptyList(), likedHunts = emptyList())
 }
 
-fun createTestHunt(
+fun createHuntWithRateAndDifficulty(
     uid: String,
     title: String,
     reviewRate: Double = 4.0,

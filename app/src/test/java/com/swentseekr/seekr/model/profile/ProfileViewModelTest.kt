@@ -154,12 +154,12 @@ class ProfileViewModelTest {
   fun buildComputedProfile_calculatesCorrectReviewAndSportRates() = runTest {
     val myHunts =
         listOf(
-            createTestHunt("hunt1", "Hunt 1", reviewRate = 3.0),
-            createTestHunt("hunt2", "Hunt 2", reviewRate = 5.0))
+            createHuntWithRateAndDifficulty("hunt1", "Hunt 1", reviewRate = 3.0),
+            createHuntWithRateAndDifficulty("hunt2", "Hunt 2", reviewRate = 5.0))
     val doneHunts =
         listOf(
-            createTestHunt("done1", "Done 1", difficulty = Difficulty.EASY),
-            createTestHunt("done2", "Done 2", difficulty = Difficulty.DIFFICULT))
+            createHuntWithRateAndDifficulty("done1", "Done 1", difficulty = Difficulty.EASY),
+            createHuntWithRateAndDifficulty("done2", "Done 2", difficulty = Difficulty.DIFFICULT))
 
     val baseProfile = sampleProfile(myHunts = myHunts, doneHunts = doneHunts)
     val computedProfile = viewModel.buildComputedProfile(baseProfile)
