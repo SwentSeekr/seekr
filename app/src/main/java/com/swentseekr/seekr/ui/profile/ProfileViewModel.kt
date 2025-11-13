@@ -3,7 +3,9 @@ package com.swentseekr.seekr.ui.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryProvider
 import com.swentseekr.seekr.model.profile.ProfileRepository
 import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
 import kotlin.String
@@ -17,6 +19,7 @@ data class ProfileUIState(
     val profile: Profile? = null,
     val isMyProfile: Boolean = false,
     val errorMsg: String? = null,
+    val isLoading: Boolean = false
 )
 
 /**
@@ -42,35 +45,100 @@ class ProfileViewModel(
   val currentUid: String?
     get() = injectedCurrentUid ?: firebaseAuth?.currentUser?.uid
 
+  private val _totalReviews = MutableStateFlow(0)
+  val totalReviews: StateFlow<Int> = _totalReviews.asStateFlow()
+
+  private fun updateUiState(transform: (ProfileUIState) -> ProfileUIState) {
+    _uiState.value = transform(_uiState.value)
+  }
+
+  fun loadTotalReviewsForProfile(profile: Profile) {
+    viewModelScope.launch {
+      var total = 0
+      profile.myHunts.forEach { hunt ->
+        try {
+          val reviews = HuntReviewRepositoryProvider.repository.getHuntReviews(hunt.uid)
+          total += reviews.size
+        } catch (e: Exception) {
+          // updateUiState { it.copy(errorMsg = "Failed to load reviews for hunt ${hunt.uid}") }
+        }
+      }
+      _totalReviews.value = total
+    }
+  }
+
   fun loadProfile(userId: String? = null) {
     val uidToLoad = userId ?: currentUid
     if (uidToLoad == null) {
-      _uiState.value = ProfileUIState(errorMsg = "User not logged in")
+      updateUiState { it.copy(errorMsg = "User not logged in") }
       return
     }
     viewModelScope.launch {
+      _uiState.value = _uiState.value.copy(isLoading = true, errorMsg = null)
       try {
         val profile = repository.getProfile(uidToLoad)
         val myHunts = repository.getMyHunts(uidToLoad)
         val doneHunts = repository.getDoneHunts(uidToLoad)
         val likedHunts = repository.getLikedHunts(uidToLoad)
 
-        _uiState.value =
-            ProfileUIState(
-                profile =
-                    profile?.copy(
-                        myHunts = myHunts.toMutableList(),
-                        doneHunts = doneHunts.toMutableList(),
-                        likedHunts = likedHunts.toMutableList()),
-                isMyProfile = uidToLoad == currentUid)
+        if (profile == null) {
+          updateUiState { it.copy(errorMsg = "Profile not found", isLoading = false) }
+          return@launch
+        }
+
+        val updatedProfile =
+            buildProfileWithComputedRatings(
+                profile = profile,
+                myHunts = myHunts,
+                doneHunts = doneHunts,
+                likedHunts = likedHunts)
+
+        updateUiState {
+          it.copy(
+              profile = updatedProfile, isMyProfile = uidToLoad == currentUid, isLoading = false)
+        }
       } catch (e: Exception) {
         val msg =
             if (e.message?.contains("not found", ignoreCase = true) == true) "Profile not found"
             else e.message ?: "Failed to load profile"
 
-        _uiState.value = ProfileUIState(errorMsg = msg)
+        updateUiState { it.copy(errorMsg = msg, isLoading = false) }
       }
     }
+  }
+
+  private fun buildProfileWithComputedRatings(
+      profile: Profile,
+      myHunts: List<Hunt>,
+      doneHunts: List<Hunt>,
+      likedHunts: List<Hunt>
+  ): Profile {
+    val reviewRate = calculateAverageReview(myHunts)
+    val sportRate = calculateAverageSport(doneHunts)
+
+    return profile.copy(
+        author = profile.author.copy(reviewRate = reviewRate, sportRate = sportRate),
+        myHunts = myHunts.toMutableList(),
+        doneHunts = doneHunts.toMutableList(),
+        likedHunts = likedHunts.toMutableList())
+  }
+
+  private fun calculateAverageReview(myHunts: List<Hunt>): Double {
+    if (myHunts.isEmpty()) return 0.0
+    return myHunts.map { it.reviewRate }.average().coerceIn(0.0, 5.0)
+  }
+
+  private fun calculateAverageSport(doneHunts: List<Hunt>): Double {
+    if (doneHunts.isEmpty()) return 0.0
+    val points =
+        doneHunts.map {
+          when (it.difficulty) {
+            Difficulty.EASY -> 1.0
+            Difficulty.INTERMEDIATE -> 3.0
+            Difficulty.DIFFICULT -> 5.0
+          }
+        }
+    return points.average().coerceIn(0.0, 5.0)
   }
 
   fun refreshUIState() {
@@ -86,7 +154,7 @@ class ProfileViewModel(
     viewModelScope.launch {
       val uid = currentUid
       if (uid == null) {
-        _uiState.value = _uiState.value.copy(errorMsg = "User not logged in")
+        updateUiState { it.copy(errorMsg = "User not logged in") }
         return@launch
       }
 
@@ -94,7 +162,7 @@ class ProfileViewModel(
         repository.updateProfile(profile.copy(uid = uid))
         loadProfile(uid)
       } catch (e: Exception) {
-        _uiState.value = _uiState.value.copy(errorMsg = "Failed to update profile")
+        updateUiState { it.copy(errorMsg = "User not logged in") }
       }
     }
   }
@@ -105,19 +173,29 @@ class ProfileViewModel(
         val myHunts = repository.getMyHunts(userId)
         val doneHunts = repository.getDoneHunts(userId)
         val likedHunts = repository.getLikedHunts(userId)
-        val currentProfile = _uiState.value.profile
-        if (currentProfile != null) {
-          _uiState.value =
-              _uiState.value.copy(
-                  profile =
-                      currentProfile.copy(
-                          myHunts = myHunts as MutableList<Hunt>,
-                          doneHunts = doneHunts as MutableList<Hunt>,
-                          likedHunts = likedHunts as MutableList<Hunt>))
+        updateUiState { state ->
+          val currentProfile = state.profile
+          if (currentProfile != null) {
+            val updatedProfile =
+                buildProfileWithComputedRatings(
+                    profile = currentProfile,
+                    myHunts = myHunts,
+                    doneHunts = doneHunts,
+                    likedHunts = likedHunts)
+            state.copy(profile = updatedProfile)
+          } else state
         }
       } catch (e: Exception) {
         _uiState.value = _uiState.value.copy(errorMsg = "Failed to load hunts")
       }
     }
+  }
+  // For testing or preview purposes: builds a profile with computed averages
+  fun buildComputedProfile(profile: Profile): Profile {
+    return buildProfileWithComputedRatings(
+        profile = profile,
+        myHunts = profile.myHunts,
+        doneHunts = profile.doneHunts,
+        likedHunts = profile.likedHunts)
   }
 }

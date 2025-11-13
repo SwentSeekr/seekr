@@ -1,6 +1,7 @@
 package com.swentseekr.seekr.model.profile
 
 import com.swentseekr.seekr.model.author.Author
+import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.ui.profile.Profile
 import com.swentseekr.seekr.ui.profile.ProfileViewModel
 import kotlinx.coroutines.Dispatchers
@@ -147,5 +148,47 @@ class ProfileViewModelTest {
     advanceUntilIdle()
 
     assertEquals("User not logged in", viewModelNoUid.uiState.value.errorMsg)
+  }
+
+  @Test
+  fun buildComputedProfile_calculatesCorrectReviewAndSportRates() = runTest {
+    val myHunts =
+        listOf(
+            createHuntWithRateAndDifficulty("hunt1", "Hunt 1", reviewRate = 3.0),
+            createHuntWithRateAndDifficulty("hunt2", "Hunt 2", reviewRate = 5.0))
+    val doneHunts =
+        listOf(
+            createHuntWithRateAndDifficulty("done1", "Done 1", difficulty = Difficulty.EASY),
+            createHuntWithRateAndDifficulty("done2", "Done 2", difficulty = Difficulty.DIFFICULT))
+
+    val baseProfile = sampleProfile(myHunts = myHunts, doneHunts = doneHunts)
+    val computedProfile = viewModel.buildComputedProfile(baseProfile)
+
+    assertEquals(4.0, computedProfile.author.reviewRate, 0.01)
+    assertEquals(3.0, computedProfile.author.sportRate, 0.01)
+    assertEquals(2, computedProfile.doneHunts.size)
+    assertEquals(2, computedProfile.myHunts.size)
+  }
+
+  @Test
+  fun loadEmptyHunts_computesZeroRates() = runTest {
+    val profile = sampleProfile(myHunts = emptyList(), doneHunts = emptyList(), uid = "user1")
+    repository.addProfile(profile)
+
+    viewModel.loadProfile("user1")
+    advanceUntilIdle()
+
+    val loadedProfile = viewModel.uiState.value.profile!!
+    assertEquals(0.0, loadedProfile.author.reviewRate, 0.01)
+    assertEquals(0.0, loadedProfile.author.sportRate, 0.01)
+    assertEquals(0, viewModel.totalReviews.value)
+  }
+
+  @Test
+  fun repositoryFailure_doesNotCrashViewModel() = runTest {
+    viewModel.loadProfile("nonexistent_user")
+    advanceUntilIdle()
+
+    assertNull(viewModel.uiState.value.profile)
   }
 }

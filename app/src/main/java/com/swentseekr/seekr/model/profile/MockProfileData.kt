@@ -90,3 +90,26 @@ fun createHunt(uid: String, title: String) =
 fun emptyProfile(): Profile {
   return sampleProfile(myHunts = emptyList(), doneHunts = emptyList(), likedHunts = emptyList())
 }
+
+fun createHuntWithRateAndDifficulty(
+    uid: String,
+    title: String,
+    reviewRate: Double = 4.0,
+    difficulty: Difficulty = Difficulty.EASY
+): Hunt {
+  return Hunt(
+      uid = uid,
+      start = Location(0.0, 0.0, "Start"),
+      end = Location(1.0, 1.0, "End"),
+      middlePoints = emptyList(),
+      status = HuntStatus.FUN,
+      title = title,
+      description = "Description for $title",
+      time = 1.0,
+      distance = 2.0,
+      difficulty = difficulty,
+      authorId = "0",
+      mainImageUrl = R.drawable.empty_user.toString(),
+      otherImagesUrls = emptyList(),
+      reviewRate = reviewRate)
+}
