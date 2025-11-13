@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+
   pull_request:
     types:
       - opened
@@ -11,8 +12,8 @@ on:
       - reopened
 
 jobs:
-  ci:
-    name: CI
+  static-checks:
+    name: Static checks (format & lint)
     runs-on: ubuntu-latest
 
     steps:
@@ -22,6 +23,44 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Gradle cache
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Decode google-services.json
+        run: echo "$GOOGLE_SERVICES" | base64 --decode > app/google-services.json
+        env:
+          GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES }}
+
+      # Check formatting
+      - name: KTFmt Check
+        run: ./gradlew ktfmtCheck --parallel --build-cache
+
+      # Android Lint (no emulator needed)
+      - name: Lint
+        run: ./gradlew lint --parallel --build-cache
+
+  tests-and-coverage:
+    name: Unit & instrumentation tests + coverage + Sonar
+    runs-on: ubuntu-latest
+    # no "needs" here -> runs in parallel with static-checks, but both must pass
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      # Enable KVM so the emulator runs faster
       - name: Enable KVM group perms
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -67,28 +106,19 @@ jobs:
         env:
           GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES }}
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
       - name: Install Firebase CLI
-        run: npm install firebase-tools
+        run: npm install -g firebase-tools
 
-      # Check formatting
-      - name: KTFmt Check
-        run: ./gradlew ktfmtCheck --parallel --build-cache
-
-      # Build & static checks (including unit tests)
-      - name: Assemble + Lint + Unit tests
-        run: ./gradlew assemble lint check --parallel --build-cache
+      # Run unit tests & other checks (no emulator)
+      - name: Run unit tests (check)
+        run: ./gradlew check --parallel --build-cache
 
       # Start Firebase emulators for instrumentation tests
       - name: Start Firebase emulators
         run: |
           if [ -e "firebase.json" ] && jq -e '.emulators' firebase.json >/dev/null; then
             echo "Starting Firebase emulators for instrumentation tests..."
-            npx firebase emulators:start --only auth,firestore,storage --project demo-project &
+            firebase emulators:start --only auth,firestore,storage --project demo-project &
             echo "Firebase emulators started"
           else
             echo "Firebase emulators not configured, skipping emulator startup..."
@@ -105,7 +135,8 @@ jobs:
           target: google_apis
           arch: x86_64
           avd-name: github
-          force-avd-creation: false
+          force-avd-creation: false           # reuse cached AVD if present
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -skin 1080x2400
           disable-animations: true
+          # Unit tests already ran in the previous step, so we don't rerun testDebugUnitTest here
           script: ./gradlew connectedDebugAndroidTest jacocoTestReport sonar --parallel --build-cache
