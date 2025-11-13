@@ -27,6 +27,8 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
 
+val spacerHeigtSmall = 3.dp
+
 /**
  * Displays a card representing a hunt with title, author, image, difficulty, distance, and time.
  */
@@ -77,40 +79,26 @@ fun HuntCard(hunt: Hunt, modifier: Modifier = Modifier) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally) {
                           StatsBox(hunt.difficulty.toString(), DifficultyColor(hunt.difficulty))
-                          Spacer(modifier = modifier.height(3.dp))
+                          Spacer(modifier = modifier.height(spacerHeigtSmall))
                           StatsBox("${hunt.distance} km", Color.White)
-                          Spacer(modifier = modifier.height(3.dp))
+                          Spacer(modifier = modifier.height(spacerHeigtSmall))
                           StatsBox("${hunt.time} min", Color.White)
                         }
                   }
             }
       }
 }
-/*
-@Composable
-private fun InfoBox(text: String, backgroundColor: Color, modifier: Modifier = Modifier) {
-  Box(
-      modifier =
-          modifier
-              .padding(4.dp)
-              .background(backgroundColor)
-              .height(20.dp)
-              .width(80.dp)
-              .clip(RectangleShape)) {
-        Text(text, modifier = Modifier.align(Alignment.Center).padding(2.dp))
-      }
-}*/
 
 @Composable
 fun StatsBox(title: String, backColor: Color, modifier: Modifier = Modifier) {
   Box(
       modifier =
           modifier
-              .background(backColor, RoundedCornerShape(5.dp))
-              .height(25.dp)
-              .width(90.dp)
-              .clip(RoundedCornerShape(4.dp))
-              .padding(1.dp),
+              .background(backColor, RoundedCornerShape(HuntCardScreenDefaults.statBoxCornerRadius))
+              .height(HuntCardScreenDefaults.statBoxHeight)
+              .width(HuntCardScreenDefaults.statBoxWidth)
+              .clip(RoundedCornerShape(HuntCardScreenDefaults.statBoxCornerRadius))
+              .padding(HuntCardScreenDefaults.statBoxPadding),
   ) {
     Text(
         title,

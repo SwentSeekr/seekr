@@ -55,14 +55,10 @@ class HuntCardScreenTest {
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.TITLE_TEXT).assertIsDisplayed()
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.AUTHOR_TEXT).assertIsDisplayed()
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.IMAGE).assertIsDisplayed()
-    // composeTestRule.onNodeWithTag(HuntCardScreenTestTags.DIFFICULTY_BOX).assertIsDisplayed()
-    // composeTestRule.onNodeWithTag(HuntCardScreenTestTags.DISTANCE_BOX).assertIsDisplayed()
-    // composeTestRule.onNodeWithTag(HuntCardScreenTestTags.TIME_BOX).assertIsDisplayed()
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.DESCRIPTION_TEXT).assertIsDisplayed()
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.MAP_CONTAINER).assertIsDisplayed()
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.BEGIN_BUTTON).assertIsDisplayed()
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.REVIEW_BUTTON).assertIsDisplayed()
-    // composeTestRule.onAllNodesWithTag(HuntCardScreenTestTags.REVIEW_CARD).onFirst().assertIsDisplayed()
   }
 
   @Test
