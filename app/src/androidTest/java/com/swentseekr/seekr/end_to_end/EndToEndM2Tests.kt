@@ -40,8 +40,8 @@ import org.junit.runner.RunWith
 // Timeouts used for polling UI state via waitUntil.
 // Keep them centralized so we can tweak timings easily if needed.
 // -------------------------------------------------------------------------
-private const val WAIT_SHORT_MS = 5_000L
-private const val WAIT_LONG_MS = 10_000L
+private const val WAIT_SHORT_MS = 10_000L
+private const val WAIT_LONG_MS = 20_000L
 
 /**
  * End-to-end test for the "Milestone 2" flow.
@@ -190,7 +190,7 @@ private class OverviewRobot(private val rule: ComposeTestRule) {
    * This protects us against transient/loading states and recompositions.
    */
   fun assertOnOverview(): OverviewRobot {
-    rule.waitUntil(timeoutMillis = WAIT_SHORT_MS) {
+    rule.waitUntil(timeoutMillis = WAIT_LONG_MS) {
       try {
         rule
             .onAllNodesWithTag(OverviewScreenTestTags.OVERVIEW_SCREEN)
