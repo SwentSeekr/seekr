@@ -7,22 +7,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
 import com.swentseekr.seekr.model.map.Location
-
-private const val TITLE_TEXT = "Select Hunt Points"
-private const val BACK_CONTENT_DESC = "Back"
-private const val BUTTON_CONFIRM_LABEL = "Confirm Points"
-private const val BOTTOM_PADDING = 16
-
-object AddPointsMapScreenTestTags {
-  const val CONFIRM_BUTTON = "ConfirmButton"
-  const val MAP_VIEW = "MapView"
-  const val CANCEL_BUTTON = "CancelButton"
-  const val POINT_NAME_FIELD = "PointNameField"
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,23 +32,25 @@ fun BaseAddPointsMapScreen(
   Scaffold(
       topBar = {
         TopAppBar(
-            title = { Text(TITLE_TEXT) },
+            title = { Text(AddPointsMapScreenDefaults.TitleText) },
             navigationIcon = {
               IconButton(
                   onClick = onCancel,
                   modifier = Modifier.testTag(AddPointsMapScreenTestTags.CANCEL_BUTTON)) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = BACK_CONTENT_DESC)
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        contentDescription = AddPointsMapScreenDefaults.BackContentDescription)
                   }
             })
       },
       bottomBar = {
-        Column(Modifier.padding(BOTTOM_PADDING.dp)) {
+        Column(Modifier.padding(AddPointsMapScreenDefaults.BottomPadding)) {
           Button(
               onClick = { onDone(points) },
               modifier = Modifier.fillMaxWidth().testTag(AddPointsMapScreenTestTags.CONFIRM_BUTTON),
               enabled = points.size >= 2,
           ) {
-            Text("$BUTTON_CONFIRM_LABEL (${points.size})")
+            Text("${AddPointsMapScreenDefaults.ConfirmButtonLabel} (${points.size})")
           }
         }
       }) { padding ->

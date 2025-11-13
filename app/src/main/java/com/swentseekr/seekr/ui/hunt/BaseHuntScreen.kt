@@ -6,8 +6,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.swentseekr.seekr.model.map.Location
 
-private const val TOAST_HUNT_SAVED = "Hunt saved successfully!"
-
 @Composable
 fun BaseHuntScreen(
     title: String = "Add your Hunt",
@@ -28,7 +26,7 @@ fun BaseHuntScreen(
   // Toast when then hunt is saved
   LaunchedEffect(uiState.saveSuccessful) {
     if (uiState.saveSuccessful) {
-      Toast.makeText(context, TOAST_HUNT_SAVED, Toast.LENGTH_SHORT).show()
+      Toast.makeText(context, BaseHuntScreenMessages.HUNT_SAVED, Toast.LENGTH_SHORT).show()
       onDone()
       vm.resetSaveSuccess()
     }
