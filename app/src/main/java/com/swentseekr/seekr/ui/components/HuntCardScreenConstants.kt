@@ -20,11 +20,15 @@ object HuntCardScreenDefaults {
   val BadgeWidth: Dp = 80.dp
   val BadgePadding: Dp = 4.dp
   val BadgeTextPadding: Dp = 2.dp
-  val MapHeight: Dp = 400.dp
+  val MapHeight: Dp = 350.dp
   val MapPadding: Dp = 8.dp
   val CardBorderWidth: Dp = 2.dp
   val CornerRadius: Dp = 12.dp
-  val ButtonWidth: Dp = 120.dp
+  val statBoxCornerRadius: Dp = 5.dp
+  val statBoxHeight: Dp = 25.dp
+  val statBoxWidth: Dp = 90.dp
+  val statBoxPadding: Dp = 1.dp
+  val ButtonWidth: Dp = 100.dp
   val ReviewCardVerticalPadding: Dp = 4.dp
   val ReviewCardPadding: Dp = 8.dp
   val TitleFontSize = 20.sp
@@ -43,6 +47,7 @@ object HuntCardScreenStrings {
   const val TimeUnit = "min"
   const val BeginHunt = "Begin Hunt"
   const val AddReview = "Add Review"
+  const val EditHunt = "Edit Hunt"
   const val ReviewTitlePrefix = "Rating:"
   const val ReviewHint = "Point de départ de la chasse"
   const val ReviewMarkerTitlePrefix = "Départ : "
