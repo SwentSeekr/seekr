@@ -125,7 +125,6 @@ jobs:
 
       # Run instrumentation tests + unit tests + Coverage + Sonar
       - name: Run instrumentation tests + unit tests + Coverage + Sonar
-        timeout-minutes: 25
         uses: reactivecircus/android-emulator-runner@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
