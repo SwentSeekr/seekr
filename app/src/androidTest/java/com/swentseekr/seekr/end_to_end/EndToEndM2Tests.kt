@@ -434,11 +434,21 @@ private class MapRobot(private val rule: ComposeTestRule) {
    * 3) Types the name and taps "Add".
    */
   fun addPointNamed(name: String): MapRobot {
-    // Tap the map to open the point-name dialog.
-    rule.onNodeWithTag(TAG_MAP).assertIsDisplayed().performClick()
+    // 1) Wait for the map to actually be on screen (robust on slow CI).
+    rule.waitUntil(timeoutMillis = WAIT_LONG_MS) {
+      try {
+        rule.onNodeWithTag(TAG_MAP).assertIsDisplayed()
+        true
+      } catch (_: Throwable) {
+        false
+      }
+    }
 
-    // Wait until the point-name text field actually exists before typing.
-    rule.waitUntil(timeoutMillis = WAIT_SHORT_MS) {
+    // 2) Tap the map to open the point-name dialog.
+    rule.onNodeWithTag(TAG_MAP).performClick()
+
+    // 3) Wait until the point-name text field actually exists before typing.
+    rule.waitUntil(timeoutMillis = WAIT_LONG_MS) {
       try {
         rule.onNodeWithTag(TAG_POINT_FIELD).fetchSemanticsNode()
         true
@@ -447,6 +457,8 @@ private class MapRobot(private val rule: ComposeTestRule) {
       }
     }
 
+    // 4) Type the name and confirm.
+    rule.onNodeWithTag(TAG_POINT_FIELD).performTextClearance()
     rule.onNodeWithTag(TAG_POINT_FIELD).performTextInput(name)
     rule.onNodeWithText("Add").performClick()
     rule.waitForIdleSync()
@@ -538,7 +550,7 @@ private class EditHuntRobot(private val rule: ComposeTestRule) {
 
     // 4) Wait until the Save button is actually enabled
     //    (validation complete, recomposition done).
-    rule.waitUntil(timeoutMillis = WAIT_SHORT_MS) {
+    rule.waitUntil(timeoutMillis = WAIT_LONG_MS) {
       try {
         rule.onNodeWithTag(TAG_SAVE_BUTTON).assertIsEnabled()
         true
