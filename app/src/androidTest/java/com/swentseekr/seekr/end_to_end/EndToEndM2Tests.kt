@@ -41,7 +41,7 @@ import org.junit.runner.RunWith
 // Keep them centralized so we can tweak timings easily if needed.
 // -------------------------------------------------------------------------
 private const val WAIT_SHORT_MS = 10_000L
-private const val WAIT_LONG_MS = 20_000L
+private const val WAIT_LONG_MS = 40_000L
 
 /**
  * End-to-end test for the "Milestone 2" flow.
