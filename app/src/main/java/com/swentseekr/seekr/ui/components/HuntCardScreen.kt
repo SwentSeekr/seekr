@@ -6,15 +6,19 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -24,6 +28,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -43,6 +48,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -54,11 +60,8 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.swentseekr.seekr.R
-import com.swentseekr.seekr.model.hunt.Difficulty
-import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.model.hunt.DifficultyColor
 import com.swentseekr.seekr.model.hunt.HuntReview
-import com.swentseekr.seekr.model.hunt.HuntStatus
-import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 
 const val MAX_STAR_NUMBER = 5
@@ -87,44 +90,44 @@ fun HuntCardScreen(
     onGoBack: () -> Unit = {},
     beginHunt: () -> Unit = {},
     addReview: () -> Unit = {},
+    editHunt: () -> Unit = {},
     testmode: Boolean = false,
 ) {
   val uiState by huntCardViewModel.uiState.collectAsState()
 
   // Load when arriving / when id changes
   LaunchedEffect(huntId) { huntCardViewModel.loadHunt(huntId) }
-  LaunchedEffect(huntId) { huntCardViewModel.loadOtherReview(huntId) }
-
   val hunt2 = uiState.hunt
-  // val reviews = uiState.reviewList
-  val reviews =
-      List(10) { index ->
-        HuntReview(
-            reviewId = "review$index",
-            authorId = "author$index",
-            huntId = "hunt123",
-            rating = 4.0 + (index % 2),
-            comment = "This is review number $index",
-            photos = emptyList())
-      }
+  val authorId = hunt2?.authorId ?: ""
 
-  val author = "SpikeMan"
-  val hunt =
-      Hunt(
-          uid = "hunt123",
-          start = Location(40.7128, -74.0060, "New York"),
-          end = Location(40.730610, -73.935242, "Brooklyn"),
-          middlePoints = emptyList(),
-          status = HuntStatus.FUN,
-          title = "City Exploration",
-          description =
-              "Discover hidden gems in the city åß∂ƒ@ªº∆¬±“#Ç[]|{}≠¿´‘¶–…«¬∆øπ§¢æ‘¡°œ∑€®️†Ωn hello kitty",
-          time = 2.5,
-          distance = 5.0,
-          difficulty = Difficulty.DIFFICULT,
-          authorId = "0",
-          mainImageUrl = R.drawable.ic_launcher_foreground.toString(),
-          reviewRate = 4.5)
+  LaunchedEffect(authorId) { huntCardViewModel.loadAuthorProfile(authorId) }
+  val authorProfile = uiState.authorProfile
+
+  LaunchedEffect(huntId) { huntCardViewModel.loadOtherReview(huntId) }
+  val reviews = uiState.reviewList
+
+  LaunchedEffect(Unit) { huntCardViewModel.loadCurrentUserID() }
+  val currentUserId = uiState.currentUserId
+
+  val isCurrentId = currentUserId == authorId // verify if current user is author
+  val buttonFunctionEdit = if (isCurrentId) editHunt else addReview
+  val buttonText = if (isCurrentId) "Edit Hunt" else "Add Review"
+
+  /*var reviews =
+  List(10) { index ->
+    HuntReview(
+        reviewId = "review$index",
+        authorId = "author$index",
+        huntId = "hunt123",
+        rating = 4.0 + (index % 2),
+        comment = "This is review number $index",
+        photos = emptyList()
+    )
+  }*/
+  // reviews = emptyList() // For test purpose, no reviews
+
+  val author = authorProfile?.author?.pseudonym ?: ("Unknown Author")
+
   Scaffold(
       // BAR GOBACK ARROW
       topBar = {
@@ -150,168 +153,165 @@ fun HuntCardScreen(
         } else {
 
           // COLUMN FOR INFORMATIONS
-          Card(
-              modifier =
-                  modifier
-                      .fillMaxWidth()
-                      .padding(innerPadding)
-                      .padding(horizontal = 16.dp)
-                      .padding(top = 8.dp, bottom = 16.dp)
-                      .border(2.dp, Color(0xFF60BA37), RoundedCornerShape(12.dp)),
-              colors = CardDefaults.cardColors(containerColor = Color(0xFFF8DEB6)),
-              shape = RoundedCornerShape(12.dp)) {
-                LazyColumn(
-                    modifier = Modifier.padding(12.dp).fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                      // ROW WITH IMAGE, TITLE, AUTHOR, DIFFICULTY, DISTANCE, TIME
-                      item {
-                        Column(modifier = modifier.padding(8.dp).fillMaxWidth().fillMaxSize()) {
-                          Row(verticalAlignment = Alignment.CenterVertically) {
+          LazyColumn {
+            item {
+              Card(
+                  modifier =
+                      modifier
+                          .fillMaxWidth()
+                          .padding(innerPadding)
+                          .padding(horizontal = 16.dp)
+                          .padding(top = 8.dp, bottom = 16.dp)
+                          .border(2.dp, Color(0xFF60BA37), RoundedCornerShape(12.dp))
+                          .height(700.dp),
+                  colors = CardDefaults.cardColors(containerColor = Color(0xFFF8DEB6)),
+                  shape = RoundedCornerShape(12.dp)) {
+                    Column(
+                        modifier =
+                            Modifier.padding(12.dp)
+                                .fillMaxWidth()
+                                .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                          // ROW WITH IMAGE, TITLE, AUTHOR, DIFFICULTY, DISTANCE, TIME
+
+                          Column(modifier = modifier.padding(8.dp).fillMaxWidth().fillMaxSize()) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                              Text(
+                                  hunt.title,
+                                  fontSize = 20.sp,
+                                  fontWeight = FontWeight.Bold,
+                                  textAlign = TextAlign.Center,
+                                  modifier =
+                                      Modifier.weight(1f)
+                                          .padding(4.dp)
+                                          .testTag(HuntCardScreenTestTags.TITLE_TEXT))
+                            }
                             Text(
-                                hunt.title,
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center,
-                                modifier =
-                                    Modifier.weight(1f)
-                                        .padding(4.dp)
-                                        .testTag(HuntCardScreenTestTags.TITLE_TEXT))
-                          }
-                          Text(
-                              "by $author",
-                              modifier =
-                                  Modifier.padding(horizontal = 4.dp)
-                                      .testTag(HuntCardScreenTestTags.AUTHOR_TEXT))
-                          Row {
-                            AsyncImage(
-                                model = hunt.mainImageUrl.ifEmpty { R.drawable.empty_image },
-                                contentDescription = "Hunt Picture",
+                                "by $author",
                                 modifier =
                                     Modifier.padding(horizontal = 4.dp)
-                                        .size(100.dp)
-                                        .clip(RectangleShape)
-                                        .testTag(HuntCardScreenTestTags.IMAGE),
-                                placeholder = painterResource(R.drawable.empty_image),
-                                error = painterResource(R.drawable.empty_image))
-                            Column(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalAlignment = Alignment.CenterHorizontally) {
-                                  Box(
-                                      modifier =
-                                          Modifier.padding(4.dp)
-                                              .background(Color.Green)
-                                              .height(20.dp)
-                                              .width(80.dp)
-                                              .clip(RectangleShape)
-                                              .testTag(HuntCardScreenTestTags.DIFFICULTY_BOX),
-                                  ) {
-                                    Text(
+                                        .testTag(HuntCardScreenTestTags.AUTHOR_TEXT))
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                              AsyncImage(
+                                  model = hunt.mainImageUrl.ifEmpty { R.drawable.empty_image },
+                                  contentDescription = "Hunt Picture",
+                                  modifier =
+                                      Modifier.padding(horizontal = 4.dp)
+                                          .size(100.dp)
+                                          .clip(RectangleShape)
+                                          .testTag(HuntCardScreenTestTags.IMAGE),
+                                  placeholder = painterResource(R.drawable.empty_image),
+                                  error = painterResource(R.drawable.empty_image))
+                              Column(
+                                  modifier = Modifier.fillMaxWidth(),
+                                  horizontalAlignment = Alignment.CenterHorizontally,
+                                  verticalArrangement = Arrangement.Center) {
+                                    StatsBox(
                                         hunt.difficulty.toString(),
-                                        modifier = Modifier.align(Alignment.Center).padding(2.dp))
-                                  }
-
-                                  Box(
-                                      modifier =
-                                          Modifier.padding(4.dp)
-                                              .background(Color.White)
-                                              .height(20.dp)
-                                              .width(80.dp)
-                                              .clip(RectangleShape)
-                                              .testTag(HuntCardScreenTestTags.DISTANCE_BOX),
-                                  ) {
-                                    Text(
+                                        DifficultyColor(hunt.difficulty),
+                                        HuntCardScreenTestTags.DIFFICULTY_BOX,
+                                        modifier)
+                                    Spacer(modifier = modifier.height(4.dp))
+                                    StatsBox(
                                         "${hunt.distance} km",
-                                        modifier = Modifier.align(Alignment.Center).padding(2.dp))
+                                        Color.White,
+                                        HuntCardScreenTestTags.DISTANCE_BOX,
+                                        modifier)
+                                    Spacer(modifier = modifier.height(4.dp))
+                                    StatsBox(
+                                        "${hunt.time} h",
+                                        Color.White,
+                                        HuntCardScreenTestTags.TIME_BOX,
+                                        modifier)
                                   }
-                                  Box(
-                                      modifier =
-                                          Modifier.padding(4.dp)
-                                              .background(Color.White)
-                                              .height(20.dp)
-                                              .width(80.dp)
-                                              .clip(RectangleShape)
-                                              .testTag(HuntCardScreenTestTags.TIME_BOX),
-                                  ) {
-                                    Text(
-                                        "${hunt.time} min",
-                                        modifier = Modifier.align(Alignment.Center).padding(2.dp))
-                                  }
+                            }
+                          }
+
+                          // DESCRIPTION
+
+                          Text(
+                              hunt.description, // +"  "+ currentUserId,
+                              modifier =
+                                  Modifier.padding(8.dp)
+                                      .testTag(HuntCardScreenTestTags.DESCRIPTION_TEXT))
+
+                          // MAP WITH START POINT
+
+                          var mapLoaded by remember { mutableStateOf(true) }
+
+                          if (mapLoaded) {
+                            val startPosition = LatLng(hunt.start.latitude, hunt.start.longitude)
+                            val cameraPositionState = rememberCameraPositionState {
+                              position = CameraPosition.fromLatLngZoom(startPosition, 12f)
+                            }
+
+                            Box(
+                                modifier =
+                                    Modifier.fillMaxWidth()
+                                        .height(350.dp)
+                                        .padding(8.dp)
+                                        .testTag(HuntCardScreenTestTags.MAP_CONTAINER)) {
+                                  GoogleMap(
+                                      modifier = Modifier.matchParentSize(),
+                                      cameraPositionState = cameraPositionState) {
+                                        Marker(
+                                            state = MarkerState(position = startPosition),
+                                            title = "Départ : ${hunt.start.name}",
+                                            snippet = "Point de départ de la chasse")
+                                      }
+                                }
+                          }
+
+                          // BOUTON BEGIN HUNT
+
+                          Row(
+                              modifier = modifier.fillMaxWidth(),
+                              horizontalArrangement = Arrangement.SpaceEvenly,
+                          ) {
+                            Button(
+                                beginHunt,
+                                modifier =
+                                    modifier
+                                        .defaultMinSize(minWidth = 100.dp)
+                                        .wrapContentWidth()
+                                        .testTag(HuntCardScreenTestTags.BEGIN_BUTTON)) {
+                                  Text("Begin Hunt")
+                                }
+                            Button(
+                                buttonFunctionEdit,
+                                modifier =
+                                    modifier
+                                        .defaultMinSize(minWidth = 100.dp)
+                                        .wrapContentWidth()
+                                        .testTag(HuntCardScreenTestTags.REVIEW_BUTTON)) {
+                                  Text(buttonText, Modifier.padding(4.dp))
                                 }
                           }
                         }
-                      }
+                  }
+            }
 
-                      // DESCRIPTION
-                      item {
-                        Text(
-                            hunt.description,
-                            modifier =
-                                Modifier.padding(8.dp)
-                                    .testTag(HuntCardScreenTestTags.DESCRIPTION_TEXT))
-                      }
-                      // MAP WITH START POINT
-                      item {
-                        var mapLoaded by remember { mutableStateOf(true) }
-
-                        if (mapLoaded) {
-                          val startPosition = LatLng(hunt.start.latitude, hunt.start.longitude)
-                          val cameraPositionState = rememberCameraPositionState {
-                            position = CameraPosition.fromLatLngZoom(startPosition, 12f)
-                          }
-
-                          Box(
-                              modifier =
-                                  Modifier.fillMaxWidth()
-                                      .height(400.dp)
-                                      .padding(8.dp)
-                                      .testTag(HuntCardScreenTestTags.MAP_CONTAINER)) {
-                                GoogleMap(
-                                    modifier = Modifier.matchParentSize(),
-                                    cameraPositionState = cameraPositionState) {
-                                      Marker(
-                                          state = MarkerState(position = startPosition),
-                                          title = "Départ : ${hunt.start.name}",
-                                          snippet = "Point de départ de la chasse")
-                                    }
-                              }
-                        }
-                      }
-                      // BOUTON BEGIN HUNT
-                      item {
-                        Row(
-                            modifier = modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly,
-                        ) {
-                          Button(
-                              beginHunt,
-                              modifier =
-                                  modifier
-                                      .width(120.dp)
-                                      .testTag(HuntCardScreenTestTags.BEGIN_BUTTON)) {
-                                Text("Begin Hunt")
-                              }
-                          Button(
-                              addReview,
-                              modifier =
-                                  modifier
-                                      .width(120.dp)
-                                      .testTag(HuntCardScreenTestTags.REVIEW_BUTTON)) {
-                                Text("Add Review")
-                              }
-                        }
-                      }
-                    }
+            item {
+              Text(
+                  "Reviews :",
+                  fontSize = MaterialTheme.typography.headlineSmall.fontSize,
+                  fontWeight = FontWeight.Bold,
+                  textAlign = TextAlign.Center,
+                  modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 4.dp))
+            }
+            if (reviews == null || reviews.isEmpty()) {
+              item {
+                Text(
+                    "No reviews yet.",
+                    fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                    fontWeight = FontWeight.Normal,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(top = 30.dp, bottom = 30.dp))
               }
-
-          LazyColumn(
-              modifier =
-                  modifier
-                      .fillMaxWidth()
-                      .padding(innerPadding)
-                      .padding(horizontal = 16.dp)
-                      .padding(top = 8.dp, bottom = 16.dp)) {
-                items(reviews) { review -> ReviewCard(review) }
-              }
+            } else {
+              items(reviews) { review -> ReviewCard(review) }
+            }
+          }
         }
       }
 }
@@ -321,6 +321,7 @@ fun ReviewCard(review: HuntReview) {
   Card(
       modifier =
           Modifier.fillMaxWidth()
+              .padding(horizontal = 16.dp)
               .padding(vertical = 4.dp)
               .border(2.dp, Color(0xFF60BA37), RoundedCornerShape(12.dp))
               .testTag(HuntCardScreenTestTags.REVIEW_CARD),
@@ -333,7 +334,11 @@ fun ReviewCard(review: HuntReview) {
   }
 }
 
-/**
- * @Preview
- * @Composable fun HuntCardScreenPreview() { HuntCardScreen() }
- */
+@Preview
+@Composable
+fun HuntCardScreenPreview() {
+  HuntCardScreen(
+      huntId = "hunt123",
+      testmode = true,
+  )
+}

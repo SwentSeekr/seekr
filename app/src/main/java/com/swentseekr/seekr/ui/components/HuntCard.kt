@@ -12,16 +12,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Difficulty
+import com.swentseekr.seekr.model.hunt.DifficultyColor
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
@@ -75,15 +76,17 @@ fun HuntCard(hunt: Hunt, modifier: Modifier = Modifier) {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally) {
-                          InfoBox(hunt.difficulty.toString(), Color.Green)
-                          InfoBox("${hunt.distance} km", Color.White)
-                          InfoBox("${hunt.time} min", Color.White)
+                          StatsBox(hunt.difficulty.toString(), DifficultyColor(hunt.difficulty), "")
+                          Spacer(modifier = modifier.height(3.dp))
+                          StatsBox("${hunt.distance} km", Color.White, "")
+                          Spacer(modifier = modifier.height(3.dp))
+                          StatsBox("${hunt.time} min", Color.White, "")
                         }
                   }
             }
       }
 }
-
+/*
 @Composable
 private fun InfoBox(text: String, backgroundColor: Color, modifier: Modifier = Modifier) {
   Box(
@@ -96,6 +99,26 @@ private fun InfoBox(text: String, backgroundColor: Color, modifier: Modifier = M
               .clip(RectangleShape)) {
         Text(text, modifier = Modifier.align(Alignment.Center).padding(2.dp))
       }
+}*/
+
+@Composable
+fun StatsBox(title: String, backColor: Color, testTag: String, modifier: Modifier = Modifier) {
+  Box(
+      modifier =
+          modifier
+              .background(backColor, RoundedCornerShape(5.dp))
+              .height(25.dp)
+              .width(90.dp)
+              .clip(RoundedCornerShape(4.dp))
+              .padding(1.dp)
+              .testTag(testTag),
+  ) {
+    Text(
+        title,
+        textAlign = TextAlign.Center,
+        modifier = modifier.align(Alignment.Center).padding(2.dp),
+    )
+  }
 }
 
 /** Preview of [HuntCard] composable for Android Studio. */

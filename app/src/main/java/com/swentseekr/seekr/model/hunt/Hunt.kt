@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.model.hunt
 
+import androidx.compose.ui.graphics.Color
 import com.swentseekr.seekr.model.map.Location
 
 data class Hunt(
@@ -31,11 +32,11 @@ enum class Difficulty {
   DIFFICULT
 }
 
-fun DifficultyColor(difficulty: Difficulty): Int {
+fun DifficultyColor(difficulty: Difficulty): Color {
   return when (difficulty) {
-    Difficulty.EASY -> 0x60BA37 // Green
-    Difficulty.INTERMEDIATE -> 0xFFDFAD // Yellow
-    Difficulty.DIFFICULT -> 0xFFC1C1 // Red
+    Difficulty.EASY -> Color.Green // Green
+    Difficulty.INTERMEDIATE -> Color.Yellow // Yellow
+    Difficulty.DIFFICULT -> Color.Red // Red
   }
 }
 
