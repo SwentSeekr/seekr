@@ -5,11 +5,13 @@ import androidx.activity.compose.setContent
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
@@ -43,6 +45,9 @@ class SeekrNavigationTest {
 
   // --- convenience helpers (unmerged tree = true avoids "button not pressed" issues) ---
   private fun node(tag: String) = compose.onNodeWithTag(tag, useUnmergedTree = true)
+
+  private fun firstNode(tag: String) =
+      compose.onAllNodes(hasTestTag(tag), useUnmergedTree = true).onFirst()
 
   /** Helper to open the Profile tab and wait for compose to settle. */
   private fun goToProfileTab() {
@@ -160,7 +165,7 @@ class SeekrNavigationTest {
     goToProfileTab()
 
     // first MyHunt card
-    node("HUNT_CARD_0").performClick()
+    firstNode("HUNT_CARD_0").performClick()
 
     // wait for EditHunt wrapper tag
     waitUntilTrue(SHORT) {
@@ -252,7 +257,8 @@ class SeekrNavigationTest {
 
       // Click the last card.
       compose
-          .onNodeWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
+          .onAllNodesWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
+          .onFirst()
           .assertExists()
           .performClick()
 
@@ -284,7 +290,7 @@ class SeekrNavigationTest {
       goToProfileTab()
 
       // Open the first My Hunt card -> navigates to EditHunt(hunt123).
-      node("HUNT_CARD_0").assertIsDisplayed().performClick()
+      firstNode("HUNT_CARD_0").assertIsDisplayed().performClick()
       waitUntilTrue(MED) {
         node(NavigationTestTags.EDIT_HUNT_SCREEN).assertIsDisplayed()
         true
@@ -365,9 +371,11 @@ class SeekrNavigationTest {
     withFakeRepo(FakeRepoSuccess(listOf(seeded))) {
       compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
       goToProfileTab()
-      node("HUNT_CARD_0").performClick()
+      firstNode("HUNT_CARD_0").performClick()
       node(NavigationTestTags.EDIT_HUNT_SCREEN).assertIsDisplayed()
       node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
+      node(HuntScreenTestTags.COLLUMN_HUNT_FIELDS)
+          .performScrollToNode(hasTestTag(HuntScreenTestTags.HUNT_SAVE))
 
       compose.onNodeWithTag(HuntScreenTestTags.HUNT_SAVE, useUnmergedTree = true).performClick()
       compose.waitForIdle()
