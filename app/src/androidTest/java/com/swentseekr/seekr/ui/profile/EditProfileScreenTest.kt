@@ -12,6 +12,7 @@ import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import com.swentseekr.seekr.ui.theme.SampleAppTheme
@@ -378,5 +379,143 @@ class EditProfileScreenTest {
           onProfilePictureChange = {})
     }
     composeTestRule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).assertIsNotEnabled()
+  }
+
+  @Test
+  fun pseudonymTooLong_showsError() {
+    var canSave = true
+
+    composeTestRule.setContent {
+      var pseudonym by remember { mutableStateOf("") }
+      var bio by remember { mutableStateOf("") }
+
+      SampleAppTheme {
+        EditProfileContent(
+            uiState = EditProfileUIState(pseudonym = pseudonym, bio = bio, canSave = true),
+            onPseudonymChange = { pseudonym = it },
+            onBioChange = { bio = it },
+            onCancel = {},
+            onSave = { canSave = true },
+            onProfilePictureChange = {})
+      }
+    }
+
+    val longPseudonym = "a".repeat(31)
+    composeTestRule
+        .onNodeWithTag(EditProfileTestTags.PSEUDONYM_FIELD)
+        .performTextInput(longPseudonym)
+
+    composeTestRule.onNodeWithText("Max 30 characters allowed").assertIsDisplayed()
+    composeTestRule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).assertIsNotEnabled()
+  }
+
+  @Test
+  fun bioTooLong_showsError() {
+    var canSave = true
+
+    composeTestRule.setContent {
+      var pseudonym by remember { mutableStateOf("Valid") }
+      var bio by remember { mutableStateOf("") }
+
+      SampleAppTheme {
+        EditProfileContent(
+            uiState = EditProfileUIState(pseudonym = pseudonym, bio = bio, canSave = true),
+            onPseudonymChange = { pseudonym = it },
+            onBioChange = { bio = it },
+            onCancel = {},
+            onSave = { canSave = true },
+            onProfilePictureChange = {})
+      }
+    }
+
+    val longBio = "b".repeat(201)
+    composeTestRule.onNodeWithTag(EditProfileTestTags.BIO_FIELD).performTextInput(longBio)
+
+    composeTestRule.onNodeWithText("Max 200 characters allowed").assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).assertIsNotEnabled()
+  }
+
+  @Test
+  fun cameraButton_triggersLaunchCheckedByDisappearingDialog() {
+    var cameraLaunched = false
+
+    composeTestRule.setContent {
+      SampleAppTheme { EditProfileScreen(testMode = true, onGoBack = {}, onDone = {}) }
+    }
+
+    composeTestRule.onNodeWithTag(EditProfileTestTags.PROFILE_PICTURE).performClick()
+    composeTestRule.onNodeWithTag(EditProfileTestTags.CAMERA_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(EditProfileTestTags.DIALOG).assertDoesNotExist()
+  }
+
+  @Test
+  fun selectingProfilePictureFromGallery_updatesUri() {
+    val testUri = Uri.parse("content://fake/image_gallery.jpg")
+    var selectedUri: Uri? = null
+
+    composeTestRule.setContent {
+      SampleAppTheme {
+        EditProfileContent(
+            uiState = EditProfileUIState(pseudonym = "", bio = "", profilePicture = 0),
+            onPseudonymChange = {},
+            onBioChange = {},
+            onCancel = {},
+            onSave = {},
+            onProfilePictureChange = { selectedUri = testUri },
+            profilePictureUri = null)
+      }
+    }
+
+    composeTestRule.onNodeWithTag(EditProfileTestTags.PROFILE_PICTURE).performClick()
+    assert(selectedUri == testUri)
+  }
+
+  @Test
+  fun emptyPseudonym_showsErrorAndDisablesSave() {
+    composeTestRule.setContent {
+      var pseudonym by remember { mutableStateOf("") }
+
+      SampleAppTheme {
+        EditProfileContent(
+            uiState =
+                EditProfileUIState(
+                    pseudonym = pseudonym, bio = "Some bio", profilePicture = 0, canSave = true),
+            onPseudonymChange = { pseudonym = it },
+            onBioChange = {},
+            onCancel = {},
+            onSave = {},
+            onProfilePictureChange = {})
+      }
+    }
+
+    composeTestRule.onNodeWithTag(EditProfileTestTags.PSEUDONYM_FIELD).performTextInput(" ")
+
+    composeTestRule.onNodeWithText("Pseudonym cannot be empty").assertIsDisplayed()
+  }
+
+  @Test
+  fun profilePicture_whenNoneSelected_isDefault() {
+    val uiState =
+        EditProfileUIState(
+            pseudonym = "",
+            bio = "",
+        )
+
+    composeTestRule.setContent {
+      SampleAppTheme {
+        EditProfileContent(
+            uiState = uiState,
+            onPseudonymChange = {},
+            onBioChange = {},
+            onCancel = {},
+            onSave = {},
+            onProfilePictureChange = {})
+      }
+    }
+
+    composeTestRule.onNodeWithTag(EditProfileTestTags.PROFILE_PICTURE).assertIsDisplayed()
+
+    assert(uiState.profilePicture == 0)
   }
 }
