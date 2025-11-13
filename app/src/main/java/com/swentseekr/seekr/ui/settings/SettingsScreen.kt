@@ -41,45 +41,36 @@ fun SettingsScreen(
     onEditProfile: () -> Unit = {},
     credentialManager: CredentialManager = CredentialManager.create(LocalContext.current)
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val scope = rememberCoroutineScope()
+  val uiState by viewModel.uiState.collectAsState()
+  val scope = rememberCoroutineScope()
 
-    LaunchedEffect(uiState.signedOut) {
-        if (uiState.signedOut) onSignedOut()
-    }
+  LaunchedEffect(uiState.signedOut) { if (uiState.signedOut) onSignedOut() }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(SettingsScreenStrings.TopBarTitle) },
-                navigationIcon = {
-                    IconButton(
-                        onClick = onGoBack,
-                        modifier = Modifier.testTag(SettingsScreenTestTags.BACK_BUTTON)
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = SettingsScreenStrings.BackContentDescription
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
+  Scaffold(
+      topBar = {
+        TopAppBar(
+            title = { Text(SettingsScreenStrings.TopBarTitle) },
+            navigationIcon = {
+              IconButton(
+                  onClick = onGoBack,
+                  modifier = Modifier.testTag(SettingsScreenTestTags.BACK_BUTTON)) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = SettingsScreenStrings.BackContentDescription)
+                  }
+            },
+            colors =
+                TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            )
-        }
-    ) { padding ->
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary))
+      }) { padding ->
         SettingsContent(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize(),
+            modifier = Modifier.padding(padding).fillMaxSize(),
             appVersion = uiState.appVersion,
             onEditProfileClick = onEditProfile,
-            onLogoutClick = { scope.launch { viewModel.signOut(credentialManager) } }
-        )
-    }
+            onLogoutClick = { scope.launch { viewModel.signOut(credentialManager) } })
+      }
 }
 
 @Composable
@@ -89,62 +80,48 @@ fun SettingsContent(
     onEditProfileClick: () -> Unit,
     onLogoutClick: () -> Unit
 ) {
-    Column(
-        modifier = modifier
-            .padding(SettingsScreenDefaults.ScreenPadding)
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.SpaceBetween,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+  Column(
+      modifier = modifier.padding(SettingsScreenDefaults.ScreenPadding).fillMaxSize(),
+      verticalArrangement = Arrangement.SpaceBetween,
+      horizontalAlignment = Alignment.CenterHorizontally) {
         // Top section
         Column(
             verticalArrangement = Arrangement.spacedBy(SettingsScreenDefaults.ItemSpacing),
             horizontalAlignment = Alignment.Start,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            SettingsItem(
-                title = SettingsScreenStrings.VersionLabel,
-                value = appVersion ?: SettingsScreenStrings.UnknownVersion,
-                modifier = Modifier.testTag(SettingsScreenTestTags.APP_VERSION_TEXT)
-            )
+            modifier = Modifier.fillMaxWidth()) {
+              SettingsItem(
+                  title = SettingsScreenStrings.VersionLabel,
+                  value = appVersion ?: SettingsScreenStrings.UnknownVersion,
+                  modifier = Modifier.testTag(SettingsScreenTestTags.APP_VERSION_TEXT))
 
-            androidx.compose.material3.Button(
-                onClick = onEditProfileClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag(SettingsScreenTestTags.EDIT_PROFILE_BUTTON)
-            ) {
-                Text(EDIT_PROFILE_TEXT)
+              androidx.compose.material3.Button(
+                  onClick = onEditProfileClick,
+                  modifier =
+                      Modifier.fillMaxWidth().testTag(SettingsScreenTestTags.EDIT_PROFILE_BUTTON)) {
+                    Text(EDIT_PROFILE_TEXT)
+                  }
             }
-        }
 
         // Bottom section
         androidx.compose.material3.Button(
             onClick = onLogoutClick,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.error
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = SettingsScreenDefaults.LogoutTopPadding)
-                .testTag(SettingsScreenTestTags.LOGOUT_BUTTON)
-        ) {
-            Text(
-                SettingsScreenStrings.LogoutLabel,
-                color = MaterialTheme.colorScheme.onError
-            )
-        }
-    }
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(top = SettingsScreenDefaults.LogoutTopPadding)
+                    .testTag(SettingsScreenTestTags.LOGOUT_BUTTON)) {
+              Text(SettingsScreenStrings.LogoutLabel, color = MaterialTheme.colorScheme.onError)
+            }
+      }
 }
 
 @Composable
 fun SettingsItem(title: String, value: String, modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+  Row(
+      modifier = modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically) {
         Text(text = title, fontWeight = FontWeight.Medium)
         Text(text = value, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    }
+      }
 }

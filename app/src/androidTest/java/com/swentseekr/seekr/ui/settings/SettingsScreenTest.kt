@@ -31,9 +31,7 @@ class SettingsScreenTest {
   fun clicking_back_button_triggers_callback() {
     var backPressed = false
 
-    composeRule.setContent {
-      MaterialTheme { SettingsScreen(onGoBack = { backPressed = true }) }
-    }
+    composeRule.setContent { MaterialTheme { SettingsScreen(onGoBack = { backPressed = true }) } }
 
     composeRule.onNodeWithTag(SettingsScreenTestTags.BACK_BUTTON).performClick()
     assertTrue(backPressed)
@@ -46,10 +44,9 @@ class SettingsScreenTest {
     composeRule.setContent {
       MaterialTheme {
         SettingsContent(
-          appVersion = "1.0.0",
-          onEditProfileClick = { editProfileTriggered = true },
-          onLogoutClick = {}
-        )
+            appVersion = "1.0.0",
+            onEditProfileClick = { editProfileTriggered = true },
+            onLogoutClick = {})
       }
     }
 
@@ -64,10 +61,9 @@ class SettingsScreenTest {
     composeRule.setContent {
       MaterialTheme {
         SettingsContent(
-          appVersion = "1.0.0",
-          onEditProfileClick = {},
-          onLogoutClick = { logoutTriggered = true }
-        )
+            appVersion = "1.0.0",
+            onEditProfileClick = {},
+            onLogoutClick = { logoutTriggered = true })
       }
     }
 
@@ -80,11 +76,7 @@ class SettingsScreenTest {
     val expectedVersion = "1.2.3"
     composeRule.setContent {
       MaterialTheme {
-        SettingsContent(
-          appVersion = expectedVersion,
-          onEditProfileClick = {},
-          onLogoutClick = {}
-        )
+        SettingsContent(appVersion = expectedVersion, onEditProfileClick = {}, onLogoutClick = {})
       }
     }
     composeRule.onNodeWithText(SettingsScreenStrings.VersionLabel).assertExists()
@@ -95,11 +87,7 @@ class SettingsScreenTest {
   fun app_version_is_unknown_when_null() {
     composeRule.setContent {
       MaterialTheme {
-        SettingsContent(
-          appVersion = null,
-          onEditProfileClick = {},
-          onLogoutClick = {}
-        )
+        SettingsContent(appVersion = null, onEditProfileClick = {}, onLogoutClick = {})
       }
     }
 
