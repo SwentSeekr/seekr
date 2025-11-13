@@ -87,6 +87,24 @@ fun createHunt(uid: String, title: String) =
         otherImagesUrls = emptyList(),
         reviewRate = 4.0)
 
+fun createAlienHunt(uid: String, title: String) =
+    Hunt(
+        uid = uid,
+        start = Location(0.0, 0.0, "Start"),
+        end = Location(1.0, 1.0, "End"),
+        middlePoints = emptyList(),
+        status = HuntStatus.FUN,
+        title = title,
+        description = "Desc $title",
+        time = 1.0,
+        distance = 2.0,
+        difficulty = Difficulty.EASY,
+        authorId = "932983",
+        mainImageUrl = R.drawable.empty_user.toString(),
+        otherImagesUrls = emptyList(),
+        reviewRate = 4.0)
+
+
 fun emptyProfile(): Profile {
   return sampleProfile(myHunts = emptyList(), doneHunts = emptyList(), likedHunts = emptyList())
 }

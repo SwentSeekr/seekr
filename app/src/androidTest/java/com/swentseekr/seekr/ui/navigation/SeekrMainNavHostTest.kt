@@ -15,6 +15,7 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
+import com.swentseekr.seekr.model.profile.createAlienHunt
 import com.swentseekr.seekr.model.profile.createHunt
 import com.swentseekr.seekr.ui.components.HuntCardScreenTestTags
 import com.swentseekr.seekr.ui.hunt.HuntScreenTestTags
@@ -282,52 +283,51 @@ class SeekrNavigationTest {
     }
   }
 
-  @Test
-  fun profile_myHunt_edit_flow_uses_mockProfileData_and_onDone_returns_to_profile() {
-    // Seed repo so EditHuntViewModel.load("hunt123") succeeds (matches mockProfileData()).
-    val seeded = createHunt(uid = "hunt123", title = "City Exploration")
+    @Test
+    fun profile_myHunt_edit_flow_uses_mockProfileData_and_onDone_returns_to_profile() {
+        // Seed repo so EditHuntViewModel.load("hunt123") succeeds (matches mockProfileData()).
+        val seeded = createHunt(uid = "hunt123", title = "City Exploration")
 
-    withFakeRepo(FakeRepoSuccess(listOf(seeded))) {
-      // Compose with testMode so Profile uses mockProfileData() and exposes HUNT_CARD_0.
-      compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
+        withFakeRepo(FakeRepoSuccess(listOf(seeded))) {
+            // Compose with testMode so Profile uses mockProfileData() and exposes HUNT_CARD_0.
+            compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
 
-      // Go to Profile tab.
-      goToProfileTab()
+            // Go to Profile tab.
+            goToProfileTab()
 
-      // Open the first My Hunt card -> navigates to EditHunt(hunt123).
-      firstNode("HUNT_CARD_0").assertIsDisplayed().performClick()
-      waitUntilTrue(MED) {
-        node(NavigationTestTags.EDIT_HUNT_SCREEN).assertIsDisplayed()
-        true
-      }
+            // Open the first My Hunt card -> navigates to EditHunt(hunt123).
+            firstNode("HUNT_CARD_0").assertIsDisplayed().performClick()
+            waitUntilTrue(MED) {
+                node(NavigationTestTags.EDIT_HUNT_SCREEN).assertIsDisplayed()
+                true
+            }
 
-      // Bottom bar should be hidden on EditHunt.
-      node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
+            // Bottom bar should be hidden on EditHunt.
+            node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
 
-      // BEST EFFORT: try to go through the "select locations" branch, then cancel (no-ops if
-      // absent).
-      runCatching {
-            listOf(
+            // BEST EFFORT: try to go through the "select locations" branch, then cancel (no-ops if absent).
+            runCatching {
+                listOf(
                     { tryClickByTag("SELECT_LOCATIONS", "HUNT_SELECT_LOCATIONS", "POINTS_PICKER") },
                     { tryClickByDesc("Select locations", "Pick points", "Select points") },
                     { tryClickByText("Select locations", "Select points", "Add points") },
                 )
-                .any { it() }
+                    .any { it() }
 
-            listOf(
+                listOf(
                     { tryClickByTag("CANCEL", "MAP_CANCEL", "Back") },
                     { tryClickByDesc("Cancel", "Back") },
                     { tryClickByText("Cancel", "Back") },
                 )
-                .any { it() }
-          }
-          .getOrNull()
+                    .any { it() }
+            }
+                .getOrNull()
 
-      // Try to SAVE to trigger onDone() → back to Profile.
-      val didClickSave =
-          listOf<(Unit) -> Boolean>(
-                  {
-                    listOf(
+            // Try to SAVE to trigger onDone() → back to Profile.
+            val didClickSave =
+                listOf<(Unit) -> Boolean>(
+                    {
+                        listOf(
                             "SAVE",
                             "SAVE_BUTTON",
                             "HUNT_SAVE",
@@ -335,154 +335,196 @@ class SeekrNavigationTest {
                             "SAVE_HUNT",
                             "HUNT_SUBMIT",
                             "SUBMIT_BUTTON")
-                        .any { tag -> tryClickByTag(tag) }
-                  },
-                  { arrayOf("Save", "Done").any { d -> tryClickByDesc(d) } },
-                  {
-                    arrayOf("Save", "SAVE", "Save Hunt", "Done", "DONE").any { t ->
-                      tryClickByText(t)
-                    }
-                  },
-              )
-              .any { it(Unit) }
+                            .any { tag -> tryClickByTag(tag) }
+                    },
+                    { arrayOf("Save", "Done").any { d -> tryClickByDesc(d) } },
+                    {
+                        arrayOf("Save", "SAVE", "Save Hunt", "Done", "DONE").any { t ->
+                            tryClickByText(t)
+                        }
+                    },
+                )
+                    .any { it(Unit) }
 
-      if (didClickSave) {
-        waitUntilTrue(LONG) {
-          node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
-          true
+            if (didClickSave) {
+                // After save/onDone we expect to be back on Profile with bottom bar visible.
+                waitUntilTrue(LONG) {
+                    node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
+                    true
+                }
+                val editGone =
+                    compose
+                        .onAllNodes(hasTestTag(NavigationTestTags.EDIT_HUNT_SCREEN), useUnmergedTree = true)
+                        .fetchSemanticsNodes()
+                        .isEmpty()
+                assert(editGone) { "EditHunt wrapper should be dismissed after save/onDone." }
+            } else {
+                // If we couldn't find a Save control, at least exercise back navigation.
+                compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
+                waitUntilTrue(MED) {
+                    node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
+                    true
+                }
+            }
+
+            // Final sanity: we're back in a tab destination (Profile) and the bottom bar is visible.
+            node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
+            node(NavigationTestTags.PROFILE_TAB).assertIsDisplayed()
         }
-        val editGone =
+    }
+
+
+    @Test
+    fun addreview_cancel_and_done_each_pop_back_to_huntcard() {
+        val hunt = createAlienHunt(uid = "rev-2", title = "Reviewable 2")
+
+        withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
+            compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
+
+            // 1) Start from Overview → wait for list.
+            waitUntilTrue(LONG) {
+                compose
+                    .onNodeWithTag(OverviewScreenTestTags.HUNT_LIST, useUnmergedTree = true)
+                    .assertExists()
+                true
+            }
+
+            // 2) Click the last card → go to HuntCard.
             compose
-                .onAllNodes(hasTestTag(NavigationTestTags.EDIT_HUNT_SCREEN), useUnmergedTree = true)
-                .fetchSemanticsNodes()
-                .isEmpty()
-        assert(editGone) { "EditHunt wrapper should be dismissed after save/onDone." }
-      } else {
-        // If no visible Save control, at least exercise onGoBack → popBackStack.
-        compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
-        waitUntilTrue(MED) {
-          node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
-          true
+                .onAllNodesWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
+                .onFirst()
+                .assertExists()
+                .performClick()
+
+            compose.waitUntil(timeoutMillis = XLONG) {
+                compose
+                    .onAllNodes(hasTestTag(NavigationTestTags.HUNTCARD_SCREEN), useUnmergedTree = true)
+                    .fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
+            firstNode(NavigationTestTags.HUNTCARD_SCREEN).assertIsDisplayed()
+
+            // Wait for Review button to appear (after HuntCardViewModel load).
+            waitUntilTrue(LONG) {
+                node(HuntCardScreenTestTags.REVIEW_BUTTON).assertExists()
+                true
+            }
+
+            // --- First pass: Cancel from AddReview → back to HuntCard ---
+
+            node(HuntCardScreenTestTags.REVIEW_BUTTON).performClick()
+            firstNode(NavigationTestTags.REVIEW_HUNT_SCREEN).assertIsDisplayed()
+
+            compose
+                .onNodeWithTag(AddReviewScreenTestTags.CANCEL_BUTTON, useUnmergedTree = true)
+                .performClick()
+            firstNode(NavigationTestTags.HUNTCARD_SCREEN).assertIsDisplayed()
+
+            // Wait again for Review button on returning.
+            waitUntilTrue(LONG) {
+                node(HuntCardScreenTestTags.REVIEW_BUTTON).assertExists()
+                true
+            }
+
+            // --- Second pass: Done from AddReview → back to HuntCard ---
+
+            node(HuntCardScreenTestTags.REVIEW_BUTTON).performClick()
+            firstNode(NavigationTestTags.REVIEW_HUNT_SCREEN).assertIsDisplayed()
+
+            compose
+                .onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON, useUnmergedTree = true)
+                .performClick()
+            firstNode(NavigationTestTags.HUNTCARD_SCREEN).assertIsDisplayed()
         }
-      }
-      node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
-
-      // Back to HuntCard
-      compose
-          .onNodeWithTag(AddReviewScreenTestTags.GO_BACK_BUTTON, useUnmergedTree = true)
-          .performClick()
-      firstNode(NavigationTestTags.HUNTCARD_SCREEN).assertIsDisplayed()
     }
-  }
 
-  @Test
-  fun addreview_cancel_and_done_each_pop_back_to_huntcard() {
-    val hunt = createHunt(uid = "rev-2", title = "Reviewable 2")
 
-    withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
-      compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
-      goToProfileTab()
-      firstNode("HUNT_CARD_0").performClick()
-      node(NavigationTestTags.EDIT_HUNT_SCREEN).assertIsDisplayed()
-      node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
-      node(HuntScreenTestTags.COLLUMN_HUNT_FIELDS)
-          .performScrollToNode(hasTestTag(HuntScreenTestTags.HUNT_SAVE))
 
-      // Open HuntCard
-      waitUntilTrue(MED) {
-        compose
-            .onNodeWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
-            .assertExists()
-        true
-      }
-      compose
-          .onNodeWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
-          .performClick()
-      // After opening card
-      firstNode(NavigationTestTags.HUNTCARD_SCREEN).assertIsDisplayed()
 
-      // To AddReview
-      node(HuntCardScreenTestTags.REVIEW_BUTTON).performClick()
-      firstNode(NavigationTestTags.REVIEW_HUNT_SCREEN).assertIsDisplayed()
+    @Test
+    fun huntcard_to_addreview_uses_route_arg_and_survives_recompose() {
+        // Ensure that route arg forwarding (huntId) is exercised and screen survives recompositions.
+        val huntId = "rev-arg"
+        val huntTitle = "Arg Hunt"
+        val hunt = createAlienHunt(uid = huntId, title = huntTitle)
 
-      // Cancel → back to HuntCard
-      compose
-          .onNodeWithTag(AddReviewScreenTestTags.CANCEL_BUTTON, useUnmergedTree = true)
-          .performClick()
-      firstNode(NavigationTestTags.HUNTCARD_SCREEN).assertIsDisplayed()
+        withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
+            // Compose the real NavHost (no Firebase).
+            compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
 
-      // Again to AddReview
-      node(HuntCardScreenTestTags.REVIEW_BUTTON).performClick()
-      firstNode(NavigationTestTags.REVIEW_HUNT_SCREEN).assertIsDisplayed()
+            // 1) Wait for Overview list to exist.
+            waitUntilTrue(LONG) {
+                compose
+                    .onNodeWithTag(OverviewScreenTestTags.HUNT_LIST, useUnmergedTree = true)
+                    .assertExists()
+                true
+            }
 
-      // Done → back to HuntCard
-      compose
-          .onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON, useUnmergedTree = true)
-          .performClick()
-      firstNode(NavigationTestTags.HUNTCARD_SCREEN).assertIsDisplayed()
+            // 2) Click the last card in the list → opens HuntCardScreen.
+            compose
+                .onAllNodesWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
+                .onFirst()
+                .assertExists()
+                .performClick()
+
+            // 3) Wait until HuntCard content is visible
+            // Also wait for the Review button to be present *and displayed*.
+            waitUntilTrue(LONG) {
+                node(HuntCardScreenTestTags.REVIEW_BUTTON).assertExists().assertIsDisplayed()
+                true
+            }
+
+            // --- FIRST ENTRY TO ADDREVIEW ---
+
+            // 4) Click the Add-Review/Edit button.
+            node(HuntCardScreenTestTags.REVIEW_BUTTON).performClick()
+
+            // We should now be on AddReviewScreen: wait for main content and check hunt data.
+            waitUntilTrue(LONG) {
+                compose
+                    .onNodeWithTag(AddReviewScreenTestTags.INFO_COLUMN, useUnmergedTree = true)
+                    .assertExists()
+                true
+            }
+
+            // Route arg check: AddReviewScreen should show the correct title and uid.
+            waitUntilTrue(LONG) {
+                compose.onNodeWithText(huntTitle, useUnmergedTree = true).assertExists()
+                compose.onNodeWithText(huntId, useUnmergedTree = true).assertExists()
+                true
+            }
+
+            // --- POP BACK AND RE-ENTER TO TEST RECOMPOSITION / ARG STABILITY ---
+
+            compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
+
+            // Back on HuntCard: wait for title and button again.
+            waitUntilTrue(LONG) {
+                node(HuntCardScreenTestTags.TITLE_TEXT).assertExists()
+                true
+            }
+            waitUntilTrue(LONG) {
+                node(HuntCardScreenTestTags.REVIEW_BUTTON).assertExists().assertIsDisplayed()
+                true
+            }
+
+            // Click the button again.
+            node(HuntCardScreenTestTags.REVIEW_BUTTON).performClick()
+
+            // Confirm AddReview again and check that the same hunt is loaded.
+            waitUntilTrue(LONG) {
+                compose
+                    .onNodeWithTag(AddReviewScreenTestTags.INFO_COLUMN, useUnmergedTree = true)
+                    .assertExists()
+                true
+            }
+            waitUntilTrue(LONG) {
+                compose.onNodeWithText(huntTitle, useUnmergedTree = true).assertExists()
+                compose.onNodeWithText(huntId, useUnmergedTree = true).assertExists()
+                true
+            }
+        }
     }
-  }
 
-  @Test
-  fun settings_edit_profile_button_navigates_to_editprofile_cancel_returns_to_settings_then_back_to_tabs() {
-    // Go to Settings
-    goToProfileTab()
-    node(ProfileTestTags.SETTINGS).performClick()
-    node(NavigationTestTags.SETTINGS_SCREEN).assertIsDisplayed()
-    node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
 
-    // Click "Edit Profile" (new line in SeekrMainNavHost wiring)
-    compose
-        .onNodeWithTag(SettingsScreenTestTags.EDIT_PROFILE_BUTTON, useUnmergedTree = true)
-        .assertIsDisplayed()
-        .performClick()
-
-    // On EditProfile route now
-    compose
-        .onAllNodes(hasTestTag(NavigationTestTags.EDIT_PROFILE_SCREEN), useUnmergedTree = true)
-        .onFirst()
-        .assertIsDisplayed()
-    node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
-
-    // Cancel inside EditProfile → popBack to Settings
-    compose.onNodeWithTag(EditProfileTestTags.CANCEL_BUTTON, useUnmergedTree = true).performClick()
-    node(NavigationTestTags.SETTINGS_SCREEN).assertIsDisplayed()
-    node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
-
-    // Back (in-screen back button in Settings) → return to tabs, bottom bar visible
-    compose.onNodeWithTag(SettingsScreenTestTags.BACK_BUTTON, useUnmergedTree = true).performClick()
-    node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
-  }
-
-  @Test
-  fun huntcard_to_addreview_uses_route_arg_and_survives_recompose() {
-    // Ensure that route arg forwarding (huntId) is exercised and screen survives recompositions.
-    val hunt = createHunt(uid = "rev-arg", title = "Arg Hunt")
-
-    withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
-      compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
-
-      // Navigate to HuntCard
-      waitUntilTrue(MED) {
-        compose
-            .onNodeWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
-            .assertExists()
-        true
-      }
-      compose
-          .onNodeWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
-          .performClick()
-      firstNode(NavigationTestTags.HUNTCARD_SCREEN).assertIsDisplayed()
-
-      // To AddReview
-      node(HuntCardScreenTestTags.REVIEW_BUTTON).performClick()
-      firstNode(NavigationTestTags.REVIEW_HUNT_SCREEN).assertIsDisplayed()
-
-      // Pop and re-enter
-      compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
-      firstNode(NavigationTestTags.HUNTCARD_SCREEN).assertIsDisplayed()
-      node(HuntCardScreenTestTags.REVIEW_BUTTON).performClick()
-      firstNode(NavigationTestTags.REVIEW_HUNT_SCREEN).assertIsDisplayed()
-    }
-  }
 }

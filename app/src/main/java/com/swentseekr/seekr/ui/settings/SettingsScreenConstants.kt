@@ -15,7 +15,7 @@ object SettingsScreenStrings {
   const val VersionLabel = "App Version"
   const val UnknownVersion = "Unknown"
   const val LogoutLabel = "Log out"
-  const val EDIT_PROFILE_TEXT = "editProfileButton"
+  const val EDIT_PROFILE_TEXT = "Edit Profile"
 }
 
 object SettingsScreenTestTags {
