@@ -1,6 +1,11 @@
 package com.swentseekr.seekr.ui.settings
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -10,27 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
-
-object SettingsScreenTestTags {
-  const val LOGOUT_BUTTON = "logoutButton"
-  const val APP_VERSION_TEXT = "appVersionText"
-  const val BACK_BUTTON = "backButton"
-}
-
-// text constants
-const val TOP_BAR_TEXT = "Settings"
-const val VERSION_TEXT = "App Version"
-const val UNKNOWN_VERSION_TEXT = "Unknown"
-const val LOGOUT_TEXT = "Log out"
-
-// layout constants
-private val SCREEN_PADDING = 24.dp
-private val ITEM_SPACING = 16.dp
-private val LOGOUT_TOP_PADDING = 32.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,14 +35,14 @@ fun SettingsScreen(
   Scaffold(
       topBar = {
         TopAppBar(
-            title = { Text(TOP_BAR_TEXT) },
+            title = { Text(SettingsScreenStrings.TopBarTitle) },
             navigationIcon = {
               IconButton(
                   onClick = onGoBack,
                   modifier = Modifier.testTag(SettingsScreenTestTags.BACK_BUTTON)) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back")
+                        contentDescription = SettingsScreenStrings.BackContentDescription)
                   }
             },
             colors =
@@ -74,16 +61,16 @@ fun SettingsScreen(
 @Composable
 fun SettingsContent(modifier: Modifier = Modifier, appVersion: String?, onLogoutClick: () -> Unit) {
   Column(
-      modifier = modifier.padding(SCREEN_PADDING).fillMaxSize(),
+      modifier = modifier.padding(SettingsScreenDefaults.ScreenPadding).fillMaxSize(),
       verticalArrangement = Arrangement.SpaceBetween,
       horizontalAlignment = Alignment.CenterHorizontally) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(ITEM_SPACING),
+            verticalArrangement = Arrangement.spacedBy(SettingsScreenDefaults.ItemSpacing),
             horizontalAlignment = Alignment.Start,
             modifier = Modifier.fillMaxWidth()) {
               SettingsItem(
-                  title = VERSION_TEXT,
-                  value = appVersion ?: UNKNOWN_VERSION_TEXT,
+                  title = SettingsScreenStrings.VersionLabel,
+                  value = appVersion ?: SettingsScreenStrings.UnknownVersion,
                   modifier = Modifier.testTag(SettingsScreenTestTags.APP_VERSION_TEXT))
             }
 
@@ -92,9 +79,9 @@ fun SettingsContent(modifier: Modifier = Modifier, appVersion: String?, onLogout
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
             modifier =
                 Modifier.fillMaxWidth()
-                    .padding(top = LOGOUT_TOP_PADDING)
+                    .padding(top = SettingsScreenDefaults.LogoutTopPadding)
                     .testTag(SettingsScreenTestTags.LOGOUT_BUTTON)) {
-              Text(LOGOUT_TEXT, color = MaterialTheme.colorScheme.onError)
+              Text(SettingsScreenStrings.LogoutLabel, color = MaterialTheme.colorScheme.onError)
             }
       }
 }

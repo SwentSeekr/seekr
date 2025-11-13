@@ -6,5 +6,5 @@ data class HuntReview(
     val huntId: String = "",
     val rating: Double = 0.0,
     val comment: String = "",
-    val photos: List<PhotoFile> = emptyList()
+    val photos: List<String> = emptyList()
 )

@@ -54,7 +54,7 @@ class SettingsScreenTest {
     composeRule.setContent {
       MaterialTheme { SettingsContent(appVersion = expectedVersion, onLogoutClick = {}) }
     }
-    composeRule.onNodeWithText("$VERSION_TEXT").assertExists()
+    composeRule.onNodeWithText(SettingsScreenStrings.VersionLabel).assertExists()
     composeRule.onNodeWithText(expectedVersion).assertExists()
   }
 
@@ -64,7 +64,7 @@ class SettingsScreenTest {
       MaterialTheme { SettingsContent(appVersion = null, onLogoutClick = {}) }
     }
 
-    composeRule.onNodeWithText(VERSION_TEXT).assertExists()
-    composeRule.onNodeWithText(UNKNOWN_VERSION_TEXT).assertExists()
+    composeRule.onNodeWithText(SettingsScreenStrings.VersionLabel).assertExists()
+    composeRule.onNodeWithText(SettingsScreenStrings.UnknownVersion).assertExists()
   }
 }

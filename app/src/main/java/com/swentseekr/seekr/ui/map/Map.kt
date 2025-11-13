@@ -37,7 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -71,20 +70,6 @@ import kotlinx.coroutines.launch
  * - [BUTTON_VIEW], [BUTTON_CANCEL]: actions in the popup.
  * - [BUTTON_BACK]: "Back to all hunts" shown in focused mode.
  */
-object MapScreenTestTags {
-  const val GOOGLE_MAP_SCREEN = "mapScreen"
-  const val POPUP_CARD = "huntPopupCard"
-  const val POPUP_TITLE = "huntPopupTitle"
-  const val POPUP_DESC = "huntPopupDesc"
-  const val BUTTON_CANCEL = "huntPopupCancel"
-  const val BUTTON_VIEW = "huntPopupView"
-  const val BUTTON_BACK = "backToAllHunts"
-  const val MAP_SCREEN = "MapScreen"
-  const val PERMISSION_POPUP = "permissionPopup"
-  const val GRANT_LOCATION_PERMISSION = "grantLocationPermission"
-  const val EXPLAIN = "explain"
-}
-
 /**
  * Top-level composable for the Map screen.
  *
@@ -147,7 +132,10 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
     fused.lastLocation.addOnSuccessListener { location ->
       location?.let {
         val here = LatLng(it.latitude, it.longitude)
-        scope.launch { cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(here, 16f)) }
+        scope.launch {
+          cameraPositionState.animate(
+              CameraUpdateFactory.newLatLngZoom(here, MapScreenDefaults.UserLocationZoom))
+        }
       }
     }
   }
@@ -177,7 +165,8 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
                 previousCameraPosition = cameraPositionState.position
               }
               val target = LatLng(hunt.start.latitude, hunt.start.longitude)
-              cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(target, 15f))
+              cameraPositionState.animate(
+                  CameraUpdateFactory.newLatLngZoom(target, MapScreenDefaults.FocusedZoom))
             } else {
               val points = buildList {
                 add(LatLng(hunt.start.latitude, hunt.start.longitude))
@@ -185,11 +174,14 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
                 add(LatLng(hunt.end.latitude, hunt.end.longitude))
               }
 
-              if (points.size == 1) {
-                cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(points.first(), 15f))
+              if (points.size == MapScreenDefaults.UnitPointSize) {
+                cameraPositionState.animate(
+                    CameraUpdateFactory.newLatLngZoom(
+                        points.first(), MapScreenDefaults.FocusedZoom))
               } else {
                 val bounds = LatLngBounds.Builder().apply { points.forEach { include(it) } }.build()
-                cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(bounds, 100))
+                cameraPositionState.animate(
+                    CameraUpdateFactory.newLatLngBounds(bounds, MapScreenDefaults.BoundsPadding))
               }
             }
           }
@@ -198,7 +190,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
             Marker(
                 state =
                     MarkerState(LatLng(selectedHunt.start.latitude, selectedHunt.start.longitude)),
-                title = "Start: ${selectedHunt.title}",
+                title = "${MapScreenStrings.StartPrefix}${selectedHunt.title}",
                 icon = bitmapDescriptorFromVector(LocalContext.current, R.drawable.ic_start_marker))
             selectedHunt.middlePoints.forEachIndexed { idx, point ->
               Marker(
@@ -206,10 +198,11 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
             }
             Marker(
                 state = MarkerState(LatLng(selectedHunt.end.latitude, selectedHunt.end.longitude)),
-                title = "End: ${selectedHunt.title}",
+                title = "${MapScreenStrings.EndPrefix}${selectedHunt.title}",
                 icon = bitmapDescriptorFromVector(LocalContext.current, R.drawable.ic_end_marker))
             if (uiState.route.isNotEmpty()) {
-              Polyline(points = uiState.route, width = 12f, color = Blue)
+              Polyline(
+                  points = uiState.route, width = MapScreenDefaults.RouteStrokeWidth, color = Blue)
             }
           } else {
             uiState.hunts.forEach { hunt ->
@@ -258,9 +251,9 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
               ButtonDefaults.textButtonColors(containerColor = Green, contentColor = Color.White),
           modifier =
               Modifier.align(Alignment.TopStart)
-                  .padding(12.dp)
+                  .padding(MapScreenDefaults.BackButtonPadding)
                   .testTag(MapScreenTestTags.BUTTON_BACK)) {
-            Text("Back to all hunts")
+            Text(MapScreenStrings.BackToAllHunts)
           }
     }
   }
@@ -276,32 +269,32 @@ fun PermissionRequestPopup(onRequestPermission: () -> Unit) {
   Box(
       modifier =
           Modifier.fillMaxSize()
-              .background(Color(0x80000000))
-              .padding(32.dp)
+              .background(MapScreenDefaults.OverlayScrimColor)
+              .padding(MapScreenDefaults.OverlayPadding)
               .testTag(MapScreenTestTags.PERMISSION_POPUP),
       contentAlignment = Alignment.Center) {
         Card(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-            elevation = CardDefaults.cardElevation(8.dp)) {
+            modifier = Modifier.fillMaxWidth().padding(MapScreenDefaults.CardPadding),
+            shape = RoundedCornerShape(MapScreenDefaults.CardCornerRadius),
+            elevation = CardDefaults.cardElevation(MapScreenDefaults.CardElevation)) {
               Column(
-                  modifier = Modifier.padding(24.dp).fillMaxWidth(),
+                  modifier = Modifier.padding(MapScreenDefaults.OverlayInnerPadding).fillMaxWidth(),
                   horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text =
-                            "Seekr needs access to your location to display hunts near you on the map!",
+                        text = MapScreenStrings.PermissionExplanation,
                         style = MaterialTheme.typography.bodyLarge,
                         color = Color.Black,
                         modifier =
-                            Modifier.padding(bottom = 16.dp).testTag(MapScreenTestTags.EXPLAIN))
+                            Modifier.padding(bottom = MapScreenDefaults.CardPadding)
+                                .testTag(MapScreenTestTags.EXPLAIN))
                     TextButton(
                         onClick = { onRequestPermission() },
                         colors = ButtonDefaults.buttonColors(containerColor = Green),
                         modifier =
                             Modifier.fillMaxWidth()
-                                .padding(top = 8.dp)
+                                .padding(top = MapScreenDefaults.PopupSpacing)
                                 .testTag(MapScreenTestTags.GRANT_LOCATION_PERMISSION)) {
-                          Text("Grant Location Permission", color = Color.White)
+                          Text(MapScreenStrings.GrantPermission, color = Color.White)
                         }
                   }
             }
@@ -322,10 +315,13 @@ fun PermissionRequestPopup(onRequestPermission: () -> Unit) {
 @Composable
 fun HuntPopup(hunt: Hunt, onViewClick: () -> Unit, onDismiss: () -> Unit) {
   Card(
-      modifier = Modifier.fillMaxWidth().padding(16.dp).testTag(MapScreenTestTags.POPUP_CARD),
-      shape = RoundedCornerShape(16.dp),
-      elevation = CardDefaults.cardElevation(8.dp)) {
-        Column(Modifier.padding(16.dp)) {
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(MapScreenDefaults.CardPadding)
+              .testTag(MapScreenTestTags.POPUP_CARD),
+      shape = RoundedCornerShape(MapScreenDefaults.CardCornerRadius),
+      elevation = CardDefaults.cardElevation(MapScreenDefaults.CardElevation)) {
+        Column(Modifier.padding(MapScreenDefaults.CardPadding)) {
           Text(
               hunt.title,
               style = MaterialTheme.typography.titleLarge,
@@ -333,15 +329,15 @@ fun HuntPopup(hunt: Hunt, onViewClick: () -> Unit, onDismiss: () -> Unit) {
           Text(
               hunt.description,
               style = MaterialTheme.typography.bodyMedium,
-              maxLines = 2,
+              maxLines = MapScreenDefaults.MaxLines,
               modifier = Modifier.testTag(MapScreenTestTags.POPUP_DESC))
-          Spacer(Modifier.height(8.dp))
+          Spacer(Modifier.height(MapScreenDefaults.PopupSpacing))
           Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
             TextButton(
                 onClick = onDismiss,
                 colors = ButtonDefaults.textButtonColors(contentColor = Green),
                 modifier = Modifier.testTag(MapScreenTestTags.BUTTON_CANCEL)) {
-                  Text("Cancel")
+                  Text(MapScreenStrings.Cancel)
                 }
             Button(
                 onClick = onViewClick,
@@ -349,7 +345,7 @@ fun HuntPopup(hunt: Hunt, onViewClick: () -> Unit, onDismiss: () -> Unit) {
                     ButtonDefaults.textButtonColors(
                         containerColor = Green, contentColor = Color.White),
                 modifier = Modifier.testTag(MapScreenTestTags.BUTTON_VIEW)) {
-                  Text("View Hunt")
+                  Text(MapScreenStrings.ViewHunt)
                 }
           }
         }
