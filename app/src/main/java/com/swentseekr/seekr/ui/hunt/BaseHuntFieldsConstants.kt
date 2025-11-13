@@ -35,7 +35,7 @@ object BaseHuntFieldsUi {
 
   val SpacerHeightMedium: Dp = 12.dp
 
-    val SpacerHeightSmall: Dp = 8.dp
+  val SpacerHeightSmall: Dp = 8.dp
 }
 
 object HuntScreenTestTags {

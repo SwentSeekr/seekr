@@ -21,7 +21,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Difficulty
@@ -148,7 +147,10 @@ fun BaseHuntFieldsScreen(
             AsyncImage(
                 model = imageToDisplay,
                 contentDescription = "Selected Hunt Image",
-                modifier = Modifier.fillMaxWidth().height(BaseHuntFieldsUi.ImageHeight).clip(RoundedCornerShape(BaseHuntFieldsUi.FieldCornerRadius)),
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .height(BaseHuntFieldsUi.ImageHeight)
+                        .clip(RoundedCornerShape(BaseHuntFieldsUi.FieldCornerRadius)),
                 placeholder = painterResource(R.drawable.empty_image),
                 error = painterResource(R.drawable.empty_image))
           }
