@@ -1,6 +1,7 @@
 package com.swentseekr.seekr.ui.profile
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -103,7 +104,7 @@ fun EditProfileScreen(
       cameraPhotoUri = createTempImageUri()
       cameraLauncher.launch(cameraPhotoUri)
     } catch (e: Exception) {
-      println("Failed to launch camera: ${e.message}")
+      Log.e("CameraLaunch", "Failed to launch camera: ${e.message}", e)
     }
   }
 

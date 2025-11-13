@@ -437,7 +437,7 @@ class EditProfileScreenTest {
   }
 
   @Test
-  fun cameraButton_triggersLaunch() {
+  fun cameraButton_triggersLaunchCheckedByDisappearingDialog() {
     var cameraLaunched = false
 
     composeTestRule.setContent {
@@ -473,9 +473,9 @@ class EditProfileScreenTest {
 
   @Test
   fun emptyPseudonym_showsErrorAndDisablesSave() {
-    var pseudonym by mutableStateOf("")
-
     composeTestRule.setContent {
+      var pseudonym by remember { mutableStateOf("") }
+
       SampleAppTheme {
         EditProfileContent(
             uiState =
