@@ -7,12 +7,43 @@ import androidx.compose.ui.unit.sp
 
 object AddReviewScreenDefaults {
   val SpacePadding: Dp = 16.dp
+  val InfoVerticalPadding: Dp = 4.dp
+  val FieldVerticalPadding: Dp = 8.dp
+  val PhotoSectionSpacing: Dp = 12.dp
+  val PhotosSpacing: Dp = 8.dp
+  val StarPadding: Dp = 4.dp
+  val AddPhotosIconSize: Dp = 20.dp
+  val ImageSize: Dp = 120.dp
+  val CommentFieldCornerRadius: Dp = 12.dp
+  val CommentFieldWidthFraction = 0.9f
   val TitleFontSize = 24.sp
   val SubtitleFontSize = 14.sp
   const val MaxStars = 5
   val CommentFieldHeight: Dp = 350.dp
   val SelectedStarColor = Color(0xFFFFC107)
   val UnselectedStarColor = Color.Gray
+  val TopBarBackgroundColor: Color = Color.LightGray
+  val CommentLineHeight = 20.sp
+  const val CommentMaxLines = 15
+}
+
+object AddReviewScreenStrings {
+  const val Title = "Add Review Hunt"
+  const val BackContentDescription = "Back"
+  const val RateThisHunt = "Rate this Hunt:"
+  const val RatingPrefix = "Your rating: "
+  const val CommentLabel = "Comment"
+  const val CommentPlaceholder = "Leave a comment..."
+  const val AddPhotoContentDescription = "Add Photo"
+  const val AddPicturesButtonLabel = "Add Pictures"
+  const val CancelButtonLabel = "Cancel"
+  const val DoneButtonLabel = "Done"
+  const val LoadingPlaceholder = "Loading..."
+  const val ImageMimeType = "image/*"
+  const val SelectedImageContentDescriptionPrefix = "Selected Image "
+  const val StarContentDescriptionPrefix = "Star "
+
+  fun ratingSummary(rating: Int, maxStars: Int): String = "$RatingPrefix$rating /$maxStars"
 }
 
 object AddReviewScreenTestTags {

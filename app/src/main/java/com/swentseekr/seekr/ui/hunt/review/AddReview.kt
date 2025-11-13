@@ -5,7 +5,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,7 +23,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
-import androidx.compose.material3.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -34,7 +33,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,13 +43,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
@@ -85,7 +80,7 @@ fun AddReviewScreen(
         TopAppBar(
             title = {
               Text(
-                  text = "Add Review Hunt",
+                  text = AddReviewScreenStrings.Title,
                   fontSize = AddReviewScreenDefaults.TitleFontSize,
                   fontWeight = FontWeight.Bold,
                   modifier = modifier.padding(vertical = AddReviewScreenDefaults.SpacePadding))
@@ -96,10 +91,10 @@ fun AddReviewScreen(
                   onClick = onGoBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back")
+                        contentDescription = AddReviewScreenStrings.BackContentDescription)
                   }
             },
-            modifier = modifier.background(Color.LightGray))
+            modifier = modifier.background(AddReviewScreenDefaults.TopBarBackgroundColor))
       },
       modifier = modifier.fillMaxWidth()) { innerPadding ->
         Column(
@@ -115,19 +110,20 @@ fun AddReviewScreen(
 
               Spacer(modifier = modifier.height(AddReviewScreenDefaults.SpacePadding))
               Text(
-                  text = hunt?.title ?: "Loading...",
+                  text = hunt?.title ?: AddReviewScreenStrings.LoadingPlaceholder,
                   fontSize = AddReviewScreenDefaults.TitleFontSize,
                   fontWeight = FontWeight.Bold,
                   style = MaterialTheme.typography.titleLarge,
-                  modifier = modifier.padding(vertical = 4.dp))
+                  modifier =
+                      modifier.padding(vertical = AddReviewScreenDefaults.InfoVerticalPadding))
               Text(
-                  text = hunt?.uid ?: "Loading...",
+                  text = hunt?.uid ?: AddReviewScreenStrings.LoadingPlaceholder,
                   fontSize = AddReviewScreenDefaults.SubtitleFontSize,
               )
               Spacer(modifier = modifier.height(AddReviewScreenDefaults.SpacePadding))
 
               Text(
-                  "Rate this Hunt:",
+                  AddReviewScreenStrings.RateThisHunt,
                   style = MaterialTheme.typography.titleMedium,
                   fontSize = AddReviewScreenDefaults.SubtitleFontSize)
               StarRatingBar(
@@ -137,54 +133,72 @@ fun AddReviewScreen(
                     reviewViewModel.updateRating(newRating.toDouble())
                   })
 
-              Text("Your rating: ${uiState.rating.toInt()} /$maxStar ")
+              Text(AddReviewScreenStrings.ratingSummary(uiState.rating.toInt(), maxStar))
 
-              Box(modifier = modifier.fillMaxWidth(0.9f).padding()) {
-                OutlinedTextField(
-                    value = uiState.reviewText,
-                    onValueChange = { reviewViewModel.setReviewText(it) },
-                    modifier =
-                        modifier
-                            .fillMaxWidth()
-                            .height(AddReviewScreenDefaults.CommentFieldHeight)
-                            .padding(vertical = 8.dp)
-                            .testTag(AddReviewScreenTestTags.COMMENT_TEXT_FIELD),
-                    label = { Text("Comment") },
-                    placeholder = { Text("Leave a comment...") },
-                    isError = uiState.invalidReviewText != null,
-                    supportingText = {
-                      uiState.invalidReviewText?.let {
-                        Text(it, modifier = Modifier.testTag(AddReviewScreenTestTags.ERROR_MESSAGE))
-                      }
-                    },
-                    textStyle = LocalTextStyle.current.copy(lineHeight = 20.sp),
-                    singleLine = false,
-                    maxLines = 15,
-                    shape = RoundedCornerShape(12.dp))
-              }
+              Box(
+                  modifier =
+                      modifier.fillMaxWidth(AddReviewScreenDefaults.CommentFieldWidthFraction)) {
+                    OutlinedTextField(
+                        value = uiState.reviewText,
+                        onValueChange = { reviewViewModel.setReviewText(it) },
+                        modifier =
+                            modifier
+                                .fillMaxWidth()
+                                .height(AddReviewScreenDefaults.CommentFieldHeight)
+                                .padding(vertical = AddReviewScreenDefaults.FieldVerticalPadding)
+                                .testTag(AddReviewScreenTestTags.COMMENT_TEXT_FIELD),
+                        label = { Text(AddReviewScreenStrings.CommentLabel) },
+                        placeholder = { Text(AddReviewScreenStrings.CommentPlaceholder) },
+                        isError = uiState.invalidReviewText != null,
+                        supportingText = {
+                          uiState.invalidReviewText?.let {
+                            Text(
+                                it,
+                                modifier = Modifier.testTag(AddReviewScreenTestTags.ERROR_MESSAGE))
+                          }
+                        },
+                        textStyle =
+                            LocalTextStyle.current.copy(
+                                lineHeight = AddReviewScreenDefaults.CommentLineHeight),
+                        singleLine = false,
+                        maxLines = AddReviewScreenDefaults.CommentMaxLines,
+                        shape =
+                            RoundedCornerShape(AddReviewScreenDefaults.CommentFieldCornerRadius))
+                  }
 
-              Spacer(modifier = Modifier.height(8.dp))
+              Spacer(modifier = Modifier.height(AddReviewScreenDefaults.FieldVerticalPadding))
 
               Button(
-                  onClick = { imagePickerLauncher.launch("image/*") },
+                  onClick = { imagePickerLauncher.launch(AddReviewScreenStrings.ImageMimeType) },
                   modifier = Modifier.fillMaxWidth()) {
                     Icon(
                         imageVector = Icons.Default.AddCircle,
-                        contentDescription = "Add Photo",
-                        modifier = Modifier.size(20.dp))
-                    Text("Add Pictures", modifier = Modifier.padding(start = 8.dp))
+                        contentDescription = AddReviewScreenStrings.AddPhotoContentDescription,
+                        modifier = Modifier.size(AddReviewScreenDefaults.AddPhotosIconSize))
+                    Text(
+                        AddReviewScreenStrings.AddPicturesButtonLabel,
+                        modifier =
+                            Modifier.padding(start = AddReviewScreenDefaults.FieldVerticalPadding))
                   }
 
               if (uiState.photos.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(AddReviewScreenDefaults.PhotoSectionSpacing))
                 LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                    horizontalArrangement =
+                        Arrangement.spacedBy(AddReviewScreenDefaults.PhotosSpacing),
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .padding(horizontal = AddReviewScreenDefaults.SpacePadding)) {
                       items(uiState.photos.size) { index ->
                         AsyncImage(
                             model = uiState.photos[index],
-                            contentDescription = "Selected Image $index",
-                            modifier = Modifier.size(120.dp).clip(RoundedCornerShape(12.dp)),
+                            contentDescription =
+                                "${AddReviewScreenStrings.SelectedImageContentDescriptionPrefix}$index",
+                            modifier =
+                                Modifier.size(AddReviewScreenDefaults.ImageSize)
+                                    .clip(
+                                        RoundedCornerShape(
+                                            AddReviewScreenDefaults.CommentFieldCornerRadius)),
                             placeholder = painterResource(R.drawable.empty_image),
                             error = painterResource(R.drawable.empty_image))
                       }
@@ -195,7 +209,6 @@ fun AddReviewScreen(
                   modifier =
                       modifier
                           .fillMaxWidth()
-                          .padding()
                           .align(Alignment.CenterHorizontally)
                           .testTag(AddReviewScreenTestTags.BUTTONS_ROW),
                   horizontalArrangement = Arrangement.SpaceEvenly) {
@@ -205,7 +218,7 @@ fun AddReviewScreen(
                           onCancel()
                         },
                         modifier = modifier.testTag(AddReviewScreenTestTags.CANCEL_BUTTON)) {
-                          Text("Cancel")
+                          Text(AddReviewScreenStrings.CancelButtonLabel)
                         }
                     Button(
                         onClick = {
@@ -213,7 +226,7 @@ fun AddReviewScreen(
                           onDone()
                         },
                         modifier = modifier.testTag(AddReviewScreenTestTags.DONE_BUTTON)) {
-                          Text("Done")
+                          Text(AddReviewScreenStrings.DoneButtonLabel)
                         }
                   }
             }
@@ -232,12 +245,12 @@ fun StarRatingBar(
 
       Icon(
           imageVector = if (i <= rating) Icons.Filled.Star else Icons.Outlined.Star,
-          contentDescription = "Star $i",
+          contentDescription = "${AddReviewScreenStrings.StarContentDescriptionPrefix}$i",
           tint =
               if (i <= rating) AddReviewScreenDefaults.SelectedStarColor
               else AddReviewScreenDefaults.UnselectedStarColor,
           modifier =
-              Modifier.padding(4.dp)
+              Modifier.padding(AddReviewScreenDefaults.StarPadding)
                   .clickable {
                     if (i == rating) {
                       onRatingChanged(i - 1)
