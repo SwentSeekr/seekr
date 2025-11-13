@@ -1,0 +1,48 @@
+package com.swentseekr.seekr.ui.map
+
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+
+object MapScreenDefaults {
+
+  const val UnitPointSize = 1
+  const val MaxLines = 2
+  const val UserLocationZoom = 16f
+  const val FocusedZoom = 15f
+  const val BoundsPadding = 100
+  const val RouteStrokeWidth = 12f
+  val OverlayScrimColor: Color = Color(0x80000000)
+  val OverlayPadding: Dp = 32.dp
+  val OverlayInnerPadding: Dp = 24.dp
+  val CardPadding: Dp = 16.dp
+  val CardCornerRadius: Dp = 16.dp
+  val CardElevation: Dp = 8.dp
+  val BackButtonPadding: Dp = 12.dp
+  val PopupSpacing: Dp = 8.dp
+}
+
+object MapScreenStrings {
+  const val StartPrefix = "Start: "
+  const val EndPrefix = "End: "
+  const val PermissionExplanation =
+      "Seekr needs access to your location to display hunts near you on the map!"
+  const val GrantPermission = "Grant Location Permission"
+  const val BackToAllHunts = "Back to all hunts"
+  const val Cancel = "Cancel"
+  const val ViewHunt = "View Hunt"
+}
+
+object MapScreenTestTags {
+  const val GOOGLE_MAP_SCREEN = "mapScreen"
+  const val POPUP_CARD = "huntPopupCard"
+  const val POPUP_TITLE = "huntPopupTitle"
+  const val POPUP_DESC = "huntPopupDesc"
+  const val BUTTON_CANCEL = "huntPopupCancel"
+  const val BUTTON_VIEW = "huntPopupView"
+  const val BUTTON_BACK = "backToAllHunts"
+  const val MAP_SCREEN = "MapScreen"
+  const val PERMISSION_POPUP = "permissionPopup"
+  const val GRANT_LOCATION_PERMISSION = "grantLocationPermission"
+  const val EXPLAIN = "explain"
+}

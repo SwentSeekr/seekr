@@ -21,57 +21,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
-
-private const val BACK_CONTENT_DESC = "Back"
-
-private const val LABEL_TITLE = "Title"
-private const val PLACEHOLDER_TITLE = "Enter hunt name"
-
-private const val LABEL_DESCRIPTION = "Description"
-private const val PLACEHOLDER_DESCRIPTION = "Describe your hunt"
-
-private const val LABEL_STATUS = "Status"
-private const val EXPAND_STATUS_DESC = "Expand Status"
-
-private const val LABEL_DIFFICULTY = "Difficulty"
-private const val EXPAND_DIFFICULTY_DESC = "Expand Difficulty"
-
-private const val LABEL_TIME = "Estimated Time (hours)"
-private const val PLACEHOLDER_TIME = "e.g., 1.5"
-
-private const val LABEL_DISTANCE = "Distance (km)"
-private const val PLACEHOLDER_DISTANCE = "e.g., 2.3"
-
-private const val BUTTON_SELECT_LOCATIONS = "Select Locations"
-private const val BUTTON_SAVE_HUNT = "Save Hunt"
-
-private const val UNIT_POINT = "point"
-private const val UNIT_POINTS = "points"
-
-private const val FIELD_CORNER_RADIUS = 12
-private const val DESCRIPTION_HEIGHT = 150
-private const val SAVE_BUTTON_HEIGHT = 64
-private const val SAVE_BUTTON_RADIUS = 16
-private const val SCREEN_PADDING = 16
-private const val SPACER_HEIGHT = 24
-
-object HuntScreenTestTags {
-  const val INPUT_HUNT_TITLE = "inputHuntTitle"
-  const val INPUT_HUNT_DESCRIPTION = "inputHuntDescription"
-  const val INPUT_HUNT_TIME = "inputHuntTime"
-  const val INPUT_HUNT_DISTANCE = "inputHuntDistance"
-  const val DROPDOWN_STATUS = "dropdownStatus"
-  const val DROPDOWN_DIFFICULTY = "dropdownDifficulty"
-  const val BUTTON_SELECT_LOCATION = "buttonSelectLocation"
-  const val HUNT_SAVE = "huntSave"
-  const val ERROR_MESSAGE = "errorMessage"
-  const val ADD_HUNT_SCREEN = "AddHuntScreen"
-}
 
 @Composable
 fun ValidatedOutlinedField(
@@ -90,7 +43,7 @@ fun ValidatedOutlinedField(
       errorMsg = errorMsg,
       testTag = testTag,
       modifier = Modifier.fillMaxWidth(),
-      shape = RoundedCornerShape(FIELD_CORNER_RADIUS.dp),
+      shape = RoundedCornerShape(BaseHuntFieldsUi.FieldCornerRadius),
       colors =
           OutlinedTextFieldDefaults.colors(
               unfocusedBorderColor = MaterialTheme.colorScheme.outline,
@@ -157,7 +110,7 @@ fun BaseHuntFieldsScreen(
               IconButton(onClick = onGoBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                    contentDescription = BACK_CONTENT_DESC)
+                    contentDescription = BaseHuntFieldsStrings.BACK_CONTENT_DESC)
               }
             })
       },
@@ -166,11 +119,11 @@ fun BaseHuntFieldsScreen(
             modifier =
                 Modifier.fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
-                    .padding(SCREEN_PADDING.dp)
+                    .padding(BaseHuntFieldsUi.ScreenPadding)
                     .padding(paddingValues)
                     .verticalScroll(scrollState),
         ) {
-          val fieldShape = RoundedCornerShape(FIELD_CORNER_RADIUS.dp)
+          val fieldShape = RoundedCornerShape(BaseHuntFieldsUi.FieldCornerRadius)
           val fieldColors =
               OutlinedTextFieldDefaults.colors(
                   unfocusedBorderColor = MaterialTheme.colorScheme.outline,
@@ -178,7 +131,7 @@ fun BaseHuntFieldsScreen(
 
           // IMAGE PICKER + PREVIEW
           Text("Main Image", style = MaterialTheme.typography.titleMedium)
-          Spacer(modifier = Modifier.height(8.dp))
+          Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightSmall))
 
           Button(
               onClick = { imagePickerLauncher.launch("image/*") },
@@ -190,34 +143,37 @@ fun BaseHuntFieldsScreen(
           val imageToDisplay = uiState.mainImageUrl
 
           if (!imageToDisplay.isNullOrBlank()) {
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightMedium))
             AsyncImage(
                 model = imageToDisplay,
                 contentDescription = "Selected Hunt Image",
-                modifier = Modifier.fillMaxWidth().height(180.dp).clip(RoundedCornerShape(12.dp)),
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .height(BaseHuntFieldsUi.ImageHeight)
+                        .clip(RoundedCornerShape(BaseHuntFieldsUi.FieldCornerRadius)),
                 placeholder = painterResource(R.drawable.empty_image),
                 error = painterResource(R.drawable.empty_image))
           }
 
-          Spacer(modifier = Modifier.height(SPACER_HEIGHT.dp))
+          Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeight))
 
           // === Form ===
           ValidatedOutlinedField(
               value = uiState.title,
               onValueChange = onTitleChange,
-              label = LABEL_TITLE,
-              placeholder = PLACEHOLDER_TITLE,
+              label = BaseHuntFieldsStrings.LABEL_TITLE,
+              placeholder = BaseHuntFieldsStrings.PLACEHOLDER_TITLE,
               errorMsg = uiState.invalidTitleMsg,
               testTag = HuntScreenTestTags.INPUT_HUNT_TITLE)
 
           ValidatedOutlinedField(
               value = uiState.description,
               onValueChange = onDescriptionChange,
-              label = LABEL_DESCRIPTION,
-              placeholder = PLACEHOLDER_DESCRIPTION,
+              label = BaseHuntFieldsStrings.LABEL_DESCRIPTION,
+              placeholder = BaseHuntFieldsStrings.PLACEHOLDER_DESCRIPTION,
               errorMsg = uiState.invalidDescriptionMsg,
               testTag = HuntScreenTestTags.INPUT_HUNT_DESCRIPTION,
-              modifier = Modifier.fillMaxWidth().height(DESCRIPTION_HEIGHT.dp),
+              modifier = Modifier.fillMaxWidth().height(BaseHuntFieldsUi.DescriptionHeight),
               shape = fieldShape,
               colors = fieldColors)
 
@@ -227,14 +183,14 @@ fun BaseHuntFieldsScreen(
                 OutlinedTextField(
                     value = uiState.status?.name ?: "",
                     onValueChange = {},
-                    label = { Text(LABEL_STATUS) },
+                    label = { Text(BaseHuntFieldsStrings.LABEL_STATUS) },
                     readOnly = true,
                     trailingIcon = {
                       Icon(
                           imageVector =
                               if (showStatusDropdown) Icons.Outlined.KeyboardArrowUp
                               else Icons.Outlined.KeyboardArrowDown,
-                          contentDescription = EXPAND_STATUS_DESC)
+                          contentDescription = BaseHuntFieldsStrings.EXPAND_STATUS_DESC)
                     },
                     modifier =
                         Modifier.menuAnchor()
@@ -263,14 +219,14 @@ fun BaseHuntFieldsScreen(
                 OutlinedTextField(
                     value = uiState.difficulty?.name ?: "",
                     onValueChange = {},
-                    label = { Text(LABEL_DIFFICULTY) },
+                    label = { Text(BaseHuntFieldsStrings.LABEL_DIFFICULTY) },
                     readOnly = true,
                     trailingIcon = {
                       Icon(
                           imageVector =
                               if (showDifficultyDropdown) Icons.Outlined.KeyboardArrowUp
                               else Icons.Outlined.KeyboardArrowDown,
-                          contentDescription = EXPAND_DIFFICULTY_DESC)
+                          contentDescription = BaseHuntFieldsStrings.EXPAND_DIFFICULTY_DESC)
                     },
                     modifier =
                         Modifier.menuAnchor()
@@ -295,16 +251,16 @@ fun BaseHuntFieldsScreen(
           ValidatedOutlinedField(
               value = uiState.time,
               onValueChange = onTimeChange,
-              label = LABEL_TIME,
-              placeholder = PLACEHOLDER_TIME,
+              label = BaseHuntFieldsStrings.LABEL_TIME,
+              placeholder = BaseHuntFieldsStrings.PLACEHOLDER_TIME,
               errorMsg = uiState.invalidTimeMsg,
               testTag = HuntScreenTestTags.INPUT_HUNT_TIME)
 
           ValidatedOutlinedField(
               value = uiState.distance,
               onValueChange = onDistanceChange,
-              label = LABEL_DISTANCE,
-              placeholder = PLACEHOLDER_DISTANCE,
+              label = BaseHuntFieldsStrings.LABEL_DISTANCE,
+              placeholder = BaseHuntFieldsStrings.PLACEHOLDER_DISTANCE,
               errorMsg = uiState.invalidDistanceMsg,
               testTag = HuntScreenTestTags.INPUT_HUNT_DISTANCE)
 
@@ -318,28 +274,30 @@ fun BaseHuntFieldsScreen(
                 val pointCount = uiState.points.size
                 val label =
                     if (pointCount > 0) {
-                      "$BUTTON_SELECT_LOCATIONS ($pointCount ${if (pointCount == 1) UNIT_POINT else UNIT_POINTS})"
+                      "${BaseHuntFieldsStrings.BUTTON_SELECT_LOCATIONS} ($pointCount ${if (pointCount == 1) BaseHuntFieldsStrings.UNIT_POINT else BaseHuntFieldsStrings.UNIT_POINTS})"
                     } else {
-                      BUTTON_SELECT_LOCATIONS
+                      BaseHuntFieldsStrings.BUTTON_SELECT_LOCATIONS
                     }
                 Text(label)
               }
 
-          Spacer(modifier = Modifier.height(SPACER_HEIGHT.dp))
+          Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeight))
 
           Button(
               onClick = onSave,
               modifier =
                   Modifier.fillMaxWidth()
-                      .height(SAVE_BUTTON_HEIGHT.dp)
-                      .clip(RoundedCornerShape(SAVE_BUTTON_RADIUS.dp))
+                      .height(BaseHuntFieldsUi.SaveButtonHeight)
+                      .clip(RoundedCornerShape(BaseHuntFieldsUi.SaveButtonCornerRadius))
                       .testTag(HuntScreenTestTags.HUNT_SAVE),
               enabled = uiState.isValid,
               colors =
                   ButtonDefaults.buttonColors(
                       containerColor = MaterialTheme.colorScheme.primary,
                       contentColor = MaterialTheme.colorScheme.onPrimary)) {
-                Text(BUTTON_SAVE_HUNT, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    BaseHuntFieldsStrings.BUTTON_SAVE_HUNT,
+                    style = MaterialTheme.typography.titleMedium)
               }
         }
       }

@@ -150,4 +150,9 @@ class EditProfileViewModel(
     _uiState.value =
         newState.copy(hasChanges = hasChanges, canSave = canSave, success = false, errorMsg = null)
   }
+
+  fun removeProfilePicture() {
+    val newState = _uiState.value.copy(profilePicture = 0)
+    updateChangesFlags(newState)
+  }
 }

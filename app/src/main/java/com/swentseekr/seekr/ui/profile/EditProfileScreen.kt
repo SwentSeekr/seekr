@@ -1,6 +1,7 @@
 package com.swentseekr.seekr.ui.profile
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -94,17 +95,22 @@ fun EditProfileScreen(
 
   fun createTempImageUri(): Uri {
     val imageFile = File(context.cacheDir, "temp_profile.jpg")
+    if (!imageFile.exists()) imageFile.createNewFile()
     return FileProvider.getUriForFile(context, "${context.packageName}.provider", imageFile)
   }
 
-  LaunchedEffect(userId) {
-    if (!testMode && userId != null) editProfileViewModel.loadProfile(userId)
+  fun launchCamera() {
+    try {
+      cameraPhotoUri = createTempImageUri()
+      cameraLauncher.launch(cameraPhotoUri)
+    } catch (e: Exception) {
+      Log.e("CameraLaunch", "Failed to launch camera: ${e.message}", e)
+    }
   }
 
-  LaunchedEffect(uiState.success) {
-    if (uiState.success) {
-      onDone()
-    }
+  LaunchedEffect(Unit) {
+    if (!testMode && userId != null) editProfileViewModel.loadProfile(userId)
+    editProfileViewModel.uiState.collect { if (it.success) onDone() }
   }
 
   if (showDialog) {
@@ -114,35 +120,50 @@ fun EditProfileScreen(
         title = { Text("Choose Image") },
         text = { Text("Pick a source for your new profile picture") },
         confirmButton = {
-          Button(
-              modifier = Modifier.testTag(EditProfileTestTags.GALLERY_BUTTON),
-              onClick = {
-                galleryLauncher.launch("image/*")
-                showDialog = false
-              }) {
-                Text("Gallery")
+          Column(
+              modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+              verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(
+                    modifier = Modifier.fillMaxWidth().testTag(EditProfileTestTags.GALLERY_BUTTON),
+                    onClick = {
+                      galleryLauncher.launch("image/*")
+                      showDialog = false
+                    }) {
+                      Text("Gallery")
+                    }
+
+                Button(
+                    modifier = Modifier.fillMaxWidth().testTag(EditProfileTestTags.CAMERA_BUTTON),
+                    onClick = {
+                      launchCamera()
+                      showDialog = false
+                    }) {
+                      Text("Camera")
+                    }
+
+                if (uiState.profilePicture != 0 || selectedImageUri != null) {
+                  Button(
+                      modifier = Modifier.fillMaxWidth(),
+                      colors =
+                          ButtonDefaults.buttonColors(
+                              containerColor = MaterialTheme.colorScheme.errorContainer),
+                      onClick = {
+                        editProfileViewModel.removeProfilePicture()
+                        selectedImageUri = null
+                        showDialog = false
+                      }) {
+                        Text("Remove Picture", color = MaterialTheme.colorScheme.onErrorContainer)
+                      }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedButton(
+                    modifier = Modifier.fillMaxWidth().testTag("DIALOG_CANCEL_BUTTON"),
+                    onClick = { showDialog = false }) {
+                      Text("Cancel")
+                    }
               }
-        },
-        dismissButton = {
-          Row {
-            Button(
-                modifier = Modifier.testTag(EditProfileTestTags.CAMERA_BUTTON),
-                onClick = {
-                  cameraPhotoUri = createTempImageUri()
-                  cameraLauncher.launch(cameraPhotoUri)
-                  showDialog = false
-                }) {
-                  Text("Camera")
-                }
-
-            Spacer(modifier = Modifier.width(EditProfileConstants.SPACER_SMALL))
-
-            Button(
-                modifier = Modifier.testTag("DIALOG_CANCEL_BUTTON"),
-                onClick = { showDialog = false }) {
-                  Text("Cancel")
-                }
-          }
         })
   }
 
@@ -186,6 +207,8 @@ fun EditProfileContent(
     onProfilePictureChange: () -> Unit,
     profilePictureUri: Uri? = null
 ) {
+  var pseudonymError by remember { mutableStateOf<String?>(null) }
+  var bioError by remember { mutableStateOf<String?>(null) }
   var localError by remember { mutableStateOf<String?>(null) }
   Column(
       modifier =
@@ -218,18 +241,51 @@ fun EditProfileContent(
 
         OutlinedTextField(
             value = uiState.pseudonym,
-            onValueChange = onPseudonymChange,
+            onValueChange = { newValue ->
+              onPseudonymChange(newValue)
+              pseudonymError =
+                  when {
+                    newValue.isBlank() -> "Pseudonym cannot be empty"
+                    newValue.length > 30 -> "Max 30 characters allowed"
+                    else -> null
+                  }
+            },
             label = { Text("Pseudonym") },
+            isError = pseudonymError != null,
             modifier = Modifier.fillMaxWidth().testTag(EditProfileTestTags.PSEUDONYM_FIELD))
+
+        if (pseudonymError != null) {
+          Text(
+              text = pseudonymError!!,
+              color = MaterialTheme.colorScheme.error,
+              style = MaterialTheme.typography.bodySmall,
+              modifier = Modifier.align(Alignment.Start))
+        }
+
+        Spacer(modifier = Modifier.height(EditProfileConstants.SPACER_MEDIUM))
 
         OutlinedTextField(
             value = uiState.bio,
-            onValueChange = onBioChange,
+            onValueChange = { newValue ->
+              onBioChange(newValue)
+              bioError =
+                  when {
+                    newValue.length > 200 -> "Max 200 characters allowed"
+                    else -> null
+                  }
+            },
             label = { Text("Bio") },
             modifier =
                 Modifier.fillMaxWidth()
                     .heightIn(min = EditProfileConstants.BIO_FIELD_MIN_HEIGHT)
                     .testTag(EditProfileTestTags.BIO_FIELD))
+        if (bioError != null) {
+          Text(
+              text = bioError!!,
+              color = MaterialTheme.colorScheme.error,
+              style = MaterialTheme.typography.bodySmall,
+              modifier = Modifier.align(Alignment.Start))
+        }
 
         Spacer(modifier = Modifier.height(EditProfileConstants.SPACER_LARGE))
 
@@ -247,7 +303,11 @@ fun EditProfileContent(
                   onSave()
                 }
               },
-              enabled = uiState.canSave && !uiState.isSaving) {
+              enabled =
+                  uiState.canSave &&
+                      pseudonymError == null &&
+                      bioError == null &&
+                      !uiState.isSaving) {
                 Text(if (uiState.isSaving) "Saving..." else "Save")
               }
         }

@@ -28,23 +28,6 @@ import com.swentseekr.seekr.ui.overview.OverviewScreen
 import com.swentseekr.seekr.ui.profile.EditProfileScreen
 import com.swentseekr.seekr.ui.profile.ProfileScreen
 import com.swentseekr.seekr.ui.settings.SettingsScreen
-import com.swentseekr.seekr.ui.theme.*
-
-// Test Tags
-object NavigationTestTags {
-    const val BOTTOM_NAVIGATION_MENU = "BOTTOM_NAVIGATION_MENU"
-    const val OVERVIEW_TAB = "OVERVIEW_TAB"
-    const val MAP_TAB = "MAP_TAB"
-    const val PROFILE_TAB = "PROFILE_TAB"
-    const val HUNTCARD_SCREEN = "HUNTCARD_SCREEN"
-    const val ADD_HUNT_SCREEN = "ADD_HUNT_SCREEN"
-    const val MAP_SCREEN = "MAP_SCREEN"
-    const val OVERVIEW_SCREEN = "OVERVIEW_SCREEN"
-    const val EDIT_HUNT_SCREEN = "EDIT_HUNT_SCREEN"
-    const val REVIEW_HUNT_SCREEN = "REVIEW_HUNT_SCREEN"
-    const val SETTINGS_SCREEN = "SETTINGS_SCREEN"
-    const val EDIT_PROFILE_SCREEN = "EDIT_PROFILE_SCREEN"
-}
 
 // Destinations as sealed class
 sealed class SeekrDestination(
@@ -88,20 +71,20 @@ fun SeekrNavigationBar(
     currentDestination: SeekrDestination,
     onTabSelected: (SeekrDestination) -> Unit
 ) {
-    val containerColor = GrassGreen
-    val iconColor = Black
+  val containerColor = SeekrNavigationDefaults.BottomBarContainerColor
+  val iconColor = SeekrNavigationDefaults.BottomBarIconColor
 
     NavigationBar(
         containerColor = containerColor,
         modifier = Modifier.testTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU)) {
         SeekrDestination.all.forEach { dest ->
-            val testTag =
-                when (dest) {
-                    is SeekrDestination.Overview -> NavigationTestTags.OVERVIEW_TAB
-                    is SeekrDestination.Map -> NavigationTestTags.MAP_TAB
-                    is SeekrDestination.Profile -> NavigationTestTags.PROFILE_TAB
-                    else -> "IGNORED"
-                }
+          val testTag =
+              when (dest) {
+                is SeekrDestination.Overview -> NavigationTestTags.OVERVIEW_TAB
+                is SeekrDestination.Map -> NavigationTestTags.MAP_TAB
+                is SeekrDestination.Profile -> NavigationTestTags.PROFILE_TAB
+                else -> SeekrNavigationDefaults.IgnoredTestTag
+              }
 
             NavigationBarItem(
                 selected = currentDestination.route == dest.route,
@@ -135,21 +118,21 @@ fun SeekrMainNavHost(
         SeekrDestination.all.find { it.route == currentRoute } ?: SeekrDestination.Overview
     val showBottomBar = SeekrDestination.all.any { it.route == currentRoute }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        containerColor = White,
-        bottomBar = {
-            if (showBottomBar) {
-                SeekrNavigationBar(
-                    currentDestination = currentDestination,
-                    onTabSelected = { destination ->
-                        navController.navigate(destination.route) {
-                            launchSingleTop = true
-                            popUpTo(SeekrDestination.Overview.route)
-                        }
-                    })
-            }
-        }) { innerPadding ->
+  Scaffold(
+      modifier = Modifier.fillMaxSize(),
+      containerColor = SeekrNavigationDefaults.ScaffoldContainerColor,
+      bottomBar = {
+        if (showBottomBar) {
+          SeekrNavigationBar(
+              currentDestination = currentDestination,
+              onTabSelected = { destination ->
+                navController.navigate(destination.route) {
+                  launchSingleTop = true
+                  popUpTo(SeekrDestination.Overview.route)
+                }
+              })
+        }
+      }) { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = SeekrDestination.Overview.route,

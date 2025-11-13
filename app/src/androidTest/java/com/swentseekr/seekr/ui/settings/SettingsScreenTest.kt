@@ -87,7 +87,7 @@ class SettingsScreenTest {
         )
       }
     }
-    composeRule.onNodeWithText("$VERSION_TEXT").assertExists()
+    composeRule.onNodeWithText(SettingsScreenStrings.VersionLabel).assertExists()
     composeRule.onNodeWithText(expectedVersion).assertExists()
   }
 
@@ -103,7 +103,7 @@ class SettingsScreenTest {
       }
     }
 
-    composeRule.onNodeWithText(VERSION_TEXT).assertExists()
-    composeRule.onNodeWithText(UNKNOWN_VERSION_TEXT).assertExists()
+    composeRule.onNodeWithText(SettingsScreenStrings.VersionLabel).assertExists()
+    composeRule.onNodeWithText(SettingsScreenStrings.UnknownVersion).assertExists()
   }
 }
