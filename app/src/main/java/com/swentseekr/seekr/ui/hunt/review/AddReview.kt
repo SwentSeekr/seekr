@@ -56,23 +56,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 
-val SPACE_PADDING = 16.dp
-val TITLE_FONT_SIZE = 24.sp
-val SUBTITLE_FONT_SIZE = 14.sp
-
-object AddReviewScreenTestTags {
-  const val GO_BACK_BUTTON = "HuntCardReview_GoBackButton"
-  const val INFO_COLUMN = "HuntCardReview_InfoColumn"
-  const val RATING_BAR = "HuntCardReview_RatingBar"
-  const val COMMENT_TEXT_FIELD = "HuntCardReview_CommentTextField"
-  const val BUTTONS_ROW = "HuntCardReview_ButtonsRow"
-  const val CANCEL_BUTTON = "HuntCardReview_CancelButton"
-  const val DONE_BUTTON = "HuntCardReview_DoneButton"
-  const val ERROR_MESSAGE = "HuntCardReview_ErrorMessage"
-
-  fun starTag(index: Int) = "Star_$index"
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddReviewScreen(
@@ -87,7 +70,7 @@ fun AddReviewScreen(
   val uiState by reviewViewModel.uiState.collectAsState()
   LaunchedEffect(huntId) { reviewViewModel.loadHunt(huntId) }
   val hunt = uiState.hunt
-  val maxStar = 5
+  val maxStar = AddReviewScreenDefaults.MaxStars
   var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
   val imagePickerLauncher =
       rememberLauncherForActivityResult(
@@ -103,9 +86,9 @@ fun AddReviewScreen(
             title = {
               Text(
                   text = "Add Review Hunt",
-                  fontSize = TITLE_FONT_SIZE,
+                  fontSize = AddReviewScreenDefaults.TitleFontSize,
                   fontWeight = FontWeight.Bold,
-                  modifier = modifier.padding(vertical = SPACE_PADDING))
+                  modifier = modifier.padding(vertical = AddReviewScreenDefaults.SpacePadding))
             },
             navigationIcon = {
               IconButton(
@@ -128,25 +111,25 @@ fun AddReviewScreen(
                     .testTag(AddReviewScreenTestTags.INFO_COLUMN),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top) {
-              Spacer(modifier = modifier.height(SPACE_PADDING))
+              Spacer(modifier = modifier.height(AddReviewScreenDefaults.SpacePadding))
 
-              Spacer(modifier = modifier.height(SPACE_PADDING))
+              Spacer(modifier = modifier.height(AddReviewScreenDefaults.SpacePadding))
               Text(
                   text = hunt?.title ?: "Loading...",
-                  fontSize = TITLE_FONT_SIZE,
+                  fontSize = AddReviewScreenDefaults.TitleFontSize,
                   fontWeight = FontWeight.Bold,
                   style = MaterialTheme.typography.titleLarge,
                   modifier = modifier.padding(vertical = 4.dp))
               Text(
                   text = hunt?.uid ?: "Loading...",
-                  fontSize = SUBTITLE_FONT_SIZE,
+                  fontSize = AddReviewScreenDefaults.SubtitleFontSize,
               )
-              Spacer(modifier = modifier.height(SPACE_PADDING))
+              Spacer(modifier = modifier.height(AddReviewScreenDefaults.SpacePadding))
 
               Text(
                   "Rate this Hunt:",
                   style = MaterialTheme.typography.titleMedium,
-                  fontSize = SUBTITLE_FONT_SIZE)
+                  fontSize = AddReviewScreenDefaults.SubtitleFontSize)
               StarRatingBar(
                   rating = uiState.rating.toInt(),
                   maxStars = maxStar,
@@ -163,7 +146,7 @@ fun AddReviewScreen(
                     modifier =
                         modifier
                             .fillMaxWidth()
-                            .height(350.dp)
+                            .height(AddReviewScreenDefaults.CommentFieldHeight)
                             .padding(vertical = 8.dp)
                             .testTag(AddReviewScreenTestTags.COMMENT_TEXT_FIELD),
                     label = { Text("Comment") },
@@ -238,14 +221,21 @@ fun AddReviewScreen(
 }
 
 @Composable
-fun StarRatingBar(maxStars: Int = 5, rating: Int = 0, onRatingChanged: (Int) -> Unit) {
+fun StarRatingBar(
+    maxStars: Int = AddReviewScreenDefaults.MaxStars,
+    rating: Int = 0,
+    onRatingChanged: (Int) -> Unit
+) {
+  val starCount = if (maxStars > 0) maxStars else AddReviewScreenDefaults.MaxStars
   Row(modifier = Modifier.testTag(AddReviewScreenTestTags.RATING_BAR)) {
-    for (i in 1..maxStars) {
+    for (i in 1..starCount) {
 
       Icon(
           imageVector = if (i <= rating) Icons.Filled.Star else Icons.Outlined.Star,
           contentDescription = "Star $i",
-          tint = if (i <= rating) Color(0xFFFFC107) else Color.Gray,
+          tint =
+              if (i <= rating) AddReviewScreenDefaults.SelectedStarColor
+              else AddReviewScreenDefaults.UnselectedStarColor,
           modifier =
               Modifier.padding(4.dp)
                   .clickable {
