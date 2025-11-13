@@ -6,6 +6,7 @@ import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryLocal
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryLocal
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.model.profile.ProfileRepositoryLocal
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -21,6 +22,7 @@ class HuntCardViewModelTest {
   private lateinit var viewModel: HuntCardViewModel
   private lateinit var fakeRepository: HuntsRepositoryLocal
   private lateinit var fakeRevRepository: HuntReviewRepositoryLocal
+  private lateinit var fakeProRepository: ProfileRepositoryLocal
   private val testDispatcher = StandardTestDispatcher()
 
   private val testHunt =
@@ -45,8 +47,9 @@ class HuntCardViewModelTest {
     fakeRepository = HuntsRepositoryLocal()
     fakeRepository.addHunt(testHunt)
     fakeRevRepository = HuntReviewRepositoryLocal()
+    fakeProRepository = ProfileRepositoryLocal()
 
-    viewModel = HuntCardViewModel(fakeRepository, fakeRevRepository)
+    viewModel = HuntCardViewModel(fakeRepository, fakeRevRepository, fakeProRepository)
 
     advanceUntilIdle()
   }
