@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.hasTestTag
@@ -13,13 +14,18 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
+import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.profile.createHunt
+import com.swentseekr.seekr.model.profile.createHuntWithRateAndDifficulty
 import com.swentseekr.seekr.model.profile.emptyProfile
 import com.swentseekr.seekr.model.profile.sampleProfile
+import com.swentseekr.seekr.ui.components.RatingTestTags
+import com.swentseekr.seekr.ui.components.RatingType
+import com.swentseekr.seekr.ui.theme.*
 import org.junit.Rule
 import org.junit.Test
 
-const val UI_WAIT_TIMEOUT = 15_000L
+const val UI_WAIT_TIMEOUT = 3_000L
 
 fun hasBackgroundColor(expected: Color) = SemanticsMatcher.expectValue(BackgroundColorKey, expected)
 
@@ -83,6 +89,7 @@ class ProfileScreenTest {
     composeTestRule.onNodeWithTag(ProfileTestTags.PROFILE_SPORT_RATING).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileTestTags.PROFILE_BIO).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileTestTags.ADD_HUNT).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(ProfileTestTags.SETTINGS).assertIsDisplayed()
   }
 
   @Test
@@ -102,14 +109,6 @@ class ProfileScreenTest {
     composeTestRule.setContent { ProfileScreen(userId = "otherUser", testMode = false) }
 
     composeTestRule.onNodeWithTag(ProfileTestTags.ADD_HUNT).assertIsNotDisplayed()
-  }
-
-  @Test
-  fun profileScreen_emptyHuntsShowsNothing() {
-    setProfileScreen(
-        sampleProfile(myHunts = emptyList(), doneHunts = emptyList(), likedHunts = emptyList()))
-    composeTestRule.onNodeWithTag(ProfileTestTags.PROFILE_HUNTS_LIST).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(ProfileTestTags.EMPTY_HUNTS_MESSAGE).assertIsDisplayed()
   }
 
   @Test
@@ -157,7 +156,6 @@ class ProfileScreenTest {
     composeTestRule.onNodeWithTag(lastHuntTag).assertIsDisplayed()
   }
 
-  // colors will be refactored as soon as we implement the theme
   @Test
   fun profileScreen_tabBackgroundChanges() {
     val profile =
@@ -167,18 +165,18 @@ class ProfileScreenTest {
             likedHunts = listOf(createHunt("hunt3", "Liked Hunt")))
     setProfileScreen(profile)
     composeTestRule.waitForIdle()
-    waitForTabColor(ProfileTestTags.TAB_MY_HUNTS, Color.Green)
-    checkTabColors(Color.Green, Color.White, Color.White)
+    waitForTabColor(ProfileTestTags.TAB_MY_HUNTS, Green)
+    checkTabColors(Green, White, White)
 
     composeTestRule.onNodeWithTag(ProfileTestTags.TAB_DONE_HUNTS).performClick()
     composeTestRule.waitForIdle()
-    waitForTabColor(ProfileTestTags.TAB_DONE_HUNTS, Color.Green)
-    checkTabColors(Color.White, Color.Green, Color.White)
+    waitForTabColor(ProfileTestTags.TAB_DONE_HUNTS, Green)
+    checkTabColors(White, Green, White)
 
     composeTestRule.onNodeWithTag(ProfileTestTags.TAB_LIKED_HUNTS).performClick()
     composeTestRule.waitForIdle()
-    waitForTabColor(ProfileTestTags.TAB_LIKED_HUNTS, Color.Green)
-    checkTabColors(Color.White, Color.White, Color.Green)
+    waitForTabColor(ProfileTestTags.TAB_LIKED_HUNTS, Green)
+    checkTabColors(White, White, Green)
   }
 
   private fun assertEmptyStateForTab(tabTestTag: String? = null) {
@@ -201,5 +199,76 @@ class ProfileScreenTest {
   @Test
   fun profileScreen_displaysEmptyMessage_whenLikedHuntsEmpty() {
     assertEmptyStateForTab(ProfileTestTags.TAB_LIKED_HUNTS)
+  }
+
+  @Test
+  fun profileScreen_settingsButton_visibilityDependsOnProfile_notDisplayed() {
+    composeTestRule.setContent { ProfileScreen(userId = "otherUser", testMode = false) }
+
+    composeTestRule.onNodeWithTag(ProfileTestTags.SETTINGS).assertIsNotDisplayed()
+  }
+
+  @Test
+  fun profileScreen_displaysCorrectCalculatedRatings() {
+    val myHunts =
+        listOf(
+            createHuntWithRateAndDifficulty("hunt1", "Hunt 1", reviewRate = 2.0),
+            createHuntWithRateAndDifficulty("hunt2", "Hunt 2", reviewRate = 4.0))
+    val doneHunts =
+        listOf(
+            createHuntWithRateAndDifficulty("done1", "Done 1", difficulty = Difficulty.EASY),
+            createHuntWithRateAndDifficulty("done2", "Done 2", difficulty = Difficulty.DIFFICULT))
+
+    val baseProfile = sampleProfile(myHunts = myHunts, doneHunts = doneHunts)
+    val viewModel = ProfileViewModel()
+    val computedProfile = viewModel.buildComputedProfile(baseProfile)
+
+    setProfileScreen(computedProfile)
+
+    composeTestRule.onAllNodesWithTag(RatingTestTags.full(0, RatingType.STAR)).assertCountEquals(1)
+    composeTestRule.onAllNodesWithTag(RatingTestTags.full(1, RatingType.STAR)).assertCountEquals(1)
+    composeTestRule.onAllNodesWithTag(RatingTestTags.full(2, RatingType.STAR)).assertCountEquals(1)
+    composeTestRule.onAllNodesWithTag(RatingTestTags.half(RatingType.STAR)).assertCountEquals(0)
+    composeTestRule.onAllNodesWithTag(RatingTestTags.empty(0, RatingType.STAR)).assertCountEquals(1)
+    composeTestRule.onAllNodesWithTag(RatingTestTags.empty(1, RatingType.STAR)).assertCountEquals(1)
+
+    composeTestRule.onAllNodesWithTag(RatingTestTags.full(0, RatingType.SPORT)).assertCountEquals(1)
+    composeTestRule.onAllNodesWithTag(RatingTestTags.full(1, RatingType.SPORT)).assertCountEquals(1)
+    composeTestRule.onAllNodesWithTag(RatingTestTags.full(2, RatingType.SPORT)).assertCountEquals(1)
+    composeTestRule.onAllNodesWithTag(RatingTestTags.half(RatingType.SPORT)).assertCountEquals(0)
+    composeTestRule
+        .onAllNodesWithTag(RatingTestTags.empty(0, RatingType.SPORT))
+        .assertCountEquals(1)
+    composeTestRule
+        .onAllNodesWithTag(RatingTestTags.empty(1, RatingType.SPORT))
+        .assertCountEquals(1)
+  }
+
+  @Test
+  fun profileScreen_displaysCorrectReviewCountAndHuntsDone_withoutRepository() {
+    val myHunts =
+        listOf(
+            createHuntWithRateAndDifficulty("hunt1", "Hunt 1"),
+            createHuntWithRateAndDifficulty("hunt2", "Hunt 2"))
+    val doneHunts =
+        listOf(
+            createHuntWithRateAndDifficulty("done1", "Done 1"),
+            createHuntWithRateAndDifficulty("done2", "Done 2"),
+            createHuntWithRateAndDifficulty("done3", "Done 3"))
+
+    val profile = sampleProfile(myHunts = myHunts, doneHunts = doneHunts)
+
+    setProfileScreen(
+        profile = profile,
+    )
+
+    composeTestRule.onNodeWithTag(ProfileTestTags.PROFILE_REVIEWS_COUNT).assertIsDisplayed()
+    // Assert correct reviews count isn't tested on purpose here since the review doesn't exist in
+    // firebase yet
+
+    composeTestRule
+        .onNodeWithTag(ProfileTestTags.PROFILE_HUNTS_DONE_COUNT)
+        .assertIsDisplayed()
+        .assert(hasText("- ${doneHunts.size} Hunts done"))
   }
 }

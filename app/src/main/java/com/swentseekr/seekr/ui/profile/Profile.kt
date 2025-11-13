@@ -1,13 +1,18 @@
 package com.swentseekr.seekr.ui.profile
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -15,6 +20,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -34,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsPropertyKey
+import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -44,8 +51,10 @@ import com.swentseekr.seekr.ui.components.HuntCard
 import com.swentseekr.seekr.ui.components.MAX_RATING
 import com.swentseekr.seekr.ui.components.Rating
 import com.swentseekr.seekr.ui.components.RatingType
+import com.swentseekr.seekr.ui.theme.*
 
 val BackgroundColorKey = SemanticsPropertyKey<Color>("BackgroundColor")
+var SemanticsPropertyReceiver.backgroundColor by BackgroundColorKey
 
 data class TabItem(val tab: ProfileTab, val testTag: String, val icon: ImageVector)
 
@@ -96,9 +105,27 @@ fun ProfileScreen(
       if (testMode) {
         testProfile ?: mockProfileData()
       } else {
-        val uiState by viewModel.uiState.collectAsState()
 
         LaunchedEffect(userId) { viewModel.loadProfile(userId) }
+        uiState.profile
+
+        AnimatedVisibility(visible = uiState.isLoading, enter = fadeIn(), exit = fadeOut()) {
+          Box(
+              modifier = Modifier.fillMaxSize().testTag(ProfileTestTags.PROFILE_LOADING),
+              contentAlignment = Alignment.Center) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center) {
+                      CircularProgressIndicator(color = Green)
+                      Text(
+                          text = ProfileConstants.LOADING_PROFILE,
+                          color = GrayDislike,
+                          fontSize = ProfileConstants.TEXT_SIZE_LOADING,
+                          modifier = Modifier.padding(top = ProfileConstants.SIZE_MEDIUM_DP))
+                    }
+              }
+        }
+
         if (uiState.errorMsg != null) {
           Text(
               "${ProfileScreenStrings.ErrorPrefix}${uiState.errorMsg}",
@@ -116,6 +143,9 @@ fun ProfileScreen(
   val isMyProfile = testMode || uiState.isMyProfile
 
   var selectedTab by remember { mutableStateOf(ProfileTab.MY_HUNTS) }
+  val reviewCount by viewModel.totalReviews.collectAsState()
+  LaunchedEffect(profile.myHunts) { viewModel.loadTotalReviewsForProfile(profile) }
+
   Scaffold(
       floatingActionButton = {
         if (isMyProfile) {
@@ -127,11 +157,7 @@ fun ProfileScreen(
               }
         }
       },
-      modifier = Modifier.testTag(ProfileTestTags.PROFILE_SCREEN)
-
-      // TODO settings
-
-      ) { padding ->
+      modifier = Modifier.testTag(ProfileTestTags.PROFILE_SCREEN)) { padding ->
         Column(
             modifier = Modifier.fillMaxSize().padding(padding),
         ) {
@@ -252,7 +278,7 @@ fun CustomToolbar(selectedTab: ProfileTab, onTabSelected: (ProfileTab) -> Unit =
                       horizontal = ProfileScreenDefaults.TabHorizontalPadding,
                       vertical = ProfileScreenDefaults.TabVerticalPadding)
                   .clickable { onTabSelected(item.tab) }
-                  .semantics { this[BackgroundColorKey] = color }
+                  .semantics { backgroundColor = color }
                   .testTag(item.testTag))
     }
   }
