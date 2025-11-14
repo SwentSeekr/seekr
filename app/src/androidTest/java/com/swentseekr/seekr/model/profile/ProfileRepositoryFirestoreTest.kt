@@ -228,11 +228,14 @@ class ProfileRepositoryFirestoreTest {
 
   @Test
   fun toLocation_handlesMissingFields() = runTest {
-    val repo = ProfileRepositoryFirestore(FirebaseFirestore.getInstance(), auth)
+    val companion = ProfileRepositoryFirestore.Companion
     val map = mapOf<String, Any>()
-    val locationMethod = repo.javaClass.getDeclaredMethod("toLocation", Map::class.java)
+    val locationMethod =
+        ProfileRepositoryFirestore.Companion::class
+            .java
+            .getDeclaredMethod("toLocation", Map::class.java)
     locationMethod.isAccessible = true
-    val result = locationMethod.invoke(repo, map) as com.swentseekr.seekr.model.map.Location
+    val result = locationMethod.invoke(companion, map) as Location
     assertEquals(0.0, result.latitude)
     assertEquals(0.0, result.longitude)
     assertEquals("", result.name)
