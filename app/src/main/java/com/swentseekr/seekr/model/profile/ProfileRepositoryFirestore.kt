@@ -46,6 +46,47 @@ class ProfileRepositoryFirestore(
             "distance" to hunt.distance,
             "reviewRate" to hunt.reviewRate,
             "mainImageUrl" to hunt.mainImageUrl)
+
+    fun mapToHunt(map: Map<*, *>): Hunt? {
+      val uid = map["uid"] as? String ?: ""
+      val title = map["title"] as? String ?: return null
+      val description = map["description"] as? String ?: return null
+      val time = (map["time"] as? Number)?.toDouble() ?: 0.0
+      val distance = (map["distance"] as? Number)?.toDouble() ?: 0.0
+      val reviewRate = (map["reviewRate"] as? Number)?.toDouble() ?: 0.0
+      val mainImageUrl = map["mainImageUrl"] as? String ?: ""
+
+      val start = (map["start"] as? Map<*, *>)?.toLocation() ?: Location(0.0, 0.0, "")
+      val end = (map["end"] as? Map<*, *>)?.toLocation() ?: Location(0.0, 0.0, "")
+      val middlePoints =
+          (map["middlePoints"] as? List<Map<*, *>>)?.map { it.toLocation() } ?: emptyList()
+
+      val difficulty =
+          (map["difficulty"] as? String)?.let { Difficulty.valueOf(it) } ?: Difficulty.EASY
+      val status = (map["status"] as? String)?.let { HuntStatus.valueOf(it) } ?: HuntStatus.FUN
+      val authorId = map["authorId"] as? String ?: ""
+
+      return Hunt(
+          uid = uid,
+          start = start,
+          end = end,
+          middlePoints = middlePoints,
+          status = status,
+          title = title,
+          description = description,
+          time = time,
+          distance = distance,
+          difficulty = difficulty,
+          authorId = authorId,
+          mainImageUrl = mainImageUrl,
+          reviewRate = reviewRate)
+    }
+
+    private fun Map<*, *>.toLocation(): Location =
+        Location(
+            latitude = this["latitude"] as? Double ?: 0.0,
+            longitude = this["longitude"] as? Double ?: 0.0,
+            name = this["name"] as? String ?: "")
   }
 
   private val profilesCollection = db.collection("profiles")
@@ -214,46 +255,5 @@ class ProfileRepositoryFirestore(
         myHunts = myHunts,
         doneHunts = doneHunts,
         likedHunts = likedHunts)
-  }
-
-  private fun Map<*, *>.toLocation(): Location =
-      Location(
-          latitude = this["latitude"] as? Double ?: 0.0,
-          longitude = this["longitude"] as? Double ?: 0.0,
-          name = this["name"] as? String ?: "")
-
-  fun mapToHunt(map: Map<*, *>): Hunt? {
-    val uid = map["uid"] as? String ?: ""
-    val title = map["title"] as? String ?: return null
-    val description = map["description"] as? String ?: return null
-    val time = (map["time"] as? Number)?.toDouble() ?: 0.0
-    val distance = (map["distance"] as? Number)?.toDouble() ?: 0.0
-    val reviewRate = (map["reviewRate"] as? Number)?.toDouble() ?: 0.0
-    val mainImageUrl = map["mainImageUrl"] as? String ?: ""
-
-    val start = (map["start"] as? Map<*, *>)?.toLocation() ?: Location(0.0, 0.0, "")
-    val end = (map["end"] as? Map<*, *>)?.toLocation() ?: Location(0.0, 0.0, "")
-    val middlePoints =
-        (map["middlePoints"] as? List<Map<*, *>>)?.map { it.toLocation() } ?: emptyList()
-
-    val difficulty =
-        (map["difficulty"] as? String)?.let { Difficulty.valueOf(it) } ?: Difficulty.EASY
-    val status = (map["status"] as? String)?.let { HuntStatus.valueOf(it) } ?: HuntStatus.FUN
-    val authorId = map["authorId"] as? String ?: ""
-
-    return Hunt(
-        uid = uid,
-        start = start,
-        end = end,
-        middlePoints = middlePoints,
-        status = status,
-        title = title,
-        description = description,
-        time = time,
-        distance = distance,
-        difficulty = difficulty,
-        authorId = authorId,
-        mainImageUrl = mainImageUrl,
-        reviewRate = reviewRate)
   }
 }

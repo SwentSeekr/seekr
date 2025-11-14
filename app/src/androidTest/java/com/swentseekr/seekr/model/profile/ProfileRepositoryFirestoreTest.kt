@@ -8,6 +8,7 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.model.profile.ProfileRepositoryFirestore.Companion.huntToMap
+import com.swentseekr.seekr.model.profile.ProfileRepositoryFirestore.Companion.mapToHunt
 import com.swentseekr.seekr.ui.profile.Profile
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment.clearEmulatorData
@@ -293,5 +294,54 @@ class ProfileRepositoryFirestoreTest {
     assertEquals(5.0, map["distance"])
     assertEquals(4.5, map["reviewRate"])
     assertEquals("http://image.url", map["mainImageUrl"])
+  }
+
+  @Test
+  fun mapToHuntMapsHuntCorrectly() {
+    val map =
+        mapOf(
+            "uid" to "hunt1",
+            "title" to "Sample Hunt",
+            "description" to "A great adventure",
+            "time" to 120.0,
+            "distance" to 5.0,
+            "reviewRate" to 4.5,
+            "mainImageUrl" to "http://image.url",
+            "start" to mapOf("latitude" to 10.0, "longitude" to 20.0, "name" to "Start Point"),
+            "end" to mapOf("latitude" to 15.0, "longitude" to 25.0, "name" to "End Point"),
+            "middlePoints" to
+                listOf(mapOf("latitude" to 12.0, "longitude" to 22.0, "name" to "Mid Point")),
+            "difficulty" to "EASY",
+            "status" to "FUN",
+            "authorId" to "author1")
+
+    val hunt = mapToHunt(map)
+
+    assertNotNull(hunt)
+    assertEquals("hunt1", hunt?.uid)
+    assertEquals("Sample Hunt", hunt?.title)
+    assertEquals("A great adventure", hunt?.description)
+    assertEquals(120.0, hunt?.time)
+    assertEquals(5.0, hunt?.distance)
+    assertEquals(4.5, hunt?.reviewRate)
+    assertEquals("http://image.url", hunt?.mainImageUrl)
+
+    assertNotNull(hunt?.start)
+    assertEquals(10.0, hunt?.start?.latitude)
+    assertEquals(20.0, hunt?.start?.longitude)
+    assertEquals("Start Point", hunt?.start?.name)
+
+    assertNotNull(hunt?.end)
+    assertEquals(15.0, hunt?.end?.latitude)
+    assertEquals(25.0, hunt?.end?.longitude)
+    assertEquals("End Point", hunt?.end?.name)
+
+    assertNotNull(hunt?.middlePoints)
+    assertEquals(1, hunt?.middlePoints?.size)
+    assertEquals("Mid Point", hunt?.middlePoints?.get(0)?.name)
+
+    assertEquals(Difficulty.EASY, hunt?.difficulty)
+    assertEquals(HuntStatus.FUN, hunt?.status)
+    assertEquals("author1", hunt?.authorId)
   }
 }
