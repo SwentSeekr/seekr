@@ -3,7 +3,6 @@ package com.swentseekr.seekr.ui.map
 import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -195,28 +194,28 @@ class MapTest {
     composeRule.onNodeWithTag(MapScreenTestTags.VALIDATE).assertIsDisplayed()
   }
 
-//  @Test
-//  fun validateButtonUpdatesProgressCorrectly() {
-//    val h = huntShort("1")
-//    val vm = MapViewModel(repository = repo(h))
-//    composeRule.setContent { MapScreen(viewModel = vm, testMode = true) }
-//    composeRule.runOnIdle { vm.onMarkerClick(h) }
-//
-//    composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_VIEW).performClick()
-//    composeRule.onNodeWithTag(MapScreenTestTags.START).performClick()
-//    composeRule.onNodeWithTag(MapScreenTestTags.VALIDATE).performClick()
-//
-//    composeRule
-//        .onNodeWithTag(MapScreenTestTags.PROGRESS)
-//        .assertTextContains("1 / 2", substring = true)
-//
-//    composeRule.onNodeWithTag(MapScreenTestTags.VALIDATE).performClick()
-//
-//    composeRule
-//        .onNodeWithTag(MapScreenTestTags.PROGRESS)
-//        .assertTextContains("2 / 2", substring = true)
-//    composeRule.onNodeWithTag(MapScreenTestTags.FINISH).assertIsEnabled()
-//  }
+  //  @Test
+  //  fun validateButtonUpdatesProgressCorrectly() {
+  //    val h = huntShort("1")
+  //    val vm = MapViewModel(repository = repo(h))
+  //    composeRule.setContent { MapScreen(viewModel = vm, testMode = true) }
+  //    composeRule.runOnIdle { vm.onMarkerClick(h) }
+  //
+  //    composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_VIEW).performClick()
+  //    composeRule.onNodeWithTag(MapScreenTestTags.START).performClick()
+  //    composeRule.onNodeWithTag(MapScreenTestTags.VALIDATE).performClick()
+  //
+  //    composeRule
+  //        .onNodeWithTag(MapScreenTestTags.PROGRESS)
+  //        .assertTextContains("1 / 2", substring = true)
+  //
+  //    composeRule.onNodeWithTag(MapScreenTestTags.VALIDATE).performClick()
+  //
+  //    composeRule
+  //        .onNodeWithTag(MapScreenTestTags.PROGRESS)
+  //        .assertTextContains("2 / 2", substring = true)
+  //    composeRule.onNodeWithTag(MapScreenTestTags.FINISH).assertIsEnabled()
+  //  }
 
   @Test
   fun validateButtonDoesNotWorkIfUserTooFar() {
