@@ -362,4 +362,87 @@ class MapViewModelTest {
     assertTrue(after.route.isEmpty())
     assertNull(after.selectedHunt)
   }
+
+  @Test
+  fun startHuntUpdatesUIStateCorrectly() = runTest {
+    val hunts = listOf(sample(uid = "1"))
+    val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
+
+    vm.onMarkerClick(hunts[0])
+    vm.startHunt()
+
+    val state = vm.uiState.value
+    assertTrue(state.isHuntStarted)
+    assertTrue(state.isFocused)
+    assertEquals(0, state.validatedCount)
+    assertTrue(state.route.isEmpty())
+  }
+
+  @Test
+  fun validateCurrentPointUpdatesStateCorrectly() = runTest {
+    val hunts = listOf(sample(uid = "1"))
+    val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
+
+    vm.onMarkerClick(hunts[0])
+    vm.startHunt()
+
+    val validLocation = LatLng(10.0, 20.0)
+    vm.validateCurrentPoint(validLocation)
+
+    val state = vm.uiState.value
+    assertEquals(1, state.validatedCount)
+
+    val invalidLocation = LatLng(46.54, 6.64)
+    vm.validateCurrentPoint(invalidLocation)
+
+    assertEquals(1, state.validatedCount)
+  }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun finishHuntIsEnabledWhenAllCheckpointsValidated() = runTest {
+    val hunts = listOf(sample(uid = "1"))
+    val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
+
+    vm.onMarkerClick(hunts[0])
+    vm.startHunt()
+
+    val validLocation = LatLng(10.0, 20.0)
+    vm.validateCurrentPoint(validLocation)
+    vm.validateCurrentPoint(validLocation)
+    vm.validateCurrentPoint(validLocation)
+    vm.validateCurrentPoint(validLocation)
+
+    assertTrue(vm.uiState.value.validatedCount >= (hunts[0].middlePoints.size + 2))
+
+    var persistedHunt: Hunt? = null
+    vm.finishHunt { finishedHunt -> persistedHunt = finishedHunt }
+
+    advanceUntilIdle()
+
+    val state = vm.uiState.value
+    assertFalse(state.isHuntStarted)
+    assertNull(state.selectedHunt)
+    assertEquals(0, state.validatedCount)
+    assertNotNull(persistedHunt)
+  }
+
+  @Test
+  fun finishHuntIsNotAllowedWhenNotAllCheckpointsValidated() = runTest {
+    val hunts = listOf(sample(uid = "1"))
+    val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
+
+    vm.onMarkerClick(hunts[0])
+    vm.startHunt()
+
+    val validLocation = LatLng(46.52, 6.63) // Simulate the first valid location
+    vm.validateCurrentPoint(validLocation)
+
+    var errorMsg: String? = null
+    vm.finishHunt {}
+
+    errorMsg = vm.uiState.value.errorMsg
+    assertNotNull(errorMsg)
+    assertTrue(errorMsg!!.contains("You still have checkpoints to validate"))
+  }
 }

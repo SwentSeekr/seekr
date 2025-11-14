@@ -340,11 +340,7 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
           false
         }
 
-    if (within) {
-      _uiState.value = state.copy(validatedCount = state.validatedCount + 1)
-    } else {
-      setErrorMsg("Move closer to the checkpoint to validate.")
-    }
+    if (within) _uiState.value = state.copy(validatedCount = state.validatedCount + 1)
   }
 
   /**
