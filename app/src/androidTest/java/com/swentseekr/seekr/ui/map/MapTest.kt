@@ -41,20 +41,20 @@ class MapTest {
           reviewRate = 4.0)
 
   private fun huntShort(uid: String, title: String = "Hunt $uid") =
-    Hunt(
-      uid = uid,
-      start = Location(37.422000053069546, -122.08405248820782, "Start$uid"),
-      end = Location(37.421952923256626, -122.08407126367091, "End$uid"),
-      middlePoints = emptyList(),
-      status = HuntStatus.FUN,
-      title = title,
-      description = "desc $uid",
-      time = 1.0,
-      distance = 1.0,
-      difficulty = Difficulty.EASY,
-      authorId = "A",
-      mainImageUrl = 0.toString(),
-      reviewRate = 4.0)
+      Hunt(
+          uid = uid,
+          start = Location(37.422000053069546, -122.08405248820782, "Start$uid"),
+          end = Location(37.421952923256626, -122.08407126367091, "End$uid"),
+          middlePoints = emptyList(),
+          status = HuntStatus.FUN,
+          title = title,
+          description = "desc $uid",
+          time = 1.0,
+          distance = 1.0,
+          difficulty = Difficulty.EASY,
+          authorId = "A",
+          mainImageUrl = 0.toString(),
+          reviewRate = 4.0)
 
   private fun repo(vararg hunts: Hunt) =
       object : HuntsRepository {
@@ -195,7 +195,6 @@ class MapTest {
     composeRule.onNodeWithTag(MapScreenTestTags.VALIDATE).assertIsDisplayed()
   }
 
-
   @Test
   fun validateButtonUpdatesProgressCorrectly() {
     val h = huntShort("1")
@@ -207,11 +206,15 @@ class MapTest {
     composeRule.onNodeWithTag(MapScreenTestTags.START).performClick()
     composeRule.onNodeWithTag(MapScreenTestTags.VALIDATE).performClick()
 
-    composeRule.onNodeWithTag(MapScreenTestTags.PROGRESS).assertTextContains("1 / 2", substring = true)
+    composeRule
+        .onNodeWithTag(MapScreenTestTags.PROGRESS)
+        .assertTextContains("1 / 2", substring = true)
 
     composeRule.onNodeWithTag(MapScreenTestTags.VALIDATE).performClick()
 
-    composeRule.onNodeWithTag(MapScreenTestTags.PROGRESS).assertTextContains("2 / 2", substring = true)
+    composeRule
+        .onNodeWithTag(MapScreenTestTags.PROGRESS)
+        .assertTextContains("2 / 2", substring = true)
     composeRule.onNodeWithTag(MapScreenTestTags.FINISH).assertIsEnabled()
   }
 
@@ -225,8 +228,12 @@ class MapTest {
     composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_VIEW).performClick()
     composeRule.onNodeWithTag(MapScreenTestTags.START).performClick()
 
-    composeRule.onNodeWithTag(MapScreenTestTags.PROGRESS).assertTextContains("0 / 2", substring = true)
+    composeRule
+        .onNodeWithTag(MapScreenTestTags.PROGRESS)
+        .assertTextContains("0 / 2", substring = true)
     composeRule.onNodeWithTag(MapScreenTestTags.VALIDATE).performClick()
-    composeRule.onNodeWithTag(MapScreenTestTags.PROGRESS).assertTextContains("0 / 2", substring = true)
+    composeRule
+        .onNodeWithTag(MapScreenTestTags.PROGRESS)
+        .assertTextContains("0 / 2", substring = true)
   }
 }
