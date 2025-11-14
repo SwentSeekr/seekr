@@ -31,8 +31,11 @@ object MapScreenStrings {
   const val BackToAllHunts = "Back to all hunts"
   const val Cancel = "Cancel"
   const val ViewHunt = "View Hunt"
+  const val Progress = "Progress: "
+  const val StartHunt = "Start Hunt"
+  const val Validate = "Validate"
+  const val FinishHunt = "Finish hunt"
 }
-
 
 /**
  * Test tags used by instrumented tests to target key UI elements on the Map screen.
@@ -56,4 +59,8 @@ object MapScreenTestTags {
   const val PERMISSION_POPUP = "permissionPopup"
   const val GRANT_LOCATION_PERMISSION = "grantLocationPermission"
   const val EXPLAIN = "explain"
+  const val START = "start"
+  const val PROGRESS = "progress"
+  const val VALIDATE = "validate"
+  const val FINISH = "finish"
 }

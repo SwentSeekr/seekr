@@ -66,6 +66,8 @@ import com.swentseekr.seekr.ui.theme.Blue
 import com.swentseekr.seekr.ui.theme.Green
 import kotlinx.coroutines.launch
 
+private const val s = "Validate"
+
 /**
  * Top-level composable for the Map screen.
  *
@@ -186,7 +188,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
             Marker(
                 state =
                     MarkerState(LatLng(selectedHunt.start.latitude, selectedHunt.start.longitude)),
-                title = "${MapScreenStrings.StartPrefix}${selectedHunt.title}",
+                title = "${MapScreenStrings.StartPrefix}${selectedHunt.start.name}",
                 icon = bitmapDescriptorFromVector(LocalContext.current, R.drawable.ic_start_marker))
             selectedHunt.middlePoints.forEachIndexed { idx, point ->
               Marker(
@@ -194,7 +196,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
             }
             Marker(
                 state = MarkerState(LatLng(selectedHunt.end.latitude, selectedHunt.end.longitude)),
-                title = "${MapScreenStrings.EndPrefix}${selectedHunt.title}",
+                title = "${MapScreenStrings.EndPrefix}${selectedHunt.end.name}",
                 icon = bitmapDescriptorFromVector(LocalContext.current, R.drawable.ic_end_marker))
             if (uiState.route.isNotEmpty()) {
               Polyline(
@@ -246,9 +248,9 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
               ButtonDefaults.textButtonColors(containerColor = Green, contentColor = Color.White),
           modifier =
               Modifier.align(Alignment.TopStart)
-                  .padding(12.dp)
+                  .padding(MapScreenDefaults.BackButtonPadding)
                   .testTag(MapScreenTestTags.BUTTON_BACK)) {
-            Text("Back to all hunts")
+            Text(MapScreenStrings.BackToAllHunts)
           }
       Card(
           modifier = Modifier.align(Alignment.TopEnd).padding(12.dp),
@@ -261,7 +263,8 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
 
               Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    "Progress: $validated / $totalPoints",
+                    modifier = Modifier.testTag(MapScreenTestTags.PROGRESS),
+                    text = MapScreenStrings.Progress + "$validated / $totalPoints",
                     style = MaterialTheme.typography.bodyMedium)
               }
 
@@ -269,15 +272,17 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
 
               if (!uiState.isHuntStarted) {
                 Button(
+                    modifier = Modifier.testTag(MapScreenTestTags.START),
                     onClick = { viewModel.startHunt() },
                     colors =
                         ButtonDefaults.buttonColors(
                             containerColor = Green, contentColor = Color.White)) {
-                      Text("Start hunt")
+                      Text(MapScreenStrings.StartHunt)
                     }
               } else {
                 Row {
                   TextButton(
+                      modifier = Modifier.testTag(MapScreenTestTags.VALIDATE),
                       onClick = {
                         val fineGranted =
                             ContextCompat.checkSelfPermission(
@@ -297,13 +302,14 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
                         }
                       },
                       colors = ButtonDefaults.textButtonColors(contentColor = Green)) {
-                        Text("Validate")
+                        Text(MapScreenStrings.Validate)
                       }
 
                   Spacer(Modifier.width(8.dp))
 
                   val canFinish = validated >= totalPoints
                   Button(
+                      modifier = Modifier.testTag(MapScreenTestTags.FINISH),
                       onClick = {
                         val userId = Firebase.auth.currentUser?.uid
                         if (userId != null) {
@@ -325,7 +331,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
                           ButtonDefaults.buttonColors(
                               containerColor = if (canFinish) Green else Color.LightGray,
                               contentColor = Color.White)) {
-                        Text("Finish hunt")
+                        Text(MapScreenStrings.FinishHunt)
                       }
                 }
               }
