@@ -23,6 +23,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
+private const val DEFAULT_COUNT = 0
+private const val VALIDATION_RADIUS = 25
+
 /**
  * Immutable UI model for the Map screen.
  *
@@ -42,7 +45,10 @@ data class MapUIState(
     val isFocused: Boolean = false,
     val errorMsg: String? = null,
     val route: List<LatLng> = emptyList(),
-    val isRouteLoading: Boolean = false
+    val isRouteLoading: Boolean = false,
+    val isHuntStarted: Boolean = false,
+    val validatedCount: Int = DEFAULT_COUNT,
+    val validationRadiusMeters: Int = VALIDATION_RADIUS
 )
 
 /**
@@ -288,6 +294,93 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
       }
 
       return fullPath
+    }
+  }
+
+  /**
+   * Starts the hunt by changing the UI state to focused mode and initializing route calculation.
+   *
+   * This method sets the hunt as started, clears the existing route, and begins calculating the
+   * route using the [computeRouteForSelectedHunt] method.
+   */
+  fun startHunt() {
+    _uiState.value.selectedHunt ?: return
+    _uiState.value =
+        _uiState.value.copy(
+            isFocused = true,
+            route = emptyList(),
+            isHuntStarted = true,
+            validatedCount = DEFAULT_COUNT)
+    viewModelScope.launch { computeRouteForSelectedHunt(travelMode = "walking") }
+  }
+
+  /**
+   * Validates the user's current location against the next checkpoint in the hunt.
+   *
+   * This method checks if the user's current location is within the validation radius of the next
+   * checkpoint in the hunt and updates the validation count if the point is validated. If the
+   * validation fails, an error message is displayed.
+   *
+   * @param currentLocation the user's current location to validate against the next checkpoint.
+   */
+  fun validateCurrentPoint(currentLocation: LatLng) {
+    val state = _uiState.value
+    val hunt = state.selectedHunt ?: return
+    if (!state.isHuntStarted) return
+
+    val ordered = buildList {
+      add(LatLng(hunt.start.latitude, hunt.start.longitude))
+      hunt.middlePoints.forEach { add(LatLng(it.latitude, it.longitude)) }
+      add(LatLng(hunt.end.latitude, hunt.end.longitude))
+    }
+
+    val nextIdx = state.validatedCount
+    if (nextIdx >= ordered.size) return
+
+    val nextPoint = ordered[nextIdx]
+    val within =
+        try {
+          com.google.maps.android.SphericalUtil.computeDistanceBetween(
+              currentLocation, nextPoint) <= state.validationRadiusMeters
+        } catch (e: Exception) {
+          false
+        }
+
+    if (within) _uiState.value = state.copy(validatedCount = state.validatedCount + 1)
+  }
+
+  /**
+   * Finishes the hunt after validating all checkpoints and saves the hunt progress.
+   *
+   * This method checks if all checkpoints have been validated. If not, an error message is
+   * displayed. If all checkpoints are validated, it calls the [onPersist] callback to save the hunt
+   * as completed.
+   *
+   * @param onPersist a callback invoked to persist the completed hunt (e.g., saving to the
+   *   repository).
+   */
+  fun finishHunt(onPersist: suspend (Hunt) -> Unit = {}) {
+    val state = _uiState.value
+    val hunt = state.selectedHunt ?: return
+    val total = 2 + hunt.middlePoints.size
+    if (state.validatedCount < total) {
+      setErrorMsg("You still have checkpoints to validate.")
+      return
+    }
+
+    viewModelScope.launch {
+      try {
+        onPersist(hunt)
+        _uiState.value =
+            state.copy(
+                isHuntStarted = false,
+                validatedCount = DEFAULT_COUNT,
+                isFocused = false,
+                selectedHunt = null,
+                route = emptyList())
+      } catch (e: Exception) {
+        setErrorMsg("Failed to finish hunt: ${e.message}")
+      }
     }
   }
 }

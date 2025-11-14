@@ -3,6 +3,7 @@ package com.swentseekr.seekr.ui.map
 import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -160,5 +161,39 @@ class MapTest {
     composeRule.waitForIdle()
     composeRule.onNodeWithTag(MapScreenTestTags.GOOGLE_MAP_SCREEN).assertIsDisplayed()
     composeRule.onNodeWithTag(MapScreenTestTags.PERMISSION_POPUP).assertDoesNotExist()
+  }
+
+  @Test
+  fun startHuntButtonDisplaysAndStartsHunt() {
+    val h = hunt("1")
+    val vm = MapViewModel(repository = repo(h))
+    composeRule.setContent { MapScreen(viewModel = vm) }
+    composeRule.runOnIdle { vm.onMarkerClick(h) }
+
+    composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_VIEW).performClick()
+    composeRule.onNodeWithTag(MapScreenTestTags.START).assertIsDisplayed()
+
+    composeRule.onNodeWithTag(MapScreenTestTags.START).performClick()
+    composeRule.onNodeWithTag(MapScreenTestTags.PROGRESS).assertIsDisplayed()
+    composeRule.onNodeWithTag(MapScreenTestTags.VALIDATE).assertIsDisplayed()
+  }
+
+  @Test
+  fun validateButtonDoesNotWorkIfUserTooFar() {
+    val h = hunt("1")
+    val vm = MapViewModel(repository = repo(h))
+    composeRule.setContent { MapScreen(viewModel = vm) }
+    composeRule.runOnIdle { vm.onMarkerClick(h) }
+
+    composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_VIEW).performClick()
+    composeRule.onNodeWithTag(MapScreenTestTags.START).performClick()
+
+    composeRule
+        .onNodeWithTag(MapScreenTestTags.PROGRESS)
+        .assertTextContains("0 / 2", substring = true)
+    composeRule.onNodeWithTag(MapScreenTestTags.VALIDATE).performClick()
+    composeRule
+        .onNodeWithTag(MapScreenTestTags.PROGRESS)
+        .assertTextContains("0 / 2", substring = true)
   }
 }

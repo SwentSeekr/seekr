@@ -31,8 +31,22 @@ object MapScreenStrings {
   const val BackToAllHunts = "Back to all hunts"
   const val Cancel = "Cancel"
   const val ViewHunt = "View Hunt"
+  const val Progress = "Progress: "
+  const val StartHunt = "Start Hunt"
+  const val Validate = "Validate"
+  const val FinishHunt = "Finish hunt"
 }
 
+/**
+ * Test tags used by instrumented tests to target key UI elements on the Map screen.
+ *
+ * These tags are applied to:
+ * - [GOOGLE_MAP_SCREEN]: the `GoogleMap` composable root.
+ * - [POPUP_CARD], [POPUP_TITLE], [POPUP_DESC]: the bottom popup and its content shown after a
+ *   marker tap.
+ * - [BUTTON_VIEW], [BUTTON_CANCEL]: actions in the popup.
+ * - [BUTTON_BACK]: "Back to all hunts" shown in focused mode.
+ */
 object MapScreenTestTags {
   const val GOOGLE_MAP_SCREEN = "mapScreen"
   const val POPUP_CARD = "huntPopupCard"
@@ -45,4 +59,8 @@ object MapScreenTestTags {
   const val PERMISSION_POPUP = "permissionPopup"
   const val GRANT_LOCATION_PERMISSION = "grantLocationPermission"
   const val EXPLAIN = "explain"
+  const val START = "start"
+  const val PROGRESS = "progress"
+  const val VALIDATE = "validate"
+  const val FINISH = "finish"
 }

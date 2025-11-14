@@ -3,6 +3,12 @@ package com.swentseekr.seekr.model.profile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.swentseekr.seekr.model.author.Author
+import com.swentseekr.seekr.model.hunt.Difficulty
+import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.model.hunt.HuntStatus
+import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.model.profile.ProfileRepositoryFirestore.Companion.huntToMap
+import com.swentseekr.seekr.model.profile.ProfileRepositoryFirestore.Companion.mapToHunt
 import com.swentseekr.seekr.ui.profile.Profile
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment.clearEmulatorData
@@ -17,6 +23,21 @@ import org.junit.Test
 class ProfileRepositoryFirestoreTest {
   private lateinit var repository: ProfileRepository
   private lateinit var auth: FirebaseAuth
+  private val hunt =
+      Hunt(
+          uid = "hunt1",
+          title = "Sample Hunt",
+          description = "Test Hunt",
+          start = Location(10.0, 20.0, "Start"),
+          end = Location(15.0, 25.0, "End"),
+          middlePoints = listOf(Location(12.0, 22.0, "Middle")),
+          difficulty = Difficulty.EASY,
+          status = HuntStatus.FUN,
+          authorId = "author1",
+          time = 30.0,
+          distance = 5.0,
+          reviewRate = 4.5,
+          mainImageUrl = "http://image.url")
 
   @Before
   fun setup() {
@@ -207,13 +228,123 @@ class ProfileRepositoryFirestoreTest {
 
   @Test
   fun toLocation_handlesMissingFields() = runTest {
-    val repo = ProfileRepositoryFirestore(FirebaseFirestore.getInstance(), auth)
+    val companion = ProfileRepositoryFirestore.Companion
     val map = mapOf<String, Any>()
-    val locationMethod = repo.javaClass.getDeclaredMethod("toLocation", Map::class.java)
+    val locationMethod =
+        ProfileRepositoryFirestore.Companion::class
+            .java
+            .getDeclaredMethod("toLocation", Map::class.java)
     locationMethod.isAccessible = true
-    val result = locationMethod.invoke(repo, map) as com.swentseekr.seekr.model.map.Location
+    val result = locationMethod.invoke(companion, map) as Location
     assertEquals(0.0, result.latitude)
     assertEquals(0.0, result.longitude)
     assertEquals("", result.name)
+  }
+
+  @Test
+  fun addDoneHuntAddsHuntWhenNotAlreadyInList() = runTest {
+    val uid = auth.currentUser!!.uid
+
+    val db = FirebaseFirestore.getInstance()
+    val docRef = db.collection("profiles").document(uid)
+    docRef.set(mapOf("doneHunts" to emptyList<Map<String, Any?>>())).await()
+
+    repository.addDoneHunt(uid, hunt)
+    val snapshot = docRef.get().await()
+
+    @Suppress("UNCHECKED_CAST")
+    val doneHunts = snapshot.get("doneHunts") as? List<Map<String, Any?>> ?: emptyList()
+
+    assertEquals(1, doneHunts.size)
+    assertEquals("hunt1", doneHunts[0]["uid"])
+  }
+
+  @Test
+  fun addDoneHuntDoesNotAddHuntIfAlreadyInList() = runTest {
+    val uid = auth.currentUser!!.uid
+
+    val db = FirebaseFirestore.getInstance()
+    val docRef = db.collection("profiles").document(uid)
+    val doneHunts =
+        listOf(mapOf("uid" to "hunt1", "title" to "Sample Hunt", "description" to "Test Hunt"))
+    docRef.set(mapOf("doneHunts" to doneHunts)).await()
+
+    repository.addDoneHunt(uid, hunt)
+
+    val snapshot = docRef.get().await()
+
+    @Suppress("UNCHECKED_CAST")
+    val updatedDoneHunts = snapshot.get("doneHunts") as? List<Map<String, Any?>> ?: emptyList()
+
+    assertEquals(1, updatedDoneHunts.size)
+    assertEquals("hunt1", updatedDoneHunts[0]["uid"])
+  }
+
+  @Test
+  fun huntToMapMapsHuntCorrectly() {
+    val map = huntToMap(hunt)
+
+    assertEquals("hunt1", map["uid"])
+    assertEquals("Sample Hunt", map["title"])
+    assertEquals("Test Hunt", map["description"])
+    assertNotNull(map["start"])
+    assertNotNull(map["end"])
+    assertEquals(1, (map["middlePoints"] as List<*>).size)
+    assertEquals("EASY", map["difficulty"])
+    assertEquals("FUN", map["status"])
+    assertEquals("author1", map["authorId"])
+    assertEquals(30.0, map["time"])
+    assertEquals(5.0, map["distance"])
+    assertEquals(4.5, map["reviewRate"])
+    assertEquals("http://image.url", map["mainImageUrl"])
+  }
+
+  @Test
+  fun mapToHuntMapsHuntCorrectly() {
+    val map =
+        mapOf(
+            "uid" to "hunt1",
+            "title" to "Sample Hunt",
+            "description" to "A great adventure",
+            "time" to 120.0,
+            "distance" to 5.0,
+            "reviewRate" to 4.5,
+            "mainImageUrl" to "http://image.url",
+            "start" to mapOf("latitude" to 10.0, "longitude" to 20.0, "name" to "Start Point"),
+            "end" to mapOf("latitude" to 15.0, "longitude" to 25.0, "name" to "End Point"),
+            "middlePoints" to
+                listOf(mapOf("latitude" to 12.0, "longitude" to 22.0, "name" to "Mid Point")),
+            "difficulty" to "EASY",
+            "status" to "FUN",
+            "authorId" to "author1")
+
+    val hunt = mapToHunt(map)
+
+    assertNotNull(hunt)
+    assertEquals("hunt1", hunt?.uid)
+    assertEquals("Sample Hunt", hunt?.title)
+    assertEquals("A great adventure", hunt?.description)
+    assertEquals(120.0, hunt?.time)
+    assertEquals(5.0, hunt?.distance)
+    assertEquals(4.5, hunt?.reviewRate)
+    assertEquals("http://image.url", hunt?.mainImageUrl)
+
+    assertNotNull(hunt?.start)
+    assertEquals(10.0, hunt?.start?.latitude)
+    assertEquals(20.0, hunt?.start?.longitude)
+    assertEquals("Start Point", hunt?.start?.name)
+
+    assertNotNull(hunt?.end)
+    assertEquals(15.0, hunt?.end?.latitude)
+    assertEquals(25.0, hunt?.end?.longitude)
+    assertEquals("End Point", hunt?.end?.name)
+
+    assertNotNull(hunt?.middlePoints)
+    assertEquals(1, hunt?.middlePoints?.size)
+    assertEquals("Mid Point", hunt?.middlePoints?.get(0)?.name)
+
+    assertEquals(Difficulty.EASY, hunt?.difficulty)
+    assertEquals(HuntStatus.FUN, hunt?.status)
+    assertEquals("author1", hunt?.authorId)
   }
 }
