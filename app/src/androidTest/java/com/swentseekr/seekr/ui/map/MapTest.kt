@@ -39,22 +39,6 @@ class MapTest {
           mainImageUrl = 0.toString(),
           reviewRate = 4.0)
 
-  private fun huntShort(uid: String, title: String = "Hunt $uid") =
-      Hunt(
-          uid = uid,
-          start = Location(37.422000053069546, -122.08405248820782, "Start$uid"),
-          end = Location(37.421952923256626, -122.08407126367091, "End$uid"),
-          middlePoints = emptyList(),
-          status = HuntStatus.FUN,
-          title = title,
-          description = "desc $uid",
-          time = 1.0,
-          distance = 1.0,
-          difficulty = Difficulty.EASY,
-          authorId = "A",
-          mainImageUrl = 0.toString(),
-          reviewRate = 4.0)
-
   private fun repo(vararg hunts: Hunt) =
       object : HuntsRepository {
         private val list = hunts.toList()

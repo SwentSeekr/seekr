@@ -8,16 +8,7 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -26,14 +17,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,44 +29,18 @@ import androidx.core.graphics.createBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.model.BitmapDescriptor
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.LatLngBounds
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.MapUiSettings
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
-import com.google.maps.android.compose.Polyline
-import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.android.gms.maps.model.*
+import com.google.firebase.auth.FirebaseAuth
+import com.google.maps.android.compose.*
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
 import com.swentseekr.seekr.ui.theme.Blue
+import com.swentseekr.seekr.ui.theme.GrayDislike
 import com.swentseekr.seekr.ui.theme.Green
+import com.swentseekr.seekr.ui.theme.White
 import kotlinx.coroutines.launch
 
-private const val s = "Validate"
-
-/**
- * Top-level composable for the Map screen.
- *
- * Responsibilities:
- * - Renders a Google Map and reacts to [MapViewModel.uiState] changes to display markers.
- * - In overview mode: shows one marker per hunt (start).
- * - In focused mode: shows the selected hunt’s start, middle checkpoints, and end.
- * - Animates the camera when a hunt is selected (zoom in) and when a hunt is viewed (fit bounds).
- * - Exposes a bottom popup to “View Hunt” or “Cancel”; “Cancel” restores the previous camera.
- *
- * Side effects and animation are driven by [LaunchedEffect] keyed to `selectedHunt`, `isFocused`,
- * and the map’s loaded state.
- *
- * @param viewModel the screen view model providing [MapUIState] and user intents.
- */
 @Composable
 fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) {
   val uiState by viewModel.uiState.collectAsState()
@@ -244,8 +202,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
     if (uiState.isFocused) {
       Button(
           onClick = { viewModel.onBackToAllHunts() },
-          colors =
-              ButtonDefaults.textButtonColors(containerColor = Green, contentColor = Color.White),
+          colors = ButtonDefaults.textButtonColors(containerColor = Green, contentColor = White),
           modifier =
               Modifier.align(Alignment.TopStart)
                   .padding(MapScreenDefaults.BackButtonPadding)
@@ -275,8 +232,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
                     modifier = Modifier.testTag(MapScreenTestTags.START),
                     onClick = { viewModel.startHunt() },
                     colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = Green, contentColor = Color.White)) {
+                        ButtonDefaults.buttonColors(containerColor = Green, contentColor = White)) {
                       Text(MapScreenStrings.StartHunt)
                     }
               } else {
@@ -311,7 +267,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
                   Button(
                       modifier = Modifier.testTag(MapScreenTestTags.FINISH),
                       onClick = {
-                        val userId = Firebase.auth.currentUser?.uid
+                        val userId = FirebaseAuth.getInstance().currentUser?.uid
                         if (userId != null) {
                           viewModel.finishHunt(
                               onPersist = { finished ->
@@ -329,8 +285,8 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
                       enabled = canFinish,
                       colors =
                           ButtonDefaults.buttonColors(
-                              containerColor = if (canFinish) Green else Color.LightGray,
-                              contentColor = Color.White)) {
+                              containerColor = if (canFinish) Green else GrayDislike,
+                              contentColor = White)) {
                         Text(MapScreenStrings.FinishHunt)
                       }
                 }

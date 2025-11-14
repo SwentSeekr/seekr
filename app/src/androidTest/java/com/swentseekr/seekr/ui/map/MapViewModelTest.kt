@@ -46,27 +46,34 @@ class MainDispatcherRule(val dispatcher: TestDispatcher = StandardTestDispatcher
 class MapViewModelTest {
   @get:Rule val mainDispatcherRule = MainDispatcherRule()
 
-  private fun sample(uid: String = "1", lat: Double = 10.0, lng: Double = 20.0) =
+  private fun sample(
+      uid: String = Constants.HUNT_UID_1,
+      lat: Double = Constants.VALID_LAT,
+      lng: Double = Constants.VALID_LNG
+  ) =
       Hunt(
           uid = uid,
           start = Location(lat, lng, "Start"),
           end = Location(lat, lng, "End"),
           middlePoints = listOf(Location(lat, lng, "M1"), Location(lat, lng, "M2")),
           status = HuntStatus.FUN,
-          title = "Hunt $uid",
-          description = "desc",
-          time = 1.0,
-          distance = 2.0,
+          title = "${Constants.HUNT_TITLE} $uid",
+          description = Constants.HUNT_DESCRIPTION,
+          time = Constants.HUNT_TIME,
+          distance = Constants.HUNT_DISTANCE,
           difficulty = Difficulty.EASY,
-          authorId = "A",
+          authorId = Constants.AUTHOR_ID,
           mainImageUrl = "",
-          reviewRate = 4.2)
+          reviewRate = Constants.REVIEW_RATE)
 
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun initialStateLoadsHuntsAndTargetsFirstStart() =
       runTest(mainDispatcherRule.dispatcher) {
-        val hunts = listOf(sample(uid = "1", lat = 46.5, lng = 6.6), sample(uid = "2"))
+        val hunts =
+            listOf(
+                sample(uid = Constants.HUNT_UID_1, lat = 46.5, lng = 6.6),
+                sample(uid = Constants.HUNT_UID_2))
         val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
 
         advanceUntilIdle()
@@ -82,9 +89,8 @@ class MapViewModelTest {
   fun initialStateWithEmptyRepoUsesLausanneFallback() = runTest {
     val vm = MapViewModel(repository = FakeRepoEmpty())
     val state = vm.uiState.value
-    // Lausanne fallback from MapViewModel default path
-    assertEquals(46.519962, state.target.latitude, 0.0001)
-    assertEquals(6.633597, state.target.longitude, 0.0001)
+    assertEquals(Constants.FALLBACK_LAT, state.target.latitude, 0.0001)
+    assertEquals(Constants.FALLBACK_LNG, state.target.longitude, 0.0001)
     assertTrue(state.hunts.isEmpty())
   }
 
@@ -119,19 +125,19 @@ class MapViewModelTest {
 
   @Test
   fun onMarkerClickSelectsHuntAndIsNotFocused() = runTest {
-    val hunts = listOf(sample(uid = "1"), sample(uid = "2"))
+    val hunts = listOf(sample(uid = Constants.HUNT_UID_1), sample(uid = Constants.HUNT_UID_2))
     val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
     vm.onMarkerClick(hunts[1])
 
     val state = vm.uiState.value
-    assertEquals("2", state.selectedHunt?.uid)
+    assertEquals(Constants.HUNT_UID_2, state.selectedHunt?.uid)
     assertFalse(state.isFocused)
   }
 
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun onViewHuntClickSetsFocusedTrue() = runTest {
-    val hunts = listOf(sample(uid = "1"))
+    val hunts = listOf(sample(uid = Constants.HUNT_UID_1))
     val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
 
     advanceUntilIdle()
@@ -141,12 +147,12 @@ class MapViewModelTest {
 
     val state = vm.uiState.value
     assertTrue(state.isFocused)
-    assertEquals("1", state.selectedHunt?.uid)
+    assertEquals(Constants.HUNT_UID_1, state.selectedHunt?.uid)
   }
 
   @Test
   fun onBackToAllHuntsClearsSelectionAndFocus() = runTest {
-    val hunts = listOf(sample(uid = "1"))
+    val hunts = listOf(sample(uid = Constants.HUNT_UID_1))
     val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
     vm.onMarkerClick(hunts[0])
     vm.onViewHuntClick()
@@ -159,7 +165,7 @@ class MapViewModelTest {
 
   @Test
   fun refreshUIStateReloadsFromRepository() = runTest {
-    val hunts = listOf(sample(uid = "1"))
+    val hunts = listOf(sample(uid = Constants.HUNT_UID_1))
     val repo = FakeRepoSuccess(hunts)
     val vm = MapViewModel(repository = repo)
 
@@ -220,14 +226,20 @@ class MapViewModelTest {
                 String::class.java)
     m.isAccessible = true
     @Suppress("UNCHECKED_CAST")
-    return m.invoke(this, 46.52, 6.63, 46.53, 6.64, emptyList<Pair<Double, Double>>(), "walking")
-        as List<LatLng>
+    return m.invoke(
+        this,
+        Constants.FALLBACK_LAT,
+        Constants.FALLBACK_LNG,
+        Constants.FALLBACK_LAT + 0.01,
+        Constants.FALLBACK_LNG + 0.01,
+        emptyList<Pair<Double, Double>>(),
+        "walking") as List<LatLng>
   }
 
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun onViewHuntClickWithNoSelectedHuntKeepsRouteEmpty() = runTest {
-    val hunts = listOf(sample(uid = "1"))
+    val hunts = listOf(sample(uid = Constants.HUNT_UID_1))
     val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
 
     advanceUntilIdle()
@@ -342,7 +354,7 @@ class MapViewModelTest {
 
   @Test
   fun onBackToAllHuntsClearsRoute() = runTest {
-    val hunts = listOf(sample(uid = "1"))
+    val hunts = listOf(sample(uid = Constants.HUNT_UID_1))
     val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
 
     val s =
@@ -365,7 +377,7 @@ class MapViewModelTest {
 
   @Test
   fun startHuntUpdatesUIStateCorrectly() = runTest {
-    val hunts = listOf(sample(uid = "1"))
+    val hunts = listOf(sample(uid = Constants.HUNT_UID_1))
     val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
 
     vm.onMarkerClick(hunts[0])
@@ -379,39 +391,51 @@ class MapViewModelTest {
   }
 
   @Test
-  fun validateCurrentPointUpdatesStateCorrectly() = runTest {
-    val hunts = listOf(sample(uid = "1"))
+  fun validateCurrentPointWithValidLocationUpdatesState() = runTest {
+    val hunts = listOf(sample(uid = Constants.HUNT_UID_1))
     val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
 
     vm.onMarkerClick(hunts[0])
     vm.startHunt()
 
-    val validLocation = LatLng(10.0, 20.0)
+    val validLocation = LatLng(Constants.VALID_LAT, Constants.VALID_LNG)
     vm.validateCurrentPoint(validLocation)
 
     val state = vm.uiState.value
     assertEquals(1, state.validatedCount)
+  }
 
-    val invalidLocation = LatLng(46.54, 6.64)
+  @Test
+  fun validateCurrentPointWithInvalidLocationDoesNotUpdateState() = runTest {
+    val hunts = listOf(sample(uid = Constants.HUNT_UID_1))
+    val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
+
+    vm.onMarkerClick(hunts[0])
+    vm.startHunt()
+
+    val validLocation = LatLng(Constants.VALID_LAT, Constants.VALID_LNG)
+    vm.validateCurrentPoint(validLocation)
+
+    val stateBeforeInvalid = vm.uiState.value.validatedCount
+
+    val invalidLocation = LatLng(Constants.INVALID_LAT, Constants.INVALID_LNG)
     vm.validateCurrentPoint(invalidLocation)
 
-    assertEquals(1, state.validatedCount)
+    val state = vm.uiState.value
+    assertEquals(stateBeforeInvalid, state.validatedCount)
   }
 
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun finishHuntIsEnabledWhenAllCheckpointsValidated() = runTest {
-    val hunts = listOf(sample(uid = "1"))
+    val hunts = listOf(sample(uid = Constants.HUNT_UID_1))
     val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
 
     vm.onMarkerClick(hunts[0])
     vm.startHunt()
 
-    val validLocation = LatLng(10.0, 20.0)
-    vm.validateCurrentPoint(validLocation)
-    vm.validateCurrentPoint(validLocation)
-    vm.validateCurrentPoint(validLocation)
-    vm.validateCurrentPoint(validLocation)
+    val validLocation = LatLng(Constants.VALID_LAT, Constants.VALID_LNG)
+    repeat(4) { vm.validateCurrentPoint(validLocation) }
 
     assertTrue(vm.uiState.value.validatedCount >= (hunts[0].middlePoints.size + 2))
 
@@ -429,19 +453,24 @@ class MapViewModelTest {
 
   @Test
   fun finishHuntIsNotAllowedWhenNotAllCheckpointsValidated() = runTest {
-    val hunts = listOf(sample(uid = "1"))
+    val hunts = listOf(sample(uid = Constants.HUNT_UID_1))
     val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
 
     vm.onMarkerClick(hunts[0])
     vm.startHunt()
 
-    val validLocation = LatLng(46.52, 6.63) // Simulate the first valid location
+    val validLocation = LatLng(Constants.VALID_LAT, Constants.VALID_LNG)
     vm.validateCurrentPoint(validLocation)
 
     var errorMsg: String? = null
     vm.finishHunt {}
 
-    errorMsg = vm.uiState.value.errorMsg
+    val state = vm.uiState.value
+    assertTrue(state.isHuntStarted)
+    assertNotNull(state.selectedHunt)
+    assertEquals(1, state.validatedCount)
+
+    errorMsg = state.errorMsg
     assertNotNull(errorMsg)
     assertTrue(errorMsg!!.contains("You still have checkpoints to validate"))
   }

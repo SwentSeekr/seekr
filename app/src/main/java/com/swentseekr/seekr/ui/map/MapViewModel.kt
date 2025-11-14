@@ -23,6 +23,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
+private const val DEFAULT_COUNT = 0
+private const val VALIDATION_RADIUS = 25
+
 /**
  * Immutable UI model for the Map screen.
  *
@@ -44,8 +47,8 @@ data class MapUIState(
     val route: List<LatLng> = emptyList(),
     val isRouteLoading: Boolean = false,
     val isHuntStarted: Boolean = false,
-    val validatedCount: Int = 0,
-    val validationRadiusMeters: Int = 25
+    val validatedCount: Int = DEFAULT_COUNT,
+    val validationRadiusMeters: Int = VALIDATION_RADIUS
 )
 
 /**
@@ -304,7 +307,10 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
     _uiState.value.selectedHunt ?: return
     _uiState.value =
         _uiState.value.copy(
-            isFocused = true, route = emptyList(), isHuntStarted = true, validatedCount = 0)
+            isFocused = true,
+            route = emptyList(),
+            isHuntStarted = true,
+            validatedCount = DEFAULT_COUNT)
     viewModelScope.launch { computeRouteForSelectedHunt(travelMode = "walking") }
   }
 
@@ -368,7 +374,7 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
         _uiState.value =
             state.copy(
                 isHuntStarted = false,
-                validatedCount = 0,
+                validatedCount = DEFAULT_COUNT,
                 isFocused = false,
                 selectedHunt = null,
                 route = emptyList())
