@@ -199,7 +199,7 @@ class MapTest {
   fun validateButtonUpdatesProgressCorrectly() {
     val h = huntShort("1")
     val vm = MapViewModel(repository = repo(h))
-    composeRule.setContent { MapScreen(viewModel = vm) }
+    composeRule.setContent { MapScreen(viewModel = vm, testMode = true) }
     composeRule.runOnIdle { vm.onMarkerClick(h) }
 
     composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_VIEW).performClick()
