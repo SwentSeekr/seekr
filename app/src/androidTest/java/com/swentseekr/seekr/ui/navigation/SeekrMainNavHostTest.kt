@@ -366,4 +366,66 @@ class SeekrNavigationTest {
       node(NavigationTestTags.PROFILE_TAB).assertIsDisplayed()
     }
   }
+
+  @Test
+  fun settings_editProfile_navigates_to_edit_profile_and_back_restores_bottom_bar() {
+    // Profile → Settings
+    goToProfileTab()
+    node(ProfileTestTags.SETTINGS).assertIsDisplayed().performClick()
+    node(NavigationTestTags.SETTINGS_SCREEN).assertIsDisplayed()
+    node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
+
+    // Open Edit Profile
+    clickAny(
+        { tryClickByTag("EDIT_PROFILE", "EDIT_PROFILE_BUTTON", "SETTINGS_EDIT_PROFILE") },
+        { tryClickByDesc("Edit profile", "Edit Profile") },
+        { tryClickByText("Edit profile", "Edit Profile") },
+    )
+
+    // Wait until EditProfile wrapper is present
+    waitUntilTrue(MED) {
+      compose
+          .onAllNodes(hasTestTag(NavigationTestTags.EDIT_PROFILE_SCREEN), useUnmergedTree = true)
+          .fetchSemanticsNodes()
+          .isNotEmpty()
+    }
+    firstNode(NavigationTestTags.EDIT_PROFILE_SCREEN).assertIsDisplayed()
+    node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
+
+    // Try in-screen back; if not found, fall back to system back.
+    val didInScreenBack =
+        runCatching {
+              clickAny(
+                  { tryClickByTag("EDIT_PROFILE_BACK", "PROFILE_BACK", "BACK") },
+                  { tryClickByDesc("Back", "Navigate up") },
+                  { tryClickByText("Back") },
+              )
+              true
+            }
+            .getOrDefault(false)
+
+    if (!didInScreenBack) {
+      compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
+    }
+
+    // Wait until EditProfile is removed from the tree
+    waitUntilTrue(MED) {
+      compose
+          .onAllNodes(hasTestTag(NavigationTestTags.EDIT_PROFILE_SCREEN), useUnmergedTree = true)
+          .fetchSemanticsNodes()
+          .isEmpty()
+    }
+
+    // Now we are back on Settings (still no bottom bar). Use system back to go to Profile.
+    compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
+
+    // Bottom bar should be visible again on a tab screen.
+    waitUntilTrue(MED) {
+      compose
+          .onAllNodes(hasTestTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU), useUnmergedTree = true)
+          .fetchSemanticsNodes()
+          .isNotEmpty()
+    }
+    node(NavigationTestTags.PROFILE_TAB).assertIsDisplayed()
+  }
 }
