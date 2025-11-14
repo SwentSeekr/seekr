@@ -182,8 +182,33 @@ class SeekrNavigationTest {
     // Ensure we're on AddHunt
     node(NavigationTestTags.ADD_HUNT_SCREEN).assertIsDisplayed()
 
-    compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
-    compose.waitForIdle()
+    // BEST EFFORT: try to click a "Done/Save" style control to trigger onDone().
+    val didClickDone =
+        listOf<(Unit) -> Boolean>(
+                {
+                  listOf(
+                          "ADD_HUNT_DONE",
+                          "ADD_HUNT_SAVE",
+                          "SAVE",
+                          "DONE",
+                          "SAVE_BUTTON",
+                          "HUNT_SAVE",
+                          "SUBMIT_BUTTON")
+                      .any { tag -> tryClickByTag(tag) }
+                },
+                { arrayOf("Done", "Save", "Create", "Create hunt").any { d -> tryClickByDesc(d) } },
+                {
+                  arrayOf("Done", "Save", "SAVE", "Create", "Create hunt").any { t ->
+                    tryClickByText(t)
+                  }
+                },
+            )
+            .any { it(Unit) }
+
+    if (!didClickDone) {
+      // Fallback: if we couldn't find a 'Done' control, use system back as before.
+      compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
+    }
 
     // Wait until: bottom bar is visible AND AddHunt wrapper no longer exists
     compose.waitUntil(timeoutMillis = LONG) {
@@ -427,5 +452,117 @@ class SeekrNavigationTest {
           .isNotEmpty()
     }
     node(NavigationTestTags.PROFILE_TAB).assertIsDisplayed()
+  }
+
+  @Test
+  fun huntcard_addReview_navigates_to_add_review_and_back_restores_huntcard() {
+    // Seed repo with a single hunt that will appear in Overview and then in HuntCard.
+    val hunt = createHunt(uid = "review-123", title = "Reviewable Hunt")
+
+    withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
+      // Re-compose with fake repo.
+      compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
+
+      // Wait for the overview list to appear.
+      waitUntilTrue(MED) {
+        compose
+            .onNodeWithTag(OverviewScreenTestTags.HUNT_LIST, useUnmergedTree = true)
+            .assertExists()
+        true
+      }
+
+      // Open the hunt card screen.
+      compose
+          .onAllNodesWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
+          .onFirst()
+          .assertExists()
+          .performClick()
+
+      // Wait for HuntCard wrapper to exist.
+      waitUntilTrue(MED) {
+        compose
+            .onAllNodesWithTag(NavigationTestTags.HUNTCARD_SCREEN, useUnmergedTree = true)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+      }
+
+      // Still ensure we're on a non-tab route (bottom bar hidden).
+      node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
+
+      // BEST EFFORT: tap an "Add review" style control to trigger HuntCardScreen.addReview
+      // callback.
+      val didClickAddReview =
+          listOf<(Unit) -> Boolean>(
+                  {
+                    listOf(
+                            "ADD_REVIEW",
+                            "ADD_REVIEW_BUTTON",
+                            "HUNT_ADD_REVIEW",
+                            "HUNTCARD_ADD_REVIEW",
+                            "REVIEW_HUNT")
+                        .any { tag -> tryClickByTag(tag) }
+                  },
+                  {
+                    arrayOf("Add review", "Add Review", "Write review", "Write a review").any { d ->
+                      tryClickByDesc(d)
+                    }
+                  },
+                  {
+                    arrayOf("Add review", "Add Review", "Write review", "Write a review").any { t ->
+                      tryClickByText(t)
+                    }
+                  },
+              )
+              .any { it(Unit) }
+
+      check(didClickAddReview) { "Could not find Add Review control on HuntCardScreen." }
+
+      // Wait until AddReview wrapper is present.
+      waitUntilTrue(MED) {
+        compose
+            .onAllNodesWithTag(NavigationTestTags.REVIEW_HUNT_SCREEN, useUnmergedTree = true)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+      }
+      compose
+          .onAllNodesWithTag(NavigationTestTags.REVIEW_HUNT_SCREEN, useUnmergedTree = true)
+          .onFirst()
+          .assertIsDisplayed()
+      node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
+
+      // Try any in-screen back / cancel / done action wired inside AddReviewScreen.
+      runCatching {
+            clickAny(
+                {
+                  tryClickByTag(
+                      "REVIEW_DONE", "REVIEW_SUBMIT", "SUBMIT_REVIEW", "REVIEW_CANCEL", "CANCEL")
+                },
+                { tryClickByDesc("Back", "Cancel", "Navigate up") },
+                { tryClickByText("Back", "Cancel", "Done", "Submit") },
+            )
+          }
+          .getOrNull()
+
+      // After leaving AddReview, we should be back on HuntCard (still no bottom bar).
+      waitUntilTrue(LONG) {
+        val reviewGone =
+            compose
+                .onAllNodesWithTag(NavigationTestTags.REVIEW_HUNT_SCREEN, useUnmergedTree = true)
+                .fetchSemanticsNodes()
+                .isEmpty()
+        val huntCardPresent =
+            compose
+                .onAllNodesWithTag(NavigationTestTags.HUNTCARD_SCREEN, useUnmergedTree = true)
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        reviewGone && huntCardPresent
+      }
+
+      compose
+          .onAllNodesWithTag(NavigationTestTags.HUNTCARD_SCREEN, useUnmergedTree = true)
+          .onFirst()
+          .assertIsDisplayed()
+      node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
+    }
   }
 }
