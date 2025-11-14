@@ -26,6 +26,7 @@ import com.swentseekr.seekr.ui.hunt.HuntScreenTestTags
 import com.swentseekr.seekr.ui.navigation.NavigationTestTags
 import com.swentseekr.seekr.ui.navigation.SeekrRootApp
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
+import com.swentseekr.seekr.ui.profile.EditProfileTestTags
 import com.swentseekr.seekr.ui.profile.ProfileTestTags
 import com.swentseekr.seekr.ui.settings.SettingsScreenTestTags
 import com.swentseekr.seekr.utils.FakeAuthEmulator
@@ -100,6 +101,40 @@ class EndToEndM2Tests {
     val fakeToken = FakeJwtGenerator.createFakeGoogleIdToken()
     FakeAuthEmulator.signInWithFakeGoogleToken(fakeToken)
   }
+  /**
+   * Second E2E scenario:
+   * - Start app in authenticated state.
+   * - Navigate Overview → Profile → Settings → Edit Profile.
+   * - Change the pseudonym and save.
+   * - Verify the updated pseudonym is visible again on the Profile screen.
+   */
+  @Test
+  fun editProfile_fromSettings_updatesPseudonymOnProfile() {
+    val newPseudonym = "E2E Edited Pseudonym"
+
+    // Entry point for the app under test.
+    compose.setContent { SeekrRootApp() }
+
+    // 0) We’re already authenticated via FakeAuthEmulator in @Before.
+    //    Wait for the Overview screen to be ready and go to Profile.
+    OverviewRobot(compose).assertOnOverview().openProfileViaBottomBar()
+
+    // 1) From Profile → open Settings.
+    val profileRobot = ProfileRobot(compose).assertOnProfile()
+    val settingsRobot = profileRobot.openSettings()
+
+    // 2) From Settings → open Edit Profile, change pseudonym, and save.
+    settingsRobot
+      .openEditProfile()
+      .typePseudonym(newPseudonym)
+      .save()
+
+    // 3) Back on Profile: verify the pseudonym reflects the new value.
+    ProfileRobot(compose)
+      .assertOnProfile()
+      .assertPseudonymVisible(newPseudonym)
+  }
+
 
   /**
    * Main E2E scenario:
@@ -257,6 +292,30 @@ private class ProfileRobot(private val rule: ComposeTestRule) {
 
     return this
   }
+
+  /**
+   * Asserts that the profile pseudonym text eventually matches [expected].
+   *
+   * Uses a wait loop to be robust against async updates.
+   */
+  fun assertPseudonymVisible(expected: String): ProfileRobot {
+    rule.waitUntil(timeoutMillis = WAIT_LONG_MS) {
+      try {
+        // Ensure pseudonym node exists and carries the expected text.
+        rule.onNodeWithTag(ProfileTestTags.PROFILE_PSEUDONYM).assertIsDisplayed()
+        rule.onNodeWithText(expected, substring = false).fetchSemanticsNode()
+        true
+      } catch (_: Throwable) {
+        false
+      }
+    }
+
+    rule.onNodeWithTag(ProfileTestTags.PROFILE_PSEUDONYM).assertIsDisplayed()
+    rule.onNodeWithText(expected, substring = false).assertIsDisplayed()
+    rule.waitForIdleSync()
+    return this
+  }
+
 
   /**
    * Taps the "Add Hunt" Floating Action Button on the Profile screen and returns an [AddHuntRobot]
@@ -491,6 +550,27 @@ private class SettingsRobot(private val rule: ComposeTestRule) {
     rule.waitForIdleSync()
     return AuthRobot(rule)
   }
+
+  /**
+   * Opens the "Edit Profile" screen from Settings.
+   *
+   * Tries a dedicated test tag first (if you add one later), then falls back
+   * to clicking by visible text / content description "Edit profile".
+   */
+  fun openEditProfile(): EditProfileRobot {
+    // If you later add a dedicated tag like SettingsScreenTestTags.EDIT_PROFILE_BUTTON,
+    // you can replace the hardcoded string here.
+    try {
+      rule.onNodeWithTag("EDIT_PROFILE_BUTTON").performClick()
+    } catch (_: Throwable) {
+      // Fall back to text / content description.
+      rule.tryClickByTextOrContentDesc("Edit profile")
+    }
+
+    rule.waitForIdleSync()
+    return EditProfileRobot(rule).assertOnEditProfile()
+  }
+
 }
 
 /**
@@ -566,6 +646,69 @@ private class EditHuntRobot(private val rule: ComposeTestRule) {
     return ProfileRobot(rule)
   }
 }
+
+/**
+ * Robot for the Edit Profile screen.
+ *
+ * Uses [EditProfileTestTags] to drive the UI:
+ * - Change pseudonym
+ * - (Optionally) change bio / picture
+ * - Save and return to Profile.
+ */
+private class EditProfileRobot(private val rule: ComposeTestRule) {
+
+  /** Waits until the Edit Profile screen is visible. */
+  fun assertOnEditProfile(): EditProfileRobot {
+    rule.waitUntil(timeoutMillis = WAIT_LONG_MS) {
+      try {
+        rule.onNodeWithTag(EditProfileTestTags.SCREEN).assertIsDisplayed()
+        true
+      } catch (_: Throwable) {
+        false
+      }
+    }
+    rule.onNodeWithTag(EditProfileTestTags.SCREEN).assertIsDisplayed()
+    return this
+  }
+
+  /** Replaces the pseudonym with [newPseudonym]. */
+  fun typePseudonym(newPseudonym: String): EditProfileRobot {
+    rule.onNodeWithTag(EditProfileTestTags.PSEUDONYM_FIELD).apply {
+      performTextClearance()
+      performTextInput(newPseudonym)
+    }
+    rule.waitForIdleSync()
+    return this
+  }
+
+  /**
+   * Saves the profile:
+   * - Waits for the Save button to become enabled.
+   * - Closes the keyboard.
+   * - Clicks Save.
+   * - Returns a [ProfileRobot] expecting to be back on Profile.
+   */
+  fun save(): ProfileRobot {
+    // Wait for button to be enabled (validation finished, etc.).
+    rule.waitUntil(timeoutMillis = WAIT_LONG_MS) {
+      try {
+        rule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).assertIsEnabled()
+        true
+      } catch (_: Throwable) {
+        false
+      }
+    }
+
+    Espresso.closeSoftKeyboard()
+    rule.waitForIdleSync()
+
+    rule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).performClick()
+    rule.waitForIdleSync()
+
+    return ProfileRobot(rule).assertOnProfile()
+  }
+}
+
 
 /* ------------------------------------------------------------------------ */
 /*                                 Helpers                                  */
