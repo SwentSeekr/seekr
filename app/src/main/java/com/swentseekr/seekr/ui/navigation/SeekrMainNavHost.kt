@@ -22,8 +22,10 @@ import com.google.firebase.auth.FirebaseUser
 import com.swentseekr.seekr.ui.components.HuntCardScreen
 import com.swentseekr.seekr.ui.hunt.add.AddHuntScreen
 import com.swentseekr.seekr.ui.hunt.edit.EditHuntScreen
+import com.swentseekr.seekr.ui.hunt.review.AddReviewScreen
 import com.swentseekr.seekr.ui.map.MapScreen
 import com.swentseekr.seekr.ui.overview.OverviewScreen
+import com.swentseekr.seekr.ui.profile.EditProfileScreen
 import com.swentseekr.seekr.ui.profile.ProfileScreen
 import com.swentseekr.seekr.ui.settings.SettingsScreen
 
@@ -51,9 +53,17 @@ sealed class SeekrDestination(
     const val ARG_HUNT_ID = "huntId"
   }
 
+  object AddReview : SeekrDestination("add_review/{huntId}", "Add Review", Icons.Filled.List) {
+    fun createRoute(huntId: String) = "add_review/$huntId"
+
+    const val ARG_HUNT_ID = "huntId"
+  }
+
   object AddHunt : SeekrDestination("add_hunt", "Add Hunt", Icons.Filled.List)
 
   object Settings : SeekrDestination("settings", "Settings", Icons.Filled.List)
+
+  object EditProfile : SeekrDestination("edit_profile", "Edit Profile", Icons.Filled.List)
 
   companion object {
     val all = listOf(Overview, Map, Profile)
@@ -132,6 +142,8 @@ fun SeekrMainNavHost(
             navController = navController,
             startDestination = SeekrDestination.Overview.route,
             modifier = Modifier.padding(innerPadding)) {
+
+              // Overview
               composable(SeekrDestination.Overview.route) {
                 Surface(
                     modifier = Modifier.fillMaxSize().testTag(NavigationTestTags.OVERVIEW_SCREEN)) {
@@ -145,12 +157,14 @@ fun SeekrMainNavHost(
                     }
               }
 
+              // Map
               composable(SeekrDestination.Map.route) {
                 Surface(modifier = Modifier.fillMaxSize().testTag(NavigationTestTags.MAP_SCREEN)) {
                   MapScreen()
                 }
               }
 
+              // Profile
               composable(SeekrDestination.Profile.route) {
                 ProfileScreen(
                     userId = user?.uid,
@@ -164,6 +178,7 @@ fun SeekrMainNavHost(
                     testMode = testMode)
               }
 
+              // Hunt card (details)
               composable(
                   route = SeekrDestination.HuntCard.route,
                   arguments =
@@ -178,9 +193,16 @@ fun SeekrMainNavHost(
                     HuntCardScreen(
                         huntId = huntId,
                         onGoBack = { navController.popBackStack() },
+                        beginHunt = { /* wire if needed */},
+                        addReview = {
+                          navController.navigate(SeekrDestination.AddReview.createRoute(huntId)) {
+                            launchSingleTop = true
+                          }
+                        },
                         modifier = Modifier.testTag(NavigationTestTags.HUNTCARD_SCREEN))
                   }
 
+              // Add Hunt
               composable(SeekrDestination.AddHunt.route) {
                 Surface(
                     modifier = Modifier.fillMaxSize().testTag(NavigationTestTags.ADD_HUNT_SCREEN)) {
@@ -196,6 +218,7 @@ fun SeekrMainNavHost(
                     }
               }
 
+              // Edit Hunt
               composable(
                   route = SeekrDestination.EditHunt.route,
                   arguments =
@@ -223,12 +246,54 @@ fun SeekrMainNavHost(
                               testMode = testMode)
                         }
                   }
+
+              // Add Review (new)
+              composable(
+                  route = SeekrDestination.AddReview.route,
+                  arguments =
+                      listOf(
+                          navArgument(SeekrDestination.AddReview.ARG_HUNT_ID) {
+                            type = NavType.StringType
+                          })) { backStackEntry ->
+                    val huntId =
+                        backStackEntry.arguments
+                            ?.getString(SeekrDestination.AddReview.ARG_HUNT_ID)
+                            .orEmpty()
+                    Surface(
+                        modifier =
+                            Modifier.fillMaxSize().testTag(NavigationTestTags.REVIEW_HUNT_SCREEN)) {
+                          AddReviewScreen(
+                              huntId = huntId,
+                              onGoBack = { navController.popBackStack() },
+                              onCancel = { navController.popBackStack() },
+                              onDone = { navController.popBackStack() })
+                        }
+                  }
+
+              // Settings
               composable(SeekrDestination.Settings.route) {
                 Surface(
                     modifier = Modifier.fillMaxSize().testTag(NavigationTestTags.SETTINGS_SCREEN)) {
                       SettingsScreen(
                           onGoBack = { navController.popBackStack() },
-                      )
+                          onEditProfile = {
+                            navController.navigate(SeekrDestination.EditProfile.route) {
+                              launchSingleTop = true
+                            }
+                          })
+                    }
+              }
+
+              // Edit Profile (new)
+              composable(SeekrDestination.EditProfile.route) {
+                Surface(
+                    modifier =
+                        Modifier.fillMaxSize().testTag(NavigationTestTags.EDIT_PROFILE_SCREEN)) {
+                      EditProfileScreen(
+                          userId = user?.uid, // pass current user if available
+                          onGoBack = { navController.popBackStack() },
+                          onDone = { navController.popBackStack() },
+                          testMode = testMode)
                     }
               }
             }
