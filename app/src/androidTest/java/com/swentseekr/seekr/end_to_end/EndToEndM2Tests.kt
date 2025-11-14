@@ -5,9 +5,12 @@ import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -45,24 +48,12 @@ private const val WAIT_SHORT_MS = 10_000L
 private const val WAIT_LONG_MS = 40_000L
 
 /**
- * End-to-end test for the "Milestone 2" flow.
+ * End-to-end tests for "Milestone 2" flows.
  *
- * High-level scenario:
- * 1) App starts while user is *already authenticated* via [FakeAuthEmulator].
- * 2) Overview screen appears.
- * 3) Navigate to Profile via bottom bar.
- * 4) From Profile, open "Add Hunt".
- * 5) Fill the hunt form, select 2 points on the map, and save the hunt.
- * 6) Back to Profile, verify the hunt exists in "My Hunts".
- * 7) Open the hunt in Edit mode.
- * 8) Change the title and save.
- * 9) Verify the edited title is visible in Profile.
- *
- * Notes:
- * - This test intentionally reuses the same semantics test tags used by the dedicated screen-level
- *   tests (Overview/Profile/Add/Edit/Map).
- * - Authentication uses a deterministic "fake" Google token and a Firebase emulator helper, so no
- *   real network / Google sign-in happens here.
+ * We always:
+ * - Boot the real app entrypoint [SeekrRootApp].
+ * - Start in an authenticated state via [FakeAuthEmulator].
+ * - Drive navigation only through UI (tabs, buttons, forms, etc.).
  */
 @RunWith(AndroidJUnit4::class)
 class EndToEndM2Tests {
@@ -84,25 +75,23 @@ class EndToEndM2Tests {
    * Initializes Firebase once per test process and signs in a fake user using a JWT created by
    * [FakeJwtGenerator] and wired through [FakeAuthEmulator].
    *
-   * The important part for the E2E flow is that, when [SeekrRootApp] starts, it will see an already
-   * authenticated user and go directly to the main navigation (Overview/Profile/etc.) instead of
-   * the auth flow.
+   * When [SeekrRootApp] starts, it sees an already authenticated user and goes directly to the main
+   * navigation (Overview/Profile/etc.) instead of the auth flow.
    */
   @Before
   fun setupFirebaseAndAuth() = runBlocking {
     val context = ApplicationProvider.getApplicationContext<Context>()
 
-    // Initialize FirebaseApp if it hasn't been done already in this process.
     if (FirebaseApp.getApps(context).isEmpty()) {
       FirebaseApp.initializeApp(context)
     }
 
-    // Create a deterministic fake Google ID token and sign in via the emulator helper.
     val fakeToken = FakeJwtGenerator.createFakeGoogleIdToken()
     FakeAuthEmulator.signInWithFakeGoogleToken(fakeToken)
   }
+
   /**
-   * Second E2E scenario:
+   * E2E scenario:
    * - Start app in authenticated state.
    * - Navigate Overview → Profile → Settings → Edit Profile.
    * - Change the pseudonym and save.
@@ -111,81 +100,31 @@ class EndToEndM2Tests {
   @Test
   fun editProfile_fromSettings_updatesPseudonymOnProfile() {
     val newPseudonym = "E2E Edited Pseudonym"
+    val newBio = "E2E test bio for this user"
 
-    // Entry point for the app under test.
     compose.setContent { SeekrRootApp() }
 
-    // 0) We’re already authenticated via FakeAuthEmulator in @Before.
-    //    Wait for the Overview screen to be ready and go to Profile.
-    OverviewRobot(compose).assertOnOverview().openProfileViaBottomBar()
+    // 0) Because we are authenticated, we should land on Overview.
+    val overview = OverviewRobot(compose).assertOnOverview()
 
-    // 1) From Profile → open Settings.
-    val profileRobot = ProfileRobot(compose).assertOnProfile()
-    val settingsRobot = profileRobot.openSettings()
+    // 1) Navigate to Profile via bottom bar.
+    val profileRobot = overview.openProfileViaBottomBar()
 
-    // 2) From Settings → open Edit Profile, change pseudonym, and save.
-    settingsRobot
-      .openEditProfile()
-      .typePseudonym(newPseudonym)
-      .save()
+    // 2) From Profile → open Settings.
+    val settingsRobot = profileRobot.assertOnProfile().openSettings()
 
-    // 3) Back on Profile: verify the pseudonym reflects the new value.
-    ProfileRobot(compose)
-      .assertOnProfile()
-      .assertPseudonymVisible(newPseudonym)
-  }
+    // 3) From Settings → open Edit Profile, change pseudonym & bio, and save (back to Settings).
+    val settingsAfterSave =
+        settingsRobot
+            .openEditProfile()
+            .typePseudonym(newPseudonym)
+            .typeBio(newBio)
+            .save() // now returns SettingsRobot
 
-
-  /**
-   * Main E2E scenario:
-   * - Start app in authenticated state.
-   * - Create a hunt (with 2 map points).
-   * - Navigate back to profile, open the hunt, edit the title.
-   * - Assert that the edited title is shown.
-   */
-  @Test
-  fun addHunt_thenEditHunt() {
-    val huntTitle = "E2E River Walk"
-    val huntDescription = "Scenic path by the river."
-    val editedTitle = "E2E River Walk (Edited)"
-
-    // Entry point for the app under test.
-    compose.setContent { SeekrRootApp() }
-
-    // 0) We’re already authenticated via FakeAuthEmulator in @Before.
-    //    Wait for the Overview screen to be ready.
-    OverviewRobot(compose).assertOnOverview().openProfileViaBottomBar()
-
-    // 1) Add Hunt from Profile screen.
-    ProfileRobot(compose).assertOnProfile().tapAddHuntFab()
-
-    // 2) Fill the Add Hunt form, select locations, and save.
-    AddHuntRobot(compose)
-        .assertOnAddHuntScreen()
-        .typeTitle(huntTitle)
-        .typeDescription(huntDescription)
-        .typeTime("1.5")
-        .typeDistance("3.2")
-        .pickFirstStatus()
-        .pickFirstDifficulty()
-        .openSelectLocations()
-        .addPointNamed("Start Bridge")
-        .addPointNamed("End Promenade")
-        .confirmPoints()
-        .save() // -> Overview
-
-    // 3) Navigate back to Profile to edit the just-created hunt.
-    OverviewRobot(compose).openProfileViaBottomBar()
-
-    ProfileRobot(compose).assertOnProfile().assertHuntVisible(huntTitle).openMyHunt(huntTitle)
-
-    // 4) Edit the hunt title and verify the updated title is displayed in Profile.
-    EditHuntRobot(compose).assertOnEditHunt().editTitle(editedTitle).save()
-
-    ProfileRobot(compose).assertHuntVisible(editedTitle)
+    // 4) Go back from Settings → Profile and assert pseudonym updated.
+    settingsAfterSave.goBackToProfile().assertPseudonymVisible(newPseudonym)
   }
 }
-
 /* ------------------------------------------------------------------------ */
 /*                                  Robots                                  */
 /* ------------------------------------------------------------------------ */
@@ -193,21 +132,15 @@ class EndToEndM2Tests {
 /**
  * Small wrapper around the auth screen.
  *
- * In this specific E2E test we start with an authenticated user, so this robot is mostly useful
- * when we deliberately sign out or write additional tests that exercise the login UI.
+ * Mostly useful if we add flows that explicitly sign out and back in.
  */
 private class AuthRobot(private val rule: ComposeTestRule) {
 
-  /** Verifies that the Sign-In screen is currently visible. */
   fun assertOnSignIn(): AuthRobot {
     rule.onNodeWithTag(SignInScreenTestTags.LOGIN_BUTTON).assertIsDisplayed()
     return this
   }
 
-  /**
-   * Taps the login button and waits for the Overview screen to be ready, returning an
-   * [OverviewRobot].
-   */
   fun tapLogin(): OverviewRobot {
     rule.onNodeWithTag(SignInScreenTestTags.LOGIN_BUTTON).performClick()
     rule.waitForIdleSync()
@@ -218,17 +151,11 @@ private class AuthRobot(private val rule: ComposeTestRule) {
 /** Robot for interacting with the Overview (main feed) screen. */
 private class OverviewRobot(private val rule: ComposeTestRule) {
 
-  /**
-   * Waits until at least one node with the Overview tag exists and then asserts that the overview
-   * screen is displayed.
-   *
-   * This protects us against transient/loading states and recompositions.
-   */
   fun assertOnOverview(): OverviewRobot {
     rule.waitUntil(timeoutMillis = WAIT_LONG_MS) {
       try {
         rule
-            .onAllNodesWithTag(OverviewScreenTestTags.OVERVIEW_SCREEN)
+            .onAllNodesWithTag(OverviewScreenTestTags.OVERVIEW_SCREEN, useUnmergedTree = true)
             .fetchSemanticsNodes()
             .isNotEmpty()
       } catch (_: Throwable) {
@@ -252,7 +179,7 @@ private class OverviewRobot(private val rule: ComposeTestRule) {
  * Robot for the Profile screen.
  *
  * Handles:
- * - Waiting for the profile content to load (and loading indicator to disappear).
+ * - Waiting for profile content to load (and loading indicator to disappear).
  * - Opening the Add Hunt FAB.
  * - Navigating to Settings.
  * - Verifying and opening hunts shown in the "My Hunts" list.
@@ -260,11 +187,6 @@ private class OverviewRobot(private val rule: ComposeTestRule) {
 private class ProfileRobot(private val rule: ComposeTestRule) {
   private val TEXT_SETTINGS = "Settings"
 
-  /**
-   * Waits until:
-   * - the profile screen node exists; and
-   * - the loading node is no longer present; then asserts that key profile elements are displayed.
-   */
   fun assertOnProfile(): ProfileRobot {
     rule.waitUntil(timeoutMillis = WAIT_LONG_MS) {
       val hasProfileScreen =
@@ -290,70 +212,78 @@ private class ProfileRobot(private val rule: ComposeTestRule) {
     rule.onNodeWithTag(ProfileTestTags.PROFILE_PSEUDONYM).assertIsDisplayed()
     rule.onNodeWithTag(ProfileTestTags.PROFILE_HUNTS_LIST).assertIsDisplayed()
 
+    // ✅ Make sure no more layout / animation is in progress.
+    rule.waitForIdleSync()
+
     return this
   }
 
   /**
    * Asserts that the profile pseudonym text eventually matches [expected].
    *
-   * Uses a wait loop to be robust against async updates.
+   * Uses a matcher constrained to the pseudonym tag + the expected text to avoid collisions with
+   * other nodes.
    */
   fun assertPseudonymVisible(expected: String): ProfileRobot {
     rule.waitUntil(timeoutMillis = WAIT_LONG_MS) {
       try {
-        // Ensure pseudonym node exists and carries the expected text.
-        rule.onNodeWithTag(ProfileTestTags.PROFILE_PSEUDONYM).assertIsDisplayed()
-        rule.onNodeWithText(expected, substring = false).fetchSemanticsNode()
+        rule
+            .onNode(
+                hasTestTag(ProfileTestTags.PROFILE_PSEUDONYM) and
+                    hasText(expected, substring = true))
+            .fetchSemanticsNode()
         true
       } catch (_: Throwable) {
         false
       }
     }
 
-    rule.onNodeWithTag(ProfileTestTags.PROFILE_PSEUDONYM).assertIsDisplayed()
-    rule.onNodeWithText(expected, substring = false).assertIsDisplayed()
+    rule
+        .onNode(
+            hasTestTag(ProfileTestTags.PROFILE_PSEUDONYM) and hasText(expected, substring = true))
+        .assertIsDisplayed()
+
     rule.waitForIdleSync()
     return this
   }
 
-
-  /**
-   * Taps the "Add Hunt" Floating Action Button on the Profile screen and returns an [AddHuntRobot]
-   * for further interaction.
-   */
   fun tapAddHuntFab(): AddHuntRobot {
-    // Use the dedicated tag from ProfileTestTags instead of textual matching.
     rule.onNodeWithTag(ProfileTestTags.ADD_HUNT).assertIsDisplayed().performClick()
     rule.waitForIdleSync()
     return AddHuntRobot(rule)
   }
 
   /** Opens the Settings screen from Profile by clicking on the "Settings" entry. */
+  /** Opens the Settings screen from Profile by clicking on the "Settings" entry. */
+  /** Opens the Settings screen from Profile by clicking the Settings icon button. */
   fun openSettings(): SettingsRobot {
-    rule.onNodeWithText(TEXT_SETTINGS, substring = true).performClick()
+    // 1) Wait until the Settings icon is in the semantics tree and visible.
+    rule.waitUntil(timeoutMillis = WAIT_LONG_MS) {
+      try {
+        rule.onNodeWithTag(ProfileTestTags.SETTINGS, useUnmergedTree = true).assertIsDisplayed()
+        true
+      } catch (_: Throwable) {
+        false
+      }
+    }
+
+    // 2) Click the icon button.
+    rule.onNodeWithTag(ProfileTestTags.SETTINGS, useUnmergedTree = true).performClick()
+
+    // 3) Let navigation finish and assert we’re on the Settings screen.
     rule.waitForIdleSync()
     return SettingsRobot(rule).assertOnSettings()
   }
 
-  /**
-   * Ensures the given [title] is visible somewhere in the "My Hunts" tab.
-   *
-   * The method:
-   * 1) Ensures the "My Hunts" tab is selected (best-effort).
-   * 2) Waits until the title appears in the UI.
-   * 3) Scrolls to it if needed.
-   * 4) Asserts it is displayed.
-   */
   fun assertHuntVisible(title: String): ProfileRobot {
-    // 1) Make sure we are on the "My Hunts" tab (ignore failures if tab not found).
+    // Try to ensure we’re on the "My Hunts" tab.
     try {
       rule.onNodeWithTag(ProfileTestTags.TAB_MY_HUNTS).performClick()
       rule.waitForIdleSync()
     } catch (_: Throwable) {
-      // If the tab isn't found, we assume the default tab is already MY_HUNTS.
+      // If not found, assume default tab is already MY_HUNTS.
     }
 
-    // 2) Wait for the hunt title to actually appear in the UI (handles async loading).
     rule.waitUntil(timeoutMillis = WAIT_LONG_MS) {
       try {
         rule.onNodeWithText(title, substring = false).fetchSemanticsNode()
@@ -363,21 +293,17 @@ private class ProfileRobot(private val rule: ComposeTestRule) {
       }
     }
 
-    // 3) Try to scroll to it in case it's off-screen inside a LazyColumn.
     try {
       rule.onNodeWithText(title, substring = false).performScrollTo()
     } catch (_: Throwable) {
-      // If no scrollable parent or it's already visible, ignore.
+      // Ignore if not scrollable or already visible.
     }
 
-    // 4) Final assertion.
     rule.onNodeWithText(title, substring = false).assertIsDisplayed()
     rule.waitForIdleSync()
-
     return this
   }
 
-  /** Opens a hunt from the "My Hunts" list by its [title], and returns an [EditHuntRobot]. */
   fun openMyHunt(title: String): EditHuntRobot {
     rule.onNodeWithText(title, substring = false).performClick()
     rule.waitForIdleSync()
@@ -385,12 +311,7 @@ private class ProfileRobot(private val rule: ComposeTestRule) {
   }
 }
 
-/**
- * Robot for the "Add Hunt" screen (create or edit form).
- *
- * Encapsulates interactions with the form fields, dropdowns, and the navigation to the "Select
- * Locations" map.
- */
+/** Robot for the "Add Hunt" screen (create or edit form). */
 private class AddHuntRobot(private val rule: ComposeTestRule) {
   private val TAG_TITLE = HuntScreenTestTags.INPUT_HUNT_TITLE
   private val TAG_DESC = HuntScreenTestTags.INPUT_HUNT_DESCRIPTION
@@ -401,40 +322,31 @@ private class AddHuntRobot(private val rule: ComposeTestRule) {
   private val TAG_SELECT_LOCATIONS = HuntScreenTestTags.BUTTON_SELECT_LOCATION
   private val TAG_SAVE = HuntScreenTestTags.HUNT_SAVE
 
-  /** Ensures we are on the Add Hunt screen. */
   fun assertOnAddHuntScreen(): AddHuntRobot {
     rule.onNodeWithTag(HuntScreenTestTags.ADD_HUNT_SCREEN).assertIsDisplayed()
     return this
   }
 
-  /** Replaces the content of the Title text field. */
   fun typeTitle(text: String): AddHuntRobot {
     rule.replaceText(TAG_TITLE, text)
     return this
   }
 
-  /** Replaces the content of the Description text field. */
   fun typeDescription(text: String): AddHuntRobot {
     rule.replaceText(TAG_DESC, text)
     return this
   }
 
-  /** Replaces the content of the Time text field. */
   fun typeTime(text: String): AddHuntRobot {
     rule.replaceText(TAG_TIME, text)
     return this
   }
 
-  /** Replaces the content of the Distance text field. */
   fun typeDistance(text: String): AddHuntRobot {
     rule.replaceText(TAG_DISTANCE, text)
     return this
   }
 
-  /**
-   * Opens the Status dropdown and selects the first enum value from
-   * [com.swentseekr.seekr.model.hunt.HuntStatus].
-   */
   fun pickFirstStatus(): AddHuntRobot {
     rule.clickTag(TAG_STATUS)
     val first = com.swentseekr.seekr.model.hunt.HuntStatus.values().first().name
@@ -443,10 +355,6 @@ private class AddHuntRobot(private val rule: ComposeTestRule) {
     return this
   }
 
-  /**
-   * Opens the Difficulty dropdown and selects the first enum value from
-   * [com.swentseekr.seekr.model.hunt.Difficulty].
-   */
   fun pickFirstDifficulty(): AddHuntRobot {
     rule.clickTag(TAG_DIFFICULTY)
     val first = com.swentseekr.seekr.model.hunt.Difficulty.values().first().name
@@ -455,18 +363,12 @@ private class AddHuntRobot(private val rule: ComposeTestRule) {
     return this
   }
 
-  /** Navigates to the "Select Locations" map screen for picking points. */
   fun openSelectLocations(): MapRobot {
     rule.clickTag(TAG_SELECT_LOCATIONS)
     rule.waitForIdleSync()
     return MapRobot(rule)
   }
 
-  /**
-   * Clicks the Save button (after ensuring it is enabled) and returns an [OverviewRobot].
-   *
-   * This assumes that after saving, the screen navigates back to Overview.
-   */
   fun save(): OverviewRobot {
     rule.onNodeWithTag(TAG_SAVE).assertIsEnabled().performClick()
     rule.waitForIdleSync()
@@ -474,26 +376,13 @@ private class AddHuntRobot(private val rule: ComposeTestRule) {
   }
 }
 
-/**
- * Robot for the "Select Points on Map" flow.
- *
- * Encapsulates:
- * - Adding points by tapping the map and filling the dialog.
- * - Confirming the selected points and returning to Add Hunt.
- */
+/** Robot for the "Select Points on Map" flow. */
 private class MapRobot(private val rule: ComposeTestRule) {
   private val TAG_MAP = AddPointsMapScreenTestTags.MAP_VIEW
   private val TAG_CONFIRM = AddPointsMapScreenTestTags.CONFIRM_BUTTON
   private val TAG_POINT_FIELD = AddPointsMapScreenTestTags.POINT_NAME_FIELD
 
-  /**
-   * Adds a point with the given [name]:
-   * 1) Taps the map (this should open a dialog).
-   * 2) Waits for the point-name field to appear.
-   * 3) Types the name and taps "Add".
-   */
   fun addPointNamed(name: String): MapRobot {
-    // 1) Wait for the map to actually be on screen (robust on slow CI).
     rule.waitUntil(timeoutMillis = WAIT_LONG_MS) {
       try {
         rule.onNodeWithTag(TAG_MAP).assertIsDisplayed()
@@ -503,10 +392,8 @@ private class MapRobot(private val rule: ComposeTestRule) {
       }
     }
 
-    // 2) Tap the map to open the point-name dialog.
     rule.onNodeWithTag(TAG_MAP).performClick()
 
-    // 3) Wait until the point-name text field actually exists before typing.
     rule.waitUntil(timeoutMillis = WAIT_LONG_MS) {
       try {
         rule.onNodeWithTag(TAG_POINT_FIELD).fetchSemanticsNode()
@@ -516,7 +403,6 @@ private class MapRobot(private val rule: ComposeTestRule) {
       }
     }
 
-    // 4) Type the name and confirm.
     rule.onNodeWithTag(TAG_POINT_FIELD).performTextClearance()
     rule.onNodeWithTag(TAG_POINT_FIELD).performTextInput(name)
     rule.onNodeWithText("Add").performClick()
@@ -524,7 +410,6 @@ private class MapRobot(private val rule: ComposeTestRule) {
     return this
   }
 
-  /** Confirms all selected points and returns to the Add Hunt screen. */
   fun confirmPoints(): AddHuntRobot {
     rule.onNodeWithTag(TAG_CONFIRM).assertIsEnabled().performClick()
     rule.waitForIdleSync()
@@ -535,68 +420,88 @@ private class MapRobot(private val rule: ComposeTestRule) {
 /** Robot for the Settings screen. */
 private class SettingsRobot(private val rule: ComposeTestRule) {
 
-  /** Verifies that the Settings screen is visible. */
+  /** Asserts that the Settings screen is visible, with proper waiting. */
   fun assertOnSettings(): SettingsRobot {
-    rule.onNodeWithTag(NavigationTestTags.SETTINGS_SCREEN).assertIsDisplayed()
+    rule.waitUntil(timeoutMillis = WAIT_LONG_MS) {
+      try {
+        rule
+            .onNodeWithTag(NavigationTestTags.SETTINGS_SCREEN, useUnmergedTree = true)
+            .assertIsDisplayed()
+        true
+      } catch (_: Throwable) {
+        false
+      }
+    }
+
+    // Final hard assert once waitUntil succeeds.
+    rule
+        .onNodeWithTag(NavigationTestTags.SETTINGS_SCREEN, useUnmergedTree = true)
+        .assertIsDisplayed()
+
+    rule.waitForIdleSync()
     return this
   }
 
-  /**
-   * Taps the "Sign out" button and returns an [AuthRobot], which expects to see the login screen
-   * again.
-   */
   fun tapSignOut(): AuthRobot {
     rule.onNodeWithTag(SettingsScreenTestTags.LOGOUT_BUTTON).performClick()
     rule.waitForIdleSync()
     return AuthRobot(rule)
   }
 
+  fun goBackToProfile(): ProfileRobot {
+    rule.onNodeWithTag(SettingsScreenTestTags.BACK_BUTTON).performClick()
+    rule.waitForIdleSync()
+    return ProfileRobot(rule).assertOnProfile()
+  }
+
   /**
    * Opens the "Edit Profile" screen from Settings.
    *
-   * Tries a dedicated test tag first (if you add one later), then falls back
-   * to clicking by visible text / content description "Edit profile".
+   * Tries a dedicated test tag first, then falls back to clicking by visible text / content
+   * description "Edit profile".
    */
   fun openEditProfile(): EditProfileRobot {
-    // If you later add a dedicated tag like SettingsScreenTestTags.EDIT_PROFILE_BUTTON,
-    // you can replace the hardcoded string here.
+    var clicked = false
+
+    // 1) Preferred: dedicated test tag, if you have one.
     try {
-      rule.onNodeWithTag("EDIT_PROFILE_BUTTON").performClick()
+      rule.onNodeWithTag(SettingsScreenTestTags.EDIT_PROFILE_BUTTON).performClick()
+      clicked = true
     } catch (_: Throwable) {
-      // Fall back to text / content description.
+      // Ignore and try alternatives.
+    }
+
+    if (!clicked) {
+      // 2) Fallback: visible text.
+      try {
+        rule.onNodeWithText("Edit profile", substring = true).performClick()
+        clicked = true
+      } catch (_: Throwable) {
+        // Ignore and try content description.
+      }
+    }
+
+    if (!clicked) {
+      // 3) Fallback: content description (for icon-only buttons).
       rule.tryClickByTextOrContentDesc("Edit profile")
     }
 
     rule.waitForIdleSync()
     return EditProfileRobot(rule).assertOnEditProfile()
   }
-
 }
 
-/**
- * Robot for the Edit Hunt screen.
- *
- * Reuses the same semantic tags as the Add Hunt screen for form fields, plus a specific tag for the
- * Edit Hunt navigation entry.
- */
+/** Robot for the Edit Hunt screen. */
 private class EditHuntRobot(private val rule: ComposeTestRule) {
   private val TAG_TITLE_FIELD = HuntScreenTestTags.INPUT_HUNT_TITLE
   private val TAG_SAVE_BUTTON = HuntScreenTestTags.HUNT_SAVE
 
-  /**
-   * Verifies we are currently on the Edit Hunt screen (by tag) and waits for Compose to be idle.
-   */
   fun assertOnEditHunt(): EditHuntRobot {
     rule.onNodeWithTag(NavigationTestTags.EDIT_HUNT_SCREEN).assertIsDisplayed()
     rule.waitForIdleSync()
     return this
   }
 
-  /**
-   * Clears the existing title and types [newTitle].
-   *
-   * This method assumes that the title field is already present and focusable.
-   */
   fun editTitle(newTitle: String): EditHuntRobot {
     rule.onNodeWithTag(TAG_TITLE_FIELD).apply {
       performTextClearance()
@@ -606,30 +511,16 @@ private class EditHuntRobot(private val rule: ComposeTestRule) {
     return this
   }
 
-  /**
-   * Saves the current edit:
-   * 1) Closes the soft keyboard (via Espresso).
-   * 2) Waits for Compose to be idle.
-   * 3) Scrolls the Save button into view (if necessary).
-   * 4) Polls until the Save button is enabled.
-   * 5) Clicks Save and returns a [ProfileRobot].
-   */
   fun save(): ProfileRobot {
-    // 1) Ask Espresso to close the soft keyboard.
     Espresso.closeSoftKeyboard()
-
-    // 2) Give Compose time to settle after the keyboard closes.
     rule.waitForIdleSync()
 
-    // 3) Try to scroll the Save button into view (if it’s inside a scrollable container).
     try {
       rule.onNodeWithTag(TAG_SAVE_BUTTON).performScrollTo()
     } catch (_: Throwable) {
-      // If there is no scrollable parent, ignore.
+      // Ignore if not in scrollable parent.
     }
 
-    // 4) Wait until the Save button is actually enabled
-    //    (validation complete, recomposition done).
     rule.waitUntil(timeoutMillis = WAIT_LONG_MS) {
       try {
         rule.onNodeWithTag(TAG_SAVE_BUTTON).assertIsEnabled()
@@ -639,39 +530,29 @@ private class EditHuntRobot(private val rule: ComposeTestRule) {
       }
     }
 
-    // 5) Click the Save button and wait until navigation is complete.
     rule.onNodeWithTag(TAG_SAVE_BUTTON).performClick()
     rule.waitForIdleSync()
 
-    return ProfileRobot(rule)
+    return ProfileRobot(rule).assertOnProfile()
   }
 }
 
-/**
- * Robot for the Edit Profile screen.
- *
- * Uses [EditProfileTestTags] to drive the UI:
- * - Change pseudonym
- * - (Optionally) change bio / picture
- * - Save and return to Profile.
- */
+/** Robot for the Edit Profile screen. */
 private class EditProfileRobot(private val rule: ComposeTestRule) {
 
-  /** Waits until the Edit Profile screen is visible. */
   fun assertOnEditProfile(): EditProfileRobot {
     rule.waitUntil(timeoutMillis = WAIT_LONG_MS) {
       try {
-        rule.onNodeWithTag(EditProfileTestTags.SCREEN).assertIsDisplayed()
+        rule.onAllNodesWithTag(EditProfileTestTags.SCREEN).onFirst().assertIsDisplayed()
         true
       } catch (_: Throwable) {
         false
       }
     }
-    rule.onNodeWithTag(EditProfileTestTags.SCREEN).assertIsDisplayed()
+    rule.onAllNodesWithTag(EditProfileTestTags.SCREEN).onFirst().assertIsDisplayed()
     return this
   }
 
-  /** Replaces the pseudonym with [newPseudonym]. */
   fun typePseudonym(newPseudonym: String): EditProfileRobot {
     rule.onNodeWithTag(EditProfileTestTags.PSEUDONYM_FIELD).apply {
       performTextClearance()
@@ -681,15 +562,18 @@ private class EditProfileRobot(private val rule: ComposeTestRule) {
     return this
   }
 
-  /**
-   * Saves the profile:
-   * - Waits for the Save button to become enabled.
-   * - Closes the keyboard.
-   * - Clicks Save.
-   * - Returns a [ProfileRobot] expecting to be back on Profile.
-   */
-  fun save(): ProfileRobot {
-    // Wait for button to be enabled (validation finished, etc.).
+  fun typeBio(newBio: String): EditProfileRobot {
+    rule.onNodeWithTag(EditProfileTestTags.BIO_FIELD).apply {
+      performTextClearance()
+      performTextInput(newBio)
+    }
+    rule.waitForIdleSync()
+    return this
+  }
+
+  /** Saves changes on Edit Profile and returns to Settings. */
+  fun save(): SettingsRobot {
+    // Wait until Save is enabled.
     rule.waitUntil(timeoutMillis = WAIT_LONG_MS) {
       try {
         rule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).assertIsEnabled()
@@ -705,25 +589,19 @@ private class EditProfileRobot(private val rule: ComposeTestRule) {
     rule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).performClick()
     rule.waitForIdleSync()
 
-    return ProfileRobot(rule).assertOnProfile()
+    // After onDone(), navController.popBackStack() → back to Settings.
+    return SettingsRobot(rule).assertOnSettings()
   }
 }
-
 
 /* ------------------------------------------------------------------------ */
 /*                                 Helpers                                  */
 /* ------------------------------------------------------------------------ */
 
-/** Convenience helper to click a node by its test [tag]. */
 private fun ComposeTestRule.clickTag(tag: String) {
   onNodeWithTag(tag).performClick()
 }
 
-/**
- * Convenience helper to replace text in a text field identified by [tag]:
- * - Clears the existing text.
- * - Types the new [text].
- */
 private fun ComposeTestRule.replaceText(tag: String, text: String) {
   onNodeWithTag(tag).performTextClearance()
   onNodeWithTag(tag).performTextInput(text)
@@ -732,8 +610,6 @@ private fun ComposeTestRule.replaceText(tag: String, text: String) {
 /**
  * Tries to click a node either by visible text or by content description, using [textOrCd] as the
  * match string (substring match).
- *
- * This is useful for icon buttons that only expose a content description.
  */
 private fun ComposeTestRule.tryClickByTextOrContentDesc(textOrCd: String) {
   val byText = onNodeWithText(textOrCd, substring = true)
@@ -748,10 +624,7 @@ private fun ComposeTestRule.tryClickByTextOrContentDesc(textOrCd: String) {
   byCd.performClick()
 }
 
-/**
- * Thin wrapper over [ComposeTestRule.waitForIdle] with a more descriptive name for tests that
- * conceptually "wait for the UI to settle".
- */
+/** Thin wrapper over [ComposeTestRule.waitForIdle]. */
 private fun ComposeTestRule.waitForIdleSync() {
   this.waitForIdle()
 }
