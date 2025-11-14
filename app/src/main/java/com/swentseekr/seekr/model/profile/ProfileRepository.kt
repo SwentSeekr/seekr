@@ -16,4 +16,6 @@ interface ProfileRepository {
   suspend fun getDoneHunts(userId: String): List<Hunt>
 
   suspend fun getLikedHunts(userId: String): List<Hunt>
+
+  suspend fun addDoneHunt(userId: String, hunt: Hunt)
 }

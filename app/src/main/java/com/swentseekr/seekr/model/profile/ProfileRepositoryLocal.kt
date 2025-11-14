@@ -49,4 +49,14 @@ class ProfileRepositoryLocal : ProfileRepository {
   override suspend fun getLikedHunts(userId: String): List<Hunt> {
     return getProfile(userId).likedHunts.toList()
   }
+
+  override suspend fun addDoneHunt(userId: String, hunt: Hunt) {
+    val profile =
+        profiles.find { it.uid == userId }
+            ?: throw IllegalArgumentException("Profile with ID $userId not found")
+
+    if (profile.doneHunts.none { it.uid == hunt.uid }) {
+      profile.doneHunts.add(hunt)
+    }
+  }
 }

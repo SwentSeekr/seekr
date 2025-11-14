@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Canvas
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -37,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -47,6 +50,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
@@ -56,20 +61,11 @@ import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
 import com.swentseekr.seekr.ui.theme.Blue
 import com.swentseekr.seekr.ui.theme.Green
 import kotlinx.coroutines.launch
 
-/**
- * Test tags used by instrumented tests to target key UI elements on the Map screen.
- *
- * These tags are applied to:
- * - [GOOGLE_MAP_SCREEN]: the `GoogleMap` composable root.
- * - [POPUP_CARD], [POPUP_TITLE], [POPUP_DESC]: the bottom popup and its content shown after a
- *   marker tap.
- * - [BUTTON_VIEW], [BUTTON_CANCEL]: actions in the popup.
- * - [BUTTON_BACK]: "Back to all hunts" shown in focused mode.
- */
 /**
  * Top-level composable for the Map screen.
  *
@@ -244,16 +240,96 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
     }
 
     if (uiState.isFocused) {
-
       Button(
           onClick = { viewModel.onBackToAllHunts() },
           colors =
               ButtonDefaults.textButtonColors(containerColor = Green, contentColor = Color.White),
           modifier =
               Modifier.align(Alignment.TopStart)
-                  .padding(MapScreenDefaults.BackButtonPadding)
+                  .padding(12.dp)
                   .testTag(MapScreenTestTags.BUTTON_BACK)) {
-            Text(MapScreenStrings.BackToAllHunts)
+            Text("Back to all hunts")
+          }
+      Card(
+          modifier = Modifier.align(Alignment.TopEnd).padding(12.dp),
+          shape = RoundedCornerShape(16.dp),
+          elevation = CardDefaults.cardElevation(8.dp)) {
+            Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.End) {
+              val hunt = selectedHunt
+              val totalPoints = (hunt?.middlePoints?.size ?: 0) + 2
+              val validated = uiState.validatedCount
+
+              Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "Progress: $validated / $totalPoints",
+                    style = MaterialTheme.typography.bodyMedium)
+              }
+
+              Spacer(Modifier.height(8.dp))
+
+              if (!uiState.isHuntStarted) {
+                Button(
+                    onClick = { viewModel.startHunt() },
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = Green, contentColor = Color.White)) {
+                      Text("Start hunt")
+                    }
+              } else {
+                Row {
+                  TextButton(
+                      onClick = {
+                        val fineGranted =
+                            ContextCompat.checkSelfPermission(
+                                context, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                                PackageManager.PERMISSION_GRANTED
+                        val coarseGranted =
+                            ContextCompat.checkSelfPermission(
+                                context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                                PackageManager.PERMISSION_GRANTED
+
+                        if (!(fineGranted || coarseGranted)) return@TextButton
+
+                        fused.lastLocation.addOnSuccessListener { loc ->
+                          loc?.let {
+                            viewModel.validateCurrentPoint(LatLng(it.latitude, it.longitude))
+                          }
+                        }
+                      },
+                      colors = ButtonDefaults.textButtonColors(contentColor = Green)) {
+                        Text("Validate")
+                      }
+
+                  Spacer(Modifier.width(8.dp))
+
+                  val canFinish = validated >= totalPoints
+                  Button(
+                      onClick = {
+                        val userId = Firebase.auth.currentUser?.uid
+                        if (userId != null) {
+                          viewModel.finishHunt(
+                              onPersist = { finished ->
+                                scope.launch {
+                                  try {
+                                    ProfileRepositoryProvider.repository.addDoneHunt(
+                                        userId, finished)
+                                  } catch (e: Exception) {
+                                    Log.e("MapScreen", "Failed to add done hunt", e)
+                                  }
+                                }
+                              })
+                        }
+                      },
+                      enabled = canFinish,
+                      colors =
+                          ButtonDefaults.buttonColors(
+                              containerColor = if (canFinish) Green else Color.LightGray,
+                              contentColor = Color.White)) {
+                        Text("Finish hunt")
+                      }
+                }
+              }
+            }
           }
     }
   }

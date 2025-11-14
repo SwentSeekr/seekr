@@ -63,13 +63,47 @@ class ProfileRepositoryFirestore(
   }
 
   override suspend fun getDoneHunts(userId: String): List<Hunt> {
-    val snapshot = db.collection("users").document(userId).collection("doneHunts").get().await()
-    return snapshot.documents.mapNotNull { documentToHunt(it) }
+    val snapshot = profilesCollection.document(userId).get().await()
+
+    @Suppress("UNCHECKED_CAST")
+    val doneHuntsData = snapshot.get("doneHunts") as? List<Map<String, Any?>> ?: emptyList()
+
+    return doneHuntsData.mapNotNull { mapToHunt(it) }
   }
 
   override suspend fun getLikedHunts(userId: String): List<Hunt> {
-    val snapshot = db.collection("users").document(userId).collection("likedHunts").get().await()
-    return snapshot.documents.mapNotNull { documentToHunt(it) }
+    val snapshot = profilesCollection.document(userId).get().await()
+
+    @Suppress("UNCHECKED_CAST")
+    val doneHuntsData = snapshot.get("likedHunts") as? List<Map<String, Any?>> ?: emptyList()
+
+    return doneHuntsData.mapNotNull { mapToHunt(it) }
+  }
+
+  override suspend fun addDoneHunt(userId: String, hunt: Hunt) {
+    try {
+      val userDocRef = profilesCollection.document(userId)
+      val snapshot = userDocRef.get().await()
+
+      @Suppress("UNCHECKED_CAST")
+      val currentList = snapshot.get("doneHunts") as? List<Map<String, Any?>> ?: emptyList()
+
+      val isAlreadyAdded = currentList.any { it["uid"] == hunt.uid }
+      if (isAlreadyAdded) {
+        Log.i(
+            "ProfileRepo", "Hunt '${hunt.title}' is already in the doneHunts list for user $userId")
+        return
+      }
+
+      val huntData = huntToMap(hunt)
+      val updatedList = currentList + huntData
+
+      userDocRef.update("doneHunts", updatedList).await()
+      Log.i("ProfileRepo", "Added done hunt '${hunt.title}' for user $userId")
+    } catch (e: Exception) {
+      Log.e("ProfileRepo", "Failed to add done hunt for user $userId", e)
+      throw e
+    }
   }
 
   private fun documentToHunt(document: DocumentSnapshot): Hunt? {
@@ -157,4 +191,66 @@ class ProfileRepositoryFirestore(
           latitude = this["latitude"] as? Double ?: 0.0,
           longitude = this["longitude"] as? Double ?: 0.0,
           name = this["name"] as? String ?: "")
+
+  private fun huntToMap(hunt: Hunt): Map<String, Any?> =
+      mapOf(
+          "uid" to hunt.uid,
+          "title" to hunt.title,
+          "description" to hunt.description,
+          "start" to
+              mapOf(
+                  "latitude" to hunt.start.latitude,
+                  "longitude" to hunt.start.longitude,
+                  "name" to hunt.start.name),
+          "end" to
+              mapOf(
+                  "latitude" to hunt.end.latitude,
+                  "longitude" to hunt.end.longitude,
+                  "name" to hunt.end.name),
+          "middlePoints" to
+              hunt.middlePoints.map {
+                mapOf("latitude" to it.latitude, "longitude" to it.longitude, "name" to it.name)
+              },
+          "difficulty" to hunt.difficulty.name,
+          "status" to hunt.status.name,
+          "authorId" to hunt.authorId,
+          "time" to hunt.time,
+          "distance" to hunt.distance,
+          "reviewRate" to hunt.reviewRate,
+          "mainImageUrl" to hunt.mainImageUrl)
+
+  private fun mapToHunt(map: Map<*, *>): Hunt? {
+    val uid = map["uid"] as? String ?: ""
+    val title = map["title"] as? String ?: return null
+    val description = map["description"] as? String ?: return null
+    val time = (map["time"] as? Number)?.toDouble() ?: 0.0
+    val distance = (map["distance"] as? Number)?.toDouble() ?: 0.0
+    val reviewRate = (map["reviewRate"] as? Number)?.toDouble() ?: 0.0
+    val mainImageUrl = map["mainImageUrl"] as? String ?: ""
+
+    val start = (map["start"] as? Map<*, *>)?.toLocation() ?: Location(0.0, 0.0, "")
+    val end = (map["end"] as? Map<*, *>)?.toLocation() ?: Location(0.0, 0.0, "")
+    val middlePoints =
+        (map["middlePoints"] as? List<Map<*, *>>)?.map { it.toLocation() } ?: emptyList()
+
+    val difficulty =
+        (map["difficulty"] as? String)?.let { Difficulty.valueOf(it) } ?: Difficulty.EASY
+    val status = (map["status"] as? String)?.let { HuntStatus.valueOf(it) } ?: HuntStatus.FUN
+    val authorId = map["authorId"] as? String ?: ""
+
+    return Hunt(
+        uid = uid,
+        start = start,
+        end = end,
+        middlePoints = middlePoints,
+        status = status,
+        title = title,
+        description = description,
+        time = time,
+        distance = distance,
+        difficulty = difficulty,
+        authorId = authorId,
+        mainImageUrl = mainImageUrl,
+        reviewRate = reviewRate)
+  }
 }
