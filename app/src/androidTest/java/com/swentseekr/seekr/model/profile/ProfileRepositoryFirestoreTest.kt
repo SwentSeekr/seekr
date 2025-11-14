@@ -3,6 +3,11 @@ package com.swentseekr.seekr.model.profile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.swentseekr.seekr.model.author.Author
+import com.swentseekr.seekr.model.hunt.Difficulty
+import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.model.hunt.HuntStatus
+import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.model.profile.ProfileRepositoryFirestore.Companion.huntToMap
 import com.swentseekr.seekr.ui.profile.Profile
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment.clearEmulatorData
@@ -17,6 +22,21 @@ import org.junit.Test
 class ProfileRepositoryFirestoreTest {
   private lateinit var repository: ProfileRepository
   private lateinit var auth: FirebaseAuth
+  private val hunt =
+      Hunt(
+          uid = "hunt1",
+          title = "Sample Hunt",
+          description = "Test Hunt",
+          start = Location(10.0, 20.0, "Start"),
+          end = Location(15.0, 25.0, "End"),
+          middlePoints = listOf(Location(12.0, 22.0, "Middle")),
+          difficulty = Difficulty.EASY,
+          status = HuntStatus.FUN,
+          authorId = "author1",
+          time = 30.0,
+          distance = 5.0,
+          reviewRate = 4.5,
+          mainImageUrl = "http://image.url")
 
   @Before
   fun setup() {
@@ -215,5 +235,63 @@ class ProfileRepositoryFirestoreTest {
     assertEquals(0.0, result.latitude)
     assertEquals(0.0, result.longitude)
     assertEquals("", result.name)
+  }
+
+  @Test
+  fun addDoneHuntAddsHuntWhenNotAlreadyInList() = runTest {
+    val uid = auth.currentUser!!.uid
+
+    val db = FirebaseFirestore.getInstance()
+    val docRef = db.collection("profiles").document(uid)
+    docRef.set(mapOf("doneHunts" to emptyList<Map<String, Any?>>())).await()
+
+    repository.addDoneHunt(uid, hunt)
+    val snapshot = docRef.get().await()
+
+    @Suppress("UNCHECKED_CAST")
+    val doneHunts = snapshot.get("doneHunts") as? List<Map<String, Any?>> ?: emptyList()
+
+    assertEquals(1, doneHunts.size)
+    assertEquals("hunt1", doneHunts[0]["uid"])
+  }
+
+  @Test
+  fun addDoneHuntDoesNotAddHuntIfAlreadyInList() = runTest {
+    val uid = auth.currentUser!!.uid
+
+    val db = FirebaseFirestore.getInstance()
+    val docRef = db.collection("profiles").document(uid)
+    val doneHunts =
+        listOf(mapOf("uid" to "hunt1", "title" to "Sample Hunt", "description" to "Test Hunt"))
+    docRef.set(mapOf("doneHunts" to doneHunts)).await()
+
+    repository.addDoneHunt(uid, hunt)
+
+    val snapshot = docRef.get().await()
+
+    @Suppress("UNCHECKED_CAST")
+    val updatedDoneHunts = snapshot.get("doneHunts") as? List<Map<String, Any?>> ?: emptyList()
+
+    assertEquals(1, updatedDoneHunts.size)
+    assertEquals("hunt1", updatedDoneHunts[0]["uid"])
+  }
+
+  @Test
+  fun huntToMapMapsHuntCorrectly() {
+    val map = huntToMap(hunt)
+
+    assertEquals("hunt1", map["uid"])
+    assertEquals("Sample Hunt", map["title"])
+    assertEquals("Test Hunt", map["description"])
+    assertNotNull(map["start"])
+    assertNotNull(map["end"])
+    assertEquals(1, (map["middlePoints"] as List<*>).size)
+    assertEquals("EASY", map["difficulty"])
+    assertEquals("FUN", map["status"])
+    assertEquals("author1", map["authorId"])
+    assertEquals(30.0, map["time"])
+    assertEquals(5.0, map["distance"])
+    assertEquals(4.5, map["reviewRate"])
+    assertEquals("http://image.url", map["mainImageUrl"])
   }
 }

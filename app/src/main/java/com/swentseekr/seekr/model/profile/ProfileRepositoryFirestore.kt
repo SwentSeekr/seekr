@@ -18,6 +18,36 @@ class ProfileRepositoryFirestore(
     private val auth: FirebaseAuth,
     private val huntsRepository: HuntsRepositoryFirestore = HuntsRepositoryFirestore(db)
 ) : ProfileRepository {
+
+  companion object {
+    fun huntToMap(hunt: Hunt): Map<String, Any?> =
+        mapOf(
+            "uid" to hunt.uid,
+            "title" to hunt.title,
+            "description" to hunt.description,
+            "start" to
+                mapOf(
+                    "latitude" to hunt.start.latitude,
+                    "longitude" to hunt.start.longitude,
+                    "name" to hunt.start.name),
+            "end" to
+                mapOf(
+                    "latitude" to hunt.end.latitude,
+                    "longitude" to hunt.end.longitude,
+                    "name" to hunt.end.name),
+            "middlePoints" to
+                hunt.middlePoints.map {
+                  mapOf("latitude" to it.latitude, "longitude" to it.longitude, "name" to it.name)
+                },
+            "difficulty" to hunt.difficulty.name,
+            "status" to hunt.status.name,
+            "authorId" to hunt.authorId,
+            "time" to hunt.time,
+            "distance" to hunt.distance,
+            "reviewRate" to hunt.reviewRate,
+            "mainImageUrl" to hunt.mainImageUrl)
+  }
+
   private val profilesCollection = db.collection("profiles")
 
   override suspend fun createProfile(profile: Profile) {
@@ -192,34 +222,7 @@ class ProfileRepositoryFirestore(
           longitude = this["longitude"] as? Double ?: 0.0,
           name = this["name"] as? String ?: "")
 
-  private fun huntToMap(hunt: Hunt): Map<String, Any?> =
-      mapOf(
-          "uid" to hunt.uid,
-          "title" to hunt.title,
-          "description" to hunt.description,
-          "start" to
-              mapOf(
-                  "latitude" to hunt.start.latitude,
-                  "longitude" to hunt.start.longitude,
-                  "name" to hunt.start.name),
-          "end" to
-              mapOf(
-                  "latitude" to hunt.end.latitude,
-                  "longitude" to hunt.end.longitude,
-                  "name" to hunt.end.name),
-          "middlePoints" to
-              hunt.middlePoints.map {
-                mapOf("latitude" to it.latitude, "longitude" to it.longitude, "name" to it.name)
-              },
-          "difficulty" to hunt.difficulty.name,
-          "status" to hunt.status.name,
-          "authorId" to hunt.authorId,
-          "time" to hunt.time,
-          "distance" to hunt.distance,
-          "reviewRate" to hunt.reviewRate,
-          "mainImageUrl" to hunt.mainImageUrl)
-
-  private fun mapToHunt(map: Map<*, *>): Hunt? {
+  fun mapToHunt(map: Map<*, *>): Hunt? {
     val uid = map["uid"] as? String ?: ""
     val title = map["title"] as? String ?: return null
     val description = map["description"] as? String ?: return null

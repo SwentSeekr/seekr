@@ -178,4 +178,34 @@ class ProfileRepositoryLocalTest {
     val result = repository.getLikedHunts("user2")
     assertTrue(result.isEmpty())
   }
+
+  @Test
+  fun addDoneHuntAddsHuntWhenNotAlreadyInList() = runTest {
+    val profile = sampleProfileWithPseudonym(uid = "user1", pseudonym = "Alice")
+    val hunt = createHunt(uid = "hunt1", title = "New City Exploration")
+    repository.addProfile(profile)
+    repository.addDoneHunt("user1", hunt)
+
+    val updatedProfile = repository.getProfile("user1")
+    assertEquals(1, updatedProfile.doneHunts.size)
+    assertEquals("hunt1", updatedProfile.doneHunts[0].uid)
+  }
+
+  @Test
+  fun addDoneHuntDoesNotAddHuntIfAlreadyInList() = runTest {
+    val profile = sampleProfileWithPseudonym(uid = "user1", pseudonym = "Alice")
+    val hunt = createHunt(uid = "hunt1", title = "New City Exploration")
+    repository.addProfile(profile)
+    repository.addDoneHunt("user1", hunt)
+
+    val updatedProfile = repository.getProfile("user1")
+    assertEquals(1, updatedProfile.doneHunts.size)
+    assertEquals("hunt1", updatedProfile.doneHunts[0].uid)
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun addDoneHuntThrowsExceptionIfProfileNotFound() = runTest {
+    val hunt = createHunt(uid = "hunt1", title = "New City Exploration")
+    repository.addDoneHunt("nonExistentUser", hunt)
+  }
 }
