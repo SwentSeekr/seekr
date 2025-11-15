@@ -16,7 +16,10 @@ import kotlinx.coroutines.launch
 data class SettingsUIState(
     val signedOut: Boolean = false,
     val errorMsg: String? = null,
-    val appVersion: String? = null
+    val appVersion: String? = null,
+    val notificationsEnabled: Boolean = false,
+    val picturesEnabled: Boolean = false,
+    val localisationEnabled: Boolean = false
 )
 
 class SettingsViewModel(private val authRepository: AuthRepository = AuthRepositoryFirebase()) :
@@ -49,5 +52,17 @@ class SettingsViewModel(private val authRepository: AuthRepository = AuthReposit
   // We could have used BuildConfig directly in the UI, but this way it's easier to test
   fun setAppVersion(version: String) {
     _uiState.update { it.copy(appVersion = version) }
+  }
+
+  fun updateNotifications(enabled: Boolean) {
+    _uiState.value = _uiState.value.copy(notificationsEnabled = enabled)
+  }
+
+  fun updatePictures(enabled: Boolean) {
+    _uiState.value = _uiState.value.copy(picturesEnabled = enabled)
+  }
+
+  fun updateLocalisation(enabled: Boolean) {
+    _uiState.value = _uiState.value.copy(localisationEnabled = enabled)
   }
 }

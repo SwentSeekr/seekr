@@ -5,8 +5,12 @@ import androidx.compose.ui.unit.dp
 
 object SettingsScreenDefaults {
   val ScreenPadding: Dp = 24.dp
-  val ItemSpacing: Dp = 16.dp
   val LogoutTopPadding: Dp = 32.dp
+
+  val ItemSpacing = 56.dp
+  val ComponentsPadding = 12.dp
+
+  val ColumnWeight = 1f
 }
 
 object SettingsScreenStrings {
@@ -15,7 +19,11 @@ object SettingsScreenStrings {
   const val VersionLabel = "App Version"
   const val UnknownVersion = "Unknown"
   const val LogoutLabel = "Log out"
-  const val EDIT_PROFILE_TEXT = "Edit Profile"
+  const val NotificationsLabel = "Notifications"
+  const val PicturesLabel = "My Pictures"
+  const val LocalisationLabel = "My Localisation"
+  const val EditProfileLabel = "Edit Profile"
+  const val AppConditionLabel = "App Condition"
 }
 
 object SettingsScreenTestTags {
@@ -23,4 +31,9 @@ object SettingsScreenTestTags {
   const val APP_VERSION_TEXT = "appVersionText"
   const val BACK_BUTTON = "backButton"
   const val EDIT_PROFILE_BUTTON = "editProfileButton"
+
+  const val NOTIFICATIONS_TOGGLE = "notificationsToggle"
+  const val PICTURES_TOGGLE = "picturesToggle"
+  const val LOCALISATION_TOGGLE = "localisationToggle"
+  const val APP_CONDITION_BUTTON = "appConditionButton"
 }
