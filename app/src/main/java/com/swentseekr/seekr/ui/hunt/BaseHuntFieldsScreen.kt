@@ -92,6 +92,7 @@ fun BaseHuntFieldsScreen(
     onSelectImage: (Uri?) -> Unit,
     onSelectOtherImages: (List<Uri>) -> Unit,
     onRemoveOtherImage: (Uri) -> Unit,
+    onRemoveExistingImage: (String) -> Unit,
     onSave: () -> Unit,
     onGoBack: () -> Unit,
 ) {
@@ -166,7 +167,8 @@ fun BaseHuntFieldsScreen(
 
           Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeight))
 
-          // MULTIPLE IMAGES PICKER + PREVIEW
+          // OTHER IMAGES SECTION – EDIT + ADD MODE
+
           Text("Other Images", style = MaterialTheme.typography.titleMedium)
           Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightSmall))
 
@@ -176,25 +178,50 @@ fun BaseHuntFieldsScreen(
                 Text("Choose Additional Images")
               }
 
-          if (uiState.otherImagesUris.isNotEmpty()) {
+          // Combine both existing URLs + newly added URIs
+          val combinedImages: List<Any> = uiState.otherImagesUrls + uiState.otherImagesUris
+
+          if (combinedImages.isNotEmpty()) {
             Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightMedium))
 
             Column {
-              uiState.otherImagesUris.forEach { uri ->
-                AsyncImage(
-                    model = uri,
-                    contentDescription = "Secondary Image",
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .height(BaseHuntFieldsUi.ImageHeight / 1.5f)
-                            .clip(RoundedCornerShape(BaseHuntFieldsUi.FieldCornerRadius))
-                            .padding(bottom = 8.dp),
-                    placeholder = painterResource(R.drawable.empty_image),
-                    error = painterResource(R.drawable.empty_image))
+              combinedImages.forEach { image ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween) {
+                      val model =
+                          when (image) {
+                            is String -> image // URL
+                            is Uri -> image // New local image
+                            else -> null
+                          }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                      AsyncImage(
+                          model = model,
+                          contentDescription = "Secondary Image",
+                          modifier =
+                              Modifier.weight(1f)
+                                  .height(BaseHuntFieldsUi.ImageHeight / 1.5f)
+                                  .clip(RoundedCornerShape(BaseHuntFieldsUi.FieldCornerRadius)),
+                          placeholder = painterResource(R.drawable.empty_image),
+                          error = painterResource(R.drawable.empty_image))
 
-                TextButton(onClick = { onRemoveOtherImage(uri) }) { Text("Remove") }
+                      Spacer(modifier = Modifier.width(8.dp))
+
+                      TextButton(
+                          onClick = {
+                            if (image is String) {
+                              onRemoveExistingImage(image)
+                            }
+                            if (image is Uri) {
+                              onRemoveOtherImage(image)
+                            }
+                          }) {
+                            Text("Remove")
+                          }
+                    }
+
+                Spacer(modifier = Modifier.height(8.dp))
               }
             }
 

@@ -49,6 +49,18 @@ interface IHuntsImageRepository {
    * @throws Exception If deletion fails (e.g., network error or missing permissions).
    */
   suspend fun deleteAllHuntImages(huntId: String)
+
+  /**
+   * Deletes a single image identified by its public URL.
+   *
+   * Implementations should remove the file corresponding to the provided public download URL from
+   * the storage backend. If the URL points to an image that does not exist, implementations may
+   * either succeed silently or throw an exception according to their policy.
+   *
+   * @param url The public download URL of the image to delete.
+   * @throws Exception If the deletion fails (e.g., network error, permission denied).
+   */
+  suspend fun deleteImageByUrl(url: String)
 }
 
 // documentation done assisted by AI

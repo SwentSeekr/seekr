@@ -1,5 +1,7 @@
 package com.swentseekr.seekr.model.hunt
 
+import android.net.Uri
+
 /** Represents a repository that manages Hunt items. */
 interface HuntsRepository {
   /** Generates and returns a new unique identifier for a Hunt item. */
@@ -46,13 +48,21 @@ interface HuntsRepository {
   )
 
   /**
-   * Edits an existing Hunt item in the repository.
+   * Edits an existing Hunt item including images update and deletion.
    *
-   * @param huntID The unique identifier of the item to edit.
-   * @param newValue The new value for the Hunt item.
-   * @throws Exception if the Hunt item is not found.
+   * @param huntID the ID of the Hunt to update.
+   * @param newValue the new Hunt data (without image uploads applied yet).
+   * @param mainImageUri optional new main image (null = unchanged).
+   * @param addedOtherImages new other images selected by the user.
+   * @param removedOtherImages list of URLs of images that must be deleted from storage.
    */
-  suspend fun editHunt(huntID: String, newValue: Hunt)
+  suspend fun editHunt(
+      huntID: String,
+      newValue: Hunt,
+      mainImageUri: Uri? = null,
+      addedOtherImages: List<Uri> = emptyList(),
+      removedOtherImages: List<String> = emptyList()
+  )
 
   /**
    * Deletes a Hunt item from the repository.

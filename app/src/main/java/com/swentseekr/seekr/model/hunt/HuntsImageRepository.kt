@@ -69,4 +69,13 @@ class HuntsImageRepository(private val storage: FirebaseStorage = FirebaseStorag
       Log.w("HuntsImageRepository", "Unexpected error deleting images for $huntId: ${e.message}")
     }
   }
+
+  override suspend fun deleteImageByUrl(url: String) {
+    try {
+      val ref = FirebaseStorage.getInstance().getReferenceFromUrl(url)
+      ref.delete().await()
+    } catch (e: Exception) {
+      Log.w("HuntsRepositoryFirestore", "Failed to delete image: $url", e)
+    }
+  }
 }

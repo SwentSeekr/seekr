@@ -29,12 +29,18 @@ class HuntsRepositoryLocal : HuntsRepository {
     hunts.add(hunt)
   }
 
-  override suspend fun editHunt(huntID: String, newValue: Hunt) {
-    val index = hunts.indexOfFirst { it.uid == huntID }
+  override suspend fun editHunt(
+      huntId: String,
+      hunt: Hunt,
+      newMainImage: Uri?,
+      newOtherImages: List<Uri>,
+      deletedImages: List<String>
+  ) {
+    val index = hunts.indexOfFirst { it.uid == huntId }
     if (index != -1) {
-      hunts[index] = newValue
+      hunts[index] = hunt
     } else {
-      throw IllegalArgumentException("Hunt with ID $huntID is not found")
+      throw IllegalArgumentException("Hunt with ID $huntId is not found")
     }
   }
 

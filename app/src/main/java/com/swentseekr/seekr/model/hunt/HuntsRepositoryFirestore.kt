@@ -68,8 +68,42 @@ class HuntsRepositoryFirestore(
     db.collection(HUNTS_COLLECTION_PATH).document(hunt.uid).set(huntWithImages).await()
   }
 
-  override suspend fun editHunt(huntID: String, newValue: Hunt) {
-    db.collection(HUNTS_COLLECTION_PATH).document(huntID).set(newValue).await()
+  override suspend fun editHunt(
+      huntId: String,
+      hunt: Hunt,
+      newMainImage: Uri?,
+      newOtherImages: List<Uri>,
+      deletedImages: List<String>
+  ) {
+
+    // Delete removed images using ImageRepo
+    deletedImages.forEach { url ->
+      try {
+        imageRepo.deleteImageByUrl(url)
+      } catch (e: Exception) {
+        Log.w("HuntsRepositoryFirestore", "Failed to delete $url", e)
+      }
+    }
+
+    var mainImageUrl = hunt.mainImageUrl
+
+    // Upload new main image
+    if (newMainImage != null) {
+      mainImageUrl = imageRepo.uploadMainImage(huntId, newMainImage)
+    }
+
+    // Upload new other images
+    val newOtherImageUrls =
+        if (newOtherImages.isNotEmpty()) imageRepo.uploadOtherImages(huntId, newOtherImages)
+        else emptyList()
+
+    // Combine updated URL list
+    val finalOtherImages = hunt.otherImagesUrls + newOtherImageUrls
+
+    // Save updated Hunt
+    val updated = hunt.copy(mainImageUrl = mainImageUrl, otherImagesUrls = finalOtherImages)
+
+    db.collection(HUNTS_COLLECTION_PATH).document(huntId).set(updated).await()
   }
 
   override suspend fun deleteHunt(huntID: String) {
