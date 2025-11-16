@@ -4,6 +4,7 @@ import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
+import com.swentseekr.seekr.model.hunt.HuntsImageRepository
 import com.swentseekr.seekr.model.hunt.HuntsRepository
 import com.swentseekr.seekr.ui.hunt.BaseHuntViewModel
 import com.swentseekr.seekr.ui.hunt.HuntUIState
@@ -13,11 +14,14 @@ class EditHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.rep
 
   private var huntId: String? = null
 
+  private val imageRepo = HuntsImageRepository()
+
   var mainImageUri: Uri? = null
 
   suspend fun load(id: String) {
     try {
       val hunt = repository.getHunt(id)
+
       _uiState.value =
           _uiState.value.copy(
               title = hunt.title,
@@ -28,7 +32,9 @@ class EditHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.rep
               difficulty = hunt.difficulty,
               status = hunt.status,
               mainImageUrl = hunt.mainImageUrl,
+              otherImagesUrls = hunt.otherImagesUrls, // load existing secondary images
               reviewRate = hunt.reviewRate)
+
       huntId = id
     } catch (e: Exception) {
       huntId = null
@@ -53,15 +59,29 @@ class EditHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.rep
         difficulty = state.difficulty!!,
         authorId = authorId,
         mainImageUrl = state.mainImageUrl,
-        otherImagesUrls = emptyList(),
+        otherImagesUrls = state.otherImagesUrls,
         reviewRate = state.reviewRate)
   }
 
   override suspend fun persist(hunt: Hunt) {
-    if (mainImageUri != null) {
-      repository.addHunt(hunt = hunt, mainImageUri = mainImageUri, otherImageUris = emptyList())
-    } else {
-      repository.editHunt(hunt.uid, hunt)
-    }
+
+    // ---- Main image ----
+    val updatedMainImageUrl =
+        if (mainImageUri != null) {
+          imageRepo.uploadMainImage(hunt.uid, mainImageUri!!)
+        } else hunt.mainImageUrl
+
+    // ---- Secondary images (new ones only) ----
+    val newSecondaryUrls =
+        if (otherImagesUris.isNotEmpty()) {
+          imageRepo.uploadOtherImages(hunt.uid, otherImagesUris)
+        } else emptyList()
+
+    val updatedHunt =
+        hunt.copy(
+            mainImageUrl = updatedMainImageUrl,
+            otherImagesUrls = hunt.otherImagesUrls + newSecondaryUrls)
+
+    repository.editHunt(hunt.uid, updatedHunt)
   }
 }

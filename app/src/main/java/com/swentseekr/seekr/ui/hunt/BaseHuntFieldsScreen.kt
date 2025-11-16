@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Difficulty
@@ -89,6 +90,7 @@ fun BaseHuntFieldsScreen(
     onStatusSelect: (HuntStatus) -> Unit,
     onSelectLocations: () -> Unit,
     onSelectImage: (Uri?) -> Unit,
+    onSelectOtherImages: (List<Uri>) -> Unit,
     onSave: () -> Unit,
     onGoBack: () -> Unit,
 ) {
@@ -97,10 +99,16 @@ fun BaseHuntFieldsScreen(
 
   val scrollState = rememberScrollState()
 
-  // Image selector launcher
+  // Image selector launcher (main image)
   val imagePickerLauncher =
       rememberLauncherForActivityResult(
           contract = ActivityResultContracts.GetContent(), onResult = { uri -> onSelectImage(uri) })
+
+  // Launcher for multiple images selection (other images)
+  val multipleImagesPickerLauncher =
+      rememberLauncherForActivityResult(
+          contract = ActivityResultContracts.GetMultipleContents(),
+          onResult = { uris -> onSelectOtherImages(uris) })
 
   Scaffold(
       topBar = {
@@ -140,7 +148,6 @@ fun BaseHuntFieldsScreen(
                 Text("Choose Image")
               }
 
-          // Intelligent display of the image
           val imageToDisplay = uiState.mainImageUrl
 
           if (!imageToDisplay.isNullOrBlank()) {
@@ -157,6 +164,37 @@ fun BaseHuntFieldsScreen(
           }
 
           Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeight))
+
+          // MULTIPLE IMAGES PICKER + PREVIEW
+          Text("Other Images", style = MaterialTheme.typography.titleMedium)
+          Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightSmall))
+
+          Button(
+              onClick = { multipleImagesPickerLauncher.launch("image/*") },
+              modifier = Modifier.fillMaxWidth()) {
+                Text("Choose Additional Images")
+              }
+
+          if (uiState.otherImagesUris.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightMedium))
+
+            Column {
+              uiState.otherImagesUris.forEach { uri ->
+                AsyncImage(
+                    model = uri,
+                    contentDescription = "Secondary Image",
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .height(BaseHuntFieldsUi.ImageHeight / 1.5f)
+                            .clip(RoundedCornerShape(BaseHuntFieldsUi.FieldCornerRadius))
+                            .padding(bottom = 8.dp),
+                    placeholder = painterResource(R.drawable.empty_image),
+                    error = painterResource(R.drawable.empty_image))
+              }
+            }
+
+            Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeight))
+          }
 
           // === Form ===
           ValidatedOutlinedField(
