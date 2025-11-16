@@ -1,11 +1,13 @@
-package com.swentseekr.seekr.model.profile
+package com.swentseekr.seekr.ui.settings
 
-import com.swentseekr.seekr.model.author.Author
-import com.swentseekr.seekr.model.hunt.Difficulty
-import com.swentseekr.seekr.ui.profile.Profile
-import com.swentseekr.seekr.ui.profile.ProfileViewModel
+import androidx.credentials.CredentialManager
+import com.swentseekr.seekr.model.authentication.AuthRepository
+import com.swentseekr.seekr.model.settings.SettingsRepositoryFirestore
+import io.mockk.coEvery
+import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -17,25 +19,25 @@ import org.junit.Before
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ProfileViewModelTest {
-
-  private lateinit var repository: ProfileRepositoryLocal
-  private lateinit var viewModel: ProfileViewModel
+class SettingsViewModelTest {
   private val testDispatcher = StandardTestDispatcher()
-  private val profileAlice =
-      Profile(
-          uid = "user1",
-          author = Author("Alice", "Bio", 0, 4.0, 3.5),
-          myHunts = mutableListOf(),
-          doneHunts = mutableListOf(),
-          likedHunts = mutableListOf())
+
+  private lateinit var authRepository: AuthRepository
+  private lateinit var credentialManager: CredentialManager
+  private lateinit var repository: SettingsRepositoryFirestore
+  private lateinit var viewModel: SettingsViewModel
 
   @Before
-  fun setup() {
+  fun setUp() = runTest {
     Dispatchers.setMain(testDispatcher)
-    repository = ProfileRepositoryLocal()
-    repository.addProfile(profileAlice)
-    viewModel = ProfileViewModel(repository, injectedCurrentUid = "user1")
+
+    repository = mockk(relaxed = true)
+    authRepository = mockk(relaxed = true)
+    credentialManager = mockk(relaxed = true)
+
+    viewModel = SettingsViewModel(repository = repository, authRepository = authRepository)
+
+    advanceUntilIdle()
   }
 
   @After
@@ -43,152 +45,61 @@ class ProfileViewModelTest {
     Dispatchers.resetMain()
   }
 
+  /** Test that the initial app version is set from BuildConfig */
   @Test
-  fun loadProfile_success_and_failure() = runTest {
-    viewModel.loadProfile("user1")
-    advanceUntilIdle()
-    assertEquals("Alice", viewModel.uiState.value.profile?.author?.pseudonym)
-    assertNull(viewModel.uiState.value.errorMsg)
-
-    viewModel.loadProfile("ghost")
-    advanceUntilIdle()
-
-    assertEquals("Profile not found", viewModel.uiState.value.errorMsg)
+  fun initial_state_contains_app_version() = runTest {
+    val state = viewModel.uiState.first()
+    assertNotNull(state.appVersion)
+    assertTrue(state.appVersion!!.isNotBlank())
   }
 
+  /** Test that signOut updates signedOut to true when repository returns success */
   @Test
-  fun loadProfile_sets_error_for_non_existent_profile() = runTest {
-    viewModel.loadProfile("ghost")
-    advanceUntilIdle()
-    val state = viewModel.uiState.value
-    assertEquals("Profile not found", state.errorMsg)
-    assertNull(state.profile)
-  }
+  fun signOut_success_updates_signedOut_true() = runTest {
+    coEvery { authRepository.signOut() } returns Result.success(Unit)
 
-  @Test
-  fun updateProfile_updates_existing_profile() = runTest {
-    val updated = profileAlice.copy(author = profileAlice.author.copy(bio = "Updated Bio"))
-    viewModel.updateProfile(updated)
+    viewModel.signOut(credentialManager)
     advanceUntilIdle()
-    val state = viewModel.uiState.value
-    assertEquals("Updated Bio", state.profile?.author?.bio)
+
+    val state = viewModel.uiState.first()
+    assertTrue(state.signedOut)
     assertNull(state.errorMsg)
   }
 
+  /** Test that signOut sets errorMsg when repository fails */
   @Test
-  fun updateProfile_sets_error_when_user_not_logged_in() = runTest {
-    val viewModelWithoutUid = ProfileViewModel(repository)
-    val fake = profileAlice.copy(uid = "ghost")
-    viewModelWithoutUid.updateProfile(fake)
+  fun signOut_failure_sets_errorMsg() = runTest {
+    coEvery { authRepository.signOut() } returns Result.failure(Exception("Test error"))
+
+    viewModel.signOut(credentialManager)
     advanceUntilIdle()
-    val state = viewModelWithoutUid.uiState.value
-    assertEquals("User not logged in", state.errorMsg)
+
+    val state = viewModel.uiState.first()
+    assertFalse(state.signedOut)
+    assertEquals("Test error", state.errorMsg)
   }
 
+  /** Test that clearErrorMsg removes any existing error message */
   @Test
-  fun refreshUIState_reloads_existing_profile() = runTest {
-    viewModel.loadProfile("user1")
+  fun clearErrorMsg_resets_errorMsg_to_null() = runTest {
+    coEvery { authRepository.signOut() } returns Result.failure(Exception("Error"))
+
+    viewModel.signOut(credentialManager)
     advanceUntilIdle()
-    viewModel.refreshUIState()
+    viewModel.clearErrorMsg()
     advanceUntilIdle()
-    val state = viewModel.uiState.value
-    assertEquals("Alice", state.profile?.author?.pseudonym)
+
+    val state = viewModel.uiState.first()
+    assertNull(state.errorMsg)
   }
 
+  /** Test that displayAppVersion properly updates the UI state */
   @Test
-  fun loadProfile_with_null_userId_uses_currentUid() = runTest {
-    viewModel.loadProfile(null)
-    advanceUntilIdle()
-    val state = viewModel.uiState.value
-    assertEquals("Alice", state.profile?.author?.pseudonym)
-    assertTrue(state.isMyProfile)
-  }
-
-  @Test
-  fun loadProfile_sets_isMyProfile_correctly() = runTest {
-    viewModel.loadProfile("user1")
-    advanceUntilIdle()
-    assertTrue(viewModel.uiState.value.isMyProfile)
-
-    val profileBob =
-        Profile(
-            uid = "user2",
-            author = Author("Bob", "Bio", 0, 4.0, 3.5),
-            myHunts = mutableListOf(),
-            doneHunts = mutableListOf(),
-            likedHunts = mutableListOf())
-    repository.addProfile(profileBob)
-
-    viewModel.loadProfile("user2")
-    advanceUntilIdle()
-    assertFalse(viewModel.uiState.value.isMyProfile)
-  }
-
-  @Test
-  fun loadHunts_sets_error_on_failure() = runTest {
-    viewModel.loadProfile("user1")
+  fun displayAppVersion_updates_appVersion() = runTest {
+    viewModel.setAppVersion("9.9.9")
     advanceUntilIdle()
 
-    viewModel.loadHunts("nonexistent")
-    advanceUntilIdle()
-
-    val state = viewModel.uiState.value
-    assertNotNull(state)
-  }
-
-  @Test
-  fun currentUid_returns_injected_uid() {
-    assertEquals("user1", viewModel.currentUid)
-  }
-
-  @Test
-  fun loadProfile_without_logged_in_user_shows_error() = runTest {
-    val viewModelNoUid = ProfileViewModel(repository)
-    viewModelNoUid.loadProfile(null)
-    advanceUntilIdle()
-
-    assertEquals("User not logged in", viewModelNoUid.uiState.value.errorMsg)
-  }
-
-  @Test
-  fun buildComputedProfile_calculatesCorrectReviewAndSportRates() = runTest {
-    val myHunts =
-        listOf(
-            createHuntWithRateAndDifficulty("hunt1", "Hunt 1", reviewRate = 3.0),
-            createHuntWithRateAndDifficulty("hunt2", "Hunt 2", reviewRate = 5.0))
-    val doneHunts =
-        listOf(
-            createHuntWithRateAndDifficulty("done1", "Done 1", difficulty = Difficulty.EASY),
-            createHuntWithRateAndDifficulty("done2", "Done 2", difficulty = Difficulty.DIFFICULT))
-
-    val baseProfile = sampleProfile(myHunts = myHunts, doneHunts = doneHunts)
-    val computedProfile = viewModel.buildComputedProfile(baseProfile)
-
-    assertEquals(4.0, computedProfile.author.reviewRate, 0.01)
-    assertEquals(3.0, computedProfile.author.sportRate, 0.01)
-    assertEquals(2, computedProfile.doneHunts.size)
-    assertEquals(2, computedProfile.myHunts.size)
-  }
-
-  @Test
-  fun loadEmptyHunts_computesZeroRates() = runTest {
-    val profile = sampleProfile(myHunts = emptyList(), doneHunts = emptyList(), uid = "user1")
-    repository.addProfile(profile)
-
-    viewModel.loadProfile("user1")
-    advanceUntilIdle()
-
-    val loadedProfile = viewModel.uiState.value.profile!!
-    assertEquals(0.0, loadedProfile.author.reviewRate, 0.01)
-    assertEquals(0.0, loadedProfile.author.sportRate, 0.01)
-    assertEquals(0, viewModel.totalReviews.value)
-  }
-
-  @Test
-  fun repositoryFailure_doesNotCrashViewModel() = runTest {
-    viewModel.loadProfile("nonexistent_user")
-    advanceUntilIdle()
-
-    assertNull(viewModel.uiState.value.profile)
+    val state = viewModel.uiState.first()
+    assertEquals("9.9.9", state.appVersion)
   }
 }
