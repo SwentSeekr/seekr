@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.swentseekr.seekr.BuildConfig
 import com.swentseekr.seekr.model.authentication.AuthRepository
 import com.swentseekr.seekr.model.authentication.AuthRepositoryFirebase
+import com.swentseekr.seekr.model.settings.SettingsRepositoryFirestore
+import com.swentseekr.seekr.model.settings.SettingsRepositoryProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,14 +24,25 @@ data class SettingsUIState(
     val localisationEnabled: Boolean = false
 )
 
-class SettingsViewModel(private val authRepository: AuthRepository = AuthRepositoryFirebase()) :
-    ViewModel() {
+class SettingsViewModel(
+    private val repository: SettingsRepositoryFirestore = SettingsRepositoryProvider.repository,
+    private val authRepository: AuthRepository = AuthRepositoryFirebase()
+) : ViewModel() {
 
   private val _uiState = MutableStateFlow(SettingsUIState())
   val uiState: StateFlow<SettingsUIState> = _uiState.asStateFlow()
+  val settingsFlow = repository.settingsFlow
 
   init {
     setAppVersion(BuildConfig.VERSION_NAME)
+    setAppVersion(BuildConfig.VERSION_NAME)
+    viewModelScope.launch {
+      try {
+        repository.loadSettings()
+      } catch (e: Exception) {
+        e.printStackTrace()
+      }
+    }
   }
 
   fun signOut(credentialManager: CredentialManager): Unit {
@@ -54,15 +67,18 @@ class SettingsViewModel(private val authRepository: AuthRepository = AuthReposit
     _uiState.update { it.copy(appVersion = version) }
   }
 
-  fun updateNotifications(enabled: Boolean) {
-    _uiState.value = _uiState.value.copy(notificationsEnabled = enabled)
-  }
+  fun updateNotifications(enabled: Boolean) =
+      viewModelScope.launch {
+        repository.updateField(SettingsScreenStrings.NOTIFICATION_FIELD, enabled)
+      }
 
-  fun updatePictures(enabled: Boolean) {
-    _uiState.value = _uiState.value.copy(picturesEnabled = enabled)
-  }
+  fun updatePictures(enabled: Boolean) =
+      viewModelScope.launch {
+        repository.updateField(SettingsScreenStrings.PICTURES_FIELD, enabled)
+      }
 
-  fun updateLocalisation(enabled: Boolean) {
-    _uiState.value = _uiState.value.copy(localisationEnabled = enabled)
-  }
+  fun updateLocalisation(enabled: Boolean) =
+      viewModelScope.launch {
+        repository.updateField(SettingsScreenStrings.LOCALISATION_FIELD, enabled)
+      }
 }

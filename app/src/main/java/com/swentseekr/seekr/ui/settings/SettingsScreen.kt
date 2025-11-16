@@ -26,7 +26,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.swentseekr.seekr.ui.settings.SettingsScreenDefaults.ColumnWeight
+import com.swentseekr.seekr.model.settings.UserSettings
+import com.swentseekr.seekr.ui.settings.SettingsScreenDefaults.COLUMN_WEIGHT
 import com.swentseekr.seekr.ui.theme.Green
 import com.swentseekr.seekr.ui.theme.LightError
 import com.swentseekr.seekr.ui.theme.LightOnError
@@ -53,20 +54,21 @@ fun SettingsScreen(
 ) {
   val uiState by viewModel.uiState.collectAsState()
   val scope = rememberCoroutineScope()
+  val settings by viewModel.settingsFlow.collectAsState()
 
   LaunchedEffect(uiState.signedOut) { if (uiState.signedOut) onSignedOut() }
 
   Scaffold(
       topBar = {
         TopAppBar(
-            title = { Text(SettingsScreenStrings.TopBarTitle) },
+            title = { Text(SettingsScreenStrings.TOP_BAR_TITLE) },
             navigationIcon = {
               IconButton(
                   onClick = onGoBack,
                   modifier = Modifier.testTag(SettingsScreenTestTags.BACK_BUTTON)) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = SettingsScreenStrings.BackContentDescription)
+                        contentDescription = SettingsScreenStrings.BACK_CONTENT_DESCRIPTION)
                   }
             },
             colors =
@@ -80,7 +82,7 @@ fun SettingsScreen(
             appVersion = uiState.appVersion,
             onEditProfileClick = onEditProfile,
             onLogoutClick = { scope.launch { viewModel.signOut(credentialManager) } },
-            uiState = uiState,
+            uiState = settings,
             onNotificationsChange = { viewModel.updateNotifications(it) },
             onPicturesChange = { viewModel.updatePictures(it) },
             onLocalisationChange = { viewModel.updateLocalisation(it) })
@@ -105,23 +107,23 @@ fun SettingsContent(
     appVersion: String?,
     onEditProfileClick: () -> Unit,
     onLogoutClick: () -> Unit,
-    uiState: SettingsUIState = SettingsUIState(),
+    uiState: UserSettings = UserSettings(),
     onNotificationsChange: (Boolean) -> Unit = {},
     onPicturesChange: (Boolean) -> Unit = {},
     onLocalisationChange: (Boolean) -> Unit = {},
 ) {
-  Column(modifier = modifier.fillMaxSize().padding(SettingsScreenDefaults.ScreenPadding)) {
-    LazyColumn(modifier = Modifier.weight(ColumnWeight)) {
+  Column(modifier = modifier.fillMaxSize().padding(SettingsScreenDefaults.SCREEN_PADDING)) {
+    LazyColumn(modifier = Modifier.weight(COLUMN_WEIGHT)) {
       item {
         SettingsItem(
-            title = SettingsScreenStrings.VersionLabel,
-            value = appVersion ?: SettingsScreenStrings.UnknownVersion,
+            title = SettingsScreenStrings.VERSION_LABEL,
+            value = appVersion ?: SettingsScreenStrings.UNKNOW_VERSION,
             modifier = Modifier.testTag(SettingsScreenTestTags.APP_VERSION_TEXT))
       }
 
       item {
         SettingsToggleItem(
-            title = SettingsScreenStrings.NotificationsLabel,
+            title = SettingsScreenStrings.NOTIFICATION_LABEL,
             checked = uiState.notificationsEnabled,
             onToggle = onNotificationsChange,
             modifier = Modifier.testTag(SettingsScreenTestTags.NOTIFICATIONS_TOGGLE))
@@ -129,7 +131,7 @@ fun SettingsContent(
 
       item {
         SettingsToggleItem(
-            title = SettingsScreenStrings.PicturesLabel,
+            title = SettingsScreenStrings.PICTURES_LABEL,
             checked = uiState.picturesEnabled,
             onToggle = onPicturesChange,
             modifier = Modifier.testTag(SettingsScreenTestTags.PICTURES_TOGGLE))
@@ -137,7 +139,7 @@ fun SettingsContent(
 
       item {
         SettingsToggleItem(
-            title = SettingsScreenStrings.LocalisationLabel,
+            title = SettingsScreenStrings.LOCALISATION_LABEL,
             checked = uiState.localisationEnabled,
             onToggle = onLocalisationChange,
             modifier = Modifier.testTag(SettingsScreenTestTags.LOCALISATION_TOGGLE))
@@ -145,13 +147,13 @@ fun SettingsContent(
 
       item {
         SettingsArrowItem(
-            title = SettingsScreenStrings.EditProfileLabel,
+            title = SettingsScreenStrings.EDIT_PROFILE_LABEL,
             onClick = onEditProfileClick,
             modifier = Modifier.testTag(SettingsScreenTestTags.EDIT_PROFILE_BUTTON))
       }
       item {
         SettingsArrowItem(
-            title = SettingsScreenStrings.AppConditionLabel,
+            title = SettingsScreenStrings.APP_CONDITION_LABEL,
             onClick = { /* TODO */},
             modifier = Modifier.testTag(SettingsScreenTestTags.APP_CONDITION_BUTTON))
       }
@@ -162,9 +164,9 @@ fun SettingsContent(
         colors = ButtonDefaults.buttonColors(containerColor = LightError),
         modifier =
             Modifier.fillMaxWidth()
-                .padding(top = SettingsScreenDefaults.LogoutTopPadding)
+                .padding(top = SettingsScreenDefaults.LOGOUT_TOP_PADDING)
                 .testTag(SettingsScreenTestTags.LOGOUT_BUTTON)) {
-          Text(text = SettingsScreenStrings.LogoutLabel, color = LightOnError)
+          Text(text = SettingsScreenStrings.LOGOUT_LABEL, color = LightOnError)
         }
   }
 }

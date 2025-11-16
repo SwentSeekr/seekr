@@ -16,8 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import com.swentseekr.seekr.ui.settings.SettingsScreenDefaults.ComponentsPadding
-import com.swentseekr.seekr.ui.settings.SettingsScreenDefaults.ItemSpacing
 
 /**
  * Displays a settings item with a title and a corresponding value.
@@ -29,7 +27,7 @@ import com.swentseekr.seekr.ui.settings.SettingsScreenDefaults.ItemSpacing
 @Composable
 fun SettingsItem(title: String, value: String, modifier: Modifier = Modifier) {
   Row(
-      modifier = modifier.fillMaxWidth().height(ItemSpacing),
+      modifier = modifier.fillMaxWidth().height(SettingsScreenDefaults.ITEMS_SPACING),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically) {
         Text(text = title, fontWeight = FontWeight.Medium)
@@ -53,7 +51,7 @@ fun SettingsToggleItem(
     modifier: Modifier = Modifier
 ) {
   Row(
-      modifier = Modifier.fillMaxWidth().height(ItemSpacing),
+      modifier = Modifier.fillMaxWidth().height(SettingsScreenDefaults.ITEMS_SPACING),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically) {
         Text(title, fontWeight = FontWeight.Medium)
@@ -74,9 +72,9 @@ fun SettingsArrowItem(title: String, onClick: () -> Unit, modifier: Modifier = M
       modifier =
           modifier
               .fillMaxWidth()
-              .height(ItemSpacing)
+              .height(SettingsScreenDefaults.ITEMS_SPACING)
               .clickable { onClick() }
-              .padding(vertical = ComponentsPadding),
+              .padding(vertical = SettingsScreenDefaults.COMPONENTS_PADDING),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically) {
         Text(title, fontWeight = FontWeight.Medium)

@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.swentseekr.seekr.model.settings.UserSettings
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -27,6 +28,10 @@ class SettingsScreenTest {
     composeRule.onNodeWithTag(SettingsScreenTestTags.APP_VERSION_TEXT).assertExists()
     composeRule.onNodeWithTag(SettingsScreenTestTags.EDIT_PROFILE_BUTTON).assertExists()
     composeRule.onNodeWithTag(SettingsScreenTestTags.LOGOUT_BUTTON).assertExists()
+    composeRule.onNodeWithTag(SettingsScreenTestTags.APP_CONDITION_BUTTON).assertExists()
+    composeRule.onNodeWithTag(SettingsScreenTestTags.NOTIFICATIONS_TOGGLE).assertExists()
+    composeRule.onNodeWithTag(SettingsScreenTestTags.PICTURES_TOGGLE).assertExists()
+    composeRule.onNodeWithTag(SettingsScreenTestTags.LOCALISATION_TOGGLE).assertExists()
   }
 
   @Test
@@ -40,13 +45,48 @@ class SettingsScreenTest {
   }
 
   @Test
+  fun clicking_callbacks_work() {
+    var backPressed = false
+    var editProfileClicked = false
+    var logoutClicked = false
+    var notificationsToggled = false
+    var picturesToggled = false
+    var localisationToggled = false
+
+    composeRule.setContent {
+      MaterialTheme {
+        SettingsContent(
+            appVersion = SettingsScreenStrings.APP_VERSION_1,
+            onEditProfileClick = { editProfileClicked = true },
+            onLogoutClick = { logoutClicked = true },
+            uiState =
+                UserSettings(
+                    notificationsEnabled = false,
+                    picturesEnabled = false,
+                    localisationEnabled = false),
+            onNotificationsChange = { notificationsToggled = it },
+            onPicturesChange = { picturesToggled = it },
+            onLocalisationChange = { localisationToggled = it })
+      }
+    }
+
+    composeRule.onNodeWithTag(SettingsScreenTestTags.NOTIFICATIONS_TOGGLE).performClick()
+    composeRule.onNodeWithTag(SettingsScreenTestTags.PICTURES_TOGGLE).performClick()
+    composeRule.onNodeWithTag(SettingsScreenTestTags.LOCALISATION_TOGGLE).performClick()
+
+    assertTrue(notificationsToggled)
+    assertTrue(picturesToggled)
+    assertTrue(localisationToggled)
+  }
+
+  @Test
   fun clicking_edit_profile_button_triggers_callback() {
     var editProfileTriggered = false
 
     composeRule.setContent {
       MaterialTheme {
         SettingsContent(
-            appVersion = "1.0.0",
+            appVersion = SettingsScreenStrings.APP_VERSION_1,
             onEditProfileClick = { editProfileTriggered = true },
             onLogoutClick = {})
       }
@@ -63,7 +103,7 @@ class SettingsScreenTest {
     composeRule.setContent {
       MaterialTheme {
         SettingsContent(
-            appVersion = "1.0.0",
+            appVersion = SettingsScreenStrings.APP_VERSION_1,
             onEditProfileClick = {},
             onLogoutClick = { logoutTriggered = true })
       }
@@ -75,13 +115,13 @@ class SettingsScreenTest {
 
   @Test
   fun app_version_is_displayed_correctly() {
-    val expectedVersion = "1.2.3"
+    val expectedVersion = SettingsScreenStrings.APP_VERSION_2
     composeRule.setContent {
       MaterialTheme {
         SettingsContent(appVersion = expectedVersion, onEditProfileClick = {}, onLogoutClick = {})
       }
     }
-    composeRule.onNodeWithText(SettingsScreenStrings.VersionLabel).assertExists()
+    composeRule.onNodeWithText(SettingsScreenStrings.VERSION_LABEL).assertExists()
     composeRule.onNodeWithText(expectedVersion).assertExists()
   }
 
@@ -93,87 +133,20 @@ class SettingsScreenTest {
       }
     }
 
-    composeRule.onNodeWithText(SettingsScreenStrings.VersionLabel).assertExists()
-    composeRule.onNodeWithText(SettingsScreenStrings.UnknownVersion).assertExists()
+    composeRule.onNodeWithText(SettingsScreenStrings.VERSION_LABEL).assertExists()
+    composeRule.onNodeWithText(SettingsScreenStrings.UNKNOW_VERSION).assertExists()
   }
 
   @Test
-  fun toggling_notifications_calls_callback() {
-    var notificationsEnabled = false
-
+  fun unknown_app_version_displayed() {
     composeRule.setContent {
       MaterialTheme {
-        SettingsContent(
-            appVersion = "1.0.0",
-            onEditProfileClick = {},
-            onLogoutClick = {},
-            uiState = SettingsUIState(notificationsEnabled = false),
-            onNotificationsChange = { notificationsEnabled = it })
+        SettingsContent(appVersion = null, onEditProfileClick = {}, onLogoutClick = {})
       }
     }
 
-    composeRule.onNodeWithTag(SettingsScreenTestTags.NOTIFICATIONS_TOGGLE).performClick()
-    assertTrue(notificationsEnabled)
-  }
-
-  @Test
-  fun toggling_pictures_calls_callback() {
-    var picturesEnabled = false
-
-    composeRule.setContent {
-      MaterialTheme {
-        SettingsContent(
-            appVersion = "1.0.0",
-            onEditProfileClick = {},
-            onLogoutClick = {},
-            uiState = SettingsUIState(picturesEnabled = false),
-            onPicturesChange = { picturesEnabled = it })
-      }
-    }
-
-    composeRule.onNodeWithTag(SettingsScreenTestTags.PICTURES_TOGGLE).performClick()
-    assertTrue(picturesEnabled)
-  }
-
-  @Test
-  fun toggling_localisation_calls_callback() {
-    var localisationEnabled = false
-
-    composeRule.setContent {
-      MaterialTheme {
-        SettingsContent(
-            appVersion = "1.0.0",
-            onEditProfileClick = {},
-            onLogoutClick = {},
-            uiState = SettingsUIState(localisationEnabled = false),
-            onLocalisationChange = { localisationEnabled = it })
-      }
-    }
-
-    composeRule.onNodeWithTag(SettingsScreenTestTags.LOCALISATION_TOGGLE).performClick()
-    assertTrue(localisationEnabled)
-  }
-
-  @Test
-  fun app_condition_button_exists_and_clickable() {
-    var clicked = false
-    composeRule.setContent {
-      MaterialTheme {
-        SettingsContent(
-            appVersion = "1.0.0",
-            onEditProfileClick = {},
-            onLogoutClick = {},
-            uiState = SettingsUIState(),
-            onNotificationsChange = {},
-            onPicturesChange = {},
-            onLocalisationChange = {})
-      }
-    }
-
-    composeRule
-        .onNodeWithTag(SettingsScreenTestTags.APP_CONDITION_BUTTON)
-        .assertExists()
-        .performClick()
+    composeRule.onNodeWithText(SettingsScreenStrings.VERSION_LABEL).assertExists()
+    composeRule.onNodeWithText(SettingsScreenStrings.UNKNOW_VERSION).assertExists()
   }
 
   @Test
@@ -181,17 +154,14 @@ class SettingsScreenTest {
     composeRule.setContent {
       MaterialTheme {
         SettingsContent(
-            appVersion = "1.0.0",
+            appVersion = SettingsScreenStrings.APP_VERSION_1,
             onEditProfileClick = {},
             onLogoutClick = {},
             uiState =
-                SettingsUIState(
+                UserSettings(
                     notificationsEnabled = true,
                     picturesEnabled = true,
-                    localisationEnabled = false),
-            onNotificationsChange = {},
-            onPicturesChange = {},
-            onLocalisationChange = {})
+                    localisationEnabled = false))
       }
     }
 
@@ -204,6 +174,6 @@ class SettingsScreenTest {
   fun top_bar_title_is_displayed() {
     composeRule.setContent { MaterialTheme { SettingsScreen() } }
 
-    composeRule.onNodeWithText(SettingsScreenStrings.TopBarTitle).assertExists()
+    composeRule.onNodeWithText(SettingsScreenStrings.TOP_BAR_TITLE).assertExists()
   }
 }
