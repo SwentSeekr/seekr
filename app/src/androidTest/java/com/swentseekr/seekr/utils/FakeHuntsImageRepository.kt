@@ -17,9 +17,7 @@ class FakeHuntsImageRepository : IHuntsImageRepository {
   }
 
   override suspend fun uploadOtherImages(huntId: String, imageUris: List<Uri>): List<String> {
-    val urls = imageUris.mapIndexed { i, _ ->
-      "fake://other_image_${i}_for_$huntId"
-    }
+    val urls = imageUris.mapIndexed { i, _ -> "fake://other_image_${i}_for_$huntId" }
 
     val list = uploadedOtherImages.getOrPut(huntId) { mutableListOf() }
     list += urls

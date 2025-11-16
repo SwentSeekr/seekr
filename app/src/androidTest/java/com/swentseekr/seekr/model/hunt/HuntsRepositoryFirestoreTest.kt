@@ -196,41 +196,31 @@ class HuntsRepositoryFirestoreTest {
     val repo = HuntsRepositoryFirestore(db, fakeImageRepo)
 
     // GIVEN a hunt already stored
-    val original = hunt1.copy(
-      uid = "editTest",
-      mainImageUrl = "https://old_main.jpg",
-      otherImagesUrls = listOf(
-        "https://old1.jpg",
-        "https://old2.jpg"
-      )
-    )
+    val original =
+        hunt1.copy(
+            uid = "editTest",
+            mainImageUrl = "https://old_main.jpg",
+            otherImagesUrls = listOf("https://old1.jpg", "https://old2.jpg"))
 
     repo.addHunt(original)
     advanceUntilIdle()
 
     // WHEN editing the hunt
-    val updatedHunt = original.copy(
-      title = "Updated Title",
-      description = "Updated Description"
-    )
+    val updatedHunt = original.copy(title = "Updated Title", description = "Updated Description")
 
     // Simulate new images
     val newMainUri = Uri.parse("file://new_main.png")
-    val newOtherUris = listOf(
-      Uri.parse("file://otherA.jpg"),
-      Uri.parse("file://otherB.jpg")
-    )
+    val newOtherUris = listOf(Uri.parse("file://otherA.jpg"), Uri.parse("file://otherB.jpg"))
 
     // Simulate user removing old1.jpg
     val removed = listOf("https://old1.jpg")
 
     repo.editHunt(
-      huntId = "editTest",
-      hunt = updatedHunt,
-      newMainImage = newMainUri,
-      newOtherImages = newOtherUris,
-      deletedImages = removed
-    )
+        huntId = "editTest",
+        hunt = updatedHunt,
+        newMainImage = newMainUri,
+        newOtherImages = newOtherUris,
+        deletedImages = removed)
 
     advanceUntilIdle()
 
@@ -239,9 +229,8 @@ class HuntsRepositoryFirestoreTest {
 
     // Main image correctly updated
     assertTrue(
-      "Main image URL should come from fake image repo",
-      stored.mainImageUrl.startsWith("fake://main_image_url_for_editTest")
-    )
+        "Main image URL should come from fake image repo",
+        stored.mainImageUrl.startsWith("fake://main_image_url_for_editTest"))
 
     // Old images handled properly
     // old1.jpg must be removed, old2.jpg kept
@@ -259,5 +248,4 @@ class HuntsRepositoryFirestoreTest {
     assertEquals("Updated Title", stored.title)
     assertEquals("Updated Description", stored.description)
   }
-
 }

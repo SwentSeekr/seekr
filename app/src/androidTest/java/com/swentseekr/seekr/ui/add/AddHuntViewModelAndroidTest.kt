@@ -160,7 +160,6 @@ class AddHuntViewModelAndroidTest {
     assertFalse(s3.otherImagesUris.contains(uri1))
   }
 
-
   private fun setValidState(points: List<Location>) {
     viewModel.setTitle("T")
     viewModel.setDescription("D")

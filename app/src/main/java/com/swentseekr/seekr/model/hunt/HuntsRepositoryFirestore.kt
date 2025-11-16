@@ -68,45 +68,41 @@ class HuntsRepositoryFirestore(
     db.collection(HUNTS_COLLECTION_PATH).document(hunt.uid).set(huntWithImages).await()
   }
 
-    override suspend fun editHunt(
-        huntId: String,
-        hunt: Hunt,
-        newMainImage: Uri?,
-        newOtherImages: List<Uri>,
-        deletedImages: List<String>
-    ) {
+  override suspend fun editHunt(
+      huntId: String,
+      hunt: Hunt,
+      newMainImage: Uri?,
+      newOtherImages: List<Uri>,
+      deletedImages: List<String>
+  ) {
 
-        deletedImages.forEach { url ->
-            try {
-                imageRepo.deleteImageByUrl(url)
-            } catch (e: Exception) {
-                Log.w("HuntsRepositoryFirestore", "Failed to delete $url", e)
-            }
-        }
-
-        var mainImageUrl = hunt.mainImageUrl
-        if (newMainImage != null) {
-            mainImageUrl = imageRepo.uploadMainImage(huntId, newMainImage)
-        }
-
-        val newOtherImageUrls =
-            if (newOtherImages.isNotEmpty()) imageRepo.uploadOtherImages(huntId, newOtherImages)
-            else emptyList()
-
-        val remainingOldImages = hunt.otherImagesUrls.filterNot { it in deletedImages }
-
-        val finalOtherImages = remainingOldImages + newOtherImageUrls
-
-        val updated = hunt.copy(
-            mainImageUrl = mainImageUrl,
-            otherImagesUrls = finalOtherImages
-        )
-
-        db.collection(HUNTS_COLLECTION_PATH).document(huntId).set(updated).await()
+    deletedImages.forEach { url ->
+      try {
+        imageRepo.deleteImageByUrl(url)
+      } catch (e: Exception) {
+        Log.w("HuntsRepositoryFirestore", "Failed to delete $url", e)
+      }
     }
 
+    var mainImageUrl = hunt.mainImageUrl
+    if (newMainImage != null) {
+      mainImageUrl = imageRepo.uploadMainImage(huntId, newMainImage)
+    }
 
-    override suspend fun deleteHunt(huntID: String) {
+    val newOtherImageUrls =
+        if (newOtherImages.isNotEmpty()) imageRepo.uploadOtherImages(huntId, newOtherImages)
+        else emptyList()
+
+    val remainingOldImages = hunt.otherImagesUrls.filterNot { it in deletedImages }
+
+    val finalOtherImages = remainingOldImages + newOtherImageUrls
+
+    val updated = hunt.copy(mainImageUrl = mainImageUrl, otherImagesUrls = finalOtherImages)
+
+    db.collection(HUNTS_COLLECTION_PATH).document(huntId).set(updated).await()
+  }
+
+  override suspend fun deleteHunt(huntID: String) {
     imageRepo.deleteAllHuntImages(huntID)
     db.collection(HUNTS_COLLECTION_PATH).document(huntID).delete().await()
   }
