@@ -169,8 +169,14 @@ abstract class BaseHuntViewModel(
   }
 
   fun updateOtherImagesUris(uris: List<Uri>) {
-    otherImagesUris = uris
-    _uiState.value = _uiState.value.copy(otherImagesUris = uris)
+    otherImagesUris = otherImagesUris + uris
+
+    _uiState.value = _uiState.value.copy(otherImagesUris = otherImagesUris)
+  }
+
+  fun removeOtherImage(uri: Uri) {
+    otherImagesUris = otherImagesUris - uri
+    _uiState.value = _uiState.value.copy(otherImagesUris = otherImagesUris)
   }
 
   fun setIsSelectingPoints(isSelecting: Boolean) {

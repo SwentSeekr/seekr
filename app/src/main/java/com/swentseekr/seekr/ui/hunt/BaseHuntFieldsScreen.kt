@@ -91,6 +91,7 @@ fun BaseHuntFieldsScreen(
     onSelectLocations: () -> Unit,
     onSelectImage: (Uri?) -> Unit,
     onSelectOtherImages: (List<Uri>) -> Unit,
+    onRemoveOtherImage: (Uri) -> Unit,
     onSave: () -> Unit,
     onGoBack: () -> Unit,
 ) {
@@ -190,6 +191,10 @@ fun BaseHuntFieldsScreen(
                             .padding(bottom = 8.dp),
                     placeholder = painterResource(R.drawable.empty_image),
                     error = painterResource(R.drawable.empty_image))
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                TextButton(onClick = { onRemoveOtherImage(uri) }) { Text("Remove") }
               }
             }
 

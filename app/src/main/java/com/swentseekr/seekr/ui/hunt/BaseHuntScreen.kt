@@ -64,6 +64,7 @@ fun BaseHuntScreen(
         onSelectLocations = { vm.setIsSelectingPoints(true) },
         onSelectImage = onSelectImage,
         onSelectOtherImages = vm::updateOtherImagesUris,
+        onRemoveOtherImage = vm::removeOtherImage,
         onSave = { vm.submit() },
         onGoBack = onGoBack,
     )
