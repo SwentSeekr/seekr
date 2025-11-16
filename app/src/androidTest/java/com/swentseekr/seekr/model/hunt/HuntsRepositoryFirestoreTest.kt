@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.model.hunt
 
+import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment
@@ -186,4 +187,77 @@ class HuntsRepositoryFirestoreTest {
     val expectedHunts = setOf(hunt1, hunt3)
     assertEquals(expectedHunts, repository.getAllHunts().toSet())
   }
+
+  @Test
+  fun editHunt_updatesImagesCorrectly_withDeletion_andAddition() = runTest {
+    // Repository with fake image repo
+    val fakeImageRepo = com.swentseekr.seekr.utils.FakeHuntsImageRepository()
+    val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+    val repo = HuntsRepositoryFirestore(db, fakeImageRepo)
+
+    // GIVEN a hunt already stored
+    val original = hunt1.copy(
+      uid = "editTest",
+      mainImageUrl = "https://old_main.jpg",
+      otherImagesUrls = listOf(
+        "https://old1.jpg",
+        "https://old2.jpg"
+      )
+    )
+
+    repo.addHunt(original)
+    advanceUntilIdle()
+
+    // WHEN editing the hunt
+    val updatedHunt = original.copy(
+      title = "Updated Title",
+      description = "Updated Description"
+    )
+
+    // Simulate new images
+    val newMainUri = Uri.parse("file://new_main.png")
+    val newOtherUris = listOf(
+      Uri.parse("file://otherA.jpg"),
+      Uri.parse("file://otherB.jpg")
+    )
+
+    // Simulate user removing old1.jpg
+    val removed = listOf("https://old1.jpg")
+
+    repo.editHunt(
+      huntId = "editTest",
+      hunt = updatedHunt,
+      newMainImage = newMainUri,
+      newOtherImages = newOtherUris,
+      deletedImages = removed
+    )
+
+    advanceUntilIdle()
+
+    // THEN the stored hunt must contain correct merged images
+    val stored = repo.getHunt("editTest")
+
+    // Main image correctly updated
+    assertTrue(
+      "Main image URL should come from fake image repo",
+      stored.mainImageUrl.startsWith("fake://main_image_url_for_editTest")
+    )
+
+    // Old images handled properly
+    // old1.jpg must be removed, old2.jpg kept
+    assertFalse(stored.otherImagesUrls.contains("https://old1.jpg"))
+    assertTrue(stored.otherImagesUrls.contains("https://old2.jpg"))
+
+    // New images added from fake repo
+    assertTrue(stored.otherImagesUrls.contains("fake://other_image_0_for_editTest"))
+    assertTrue(stored.otherImagesUrls.contains("fake://other_image_1_for_editTest"))
+
+    // Should be exactly 3 images now: old2 + 2 new ones
+    assertEquals(3, stored.otherImagesUrls.size)
+
+    // Other fields updated & saved
+    assertEquals("Updated Title", stored.title)
+    assertEquals("Updated Description", stored.description)
+  }
+
 }

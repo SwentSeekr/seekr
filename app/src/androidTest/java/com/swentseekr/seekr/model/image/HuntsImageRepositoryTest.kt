@@ -10,6 +10,7 @@ import com.swentseekr.seekr.model.hunt.HuntsImageRepository
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment
 import java.io.File
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
@@ -52,7 +53,8 @@ class HuntsImageRepositoryTest {
     repository = HuntsImageRepository(storage)
   }
 
-  @After fun tearDown() = runBlocking { repository.deleteAllHuntImages(huntId) }
+  @After
+  fun tearDown() = runBlocking { repository.deleteAllHuntImages(huntId) }
 
   /** Utility to create a valid temporary image file. */
   private fun createTempImageFile(prefix: String = "test_img"): Uri {
@@ -76,10 +78,11 @@ class HuntsImageRepositoryTest {
   @Test
   fun uploadOtherImages_returnsValidUrls() = runBlocking {
     val uris =
-        listOf(
-            createTempImageFile("img_1"),
-            createTempImageFile("img_2"),
-            createTempImageFile("img_3"))
+      listOf(
+        createTempImageFile("img_1"),
+        createTempImageFile("img_2"),
+        createTempImageFile("img_3")
+      )
 
     val urls = repository.uploadOtherImages(huntId, uris)
     assertEquals(3, urls.size)
