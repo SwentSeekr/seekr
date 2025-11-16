@@ -43,8 +43,8 @@ interface HuntsRepository {
    */
   suspend fun addHunt(
       hunt: Hunt,
-      mainImageUri: android.net.Uri? = null,
-      otherImageUris: List<android.net.Uri> = emptyList()
+      mainImageUri: Uri? = null,
+      otherImageUris: List<Uri> = emptyList()
   )
 
   /**

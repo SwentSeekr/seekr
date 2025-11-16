@@ -81,7 +81,10 @@ class AddHuntFieldsScreenTest {
             onSelectLocations = { onSelectLocationsCalled = true },
             onSave = { onSaveCalled = true },
             onGoBack = { onGoBackCalled = true },
-            onSelectImage = { /* No-op for tests */})
+            onSelectImage = { /* No-op for tests */},
+            onSelectOtherImages = {},
+            onRemoveOtherImage = {},
+            onRemoveExistingImage = {})
       }
     }
   }
