@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.add
 
+import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.firebase.auth.FirebaseAuth
 import com.swentseekr.seekr.model.hunt.Difficulty
@@ -131,6 +132,32 @@ class AddHuntViewModelAndroidTest {
     assertNotNull(viewModel.uiState.value.errorMsg)
     viewModel.clearErrorMsg()
     assertNull(viewModel.uiState.value.errorMsg)
+  }
+
+  @Test
+  fun imageHandlers_updateStateCorrectly() = runTest {
+    val main = Uri.parse("file://main.png")
+    viewModel.updateMainImageUri(main)
+
+    val s1 = viewModel.uiState.value
+    assertEquals(main.toString(), s1.mainImageUrl)
+
+    val uri1 = Uri.parse("file://img1.png")
+    val uri2 = Uri.parse("file://img2.png")
+
+    viewModel.updateOtherImagesUris(listOf(uri1))
+    viewModel.updateOtherImagesUris(listOf(uri2))
+
+    val s2 = viewModel.uiState.value
+
+    assertEquals(listOf(uri1, uri2), s2.otherImagesUris)
+
+    viewModel.removeOtherImage(uri1)
+
+    val s3 = viewModel.uiState.value
+
+    assertEquals(listOf(uri2), s3.otherImagesUris)
+    assertFalse(s3.otherImagesUris.contains(uri1))
   }
 
   private fun setValidState(points: List<Location>) {

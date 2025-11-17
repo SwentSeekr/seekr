@@ -29,7 +29,13 @@ class HuntsRepositoryLocal : HuntsRepository {
     hunts.add(hunt)
   }
 
-  override suspend fun editHunt(huntID: String, newValue: Hunt) {
+  override suspend fun editHunt(
+      huntID: String,
+      newValue: Hunt,
+      _mainImageUri: Uri?,
+      _addedOtherImages: List<Uri>,
+      _removedOtherImages: List<String>
+  ) {
     val index = hunts.indexOfFirst { it.uid == huntID }
     if (index != -1) {
       hunts[index] = newValue

@@ -15,7 +15,13 @@ class FakeRepoSuccess(private val hunts: List<Hunt>) : HuntsRepository {
     return hunts.filter { it.authorId == authorID }
   }
 
-  override suspend fun editHunt(uid: String, updatedHunt: Hunt) = Unit
+  override suspend fun editHunt(
+      uid: String,
+      updatedHunt: Hunt,
+      mainImageUri: Uri?,
+      addedOtherImages: List<Uri>,
+      removedOtherImages: List<String>
+  ) = Unit
 
   override suspend fun deleteHunt(uid: String) = Unit
 
@@ -33,7 +39,13 @@ class FakeRepoEmpty : HuntsRepository {
 
   override suspend fun getHunt(uid: String): Hunt = error("nope")
 
-  override suspend fun editHunt(uid: String, updatedHunt: Hunt) = Unit
+  override suspend fun editHunt(
+      uid: String,
+      updatedHunt: Hunt,
+      mainImageUri: Uri?,
+      addedOtherImages: List<Uri>,
+      removedOtherImages: List<String>
+  ) = Unit
 
   override suspend fun deleteHunt(uid: String) = Unit
 
@@ -51,7 +63,13 @@ class FakeRepoThrows(private val message: String) : HuntsRepository {
 
   override suspend fun getHunt(uid: String): Hunt = throw IllegalStateException(message)
 
-  override suspend fun editHunt(uid: String, updatedHunt: Hunt) = Unit
+  override suspend fun editHunt(
+      uid: String,
+      updatedHunt: Hunt,
+      mainImageUri: Uri?,
+      addedOtherImages: List<Uri>,
+      removedOtherImages: List<String>
+  ) = Unit
 
   override suspend fun deleteHunt(uid: String) = Unit
 

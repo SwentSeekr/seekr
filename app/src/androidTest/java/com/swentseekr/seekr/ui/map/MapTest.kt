@@ -52,7 +52,13 @@ class MapTest {
 
         override suspend fun getHunt(uid: String): Hunt = list.first { it.uid == uid }
 
-        override suspend fun editHunt(uid: String, updatedHunt: Hunt) {}
+        override suspend fun editHunt(
+            huntID: String,
+            newValue: Hunt,
+            mainImageUri: Uri?,
+            addedOtherImages: List<Uri>,
+            removedOtherImages: List<String>
+        ) {}
 
         override suspend fun deleteHunt(uid: String) {}
 

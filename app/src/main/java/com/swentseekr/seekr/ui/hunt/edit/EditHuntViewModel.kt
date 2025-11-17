@@ -15,9 +15,14 @@ class EditHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.rep
 
   var mainImageUri: Uri? = null
 
+  // Images existantes à supprimer de Firebase Storage
+  private val pendingDeletionUrls = mutableListOf<String>()
+
   suspend fun load(id: String) {
     try {
       val hunt = repository.getHunt(id)
+
+      // Initialise l'état UI avec les données existantes
       _uiState.value =
           _uiState.value.copy(
               title = hunt.title,
@@ -28,7 +33,9 @@ class EditHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.rep
               difficulty = hunt.difficulty,
               status = hunt.status,
               mainImageUrl = hunt.mainImageUrl,
+              otherImagesUrls = hunt.otherImagesUrls, // <-- IMPORTANT
               reviewRate = hunt.reviewRate)
+
       huntId = id
     } catch (e: Exception) {
       huntId = null
@@ -53,15 +60,28 @@ class EditHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.rep
         difficulty = state.difficulty!!,
         authorId = authorId,
         mainImageUrl = state.mainImageUrl,
-        otherImagesUrls = emptyList(),
+        otherImagesUrls = state.otherImagesUrls, // sera mis à jour après upload
         reviewRate = state.reviewRate)
   }
 
+  /**
+   * Supprimer une image déjà stockée dans Firebase (retire de l’état et marque pour suppression)
+   */
+  override fun removeExistingOtherImage(url: String) {
+    pendingDeletionUrls += url
+
+    val newList = _uiState.value.otherImagesUrls - url
+    _uiState.value = _uiState.value.copy(otherImagesUrls = newList)
+  }
+
   override suspend fun persist(hunt: Hunt) {
-    if (mainImageUri != null) {
-      repository.addHunt(hunt = hunt, mainImageUri = mainImageUri, otherImageUris = emptyList())
-    } else {
-      repository.editHunt(hunt.uid, hunt)
-    }
+    val id = requireNotNull(huntId)
+
+    repository.editHunt(
+        huntID = id,
+        newValue = hunt,
+        mainImageUri = mainImageUri,
+        addedOtherImages = otherImagesUris,
+        removedOtherImages = pendingDeletionUrls)
   }
 }

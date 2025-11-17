@@ -22,7 +22,9 @@ data class HuntUIState(
     val distance: String = "",
     val difficulty: Difficulty? = null,
     val status: HuntStatus? = null,
-    val mainImageUrl: String = "", // String, cohérent avec ton modèle Hunt
+    val mainImageUrl: String = "",
+    val otherImagesUrls: List<String> = emptyList(),
+    val otherImagesUris: List<Uri> = emptyList(),
     val reviewRate: Double = 0.0,
     val errorMsg: String? = null,
     val invalidTitleMsg: String? = null,
@@ -55,6 +57,8 @@ abstract class BaseHuntViewModel(
   val uiState: StateFlow<HuntUIState> = _uiState.asStateFlow()
 
   private var testMode: Boolean = false
+
+  protected var otherImagesUris: List<Uri> = emptyList()
 
   fun clearErrorMsg() {
     _uiState.value = _uiState.value.copy(errorMsg = null)
@@ -162,6 +166,21 @@ abstract class BaseHuntViewModel(
       is EditHuntViewModel -> this.mainImageUri = uri
     }
     _uiState.value = _uiState.value.copy(mainImageUrl = uri?.toString() ?: "")
+  }
+
+  fun updateOtherImagesUris(uris: List<Uri>) {
+    otherImagesUris = otherImagesUris + uris
+
+    _uiState.value = _uiState.value.copy(otherImagesUris = otherImagesUris)
+  }
+
+  fun removeOtherImage(uri: Uri) {
+    otherImagesUris = otherImagesUris - uri
+    _uiState.value = _uiState.value.copy(otherImagesUris = otherImagesUris)
+  }
+
+  open fun removeExistingOtherImage(url: String) {
+    // defaut no-op
   }
 
   fun setIsSelectingPoints(isSelecting: Boolean) {
