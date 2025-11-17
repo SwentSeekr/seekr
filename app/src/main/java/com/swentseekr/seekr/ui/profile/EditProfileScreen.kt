@@ -1,6 +1,9 @@
 package com.swentseekr.seekr.ui.profile
 
+import android.content.ContentValues
+import android.content.Context
 import android.net.Uri
+import android.provider.MediaStore
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -78,19 +81,21 @@ fun EditProfileScreen(
   val uiState by editProfileViewModel.uiState.collectAsState()
   val context = LocalContext.current
 
-  var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+  // var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
   var showDialog by remember { mutableStateOf(false) }
 
   val galleryLauncher =
       rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        if (uri != null) selectedImageUri = uri
+        uri?.let { editProfileViewModel.updateProfilePictureUri(it) }
       }
 
-  var cameraPhotoUri by remember { mutableStateOf<Uri?>(null) }
+  var cameraPhotoUri = remember { mutableStateOf<Uri?>(null) }
   val cameraLauncher =
       rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-        if (success) selectedImageUri = cameraPhotoUri
+        if (success && cameraPhotoUri.value != null) {
+          editProfileViewModel.updateProfilePictureUri(cameraPhotoUri.value!!)
+        }
       }
 
   fun createTempImageUri(): Uri {
@@ -101,15 +106,16 @@ fun EditProfileScreen(
 
   fun launchCamera() {
     try {
-      cameraPhotoUri = createTempImageUri()
-      cameraLauncher.launch(cameraPhotoUri)
+      val uri = createImageUri(context)
+      cameraPhotoUri.value = uri
+      cameraLauncher.launch(uri)
     } catch (e: Exception) {
       Log.e("CameraLaunch", "Failed to launch camera: ${e.message}", e)
     }
   }
 
   LaunchedEffect(Unit) {
-    if (!testMode && userId != null) editProfileViewModel.loadProfile(userId)
+    if (!testMode && userId != null) editProfileViewModel.loadProfile()
     editProfileViewModel.uiState.collect { if (it.success) onDone() }
   }
 
@@ -141,7 +147,9 @@ fun EditProfileScreen(
                       Text("Camera")
                     }
 
-                if (uiState.profilePicture != 0 || selectedImageUri != null) {
+                if (uiState.profilePicture != 0 ||
+                    uiState.profilePictureUri != null ||
+                    uiState.profilePictureUrl.isNotEmpty()) {
                   Button(
                       modifier = Modifier.fillMaxWidth(),
                       colors =
@@ -149,7 +157,6 @@ fun EditProfileScreen(
                               containerColor = MaterialTheme.colorScheme.errorContainer),
                       onClick = {
                         editProfileViewModel.removeProfilePicture()
-                        selectedImageUri = null
                         showDialog = false
                       }) {
                         Text("Remove Picture", color = MaterialTheme.colorScheme.onErrorContainer)
@@ -180,7 +187,13 @@ fun EditProfileScreen(
         if (uiState.success) onDone()
       },
       onProfilePictureChange = { showDialog = true },
-      profilePictureUri = selectedImageUri)
+      profilePictureUri = uiState.profilePictureUri)
+}
+
+fun createImageUri(context: Context): Uri {
+  val contentValues = ContentValues().apply { put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg") }
+  return context.contentResolver.insert(
+      MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)!!
 }
 
 /**
@@ -210,6 +223,9 @@ fun EditProfileContent(
   var pseudonymError by remember { mutableStateOf<String?>(null) }
   var bioError by remember { mutableStateOf<String?>(null) }
   var localError by remember { mutableStateOf<String?>(null) }
+
+  val isLoading = uiState.isLoading
+
   Column(
       modifier =
           Modifier.fillMaxSize()
@@ -224,17 +240,22 @@ fun EditProfileContent(
               ProfilePicture(
                   profilePictureRes = uiState.profilePicture,
                   profilePictureUri = profilePictureUri,
+                  profilePictureUrl = uiState.profilePictureUrl,
                   modifier = Modifier.fillMaxSize())
-              Text(
-                  text = "+",
-                  style =
-                      MaterialTheme.typography.titleLarge.copy(
-                          color = MaterialTheme.colorScheme.onPrimary),
-                  fontSize = EditProfileConstants.ADD_ICON_FONT_SIZE,
-                  modifier =
-                      Modifier.align(Alignment.BottomEnd)
-                          .background(MaterialTheme.colorScheme.primary, shape = CircleShape)
-                          .padding(4.dp))
+              if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center).size(24.dp))
+              } else {
+                Text(
+                    text = "+",
+                    style =
+                        MaterialTheme.typography.titleLarge.copy(
+                            color = MaterialTheme.colorScheme.onPrimary),
+                    fontSize = EditProfileConstants.ADD_ICON_FONT_SIZE,
+                    modifier =
+                        Modifier.align(Alignment.BottomEnd)
+                            .background(MaterialTheme.colorScheme.primary, shape = CircleShape)
+                            .padding(4.dp))
+              }
             }
 
         Spacer(modifier = Modifier.height(EditProfileConstants.SPACER_LARGE))
@@ -242,15 +263,18 @@ fun EditProfileContent(
         OutlinedTextField(
             value = uiState.pseudonym,
             onValueChange = { newValue ->
-              onPseudonymChange(newValue)
-              pseudonymError =
-                  when {
-                    newValue.isBlank() -> "Pseudonym cannot be empty"
-                    newValue.length > 30 -> "Max 30 characters allowed"
-                    else -> null
-                  }
+              if (!isLoading) {
+                onPseudonymChange(newValue)
+                pseudonymError =
+                    when {
+                      newValue.isBlank() -> "Pseudonym cannot be empty"
+                      newValue.length > 30 -> "Max 30 characters allowed"
+                      else -> null
+                    }
+              }
             },
             label = { Text("Pseudonym") },
+            enabled = !isLoading,
             isError = pseudonymError != null,
             modifier = Modifier.fillMaxWidth().testTag(EditProfileTestTags.PSEUDONYM_FIELD))
 
@@ -267,14 +291,17 @@ fun EditProfileContent(
         OutlinedTextField(
             value = uiState.bio,
             onValueChange = { newValue ->
-              onBioChange(newValue)
-              bioError =
-                  when {
-                    newValue.length > 200 -> "Max 200 characters allowed"
-                    else -> null
-                  }
+              if (!isLoading) {
+                onBioChange(newValue)
+                bioError =
+                    when {
+                      newValue.length > 200 -> "Max 200 characters allowed"
+                      else -> null
+                    }
+              }
             },
             label = { Text("Bio") },
+            enabled = !isLoading,
             modifier =
                 Modifier.fillMaxWidth()
                     .heightIn(min = EditProfileConstants.BIO_FIELD_MIN_HEIGHT)
@@ -291,7 +318,9 @@ fun EditProfileContent(
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
           OutlinedButton(
-              modifier = Modifier.testTag(EditProfileTestTags.CANCEL_BUTTON), onClick = onCancel) {
+              modifier = Modifier.testTag(EditProfileTestTags.CANCEL_BUTTON),
+              onClick = onCancel,
+              enabled = !isLoading) {
                 Text("Cancel")
               }
           Button(
@@ -304,7 +333,8 @@ fun EditProfileContent(
                 }
               },
               enabled =
-                  uiState.canSave &&
+                  !isLoading &&
+                      uiState.canSave &&
                       pseudonymError == null &&
                       bioError == null &&
                       !uiState.isSaving) {

@@ -16,21 +16,25 @@ import com.swentseekr.seekr.R
 /**
  * Displays a user's profile picture in a circular shape.
  *
- * @param profilePictureRes The drawable resource ID of the profile picture (fallback if Uri is
+ * @param profilePictureRes The drawable resource ID of the profile picture (fallback if Uri/Url is
  *   null).
  * @param profilePictureUri The URI of a picked image from gallery or camera (optional).
+ * @param profilePictureUrl The Firebase Storage URL string (optional).
  */
 @Composable
 fun ProfilePicture(
     profilePictureRes: Int = 0,
     profilePictureUri: Uri? = null,
+    profilePictureUrl: String? = null,
     modifier: Modifier = Modifier
 ) {
-  val isFallback = profilePictureUri == null && profilePictureRes == 0
+  val isFallback =
+      profilePictureUri == null && profilePictureRes == 0 && profilePictureUrl.isNullOrEmpty()
 
   val painter =
       when {
         profilePictureUri != null -> rememberAsyncImagePainter(profilePictureUri)
+        !profilePictureUrl.isNullOrEmpty() -> rememberAsyncImagePainter(profilePictureUrl)
         profilePictureRes != 0 -> painterResource(profilePictureRes)
         else -> painterResource(R.drawable.empty_user)
       }

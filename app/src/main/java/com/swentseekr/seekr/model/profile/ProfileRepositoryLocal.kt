@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.model.profile
 
+import android.net.Uri
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.ui.profile.Profile
 
@@ -58,5 +59,15 @@ class ProfileRepositoryLocal : ProfileRepository {
     if (profile.doneHunts.none { it.uid == hunt.uid }) {
       profile.doneHunts.add(hunt)
     }
+  }
+
+  override suspend fun uploadProfilePicture(userId: String, uri: Uri): String {
+    val fakeUrl = "local://profile-picture/$userId"
+    val profile =
+        profiles.find { it.uid == userId }
+            ?: throw IllegalArgumentException("Profile with ID $userId not found")
+    val updatedProfile = profile.copy(author = profile.author.copy(profilePictureUrl = fakeUrl))
+    updateProfile(updatedProfile)
+    return fakeUrl
   }
 }
