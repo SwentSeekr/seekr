@@ -21,18 +21,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
-import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsUi
-
 
 sealed class OtherImage {
-    data class Remote(val url: String) : OtherImage()
-    data class Local(val uri: Uri) : OtherImage()
+  data class Remote(val url: String) : OtherImage()
+
+  data class Local(val uri: Uri) : OtherImage()
 }
+
 @Composable
 fun ValidatedOutlinedField(
     value: String = BaseHuntFieldsStrings.TITLE_DEFAULT,
@@ -185,27 +184,29 @@ fun BaseHuntFieldsScreen(
               }
 
           // Combine both existing URLs + newly added URIs
-            val combinedImages: List<OtherImage> =
-                uiState.otherImagesUrls.map { OtherImage.Remote(it) } +
-                        uiState.otherImagesUris.map { OtherImage.Local(it) }
+          val combinedImages: List<OtherImage> =
+              uiState.otherImagesUrls.map { OtherImage.Remote(it) } +
+                  uiState.otherImagesUris.map { OtherImage.Local(it) }
 
           if (combinedImages.isNotEmpty()) {
             Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightMedium))
 
             Column {
               combinedImages.forEach { image ->
-                  val tagSuffix = when (image) {
+                val tagSuffix =
+                    when (image) {
                       is OtherImage.Remote -> image.url
                       is OtherImage.Local -> image.uri.toString()
-                  }
+                    }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween) {
-                    val model = when (image) {
-                        is OtherImage.Remote -> image.url
-                        is OtherImage.Local -> image.uri
-                    }
+                      val model =
+                          when (image) {
+                            is OtherImage.Remote -> image.url
+                            is OtherImage.Local -> image.uri
+                          }
 
                       AsyncImage(
                           model = model,
@@ -213,7 +214,9 @@ fun BaseHuntFieldsScreen(
                           modifier =
                               Modifier.testTag("otherImage_$tagSuffix")
                                   .weight(BaseHuntFieldsUi.ImageWeight)
-                                  .height(BaseHuntFieldsUi.ImageHeight / BaseHuntFieldsUi.ImageHeightDivisor)
+                                  .height(
+                                      BaseHuntFieldsUi.ImageHeight /
+                                          BaseHuntFieldsUi.ImageHeightDivisor)
                                   .clip(RoundedCornerShape(BaseHuntFieldsUi.FieldCornerRadius)),
                           placeholder = painterResource(R.drawable.empty_image),
                           error = painterResource(R.drawable.empty_image))
@@ -223,10 +226,10 @@ fun BaseHuntFieldsScreen(
                       TextButton(
                           modifier = Modifier.testTag("removeButton_$tagSuffix"),
                           onClick = {
-                              when (image) {
-                                  is OtherImage.Remote -> onRemoveExistingImage(image.url)
-                                  is OtherImage.Local -> onRemoveOtherImage(image.uri)
-                              }
+                            when (image) {
+                              is OtherImage.Remote -> onRemoveExistingImage(image.url)
+                              is OtherImage.Local -> onRemoveOtherImage(image.uri)
+                            }
                           }) {
                             Text(BaseHuntFieldsStrings.REMOVE)
                           }

@@ -50,7 +50,6 @@ class AddHuntFieldsScreenTest {
     composeRule.setContent {
       MaterialTheme {
         state = remember { mutableStateOf(HuntUIState()) }
-        screenKey = remember { mutableStateOf(0) }
         BaseHuntFieldsScreen(
             uiState = state.value,
             onTitleChange = { title ->
@@ -198,10 +197,8 @@ class AddHuntFieldsScreenTest {
 
     val saveBtn = composeRule.onNodeWithTag(HuntScreenTestTags.HUNT_SAVE)
 
-    // Check initial state
     saveBtn.assertIsNotEnabled()
 
-    // Update state to valid
     composeRule.runOnUiThread {
       state.value =
           state.value.copy(
@@ -216,16 +213,13 @@ class AddHuntFieldsScreenTest {
               invalidDescriptionMsg = null,
               invalidTimeMsg = null,
               invalidDistanceMsg = null)
-
-      // Force a full remount
-      screenKey.value++
     }
 
     composeRule.waitForIdle()
 
     assertFalse(onSaveCalled)
 
-    // bypass enabled/disabled entirely
+    // Always triggers onSave
     saveBtn.performSemanticsAction(SemanticsActions.OnClick)
 
     assertTrue(onSaveCalled)

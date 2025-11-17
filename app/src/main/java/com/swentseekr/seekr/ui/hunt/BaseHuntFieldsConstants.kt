@@ -49,7 +49,6 @@ object BaseHuntFieldsUi {
   const val ImageWeight: Float = 1f
 
   const val ImageHeightDivisor: Float = 1.5f
-
 }
 
 object HuntScreenTestTags {

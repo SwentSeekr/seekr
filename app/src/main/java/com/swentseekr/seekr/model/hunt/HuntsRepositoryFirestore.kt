@@ -68,37 +68,33 @@ class HuntsRepositoryFirestore(
     db.collection(HUNTS_COLLECTION_PATH).document(hunt.uid).set(huntWithImages).await()
   }
 
-    override suspend fun editHunt(
-        huntID: String,
-        newValue: Hunt,
-        mainImageUri: Uri?,
-        addedOtherImages: List<Uri>,
-        removedOtherImages: List<String>
-    ) {
+  override suspend fun editHunt(
+      huntID: String,
+      newValue: Hunt,
+      mainImageUri: Uri?,
+      addedOtherImages: List<Uri>,
+      removedOtherImages: List<String>
+  ) {
 
-        removedOtherImages.forEach { url ->
-            imageRepo.deleteImageByUrl(url)
-        }
+    removedOtherImages.forEach { url -> imageRepo.deleteImageByUrl(url) }
 
-        var mainImageUrl = newValue.mainImageUrl
-        if (mainImageUri != null) {
-            mainImageUrl = imageRepo.uploadMainImage(huntID,
-                mainImageUri)
-        }
-
-        val newOtherImageUrls =
-            if (addedOtherImages.isNotEmpty()) imageRepo.uploadOtherImages(huntID, addedOtherImages)
-            else emptyList()
-
-        val remainingOldImages = newValue.otherImagesUrls.filterNot { it in removedOtherImages }
-
-        val finalOtherImages = remainingOldImages + newOtherImageUrls
-
-        val updated = newValue.copy(mainImageUrl = mainImageUrl, otherImagesUrls = finalOtherImages)
-
-        db.collection(HUNTS_COLLECTION_PATH).document(huntID).set(updated).await()
+    var mainImageUrl = newValue.mainImageUrl
+    if (mainImageUri != null) {
+      mainImageUrl = imageRepo.uploadMainImage(huntID, mainImageUri)
     }
 
+    val newOtherImageUrls =
+        if (addedOtherImages.isNotEmpty()) imageRepo.uploadOtherImages(huntID, addedOtherImages)
+        else emptyList()
+
+    val remainingOldImages = newValue.otherImagesUrls.filterNot { it in removedOtherImages }
+
+    val finalOtherImages = remainingOldImages + newOtherImageUrls
+
+    val updated = newValue.copy(mainImageUrl = mainImageUrl, otherImagesUrls = finalOtherImages)
+
+    db.collection(HUNTS_COLLECTION_PATH).document(huntID).set(updated).await()
+  }
 
   override suspend fun deleteHunt(huntID: String) {
     imageRepo.deleteAllHuntImages(huntID)
