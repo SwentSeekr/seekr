@@ -179,6 +179,10 @@ abstract class BaseHuntViewModel(
     _uiState.value = _uiState.value.copy(otherImagesUris = otherImagesUris)
   }
 
+    open fun removeExistingOtherImage(url: String) {
+        // defaut no-op
+    }
+
   fun setIsSelectingPoints(isSelecting: Boolean) {
     _uiState.value = _uiState.value.copy(isSelectingPoints = isSelecting)
   }

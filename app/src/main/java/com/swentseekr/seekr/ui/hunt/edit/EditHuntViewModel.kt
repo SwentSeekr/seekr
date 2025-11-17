@@ -67,7 +67,7 @@ class EditHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.rep
   /**
    * Supprimer une image déjà stockée dans Firebase (retire de l’état et marque pour suppression)
    */
-  fun removeExistingOtherImage(url: String) {
+  override fun removeExistingOtherImage(url: String) {
     pendingDeletionUrls += url
 
     val newList = _uiState.value.otherImagesUrls - url

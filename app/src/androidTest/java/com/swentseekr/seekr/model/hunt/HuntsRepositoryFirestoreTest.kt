@@ -216,11 +216,11 @@ class HuntsRepositoryFirestoreTest {
     val removed = listOf("https://old1.jpg")
 
     repo.editHunt(
-        huntId = "editTest",
-        hunt = updatedHunt,
-        newMainImage = newMainUri,
-        newOtherImages = newOtherUris,
-        deletedImages = removed)
+        huntID = "editTest",
+        newValue = updatedHunt,
+        mainImageUri = newMainUri,
+        addedOtherImages = newOtherUris,
+        removedOtherImages = removed)
 
     advanceUntilIdle()
 

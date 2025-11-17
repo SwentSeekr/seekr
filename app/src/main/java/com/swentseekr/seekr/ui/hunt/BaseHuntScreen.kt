@@ -5,7 +5,6 @@ import android.widget.Toast
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.swentseekr.seekr.model.map.Location
-import com.swentseekr.seekr.ui.hunt.edit.EditHuntViewModel
 
 @Composable
 fun BaseHuntScreen(
@@ -66,9 +65,7 @@ fun BaseHuntScreen(
         onSelectImage = onSelectImage,
         onSelectOtherImages = vm::updateOtherImagesUris,
         onRemoveOtherImage = vm::removeOtherImage, // <-- images locales (URIs)
-        onRemoveExistingImage = {
-          if (vm is EditHuntViewModel) vm.removeExistingOtherImage(it)
-        }, // <-- images URL (Firestore)
+        onRemoveExistingImage = vm::removeExistingOtherImage,// <-- images URL (Firestore)
         onSave = { vm.submit() },
         onGoBack = onGoBack,
     )

@@ -26,10 +26,16 @@ import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
+import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsUi
 
+
+sealed class OtherImage {
+    data class Remote(val url: String) : OtherImage()
+    data class Local(val uri: Uri) : OtherImage()
+}
 @Composable
 fun ValidatedOutlinedField(
-    value: String = "Add your Hunt",
+    value: String = BaseHuntFieldsStrings.TITLE_DEFAULT,
     onValueChange: (String) -> Unit,
     label: String,
     placeholder: String,
@@ -80,7 +86,7 @@ private fun ValidatedOutlinedField(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BaseHuntFieldsScreen(
-    title: String = "Add your Hunt",
+    title: String = BaseHuntFieldsStrings.TITLE_DEFAULT,
     uiState: HuntUIState,
     onTitleChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
@@ -141,13 +147,13 @@ fun BaseHuntFieldsScreen(
                   focusedBorderColor = MaterialTheme.colorScheme.primary)
 
           // IMAGE PICKER + PREVIEW
-          Text("Main Image", style = MaterialTheme.typography.titleMedium)
+          Text(BaseHuntFieldsStrings.MAIN_IMAGE, style = MaterialTheme.typography.titleMedium)
           Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightSmall))
 
           Button(
               onClick = { imagePickerLauncher.launch("image/*") },
               modifier = Modifier.fillMaxWidth()) {
-                Text("Choose Image")
+                Text(BaseHuntFieldsStrings.BUTTON_CHOOSE_IMAGE)
               }
 
           val imageToDisplay = uiState.mainImageUrl
@@ -156,7 +162,7 @@ fun BaseHuntFieldsScreen(
             Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightMedium))
             AsyncImage(
                 model = imageToDisplay,
-                contentDescription = "Selected Hunt Image",
+                contentDescription = BaseHuntFieldsStrings.CONTENT_DESC_SELECTED_IMAGE,
                 modifier =
                     Modifier.fillMaxWidth()
                         .height(BaseHuntFieldsUi.ImageHeight)
@@ -169,68 +175,64 @@ fun BaseHuntFieldsScreen(
 
           // OTHER IMAGES SECTION – EDIT + ADD MODE
 
-          Text("Other Images", style = MaterialTheme.typography.titleMedium)
+          Text(BaseHuntFieldsStrings.OTHER_IMAGES, style = MaterialTheme.typography.titleMedium)
           Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightSmall))
 
           Button(
               onClick = { multipleImagesPickerLauncher.launch("image/*") },
               modifier = Modifier.fillMaxWidth()) {
-                Text("Choose Additional Images")
+                Text(BaseHuntFieldsStrings.BUTTON_CHOOSE_ADDITIONAL_IMAGES)
               }
 
           // Combine both existing URLs + newly added URIs
-          val combinedImages: List<Any> = uiState.otherImagesUrls + uiState.otherImagesUris
+            val combinedImages: List<OtherImage> =
+                uiState.otherImagesUrls.map { OtherImage.Remote(it) } +
+                        uiState.otherImagesUris.map { OtherImage.Local(it) }
 
           if (combinedImages.isNotEmpty()) {
             Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightMedium))
 
             Column {
               combinedImages.forEach { image ->
-                val tagSuffix =
-                    when (image) {
-                      is String -> image
-                      is Uri -> image.toString()
-                      else -> "unknown"
-                    }
+                  val tagSuffix = when (image) {
+                      is OtherImage.Remote -> image.url
+                      is OtherImage.Local -> image.uri.toString()
+                  }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween) {
-                      val model =
-                          when (image) {
-                            is String -> image // URL
-                            is Uri -> image // New local image
-                            else -> null
-                          }
+                    val model = when (image) {
+                        is OtherImage.Remote -> image.url
+                        is OtherImage.Local -> image.uri
+                    }
 
                       AsyncImage(
                           model = model,
-                          contentDescription = "Secondary Image",
+                          contentDescription = BaseHuntFieldsStrings.CONTENT_DESC_SECONDARY_IMAGE,
                           modifier =
                               Modifier.testTag("otherImage_$tagSuffix")
-                                  .weight(1f)
-                                  .height(BaseHuntFieldsUi.ImageHeight / 1.5f)
+                                  .weight(BaseHuntFieldsUi.ImageWeight)
+                                  .height(BaseHuntFieldsUi.ImageHeight / BaseHuntFieldsUi.ImageHeightDivisor)
                                   .clip(RoundedCornerShape(BaseHuntFieldsUi.FieldCornerRadius)),
                           placeholder = painterResource(R.drawable.empty_image),
                           error = painterResource(R.drawable.empty_image))
 
-                      Spacer(modifier = Modifier.width(8.dp))
+                      Spacer(modifier = Modifier.width(BaseHuntFieldsUi.SpacerHeightSmall))
 
                       TextButton(
                           modifier = Modifier.testTag("removeButton_$tagSuffix"),
                           onClick = {
-                            if (image is String) {
-                              onRemoveExistingImage(image)
-                            }
-                            if (image is Uri) {
-                              onRemoveOtherImage(image)
-                            }
+                              when (image) {
+                                  is OtherImage.Remote -> onRemoveExistingImage(image.url)
+                                  is OtherImage.Local -> onRemoveOtherImage(image.uri)
+                              }
                           }) {
-                            Text("Remove")
+                            Text(BaseHuntFieldsStrings.REMOVE)
                           }
                     }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightSmall))
               }
             }
 
