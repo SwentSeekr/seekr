@@ -186,6 +186,13 @@ fun BaseHuntFieldsScreen(
 
             Column {
               combinedImages.forEach { image ->
+
+                  val tagSuffix = when (image) {
+                      is String -> image
+                      is Uri -> image.toString()
+                      else -> "unknown"
+                  }
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween) {
@@ -200,7 +207,9 @@ fun BaseHuntFieldsScreen(
                           model = model,
                           contentDescription = "Secondary Image",
                           modifier =
-                              Modifier.weight(1f)
+                              Modifier
+                                  .testTag("otherImage_$tagSuffix")
+                                  .weight(1f)
                                   .height(BaseHuntFieldsUi.ImageHeight / 1.5f)
                                   .clip(RoundedCornerShape(BaseHuntFieldsUi.FieldCornerRadius)),
                           placeholder = painterResource(R.drawable.empty_image),
@@ -209,6 +218,7 @@ fun BaseHuntFieldsScreen(
                       Spacer(modifier = Modifier.width(8.dp))
 
                       TextButton(
+                          modifier = Modifier.testTag("removeButton_$tagSuffix"),
                           onClick = {
                             if (image is String) {
                               onRemoveExistingImage(image)
