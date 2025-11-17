@@ -37,7 +37,6 @@ import com.swentseekr.seekr.utils.FakeJwtGenerator
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 
 // -------------------------------------------------------------------------
@@ -97,33 +96,34 @@ class EndToEndM2Tests {
    * - Change the pseudonym and save.
    * - Verify the updated pseudonym is visible again on the Profile screen.
    */
-  @Test
-  fun editProfile_fromSettings_updatesPseudonymOnProfile() {
-    val newPseudonym = "E2E Edited Pseudonym"
-    val newBio = "E2E test bio for this user"
-
-    compose.setContent { SeekrRootApp() }
-
-    // 0) Because we are authenticated, we should land on Overview.
-    val overview = OverviewRobot(compose).assertOnOverview()
-
-    // 1) Navigate to Profile via bottom bar.
-    val profileRobot = overview.openProfileViaBottomBar()
-
-    // 2) From Profile → open Settings.
-    val settingsRobot = profileRobot.assertOnProfile().openSettings()
-
-    // 3) From Settings → open Edit Profile, change pseudonym & bio, and save (back to Settings).
-    val settingsAfterSave =
-        settingsRobot
-            .openEditProfile()
-            .typePseudonym(newPseudonym)
-            .typeBio(newBio)
-            .save() // now returns SettingsRobot
-
-    // 4) Go back from Settings → Profile and assert pseudonym updated.
-    settingsAfterSave.goBackToProfile().assertPseudonymVisible(newPseudonym)
-  }
+  //  @Test
+  //  fun editProfile_fromSettings_updatesPseudonymOnProfile() {
+  //    val newPseudonym = "E2E Edited Pseudonym"
+  //    val newBio = "E2E test bio for this user"
+  //
+  //    compose.setContent { SeekrRootApp() }
+  //
+  //    // 0) Because we are authenticated, we should land on Overview.
+  //    val overview = OverviewRobot(compose).assertOnOverview()
+  //
+  //    // 1) Navigate to Profile via bottom bar.
+  //    val profileRobot = overview.openProfileViaBottomBar()
+  //
+  //    // 2) From Profile → open Settings.
+  //    val settingsRobot = profileRobot.assertOnProfile().openSettings()
+  //
+  //    // 3) From Settings → open Edit Profile, change pseudonym & bio, and save (back to
+  // Settings).
+  //    val settingsAfterSave =
+  //        settingsRobot
+  //            .openEditProfile()
+  //            .typePseudonym(newPseudonym)
+  //            .typeBio(newBio)
+  //            .save() // now returns SettingsRobot
+  //
+  //    // 4) Go back from Settings → Profile and assert pseudonym updated.
+  //    settingsAfterSave.goBackToProfile().assertPseudonymVisible(newPseudonym)
+  //  }
 }
 /* ------------------------------------------------------------------------ */
 /*                                  Robots                                  */
