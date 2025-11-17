@@ -7,7 +7,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.semantics.SemanticsActions
-import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -26,7 +25,6 @@ import com.swentseekr.seekr.ui.hunt.HuntScreenTestTags
 import com.swentseekr.seekr.ui.hunt.HuntUIState
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -42,7 +40,7 @@ class AddHuntFieldsScreenTest {
   private var onSelectLocationsCalled = false
   private var onGoBackCalled = false
 
-    private lateinit var screenKey: MutableState<Int>
+  private lateinit var screenKey: MutableState<Int>
 
   private fun setContent() {
     onSaveCalled = false
@@ -52,7 +50,7 @@ class AddHuntFieldsScreenTest {
     composeRule.setContent {
       MaterialTheme {
         state = remember { mutableStateOf(HuntUIState()) }
-          screenKey = remember { mutableStateOf(0) }
+        screenKey = remember { mutableStateOf(0) }
         BaseHuntFieldsScreen(
             uiState = state.value,
             onTitleChange = { title ->
@@ -194,99 +192,87 @@ class AddHuntFieldsScreenTest {
     assertTrue(onSelectLocationsCalled)
   }
 
-    @Test
-    fun saveButton_enabled_only_when_state_is_valid_and_invokes_onSave() {
-        setContent()
+  @Test
+  fun saveButton_enabled_only_when_state_is_valid_and_invokes_onSave() {
+    setContent()
 
-        val saveBtn = composeRule.onNodeWithTag(HuntScreenTestTags.HUNT_SAVE)
+    val saveBtn = composeRule.onNodeWithTag(HuntScreenTestTags.HUNT_SAVE)
 
-        // Check initial state
-        saveBtn.assertIsNotEnabled()
+    // Check initial state
+    saveBtn.assertIsNotEnabled()
 
-        // Update state to valid
-        composeRule.runOnUiThread {
-            state.value = state.value.copy(
-                title = "Title",
-                description = "Desc",
-                time = "1.25",
-                distance = "3.4",
-                difficulty = Difficulty.values().first(),
-                status = HuntStatus.values().first(),
-                points = listOf(
-                    Location(0.0, 0.0, "A"),
-                    Location(1.0, 1.0, "B")
-                ),
-                invalidTitleMsg = null,
-                invalidDescriptionMsg = null,
-                invalidTimeMsg = null,
-                invalidDistanceMsg = null
-            )
+    // Update state to valid
+    composeRule.runOnUiThread {
+      state.value =
+          state.value.copy(
+              title = "Title",
+              description = "Desc",
+              time = "1.25",
+              distance = "3.4",
+              difficulty = Difficulty.values().first(),
+              status = HuntStatus.values().first(),
+              points = listOf(Location(0.0, 0.0, "A"), Location(1.0, 1.0, "B")),
+              invalidTitleMsg = null,
+              invalidDescriptionMsg = null,
+              invalidTimeMsg = null,
+              invalidDistanceMsg = null)
 
-            // Force a full remount
-            screenKey.value++
-        }
-
-        composeRule.waitForIdle()
-
-        assertFalse(onSaveCalled)
-
-        // bypass enabled/disabled entirely
-        saveBtn.performSemanticsAction(SemanticsActions.OnClick)
-
-        assertTrue(onSaveCalled)
+      // Force a full remount
+      screenKey.value++
     }
 
+    composeRule.waitForIdle()
 
+    assertFalse(onSaveCalled)
 
+    // bypass enabled/disabled entirely
+    saveBtn.performSemanticsAction(SemanticsActions.OnClick)
 
+    assertTrue(onSaveCalled)
+  }
 
+  @Test
+  fun otherImages_areDisplayed_andRemoveCallbacksTriggered() {
+    var removedExisting: String? = null
+    var removedUri: Uri? = null
 
-    @Test
-    fun otherImages_areDisplayed_andRemoveCallbacksTriggered() {
-        var removedExisting: String? = null
-        var removedUri: Uri? = null
-
-        composeRule.setContent {
-            MaterialTheme {
-                state = remember {
-                    mutableStateOf(
-                        HuntUIState(
-                            otherImagesUrls = listOf("https://image1"),
-                            otherImagesUris = listOf(Uri.parse("file://localimage"))
-                        )
-                    )
-                }
-
-                BaseHuntFieldsScreen(
-                    uiState = state.value,
-                    onTitleChange = {},
-                    onDescriptionChange = {},
-                    onTimeChange = {},
-                    onDistanceChange = {},
-                    onDifficultySelect = {},
-                    onStatusSelect = {},
-                    onSelectLocations = {},
-                    onSave = {},
-                    onGoBack = {},
-                    onSelectImage = {},
-                    onSelectOtherImages = {},
-                    onRemoveOtherImage = { removedUri = it },
-                    onRemoveExistingImage = { removedExisting = it }
-                )
-            }
+    composeRule.setContent {
+      MaterialTheme {
+        state = remember {
+          mutableStateOf(
+              HuntUIState(
+                  otherImagesUrls = listOf("https://image1"),
+                  otherImagesUris = listOf(Uri.parse("file://localimage"))))
         }
 
-        // --- Vérifie l'affichage des deux images ---
-        composeRule.onNodeWithTag("otherImage_https://image1").assertExists()
-        composeRule.onNodeWithTag("otherImage_file://localimage").assertExists()
-
-        // --- Supprime l’image via URL ---
-        composeRule.onNodeWithTag("removeButton_https://image1").performClick()
-        assertEquals("https://image1", removedExisting)
-
-        // --- Supprime l’image URI ---
-        composeRule.onNodeWithTag("removeButton_file://localimage").performClick()
-        assertEquals(Uri.parse("file://localimage"), removedUri)
+        BaseHuntFieldsScreen(
+            uiState = state.value,
+            onTitleChange = {},
+            onDescriptionChange = {},
+            onTimeChange = {},
+            onDistanceChange = {},
+            onDifficultySelect = {},
+            onStatusSelect = {},
+            onSelectLocations = {},
+            onSave = {},
+            onGoBack = {},
+            onSelectImage = {},
+            onSelectOtherImages = {},
+            onRemoveOtherImage = { removedUri = it },
+            onRemoveExistingImage = { removedExisting = it })
+      }
     }
 
+    // --- Vérifie l'affichage des deux images ---
+    composeRule.onNodeWithTag("otherImage_https://image1").assertExists()
+    composeRule.onNodeWithTag("otherImage_file://localimage").assertExists()
+
+    // --- Supprime l’image via URL ---
+    composeRule.onNodeWithTag("removeButton_https://image1").performClick()
+    assertEquals("https://image1", removedExisting)
+
+    // --- Supprime l’image URI ---
+    composeRule.onNodeWithTag("removeButton_file://localimage").performClick()
+    assertEquals(Uri.parse("file://localimage"), removedUri)
+  }
 }

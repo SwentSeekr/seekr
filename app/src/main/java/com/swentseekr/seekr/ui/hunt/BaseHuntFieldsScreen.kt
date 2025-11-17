@@ -186,12 +186,12 @@ fun BaseHuntFieldsScreen(
 
             Column {
               combinedImages.forEach { image ->
-
-                  val tagSuffix = when (image) {
+                val tagSuffix =
+                    when (image) {
                       is String -> image
                       is Uri -> image.toString()
                       else -> "unknown"
-                  }
+                    }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -207,8 +207,7 @@ fun BaseHuntFieldsScreen(
                           model = model,
                           contentDescription = "Secondary Image",
                           modifier =
-                              Modifier
-                                  .testTag("otherImage_$tagSuffix")
+                              Modifier.testTag("otherImage_$tagSuffix")
                                   .weight(1f)
                                   .height(BaseHuntFieldsUi.ImageHeight / 1.5f)
                                   .clip(RoundedCornerShape(BaseHuntFieldsUi.FieldCornerRadius)),
