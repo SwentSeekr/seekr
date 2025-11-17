@@ -12,11 +12,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+const val MAX_PSEUDONYM_LENGTH = 30
+const val MAX_BIO_LENGTH = 200
+const val PROFILE_PIC_DEFAULT = 0
 /** UI state for editing a profile */
 data class EditProfileUIState(
     val pseudonym: String = "",
     val bio: String = "",
-    val profilePicture: Int = 0,
+    val profilePicture: Int = PROFILE_PIC_DEFAULT,
     val isSaving: Boolean = false,
     val hasChanges: Boolean = false,
     val canSave: Boolean = false,
@@ -132,7 +135,7 @@ class EditProfileViewModel(
                 repository.uploadProfilePicture(uid, _uiState.value.profilePictureUri!!)
               }
               _uiState.value.profilePictureUrl.isEmpty() &&
-                  _uiState.value.profilePicture == 0 &&
+                  _uiState.value.profilePicture == PROFILE_PIC_DEFAULT &&
                   _uiState.value.profilePictureUri == null -> {
                 ""
               }
@@ -180,8 +183,8 @@ class EditProfileViewModel(
     val canSave =
         hasChanges &&
             newState.pseudonym.isNotBlank() &&
-            newState.pseudonym.length <= 30 &&
-            newState.bio.length <= 200
+            newState.pseudonym.length <= MAX_PSEUDONYM_LENGTH &&
+            newState.bio.length <= MAX_BIO_LENGTH
 
     _uiState.value =
         newState.copy(hasChanges = hasChanges, canSave = canSave, success = false, errorMsg = null)
