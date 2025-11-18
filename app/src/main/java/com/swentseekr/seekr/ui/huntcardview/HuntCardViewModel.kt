@@ -4,6 +4,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
 import com.swentseekr.seekr.model.hunt.HuntReview
@@ -36,6 +38,15 @@ open class HuntCardViewModel(
 
   private val _uiState = MutableStateFlow(HuntCardUiState())
   open val uiState: StateFlow<HuntCardUiState> = _uiState.asStateFlow()
+
+  /** Clears any existing error message in the UI state. */
+  fun clearErrorMsg() {
+    _uiState.value = _uiState.value.copy(errorMsg = null)
+  }
+  /** Sets an error message in the UI state. */
+  fun setErrorMsg(error: String) {
+    _uiState.value = _uiState.value.copy(errorMsg = error)
+  }
 
   /** Loads the profile of the Maker of the hunt */
   fun loadAuthorProfile(userID: String) {
@@ -82,9 +93,22 @@ open class HuntCardViewModel(
     viewModelScope.launch {
       try {
         val hunt = huntRepository.getHunt(huntID)
+        val reviews = reviewRepository.getHuntReviews(huntID)
+        val userId = _uiState.value.currentUserId
+        val currentUserLikes =
+            if (userId != null) {
+              profileRepository.getLikedHunts(userId)
+            } else emptyList<String>()
+        val isLiked = currentUserLikes.contains(huntID)
+        val currentUserAchieved =
+            if (userId != null) {
+              profileRepository.getDoneHunts(userId)
+            } else emptyList<Hunt>()
+        val isAchieved = currentUserAchieved.any { it.uid == huntID }
+        // isLiked will be chnged later when we will have an addLike in the profile repository
         _uiState.value =
             _uiState.value.copy(
-                hunt = hunt, isLiked = false, isAchieved = false, reviewList = emptyList())
+                hunt = hunt, isLiked = false, isAchieved = isAchieved, reviewList = reviews)
       } catch (e: Exception) {
         Log.e("HuntCardViewModel", "Error loading Hunt by ID: $huntID", e)
       }
@@ -113,6 +137,29 @@ open class HuntCardViewModel(
       }
     }
   }
+
+  /** Deletes a review if the user is the author. */
+  fun deleteReview(
+      huntID: String,
+      reviewID: String,
+      userID: String,
+      currentUserId: String? = Firebase.auth.currentUser?.uid
+  ) {
+    viewModelScope.launch {
+      try {
+        val currentUid = currentUserId ?: "None (B2)"
+        if (userID == currentUid) {
+          reviewRepository.deleteReviewHunt(reviewId = reviewID)
+          loadOtherReview(huntID)
+        } else {
+          setErrorMsg("You can only delete your own review.")
+        }
+      } catch (e: Exception) {
+        Log.e("ReviewHuntViewModel", "Error deleting Review for hunt", e)
+        setErrorMsg("Failed to delete Hunt: ${e.message}")
+      }
+    }
+  }
   /** Edits a Hunt by its ID. */
   fun editHunt(huntID: String, newValue: Hunt) {
     viewModelScope.launch {
@@ -127,21 +174,53 @@ open class HuntCardViewModel(
    * Toggles the 'like' botton of a hunt item identified by [huntID] and adds it to the profile
    * likesList. Will be modify later
    */
-  fun onLikeClick(huntID: String) {
+  open fun onLikeClick(huntID: String) {
     val currentHuntUiState = _uiState.value
+    val currentUserId = _uiState.value.currentUserId
+    val currentlyLiked = _uiState.value.isLiked
     // This will be added to the likesList in the profile
     // or remove if already liked
-    val updatedHuntUiState = currentHuntUiState.copy(isLiked = !currentHuntUiState.isLiked)
+    /*
+    if(currentlyLiked){
+      profileRepository.removeLikedHunt(currentUserId ?: "", huntID)
+    }
+    else {
+      profileRepository.addLikedHunt(currentUserId ?: "", huntID)
+    }
+
+     */
+
+    val updatedHuntUiState = currentHuntUiState.copy(isLiked = !currentlyLiked)
     _uiState.value = updatedHuntUiState
   }
 
+  fun initialize(userId: String, hunt: Hunt) {
+    // This is legal
+    _uiState.value = HuntCardUiState(hunt = hunt, currentUserId = userId)
+  }
   /**
    * Filters the hunts to show only those that have been achieved by the user and adds it to the
    * profile AchievedList. Will be modify later
    */
   fun onDoneClick() {
     val currentHuntUiState = _uiState.value
+    val currentUserId = _uiState.value.currentUserId
     // This will be added to the AchivedList in the profile
-    _uiState.value = currentHuntUiState.copy(isAchieved = true)
+    val hunt = currentHuntUiState.hunt
+    if (hunt == null) {
+      setErrorMsg("Hunt data is not loaded.")
+    } else {
+      viewModelScope.launch {
+        try {
+          // Call the suspend function inside a coroutine
+          profileRepository.addDoneHunt(currentUserId ?: "", hunt)
+
+          // Update UI state
+          _uiState.value = currentHuntUiState.copy(isAchieved = true)
+        } catch (e: Exception) {
+          setErrorMsg("Failed to mark hunt as done: ${e.message}")
+        }
+      }
+    }
   }
 }

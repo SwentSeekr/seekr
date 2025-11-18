@@ -6,6 +6,7 @@ import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryLocal
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryLocal
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.model.profile.ProfileRepositoryLocal
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.*
@@ -18,6 +19,7 @@ class ReviewHuntViewModelTest {
 
   private lateinit var fakeHuntsRepository: HuntsRepositoryLocal
   private lateinit var fakeReviewRepository: HuntReviewRepositoryLocal
+  private lateinit var fakeProfileRepository: ProfileRepositoryLocal
   private val testDispatcher = StandardTestDispatcher()
 
   private lateinit var viewModel: ReviewHuntViewModel
@@ -42,9 +44,11 @@ class ReviewHuntViewModelTest {
     Dispatchers.setMain(testDispatcher)
     fakeHuntsRepository = HuntsRepositoryLocal()
     fakeReviewRepository = HuntReviewRepositoryLocal()
+    fakeProfileRepository = ProfileRepositoryLocal()
     fakeHuntsRepository.addHunt(testHunt)
 
-    viewModel = ReviewHuntViewModel(fakeHuntsRepository, fakeReviewRepository)
+    viewModel =
+        ReviewHuntViewModel(fakeHuntsRepository, fakeReviewRepository, fakeProfileRepository)
     advanceUntilIdle()
   }
 
@@ -60,6 +64,21 @@ class ReviewHuntViewModelTest {
 
     val state = viewModel.uiState.value
     assertEquals(testHunt, state.hunt)
+  }
+
+  @Test
+  fun loadHuntAuthor_whenHuntExists_doesNotCrash() = runTest {
+    // Ensure hunt exists
+    fakeHuntsRepository.addHunt(testHunt)
+
+    val vm = ReviewHuntViewModel(fakeHuntsRepository, fakeReviewRepository, fakeProfileRepository)
+
+    // Should run without exception
+    vm.loadAuthorProfile(testHunt.uid)
+    advanceUntilIdle()
+
+    // No crash -> success
+    assertTrue(true)
   }
 
   @Test

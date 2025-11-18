@@ -50,6 +50,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
+import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,13 +58,19 @@ fun AddReviewScreen(
     huntId: String,
     modifier: Modifier = Modifier,
     reviewViewModel: ReviewHuntViewModel = viewModel(),
+    huntCardViewModel: HuntCardViewModel = viewModel(),
     onGoBack: () -> Unit = {},
     onDone: () -> Unit = {},
     onCancel: () -> Unit = {},
     onSelectImage: (Uri?) -> Unit = {},
 ) {
   val uiState by reviewViewModel.uiState.collectAsState()
+  val uiStateHuntCard by huntCardViewModel.uiState.collectAsState()
   LaunchedEffect(huntId) { reviewViewModel.loadHunt(huntId) }
+  val hunt2 = uiState.hunt
+  val authorId = hunt2?.authorId ?: ""
+  LaunchedEffect(authorId) { huntCardViewModel.loadAuthorProfile(authorId) }
+  val authorProfile = uiStateHuntCard.authorProfile
   val hunt = uiState.hunt
   val maxStar = AddReviewScreenDefaults.MaxStars
   var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
@@ -74,6 +81,8 @@ fun AddReviewScreen(
             selectedImages = uris
             uris.forEach { uri -> reviewViewModel.addPhoto(uri.toString()) }
           })
+
+  val author = authorProfile?.author?.pseudonym ?: ("Unknown Author")
 
   Scaffold(
       topBar = {
@@ -117,7 +126,8 @@ fun AddReviewScreen(
                   modifier =
                       modifier.padding(vertical = AddReviewScreenDefaults.InfoVerticalPadding))
               Text(
-                  text = hunt?.uid ?: AddReviewScreenStrings.LoadingPlaceholder,
+                  // text = hunt?.uid ?: AddReviewScreenStrings.LoadingPlaceholder,
+                  text = "by $author",
                   fontSize = AddReviewScreenDefaults.SubtitleFontSize,
               )
               Spacer(modifier = modifier.height(AddReviewScreenDefaults.SpacePadding))
@@ -225,6 +235,7 @@ fun AddReviewScreen(
                           hunt?.let { reviewViewModel.submitCurrentUserReview(it) }
                           onDone()
                         },
+                        enabled = uiState.isValid,
                         modifier = modifier.testTag(AddReviewScreenTestTags.DONE_BUTTON)) {
                           Text(AddReviewScreenStrings.DoneButtonLabel)
                         }

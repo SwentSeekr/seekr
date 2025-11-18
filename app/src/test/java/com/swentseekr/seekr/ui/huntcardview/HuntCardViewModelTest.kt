@@ -1,12 +1,15 @@
 package com.swentseekr.seekr.ui.huntcardview
 
+import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryLocal
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryLocal
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.model.profile.ProfileRepositoryLocal
+import com.swentseekr.seekr.ui.profile.Profile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -85,6 +88,41 @@ class HuntCardViewModelTest {
     assertFalse(state.isAchieved)
   }
 
+  /** Test that loading a valid author profile works correctly */
+  @Test
+  fun loadAuthorProfile_success() = runTest {
+    fakeProRepository.addProfile(
+        Profile(
+            uid = "author123",
+            author = Author(pseudonym = "AuthorName", bio = "Bio", profilePicture = 1)))
+
+    viewModel.loadAuthorProfile("author123")
+    advanceUntilIdle()
+
+    val profile = viewModel.uiState.value.authorProfile
+    assertNotNull(profile)
+    assertEquals("AuthorName", profile?.author?.pseudonym)
+  }
+
+  /** Test that loading an invalid author ID does not crash and results in null profile */
+  @Test
+  fun loadAuthorProfile_invalidId_doesNotCrash() = runTest {
+    viewModel.loadAuthorProfile("nonexistent")
+    advanceUntilIdle()
+
+    assertNull(viewModel.uiState.value.authorProfile)
+  }
+
+  /** Test that setErrorMsg and clearErrorMsg work correctly */
+  @Test
+  fun setErrorMsg_and_clearErrorMsg() = runTest {
+    viewModel.setErrorMsg("Something went wrong")
+    assertEquals("Something went wrong", viewModel.uiState.value.errorMsg)
+
+    viewModel.clearErrorMsg()
+    assertNull(viewModel.uiState.value.errorMsg)
+  }
+
   /** Test that the default state has a hunt not null, no like and not achieved */
   @Test
   fun initialUiState_isDefault() {
@@ -103,13 +141,40 @@ class HuntCardViewModelTest {
     assertTrue(true)
   }
 
-  /** est that check that the load Author does not crash not really implemented yet */
+  /** Test that check that the load Author does not crash not really implemented yet */
   @Test
   fun loadHuntAuthor_withInvalidId_logsError() = runTest {
     viewModel.loadHuntAuthor("invalid_id")
     advanceUntilIdle()
 
     assertTrue(true)
+  }
+
+  /** Test that loadOtherReview correctly loads reviews */
+  @Test
+  fun loadOtherReview_populatesReviews() = runTest {
+    val review1 = HuntReview("r1", "u1", "hunt123", 5.0, "Great!")
+    val review2 = HuntReview("r2", "u2", "hunt123", 4.0, "Nice!")
+    fakeRevRepository.addReviewHunt(review1)
+    fakeRevRepository.addReviewHunt(review2)
+
+    viewModel.loadOtherReview("hunt123")
+    advanceUntilIdle()
+
+    val reviews = viewModel.uiState.value.reviewList
+    assertEquals(2, reviews.size)
+    assertTrue(reviews.contains(review1))
+    assertTrue(reviews.contains(review2))
+  }
+
+  /** Test that loadOtherReview handles empty review list */
+  @Test
+  fun loadOtherReview_emptyList() = runTest {
+    viewModel.loadOtherReview("hunt123")
+    advanceUntilIdle()
+
+    val reviews = viewModel.uiState.value.reviewList
+    assertTrue(reviews.isEmpty())
   }
 
   /** Test that check the change of the hunt state from dislike to like and from like to dislike */
@@ -124,14 +189,34 @@ class HuntCardViewModelTest {
     assertEquals(false, viewModel.uiState.value.isLiked)
   }
 
-  /** Test that check the change of the hunt state form not achieved to achieved */
+  /** Test that onDoneClick with null hunt sets error message */
   @Test
-  fun onDoneClick_sets_isAchieved_to_true() = runTest {
-    assertFalse(viewModel.uiState.value.isAchieved)
+  fun onDoneClick_with_null_hunt_sets_error_message() = runTest {
     viewModel.onDoneClick()
-    assertEquals(true, viewModel.uiState.value.isAchieved)
+    advanceUntilIdle() // wait for coroutines
+
+    // Then
+    val state = viewModel.uiState.value
+    assertEquals("Hunt data is not loaded.", state.errorMsg)
+    assertFalse(state.isAchieved)
   }
 
+  /** Test that check that the hunt is marked as achieved */
+  @Test
+  fun onDoneClick_marks_hunt_as_achieved() = runTest {
+    val userId = "testUser"
+
+    fakeProRepository.addProfile(Profile(uid = userId))
+
+    viewModel.initialize(userId, testHunt)
+
+    viewModel.onDoneClick()
+    advanceUntilIdle() // wait for coroutine
+
+    assertTrue(viewModel.uiState.value.isAchieved)
+    val doneHunts = fakeProRepository.getDoneHunts(userId)
+    assertTrue(doneHunts.contains(testHunt))
+  }
   /** Test that check that the hunt is deleted */
   @Test
   fun onDeleteClick_deletesHunt() = runTest {
@@ -154,6 +239,39 @@ class HuntCardViewModelTest {
     advanceUntilIdle()
 
     // Nothing to assert — just ensures no crash/log handled
+  }
+
+  @Test
+  fun deleteReview_userOwnsReview_deletesSuccessfully() = runTest {
+    val review =
+        HuntReview(
+            reviewId = "rev1", authorId = "u1", huntId = "hunt123", rating = 4.0, comment = "Nice")
+    fakeRevRepository.addReviewHunt(review)
+
+    viewModel.deleteReview(
+        huntID = "hunt123", reviewID = "rev1", userID = "u1", currentUserId = "u1")
+
+    advanceUntilIdle()
+
+    assertTrue(viewModel.uiState.value.reviewList.isEmpty())
+  }
+
+  @Test
+  fun deleteReview_wrongUser_setsError() = runTest {
+    val review =
+        HuntReview(
+            reviewId = "rev1", authorId = "u1", huntId = "hunt123", rating = 4.0, comment = "Nice")
+    fakeRevRepository.addReviewHunt(review)
+
+    viewModel.deleteReview(
+        huntID = "hunt123", reviewID = "rev1", userID = "u1", currentUserId = "someone_else")
+
+    advanceUntilIdle()
+
+    assertEquals("You can only delete your own review.", viewModel.uiState.value.errorMsg)
+
+    // Review must still exist
+    assertEquals(1, fakeRevRepository.getHuntReviews("hunt123").size)
   }
 
   /** Test that check the edit change correctly the hunt */

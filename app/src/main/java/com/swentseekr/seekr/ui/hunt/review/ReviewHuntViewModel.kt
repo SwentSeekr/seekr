@@ -12,6 +12,9 @@ import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.model.hunt.HuntReviewRepository
 import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryProvider
 import com.swentseekr.seekr.model.hunt.HuntsRepository
+import com.swentseekr.seekr.model.profile.ProfileRepository
+import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
+import com.swentseekr.seekr.ui.profile.Profile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,15 +31,17 @@ data class ReviewHuntUIState(
     val errorMsg: String? = null,
     val saveSuccessful: Boolean = false,
     val invalidReviewText: String? = null,
-    val invalidRating: String? = null
+    val invalidRating: String? = null,
+    val authorProfile: Profile? = null
 ) {
   val isValid: Boolean
-    get() = reviewText.isNotBlank() && rating >= 0.0 && rating <= 5.0
+    get() = reviewText.isNotBlank()
 }
 
 class ReviewHuntViewModel(
     private val repositoryHunt: HuntsRepository = HuntRepositoryProvider.repository,
-    private val repositoryReview: HuntReviewRepository = HuntReviewRepositoryProvider.repository
+    private val repositoryReview: HuntReviewRepository = HuntReviewRepositoryProvider.repository,
+    private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(ReviewHuntUIState())
@@ -51,13 +56,25 @@ class ReviewHuntViewModel(
   }
 
   /** Loads a hunt by its ID and updates the UI state. */
-  fun loadHunt(huntID: String) {
+  fun loadHunt(huntId: String) {
     viewModelScope.launch {
       try {
-        val hunt = repositoryHunt.getHunt(huntID)
+        val hunt = repositoryHunt.getHunt(huntId)
         _uiState.value = ReviewHuntUIState(hunt = hunt)
       } catch (e: Exception) {
-        Log.e("ReviewHuntViewModel", "Error loading Hunt by ID: $huntID", e)
+        Log.e("ReviewHuntViewModel", "Error loading Hunt by ID: $huntId", e)
+      }
+    }
+  }
+
+  /** Loads the profile of the Maker of the hunt */
+  fun loadAuthorProfile(userId: String) {
+    viewModelScope.launch {
+      try {
+        val profile = profileRepository.getProfile(userId)
+        _uiState.value = _uiState.value.copy(authorProfile = profile)
+      } catch (e: Exception) {
+        Log.e("HuntCardViewModel", "Error loading user profile for User ID: $userId", e)
       }
     }
   }
@@ -150,6 +167,7 @@ class ReviewHuntViewModel(
     _uiState.value = _uiState.value.copy(photos = currentPhotos)
   }
 
+  /** Updates the rating in the UI state. */
   fun updateRating(newRating: Double) {
     _uiState.value = _uiState.value.copy(rating = newRating)
   }
@@ -163,6 +181,7 @@ class ReviewHuntViewModel(
     }
   }
 
+  /** Clears the review form when click on cancel */
   fun clearFormCancel() {
     _uiState.value =
         _uiState.value.copy(
@@ -176,6 +195,7 @@ class ReviewHuntViewModel(
             errorMsg = null)
   }
 
+  /** Submits the current user's review for the given hunt. */
   fun submitCurrentUserReview(hunt: Hunt) {
     val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "0"
     submitReviewHunt(userId, hunt)

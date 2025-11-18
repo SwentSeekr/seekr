@@ -18,7 +18,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Difficulty
@@ -26,8 +25,6 @@ import com.swentseekr.seekr.model.hunt.DifficultyColor
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
-
-val spacerHeigtSmall = 3.dp
 
 /**
  * Displays a card representing a hunt with title, author, image, difficulty, distance, and time.
@@ -37,41 +34,55 @@ fun HuntCard(hunt: Hunt, modifier: Modifier = Modifier) {
   Card(
       modifier =
           modifier
-              .padding(8.dp)
-              .fillMaxWidth(0.85f)
-              .border(2.dp, Color(0xFF60BA37), RoundedCornerShape(12.dp)),
-      colors = CardDefaults.cardColors(containerColor = Color(0xFFF8DEB6)),
-      elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-      shape = RoundedCornerShape(12.dp)) {
+              .padding(HuntCardScreenDefaults.CardPadding)
+              .fillMaxWidth(HuntCardScreenDefaults.CardWidthFraction)
+              .border(
+                  HuntCardScreenDefaults.CardBorderWidthSmall,
+                  MaterialTheme.colorScheme.primary,
+                  RoundedCornerShape(HuntCardScreenDefaults.CornerRadius)),
+      colors = CardDefaults.cardColors(containerColor = HuntCardScreenDefaults.CardBackgroundColor),
+      elevation =
+          CardDefaults.cardElevation(defaultElevation = HuntCardScreenDefaults.CardElevation),
+      shape = RoundedCornerShape(HuntCardScreenDefaults.CornerRadius)) {
         Column(
             modifier =
                 Modifier.fillMaxWidth()
-                    .padding(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 8.dp)) {
+                    .padding(
+                        start = HuntCardScreenDefaults.ColumnStartingPadding,
+                        end = HuntCardScreenDefaults.ColumnEndingPadding,
+                        top = HuntCardScreenDefaults.ColumnTopPadding,
+                        bottom = HuntCardScreenDefaults.ColumnBottomPadding)) {
               Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     hunt.title,
-                    fontSize = 20.sp,
+                    fontSize = HuntCardScreenDefaults.TitleFontSize,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f).padding(4.dp))
+                    modifier =
+                        Modifier.weight(HuntCardScreenDefaults.TitleWeight)
+                            .padding(HuntCardScreenDefaults.InfoTextPadding))
                 Icon(
                     imageVector = Icons.Filled.Favorite,
-                    contentDescription = "Like Button",
-                    modifier = Modifier.testTag("HuntCard_LikeButton").padding(4.dp),
+                    contentDescription = HuntCardScreenStrings.LikeButton,
+                    modifier =
+                        Modifier.testTag("HuntCard_LikeButton")
+                            .padding(HuntCardScreenDefaults.InfoColumnPadding),
                     tint = Color.Red)
               }
 
-              Text("by ${hunt.authorId}", modifier = Modifier.padding(horizontal = 4.dp))
+              Text(
+                  "by ${hunt.authorId}",
+                  modifier = Modifier.padding(horizontal = HuntCardScreenDefaults.InfoTextPadding))
 
               Row(
                   modifier = Modifier.fillMaxWidth(),
                   verticalAlignment = Alignment.CenterVertically) {
                     AsyncImage(
                         model = hunt.mainImageUrl.ifBlank { null },
-                        contentDescription = "Hunt Picture",
+                        contentDescription = HuntCardScreenStrings.HuntPictureDescription,
                         modifier =
-                            Modifier.padding(horizontal = 4.dp)
-                                .size(100.dp)
-                                .clip(RoundedCornerShape(8.dp)),
+                            Modifier.padding(horizontal = HuntCardScreenDefaults.ImagePadding)
+                                .size(HuntCardScreenDefaults.ImageSize)
+                                .clip(RoundedCornerShape(HuntCardScreenDefaults.ImageRoundness)),
                         placeholder = painterResource(R.drawable.empty_image),
                         error = painterResource(R.drawable.empty_image))
 
@@ -79,10 +90,13 @@ fun HuntCard(hunt: Hunt, modifier: Modifier = Modifier) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally) {
                           StatsBox(hunt.difficulty.toString(), DifficultyColor(hunt.difficulty))
-                          Spacer(modifier = modifier.height(spacerHeigtSmall))
-                          StatsBox("${hunt.distance} km", Color.White)
-                          Spacer(modifier = modifier.height(spacerHeigtSmall))
-                          StatsBox("${hunt.time} min", Color.White)
+                          Spacer(
+                              modifier = modifier.height(HuntCardScreenDefaults.spacerHeightSmall))
+                          StatsBox(
+                              "${hunt.distance} ${HuntCardScreenStrings.DistanceUnit}", Color.White)
+                          Spacer(
+                              modifier = modifier.height(HuntCardScreenDefaults.spacerHeightSmall))
+                          StatsBox("${hunt.time} ${HuntCardScreenStrings.TimeUnit}", Color.White)
                         }
                   }
             }
@@ -103,7 +117,8 @@ fun StatsBox(title: String, backColor: Color, modifier: Modifier = Modifier) {
     Text(
         title,
         textAlign = TextAlign.Center,
-        modifier = modifier.align(Alignment.Center).padding(2.dp),
+        modifier =
+            modifier.align(Alignment.Center).padding(HuntCardScreenDefaults.BadgeTextPadding),
     )
   }
 }

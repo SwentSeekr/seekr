@@ -3,6 +3,7 @@ package com.swentseekr.seekr
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.swentseekr.seekr.model.hunt.Difficulty
@@ -87,4 +88,87 @@ class HuntCardScreenTest {
     assertTrue(beginClicked)
     assertTrue(reviewClicked)
   }
+
+  @Test
+  fun testLikeButtonTogglesState() {
+    val fakeVm = FakeHuntCardViewModel(createFakeHunt())
+
+    composeTestRule.setContent {
+      HuntCardScreen(huntId = "hunt123", huntCardViewModel = fakeVm, testmode = true)
+    }
+
+    // Initially: not liked
+    assertTrue(!fakeVm.uiState.value.isLiked)
+
+    // Click like
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.LIKE_BUTTON).performClick()
+
+    // ViewModel should now show liked = true
+    assertTrue(fakeVm.uiState.value.isLiked)
+
+    // Click again → unlike
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.LIKE_BUTTON).performClick()
+
+    assertTrue(!fakeVm.uiState.value.isLiked)
+  }
+
+  @Test
+  fun testAddReviewButtonShownForOtherUsers() {
+    val fakeVm = FakeHuntCardViewModel(hunt = createFakeHunt().copy(authorId = "0"))
+
+    composeTestRule.setContent {
+      HuntCardScreen(huntId = "hunt123", huntCardViewModel = fakeVm, testmode = true)
+    }
+
+    composeTestRule.onNodeWithText("Add Review").assertIsDisplayed()
+  }
+
+  @Test
+  fun testMapIsVisible() {
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = "hunt123",
+          huntCardViewModel = FakeHuntCardViewModel(createFakeHunt()),
+          testmode = true)
+    }
+
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.MAP_CONTAINER).assertIsDisplayed()
+  }
+
+  @Test
+  fun testReviewsAreDisplayed() {
+    val fakeVm =
+        FakeHuntCardViewModel(
+            hunt = createFakeHunt(),
+        )
+
+    composeTestRule.setContent {
+      HuntCardScreen(huntId = "hunt123", huntCardViewModel = fakeVm, testmode = true)
+    }
+
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.REVIEW_CARD).assertIsDisplayed()
+  }
+
+  /*
+  @Test
+  fun testDeleteButtonHiddenForOtherUsers() {
+      val fakeVm = FakeHuntCardViewModel(
+          hunt = createFakeHunt(),
+      )
+
+      composeTestRule.setContent {
+          HuntCardScreen(
+              huntId = "hunt123",
+              huntCardViewModel = fakeVm,
+              reviewViewModel = FakeReviewViewModel(),
+              testmode = true
+          )
+      }
+
+      composeTestRule
+          .onNodeWithTag(HuntCardScreenTestTags.DELETE_REVIEW_BUTTON)
+          .assertDoesNotExist()
+  }
+
+   */
 }
