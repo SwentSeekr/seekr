@@ -56,6 +56,7 @@ class SettingsRepositoryFirestoreTest {
 
   @Test
   fun getSettings_returnsDefault_whenNoDocumentExists() = runTest {
+    repository.loadSettings()
     val settings = repository.settingsFlow.first()
     assertEquals(false, settings.notificationsEnabled)
     assertEquals(false, settings.picturesEnabled)

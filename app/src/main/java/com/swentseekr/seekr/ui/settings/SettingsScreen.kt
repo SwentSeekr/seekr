@@ -117,7 +117,7 @@ fun SettingsContent(
       item {
         SettingsItem(
             title = SettingsScreenStrings.VERSION_LABEL,
-            value = appVersion ?: SettingsScreenStrings.UNKNOW_VERSION,
+            value = appVersion ?: SettingsScreenStrings.UNKNOWN_VERSION,
             modifier = Modifier.testTag(SettingsScreenTestTags.APP_VERSION_TEXT))
       }
 
@@ -154,7 +154,6 @@ fun SettingsContent(
       item {
         SettingsArrowItem(
             title = SettingsScreenStrings.APP_CONDITION_LABEL,
-            onClick = { /* TODO */},
             modifier = Modifier.testTag(SettingsScreenTestTags.APP_CONDITION_BUTTON))
       }
     }

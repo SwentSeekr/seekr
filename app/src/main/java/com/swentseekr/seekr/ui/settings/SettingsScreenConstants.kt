@@ -17,7 +17,7 @@ object SettingsScreenStrings {
   const val TOP_BAR_TITLE = "Settings"
   const val BACK_CONTENT_DESCRIPTION = "Back"
   const val VERSION_LABEL = "App Version"
-  const val UNKNOW_VERSION = "Unknown"
+  const val UNKNOWN_VERSION = "Unknown"
   const val LOGOUT_LABEL = "Log out"
   const val NOTIFICATION_LABEL = "Notifications"
   const val PICTURES_LABEL = "My Pictures"

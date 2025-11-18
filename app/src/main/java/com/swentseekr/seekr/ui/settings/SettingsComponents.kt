@@ -67,7 +67,7 @@ fun SettingsToggleItem(
  * @param modifier Optional [Modifier] for styling and layout adjustments.
  */
 @Composable
-fun SettingsArrowItem(title: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun SettingsArrowItem(title: String, onClick: () -> Unit = {}, modifier: Modifier = Modifier) {
   Row(
       modifier =
           modifier

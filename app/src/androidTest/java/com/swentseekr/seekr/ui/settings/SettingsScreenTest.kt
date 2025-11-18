@@ -134,7 +134,7 @@ class SettingsScreenTest {
     }
 
     composeRule.onNodeWithText(SettingsScreenStrings.VERSION_LABEL).assertExists()
-    composeRule.onNodeWithText(SettingsScreenStrings.UNKNOW_VERSION).assertExists()
+    composeRule.onNodeWithText(SettingsScreenStrings.UNKNOWN_VERSION).assertExists()
   }
 
   @Test
@@ -146,7 +146,7 @@ class SettingsScreenTest {
     }
 
     composeRule.onNodeWithText(SettingsScreenStrings.VERSION_LABEL).assertExists()
-    composeRule.onNodeWithText(SettingsScreenStrings.UNKNOW_VERSION).assertExists()
+    composeRule.onNodeWithText(SettingsScreenStrings.UNKNOWN_VERSION).assertExists()
   }
 
   @Test
