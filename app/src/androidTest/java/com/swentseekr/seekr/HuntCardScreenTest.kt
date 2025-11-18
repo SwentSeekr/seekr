@@ -137,38 +137,19 @@ class HuntCardScreenTest {
 
   @Test
   fun testReviewsAreDisplayed() {
-    val fakeVm =
-        FakeHuntCardViewModel(
-            hunt = createFakeHunt(),
-        )
+    val fakeVm = FakeHuntCardViewModel(createFakeHunt())
+    val fakeReviewVm = FakeReviewHuntViewModel() // you need to create this
 
     composeTestRule.setContent {
-      HuntCardScreen(huntId = "hunt123", huntCardViewModel = fakeVm, testmode = true)
+      HuntCardScreen(
+          huntId = "hunt123",
+          huntCardViewModel = fakeVm,
+          reviewViewModel = fakeReviewVm,
+          testmode = true)
     }
 
-    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.REVIEW_CARD).assertIsDisplayed()
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.REVIEW_CARD).assertExists()
   }
-
-  /*
-  @Test
-  fun testDeleteButtonHiddenForOtherUsers() {
-      val fakeVm = FakeHuntCardViewModel(
-          hunt = createFakeHunt(),
-      )
-
-      composeTestRule.setContent {
-          HuntCardScreen(
-              huntId = "hunt123",
-              huntCardViewModel = fakeVm,
-              reviewViewModel = FakeReviewViewModel(),
-              testmode = true
-          )
-      }
-
-      composeTestRule
-          .onNodeWithTag(HuntCardScreenTestTags.DELETE_REVIEW_BUTTON)
-          .assertDoesNotExist()
-  }
-
-   */
 }

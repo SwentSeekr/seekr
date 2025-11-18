@@ -29,4 +29,12 @@ class FakeHuntCardViewModel(hunt: Hunt) : HuntCardViewModel() { // Inherit from 
     val curr = _uiState.value
     _uiState.value = curr.copy(isLiked = !curr.isLiked)
   }
+
+  override fun loadHunt(huntId: String) {}
+
+  override fun loadOtherReview(huntId: String) {}
+
+  override fun loadAuthorProfile(authorId: String) {}
+
+  override fun loadCurrentUserID() {}
 }

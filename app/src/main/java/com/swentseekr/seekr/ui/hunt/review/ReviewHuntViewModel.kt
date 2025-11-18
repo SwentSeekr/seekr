@@ -38,14 +38,14 @@ data class ReviewHuntUIState(
     get() = reviewText.isNotBlank()
 }
 
-class ReviewHuntViewModel(
+open class ReviewHuntViewModel(
     private val repositoryHunt: HuntsRepository = HuntRepositoryProvider.repository,
     private val repositoryReview: HuntReviewRepository = HuntReviewRepositoryProvider.repository,
     private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(ReviewHuntUIState())
-  val uiState: StateFlow<ReviewHuntUIState> = _uiState.asStateFlow()
+  open val uiState: StateFlow<ReviewHuntUIState> = _uiState.asStateFlow()
   /** Clears any existing error message in the UI state. */
   fun clearErrorMsg() {
     _uiState.value = _uiState.value.copy(errorMsg = null)
@@ -56,7 +56,7 @@ class ReviewHuntViewModel(
   }
 
   /** Loads a hunt by its ID and updates the UI state. */
-  fun loadHunt(huntId: String) {
+  open fun loadHunt(huntId: String) {
     viewModelScope.launch {
       try {
         val hunt = repositoryHunt.getHunt(huntId)
@@ -68,7 +68,7 @@ class ReviewHuntViewModel(
   }
 
   /** Loads the profile of the Maker of the hunt */
-  fun loadAuthorProfile(userId: String) {
+  open fun loadAuthorProfile(userId: String) {
     viewModelScope.launch {
       try {
         val profile = profileRepository.getProfile(userId)

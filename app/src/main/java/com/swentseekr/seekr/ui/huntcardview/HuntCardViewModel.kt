@@ -49,7 +49,7 @@ open class HuntCardViewModel(
   }
 
   /** Loads the profile of the Maker of the hunt */
-  fun loadAuthorProfile(userID: String) {
+  open fun loadAuthorProfile(userID: String) {
     viewModelScope.launch {
       try {
         val profile = profileRepository.getProfile(userID)
@@ -61,7 +61,7 @@ open class HuntCardViewModel(
   }
 
   /** Loads current user ID in the UI state. */
-  fun loadCurrentUserID() {
+  open fun loadCurrentUserID() {
     viewModelScope.launch {
       try {
         val userID = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown"
@@ -73,7 +73,7 @@ open class HuntCardViewModel(
   }
 
   /** Loads reviews for a specific hunt.* */
-  fun loadOtherReview(huntID: String) {
+  open fun loadOtherReview(huntID: String) {
     viewModelScope.launch {
       try {
         val reviews = reviewRepository.getHuntReviews(huntID)
@@ -89,7 +89,7 @@ open class HuntCardViewModel(
    *
    * @param huntID The ID of the Hunt to be loaded.
    */
-  fun loadHunt(huntID: String) {
+  open fun loadHunt(huntID: String) {
     viewModelScope.launch {
       try {
         val hunt = huntRepository.getHunt(huntID)
