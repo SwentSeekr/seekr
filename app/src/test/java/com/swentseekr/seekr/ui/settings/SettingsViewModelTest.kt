@@ -2,6 +2,7 @@ package com.swentseekr.seekr.ui.settings
 
 import androidx.credentials.CredentialManager
 import com.swentseekr.seekr.model.authentication.AuthRepository
+import com.swentseekr.seekr.model.settings.SettingsRepositoryFirestore
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -19,19 +20,23 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModelTest {
-
   private val testDispatcher = StandardTestDispatcher()
 
   private lateinit var authRepository: AuthRepository
   private lateinit var credentialManager: CredentialManager
+  private lateinit var repository: SettingsRepositoryFirestore
   private lateinit var viewModel: SettingsViewModel
 
   @Before
   fun setUp() = runTest {
     Dispatchers.setMain(testDispatcher)
+
+    repository = mockk(relaxed = true)
     authRepository = mockk(relaxed = true)
     credentialManager = mockk(relaxed = true)
-    viewModel = SettingsViewModel(authRepository)
+
+    viewModel = SettingsViewModel(repository = repository, authRepository = authRepository)
+
     advanceUntilIdle()
   }
 

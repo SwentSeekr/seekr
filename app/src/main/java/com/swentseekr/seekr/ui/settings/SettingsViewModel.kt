@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import com.swentseekr.seekr.BuildConfig
 import com.swentseekr.seekr.model.authentication.AuthRepository
 import com.swentseekr.seekr.model.authentication.AuthRepositoryFirebase
+import com.swentseekr.seekr.model.settings.SettingsRepositoryFirestore
+import com.swentseekr.seekr.model.settings.SettingsRepositoryProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,17 +18,31 @@ import kotlinx.coroutines.launch
 data class SettingsUIState(
     val signedOut: Boolean = false,
     val errorMsg: String? = null,
-    val appVersion: String? = null
+    val appVersion: String? = null,
+    val notificationsEnabled: Boolean = false,
+    val picturesEnabled: Boolean = false,
+    val localisationEnabled: Boolean = false
 )
 
-class SettingsViewModel(private val authRepository: AuthRepository = AuthRepositoryFirebase()) :
-    ViewModel() {
+class SettingsViewModel(
+    private val repository: SettingsRepositoryFirestore = SettingsRepositoryProvider.repository,
+    private val authRepository: AuthRepository = AuthRepositoryFirebase()
+) : ViewModel() {
 
   private val _uiState = MutableStateFlow(SettingsUIState())
   val uiState: StateFlow<SettingsUIState> = _uiState.asStateFlow()
+  val settingsFlow = repository.settingsFlow
 
   init {
     setAppVersion(BuildConfig.VERSION_NAME)
+    setAppVersion(BuildConfig.VERSION_NAME)
+    viewModelScope.launch {
+      try {
+        repository.loadSettings()
+      } catch (e: Exception) {
+        e.printStackTrace()
+      }
+    }
   }
 
   fun signOut(credentialManager: CredentialManager): Unit {
@@ -50,4 +66,19 @@ class SettingsViewModel(private val authRepository: AuthRepository = AuthReposit
   fun setAppVersion(version: String) {
     _uiState.update { it.copy(appVersion = version) }
   }
+
+  fun updateNotifications(enabled: Boolean) =
+      viewModelScope.launch {
+        repository.updateField(SettingsScreenStrings.NOTIFICATION_FIELD, enabled)
+      }
+
+  fun updatePictures(enabled: Boolean) =
+      viewModelScope.launch {
+        repository.updateField(SettingsScreenStrings.PICTURES_FIELD, enabled)
+      }
+
+  fun updateLocalisation(enabled: Boolean) =
+      viewModelScope.launch {
+        repository.updateField(SettingsScreenStrings.LOCALISATION_FIELD, enabled)
+      }
 }
