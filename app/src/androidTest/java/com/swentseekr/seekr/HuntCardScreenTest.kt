@@ -2,6 +2,8 @@ package com.swentseekr.seekr
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -150,6 +152,7 @@ class HuntCardScreenTest {
 
     composeTestRule.waitForIdle()
 
-    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.REVIEW_CARD).assertExists()
+    // composeTestRule.onNodeWithTag(HuntCardScreenTestTags.REVIEW_CARD).assertExists()
+    composeTestRule.onAllNodesWithTag(HuntCardScreenTestTags.REVIEW_CARD).onFirst().assertExists()
   }
 }
