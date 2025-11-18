@@ -63,6 +63,9 @@ fun BaseHuntScreen(
         onStatusSelect = vm::setStatus,
         onSelectLocations = { vm.setIsSelectingPoints(true) },
         onSelectImage = onSelectImage,
+        onSelectOtherImages = vm::updateOtherImagesUris,
+        onRemoveOtherImage = vm::removeOtherImage, // <-- images locales (URIs)
+        onRemoveExistingImage = vm::removeExistingOtherImage, // <-- images URL (Firestore)
         onSave = { vm.submit() },
         onGoBack = onGoBack,
     )

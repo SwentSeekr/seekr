@@ -221,6 +221,41 @@ class EditHuntViewModelAndroidTest {
     assertNull(editVM.uiState.value.errorMsg)
   }
 
+  @Test
+  fun otherImages_add_and_remove_work_in_viewModel() = runTest {
+    createHunt()
+    advanceUntilIdle()
+    val id = repository.getAllHunts().first().uid
+
+    editVM.load(id)
+    advanceUntilIdle()
+
+    // --- simulate selecting local images ---
+    val uri1 = Uri.parse("file://local1.png")
+    val uri2 = Uri.parse("file://local2.png")
+
+    editVM.updateOtherImagesUris(listOf(uri1))
+    editVM.updateOtherImagesUris(listOf(uri2))
+
+    var s = editVM.uiState.value
+    assertEquals(listOf(uri1, uri2), s.otherImagesUris)
+
+    // Remove local image
+    editVM.removeOtherImage(uri1)
+
+    s = editVM.uiState.value
+    assertEquals(listOf(uri2), s.otherImagesUris)
+
+    // Remove existing Firestore image
+    val existing = repository.getHunt(id).otherImagesUrls.firstOrNull()
+    if (existing != null) {
+      editVM.removeExistingOtherImage(existing)
+
+      s = editVM.uiState.value
+      assertFalse(s.otherImagesUrls.contains(existing))
+    }
+  }
+
   // Helpers -------------------------------------------------------------
 
   private fun createHunt() {

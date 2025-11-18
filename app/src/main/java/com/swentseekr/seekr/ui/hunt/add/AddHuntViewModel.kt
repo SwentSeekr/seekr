@@ -10,7 +10,6 @@ class AddHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.repo
     BaseHuntViewModel(repository) {
 
   var mainImageUri: Uri? = null
-  var otherImagesUris: List<Uri> = emptyList()
 
   override fun buildHunt(state: HuntUIState): Hunt {
     val uid = repository.getNewUid()

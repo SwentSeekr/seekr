@@ -21,6 +21,15 @@ object BaseHuntFieldsStrings {
   const val BUTTON_SAVE_HUNT = "Save Hunt"
   const val UNIT_POINT = "point"
   const val UNIT_POINTS = "points"
+
+  const val TITLE_DEFAULT = "Add your Hunt"
+  const val MAIN_IMAGE = "Main Image"
+  const val BUTTON_CHOOSE_IMAGE = "Choose Image"
+  const val CONTENT_DESC_SELECTED_IMAGE = "Selected Hunt Image"
+  const val OTHER_IMAGES = "Other Images"
+  const val BUTTON_CHOOSE_ADDITIONAL_IMAGES = "Choose Additional Images"
+  const val CONTENT_DESC_SECONDARY_IMAGE = "Secondary Image"
+  const val REMOVE = "Remove"
 }
 
 object BaseHuntFieldsUi {
@@ -36,6 +45,10 @@ object BaseHuntFieldsUi {
   val SpacerHeightMedium: Dp = 12.dp
 
   val SpacerHeightSmall: Dp = 8.dp
+
+  const val ImageWeight: Float = 1f
+
+  const val ImageHeightDivisor: Float = 1.5f
 }
 
 object HuntScreenTestTags {
