@@ -42,6 +42,25 @@ object AddReviewScreenStrings {
   const val ImageMimeType = "image/*"
   const val SelectedImageContentDescriptionPrefix = "Selected Image "
   const val StarContentDescriptionPrefix = "Star "
+  const val By = "by"
+  const val ReviewViewModel = "ReviewHuntViewModel"
+
+  const val User0 = "0"
+
+  const val ErrorSubmisson = "At least one field is not valid"
+  const val ErrorLoadingHunt = "Error loading Hunt by ID:"
+  const val ErrorLoadingProfil = "Error loading user profile for User ID:"
+  const val HuntCardViewModel = "HuntCardViewModel"
+  const val ErrorReviewHunt = "Error review Hunt"
+  const val FailSubmitReview = "Failed to submit review:"
+  const val NoCurrentUser = "None (B2)"
+  const val ErrorDeleteReview = "You can only delete your own review."
+  const val FailDeleteHunt = "Failed to delete Hunt:"
+  const val ErrorDeleteHunt = "Error deleting Review for hunt"
+  const val ReviewNotEmpty = "The review cannot be empty"
+  const val InvalidRating = "Rating must be between 1 and 5"
+
+  const val ErrorClearSubmitReview = "Cannot clear form, review not submitted successfully."
 
   fun ratingSummary(rating: Int, maxStars: Int): String = "$RatingPrefix$rating /$maxStars"
 }

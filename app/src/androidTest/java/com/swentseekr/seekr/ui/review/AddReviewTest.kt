@@ -68,6 +68,9 @@ class HuntCardReviewScreenTest {
     composeRule.onNodeWithTag(AddReviewScreenTestTags.CANCEL_BUTTON).performClick()
     val starTag = AddReviewScreenTestTags.starTag(4)
     composeRule.onNodeWithTag(starTag).performClick()
+    composeRule
+        .onNodeWithTag(AddReviewScreenTestTags.COMMENT_TEXT_FIELD)
+        .performTextInput("Hello world")
     composeRule.onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON).performClick()
 
     assertTrue(backCalled)

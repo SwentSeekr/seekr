@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -23,6 +24,8 @@ import com.swentseekr.seekr.ui.components.HuntCardScreen
 import com.swentseekr.seekr.ui.hunt.add.AddHuntScreen
 import com.swentseekr.seekr.ui.hunt.edit.EditHuntScreen
 import com.swentseekr.seekr.ui.hunt.review.AddReviewScreen
+import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
+import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import com.swentseekr.seekr.ui.map.MapScreen
 import com.swentseekr.seekr.ui.overview.OverviewScreen
 import com.swentseekr.seekr.ui.profile.EditProfileScreen
@@ -114,6 +117,8 @@ fun SeekrNavigationBar(
 fun SeekrMainNavHost(
     user: FirebaseUser? = null,
     navController: NavHostController = rememberNavController(),
+    huntCardViewModelFactory: (() -> HuntCardViewModel)? = null,
+    reviewViewModelFactory: (() -> ReviewHuntViewModel)? = null,
     testMode: Boolean = false
 ) {
   var lastHuntId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -189,6 +194,11 @@ fun SeekrMainNavHost(
                     val argId =
                         backStackEntry.arguments?.getString(SeekrDestination.HuntCard.ARG_HUNT_ID)
                     val huntId = argId ?: lastHuntId.orEmpty()
+                    val huntCardVm =
+                        huntCardViewModelFactory?.invoke() ?: viewModel<HuntCardViewModel>()
+
+                    val reviewVm =
+                        reviewViewModelFactory?.invoke() ?: viewModel<ReviewHuntViewModel>()
 
                     HuntCardScreen(
                         huntId = huntId,
@@ -199,6 +209,8 @@ fun SeekrMainNavHost(
                             launchSingleTop = true
                           }
                         },
+                        huntCardViewModel = huntCardVm,
+                        reviewViewModel = reviewVm,
                         modifier = Modifier.testTag(NavigationTestTags.HUNTCARD_SCREEN))
                   }
 
