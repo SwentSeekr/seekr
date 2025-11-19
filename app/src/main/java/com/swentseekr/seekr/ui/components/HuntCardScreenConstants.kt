@@ -38,6 +38,32 @@ object HuntCardScreenDefaults {
   val CardBackgroundColor: Color = Color(0xFFF8DEB6)
   val DifficultyBadgeColor: Color = Color.Green
   val NeutralBadgeColor: Color = Color.White
+  // spacing between author text and image row
+  val AuthorImageSpacing: Dp = 8.dp
+  val ImageCarouselHeight: Dp = 120.dp
+  val ImageCarouselPadding: Dp = 8.dp
+  val ImageCarouselCornerRadius: Dp = 8.dp
+  val ImageCarouselWhiteFrame: Dp = 2.dp
+  val ImageCarouselPagerContentPadding: Dp = 12.dp
+  val ImageCarouselPageSpacing: Dp = 8.dp
+  const val ImageCarouselMinScale: Float = 0.85f
+  const val ImageCarouselMaxScale: Float = 1.08f
+  const val ImageCarouselSideRotationDegrees: Float = 10f
+  const val ImageCarouselOverlayMaxAlpha: Float = 0.35f
+  const val ImageCarouselOverlayMinAlpha: Float = 0f
+  const val ImageCarouselCameraDistanceFactor: Float = 8f
+  const val ImageCarouselInterpolationMinFraction: Float = 0f
+  const val ImageCarouselInterpolationMaxFraction: Float = 1f
+  val ImageCarouselShadowElevation: Dp = 4.dp
+  const val ImageCarouselWeight: Float = 2f
+  const val StatsColumnWeight: Float = 1f
+  const val FullScreenImageHeightFraction: Float = 0.9f
+  val ImageIndicatorDotSize: Dp = 6.dp
+  val ImageIndicatorDotSelectedSize: Dp = 8.dp
+  val ImageIndicatorDotSpacing: Dp = 4.dp
+  val ImageIndicatorTopPadding: Dp = 4.dp
+  val ImageIndicatorUnselectedColor: Color = Color.LightGray
+  val ImageIndicatorSelectedColor: Color = Color.DarkGray
 }
 
 object HuntCardScreenStrings {
@@ -51,6 +77,8 @@ object HuntCardScreenStrings {
   const val ReviewTitlePrefix = "Rating:"
   const val ReviewHint = "Point de départ de la chasse"
   const val ReviewMarkerTitlePrefix = "Départ : "
+  const val FullScreenImageDescription = "Full-screen hunt image"
+  const val HuntPicturePageDescriptionPrefix = "Hunt picture "
 }
 
 object HuntCardScreenTestTags {
@@ -66,4 +94,10 @@ object HuntCardScreenTestTags {
   const val BEGIN_BUTTON = "BeginButton"
   const val REVIEW_BUTTON = "ReviewButton"
   const val REVIEW_CARD = "ReviewCard"
+  const val IMAGE_CAROUSEL_CONTAINER = "hunt_card_image_carousel_container"
+  const val IMAGE_PAGER = "hunt_card_image_pager"
+  const val IMAGE_PAGE_PREFIX = "hunt_card_image_page_"
+  const val IMAGE_FULLSCREEN = "hunt_card_image_fullscreen"
+  const val IMAGE_INDICATOR_ROW = "hunt_card_image_indicator_row"
+  const val IMAGE_INDICATOR_DOT_PREFIX = "hunt_card_image_indicator_dot_"
 }
