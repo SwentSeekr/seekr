@@ -4,19 +4,9 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,7 +36,6 @@ fun HuntImageCarousel(
     hunt: com.swentseekr.seekr.model.hunt.Hunt,
     modifier: Modifier = Modifier,
 ) {
-  // Build the list: [main] + others, falling back to placeholder
   val images: List<Any> =
       remember(hunt) {
         buildList {
@@ -63,149 +52,225 @@ fun HuntImageCarousel(
   val pagerState = rememberPagerState(pageCount = { images.size })
   var showFullScreen by remember { mutableStateOf(false) }
 
-  if (showFullScreen) {
-    Dialog(onDismissRequest = { showFullScreen = false }) {
-      Box(
-          modifier = Modifier.fillMaxSize().background(Color.Black),
-          contentAlignment = Alignment.Center) {
-            AsyncImage(
-                model = images[pagerState.currentPage],
-                contentDescription = HuntCardScreenStrings.FullScreenImageDescription,
-                modifier =
-                    Modifier.fillMaxWidth()
-                        .fillMaxHeight(HuntCardScreenDefaults.FullScreenImageHeightFraction)
-                        .testTag(HuntCardScreenTestTags.IMAGE_FULLSCREEN),
-                placeholder = painterResource(R.drawable.empty_image),
-                error = painterResource(R.drawable.empty_image),
-                contentScale = ContentScale.Fit // fullscreen: no cropping
-                )
-          }
-    }
-  }
+  HuntImageFullScreenDialog(
+      showFullScreen = showFullScreen,
+      currentImage = images[pagerState.currentPage],
+      onDismiss = { showFullScreen = false },
+  )
 
   Box(
       modifier = modifier.testTag(HuntCardScreenTestTags.IMAGE_CAROUSEL_CONTAINER),
   ) {
-    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-      // PAGER with explicit height
-      HorizontalPager(
-          state = pagerState,
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+      HuntImagePager(
+          images = images,
+          pagerState = pagerState,
+          onCurrentPageClicked = { showFullScreen = true },
+      )
+
+      HuntImageIndicators(
+          imagesCount = images.size,
+          currentPage = pagerState.currentPage,
+      )
+    }
+  }
+}
+
+@Composable
+private fun HuntImageFullScreenDialog(
+    showFullScreen: Boolean,
+    currentImage: Any,
+    onDismiss: () -> Unit,
+) {
+  if (!showFullScreen) return
+
+  Dialog(onDismissRequest = onDismiss) {
+    Box(
+        modifier = Modifier.fillMaxSize().background(Color.Black),
+        contentAlignment = Alignment.Center,
+    ) {
+      AsyncImage(
+          model = currentImage,
+          contentDescription = HuntCardScreenStrings.FullScreenImageDescription,
           modifier =
               Modifier.fillMaxWidth()
-                  .height(HuntCardScreenDefaults.ImageCarouselHeight)
-                  .testTag(HuntCardScreenTestTags.IMAGE_PAGER),
-          contentPadding =
-              PaddingValues(horizontal = HuntCardScreenDefaults.ImageCarouselPagerContentPadding),
-          pageSpacing = HuntCardScreenDefaults.ImageCarouselPageSpacing) { page ->
-            val pageOffset =
-                (pagerState.currentPage - page + pagerState.currentPageOffsetFraction).absoluteValue
+                  .fillMaxHeight(HuntCardScreenDefaults.FullScreenImageHeightFraction)
+                  .testTag(HuntCardScreenTestTags.IMAGE_FULLSCREEN),
+          placeholder = painterResource(R.drawable.empty_image),
+          error = painterResource(R.drawable.empty_image),
+          contentScale = ContentScale.Fit,
+      )
+    }
+  }
+}
 
-            val clampedOffset =
-                pageOffset.coerceIn(
-                    HuntCardScreenDefaults.ImageCarouselInterpolationMinFraction,
-                    HuntCardScreenDefaults.ImageCarouselInterpolationMaxFraction)
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun HuntImagePager(
+    images: List<Any>,
+    pagerState: PagerState,
+    onCurrentPageClicked: () -> Unit,
+) {
+  HorizontalPager(
+      state = pagerState,
+      modifier =
+          Modifier.fillMaxWidth()
+              .height(HuntCardScreenDefaults.ImageCarouselHeight)
+              .testTag(HuntCardScreenTestTags.IMAGE_PAGER),
+      contentPadding =
+          PaddingValues(horizontal = HuntCardScreenDefaults.ImageCarouselPagerContentPadding),
+      pageSpacing = HuntCardScreenDefaults.ImageCarouselPageSpacing,
+  ) { page ->
+    val transforms = rememberPageTransforms(page = page, pagerState = pagerState)
 
-            val interpolationFraction =
-                HuntCardScreenDefaults.ImageCarouselInterpolationMaxFraction - clampedOffset
+    HuntImagePage(
+        image = images[page],
+        page = page,
+        isCurrentPage = page == pagerState.currentPage,
+        transforms = transforms,
+        onClickCurrent = onCurrentPageClicked,
+    )
+  }
+}
 
-            // Scale: center big, sides slightly smaller
-            val scale =
-                lerp(
-                    start = HuntCardScreenDefaults.ImageCarouselMinScale,
-                    stop = HuntCardScreenDefaults.ImageCarouselMaxScale,
-                    fraction = interpolationFraction)
+private data class PageTransforms(
+    val scale: Float,
+    val rotationY: Float,
+    val overlayAlpha: Float,
+)
 
-            // Perspective rotation
-            val sideRotation =
-                if (page < pagerState.currentPage) {
-                  HuntCardScreenDefaults.ImageCarouselSideRotationDegrees
-                } else {
-                  -HuntCardScreenDefaults.ImageCarouselSideRotationDegrees
-                }
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun rememberPageTransforms(
+    page: Int,
+    pagerState: PagerState,
+): PageTransforms {
+  val pageOffset =
+      (pagerState.currentPage - page + pagerState.currentPageOffsetFraction).absoluteValue
 
-            val rotationY = lerp(start = sideRotation, stop = 0f, fraction = interpolationFraction)
+  val clampedOffset =
+      pageOffset.coerceIn(
+          HuntCardScreenDefaults.ImageCarouselInterpolationMinFraction,
+          HuntCardScreenDefaults.ImageCarouselInterpolationMaxFraction,
+      )
 
-            // Darker on sides
-            val overlayAlpha =
-                lerp(
-                    start = HuntCardScreenDefaults.ImageCarouselOverlayMaxAlpha,
-                    stop = HuntCardScreenDefaults.ImageCarouselOverlayMinAlpha,
-                    fraction = interpolationFraction)
+  val interpolationFraction =
+      HuntCardScreenDefaults.ImageCarouselInterpolationMaxFraction - clampedOffset
 
-            Box(
-                modifier =
-                    Modifier.graphicsLayer {
-                          scaleX = scale
-                          scaleY = scale
-                          cameraDistance =
-                              HuntCardScreenDefaults.ImageCarouselCameraDistanceFactor * density
-                        }
-                        .shadow(
-                            elevation = HuntCardScreenDefaults.ImageCarouselShadowElevation,
-                            shape =
-                                RoundedCornerShape(
-                                    HuntCardScreenDefaults.ImageCarouselCornerRadius))
-                        .clip(RoundedCornerShape(HuntCardScreenDefaults.ImageCarouselCornerRadius))
-                        .background(Color.White) // small white frame
-                        .border(
-                            width = HuntCardScreenDefaults.ImageCarouselWhiteFrame,
-                            color = Color.White,
-                            shape =
-                                RoundedCornerShape(
-                                    HuntCardScreenDefaults.ImageCarouselCornerRadius))
-                        .testTag(HuntCardScreenTestTags.IMAGE_PAGE_PREFIX + page)
-                        .clickable {
-                          if (page == pagerState.currentPage) {
-                            showFullScreen = true
-                          }
-                        }) {
-                  AsyncImage(
-                      model = images[page],
-                      contentDescription =
-                          HuntCardScreenStrings.HuntPicturePageDescriptionPrefix + page,
-                      modifier = Modifier.fillMaxSize(),
-                      placeholder = painterResource(R.drawable.empty_image),
-                      error = painterResource(R.drawable.empty_image),
-                      contentScale = ContentScale.Crop // crop in carousel to fill
-                      )
+  val scale =
+      lerp(
+          start = HuntCardScreenDefaults.ImageCarouselMinScale,
+          stop = HuntCardScreenDefaults.ImageCarouselMaxScale,
+          fraction = interpolationFraction,
+      )
 
-                  // Dark overlay for non-centered pages
-                  Box(
-                      modifier =
-                          Modifier.matchParentSize()
-                              .background(Color.Black.copy(alpha = overlayAlpha)))
-                }
-          }
+  val sideRotation =
+      if (page < pagerState.currentPage) {
+        HuntCardScreenDefaults.ImageCarouselSideRotationDegrees
+      } else {
+        -HuntCardScreenDefaults.ImageCarouselSideRotationDegrees
+      }
 
-      // --- DOT INDICATOR ROW ---
-      if (images.size > 1) {
-        Spacer(modifier = Modifier.height(HuntCardScreenDefaults.ImageIndicatorTopPadding))
+  val rotationY = lerp(start = sideRotation, stop = 0f, fraction = interpolationFraction)
 
-        Row(
-            modifier = Modifier.testTag(HuntCardScreenTestTags.IMAGE_INDICATOR_ROW),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically) {
-              images.indices.forEach { index ->
-                val isSelected = index == pagerState.currentPage
+  val overlayAlpha =
+      lerp(
+          start = HuntCardScreenDefaults.ImageCarouselOverlayMaxAlpha,
+          stop = HuntCardScreenDefaults.ImageCarouselOverlayMinAlpha,
+          fraction = interpolationFraction,
+      )
 
-                Box(
-                    modifier =
-                        Modifier.size(
-                                if (isSelected) HuntCardScreenDefaults.ImageIndicatorDotSelectedSize
-                                else HuntCardScreenDefaults.ImageIndicatorDotSize)
-                            .background(
-                                color =
-                                    if (isSelected)
-                                        HuntCardScreenDefaults.ImageIndicatorSelectedColor
-                                    else HuntCardScreenDefaults.ImageIndicatorUnselectedColor,
-                                shape = CircleShape)
-                            .testTag(HuntCardScreenTestTags.IMAGE_INDICATOR_DOT_PREFIX + index))
+  return PageTransforms(
+      scale = scale,
+      rotationY = rotationY,
+      overlayAlpha = overlayAlpha,
+  )
+}
 
-                if (index != images.lastIndex) {
-                  Spacer(modifier = Modifier.width(HuntCardScreenDefaults.ImageIndicatorDotSpacing))
-                }
+@Composable
+private fun HuntImagePage(
+    image: Any,
+    page: Int,
+    isCurrentPage: Boolean,
+    transforms: PageTransforms,
+    onClickCurrent: () -> Unit,
+) {
+  Box(
+      modifier =
+          Modifier.graphicsLayer {
+                scaleX = transforms.scale
+                scaleY = transforms.scale
+                rotationY = transforms.rotationY
+                cameraDistance = HuntCardScreenDefaults.ImageCarouselCameraDistanceFactor * density
               }
-            }
+              .shadow(
+                  elevation = HuntCardScreenDefaults.ImageCarouselShadowElevation,
+                  shape = RoundedCornerShape(HuntCardScreenDefaults.ImageCarouselCornerRadius),
+              )
+              .clip(RoundedCornerShape(HuntCardScreenDefaults.ImageCarouselCornerRadius))
+              .background(Color.White)
+              .border(
+                  width = HuntCardScreenDefaults.ImageCarouselWhiteFrame,
+                  color = Color.White,
+                  shape = RoundedCornerShape(HuntCardScreenDefaults.ImageCarouselCornerRadius),
+              )
+              .testTag(HuntCardScreenTestTags.IMAGE_PAGE_PREFIX + page)
+              .clickable(enabled = isCurrentPage) { if (isCurrentPage) onClickCurrent() },
+  ) {
+    AsyncImage(
+        model = image,
+        contentDescription = HuntCardScreenStrings.HuntPicturePageDescriptionPrefix + page,
+        modifier = Modifier.fillMaxSize(),
+        placeholder = painterResource(R.drawable.empty_image),
+        error = painterResource(R.drawable.empty_image),
+        contentScale = ContentScale.Crop,
+    )
+
+    Box(
+        modifier =
+            Modifier.matchParentSize()
+                .background(Color.Black.copy(alpha = transforms.overlayAlpha)),
+    )
+  }
+}
+
+@Composable
+private fun HuntImageIndicators(
+    imagesCount: Int,
+    currentPage: Int,
+) {
+  if (imagesCount <= 1) return
+
+  Spacer(modifier = Modifier.height(HuntCardScreenDefaults.ImageIndicatorTopPadding))
+
+  Row(
+      modifier = Modifier.testTag(HuntCardScreenTestTags.IMAGE_INDICATOR_ROW),
+      horizontalArrangement = Arrangement.Center,
+      verticalAlignment = Alignment.CenterVertically,
+  ) {
+    repeat(imagesCount) { index ->
+      val isSelected = index == currentPage
+
+      Box(
+          modifier =
+              Modifier.size(
+                      if (isSelected) HuntCardScreenDefaults.ImageIndicatorDotSelectedSize
+                      else HuntCardScreenDefaults.ImageIndicatorDotSize,
+                  )
+                  .background(
+                      color =
+                          if (isSelected) HuntCardScreenDefaults.ImageIndicatorSelectedColor
+                          else HuntCardScreenDefaults.ImageIndicatorUnselectedColor,
+                      shape = CircleShape,
+                  )
+                  .testTag(HuntCardScreenTestTags.IMAGE_INDICATOR_DOT_PREFIX + index),
+      )
+
+      if (index != imagesCount - 1) {
+        Spacer(modifier = Modifier.width(HuntCardScreenDefaults.ImageIndicatorDotSpacing))
       }
     }
   }
