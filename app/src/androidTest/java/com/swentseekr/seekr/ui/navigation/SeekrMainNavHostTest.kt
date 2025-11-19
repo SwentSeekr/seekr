@@ -492,7 +492,7 @@ class SeekrNavigationTest {
 
       // BEST EFFORT: tap an "Add review" style control to trigger HuntCardScreen.addReview
       // callback.
-      /*
+
       val didClickAddReview =
           listOf<(Unit) -> Boolean>(
                   {
@@ -519,14 +519,16 @@ class SeekrNavigationTest {
 
       check(didClickAddReview) { "Could not find Add Review control on HuntCardScreen." }
 
-         */
+
       // Tap the review button to trigger HuntCardScreen.addReview
-      compose.waitForIdle()
+      /*compose.waitForIdle()
       compose
           .onNodeWithTag(HuntCardScreenTestTags.REVIEW_BUTTON)
           .assertExists()
           .assertIsDisplayed()
           .performClick()
+
+       */
 
       // Wait until AddReview wrapper is present.
       waitUntilTrue(MED) {
