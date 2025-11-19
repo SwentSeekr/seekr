@@ -62,6 +62,8 @@ object HuntCardScreenDefaults {
   val ImageIndicatorDotSelectedSize: Dp = 8.dp
   val ImageIndicatorDotSpacing: Dp = 4.dp
   val ImageIndicatorTopPadding: Dp = 4.dp
+  const val ImageCarouselRotationCenterDegrees: Float = 0f
+  const val ImageIndicatorLastIndexOffset = 1
   val ImageIndicatorUnselectedColor: Color = Color.LightGray
   val ImageIndicatorSelectedColor: Color = Color.DarkGray
 }
