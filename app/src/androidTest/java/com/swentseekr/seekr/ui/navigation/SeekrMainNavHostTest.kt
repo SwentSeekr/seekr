@@ -13,6 +13,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
+import com.swentseekr.seekr.FakeHuntCardViewModel
+import com.swentseekr.seekr.FakeReviewHuntViewModel
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
 import com.swentseekr.seekr.model.profile.createHunt
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
@@ -461,7 +463,14 @@ class SeekrNavigationTest {
 
     withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
       // Re-compose with fake repo.
-      compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
+      compose.runOnUiThread {
+        compose.activity.setContent {
+          SeekrMainNavHost(
+              testMode = true,
+              huntCardViewModelFactory = { FakeHuntCardViewModel(hunt) },
+              reviewViewModelFactory = { FakeReviewHuntViewModel() })
+        }
+      }
 
       // Wait for the overview list to appear.
       waitUntilTrue(MED) {
