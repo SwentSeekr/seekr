@@ -28,14 +28,28 @@ import androidx.compose.ui.util.lerp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
+import com.swentseekr.seekr.ui.components.HuntCardScreenDefaults.ImageCarouselRotationCenterDegrees
+import com.swentseekr.seekr.ui.components.HuntCardScreenDefaults.ImageIndicatorLastIndexOffset
 import kotlin.math.absoluteValue
 
+/**
+ * High-level image carousel for a hunt.
+ *
+ * Responsibilities:
+ * - Build the list of images from `mainImageUrl` + `otherImagesUrls` with a safe fallback.
+ * - Manage pager state and full-screen dialog visibility.
+ * - Delegate layout responsibilities to:
+ *     - [HuntImagePager] for the paged images.
+ *     - [HuntImageIndicators] for the dot indicator row.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HuntImageCarousel(
     hunt: com.swentseekr.seekr.model.hunt.Hunt,
     modifier: Modifier = Modifier,
 ) {
+  // Build the list of images once per hunt instance.
+  // The main image is first; if missing, we fall back to an empty placeholder drawable.
   val images: List<Any> =
       remember(hunt) {
         buildList {
@@ -49,9 +63,13 @@ fun HuntImageCarousel(
         }
       }
 
+  // Pager state drives the current page and offset for transforms.
   val pagerState = rememberPagerState(pageCount = { images.size })
+
+  // Local state controlling whether the full-screen dialog is visible.
   var showFullScreen by remember { mutableStateOf(false) }
 
+  // Full-screen image dialog, rendered only when requested.
   HuntImageFullScreenDialog(
       showFullScreen = showFullScreen,
       currentImage = images[pagerState.currentPage],
@@ -65,12 +83,14 @@ fun HuntImageCarousel(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+      // Main horizontal image pager with 3D transforms and overlay.
       HuntImagePager(
           images = images,
           pagerState = pagerState,
           onCurrentPageClicked = { showFullScreen = true },
       )
 
+      // Dot indicators below the pager, rendered only when multiple images are present.
       HuntImageIndicators(
           imagesCount = images.size,
           currentPage = pagerState.currentPage,
@@ -79,12 +99,20 @@ fun HuntImageCarousel(
   }
 }
 
+/**
+ * Full-screen dialog to display the currently selected image.
+ *
+ * This is intentionally separated from [HuntImageCarousel] to:
+ * - Keep the main composable easier to read.
+ * - Make the dialog behavior easier to test and maintain.
+ */
 @Composable
 private fun HuntImageFullScreenDialog(
     showFullScreen: Boolean,
     currentImage: Any,
     onDismiss: () -> Unit,
 ) {
+  // Early-return to avoid composing a Dialog when not needed.
   if (!showFullScreen) return
 
   Dialog(onDismissRequest = onDismiss) {
@@ -101,12 +129,20 @@ private fun HuntImageFullScreenDialog(
                   .testTag(HuntCardScreenTestTags.IMAGE_FULLSCREEN),
           placeholder = painterResource(R.drawable.empty_image),
           error = painterResource(R.drawable.empty_image),
+          // We avoid cropping in full-screen view to show as much of the image as possible.
           contentScale = ContentScale.Fit,
       )
     }
   }
 }
 
+/**
+ * Horizontal pager hosting each image page with the carousel effect.
+ *
+ * This composable:
+ * - Applies a fixed height from [HuntCardScreenDefaults.ImageCarouselHeight].
+ * - Delegates per-page visuals (scale, rotation, overlay) to [HuntImagePage].
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun HuntImagePager(
@@ -124,6 +160,7 @@ private fun HuntImagePager(
           PaddingValues(horizontal = HuntCardScreenDefaults.ImageCarouselPagerContentPadding),
       pageSpacing = HuntCardScreenDefaults.ImageCarouselPageSpacing,
   ) { page ->
+    // Compute animations / transforms based on current page and scroll offset.
     val transforms = rememberPageTransforms(page = page, pagerState = pagerState)
 
     HuntImagePage(
@@ -136,30 +173,49 @@ private fun HuntImagePager(
   }
 }
 
+/**
+ * Precomputed 3D transform values for a single pager page.
+ *
+ * @property scale The scale factor applied to the page.
+ * @property rotationY The Y-axis rotation angle used for the "perspective" effect.
+ * @property overlayAlpha Alpha used by the dark overlay (stronger on non-centered pages).
+ */
 private data class PageTransforms(
     val scale: Float,
     val rotationY: Float,
     val overlayAlpha: Float,
 )
 
+/**
+ * Computes the visual transforms (scale, rotation, overlay) for a given page.
+ *
+ * This function:
+ * - Derives a normalized offset from the current page.
+ * - Interpolates between min and max values defined in [HuntCardScreenDefaults].
+ * - Is separated from [HuntImagePager] for clarity and easier reuse/testing.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun rememberPageTransforms(
     page: Int,
     pagerState: PagerState,
 ): PageTransforms {
+  // Distance of this page from the currently selected page (0 = center).
   val pageOffset =
       (pagerState.currentPage - page + pagerState.currentPageOffsetFraction).absoluteValue
 
+  // Clamp offset to the expected interpolation range [0, 1].
   val clampedOffset =
       pageOffset.coerceIn(
           HuntCardScreenDefaults.ImageCarouselInterpolationMinFraction,
           HuntCardScreenDefaults.ImageCarouselInterpolationMaxFraction,
       )
 
+  // Fraction increases as the page gets closer to the center (1f = fully centered).
   val interpolationFraction =
       HuntCardScreenDefaults.ImageCarouselInterpolationMaxFraction - clampedOffset
 
+  // Scale: center image is larger, side images are slightly smaller.
   val scale =
       lerp(
           start = HuntCardScreenDefaults.ImageCarouselMinScale,
@@ -167,6 +223,7 @@ private fun rememberPageTransforms(
           fraction = interpolationFraction,
       )
 
+  // Rotation: pages rotate around the Y axis to create a "carousel" perspective effect.
   val sideRotation =
       if (page < pagerState.currentPage) {
         HuntCardScreenDefaults.ImageCarouselSideRotationDegrees
@@ -174,8 +231,14 @@ private fun rememberPageTransforms(
         -HuntCardScreenDefaults.ImageCarouselSideRotationDegrees
       }
 
-  val rotationY = lerp(start = sideRotation, stop = 0f, fraction = interpolationFraction)
+  val rotationY =
+      lerp(
+          start = sideRotation,
+          stop = ImageCarouselRotationCenterDegrees,
+          fraction = interpolationFraction,
+      )
 
+  // Overlay: side images are darker, center image has no overlay.
   val overlayAlpha =
       lerp(
           start = HuntCardScreenDefaults.ImageCarouselOverlayMaxAlpha,
@@ -190,6 +253,14 @@ private fun rememberPageTransforms(
   )
 }
 
+/**
+ * Single page in the image carousel.
+ *
+ * Responsibilities:
+ * - Render the image with scale / rotation / overlay transforms.
+ * - Expose a clickable surface **only** when this is the current page.
+ * - Provide test tags for UI tests (`IMAGE_PAGE_PREFIX + page`).
+ */
 @Composable
 private fun HuntImagePage(
     image: Any,
@@ -200,7 +271,9 @@ private fun HuntImagePage(
 ) {
   Box(
       modifier =
-          Modifier.graphicsLayer {
+          Modifier
+              // 3D transform application: scale + Y-axis rotation + camera distance.
+              .graphicsLayer {
                 scaleX = transforms.scale
                 scaleY = transforms.scale
                 rotationY = transforms.rotationY
@@ -211,6 +284,7 @@ private fun HuntImagePage(
                   shape = RoundedCornerShape(HuntCardScreenDefaults.ImageCarouselCornerRadius),
               )
               .clip(RoundedCornerShape(HuntCardScreenDefaults.ImageCarouselCornerRadius))
+              // White frame behind the image.
               .background(Color.White)
               .border(
                   width = HuntCardScreenDefaults.ImageCarouselWhiteFrame,
@@ -218,6 +292,7 @@ private fun HuntImagePage(
                   shape = RoundedCornerShape(HuntCardScreenDefaults.ImageCarouselCornerRadius),
               )
               .testTag(HuntCardScreenTestTags.IMAGE_PAGE_PREFIX + page)
+              // Only the currently centered page is clickable to open full screen.
               .clickable(enabled = isCurrentPage) { if (isCurrentPage) onClickCurrent() },
   ) {
     AsyncImage(
@@ -226,9 +301,11 @@ private fun HuntImagePage(
         modifier = Modifier.fillMaxSize(),
         placeholder = painterResource(R.drawable.empty_image),
         error = painterResource(R.drawable.empty_image),
+        // Crop in carousel to fully fill the card and keep the visual impact.
         contentScale = ContentScale.Crop,
     )
 
+    // Dark overlay whose alpha depends on the distance from the center page.
     Box(
         modifier =
             Modifier.matchParentSize()
@@ -237,12 +314,21 @@ private fun HuntImagePage(
   }
 }
 
+/**
+ * Row of dot indicators representing each page in the carousel.
+ *
+ * Behavior:
+ * - Renders one dot per image.
+ * - Uses a larger, darker dot for the currently selected page.
+ * - Hides the entire row when there is only one image.
+ */
 @Composable
 private fun HuntImageIndicators(
     imagesCount: Int,
     currentPage: Int,
 ) {
-  if (imagesCount <= 1) return
+  // No indicator when there is only a single image.
+  if (imagesCount <= ImageIndicatorLastIndexOffset) return
 
   Spacer(modifier = Modifier.height(HuntCardScreenDefaults.ImageIndicatorTopPadding))
 
@@ -269,7 +355,8 @@ private fun HuntImageIndicators(
                   .testTag(HuntCardScreenTestTags.IMAGE_INDICATOR_DOT_PREFIX + index),
       )
 
-      if (index != imagesCount - 1) {
+      // Add spacing between dots except after the last one.
+      if (index != imagesCount - ImageIndicatorLastIndexOffset) {
         Spacer(modifier = Modifier.width(HuntCardScreenDefaults.ImageIndicatorDotSpacing))
       }
     }
