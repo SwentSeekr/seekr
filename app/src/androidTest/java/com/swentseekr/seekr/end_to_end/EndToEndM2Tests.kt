@@ -10,7 +10,6 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -536,8 +535,25 @@ private class EditHuntRobot(private val rule: ComposeTestRule) {
 
     return ProfileRobot(rule).assertOnProfile()
   }
+}
+
+/** Robot for the Edit Profile screen. */
+private class EditProfileRobot(private val rule: ComposeTestRule) {
 
   private fun waitUntilReady() {
+    // Wait until pseudonym field exists & is enabled
+    rule.waitUntil(timeoutMillis = WAIT_LONG_MS) {
+      try {
+        rule
+            .onNodeWithTag(EditProfileTestTags.PSEUDONYM_FIELD)
+            .assertIsDisplayed()
+            .assertIsEnabled()
+        true
+      } catch (_: Throwable) {
+        false
+      }
+    }
+
     // Wait until bio field exists & is enabled
     rule.waitUntil(timeoutMillis = WAIT_LONG_MS) {
       try {
@@ -550,21 +566,9 @@ private class EditHuntRobot(private val rule: ComposeTestRule) {
 
     rule.waitForIdleSync()
   }
-}
-
-/** Robot for the Edit Profile screen. */
-private class EditProfileRobot(private val rule: ComposeTestRule) {
 
   fun assertOnEditProfile(): EditProfileRobot {
-    rule.waitUntil(timeoutMillis = WAIT_LONG_MS) {
-      try {
-        rule.onAllNodesWithTag(EditProfileTestTags.SCREEN).onFirst().assertIsDisplayed()
-        true
-      } catch (_: Throwable) {
-        false
-      }
-    }
-    rule.onAllNodesWithTag(EditProfileTestTags.SCREEN).onFirst().assertIsDisplayed()
+    waitUntilReady()
     rule.onNodeWithTag(EditProfileTestTags.PSEUDONYM_FIELD).assertIsDisplayed().assertIsEnabled()
     rule.onNodeWithTag(EditProfileTestTags.BIO_FIELD).assertIsDisplayed().assertIsEnabled()
 
@@ -591,19 +595,7 @@ private class EditProfileRobot(private val rule: ComposeTestRule) {
 
   /** Saves changes on Edit Profile and returns to Settings. */
   fun save(): SettingsRobot {
-    // Wait until Save is enabled.
-    rule.waitUntil(timeoutMillis = WAIT_LONG_MS) {
-      try {
-        rule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).assertIsEnabled()
-        true
-      } catch (_: Throwable) {
-        false
-      }
-    }
-
-    Espresso.closeSoftKeyboard()
-    rule.waitForIdleSync()
-
+    waitUntilReady()
     Espresso.closeSoftKeyboard()
     rule.waitForIdleSync()
 
