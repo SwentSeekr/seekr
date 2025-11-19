@@ -1,4 +1,4 @@
-package com.swentseekr.seekr
+package com.swentseekr.seekr.ui.cardScreen
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -11,7 +11,7 @@ import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.components.HuntCardScreen
 import com.swentseekr.seekr.ui.components.HuntCardScreenTestTags
-import junit.framework.TestCase.assertTrue
+import junit.framework.TestCase
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -54,7 +54,9 @@ class HuntCardScreenTest {
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.GO_BACK_BUTTON).assertIsDisplayed()
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.TITLE_TEXT).assertIsDisplayed()
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.AUTHOR_TEXT).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.IMAGE).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(HuntCardScreenTestTags.IMAGE_CAROUSEL_CONTAINER)
+        .assertIsDisplayed()
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.DESCRIPTION_TEXT).assertIsDisplayed()
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.MAP_CONTAINER).assertIsDisplayed()
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.BEGIN_BUTTON).assertIsDisplayed()
@@ -83,8 +85,8 @@ class HuntCardScreenTest {
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.REVIEW_BUTTON).performClick()
 
     // Verifies callbacks
-    assertTrue(goBackClicked)
-    assertTrue(beginClicked)
-    assertTrue(reviewClicked)
+    TestCase.assertTrue(goBackClicked)
+    TestCase.assertTrue(beginClicked)
+    TestCase.assertTrue(reviewClicked)
   }
 }

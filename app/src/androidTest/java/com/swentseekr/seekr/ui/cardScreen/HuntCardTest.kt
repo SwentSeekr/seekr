@@ -1,12 +1,14 @@
-package com.swentseekr.seekr
+package com.swentseekr.seekr.ui.cardScreen
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.*
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
@@ -41,7 +43,7 @@ class HuntCardTest {
   @Test
   fun huntCard_displaysTitleAndAuthor() {
     val hunt = createFakeHunt()
-    composeTestRule.setContent { HuntCard(hunt, modifier = Modifier.padding(2.dp)) }
+    composeTestRule.setContent { HuntCard(hunt, modifier = Modifier.Companion.padding(2.dp)) }
 
     composeTestRule.onNodeWithText(hunt.title).assertIsDisplayed()
     composeTestRule.onNodeWithText("by ${hunt.authorId}").assertIsDisplayed()
@@ -50,7 +52,7 @@ class HuntCardTest {
   @Test
   fun huntCard_displaysDistanceDifficultyAndTime() {
     val hunt = createFakeHunt()
-    composeTestRule.setContent { HuntCard(hunt, modifier = Modifier.padding(2.dp)) }
+    composeTestRule.setContent { HuntCard(hunt, modifier = Modifier.Companion.padding(2.dp)) }
 
     composeTestRule.onNodeWithText(hunt.difficulty.toString()).assertIsDisplayed()
     composeTestRule.onNodeWithText("${hunt.distance} km").assertIsDisplayed()
@@ -60,7 +62,7 @@ class HuntCardTest {
   @Test
   fun huntCard_displaysFavoriteIcon() {
     val hunt = createFakeHunt()
-    composeTestRule.setContent { HuntCard(hunt, modifier = Modifier.padding(2.dp)) }
+    composeTestRule.setContent { HuntCard(hunt, modifier = Modifier.Companion.padding(2.dp)) }
 
     // On recherche l’icône favorite par son contentDescription
     composeTestRule.onNodeWithContentDescription("Like Button").assertIsDisplayed()
