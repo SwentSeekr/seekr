@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -41,24 +40,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
-import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.DifficultyColor
 import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
@@ -95,19 +89,6 @@ fun HuntCardScreen(
   val buttonFunctionEdit = if (isCurrentId) editHunt else addReview
   val buttonText =
       if (isCurrentId) HuntCardScreenStrings.EditHunt else HuntCardScreenStrings.AddReview
-
-  /*var reviews =
-  List(10) { index ->
-    HuntReview(
-        reviewId = "review$index",
-        authorId = "author$index",
-        huntId = "hunt123",
-        rating = 4.0 + (index % 2),
-        comment = "This is review number $index",
-        photos = emptyList()
-    )
-  }*/
-  // reviews = emptyList() // For test purpose, no reviews
 
   val author = authorProfile?.author?.pseudonym ?: ("Unknown Author")
 
@@ -181,44 +162,55 @@ fun HuntCardScreen(
                                               .padding(HuntCardScreenDefaults.InfoTextPadding)
                                               .testTag(HuntCardScreenTestTags.TITLE_TEXT))
                                 }
+
                                 Text(
                                     "by $author",
                                     modifier =
                                         Modifier.padding(
                                                 horizontal = HuntCardScreenDefaults.InfoTextPadding)
                                             .testTag(HuntCardScreenTestTags.AUTHOR_TEXT))
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                  AsyncImage(
-                                      model = hunt.mainImageUrl.ifEmpty { R.drawable.empty_image },
-                                      contentDescription = "Hunt Picture",
-                                      modifier =
-                                          Modifier.padding(
-                                                  horizontal = HuntCardScreenDefaults.BadgePadding)
-                                              .size(HuntCardScreenDefaults.ImageSize)
-                                              .clip(RectangleShape)
-                                              .testTag(HuntCardScreenTestTags.IMAGE),
-                                      placeholder = painterResource(R.drawable.empty_image),
-                                      error = painterResource(R.drawable.empty_image))
-                                  Column(
-                                      modifier = Modifier.fillMaxWidth(),
-                                      horizontalAlignment = Alignment.CenterHorizontally,
-                                      verticalArrangement = Arrangement.Center) {
-                                        StatsBox(
-                                            hunt.difficulty.toString(),
-                                            DifficultyColor(hunt.difficulty),
-                                            modifier)
-                                        Spacer(
-                                            modifier =
-                                                modifier.height(
-                                                    HuntCardScreenDefaults.BadgePadding))
-                                        StatsBox("${hunt.distance} km", Color.White, modifier)
-                                        Spacer(
-                                            modifier =
-                                                modifier.height(
-                                                    HuntCardScreenDefaults.BadgePadding))
-                                        StatsBox("${hunt.time} h", Color.White, modifier)
-                                      }
-                                }
+
+                                Spacer(
+                                    modifier =
+                                        Modifier.height(HuntCardScreenDefaults.AuthorImageSpacing))
+
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth()) {
+                                      // IMAGE CAROUSEL
+                                      HuntImageCarousel(
+                                          hunt = hunt,
+                                          modifier =
+                                              Modifier.weight(
+                                                      HuntCardScreenDefaults.ImageCarouselWeight)
+                                                  .padding(
+                                                      end =
+                                                          HuntCardScreenDefaults
+                                                              .ImageCarouselPadding))
+
+                                      // STATS
+                                      Column(
+                                          modifier =
+                                              Modifier.weight(
+                                                  HuntCardScreenDefaults.StatsColumnWeight),
+                                          horizontalAlignment = Alignment.CenterHorizontally,
+                                          verticalArrangement = Arrangement.Center) {
+                                            StatsBox(
+                                                hunt.difficulty.toString(),
+                                                DifficultyColor(hunt.difficulty),
+                                                modifier)
+                                            Spacer(
+                                                modifier =
+                                                    modifier.height(
+                                                        HuntCardScreenDefaults.BadgePadding))
+                                            StatsBox("${hunt.distance} km", Color.White, modifier)
+                                            Spacer(
+                                                modifier =
+                                                    modifier.height(
+                                                        HuntCardScreenDefaults.BadgePadding))
+                                            StatsBox("${hunt.time} h", Color.White, modifier)
+                                          }
+                                    }
                               }
 
                           // DESCRIPTION
