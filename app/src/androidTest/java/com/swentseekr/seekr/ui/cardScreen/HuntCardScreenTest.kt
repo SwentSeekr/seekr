@@ -89,4 +89,105 @@ class HuntCardScreenTest {
     TestCase.assertTrue(beginClicked)
     TestCase.assertTrue(reviewClicked)
   }
+
+  @Test
+  fun huntCardScreen_showsDotsWhenMultipleImages() {
+    val huntWithImages =
+        createFakeHunt()
+            .copy(
+                mainImageUrl = "https://example.com/example1.jpg",
+                otherImagesUrls =
+                    listOf(
+                        "https://example.com/example2.jpg",
+                        "https://example.com/example3.jpg",
+                    ),
+            )
+
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = huntWithImages.uid,
+          huntCardViewModel = FakeHuntCardViewModel(huntWithImages),
+          onGoBack = {},
+          beginHunt = {},
+          addReview = {},
+          testmode = true,
+      )
+    }
+
+    // Carousel & pager
+    composeTestRule
+        .onNodeWithTag(HuntCardScreenTestTags.IMAGE_CAROUSEL_CONTAINER)
+        .assertIsDisplayed()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.IMAGE_PAGER).assertIsDisplayed()
+
+    // Indicator row (because > 1 image)
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.IMAGE_INDICATOR_ROW).assertIsDisplayed()
+
+    // 3 dots (1 main + 2 others)
+    (0 until 3).forEach { index ->
+      composeTestRule
+          .onNodeWithTag(HuntCardScreenTestTags.IMAGE_INDICATOR_DOT_PREFIX + index)
+          .assertIsDisplayed()
+    }
+  }
+
+  @Test
+  fun huntCardScreen_noDotsWhenSingleImage() {
+    val singleImageHunt =
+        createFakeHunt()
+            .copy(
+                mainImageUrl = "https://example.com/example1.jpg",
+                otherImagesUrls = emptyList(),
+            )
+
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = singleImageHunt.uid,
+          huntCardViewModel = FakeHuntCardViewModel(singleImageHunt),
+          onGoBack = {},
+          beginHunt = {},
+          addReview = {},
+          testmode = true,
+      )
+    }
+
+    composeTestRule
+        .onNodeWithTag(HuntCardScreenTestTags.IMAGE_CAROUSEL_CONTAINER)
+        .assertIsDisplayed()
+
+    // Indicator row should not exist
+    composeTestRule
+        .onNodeWithTag(HuntCardScreenTestTags.IMAGE_INDICATOR_ROW, useUnmergedTree = true)
+        .assertDoesNotExist()
+  }
+
+  @Test
+  fun huntCardScreen_tapCenterImageOpensFullscreen() {
+    val huntWithImage =
+        createFakeHunt()
+            .copy(
+                mainImageUrl = "https://example.com/example1.jpg",
+                otherImagesUrls = emptyList(),
+            )
+
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = huntWithImage.uid,
+          huntCardViewModel = FakeHuntCardViewModel(huntWithImage),
+          onGoBack = {},
+          beginHunt = {},
+          addReview = {},
+          testmode = true,
+      )
+    }
+
+    // Click center page (index 0)
+    composeTestRule
+        .onNodeWithTag(HuntCardScreenTestTags.IMAGE_PAGE_PREFIX + 0)
+        .assertIsDisplayed()
+        .performClick()
+
+    // Full-screen dialog appears
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.IMAGE_FULLSCREEN).assertIsDisplayed()
+  }
 }
