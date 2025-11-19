@@ -126,8 +126,7 @@ fun AddReviewScreen(
                   modifier =
                       modifier.padding(vertical = AddReviewScreenDefaults.InfoVerticalPadding))
               Text(
-                  // text = hunt?.uid ?: AddReviewScreenStrings.LoadingPlaceholder,
-                  text = "by $author",
+                  text = "${AddReviewScreenStrings.By} $author",
                   fontSize = AddReviewScreenDefaults.SubtitleFontSize,
               )
               Spacer(modifier = modifier.height(AddReviewScreenDefaults.SpacePadding))

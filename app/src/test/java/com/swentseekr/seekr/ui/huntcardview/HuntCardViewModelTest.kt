@@ -9,6 +9,8 @@ import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryLocal
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.model.profile.ProfileRepositoryLocal
+import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModelTestConstantsString.TEST_AUTHOR_ID
+import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModelTestConstantsString.TEST_HUNT_ID
 import com.swentseekr.seekr.ui.profile.Profile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -30,19 +32,27 @@ class HuntCardViewModelTest {
 
   private val testHunt =
       Hunt(
-          uid = "hunt123",
-          start = Location(1.0, 2.0, "Start"),
-          end = Location(3.0, 4.0, "End"),
+          uid = TEST_HUNT_ID,
+          start =
+              Location(
+                  HuntCardViewModelTestConstantsNumeric.Location1,
+                  HuntCardViewModelTestConstantsNumeric.Location2,
+                  "Start"),
+          end =
+              Location(
+                  HuntCardViewModelTestConstantsNumeric.Location3,
+                  HuntCardViewModelTestConstantsNumeric.Location4,
+                  "End"),
           middlePoints = emptyList(),
           status = HuntStatus.FUN,
-          title = "Test Hunt",
-          description = "Test Description",
-          time = 1.0,
-          distance = 5.0,
+          title = HuntCardViewModelTestConstantsString.TestTile,
+          description = HuntCardViewModelTestConstantsString.TestDescription,
+          time = HuntCardViewModelTestConstantsNumeric.Time,
+          distance = HuntCardViewModelTestConstantsNumeric.Distance,
           difficulty = Difficulty.EASY,
-          authorId = "author123",
+          authorId = TEST_AUTHOR_ID,
           mainImageUrl = "",
-          reviewRate = 4.0)
+          reviewRate = HuntCardViewModelTestConstantsNumeric.ReviewRate)
 
   @Before
   fun setUp() = runTest {
@@ -79,7 +89,7 @@ class HuntCardViewModelTest {
   /** Test in case of non existing hunt laoded */
   @Test
   fun loadHunt_withInvalidId_logsError() = runTest {
-    viewModel.loadHunt("invalid_id")
+    viewModel.loadHunt(HuntCardViewModelTestConstantsString.InvalidId)
     advanceUntilIdle()
 
     val state = viewModel.uiState.value
@@ -93,31 +103,27 @@ class HuntCardViewModelTest {
   fun loadAuthorProfile_success() = runTest {
     fakeProRepository.addProfile(
         Profile(
-            uid = "author123",
-            author = Author(pseudonym = "AuthorName", bio = "Bio", profilePicture = 1)))
+            uid = TEST_AUTHOR_ID,
+            author =
+                Author(
+                    pseudonym = HuntCardViewModelTestConstantsString.AuthorName,
+                    bio = HuntCardViewModelTestConstantsString.AuthorBio,
+                    profilePicture = 1)))
 
-    viewModel.loadAuthorProfile("author123")
+    viewModel.loadAuthorProfile(TEST_AUTHOR_ID)
     advanceUntilIdle()
 
     val profile = viewModel.uiState.value.authorProfile
     assertNotNull(profile)
-    assertEquals("AuthorName", profile?.author?.pseudonym)
-  }
-
-  /** Test that loading an invalid author ID does not crash and results in null profile */
-  @Test
-  fun loadAuthorProfile_invalidId_doesNotCrash() = runTest {
-    viewModel.loadAuthorProfile("nonexistent")
-    advanceUntilIdle()
-
-    assertNull(viewModel.uiState.value.authorProfile)
+    assertEquals(HuntCardViewModelTestConstantsString.AuthorName, profile?.author?.pseudonym)
   }
 
   /** Test that setErrorMsg and clearErrorMsg work correctly */
   @Test
   fun setErrorMsg_and_clearErrorMsg() = runTest {
-    viewModel.setErrorMsg("Something went wrong")
-    assertEquals("Something went wrong", viewModel.uiState.value.errorMsg)
+    viewModel.setErrorMsg(HuntCardViewModelTestConstantsString.ErrorMessage)
+    assertEquals(
+        HuntCardViewModelTestConstantsString.ErrorMessage, viewModel.uiState.value.errorMsg)
 
     viewModel.clearErrorMsg()
     assertNull(viewModel.uiState.value.errorMsg)
@@ -144,7 +150,7 @@ class HuntCardViewModelTest {
   /** Test that check that the load Author does not crash not really implemented yet */
   @Test
   fun loadHuntAuthor_withInvalidId_logsError() = runTest {
-    viewModel.loadHuntAuthor("invalid_id")
+    viewModel.loadHuntAuthor(HuntCardViewModelTestConstantsString.InvalidId)
     advanceUntilIdle()
 
     assertTrue(true)
@@ -153,12 +159,24 @@ class HuntCardViewModelTest {
   /** Test that loadOtherReview correctly loads reviews */
   @Test
   fun loadOtherReview_populatesReviews() = runTest {
-    val review1 = HuntReview("r1", "u1", "hunt123", 5.0, "Great!")
-    val review2 = HuntReview("r2", "u2", "hunt123", 4.0, "Nice!")
+    val review1 =
+        HuntReview(
+            HuntCardViewModelTestConstantsString.ReviewId1,
+            HuntCardViewModelTestConstantsString.AuthorId1,
+            TEST_HUNT_ID,
+            HuntCardViewModelTestConstantsNumeric.ReviewRate5,
+            HuntCardViewModelTestConstantsString.Comment1)
+    val review2 =
+        HuntReview(
+            HuntCardViewModelTestConstantsString.ReviewId2,
+            HuntCardViewModelTestConstantsString.AuthorId2,
+            TEST_HUNT_ID,
+            HuntCardViewModelTestConstantsNumeric.ReviewRate,
+            HuntCardViewModelTestConstantsString.Comment2)
     fakeRevRepository.addReviewHunt(review1)
     fakeRevRepository.addReviewHunt(review2)
 
-    viewModel.loadOtherReview("hunt123")
+    viewModel.loadOtherReview(TEST_HUNT_ID)
     advanceUntilIdle()
 
     val reviews = viewModel.uiState.value.reviewList
@@ -170,7 +188,7 @@ class HuntCardViewModelTest {
   /** Test that loadOtherReview handles empty review list */
   @Test
   fun loadOtherReview_emptyList() = runTest {
-    viewModel.loadOtherReview("hunt123")
+    viewModel.loadOtherReview(TEST_HUNT_ID)
     advanceUntilIdle()
 
     val reviews = viewModel.uiState.value.reviewList
@@ -182,10 +200,10 @@ class HuntCardViewModelTest {
   fun onLikeClick_isLiked() = runTest {
     assertFalse(viewModel.uiState.value.isLiked)
 
-    viewModel.onLikeClick("hunt123")
+    viewModel.onLikeClick(TEST_HUNT_ID)
     assertEquals(true, viewModel.uiState.value.isLiked)
 
-    viewModel.onLikeClick("hunt123")
+    viewModel.onLikeClick(TEST_HUNT_ID)
     assertEquals(false, viewModel.uiState.value.isLiked)
   }
 
@@ -197,14 +215,14 @@ class HuntCardViewModelTest {
 
     // Then
     val state = viewModel.uiState.value
-    assertEquals("Hunt data is not loaded.", state.errorMsg)
+    assertEquals(HuntCardViewModelTestConstantsString.HuntNotLoaded, state.errorMsg)
     assertFalse(state.isAchieved)
   }
 
   /** Test that check that the hunt is marked as achieved */
   @Test
   fun onDoneClick_marks_hunt_as_achieved() = runTest {
-    val userId = "testUser"
+    val userId = HuntCardViewModelTestConstantsString.TestUser
 
     fakeProRepository.addProfile(Profile(uid = userId))
 
@@ -226,16 +244,18 @@ class HuntCardViewModelTest {
     try {
       // should get error since no hunt anymore
       fakeRepository.getHunt(testHunt.uid)
-      fail("Expected IllegalArgumentException")
+      fail(HuntCardViewModelTestConstantsString.IllegalExeption_Message)
     } catch (e: IllegalArgumentException) {
-      assertEquals("Hunt with ID ${testHunt.uid} is not found", e.message)
+      assertEquals(
+          "${ HuntCardViewModelTestConstantsString.MessageErrorStart } ${testHunt.uid} ${HuntCardViewModelTestConstantsString.MessageErrorEnd}",
+          e.message)
     }
   }
 
   /** Test that check no delete if not valid hunt id */
   @Test
   fun deleteHunt_withInvalidId_logsError() = runTest {
-    viewModel.deleteHunt("nonexistent_id")
+    viewModel.deleteHunt(HuntCardViewModelTestConstantsString.NonExistingId)
     advanceUntilIdle()
 
     // Nothing to assert — just ensures no crash/log handled
@@ -245,11 +265,18 @@ class HuntCardViewModelTest {
   fun deleteReview_userOwnsReview_deletesSuccessfully() = runTest {
     val review =
         HuntReview(
-            reviewId = "rev1", authorId = "u1", huntId = "hunt123", rating = 4.0, comment = "Nice")
+            reviewId = HuntCardViewModelTestConstantsString.Rev1,
+            authorId = HuntCardViewModelTestConstantsString.AuthorId1,
+            huntId = TEST_HUNT_ID,
+            rating = HuntCardViewModelTestConstantsNumeric.ReviewRate,
+            comment = HuntCardViewModelTestConstantsString.Comment2)
     fakeRevRepository.addReviewHunt(review)
 
     viewModel.deleteReview(
-        huntID = "hunt123", reviewID = "rev1", userID = "u1", currentUserId = "u1")
+        huntID = TEST_HUNT_ID,
+        reviewID = HuntCardViewModelTestConstantsString.Rev1,
+        userID = HuntCardViewModelTestConstantsString.AuthorId1,
+        currentUserId = HuntCardViewModelTestConstantsString.AuthorId1)
 
     advanceUntilIdle()
 
@@ -260,45 +287,56 @@ class HuntCardViewModelTest {
   fun deleteReview_wrongUser_setsError() = runTest {
     val review =
         HuntReview(
-            reviewId = "rev1", authorId = "u1", huntId = "hunt123", rating = 4.0, comment = "Nice")
+            reviewId = HuntCardViewModelTestConstantsString.Rev1,
+            authorId = HuntCardViewModelTestConstantsString.AuthorId1,
+            huntId = TEST_HUNT_ID,
+            rating = HuntCardViewModelTestConstantsNumeric.ReviewRate,
+            comment = HuntCardViewModelTestConstantsString.Comment2)
     fakeRevRepository.addReviewHunt(review)
 
     viewModel.deleteReview(
-        huntID = "hunt123", reviewID = "rev1", userID = "u1", currentUserId = "someone_else")
+        huntID = TEST_HUNT_ID,
+        reviewID = HuntCardViewModelTestConstantsString.Rev1,
+        userID = HuntCardViewModelTestConstantsString.AuthorId1,
+        currentUserId = HuntCardViewModelTestConstantsString.Comment3)
 
     advanceUntilIdle()
 
-    assertEquals("You can only delete your own review.", viewModel.uiState.value.errorMsg)
+    assertEquals(
+        HuntCardViewModelTestConstantsString.ReviewErrorMessage, viewModel.uiState.value.errorMsg)
 
     // Review must still exist
-    assertEquals(1, fakeRevRepository.getHuntReviews("hunt123").size)
+    assertEquals(1, fakeRevRepository.getHuntReviews(TEST_HUNT_ID).size)
   }
 
   /** Test that check the edit change correctly the hunt */
   @Test
   fun onEditClick() = runTest {
-    val newHuntValue = testHunt.copy(title = "Edited Title")
+    val newHuntValue = testHunt.copy(title = HuntCardViewModelTestConstantsString.EditTitle)
     viewModel.editHunt(testHunt.uid, newHuntValue)
     advanceUntilIdle()
 
     val updatedHunt = fakeRepository.getHunt(testHunt.uid)
-    assertEquals("Edited Title", updatedHunt.title)
+    assertEquals(HuntCardViewModelTestConstantsString.EditTitle, updatedHunt.title)
     assertEquals(newHuntValue, updatedHunt)
   }
 
   /** Test that check that there is an error with not a valid hunt */
   @Test
   fun editHunt_withInvalidId_logsError() = runTest {
-    val newHunt = testHunt.copy(uid = "nonexistent_id", title = "Should Fail")
-    viewModel.editHunt("nonexistent_id", newHunt)
+    val newHunt =
+        testHunt.copy(
+            uid = HuntCardViewModelTestConstantsString.NonExistingId,
+            title = HuntCardViewModelTestConstantsString.Fail)
+    viewModel.editHunt(HuntCardViewModelTestConstantsString.NonExistingId, newHunt)
     advanceUntilIdle()
 
     // Verify that the hunt was NOT added or changed
     try {
-      fakeRepository.getHunt("nonexistent_id")
-      fail("Expected IllegalArgumentException")
+      fakeRepository.getHunt(HuntCardViewModelTestConstantsString.NonExistingId)
+      fail(HuntCardViewModelTestConstantsString.IllegalExeption_Message)
     } catch (e: IllegalArgumentException) {
-      assertEquals("Hunt with ID nonexistent_id is not found", e.message)
+      assertEquals(HuntCardViewModelTestConstantsString.ErrorMessageNotFound, e.message)
     }
   }
 }

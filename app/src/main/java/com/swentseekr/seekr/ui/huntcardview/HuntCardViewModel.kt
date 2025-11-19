@@ -56,6 +56,7 @@ open class HuntCardViewModel(
         _uiState.value = _uiState.value.copy(authorProfile = profile)
       } catch (e: Exception) {
         Log.e("HuntCardViewModel", "Error loading user profile for User ID: $userID", e)
+        setErrorMsg("Unable to load author profile.")
       }
     }
   }
@@ -68,6 +69,7 @@ open class HuntCardViewModel(
         _uiState.value = _uiState.value.copy(currentUserId = userID)
       } catch (e: Exception) {
         Log.e("HuntCardViewModel", "Error loading current user ID", e)
+        setErrorMsg("Unable to load your account information.")
       }
     }
   }
@@ -80,6 +82,7 @@ open class HuntCardViewModel(
         _uiState.value = _uiState.value.copy(reviewList = reviews)
       } catch (e: Exception) {
         Log.e("ReviewHuntViewModel", "Error loading reviews for Hunt ID: $huntID", e)
+        setErrorMsg("Failed to load reviews.")
       }
     }
   }
@@ -95,11 +98,12 @@ open class HuntCardViewModel(
         val hunt = huntRepository.getHunt(huntID)
         val reviews = reviewRepository.getHuntReviews(huntID)
         val userId = _uiState.value.currentUserId
-        val currentUserLikes =
-            if (userId != null) {
-              profileRepository.getLikedHunts(userId)
-            } else emptyList<String>()
-        val isLiked = currentUserLikes.contains(huntID)
+        // val currentUserLikes =
+        //    if (userId != null) {
+        //      profileRepository.getLikedHunts(userId)
+        //   } else emptyList<String>()
+        // val isLiked = currentUserLikes.contains(huntID)// this will be use later when we add
+        // likes in profile repository
         val currentUserAchieved =
             if (userId != null) {
               profileRepository.getDoneHunts(userId)
@@ -111,6 +115,7 @@ open class HuntCardViewModel(
                 hunt = hunt, isLiked = false, isAchieved = isAchieved, reviewList = reviews)
       } catch (e: Exception) {
         Log.e("HuntCardViewModel", "Error loading Hunt by ID: $huntID", e)
+        setErrorMsg("Failed to load hunt details.")
       }
     }
   }
@@ -124,6 +129,7 @@ open class HuntCardViewModel(
         // repositoryAuthor.getPseudo(authorId)
       } catch (e: Exception) {
         Log.e("HuntCardViewModel", "Error loading Author by ID: $huntID", e)
+        setErrorMsg("Unable to load hunt author.")
       }
     }
   }
@@ -134,6 +140,7 @@ open class HuntCardViewModel(
         huntRepository.deleteHunt(huntID)
       } catch (e: Exception) {
         Log.e("HuntCardViewModel", "Error in deleting Hunt by ID: $huntID", e)
+        setErrorMsg("Failed to delete hunt.")
       }
     }
   }
@@ -167,6 +174,7 @@ open class HuntCardViewModel(
         huntRepository.editHunt(huntID, newValue)
       } catch (e: Exception) {
         Log.e("HuntCardViewModel", "Error in editing Hunt by ID: $huntID", e)
+        setErrorMsg("Failed to update hunt.")
       }
     }
   }
@@ -176,7 +184,8 @@ open class HuntCardViewModel(
    */
   open fun onLikeClick(huntID: String) {
     val currentHuntUiState = _uiState.value
-    val currentUserId = _uiState.value.currentUserId
+    // val currentUserId = _uiState.value.currentUserId //will be used later when we add likes in
+    // profile repository
     val currentlyLiked = _uiState.value.isLiked
     // This will be added to the likesList in the profile
     // or remove if already liked
@@ -218,6 +227,7 @@ open class HuntCardViewModel(
           // Update UI state
           _uiState.value = currentHuntUiState.copy(isAchieved = true)
         } catch (e: Exception) {
+          Log.e("HuntCardViewModel", "Error marking hunt done", e)
           setErrorMsg("Failed to mark hunt as done: ${e.message}")
         }
       }

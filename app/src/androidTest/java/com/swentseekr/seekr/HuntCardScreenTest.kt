@@ -26,26 +26,34 @@ class HuntCardScreenTest {
 
   private fun createFakeHunt() =
       Hunt(
-          uid = "hunt123",
-          start = Location(40.7128, -74.0060, "New York"),
-          end = Location(40.730610, -73.935242, "Brooklyn"),
+          uid = HuntCardScreenConstantStrings.TestHunt,
+          start =
+              Location(
+                  HuntCardScreenConstantNumbers.Location1,
+                  HuntCardScreenConstantNumbers.Location2,
+                  HuntCardScreenConstantStrings.Name1),
+          end =
+              Location(
+                  HuntCardScreenConstantNumbers.Location3,
+                  HuntCardScreenConstantNumbers.Location4,
+                  HuntCardScreenConstantStrings.Name2),
           middlePoints = emptyList(),
           status = HuntStatus.FUN,
-          title = "City Exploration",
-          description = "Discover hidden gems in the city",
-          time = 2.5,
-          distance = 5.0,
+          title = HuntCardScreenConstantStrings.Title,
+          description = HuntCardScreenConstantStrings.Description,
+          time = HuntCardScreenConstantNumbers.Time,
+          distance = HuntCardScreenConstantNumbers.Distance,
           difficulty = Difficulty.DIFFICULT,
-          authorId = "0",
+          authorId = HuntCardScreenConstantStrings.AuthorId,
           otherImagesUrls = emptyList(),
           mainImageUrl = "",
-          reviewRate = 4.5)
+          reviewRate = HuntCardScreenConstantNumbers.ReviewRate)
 
   @Test
   fun testAllUIElementsAreDisplayed() {
     composeTestRule.setContent {
       HuntCardScreen(
-          huntId = "hunt123",
+          huntId = HuntCardScreenConstantStrings.TestHunt,
           huntCardViewModel = FakeHuntCardViewModel(createFakeHunt()),
           onGoBack = {},
           beginHunt = {},
@@ -72,7 +80,7 @@ class HuntCardScreenTest {
 
     composeTestRule.setContent {
       HuntCardScreen(
-          huntId = "hunt123",
+          huntId = HuntCardScreenConstantStrings.TestHunt,
           huntCardViewModel = FakeHuntCardViewModel(createFakeHunt()),
           onGoBack = { goBackClicked = true },
           beginHunt = { beginClicked = true },
@@ -96,7 +104,10 @@ class HuntCardScreenTest {
     val fakeVm = FakeHuntCardViewModel(createFakeHunt())
 
     composeTestRule.setContent {
-      HuntCardScreen(huntId = "hunt123", huntCardViewModel = fakeVm, testmode = true)
+      HuntCardScreen(
+          huntId = HuntCardScreenConstantStrings.TestHunt,
+          huntCardViewModel = fakeVm,
+          testmode = true)
     }
 
     // Initially: not liked
@@ -116,20 +127,25 @@ class HuntCardScreenTest {
 
   @Test
   fun testAddReviewButtonShownForOtherUsers() {
-    val fakeVm = FakeHuntCardViewModel(hunt = createFakeHunt().copy(authorId = "0"))
+    val fakeVm =
+        FakeHuntCardViewModel(
+            hunt = createFakeHunt().copy(authorId = HuntCardScreenConstantStrings.AuthorId))
 
     composeTestRule.setContent {
-      HuntCardScreen(huntId = "hunt123", huntCardViewModel = fakeVm, testmode = true)
+      HuntCardScreen(
+          huntId = HuntCardScreenConstantStrings.TestHunt,
+          huntCardViewModel = fakeVm,
+          testmode = true)
     }
 
-    composeTestRule.onNodeWithText("Add Review").assertIsDisplayed()
+    composeTestRule.onNodeWithText(HuntCardScreenConstantStrings.AddReview).assertIsDisplayed()
   }
 
   @Test
   fun testMapIsVisible() {
     composeTestRule.setContent {
       HuntCardScreen(
-          huntId = "hunt123",
+          huntId = HuntCardScreenConstantStrings.TestHunt,
           huntCardViewModel = FakeHuntCardViewModel(createFakeHunt()),
           testmode = true)
     }
@@ -144,7 +160,7 @@ class HuntCardScreenTest {
 
     composeTestRule.setContent {
       HuntCardScreen(
-          huntId = "hunt123",
+          huntId = HuntCardScreenConstantStrings.TestHunt,
           huntCardViewModel = fakeVm,
           reviewViewModel = fakeReviewVm,
           testmode = true)

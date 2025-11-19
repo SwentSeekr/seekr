@@ -61,6 +61,8 @@ object HuntCardScreenDefaults {
   val BigSpacerPadding: Dp = 90.dp
   val DeleteReviewButtonSize: Dp = 32.dp
   val DeleteReviewButtonPadding: Dp = 4.dp
+  val TextPadding: Dp = 2.dp
+  const val NoPicture = 0
 }
 
 object HuntCardScreenStrings {
@@ -69,14 +71,17 @@ object HuntCardScreenStrings {
   const val HuntPictureDescription = "Hunt Picture"
   const val DistanceUnit = "km"
   const val TimeUnit = "h"
+  const val By = "by"
   const val BeginHunt = "Begin Hunt"
   const val AddReview = "Add Review"
   const val EditHunt = "Edit Hunt"
   const val Reviews = "Reviews : "
+  const val ReviewDeleteButton = "Delete Review"
   const val NoReviews = "No reviews yet."
   const val ReviewTitlePrefix = "Rating:"
   const val ReviewHint = "Point de départ de la chasse"
   const val ReviewMarkerTitlePrefix = "Départ : "
+  const val UnknownAuthor = "Unknown Author"
 }
 
 object HuntCardScreenTestTags {

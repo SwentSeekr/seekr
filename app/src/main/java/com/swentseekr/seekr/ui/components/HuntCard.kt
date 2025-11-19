@@ -25,6 +25,8 @@ import com.swentseekr.seekr.model.hunt.DifficultyColor
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.ui.theme.RedLike
+import com.swentseekr.seekr.ui.theme.White
 
 /**
  * Displays a card representing a hunt with title, author, image, difficulty, distance, and time.
@@ -64,20 +66,23 @@ fun HuntCard(hunt: Hunt, modifier: Modifier = Modifier) {
                     imageVector = Icons.Filled.Favorite,
                     contentDescription = HuntCardScreenStrings.LikeButton,
                     modifier =
-                        Modifier.testTag("HuntCard_LikeButton")
+                        Modifier.testTag(HuntCardScreenStrings.LikeButton)
                             .padding(HuntCardScreenDefaults.InfoColumnPadding),
-                    tint = Color.Red)
+                    tint = RedLike)
               }
 
               Text(
-                  "by ${hunt.authorId}",
+                  "${HuntCardScreenStrings.By} ${hunt.authorId}",
                   modifier = Modifier.padding(horizontal = HuntCardScreenDefaults.InfoTextPadding))
 
               Row(
                   modifier = Modifier.fillMaxWidth(),
                   verticalAlignment = Alignment.CenterVertically) {
                     AsyncImage(
-                        model = hunt.mainImageUrl.ifBlank { null },
+                        model =
+                            hunt.mainImageUrl.takeIf {
+                              it.isNotBlank()
+                            }, // hunt.mainImageUrl.ifBlank { null },
                         contentDescription = HuntCardScreenStrings.HuntPictureDescription,
                         modifier =
                             Modifier.padding(horizontal = HuntCardScreenDefaults.ImagePadding)
@@ -92,11 +97,10 @@ fun HuntCard(hunt: Hunt, modifier: Modifier = Modifier) {
                           StatsBox(hunt.difficulty.toString(), DifficultyColor(hunt.difficulty))
                           Spacer(
                               modifier = modifier.height(HuntCardScreenDefaults.spacerHeightSmall))
-                          StatsBox(
-                              "${hunt.distance} ${HuntCardScreenStrings.DistanceUnit}", Color.White)
+                          StatsBox("${hunt.distance} ${HuntCardScreenStrings.DistanceUnit}", White)
                           Spacer(
                               modifier = modifier.height(HuntCardScreenDefaults.spacerHeightSmall))
-                          StatsBox("${hunt.time} ${HuntCardScreenStrings.TimeUnit}", Color.White)
+                          StatsBox("${hunt.time} ${HuntCardScreenStrings.TimeUnit}", White)
                         }
                   }
             }
@@ -117,8 +121,7 @@ fun StatsBox(title: String, backColor: Color, modifier: Modifier = Modifier) {
     Text(
         title,
         textAlign = TextAlign.Center,
-        modifier =
-            modifier.align(Alignment.Center).padding(HuntCardScreenDefaults.BadgeTextPadding),
+        modifier = modifier.align(Alignment.Center).padding(HuntCardScreenDefaults.TextPadding),
     )
   }
 }

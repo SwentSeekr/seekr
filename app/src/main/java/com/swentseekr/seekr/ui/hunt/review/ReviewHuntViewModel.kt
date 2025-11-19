@@ -18,6 +18,7 @@ import com.swentseekr.seekr.ui.profile.Profile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class ReviewHuntUIState(
@@ -60,9 +61,13 @@ open class ReviewHuntViewModel(
     viewModelScope.launch {
       try {
         val hunt = repositoryHunt.getHunt(huntId)
-        _uiState.value = ReviewHuntUIState(hunt = hunt)
+        // _uiState.value = ReviewHuntUIState(hunt = hunt)
+        _uiState.update { it.copy(hunt = hunt) }
       } catch (e: Exception) {
-        Log.e("ReviewHuntViewModel", "Error loading Hunt by ID: $huntId", e)
+        Log.e(
+            AddReviewScreenStrings.ReviewViewModel,
+            "${AddReviewScreenStrings.ErrorLoadingHunt} $huntId",
+            e)
       }
     }
   }
@@ -74,7 +79,10 @@ open class ReviewHuntViewModel(
         val profile = profileRepository.getProfile(userId)
         _uiState.value = _uiState.value.copy(authorProfile = profile)
       } catch (e: Exception) {
-        Log.e("HuntCardViewModel", "Error loading user profile for User ID: $userId", e)
+        Log.e(
+            AddReviewScreenStrings.HuntCardViewModel,
+            "${AddReviewScreenStrings.ErrorLoadingProfil} $userId",
+            e)
       }
     }
   }
@@ -95,8 +103,8 @@ open class ReviewHuntViewModel(
         _uiState.value =
             _uiState.value.copy(saveSuccessful = true, errorMsg = null, isSubmitted = true)
       } catch (e: Exception) {
-        Log.e("ReviewHuntViewModel", "Error review Hunt", e)
-        setErrorMsg("Failed to submit review: ${e.message}")
+        Log.e(AddReviewScreenStrings.ReviewViewModel, AddReviewScreenStrings.ErrorReviewHunt, e)
+        setErrorMsg("${AddReviewScreenStrings.FailSubmitReview} ${e.message}")
         _uiState.value = _uiState.value.copy(saveSuccessful = false)
       }
     }
@@ -109,15 +117,15 @@ open class ReviewHuntViewModel(
   ) {
     viewModelScope.launch {
       try {
-        val currentUid = currentUserId ?: "None (B2)"
+        val currentUid = currentUserId ?: AddReviewScreenStrings.NoCurrentUser
         if (userID == currentUid) {
           repositoryReview.deleteReviewHunt(reviewId = reviewID)
         } else {
-          setErrorMsg("You can only delete your own review.")
+          setErrorMsg(AddReviewScreenStrings.ErrorDeleteReview)
         }
       } catch (e: Exception) {
-        Log.e("ReviewHuntViewModel", "Error deleting Review for hunt", e)
-        setErrorMsg("Failed to delete Hunt: ${e.message}")
+        Log.e(AddReviewScreenStrings.ReviewViewModel, AddReviewScreenStrings.ErrorDeleteHunt, e)
+        setErrorMsg("${AddReviewScreenStrings.FailDeleteHunt} ${e.message}")
       }
     }
   }
@@ -127,7 +135,7 @@ open class ReviewHuntViewModel(
     _uiState.value =
         _uiState.value.copy(
             reviewText = text,
-            invalidReviewText = if (text.isBlank()) "The review cannot be empty" else null)
+            invalidReviewText = if (text.isBlank()) AddReviewScreenStrings.ReviewNotEmpty else null)
   }
 
   /** Sets the rating for the review and validates it. */
@@ -136,7 +144,7 @@ open class ReviewHuntViewModel(
         _uiState.value.copy(
             rating = rating,
             invalidRating =
-                if (rating <= 0.0 || rating > 5.0) "Rating must be between 1 and 5" else null)
+                if (rating <= 0.0 || rating > 5.0) AddReviewScreenStrings.InvalidRating else null)
   }
 
   /**
@@ -146,7 +154,7 @@ open class ReviewHuntViewModel(
   fun submitReviewHunt(userId: String, hunt: Hunt) {
     val state = _uiState.value
     if (!state.isValid) {
-      setErrorMsg("At least one field is not valid")
+      setErrorMsg(AddReviewScreenStrings.ErrorSubmisson)
       return
     }
     _uiState.value = _uiState.value.copy(isSubmitted = true)
@@ -177,7 +185,7 @@ open class ReviewHuntViewModel(
     if (_uiState.value.saveSuccessful) {
       clearFormCancel()
     } else {
-      setErrorMsg("Cannot clear form, review not submitted successfully.")
+      setErrorMsg(AddReviewScreenStrings.ErrorClearSubmitReview)
     }
   }
 
@@ -197,7 +205,7 @@ open class ReviewHuntViewModel(
 
   /** Submits the current user's review for the given hunt. */
   fun submitCurrentUserReview(hunt: Hunt) {
-    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "0"
+    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: AddReviewScreenStrings.User0
     submitReviewHunt(userId, hunt)
   }
 }
