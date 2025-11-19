@@ -189,32 +189,16 @@ class ProfileRepositoryFirestore(
         ProfileRepositoryFirestoreConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
         "Writing profile for UID=${currentUser.uid}")
     val userDocRef = profilesCollection.document(currentUser.uid)
-    val snapshot = userDocRef.get().await()
-    val existingAuthorMap =
-        snapshot.get(ProfileRepositoryFirestoreConstants.PROFILE_FIELD_AUTHOR) as? Map<String, Any?>
-            ?: emptyMap()
-
-    val updatedAuthorMap =
-        existingAuthorMap.toMutableMap().apply {
-          put("pseudonym", profile.author.pseudonym)
-          put("bio", profile.author.bio)
-          put("profilePicture", existingAuthorMap["profilePicture"] ?: 0)
-          put("profilePictureUrl", profile.author.profilePictureUrl)
-          put("reviewRate", profile.author.reviewRate)
-          put("sportRate", profile.author.sportRate)
-        }
-
-    val updatedProfileMap =
-        mapOf(
-            ProfileRepositoryFirestoreConstants.PROFILE_FIELD_AUTHOR to updatedAuthorMap,
-            ProfileRepositoryFirestoreConstants.PROFILE_FIELD_DONE_HUNTS to
-                profile.doneHunts.map { huntToMap(it) },
-            ProfileRepositoryFirestoreConstants.PROFILE_FIELD_LIKED_HUNTS to
-                profile.likedHunts.map { huntToMap(it) },
-            ProfileRepositoryFirestoreConstants.PROFILE_FIELD_MY_HUNTS to
-                profile.myHunts.map { huntToMap(it) })
-
-    userDocRef.set(updatedProfileMap).await()
+    userDocRef
+        .update(
+            mapOf(
+                "author.pseudonym" to profile.author.pseudonym,
+                "author.bio" to profile.author.bio,
+                "author.profilePicture" to profile.author.profilePicture,
+                "author.profilePictureUrl" to profile.author.profilePictureUrl,
+                "author.reviewRate" to profile.author.reviewRate,
+                "author.sportRate" to profile.author.sportRate))
+        .await()
   }
 
   override suspend fun getMyHunts(userId: String): List<Hunt> {
@@ -228,14 +212,17 @@ class ProfileRepositoryFirestore(
 
   override suspend fun uploadProfilePicture(userId: String, uri: Uri): String {
     val storageRef = storage.reference.child("profilePictures/$userId.jpg")
+    val docRef = db.collection("profiles").document(userId)
 
-    storageRef.putFile(uri).await()
-
-    val url = storageRef.downloadUrl.await().toString()
-
-    db.collection("profiles").document(userId).update("author.profilePictureUrl", url).await()
-
-    return url
+    return try {
+      storageRef.putFile(uri).await()
+      val url = storageRef.downloadUrl.await().toString()
+      docRef.update("author.profilePictureUrl", url).await()
+      url
+    } catch (e: Exception) {
+      Log.e("UploadProfilePicture", "Failed to upload or update profile picture", e)
+      throw e
+    }
   }
 
   override suspend fun getDoneHunts(userId: String): List<Hunt> {

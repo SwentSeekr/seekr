@@ -12,14 +12,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-const val MAX_PSEUDONYM_LENGTH = 30
-const val MAX_BIO_LENGTH = 200
-const val PROFILE_PIC_DEFAULT = 0
 /** UI state for editing a profile */
 data class EditProfileUIState(
     val pseudonym: String = "",
     val bio: String = "",
-    val profilePicture: Int = PROFILE_PIC_DEFAULT,
+    val profilePicture: Int = EditProfileImageConstants.PROFILE_PIC_DEFAULT,
     val isSaving: Boolean = false,
     val hasChanges: Boolean = false,
     val canSave: Boolean = false,
@@ -42,6 +39,9 @@ class EditProfileViewModel(
   /** Keep track of last saved profile for undo/cancel */
   private var lastSavedProfile: EditProfileUIState? = null
   private var lastSavedFullProfile: Profile? = null
+
+  private val _cameraError = MutableStateFlow<String?>(null)
+  val cameraError = _cameraError.asStateFlow()
 
   /** Load the profile for editing */
   fun loadProfile() {
@@ -129,14 +129,17 @@ class EditProfileViewModel(
                 ?: lastSavedFullProfile
                 ?: throw Exception("Profile not found")
 
+        val profilePictureUri = _uiState.value.profilePictureUri
+        val profilePictureUrlState = _uiState.value.profilePictureUrl
+
         val finalProfilePictureUrl =
             when {
-              _uiState.value.profilePictureUri != null -> {
-                repository.uploadProfilePicture(uid, _uiState.value.profilePictureUri!!)
+              profilePictureUri != null -> {
+                repository.uploadProfilePicture(uid, profilePictureUri)
               }
-              _uiState.value.profilePictureUrl.isEmpty() &&
-                  _uiState.value.profilePicture == PROFILE_PIC_DEFAULT &&
-                  _uiState.value.profilePictureUri == null -> {
+              profilePictureUrlState.isEmpty() &&
+                  _uiState.value.profilePicture ==
+                      EditProfileImageConstants.PROFILE_PIC_DEFAULT -> {
                 ""
               }
               else -> currentProfile.author.profilePictureUrl
@@ -183,8 +186,8 @@ class EditProfileViewModel(
     val canSave =
         hasChanges &&
             newState.pseudonym.isNotBlank() &&
-            newState.pseudonym.length <= MAX_PSEUDONYM_LENGTH &&
-            newState.bio.length <= MAX_BIO_LENGTH
+            newState.pseudonym.length <= EditProfileImageConstants.MAX_PSEUDONYM_LENGTH &&
+            newState.bio.length <= EditProfileImageConstants.MAX_BIO_LENGTH
 
     _uiState.value =
         newState.copy(hasChanges = hasChanges, canSave = canSave, success = false, errorMsg = null)
@@ -192,7 +195,10 @@ class EditProfileViewModel(
 
   fun removeProfilePicture() {
     val newState =
-        _uiState.value.copy(profilePicture = 0, profilePictureUri = null, profilePictureUrl = "")
+        _uiState.value.copy(
+            profilePicture = EditProfileImageConstants.PROFILE_PIC_DEFAULT,
+            profilePictureUri = null,
+            profilePictureUrl = "")
     updateChangesFlags(newState)
   }
 }

@@ -22,7 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.BUTTON_CAMERA
@@ -40,56 +39,6 @@ import com.swentseekr.seekr.ui.profile.EditProfileStrings.FIELD_LABEL_BIO
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.FIELD_LABEL_PSEUDONYM
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.SUCCESS_UPDATE
 import java.io.File
-
-/** Centralized constants for UI dimensions. */
-object EditProfileConstants {
-  val PROFILE_PICTURE_SIZE = 80.dp
-  val BIO_FIELD_MIN_HEIGHT = 120.dp
-  val SCREEN_PADDING = 24.dp
-  val SPACER_MEDIUM = 12.dp
-  val SPACER_LARGE = 16.dp
-  val ADD_ICON_FONT_SIZE = 24.sp
-}
-
-object EditProfileStrings {
-  const val DIALOG_TITLE = "Choose Image"
-  const val DIALOG_MESSAGE = "Pick a source for your new profile picture"
-
-  const val BUTTON_GALLERY = "Gallery"
-  const val BUTTON_CAMERA = "Camera"
-  const val BUTTON_REMOVE_PICTURE = "Remove Picture"
-  const val BUTTON_CANCEL = "Cancel"
-  const val BUTTON_SAVE = "Save"
-  const val BUTTON_SAVING = "Saving..."
-
-  const val FIELD_LABEL_PSEUDONYM = "Pseudonym"
-  const val FIELD_LABEL_BIO = "Bio"
-
-  const val ERROR_PSEUDONYM_EMPTY = "Pseudonym cannot be empty"
-  const val ERROR_PSEUDONYM_MAX = "Max 30 characters allowed"
-  const val ERROR_BIO_MAX = "Max 200 characters allowed"
-
-  const val SUCCESS_UPDATE = "Profile updated!"
-}
-
-/**
- * Centralized test tags for identifying composable nodes in tests.
- *
- * Used in instrumented and UI tests to find elements using `composeTestRule.onNodeWithTag(...)`.
- */
-object EditProfileTestTags {
-  const val SCREEN = "EDIT_PROFILE_SCREEN"
-  const val PROFILE_PICTURE = "PROFILE_PICTURE"
-  const val DIALOG = "PROFILE_PICTURE_DIALOG"
-  const val GALLERY_BUTTON = "GALLERY_BUTTON"
-  const val CAMERA_BUTTON = "CAMERA_BUTTON"
-  const val PSEUDONYM_FIELD = "PSEUDONYM_FIELD"
-  const val BIO_FIELD = "BIO_FIELD"
-  const val CANCEL_BUTTON = "CANCEL_BUTTON"
-  const val SAVE_BUTTON = "SAVE_BUTTON"
-  const val ERROR_MESSAGE = "ERROR_MESSAGE"
-  const val SUCCESS_MESSAGE = "SUCCESS_MESSAGE"
-}
 
 /**
  * The main screen composable for editing a user’s profile.
@@ -114,6 +63,7 @@ fun EditProfileScreen(
 
   val uiState by editProfileViewModel.uiState.collectAsState()
   val context = LocalContext.current
+  var cameraError by remember { mutableStateOf<String?>(null) }
 
   // var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
@@ -139,11 +89,16 @@ fun EditProfileScreen(
   }
 
   fun launchCamera() {
+    val uri = createImageUri(context)
+    if (uri == null) {
+      cameraError = "Could not create image file. Check storage permissions."
+      return
+    }
     try {
-      val uri = createImageUri(context)
       cameraPhotoUri.value = uri
       cameraLauncher.launch(uri)
     } catch (e: Exception) {
+      cameraError = "Failed to launch camera: ${e.message}"
       Log.e("CameraLaunch", "Failed to launch camera: ${e.message}", e)
     }
   }
@@ -151,6 +106,14 @@ fun EditProfileScreen(
   LaunchedEffect(Unit) {
     if (!testMode && userId != null) editProfileViewModel.loadProfile()
     editProfileViewModel.uiState.collect { if (it.success) onDone() }
+  }
+
+  if (cameraError != null) {
+    AlertDialog(
+        onDismissRequest = { cameraError = null },
+        title = { Text("Error") },
+        text = { Text(cameraError!!) },
+        confirmButton = { Button(onClick = { cameraError = null }) { Text("OK") } })
   }
 
   if (showDialog) {
@@ -226,10 +189,14 @@ fun EditProfileScreen(
       profilePictureUri = uiState.profilePictureUri)
 }
 
-fun createImageUri(context: Context): Uri {
+fun createImageUri(context: Context): Uri? {
   val contentValues = ContentValues().apply { put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg") }
-  return context.contentResolver.insert(
-      MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)!!
+  return try {
+    context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+  } catch (e: Exception) {
+    Log.e("CreateImageUri", "Failed to create image URI", e)
+    null
+  }
 }
 
 /**
@@ -265,12 +232,12 @@ fun EditProfileContent(
   Column(
       modifier =
           Modifier.fillMaxSize()
-              .padding(EditProfileConstants.SCREEN_PADDING)
+              .padding(EditProfileNumberConstants.SCREEN_PADDING)
               .testTag(EditProfileTestTags.SCREEN),
       horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier =
-                Modifier.size(EditProfileConstants.PROFILE_PICTURE_SIZE)
+                Modifier.size(EditProfileNumberConstants.PROFILE_PICTURE_SIZE)
                     .clickable { onProfilePictureChange() }
                     .testTag(EditProfileTestTags.PROFILE_PICTURE)) {
               ProfilePicture(
@@ -286,7 +253,7 @@ fun EditProfileContent(
                     style =
                         MaterialTheme.typography.titleLarge.copy(
                             color = MaterialTheme.colorScheme.onPrimary),
-                    fontSize = EditProfileConstants.ADD_ICON_FONT_SIZE,
+                    fontSize = EditProfileNumberConstants.ADD_ICON_FONT_SIZE,
                     modifier =
                         Modifier.align(Alignment.BottomEnd)
                             .background(MaterialTheme.colorScheme.primary, shape = CircleShape)
@@ -294,7 +261,7 @@ fun EditProfileContent(
               }
             }
 
-        Spacer(modifier = Modifier.height(EditProfileConstants.SPACER_LARGE))
+        Spacer(modifier = Modifier.height(EditProfileNumberConstants.SPACER_LARGE))
 
         OutlinedTextField(
             value = uiState.pseudonym,
@@ -304,7 +271,8 @@ fun EditProfileContent(
                 pseudonymError =
                     when {
                       newValue.isBlank() -> ERROR_PSEUDONYM_EMPTY
-                      newValue.length > MAX_PSEUDONYM_LENGTH -> ERROR_PSEUDONYM_MAX
+                      newValue.length > EditProfileImageConstants.MAX_PSEUDONYM_LENGTH ->
+                          ERROR_PSEUDONYM_MAX
                       else -> null
                     }
               }
@@ -322,7 +290,7 @@ fun EditProfileContent(
               modifier = Modifier.align(Alignment.Start))
         }
 
-        Spacer(modifier = Modifier.height(EditProfileConstants.SPACER_MEDIUM))
+        Spacer(modifier = Modifier.height(EditProfileNumberConstants.SPACER_MEDIUM))
 
         OutlinedTextField(
             value = uiState.bio,
@@ -331,7 +299,7 @@ fun EditProfileContent(
                 onBioChange(newValue)
                 bioError =
                     when {
-                      newValue.length > MAX_BIO_LENGTH -> ERROR_BIO_MAX
+                      newValue.length > EditProfileImageConstants.MAX_BIO_LENGTH -> ERROR_BIO_MAX
                       else -> null
                     }
               }
@@ -340,7 +308,7 @@ fun EditProfileContent(
             enabled = !isLoading,
             modifier =
                 Modifier.fillMaxWidth()
-                    .heightIn(min = EditProfileConstants.BIO_FIELD_MIN_HEIGHT)
+                    .heightIn(min = EditProfileNumberConstants.BIO_FIELD_MIN_HEIGHT)
                     .testTag(EditProfileTestTags.BIO_FIELD))
         if (bioError != null) {
           Text(
@@ -350,7 +318,7 @@ fun EditProfileContent(
               modifier = Modifier.align(Alignment.Start))
         }
 
-        Spacer(modifier = Modifier.height(EditProfileConstants.SPACER_LARGE))
+        Spacer(modifier = Modifier.height(EditProfileNumberConstants.SPACER_LARGE))
 
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
           OutlinedButton(
@@ -378,7 +346,7 @@ fun EditProfileContent(
               }
         }
 
-        Spacer(modifier = Modifier.height(EditProfileConstants.SPACER_MEDIUM))
+        Spacer(modifier = Modifier.height(EditProfileNumberConstants.SPACER_MEDIUM))
 
         when {
           localError != null ->
