@@ -5,6 +5,7 @@ import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants
 import com.swentseekr.seekr.ui.profile.Profile
 import org.junit.Assert.*
 import org.junit.Test
@@ -58,16 +59,16 @@ class ProfileUtilsTest {
     assertTrue(utils.isValidPseudonym("Bob"))
     assertFalse(utils.isValidPseudonym(""))
     assertFalse(utils.isValidPseudonym("ab")) // too short
-    val tooLong = "a".repeat(21)
+    val tooLong = "a".repeat(EditProfileNumberConstants.MAX_PSEUDONYM_LENGTH + 1)
     assertFalse(utils.isValidPseudonym(tooLong)) // too long
   }
 
   @Test
   fun isValidBio() {
     assertTrue(utils.isValidBio(""))
-    val ok = "a".repeat(150)
+    val ok = "a".repeat(EditProfileNumberConstants.MAX_BIO_LENGTH)
     assertTrue(utils.isValidBio(ok))
-    val tooLong = "a".repeat(151)
+    val tooLong = "a".repeat(EditProfileNumberConstants.MAX_BIO_LENGTH + 1)
     assertFalse(utils.isValidBio(tooLong))
   }
 

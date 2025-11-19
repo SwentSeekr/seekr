@@ -1,6 +1,8 @@
 package com.swentseekr.seekr.ui.profile
 
+import android.content.Context
 import android.net.Uri
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -17,11 +19,18 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.test.core.app.ApplicationProvider
+import com.swentseekr.seekr.R
+import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.MAX_BIO_LENGTH
+import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.MAX_PSEUDONYM_LENGTH
+import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.PROFILE_PIC_DEFAULT
+import com.swentseekr.seekr.ui.profile.EditProfileStrings.DIALOG_TITLE
+import com.swentseekr.seekr.ui.profile.EditProfileTestTags.DIALOG_CANCEL_BUTTON
 import com.swentseekr.seekr.ui.theme.SampleAppTheme
 import org.junit.Rule
 import org.junit.Test
@@ -39,7 +48,7 @@ import org.junit.Test
  */
 class EditProfileScreenTest {
 
-  @get:Rule val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
   private fun setContent(
       uiState: EditProfileUIState = EditProfileUIState(),
@@ -70,12 +79,6 @@ class EditProfileScreenTest {
   private fun ComposeTestRule.inputBio(text: String) =
       onNodeWithTag(EditProfileTestTags.BIO_FIELD).performTextInput(text)
 
-  private fun ComposeTestRule.clickSave() =
-      onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).performClick()
-
-  private fun ComposeTestRule.clickCancel() =
-      onNodeWithTag(EditProfileTestTags.CANCEL_BUTTON).performClick()
-
   private fun ComposeTestRule.clickProfilePicture() =
       onNodeWithTag(EditProfileTestTags.PROFILE_PICTURE).performClick()
 
@@ -88,12 +91,14 @@ class EditProfileScreenTest {
           AlertDialog(
               modifier = Modifier.testTag(EditProfileTestTags.DIALOG),
               onDismissRequest = { showDialog = false },
-              title = { Text("Choose Image") },
+              title = { Text(DIALOG_TITLE) },
               confirmButton = {
                 Column {
-                  Button(onClick = {}) { Text("Gallery") }
-                  Button(onClick = {}) { Text("Camera") }
-                  Button(onClick = { showDialog = false }) { Text("Remove Picture") }
+                  Button(onClick = {}) { Text(EditProfileStrings.BUTTON_GALLERY) }
+                  Button(onClick = {}) { Text(EditProfileStrings.BUTTON_CAMERA) }
+                  Button(onClick = { showDialog = false }) {
+                    Text(EditProfileStrings.BUTTON_REMOVE_PICTURE)
+                  }
                 }
               })
         }
@@ -138,7 +143,8 @@ class EditProfileScreenTest {
   fun saveButtonEnabled_whenErrorDisplayed() {
     setContent(
         uiState =
-            EditProfileUIState(errorMsg = "Some error", canSave = true)) // backend/server error
+            EditProfileUIState(
+                errorMsg = EditProfileStrings.SERVER_ERROR, canSave = true)) // backend/server error
     composeTestRule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).assertIsEnabled()
     composeTestRule.onNodeWithTag(EditProfileTestTags.ERROR_MESSAGE).assertIsDisplayed()
   }
@@ -157,32 +163,32 @@ class EditProfileScreenTest {
 
   @Test
   fun pseudonymTooLong_showsError() {
-    var pseudonym by mutableStateOf("")
+    var pseudonym by mutableStateOf(EditProfileStrings.EMPTY_STRING)
     setContent(pseudonymChange = { pseudonym = it })
-    val longPseudonym = "a".repeat(31)
+    val longPseudonym = "a".repeat(MAX_PSEUDONYM_LENGTH + 1)
 
     composeTestRule.inputPseudonym(longPseudonym)
-    composeTestRule.onNodeWithText("Max 30 characters allowed").assertIsDisplayed()
+    composeTestRule.onNodeWithText(EditProfileStrings.ERROR_PSEUDONYM_MAX).assertIsDisplayed()
     composeTestRule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).assertIsNotEnabled()
   }
 
   @Test
   fun bioTooLong_showsError() {
 
-    var bio by mutableStateOf("")
+    var bio by mutableStateOf(EditProfileStrings.EMPTY_STRING)
     setContent(pseudonymChange = { bio = it })
-    val longBio = "b".repeat(201)
+    val longBio = "a".repeat(MAX_BIO_LENGTH + 1)
     composeTestRule.inputBio(longBio)
-    composeTestRule.onNodeWithText("Max 200 characters allowed").assertIsDisplayed()
+    composeTestRule.onNodeWithText(EditProfileStrings.ERROR_BIO_MAX).assertIsDisplayed()
     composeTestRule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).assertIsNotEnabled()
   }
 
   @Test
   fun emptyPseudonym_showsErrorAndDisablesSave() {
-    var pseudonym by mutableStateOf("")
+    var pseudonym by mutableStateOf(EditProfileStrings.EMPTY_STRING)
     setContent(pseudonymChange = { pseudonym = it })
     composeTestRule.inputPseudonym(" ")
-    composeTestRule.onNodeWithText("Pseudonym cannot be empty").assertIsDisplayed()
+    composeTestRule.onNodeWithText(EditProfileStrings.ERROR_PSEUDONYM_EMPTY).assertIsDisplayed()
     composeTestRule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).assertIsNotEnabled()
   }
 
@@ -193,7 +199,7 @@ class EditProfileScreenTest {
     setContent(uiState = state)
 
     composeTestRule.onNodeWithTag(EditProfileTestTags.PROFILE_PICTURE).assertIsDisplayed()
-    assert(state.profilePicture == 0)
+    assert(state.profilePicture == PROFILE_PIC_DEFAULT)
   }
 
   @Test
@@ -237,24 +243,24 @@ class EditProfileScreenTest {
       SampleAppTheme { EditProfileScreen(testMode = true, onGoBack = {}, onDone = {}) }
     }
     composeTestRule.onNodeWithTag(EditProfileTestTags.PROFILE_PICTURE).performClick()
-    composeTestRule.onNodeWithTag("DIALOG_CANCEL_BUTTON").performClick()
+    composeTestRule.onNodeWithTag(DIALOG_CANCEL_BUTTON).performClick()
     composeTestRule.onNodeWithTag(EditProfileTestTags.DIALOG).assertIsNotDisplayed()
   }
 
   @Test
   fun editProfileContent_localError_overridesUiStateError_andSuccess() {
-    var pseudonymChanged = ""
+    var pseudonymChanged = EditProfileStrings.EMPTY_STRING
     composeTestRule.setContent {
       EditProfileContent(
           uiState =
               EditProfileUIState(
-                  pseudonym = "",
-                  bio = "",
-                  profilePicture = 0,
+                  pseudonym = EditProfileStrings.EMPTY_STRING,
+                  bio = EditProfileStrings.EMPTY_STRING,
+                  profilePicture = PROFILE_PIC_DEFAULT,
                   canSave = true,
                   isSaving = false,
                   success = true,
-                  errorMsg = "Repo error"),
+                  errorMsg = EditProfileStrings.REPO_ERROR),
           onPseudonymChange = { pseudonymChanged = it },
           onBioChange = {},
           onCancel = {},
@@ -264,7 +270,7 @@ class EditProfileScreenTest {
     composeTestRule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).performClick()
     composeTestRule
         .onNodeWithTag(EditProfileTestTags.ERROR_MESSAGE)
-        .assertTextContains("Pseudonym cannot be empty")
+        .assertTextContains(EditProfileStrings.ERROR_PSEUDONYM_EMPTY)
   }
 
   @Test
@@ -278,7 +284,7 @@ class EditProfileScreenTest {
           AlertDialog(
               modifier = Modifier.testTag(EditProfileTestTags.DIALOG),
               onDismissRequest = { showDialog = false },
-              title = { Text("Choose Image") },
+              title = { Text(DIALOG_TITLE) },
               confirmButton = {
                 Button(
                     modifier = Modifier.testTag(EditProfileTestTags.CAMERA_BUTTON),
@@ -286,7 +292,7 @@ class EditProfileScreenTest {
                       cameraLaunched = true
                       showDialog = false
                     }) {
-                      Text("Camera")
+                      Text(EditProfileStrings.BUTTON_CAMERA)
                     }
               })
         }
@@ -308,8 +314,8 @@ class EditProfileScreenTest {
 
   @Test
   fun pseudonymAndBioChange_updatesFieldsAndEnablesSave() {
-    var pseudonym by mutableStateOf("")
-    var bio by mutableStateOf("")
+    var pseudonym by mutableStateOf(EditProfileStrings.EMPTY_STRING)
+    var bio by mutableStateOf(EditProfileStrings.EMPTY_STRING)
     var uiState by
         mutableStateOf(EditProfileUIState(pseudonym = pseudonym, bio = bio, canSave = false))
     composeTestRule.setContent {
@@ -331,10 +337,74 @@ class EditProfileScreenTest {
           onProfilePictureChange = {})
     }
 
-    composeTestRule.inputPseudonym("NewName")
-    composeTestRule.inputBio("New bio text")
-    composeTestRule.onNodeWithTag(EditProfileTestTags.PSEUDONYM_FIELD).assertTextContains("NewName")
-    composeTestRule.onNodeWithTag(EditProfileTestTags.BIO_FIELD).assertTextContains("New bio text")
+    composeTestRule.inputPseudonym(EditProfileStrings.NEW_TEST_NAME)
+    composeTestRule.inputBio(EditProfileStrings.NEW_TEST_BIO)
+    composeTestRule
+        .onNodeWithTag(EditProfileTestTags.PSEUDONYM_FIELD)
+        .assertTextContains(EditProfileStrings.NEW_TEST_NAME)
+    composeTestRule
+        .onNodeWithTag(EditProfileTestTags.BIO_FIELD)
+        .assertTextContains(EditProfileStrings.NEW_TEST_BIO)
     composeTestRule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).assertIsEnabled()
+  }
+
+  @Test
+  fun createImageUri_success_returnsUri() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    val uri = createImageUri(context)
+    assert(uri != null)
+  }
+
+  @Test
+  fun galleryLauncher_nullUri_doesNothing() {
+    composeTestRule.setContent { EditProfileScreen(testMode = true) }
+    composeTestRule.onNodeWithTag(EditProfileTestTags.PROFILE_PICTURE).performClick()
+    composeTestRule.onNodeWithTag(EditProfileTestTags.GALLERY_BUTTON).performClick()
+
+    composeTestRule.onNodeWithTag(EditProfileTestTags.DIALOG).assertDoesNotExist()
+  }
+
+  @Test
+  fun clickingGalleryButton_closesDialog() {
+    composeTestRule.setContent { EditProfileScreen(testMode = true) }
+
+    composeTestRule.clickProfilePicture()
+    composeTestRule.onNodeWithTag(EditProfileTestTags.GALLERY_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(EditProfileTestTags.DIALOG).assertDoesNotExist()
+  }
+
+  @Test
+  fun removeProfilePictureButton_shown_whenProfileNotDefault() {
+
+    var showDialog by mutableStateOf(false)
+    composeTestRule.setContent {
+      SampleAppTheme {
+        if (showDialog) {
+          AlertDialog(
+              modifier = Modifier.testTag(EditProfileTestTags.DIALOG),
+              onDismissRequest = { showDialog = false },
+              title = { Text(DIALOG_TITLE) },
+              confirmButton = {
+                Column {
+                  Button(onClick = {}) { Text(EditProfileStrings.BUTTON_GALLERY) }
+                  Button(onClick = {}) { Text(EditProfileStrings.BUTTON_CAMERA) }
+                  Button(onClick = { showDialog = false }) {
+                    Text(EditProfileStrings.BUTTON_REMOVE_PICTURE)
+                  }
+                }
+              })
+        }
+        EditProfileContent(
+            uiState = EditProfileUIState(profilePicture = R.drawable.logo_seekr),
+            onPseudonymChange = {},
+            onBioChange = {},
+            onCancel = {},
+            onSave = {},
+            onProfilePictureChange = { showDialog = true })
+      }
+    }
+
+    composeTestRule.clickProfilePicture()
+    composeTestRule.onNodeWithText(EditProfileStrings.BUTTON_REMOVE_PICTURE).assertIsDisplayed()
   }
 }

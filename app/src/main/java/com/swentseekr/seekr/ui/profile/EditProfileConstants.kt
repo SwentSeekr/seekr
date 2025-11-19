@@ -11,9 +11,18 @@ object EditProfileNumberConstants {
   val SPACER_MEDIUM = 12.dp
   val SPACER_LARGE = 16.dp
   val ADD_ICON_FONT_SIZE = 24.sp
+  val SPACER_SMALL = 8.dp
+  val PADDING_SMALL = 4.dp
+  const val PROFILE_PICTURE_SIZE_DP = 100
+
+  const val PROFILE_PIC_DEFAULT = 0
+  const val MAX_PSEUDONYM_LENGTH = 30
+  const val MAX_BIO_LENGTH = 30
+  const val MIN_PSEUDONYM_LENGTH = 3
 }
 
 object EditProfileStrings {
+  const val PLUS = "+"
   const val DIALOG_TITLE = "Choose Image"
   const val DIALOG_MESSAGE = "Pick a source for your new profile picture"
 
@@ -26,12 +35,30 @@ object EditProfileStrings {
 
   const val FIELD_LABEL_PSEUDONYM = "Pseudonym"
   const val FIELD_LABEL_BIO = "Bio"
+  const val CAMERA_LAUNCH = "CameraLaunch"
 
   const val ERROR_PSEUDONYM_EMPTY = "Pseudonym cannot be empty"
   const val ERROR_PSEUDONYM_MAX = "Max 30 characters allowed"
   const val ERROR_BIO_MAX = "Max 200 characters allowed"
 
   const val SUCCESS_UPDATE = "Profile updated!"
+  const val EMPTY_STRING = ""
+  const val LOG_IN_ERROR = "User not logged in"
+  const val LOAD_PROFILE_ERROR = "Failed to load profile"
+  const val SAVE_PROFILE_ERROR = "Failed to save profile"
+  const val NO_PROFILE = "Profile not found"
+  const val LOAD_USER_ERROR = "User not loaded"
+  const val CAMERA_PERMISSION_ERROR = "Could not create image file. Check storage permissions."
+  const val ERROR = "Error"
+  const val OK = "OK"
+  const val IMAGE = "image/*"
+  const val IMAGE_JPEG = "image/jpeg"
+  const val IMAGE_URI = "CreateImageUri"
+  const val ERROR_URI = "Failed to create image URI"
+  const val SERVER_ERROR = "Some error"
+  const val REPO_ERROR = "Repo error"
+  const val NEW_TEST_NAME = "NewName"
+  const val NEW_TEST_BIO = "New bio text"
 }
 
 /**
@@ -51,10 +78,5 @@ object EditProfileTestTags {
   const val SAVE_BUTTON = "SAVE_BUTTON"
   const val ERROR_MESSAGE = "ERROR_MESSAGE"
   const val SUCCESS_MESSAGE = "SUCCESS_MESSAGE"
-}
-
-object EditProfileImageConstants {
-  const val PROFILE_PIC_DEFAULT = 0
-  const val MAX_PSEUDONYM_LENGTH = 30
-  const val MAX_BIO_LENGTH = 30
+  const val DIALOG_CANCEL_BUTTON = "DIALOG_CANCEL_BUTTON"
 }

@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.swentseekr.seekr.model.profile.ProfileRepository
 import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
+import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.MAX_BIO_LENGTH
+import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.MAX_PSEUDONYM_LENGTH
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,16 +16,16 @@ import kotlinx.coroutines.launch
 
 /** UI state for editing a profile */
 data class EditProfileUIState(
-    val pseudonym: String = "",
-    val bio: String = "",
-    val profilePicture: Int = EditProfileImageConstants.PROFILE_PIC_DEFAULT,
+    val pseudonym: String = EditProfileStrings.EMPTY_STRING,
+    val bio: String = EditProfileStrings.EMPTY_STRING,
+    val profilePicture: Int = EditProfileNumberConstants.PROFILE_PIC_DEFAULT,
     val isSaving: Boolean = false,
     val hasChanges: Boolean = false,
     val canSave: Boolean = false,
     val errorMsg: String? = null,
     val success: Boolean = false,
     val profilePictureUri: Uri? = null, // picked from gallery/camera
-    val profilePictureUrl: String = "", // from Firestore
+    val profilePictureUrl: String = EditProfileStrings.EMPTY_STRING, // from Firestore
     val isLoading: Boolean = false
 )
 
@@ -47,7 +49,7 @@ class EditProfileViewModel(
   fun loadProfile() {
     val uid = auth.currentUser?.uid
     if (uid == null) {
-      _uiState.update { it.copy(errorMsg = "User not logged in") }
+      _uiState.update { it.copy(errorMsg = EditProfileStrings.LOG_IN_ERROR) }
       return
     }
     viewModelScope.launch {
@@ -55,7 +57,7 @@ class EditProfileViewModel(
       try {
         val profile = repository.getProfile(uid)
         if (profile == null) {
-          _uiState.update { it.copy(isLoading = false, errorMsg = "Profile not found") }
+          _uiState.update { it.copy(isLoading = false, errorMsg = EditProfileStrings.NO_PROFILE) }
           return@launch
         }
         lastSavedFullProfile = profile
@@ -72,7 +74,8 @@ class EditProfileViewModel(
         _uiState.value = state
       } catch (e: Exception) {
         _uiState.value =
-            EditProfileUIState(errorMsg = e.message ?: "Failed to load profile", isLoading = false)
+            EditProfileUIState(
+                errorMsg = e.message ?: EditProfileStrings.LOAD_PROFILE_ERROR, isLoading = false)
         lastSavedProfile = null
         lastSavedFullProfile = null
       }
@@ -115,7 +118,7 @@ class EditProfileViewModel(
     val uid =
         auth.currentUser?.uid
             ?: run {
-              _uiState.value = _uiState.value.copy(errorMsg = "User not loaded")
+              _uiState.value = _uiState.value.copy(errorMsg = EditProfileStrings.LOAD_USER_ERROR)
               return
             }
 
@@ -127,7 +130,7 @@ class EditProfileViewModel(
         val currentProfile =
             repository.getProfile(uid)
                 ?: lastSavedFullProfile
-                ?: throw Exception("Profile not found")
+                ?: throw Exception(EditProfileStrings.NO_PROFILE)
 
         val profilePictureUri = _uiState.value.profilePictureUri
         val profilePictureUrlState = _uiState.value.profilePictureUrl
@@ -139,8 +142,8 @@ class EditProfileViewModel(
               }
               profilePictureUrlState.isEmpty() &&
                   _uiState.value.profilePicture ==
-                      EditProfileImageConstants.PROFILE_PIC_DEFAULT -> {
-                ""
+                      EditProfileNumberConstants.PROFILE_PIC_DEFAULT -> {
+                EditProfileStrings.EMPTY_STRING
               }
               else -> currentProfile.author.profilePictureUrl
             }
@@ -167,7 +170,8 @@ class EditProfileViewModel(
         _uiState.value = successState
       } catch (e: Exception) {
         _uiState.value =
-            _uiState.value.copy(isSaving = false, errorMsg = e.message ?: "Failed to save profile")
+            _uiState.value.copy(
+                isSaving = false, errorMsg = e.message ?: EditProfileStrings.SAVE_PROFILE_ERROR)
       }
     }
   }
@@ -186,8 +190,8 @@ class EditProfileViewModel(
     val canSave =
         hasChanges &&
             newState.pseudonym.isNotBlank() &&
-            newState.pseudonym.length <= EditProfileImageConstants.MAX_PSEUDONYM_LENGTH &&
-            newState.bio.length <= EditProfileImageConstants.MAX_BIO_LENGTH
+            newState.pseudonym.length <= MAX_PSEUDONYM_LENGTH &&
+            newState.bio.length <= MAX_BIO_LENGTH
 
     _uiState.value =
         newState.copy(hasChanges = hasChanges, canSave = canSave, success = false, errorMsg = null)
@@ -196,9 +200,9 @@ class EditProfileViewModel(
   fun removeProfilePicture() {
     val newState =
         _uiState.value.copy(
-            profilePicture = EditProfileImageConstants.PROFILE_PIC_DEFAULT,
+            profilePicture = EditProfileNumberConstants.PROFILE_PIC_DEFAULT,
             profilePictureUri = null,
-            profilePictureUrl = "")
+            profilePictureUrl = EditProfileStrings.EMPTY_STRING)
     updateChangesFlags(newState)
   }
 }

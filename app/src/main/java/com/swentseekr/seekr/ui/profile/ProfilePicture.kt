@@ -12,9 +12,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.swentseekr.seekr.R
+import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.PROFILE_PICTURE_SIZE_DP
+import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.PROFILE_PIC_DEFAULT
 
-const val PROFILE_PICTURE_SIZE_DP = 100
-const val DEFAULT_PROFILE_PICTURE = 0
 /**
  * Displays a user's profile picture in a circular shape.
  *
@@ -25,21 +25,21 @@ const val DEFAULT_PROFILE_PICTURE = 0
  */
 @Composable
 fun ProfilePicture(
-    profilePictureRes: Int = DEFAULT_PROFILE_PICTURE,
+    profilePictureRes: Int = PROFILE_PIC_DEFAULT,
     profilePictureUri: Uri? = null,
     profilePictureUrl: String? = null,
     modifier: Modifier = Modifier
 ) {
   val isFallback =
       profilePictureUri == null &&
-          profilePictureRes == DEFAULT_PROFILE_PICTURE &&
+          profilePictureRes == PROFILE_PIC_DEFAULT &&
           profilePictureUrl.isNullOrEmpty()
 
   val painter =
       when {
         profilePictureUri != null -> rememberAsyncImagePainter(profilePictureUri)
         !profilePictureUrl.isNullOrEmpty() -> rememberAsyncImagePainter(profilePictureUrl)
-        profilePictureRes != DEFAULT_PROFILE_PICTURE -> painterResource(profilePictureRes)
+        profilePictureRes != PROFILE_PIC_DEFAULT -> painterResource(profilePictureRes)
         else -> painterResource(R.drawable.empty_user)
       }
 

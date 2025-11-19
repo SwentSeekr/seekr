@@ -22,8 +22,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.MAX_BIO_LENGTH
+import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.MAX_PSEUDONYM_LENGTH
+import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.PROFILE_PIC_DEFAULT
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.BUTTON_CAMERA
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.BUTTON_CANCEL
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.BUTTON_GALLERY
@@ -38,7 +40,6 @@ import com.swentseekr.seekr.ui.profile.EditProfileStrings.ERROR_PSEUDONYM_MAX
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.FIELD_LABEL_BIO
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.FIELD_LABEL_PSEUDONYM
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.SUCCESS_UPDATE
-import java.io.File
 
 /**
  * The main screen composable for editing a user’s profile.
@@ -65,8 +66,6 @@ fun EditProfileScreen(
   val context = LocalContext.current
   var cameraError by remember { mutableStateOf<String?>(null) }
 
-  // var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-
   var showDialog by remember { mutableStateOf(false) }
 
   val galleryLauncher =
@@ -82,16 +81,10 @@ fun EditProfileScreen(
         }
       }
 
-  fun createTempImageUri(): Uri {
-    val imageFile = File(context.cacheDir, "temp_profile.jpg")
-    if (!imageFile.exists()) imageFile.createNewFile()
-    return FileProvider.getUriForFile(context, "${context.packageName}.provider", imageFile)
-  }
-
   fun launchCamera() {
     val uri = createImageUri(context)
     if (uri == null) {
-      cameraError = "Could not create image file. Check storage permissions."
+      cameraError = EditProfileStrings.CAMERA_PERMISSION_ERROR
       return
     }
     try {
@@ -99,7 +92,7 @@ fun EditProfileScreen(
       cameraLauncher.launch(uri)
     } catch (e: Exception) {
       cameraError = "Failed to launch camera: ${e.message}"
-      Log.e("CameraLaunch", "Failed to launch camera: ${e.message}", e)
+      Log.e(EditProfileStrings.CAMERA_LAUNCH, "Failed to launch camera: ${e.message}", e)
     }
   }
 
@@ -111,9 +104,11 @@ fun EditProfileScreen(
   if (cameraError != null) {
     AlertDialog(
         onDismissRequest = { cameraError = null },
-        title = { Text("Error") },
+        title = { Text(EditProfileStrings.ERROR) },
         text = { Text(cameraError!!) },
-        confirmButton = { Button(onClick = { cameraError = null }) { Text("OK") } })
+        confirmButton = {
+          Button(onClick = { cameraError = null }) { Text(EditProfileStrings.OK) }
+        })
   }
 
   if (showDialog) {
@@ -124,12 +119,14 @@ fun EditProfileScreen(
         text = { Text(DIALOG_MESSAGE) },
         confirmButton = {
           Column(
-              modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-              verticalArrangement = Arrangement.spacedBy(8.dp)) {
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .padding(horizontal = EditProfileNumberConstants.SPACER_SMALL),
+              verticalArrangement = Arrangement.spacedBy(EditProfileNumberConstants.SPACER_SMALL)) {
                 Button(
                     modifier = Modifier.fillMaxWidth().testTag(EditProfileTestTags.GALLERY_BUTTON),
                     onClick = {
-                      galleryLauncher.launch("image/*")
+                      galleryLauncher.launch(EditProfileStrings.IMAGE)
                       showDialog = false
                     }) {
                       Text(BUTTON_GALLERY)
@@ -144,7 +141,7 @@ fun EditProfileScreen(
                       Text(BUTTON_CAMERA)
                     }
 
-                if (uiState.profilePicture != 0 ||
+                if (uiState.profilePicture != PROFILE_PIC_DEFAULT ||
                     uiState.profilePictureUri != null ||
                     uiState.profilePictureUrl.isNotEmpty()) {
                   Button(
@@ -162,10 +159,11 @@ fun EditProfileScreen(
                       }
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(EditProfileNumberConstants.SPACER_SMALL))
 
                 OutlinedButton(
-                    modifier = Modifier.fillMaxWidth().testTag("DIALOG_CANCEL_BUTTON"),
+                    modifier =
+                        Modifier.fillMaxWidth().testTag(EditProfileTestTags.DIALOG_CANCEL_BUTTON),
                     onClick = { showDialog = false }) {
                       Text(BUTTON_CANCEL)
                     }
@@ -190,11 +188,14 @@ fun EditProfileScreen(
 }
 
 fun createImageUri(context: Context): Uri? {
-  val contentValues = ContentValues().apply { put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg") }
+  val contentValues =
+      ContentValues().apply {
+        put(MediaStore.Images.Media.MIME_TYPE, EditProfileStrings.IMAGE_JPEG)
+      }
   return try {
     context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
   } catch (e: Exception) {
-    Log.e("CreateImageUri", "Failed to create image URI", e)
+    Log.e(EditProfileStrings.IMAGE_URI, EditProfileStrings.ERROR_URI, e)
     null
   }
 }
@@ -249,7 +250,7 @@ fun EditProfileContent(
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center).size(24.dp))
               } else {
                 Text(
-                    text = "+",
+                    text = EditProfileStrings.PLUS,
                     style =
                         MaterialTheme.typography.titleLarge.copy(
                             color = MaterialTheme.colorScheme.onPrimary),
@@ -257,7 +258,7 @@ fun EditProfileContent(
                     modifier =
                         Modifier.align(Alignment.BottomEnd)
                             .background(MaterialTheme.colorScheme.primary, shape = CircleShape)
-                            .padding(4.dp))
+                            .padding(EditProfileNumberConstants.PADDING_SMALL))
               }
             }
 
@@ -271,8 +272,7 @@ fun EditProfileContent(
                 pseudonymError =
                     when {
                       newValue.isBlank() -> ERROR_PSEUDONYM_EMPTY
-                      newValue.length > EditProfileImageConstants.MAX_PSEUDONYM_LENGTH ->
-                          ERROR_PSEUDONYM_MAX
+                      newValue.length > MAX_PSEUDONYM_LENGTH -> ERROR_PSEUDONYM_MAX
                       else -> null
                     }
               }
@@ -299,7 +299,7 @@ fun EditProfileContent(
                 onBioChange(newValue)
                 bioError =
                     when {
-                      newValue.length > EditProfileImageConstants.MAX_BIO_LENGTH -> ERROR_BIO_MAX
+                      newValue.length > MAX_BIO_LENGTH -> ERROR_BIO_MAX
                       else -> null
                     }
               }
@@ -325,13 +325,13 @@ fun EditProfileContent(
               modifier = Modifier.testTag(EditProfileTestTags.CANCEL_BUTTON),
               onClick = onCancel,
               enabled = !isLoading) {
-                Text("Cancel")
+                Text(BUTTON_CANCEL)
               }
           Button(
               modifier = Modifier.testTag(EditProfileTestTags.SAVE_BUTTON),
               onClick = {
                 if (uiState.pseudonym.isBlank()) {
-                  localError = "Pseudonym cannot be empty"
+                  localError = ERROR_PSEUDONYM_EMPTY
                 } else {
                   onSave()
                 }
