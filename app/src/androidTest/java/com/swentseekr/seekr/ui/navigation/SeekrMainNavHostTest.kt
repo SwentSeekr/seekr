@@ -15,7 +15,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
 import com.swentseekr.seekr.model.profile.createHunt
-import com.swentseekr.seekr.ui.components.HuntCardScreenTestTags
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
 import com.swentseekr.seekr.ui.profile.ProfileTestTags
 import com.swentseekr.seekr.utils.FakeRepoSuccess
@@ -518,7 +517,6 @@ class SeekrNavigationTest {
               .any { it(Unit) }
 
       check(didClickAddReview) { "Could not find Add Review control on HuntCardScreen." }
-
 
       // Tap the review button to trigger HuntCardScreen.addReview
       /*compose.waitForIdle()
