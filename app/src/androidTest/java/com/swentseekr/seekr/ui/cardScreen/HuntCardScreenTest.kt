@@ -166,7 +166,7 @@ class HuntCardScreenTest {
     val huntWithImage =
         createFakeHunt()
             .copy(
-                mainImageUrl = "https://example.com/example1.jpg",
+                mainImageUrl = "https://example.com/example.jpg",
                 otherImagesUrls = emptyList(),
             )
 
