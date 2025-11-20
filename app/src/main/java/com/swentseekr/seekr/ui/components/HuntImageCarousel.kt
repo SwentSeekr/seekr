@@ -19,17 +19,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.ui.components.HuntCardScreenDefaults.ImageCarouselRotationCenterDegrees
 import com.swentseekr.seekr.ui.components.HuntCardScreenDefaults.ImageIndicatorLastIndexOffset
+import com.swentseekr.seekr.ui.theme.Black
+import com.swentseekr.seekr.ui.theme.White
 import kotlin.math.absoluteValue
 
 /**
@@ -117,7 +120,7 @@ private fun HuntImageFullScreenDialog(
 
   Dialog(onDismissRequest = onDismiss) {
     Box(
-        modifier = Modifier.fillMaxSize().background(Color.Black),
+        modifier = Modifier.fillMaxSize().background(Black),
         contentAlignment = Alignment.Center,
     ) {
       AsyncImage(
@@ -269,6 +272,11 @@ private fun HuntImagePage(
     transforms: PageTransforms,
     onClickCurrent: () -> Unit,
 ) {
+  // Compute camera distance in px from dp using the current density.
+  val density = LocalDensity.current
+  val cameraDistancePx =
+      with(density) { HuntCardScreenDefaults.ImageCarouselCameraDistanceFactor.dp.toPx() }
+
   Box(
       modifier =
           Modifier
@@ -277,7 +285,7 @@ private fun HuntImagePage(
                 scaleX = transforms.scale
                 scaleY = transforms.scale
                 rotationY = transforms.rotationY
-                cameraDistance = HuntCardScreenDefaults.ImageCarouselCameraDistanceFactor * density
+                cameraDistance = cameraDistancePx
               }
               .shadow(
                   elevation = HuntCardScreenDefaults.ImageCarouselShadowElevation,
@@ -285,15 +293,15 @@ private fun HuntImagePage(
               )
               .clip(RoundedCornerShape(HuntCardScreenDefaults.ImageCarouselCornerRadius))
               // White frame behind the image.
-              .background(Color.White)
+              .background(White)
               .border(
                   width = HuntCardScreenDefaults.ImageCarouselWhiteFrame,
-                  color = Color.White,
+                  color = White,
                   shape = RoundedCornerShape(HuntCardScreenDefaults.ImageCarouselCornerRadius),
               )
               .testTag(HuntCardScreenTestTags.IMAGE_PAGE_PREFIX + page)
               // Only the currently centered page is clickable to open full screen.
-              .clickable(enabled = isCurrentPage) { if (isCurrentPage) onClickCurrent() },
+              .clickable(enabled = isCurrentPage) { onClickCurrent() },
   ) {
     AsyncImage(
         model = image,
@@ -308,8 +316,7 @@ private fun HuntImagePage(
     // Dark overlay whose alpha depends on the distance from the center page.
     Box(
         modifier =
-            Modifier.matchParentSize()
-                .background(Color.Black.copy(alpha = transforms.overlayAlpha)),
+            Modifier.matchParentSize().background(Black.copy(alpha = transforms.overlayAlpha)),
     )
   }
 }
