@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performClick
 import com.swentseekr.seekr.ui.hunt.HuntUIState
 import com.swentseekr.seekr.ui.hunt.preview.PreviewHuntScreen
 import com.swentseekr.seekr.ui.hunt.preview.PreviewHuntScreenTestTags
+import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
 import org.junit.Test
@@ -20,9 +21,10 @@ class PreviewHuntScreenTest {
   private fun createFakeVM() =
       FakePreviewHuntViewModel(sourceState = MutableStateFlow(HuntUIState()))
 
+  private val vm = createFakeVM()
+
   @Test
   fun previewScreen_displaysAllFields_andConfirmEnabled() {
-    val vm = createFakeVM()
 
     composeTestRule.setContent { PreviewHuntScreen(viewModel = vm, onConfirm = {}, onGoBack = {}) }
 
@@ -39,16 +41,7 @@ class PreviewHuntScreenTest {
 
   @Test
   fun confirmButton_disabledWhenStateInvalid() {
-    val vm = createFakeVM()
-    vm.setState(
-        HuntUIState(
-            title = "",
-            description = "",
-            time = "",
-            distance = "",
-            difficulty = null,
-            status = null,
-            points = emptyList()))
+    vm.updateState(PreviewTestConstants.invalidUiState)
 
     composeTestRule.setContent { PreviewHuntScreen(viewModel = vm, onConfirm = {}, onGoBack = {}) }
 
@@ -58,13 +51,12 @@ class PreviewHuntScreenTest {
   @Test
   fun clickingBackButton_triggersCallback() {
     var backClicked = false
-    val vm = createFakeVM()
 
     composeTestRule.setContent {
       PreviewHuntScreen(viewModel = vm, onConfirm = {}, onGoBack = { backClicked = true })
     }
 
     composeTestRule.onNodeWithTag(PreviewHuntScreenTestTags.BACK_BUTTON).performClick()
-    assert(backClicked)
+    assertTrue(backClicked)
   }
 }

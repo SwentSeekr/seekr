@@ -27,12 +27,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.Dp
 import coil.compose.rememberAsyncImagePainter
 import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings
 
 val STRINGS = PreviewHuntStrings
 val UI_CONST = PreviewHuntUi
 val TEST_TAGS = PreviewHuntScreenTestTags
+
+@Composable
+fun VSpace(height: Dp) {
+  Spacer(modifier = Modifier.height(height))
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,44 +83,44 @@ fun PreviewHuntScreen(
                           modifier = Modifier.fillMaxSize(),
                           contentScale = ContentScale.Crop)
                     }
-                Spacer(modifier.height(UI_CONST.BIG_SPACER_HEIGHT))
+                VSpace(UI_CONST.BIG_SPACER_HEIGHT)
               }
 
               Text(STRINGS.HUNT_TITLE + ui.title, modifier = modifier.testTag(TEST_TAGS.HUNT_TITLE))
-              Spacer(Modifier.height(UI_CONST.SMALL_SPACER_HEIGHT))
+              VSpace(UI_CONST.SMALL_SPACER_HEIGHT)
 
               Text(
                   STRINGS.HUNT_DESCRIPTION, modifier = modifier.testTag(TEST_TAGS.HUNT_DESCRIPTION))
               Text(ui.description)
-              Spacer(Modifier.height(UI_CONST.MEDIUM_SPACER_HEIGHT))
+              VSpace(UI_CONST.MEDIUM_SPACER_HEIGHT)
 
               Text(STRINGS.HUNT_TIME + ui.time, modifier = modifier.testTag(TEST_TAGS.HUNT_TIME))
-              Spacer(Modifier.height(UI_CONST.SMALL_SPACER_HEIGHT))
+              VSpace(UI_CONST.SMALL_SPACER_HEIGHT)
 
               Text(
                   STRINGS.HUNT_DISTANCE + ui.distance,
                   modifier = modifier.testTag(TEST_TAGS.HUNT_DISTANCE))
-              Spacer(Modifier.height(UI_CONST.SMALL_SPACER_HEIGHT))
+              VSpace(UI_CONST.SMALL_SPACER_HEIGHT)
 
               Text(
                   STRINGS.HUNT_DIFFICULTY + (ui.difficulty?.name ?: STRINGS.NOT_SET),
                   modifier = modifier.testTag(TEST_TAGS.HUNT_DIFFICULTY))
-              Spacer(Modifier.height(UI_CONST.SMALL_SPACER_HEIGHT))
+              VSpace(UI_CONST.SMALL_SPACER_HEIGHT)
 
               Text(
                   STRINGS.HUNT_STATUS + (ui.status?.name ?: STRINGS.NOT_SET),
                   modifier = modifier.testTag(TEST_TAGS.HUNT_STATUS))
-              Spacer(Modifier.height(UI_CONST.SMALL_SPACER_HEIGHT))
+              VSpace(UI_CONST.SMALL_SPACER_HEIGHT)
 
               Text(
                   STRINGS.HUNT_POINTS + ui.points.size,
                   modifier = modifier.testTag(TEST_TAGS.HUNT_POINTS))
-              Spacer(Modifier.height(UI_CONST.BIG_SPACER_HEIGHT))
+              VSpace(UI_CONST.BIG_SPACER_HEIGHT)
 
               // --- Other Images Preview ---
               if (ui.otherImagesUris.isNotEmpty()) {
                 Text(STRINGS.OTHER_IMAGES)
-                Spacer(Modifier.height(UI_CONST.SMALL_SPACER_HEIGHT))
+                VSpace(UI_CONST.SMALL_SPACER_HEIGHT)
 
                 ui.otherImagesUris.forEach { uri ->
                   Card(
@@ -131,7 +137,7 @@ fun PreviewHuntScreen(
                       }
                 }
 
-                Spacer(Modifier.height(UI_CONST.BIG_SPACER_HEIGHT))
+                VSpace(UI_CONST.BIG_SPACER_HEIGHT)
               }
 
               Row(
