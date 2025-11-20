@@ -14,6 +14,7 @@ object MapScreenDefaults {
   const val RouteStrokeWidth = 12f
   val OverlayScrimColor: Color = Color(0x80000000)
   val OverlayPadding: Dp = 32.dp
+  val OverlayDoublePadding: Dp = 64.dp
   val OverlayInnerPadding: Dp = 24.dp
   val CardPadding: Dp = 16.dp
   val CardCornerRadius: Dp = 16.dp
