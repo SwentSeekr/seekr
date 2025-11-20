@@ -2,7 +2,9 @@ package com.swentseekr.seekr.model.hunt
 
 import androidx.compose.ui.graphics.Color
 import com.swentseekr.seekr.model.map.Location
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Hunt(
     val uid: String,
     val start: Location,
@@ -20,12 +22,14 @@ data class Hunt(
     val reviewRate: Double
 )
 
+@Serializable
 enum class HuntStatus {
   FUN,
   DISCOVER,
   SPORT
 }
 
+@Serializable
 enum class Difficulty {
   EASY,
   INTERMEDIATE,

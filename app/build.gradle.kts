@@ -6,6 +6,7 @@ plugins {
     id("jacoco")
     id("com.google.gms.google-services")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 jacoco {
@@ -160,6 +161,12 @@ dependencies {
     implementation("com.google.protobuf:protobuf-javalite:3.21.12")
     testImplementation("com.google.protobuf:protobuf-javalite:3.21.12")
     androidTestImplementation("com.google.protobuf:protobuf-javalite:3.21.12")
+
+    // Kotlinx Serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+
+    // DataStore Preferences
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 
     // Google Maps Compose library
     val mapsComposeVersion = "4.4.1"

@@ -1,5 +1,8 @@
 package com.swentseekr.seekr.model.author
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Author(
     val pseudonym: String = "",
     val bio: String = "",
