@@ -1,7 +1,7 @@
 package com.swentseekr.seekr.ui.hunt.review
 
-import android.net.Uri
 import android.util.Log
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -180,7 +180,7 @@ open class ReviewHuntViewModel(
   /** Adds a photo to the current list of photos in the UI state. */
   fun addPhoto(myPhoto: String, userId: String? = null) {
     val uid = userId ?: FirebaseAuth.getInstance().currentUser?.uid ?: return
-    val uri = Uri.parse(myPhoto)
+    val uri = myPhoto.toUri() // Uri.parse(myPhoto)
 
     viewModelScope.launch(dispatcher) {
       try {

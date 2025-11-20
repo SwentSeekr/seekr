@@ -1,6 +1,6 @@
 package com.swentseekr.seekr.model.hunt
 
-class ReviewImageRepositoryLocal : IReviewImageRepository {
+open class ReviewImageRepositoryLocal : IReviewImageRepository {
   private var id = 0
 
   override suspend fun uploadReviewPhoto(userId: String, uri: android.net.Uri): String {
