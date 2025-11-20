@@ -40,7 +40,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -67,7 +66,6 @@ fun HuntCardScreen(
     beginHunt: () -> Unit = {},
     addReview: () -> Unit = {},
     editHunt: () -> Unit = {},
-    testmode: Boolean = false,
 ) {
   val uiState by huntCardViewModel.uiState.collectAsState()
 
@@ -90,7 +88,7 @@ fun HuntCardScreen(
   val buttonText =
       if (isCurrentId) HuntCardScreenStrings.EditHunt else HuntCardScreenStrings.AddReview
 
-  val author = authorProfile?.author?.pseudonym ?: ("Unknown Author")
+  val author = authorProfile?.author?.pseudonym ?: HuntCardScreenStrings.UnknownAuthor
 
   Scaffold(
       // BAR GOBACK ARROW
@@ -194,21 +192,22 @@ fun HuntCardScreen(
                                               Modifier.weight(
                                                   HuntCardScreenDefaults.StatsColumnWeight),
                                           horizontalAlignment = Alignment.CenterHorizontally,
-                                          verticalArrangement = Arrangement.Center) {
+                                          verticalArrangement =
+                                              Arrangement.spacedBy(
+                                                  HuntCardScreenDefaults.BadgePadding,
+                                                  Alignment.CenterVertically)) {
                                             StatsBox(
                                                 hunt.difficulty.toString(),
                                                 DifficultyColor(hunt.difficulty),
-                                                modifier)
-                                            Spacer(
-                                                modifier =
-                                                    modifier.height(
-                                                        HuntCardScreenDefaults.BadgePadding))
-                                            StatsBox("${hunt.distance} km", Color.White, modifier)
-                                            Spacer(
-                                                modifier =
-                                                    modifier.height(
-                                                        HuntCardScreenDefaults.BadgePadding))
-                                            StatsBox("${hunt.time} h", Color.White, modifier)
+                                                modifier = Modifier)
+                                            StatsBox(
+                                                "${hunt.distance} ${HuntCardScreenStrings.DistanceUnit}",
+                                                HuntCardScreenDefaults.NeutralBadgeColor,
+                                                modifier = Modifier)
+                                            StatsBox(
+                                                "${hunt.time} ${HuntCardScreenStrings.HourUnit}",
+                                                HuntCardScreenDefaults.NeutralBadgeColor,
+                                                modifier = Modifier)
                                           }
                                     }
                               }
@@ -228,7 +227,9 @@ fun HuntCardScreen(
                           if (mapLoaded) {
                             val startPosition = LatLng(hunt.start.latitude, hunt.start.longitude)
                             val cameraPositionState = rememberCameraPositionState {
-                              position = CameraPosition.fromLatLngZoom(startPosition, 12f)
+                              position =
+                                  CameraPosition.fromLatLngZoom(
+                                      startPosition, HuntCardScreenDefaults.MapZoom)
                             }
 
                             Box(
@@ -338,6 +339,5 @@ fun ReviewCard(review: HuntReview) {
 fun HuntCardScreenPreview() {
   HuntCardScreen(
       huntId = "hunt123",
-      testmode = true,
   )
 }
