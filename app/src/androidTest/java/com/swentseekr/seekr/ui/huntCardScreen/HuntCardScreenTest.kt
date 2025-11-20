@@ -2,10 +2,13 @@ package com.swentseekr.seekr.ui.huntCardScreen
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.swentseekr.seekr.FakeReviewHuntViewModel
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
@@ -133,6 +136,22 @@ class HuntCardScreenTest {
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.LIKE_BUTTON).performClick()
 
     assertTrue(!fakeVm.uiState.value.isLiked)
+  }
+
+  @Test
+  fun testReviewsAreDisplayed() {
+    val fakeVm = FakeHuntCardViewModel(createFakeHunt())
+    val fakeReviewVm = FakeReviewHuntViewModel()
+
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = HuntCardScreenConstantStrings.TestHunt,
+          huntCardViewModel = fakeVm,
+          reviewViewModel = fakeReviewVm)
+    }
+
+    composeTestRule.waitForIdle()
+    composeTestRule.onAllNodesWithTag(HuntCardScreenTestTags.REVIEW_CARD).onFirst().assertExists()
   }
 
   @Test
