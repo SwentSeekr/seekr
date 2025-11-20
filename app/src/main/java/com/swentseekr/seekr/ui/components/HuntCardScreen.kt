@@ -150,74 +150,13 @@ fun HuntCardScreen(
                             Arrangement.spacedBy(HuntCardScreenDefaults.InfoColumnPadding)) {
                           // ROW WITH IMAGE, TITLE, AUTHOR, DIFFICULTY, DISTANCE, TIME
 
-                          Column(
-                              modifier =
-                                  modifier
-                                      .padding(HuntCardScreenDefaults.InfoColumnPadding)
-                                      .fillMaxWidth()
-                                      .fillMaxSize()) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                  Text(
-                                      hunt.title,
-                                      fontSize = HuntCardScreenDefaults.TitleFontSize,
-                                      fontWeight = FontWeight.Bold,
-                                      textAlign = TextAlign.Center,
-                                      modifier =
-                                          Modifier.weight(1f)
-                                              .padding(HuntCardScreenDefaults.InfoTextPadding)
-                                              .testTag(HuntCardScreenTestTags.TITLE_TEXT))
-                                }
-
-                                Text(
-                                    "by $author",
-                                    modifier =
-                                        Modifier.padding(
-                                                horizontal = HuntCardScreenDefaults.InfoTextPadding)
-                                            .testTag(HuntCardScreenTestTags.AUTHOR_TEXT))
-
-                                Spacer(
-                                    modifier =
-                                        Modifier.height(HuntCardScreenDefaults.AuthorImageSpacing))
-
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth()) {
-                                      // IMAGE CAROUSEL
-                                      HuntImageCarousel(
-                                          hunt = hunt,
-                                          modifier =
-                                              Modifier.weight(
-                                                      HuntCardScreenDefaults.ImageCarouselWeight)
-                                                  .padding(
-                                                      end =
-                                                          HuntCardScreenDefaults
-                                                              .ImageCarouselPadding))
-
-                                      // STATS
-                                      Column(
-                                          modifier =
-                                              Modifier.weight(
-                                                  HuntCardScreenDefaults.StatsColumnWeight),
-                                          horizontalAlignment = Alignment.CenterHorizontally,
-                                          verticalArrangement =
-                                              Arrangement.spacedBy(
-                                                  HuntCardScreenDefaults.BadgePadding,
-                                                  Alignment.CenterVertically)) {
-                                            StatsBox(
-                                                hunt.difficulty.toString(),
-                                                DifficultyColor(hunt.difficulty),
-                                                modifier = Modifier)
-                                            StatsBox(
-                                                "${hunt.distance} ${HuntCardScreenStrings.DistanceUnit}",
-                                                HuntCardScreenDefaults.NeutralBadgeColor,
-                                                modifier = Modifier)
-                                            StatsBox(
-                                                "${hunt.time} ${HuntCardScreenStrings.HourUnit}",
-                                                HuntCardScreenDefaults.NeutralBadgeColor,
-                                                modifier = Modifier)
-                                          }
-                                    }
-                              }
+                          HuntHeaderSection(
+                              hunt = hunt,
+                              authorName = author,
+                              huntId = huntId,
+                              huntCardViewModel = huntCardViewModel,
+                              modifier = modifier,
+                          )
 
                           // DESCRIPTION
 
@@ -385,7 +324,10 @@ fun ReviewCard(
             modifier = Modifier.size(HuntCardScreenDefaults.ProfilePictureSize))
         Spacer(modifier = Modifier.padding(horizontal = HuntCardScreenDefaults.SmallSpacerPadding))
 
-        Text("by ${author}", fontWeight = FontWeight.Bold)
+        Text(
+            "${HuntCardScreenStrings.By} $author",
+            fontWeight = FontWeight.Bold,
+        )
         Spacer(modifier = Modifier.padding(horizontal = HuntCardScreenDefaults.BigSpacerPadding))
         if (isCurrentId) {
           IconButton(
@@ -413,6 +355,85 @@ fun ReviewCard(
       Text(review.comment)
     }
   }
+}
+
+@Composable
+fun HuntHeaderSection(
+    hunt: com.swentseekr.seekr.model.hunt.Hunt,
+    authorName: String,
+    huntId: String,
+    huntCardViewModel: HuntCardViewModel,
+    modifier: Modifier = Modifier,
+) {
+  Column(
+      modifier =
+          modifier.padding(HuntCardScreenDefaults.InfoColumnPadding).fillMaxWidth().fillMaxSize()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Text(
+              hunt.title,
+              fontSize = HuntCardScreenDefaults.TitleFontSize,
+              fontWeight = FontWeight.Bold,
+              textAlign = TextAlign.Center,
+              modifier =
+                  Modifier.weight(HuntCardScreenDefaults.TitleWeight)
+                      .padding(HuntCardScreenDefaults.InfoTextPadding)
+                      .testTag(HuntCardScreenTestTags.TITLE_TEXT),
+          )
+
+          // Like button next to the title – this is what your test clicks
+          LikeButton(
+              huntCardViewModel = huntCardViewModel,
+              huntId = huntId,
+          )
+        }
+
+        Text(
+            "${HuntCardScreenStrings.By} $authorName",
+            modifier =
+                Modifier.padding(horizontal = HuntCardScreenDefaults.InfoTextPadding)
+                    .testTag(HuntCardScreenTestTags.AUTHOR_TEXT),
+        )
+
+        Spacer(modifier = Modifier.height(HuntCardScreenDefaults.AuthorImageSpacing))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+          // IMAGE CAROUSEL (keep your new design)
+          HuntImageCarousel(
+              hunt = hunt,
+              modifier =
+                  Modifier.weight(HuntCardScreenDefaults.ImageCarouselWeight)
+                      .padding(end = HuntCardScreenDefaults.ImageCarouselPadding),
+          )
+
+          // STATS
+          Column(
+              modifier = Modifier.weight(HuntCardScreenDefaults.StatsColumnWeight),
+              horizontalAlignment = Alignment.CenterHorizontally,
+              verticalArrangement =
+                  Arrangement.spacedBy(
+                      HuntCardScreenDefaults.BadgePadding, Alignment.CenterVertically),
+          ) {
+            StatsBox(
+                hunt.difficulty.toString(),
+                DifficultyColor(hunt.difficulty),
+                modifier = Modifier,
+            )
+            StatsBox(
+                "${hunt.distance} ${HuntCardScreenStrings.DistanceUnit}",
+                HuntCardScreenDefaults.NeutralBadgeColor,
+                modifier = Modifier,
+            )
+            StatsBox(
+                "${hunt.time} ${HuntCardScreenStrings.HourUnit}",
+                HuntCardScreenDefaults.NeutralBadgeColor,
+                modifier = Modifier,
+            )
+          }
+        }
+      }
 }
 
 @Preview
