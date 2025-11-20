@@ -71,7 +71,7 @@ class ProfileViewModel(
     }
   }
 
-  fun loadProfile(userId: String? = null,context: Context? = null) {
+  fun loadProfile(userId: String? = null, context: Context? = null) {
     val uidToLoad = userId ?: currentUid
     if (uidToLoad == null) {
       updateUiState { it.copy(errorMsg = LOGIN_USER_ERROR) }
@@ -152,7 +152,7 @@ class ProfileViewModel(
     {
       val uid = _uiState.value.profile?.uid ?: currentUid
       if (uid != null) {
-        loadProfile( uid,context)
+        loadProfile(uid, context)
       }
     }
   }
@@ -167,7 +167,7 @@ class ProfileViewModel(
 
       try {
         repository.updateProfile(profile.copy(uid = uid))
-        loadProfile(uid,context)
+        loadProfile(uid, context)
       } catch (e: Exception) {
         updateUiState { it.copy(errorMsg = LOGIN_USER_ERROR) }
       }

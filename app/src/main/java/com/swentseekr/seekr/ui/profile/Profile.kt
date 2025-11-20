@@ -155,7 +155,7 @@ fun ProfileScreen(
         testProfile ?: mockProfileData()
       } else {
 
-        LaunchedEffect(userId) { viewModel.loadProfile(userId,context) }
+        LaunchedEffect(userId) { viewModel.loadProfile(userId, context) }
         uiState.profile
 
         AnimatedVisibility(visible = uiState.isLoading, enter = fadeIn(), exit = fadeOut()) {
