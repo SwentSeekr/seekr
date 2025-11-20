@@ -25,6 +25,7 @@ import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
+import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.REMOVE_BUTTON_TAG_PREFIX
 
 sealed class OtherImage {
   data class Remote(val url: String) : OtherImage()
@@ -350,7 +351,7 @@ fun BaseHuntFieldsScreen(
                       Spacer(modifier = Modifier.width(BaseHuntFieldsUi.SpacerHeightSmall))
 
                       TextButton(
-                          modifier = Modifier.testTag("removeButton_$tagSuffix"),
+                          modifier = Modifier.testTag("$REMOVE_BUTTON_TAG_PREFIX$tagSuffix"),
                           onClick = {
                             when (image) {
                               is OtherImage.Remote -> onRemoveExistingImage(image.url)
