@@ -1,4 +1,4 @@
-package com.swentseekr.seekr.ui.cardScreen
+package com.swentseekr.seekr.ui.huntCardScreen
 
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntReview
