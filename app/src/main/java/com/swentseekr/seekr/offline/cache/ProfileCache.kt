@@ -10,11 +10,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-internal val Context.profileDataStore by preferencesDataStore(name = "profile_cache")
+const val PROFILE_NAME = "profile_cache"
+const val PROFILE_KEY = "profile_json"
+internal val Context.profileDataStore by preferencesDataStore(name = PROFILE_NAME)
 
 object ProfileCache {
 
-  internal val PROFILE_JSON = stringPreferencesKey("profile_json")
+  internal val PROFILE_JSON = stringPreferencesKey(PROFILE_KEY)
 
   private val json = Json {
     ignoreUnknownKeys = true
