@@ -11,6 +11,7 @@ import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.ui.hunt.AddPointsMapScreenTestTags
 import com.swentseekr.seekr.ui.hunt.HuntScreenTestTags
+import com.swentseekr.seekr.ui.hunt.preview.PreviewHuntScreenTestTags
 import com.swentseekr.seekr.ui.navigation.NavigationTestTags
 import com.swentseekr.seekr.ui.navigation.SeekrMainNavHost
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
@@ -104,8 +105,14 @@ class EndToEndM1Tests {
 
     composeTestRule.waitForIdle()
 
+    composeTestRule.onNodeWithTag(HuntScreenTestTags.HUNT_SAVE).performScrollTo()
     // Step 8 – Click “Save Hunt”
     composeTestRule.onNodeWithTag(HuntScreenTestTags.HUNT_SAVE).performClick()
+    composeTestRule.waitForIdle()
+
+    // Step 8.5 – Wait until the Preview Hunt screen is displayed
+    composeTestRule.onNodeWithTag(PreviewHuntScreenTestTags.PREVIEW_HUNT_SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(PreviewHuntScreenTestTags.CONFIRM_BUTTON).performClick()
 
     // Step 9 – Wait until the Overview screen becomes visible again
     composeTestRule.waitUntil(timeoutMillis = 10_000) {

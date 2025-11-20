@@ -80,9 +80,7 @@ fun PreviewHuntScreen(
                 Spacer(modifier.height(UI_CONST.BIG_SPACER_HEIGHT))
               }
 
-              Text(
-                  STRINGS.HUNT_TITLE + { ui.title },
-                  modifier = modifier.testTag(TEST_TAGS.HUNT_TITLE))
+              Text(STRINGS.HUNT_TITLE + ui.title, modifier = modifier.testTag(TEST_TAGS.HUNT_TITLE))
               Spacer(Modifier.height(UI_CONST.SMALL_SPACER_HEIGHT))
 
               Text(
@@ -90,27 +88,26 @@ fun PreviewHuntScreen(
               Text(ui.description)
               Spacer(Modifier.height(UI_CONST.MEDIUM_SPACER_HEIGHT))
 
-              Text(
-                  STRINGS.HUNT_TIME + { ui.time }, modifier = modifier.testTag(TEST_TAGS.HUNT_TIME))
+              Text(STRINGS.HUNT_TIME + ui.time, modifier = modifier.testTag(TEST_TAGS.HUNT_TIME))
               Spacer(Modifier.height(UI_CONST.SMALL_SPACER_HEIGHT))
 
               Text(
-                  STRINGS.HUNT_DISTANCE + { ui.distance },
+                  STRINGS.HUNT_DISTANCE + ui.distance,
                   modifier = modifier.testTag(TEST_TAGS.HUNT_DISTANCE))
               Spacer(Modifier.height(UI_CONST.SMALL_SPACER_HEIGHT))
 
               Text(
-                  STRINGS.HUNT_DIFFICULTY + { ui.difficulty?.name ?: STRINGS.NOT_SET },
+                  STRINGS.HUNT_DIFFICULTY + (ui.difficulty?.name ?: STRINGS.NOT_SET),
                   modifier = modifier.testTag(TEST_TAGS.HUNT_DIFFICULTY))
               Spacer(Modifier.height(UI_CONST.SMALL_SPACER_HEIGHT))
 
               Text(
-                  STRINGS.HUNT_STATUS + { ui.status?.name ?: STRINGS.NOT_SET },
+                  STRINGS.HUNT_STATUS + (ui.status?.name ?: STRINGS.NOT_SET),
                   modifier = modifier.testTag(TEST_TAGS.HUNT_STATUS))
               Spacer(Modifier.height(UI_CONST.SMALL_SPACER_HEIGHT))
 
               Text(
-                  STRINGS.HUNT_POINTS + { ui.points.size },
+                  STRINGS.HUNT_POINTS + ui.points.size,
                   modifier = modifier.testTag(TEST_TAGS.HUNT_POINTS))
               Spacer(Modifier.height(UI_CONST.BIG_SPACER_HEIGHT))
 
