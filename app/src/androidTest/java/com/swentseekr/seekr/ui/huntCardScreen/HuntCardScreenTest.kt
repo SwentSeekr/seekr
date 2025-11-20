@@ -1,4 +1,4 @@
-package com.swentseekr.seekr.ui.cardScreen
+package com.swentseekr.seekr.ui.huntCardScreen
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -38,17 +38,27 @@ class HuntCardScreenTest {
           mainImageUrl = "",
           reviewRate = 4.5)
 
-  @Test
-  fun testAllUIElementsAreDisplayed() {
+  private fun setHuntContent(
+      hunt: Hunt,
+      onGoBack: () -> Unit = {},
+      beginHunt: () -> Unit = {},
+      addReview: () -> Unit = {},
+  ) {
     composeTestRule.setContent {
       HuntCardScreen(
-          huntId = "hunt123",
-          huntCardViewModel = FakeHuntCardViewModel(createFakeHunt()),
-          onGoBack = {},
-          beginHunt = {},
-          addReview = {},
-          testmode = true)
+          huntId = hunt.uid,
+          huntCardViewModel = FakeHuntCardViewModel(hunt),
+          onGoBack = onGoBack,
+          beginHunt = beginHunt,
+          addReview = addReview)
     }
+  }
+
+  @Test
+  fun testAllUIElementsAreDisplayed() {
+    val hunt = createFakeHunt()
+
+    setHuntContent(hunt = hunt)
 
     // Verifies the presence of principal UI elements
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.GO_BACK_BUTTON).assertIsDisplayed()
@@ -69,15 +79,13 @@ class HuntCardScreenTest {
     var beginClicked = false
     var reviewClicked = false
 
-    composeTestRule.setContent {
-      HuntCardScreen(
-          huntId = "hunt123",
-          huntCardViewModel = FakeHuntCardViewModel(createFakeHunt()),
-          onGoBack = { goBackClicked = true },
-          beginHunt = { beginClicked = true },
-          addReview = { reviewClicked = true },
-          testmode = true)
-    }
+    val hunt = createFakeHunt()
+
+    setHuntContent(
+        hunt = hunt,
+        onGoBack = { goBackClicked = true },
+        beginHunt = { beginClicked = true },
+        addReview = { reviewClicked = true })
 
     // Click on boutons
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.GO_BACK_BUTTON).performClick()
@@ -103,16 +111,7 @@ class HuntCardScreenTest {
                     ),
             )
 
-    composeTestRule.setContent {
-      HuntCardScreen(
-          huntId = huntWithImages.uid,
-          huntCardViewModel = FakeHuntCardViewModel(huntWithImages),
-          onGoBack = {},
-          beginHunt = {},
-          addReview = {},
-          testmode = true,
-      )
-    }
+    setHuntContent(hunt = huntWithImages)
 
     // Carousel & pager
     composeTestRule
@@ -140,16 +139,7 @@ class HuntCardScreenTest {
                 otherImagesUrls = emptyList(),
             )
 
-    composeTestRule.setContent {
-      HuntCardScreen(
-          huntId = singleImageHunt.uid,
-          huntCardViewModel = FakeHuntCardViewModel(singleImageHunt),
-          onGoBack = {},
-          beginHunt = {},
-          addReview = {},
-          testmode = true,
-      )
-    }
+    setHuntContent(hunt = singleImageHunt)
 
     composeTestRule
         .onNodeWithTag(HuntCardScreenTestTags.IMAGE_CAROUSEL_CONTAINER)
@@ -170,16 +160,7 @@ class HuntCardScreenTest {
                 otherImagesUrls = emptyList(),
             )
 
-    composeTestRule.setContent {
-      HuntCardScreen(
-          huntId = huntWithImage.uid,
-          huntCardViewModel = FakeHuntCardViewModel(huntWithImage),
-          onGoBack = {},
-          beginHunt = {},
-          addReview = {},
-          testmode = true,
-      )
-    }
+    setHuntContent(hunt = huntWithImage)
 
     // Click center page (index 0)
     composeTestRule
