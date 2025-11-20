@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -54,6 +55,9 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
   var previousCameraPosition by remember { mutableStateOf<CameraPosition?>(null) }
 
   var hasLocationPermission by remember { mutableStateOf(false) }
+
+  var showStopHuntDialog by remember { mutableStateOf(false) }
+
   val permissionLauncher =
       rememberLauncherForActivityResult(
           contract = ActivityResultContracts.RequestMultiplePermissions()) { grants ->
@@ -200,15 +204,40 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
     }
 
     if (uiState.isFocused) {
+
+      val isHuntStarted = uiState.isHuntStarted
+
       Button(
-          onClick = { viewModel.onBackToAllHunts() },
+          onClick = {
+            if (isHuntStarted) showStopHuntDialog = true else viewModel.onBackToAllHunts()
+          },
           colors = ButtonDefaults.textButtonColors(containerColor = Green, contentColor = White),
           modifier =
               Modifier.align(Alignment.TopStart)
                   .padding(MapScreenDefaults.BackButtonPadding)
                   .testTag(MapScreenTestTags.BUTTON_BACK)) {
-            Text(MapScreenStrings.BackToAllHunts)
+            Text(if (isHuntStarted) MapScreenStrings.StopHunt else MapScreenStrings.BackToAllHunts)
           }
+
+      if (showStopHuntDialog) {
+        AlertDialog(
+            onDismissRequest = { showStopHuntDialog = false },
+            title = { Text(MapScreenStrings.StopHuntTitle) },
+            text = { Text(MapScreenStrings.StopHuntMessage) },
+            confirmButton = {
+              TextButton(
+                  onClick = {
+                    showStopHuntDialog = false
+                    viewModel.onBackToAllHunts()
+                  }) {
+                    Text(MapScreenStrings.ConfirmStopHunt)
+                  }
+            },
+            dismissButton = {
+              TextButton(onClick = { showStopHuntDialog = false }) { Text(MapScreenStrings.Cancel) }
+            })
+      }
+
       Card(
           modifier = Modifier.align(Alignment.TopEnd).padding(12.dp),
           shape = RoundedCornerShape(16.dp),

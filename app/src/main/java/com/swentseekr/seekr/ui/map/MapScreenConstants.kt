@@ -35,6 +35,11 @@ object MapScreenStrings {
   const val StartHunt = "Start Hunt"
   const val Validate = "Validate"
   const val FinishHunt = "Finish hunt"
+  const val StopHunt = "Stop hunt"
+  const val StopHuntTitle = "Stop current hunt?"
+  const val StopHuntMessage =
+      "Are you sure you want to stop this hunt? Your current progress will be lost."
+  const val ConfirmStopHunt = "Stop"
 }
 
 /**

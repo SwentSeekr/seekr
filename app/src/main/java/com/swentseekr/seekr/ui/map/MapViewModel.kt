@@ -134,7 +134,12 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
    */
   fun onBackToAllHunts() {
     _uiState.value =
-        _uiState.value.copy(isFocused = false, selectedHunt = null, route = emptyList())
+        _uiState.value.copy(
+            isFocused = false,
+            selectedHunt = null,
+            route = emptyList(),
+            isHuntStarted = false,
+            validatedCount = DEFAULT_COUNT)
   }
 
   /**
