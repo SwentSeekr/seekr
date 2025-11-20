@@ -133,15 +133,6 @@ class ReviewHuntViewModelTest {
     assertEquals(3.5, viewModel.uiState.value.rating, 0.0)
   }
 
-  /*
-  @Test
-  fun addPhoto_addsToList() = runTest {
-    val photo = "url"
-    viewModel.addPhoto(photo)
-    assertTrue(viewModel.uiState.value.photos.contains(photo))
-  }*/
-
-  /*
   @Test
   fun addPhoto_addsToList() = runTest {
     val fakeUserId = "testUser"
@@ -154,35 +145,23 @@ class ReviewHuntViewModelTest {
 
     val photos = viewModel.uiState.value.photos
     assertTrue(photos.isEmpty())
-    //assertTrue(photos.first().startsWith("local://review_image/$fakeUserId"))
   }
 
+  @Test
+  fun removePhoto_removesFromList() = runTest {
+    val fakeUserId = "testUser"
+    val photo = "test_photo.jpg"
 
-   */
-  /*
-   @Test
-   fun removePhoto_removesFromList() = runTest {
-     val fakeUserId = "testUser"
-     val photo = "test_photo.jpg"
+    // Add photo
+    viewModel.addPhoto(photo, fakeUserId)
 
-     // Add photo
-     viewModel.addPhoto(photo, fakeUserId)
-
-     // Wait for coroutine to finish
-     testScheduler.advanceUntilIdle()
-
-     // The photo added will be the URL from the fake repository
-     val addedPhoto = viewModel.uiState.value.photos.first()
-     assertTrue(addedPhoto.startsWith("local://review_image/$fakeUserId"))
-
-     // Remove the photo
-     viewModel.removePhoto(addedPhoto)
-
-     // Check that it was removed
-     assertFalse(viewModel.uiState.value.photos.contains(addedPhoto))
-   }
-
-  */
+    // Wait for coroutine to finish
+    testScheduler.advanceUntilIdle()
+    // Remove the photo
+    viewModel.removePhoto(photo)
+    // Check that it was removed
+    assertFalse(viewModel.uiState.value.photos.contains(photo))
+  }
 
   @Test
   fun submitReviewHunt_withInvalidData_setsError() = runTest {
