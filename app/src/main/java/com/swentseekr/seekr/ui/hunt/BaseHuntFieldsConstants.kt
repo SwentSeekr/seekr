@@ -29,7 +29,7 @@ object BaseHuntFieldsStrings {
   const val CONTENT_DESC_SECONDARY_IMAGE = "Secondary Image"
   const val REMOVE = "Remove"
   const val DELETE_ICON_DESC = "Delete Image"
-  const val  REMOVE_BUTTON_TAG_PREFIX = "removeButton_"
+  const val REMOVE_BUTTON_TAG_PREFIX = "removeButton_"
 }
 
 object BaseHuntFieldsUi {
