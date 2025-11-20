@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.profile
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,7 +10,7 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryProvider
 import com.swentseekr.seekr.model.profile.ProfileRepository
 import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
-import kotlin.String
+import com.swentseekr.seekr.offline.cache.ProfileCache
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -70,7 +71,7 @@ class ProfileViewModel(
     }
   }
 
-  fun loadProfile(userId: String? = null) {
+  fun loadProfile(userId: String? = null,context: Context? = null) {
     val uidToLoad = userId ?: currentUid
     if (uidToLoad == null) {
       updateUiState { it.copy(errorMsg = LOGIN_USER_ERROR) }
@@ -96,6 +97,9 @@ class ProfileViewModel(
                 doneHunts = doneHunts,
                 likedHunts = likedHunts)
 
+        if (context != null) {
+          ProfileCache.saveProfile(context, updatedProfile)
+        }
         updateUiState {
           it.copy(
               profile = updatedProfile, isMyProfile = uidToLoad == currentUid, isLoading = false)
@@ -144,16 +148,16 @@ class ProfileViewModel(
     return points.average().coerceIn(0.0, 5.0)
   }
 
-  fun refreshUIState() {
+  fun refreshUIState(context: Context? = null) {
     {
       val uid = _uiState.value.profile?.uid ?: currentUid
       if (uid != null) {
-        loadProfile(uid)
+        loadProfile( uid,context)
       }
     }
   }
 
-  fun updateProfile(profile: Profile) {
+  fun updateProfile(profile: Profile, context: Context? = null) {
     viewModelScope.launch {
       val uid = currentUid
       if (uid == null) {
@@ -163,7 +167,7 @@ class ProfileViewModel(
 
       try {
         repository.updateProfile(profile.copy(uid = uid))
-        loadProfile(uid)
+        loadProfile(uid,context)
       } catch (e: Exception) {
         updateUiState { it.copy(errorMsg = LOGIN_USER_ERROR) }
       }
