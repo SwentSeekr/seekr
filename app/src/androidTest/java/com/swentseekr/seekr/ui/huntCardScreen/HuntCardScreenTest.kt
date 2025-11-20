@@ -20,221 +20,216 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class HuntCardScreenTest {
 
-    @get:Rule val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
-    private fun createFakeHunt() =
-        Hunt(
-            uid = HuntCardScreenConstantStrings.TestHunt,
-            start =
-                Location(
-                    HuntCardScreenConstantNumbers.Location1,
-                    HuntCardScreenConstantNumbers.Location2,
-                    HuntCardScreenConstantStrings.Name1),
-            end =
-                Location(
-                    HuntCardScreenConstantNumbers.Location3,
-                    HuntCardScreenConstantNumbers.Location4,
-                    HuntCardScreenConstantStrings.Name2),
-            middlePoints = emptyList(),
-            status = HuntStatus.FUN,
-            title = HuntCardScreenConstantStrings.Title,
-            description = HuntCardScreenConstantStrings.Description,
-            time = HuntCardScreenConstantNumbers.Time,
-            distance = HuntCardScreenConstantNumbers.Distance,
-            difficulty = Difficulty.DIFFICULT,
-            authorId = HuntCardScreenConstantStrings.AuthorId,
-            otherImagesUrls = emptyList(),
-            mainImageUrl = "",
-            reviewRate = HuntCardScreenConstantNumbers.ReviewRate)
+  private fun createFakeHunt() =
+      Hunt(
+          uid = HuntCardScreenConstantStrings.TestHunt,
+          start =
+              Location(
+                  HuntCardScreenConstantNumbers.Location1,
+                  HuntCardScreenConstantNumbers.Location2,
+                  HuntCardScreenConstantStrings.Name1),
+          end =
+              Location(
+                  HuntCardScreenConstantNumbers.Location3,
+                  HuntCardScreenConstantNumbers.Location4,
+                  HuntCardScreenConstantStrings.Name2),
+          middlePoints = emptyList(),
+          status = HuntStatus.FUN,
+          title = HuntCardScreenConstantStrings.Title,
+          description = HuntCardScreenConstantStrings.Description,
+          time = HuntCardScreenConstantNumbers.Time,
+          distance = HuntCardScreenConstantNumbers.Distance,
+          difficulty = Difficulty.DIFFICULT,
+          authorId = HuntCardScreenConstantStrings.AuthorId,
+          otherImagesUrls = emptyList(),
+          mainImageUrl = "",
+          reviewRate = HuntCardScreenConstantNumbers.ReviewRate)
 
-    private fun setHuntContent(
-        hunt: Hunt,
-        onGoBack: () -> Unit = {},
-        beginHunt: () -> Unit = {},
-        addReview: () -> Unit = {},
-    ) {
-        composeTestRule.setContent {
-            HuntCardScreen(
-                huntId = hunt.uid,
-                huntCardViewModel = FakeHuntCardViewModel(hunt),
-                onGoBack = onGoBack,
-                beginHunt = beginHunt,
-                addReview = addReview,
+  private fun setHuntContent(
+      hunt: Hunt,
+      onGoBack: () -> Unit = {},
+      beginHunt: () -> Unit = {},
+      addReview: () -> Unit = {},
+  ) {
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = hunt.uid,
+          huntCardViewModel = FakeHuntCardViewModel(hunt),
+          onGoBack = onGoBack,
+          beginHunt = beginHunt,
+          addReview = addReview,
+      )
+    }
+  }
+
+  @Test
+  fun testAllUIElementsAreDisplayed() {
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = HuntCardScreenConstantStrings.TestHunt,
+          huntCardViewModel = FakeHuntCardViewModel(createFakeHunt()),
+          onGoBack = {},
+          beginHunt = {},
+          addReview = {})
+    }
+
+    // Verifies the presence of principal UI elements
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.GO_BACK_BUTTON).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.TITLE_TEXT).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.AUTHOR_TEXT).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.IMAGE_PAGER).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.DESCRIPTION_TEXT).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.MAP_CONTAINER).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.BEGIN_BUTTON).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.REVIEW_BUTTON).assertIsDisplayed()
+  }
+
+  @Test
+  fun testButtonsTriggerCallbacks() {
+    var goBackClicked = false
+    var beginClicked = false
+    var reviewClicked = false
+
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = HuntCardScreenConstantStrings.TestHunt,
+          huntCardViewModel = FakeHuntCardViewModel(createFakeHunt()),
+          onGoBack = { goBackClicked = true },
+          beginHunt = { beginClicked = true },
+          addReview = { reviewClicked = true })
+    }
+
+    // Click on boutons
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.GO_BACK_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.BEGIN_BUTTON).performClick()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.REVIEW_BUTTON).performClick()
+
+    // Verifies callbacks
+    assertTrue(goBackClicked)
+    assertTrue(beginClicked)
+    assertTrue(reviewClicked)
+  }
+
+  @Test
+  fun testLikeButtonTogglesState() {
+    val fakeVm = FakeHuntCardViewModel(createFakeHunt())
+
+    composeTestRule.setContent {
+      HuntCardScreen(huntId = HuntCardScreenConstantStrings.TestHunt, huntCardViewModel = fakeVm)
+    }
+
+    // Initially: not liked
+    assertTrue(!fakeVm.uiState.value.isLiked)
+
+    // Click like
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.LIKE_BUTTON).performClick()
+
+    // ViewModel should now show liked = true
+    assertTrue(fakeVm.uiState.value.isLiked)
+
+    // Click again → unlike
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.LIKE_BUTTON).performClick()
+
+    assertTrue(!fakeVm.uiState.value.isLiked)
+  }
+
+  @Test
+  fun testAddReviewButtonShownForOtherUsers() {
+    val fakeVm =
+        FakeHuntCardViewModel(
+            hunt = createFakeHunt().copy(authorId = HuntCardScreenConstantStrings.AuthorId))
+
+    composeTestRule.setContent {
+      HuntCardScreen(huntId = HuntCardScreenConstantStrings.TestHunt, huntCardViewModel = fakeVm)
+    }
+
+    composeTestRule.onNodeWithText(HuntCardScreenConstantStrings.AddReview).assertIsDisplayed()
+  }
+
+  @Test
+  fun testMapIsVisible() {
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = HuntCardScreenConstantStrings.TestHunt,
+          huntCardViewModel = FakeHuntCardViewModel(createFakeHunt()))
+    }
+
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.MAP_CONTAINER).assertIsDisplayed()
+  }
+
+  @Test
+  fun huntCardScreen_showsDotsWhenMultipleImages() {
+    val huntWithImages =
+        createFakeHunt()
+            .copy(
+                mainImageUrl = "https://example.com/example1.jpg",
+                otherImagesUrls =
+                    listOf(
+                        "https://example.com/example2.jpg",
+                        "https://example.com/example3.jpg",
+                    ),
             )
-        }
+
+    setHuntContent(hunt = huntWithImages)
+
+    // Carousel & pager
+    composeTestRule
+        .onNodeWithTag(HuntCardScreenTestTags.IMAGE_CAROUSEL_CONTAINER)
+        .assertIsDisplayed()
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.IMAGE_PAGER).assertIsDisplayed()
+
+    // Indicator row (because > 1 image)
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.IMAGE_INDICATOR_ROW).assertIsDisplayed()
+
+    // 3 dots (1 main + 2 others)
+    (0 until 3).forEach { index ->
+      composeTestRule
+          .onNodeWithTag(HuntCardScreenTestTags.IMAGE_INDICATOR_DOT_PREFIX + index)
+          .assertIsDisplayed()
     }
+  }
 
+  @Test
+  fun huntCardScreen_noDotsWhenSingleImage() {
+    val singleImageHunt =
+        createFakeHunt()
+            .copy(
+                mainImageUrl = "https://example.com/example1.jpg",
+                otherImagesUrls = emptyList(),
+            )
 
-    @Test
-    fun testAllUIElementsAreDisplayed() {
-        composeTestRule.setContent {
-            HuntCardScreen(
-                huntId = HuntCardScreenConstantStrings.TestHunt,
-                huntCardViewModel = FakeHuntCardViewModel(createFakeHunt()),
-                onGoBack = {},
-                beginHunt = {},
-                addReview = {})
-        }
+    setHuntContent(hunt = singleImageHunt)
 
-        // Verifies the presence of principal UI elements
-        composeTestRule.onNodeWithTag(HuntCardScreenTestTags.GO_BACK_BUTTON).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(HuntCardScreenTestTags.TITLE_TEXT).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(HuntCardScreenTestTags.AUTHOR_TEXT).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(HuntCardScreenTestTags.IMAGE_PAGER).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(HuntCardScreenTestTags.DESCRIPTION_TEXT).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(HuntCardScreenTestTags.MAP_CONTAINER).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(HuntCardScreenTestTags.BEGIN_BUTTON).assertIsDisplayed()
-        composeTestRule.onNodeWithTag(HuntCardScreenTestTags.REVIEW_BUTTON).assertIsDisplayed()
-    }
+    composeTestRule
+        .onNodeWithTag(HuntCardScreenTestTags.IMAGE_CAROUSEL_CONTAINER)
+        .assertIsDisplayed()
 
-    @Test
-    fun testButtonsTriggerCallbacks() {
-        var goBackClicked = false
-        var beginClicked = false
-        var reviewClicked = false
+    // Indicator row should not exist
+    composeTestRule
+        .onNodeWithTag(HuntCardScreenTestTags.IMAGE_INDICATOR_ROW, useUnmergedTree = true)
+        .assertDoesNotExist()
+  }
 
-        composeTestRule.setContent {
-            HuntCardScreen(
-                huntId = HuntCardScreenConstantStrings.TestHunt,
-                huntCardViewModel = FakeHuntCardViewModel(createFakeHunt()),
-                onGoBack = { goBackClicked = true },
-                beginHunt = { beginClicked = true },
-                addReview = { reviewClicked = true })
-        }
+  @Test
+  fun huntCardScreen_tapCenterImageOpensFullscreen() {
+    val huntWithImage =
+        createFakeHunt()
+            .copy(
+                mainImageUrl = "https://example.com/example.jpg",
+                otherImagesUrls = emptyList(),
+            )
 
-        // Click on boutons
-        composeTestRule.onNodeWithTag(HuntCardScreenTestTags.GO_BACK_BUTTON).performClick()
-        composeTestRule.onNodeWithTag(HuntCardScreenTestTags.BEGIN_BUTTON).performClick()
-        composeTestRule.onNodeWithTag(HuntCardScreenTestTags.REVIEW_BUTTON).performClick()
+    setHuntContent(hunt = huntWithImage)
 
-        // Verifies callbacks
-        assertTrue(goBackClicked)
-        assertTrue(beginClicked)
-        assertTrue(reviewClicked)
-    }
+    // Click center page (index 0)
+    composeTestRule
+        .onNodeWithTag(HuntCardScreenTestTags.IMAGE_PAGE_PREFIX + 0)
+        .assertIsDisplayed()
+        .performClick()
 
-    @Test
-    fun testLikeButtonTogglesState() {
-        val fakeVm = FakeHuntCardViewModel(createFakeHunt())
-
-        composeTestRule.setContent {
-            HuntCardScreen(
-                huntId = HuntCardScreenConstantStrings.TestHunt,
-                huntCardViewModel = fakeVm)
-        }
-
-        // Initially: not liked
-        assertTrue(!fakeVm.uiState.value.isLiked)
-
-        // Click like
-        composeTestRule.onNodeWithTag(HuntCardScreenTestTags.LIKE_BUTTON).performClick()
-
-        // ViewModel should now show liked = true
-        assertTrue(fakeVm.uiState.value.isLiked)
-
-        // Click again → unlike
-        composeTestRule.onNodeWithTag(HuntCardScreenTestTags.LIKE_BUTTON).performClick()
-
-        assertTrue(!fakeVm.uiState.value.isLiked)
-    }
-
-    @Test
-    fun testAddReviewButtonShownForOtherUsers() {
-        val fakeVm =
-            FakeHuntCardViewModel(
-                hunt = createFakeHunt().copy(authorId = HuntCardScreenConstantStrings.AuthorId))
-
-        composeTestRule.setContent {
-            HuntCardScreen(
-                huntId = HuntCardScreenConstantStrings.TestHunt,
-                huntCardViewModel = fakeVm)
-        }
-
-        composeTestRule.onNodeWithText(HuntCardScreenConstantStrings.AddReview).assertIsDisplayed()
-    }
-
-    @Test
-    fun testMapIsVisible() {
-        composeTestRule.setContent {
-            HuntCardScreen(
-                huntId = HuntCardScreenConstantStrings.TestHunt,
-                huntCardViewModel = FakeHuntCardViewModel(createFakeHunt()))
-        }
-
-        composeTestRule.onNodeWithTag(HuntCardScreenTestTags.MAP_CONTAINER).assertIsDisplayed()
-    }
-
-    @Test
-    fun huntCardScreen_showsDotsWhenMultipleImages() {
-        val huntWithImages =
-            createFakeHunt()
-                .copy(
-                    mainImageUrl = "https://example.com/example1.jpg",
-                    otherImagesUrls =
-                        listOf(
-                            "https://example.com/example2.jpg",
-                            "https://example.com/example3.jpg",
-                        ),
-                )
-
-        setHuntContent(hunt = huntWithImages)
-
-        // Carousel & pager
-        composeTestRule
-            .onNodeWithTag(HuntCardScreenTestTags.IMAGE_CAROUSEL_CONTAINER)
-            .assertIsDisplayed()
-        composeTestRule.onNodeWithTag(HuntCardScreenTestTags.IMAGE_PAGER).assertIsDisplayed()
-
-        // Indicator row (because > 1 image)
-        composeTestRule.onNodeWithTag(HuntCardScreenTestTags.IMAGE_INDICATOR_ROW).assertIsDisplayed()
-
-        // 3 dots (1 main + 2 others)
-        (0 until 3).forEach { index ->
-            composeTestRule
-                .onNodeWithTag(HuntCardScreenTestTags.IMAGE_INDICATOR_DOT_PREFIX + index)
-                .assertIsDisplayed()
-        }
-    }
-
-    @Test
-    fun huntCardScreen_noDotsWhenSingleImage() {
-        val singleImageHunt =
-            createFakeHunt()
-                .copy(
-                    mainImageUrl = "https://example.com/example1.jpg",
-                    otherImagesUrls = emptyList(),
-                )
-
-        setHuntContent(hunt = singleImageHunt)
-
-        composeTestRule
-            .onNodeWithTag(HuntCardScreenTestTags.IMAGE_CAROUSEL_CONTAINER)
-            .assertIsDisplayed()
-
-        // Indicator row should not exist
-        composeTestRule
-            .onNodeWithTag(HuntCardScreenTestTags.IMAGE_INDICATOR_ROW, useUnmergedTree = true)
-            .assertDoesNotExist()
-    }
-
-    @Test
-    fun huntCardScreen_tapCenterImageOpensFullscreen() {
-        val huntWithImage =
-            createFakeHunt()
-                .copy(
-                    mainImageUrl = "https://example.com/example.jpg",
-                    otherImagesUrls = emptyList(),
-                )
-
-        setHuntContent(hunt = huntWithImage)
-
-        // Click center page (index 0)
-        composeTestRule
-            .onNodeWithTag(HuntCardScreenTestTags.IMAGE_PAGE_PREFIX + 0)
-            .assertIsDisplayed()
-            .performClick()
-
-        // Full-screen dialog appears
-        composeTestRule.onNodeWithTag(HuntCardScreenTestTags.IMAGE_FULLSCREEN).assertIsDisplayed()
-    }
+    // Full-screen dialog appears
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.IMAGE_FULLSCREEN).assertIsDisplayed()
+  }
 }

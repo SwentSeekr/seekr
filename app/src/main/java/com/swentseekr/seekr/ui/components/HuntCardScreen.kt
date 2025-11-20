@@ -347,6 +347,7 @@ fun HuntDescriptionSection(description: String, modifier: Modifier = Modifier) {
               .padding(HuntCardScreenDefaults.SectionSpacing)
               .testTag(HuntCardScreenTestTags.DESCRIPTION_TEXT))
 }
+
 @Composable
 fun ReviewCard(
     review: HuntReview,
