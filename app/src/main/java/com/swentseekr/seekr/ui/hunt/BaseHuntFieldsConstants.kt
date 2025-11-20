@@ -31,6 +31,7 @@ object BaseHuntFieldsStrings {
   const val DELETE_ICON_DESC = "Delete Image"
 }
 
+
 object BaseHuntFieldsUi {
   val FieldCornerRadius: Dp = 12.dp
   val DescriptionHeight: Dp = 150.dp
