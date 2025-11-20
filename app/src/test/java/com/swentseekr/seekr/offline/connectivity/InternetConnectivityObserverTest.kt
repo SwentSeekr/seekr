@@ -20,6 +20,9 @@ import org.junit.Test
 
 class InternetConnectivityObserverTest {
 
+
+  // mock objects
+
   private lateinit var mockContext: Context
   private lateinit var mockConnectivityManager: ConnectivityManager
   private lateinit var mockNetwork: Network
