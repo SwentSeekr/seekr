@@ -1,4 +1,4 @@
-package com.swentseekr.seekr.ui.cardScreen
+package com.swentseekr.seekr.ui.huntCardScreen
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
