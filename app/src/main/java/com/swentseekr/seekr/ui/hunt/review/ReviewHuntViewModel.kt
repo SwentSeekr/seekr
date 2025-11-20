@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.hunt.review
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,6 +13,8 @@ import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.model.hunt.HuntReviewRepository
 import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryProvider
 import com.swentseekr.seekr.model.hunt.HuntsRepository
+import com.swentseekr.seekr.model.hunt.IReviewImageRepository
+import com.swentseekr.seekr.model.hunt.ReviewImageRepositoryProvider
 import com.swentseekr.seekr.model.profile.ProfileRepository
 import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
 import com.swentseekr.seekr.ui.profile.Profile
@@ -42,7 +45,8 @@ data class ReviewHuntUIState(
 open class ReviewHuntViewModel(
     private val repositoryHunt: HuntsRepository = HuntRepositoryProvider.repository,
     private val repositoryReview: HuntReviewRepository = HuntReviewRepositoryProvider.repository,
-    private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository
+    private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository,
+    private val imageRepository: IReviewImageRepository = ReviewImageRepositoryProvider.repository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(ReviewHuntUIState())
@@ -119,6 +123,12 @@ open class ReviewHuntViewModel(
       try {
         val currentUid = currentUserId ?: AddReviewScreenStrings.NoCurrentUser
         if (userID == currentUid) {
+          val review = repositoryReview.getReviewHunt(reviewID)
+          val photosToDelete = review.photos
+          for (photoUrl in photosToDelete) {
+            // removePhoto(photoUrl)
+            imageRepository.deleteReviewPhoto(photoUrl)
+          }
           repositoryReview.deleteReviewHunt(reviewId = reviewID)
         } else {
           setErrorMsg(AddReviewScreenStrings.ErrorDeleteReview)
@@ -162,17 +172,78 @@ open class ReviewHuntViewModel(
   }
 
   /** Adds a photo to the current list of photos in the UI state. */
-  fun addPhoto(myPhoto: String) {
-    val currentPhotos = _uiState.value.photos.toMutableList()
+  fun addPhoto(myPhoto: String, userId: String? = null) {
+    val uid = userId ?: FirebaseAuth.getInstance().currentUser?.uid ?: return
+    val uri = Uri.parse(myPhoto)
+
+    viewModelScope.launch {
+      try {
+        val downloadUrl = imageRepository.uploadReviewPhoto(uid, uri)
+        val updated = _uiState.value.photos + downloadUrl
+        _uiState.value = _uiState.value.copy(photos = updated)
+      } catch (e: Exception) {
+        _uiState.value = _uiState.value.copy(errorMsg = "Failed to upload photo: ${e.message}")
+      }
+    }
+    /*val currentPhotos = _uiState.value.photos.toMutableList()
     currentPhotos.add(myPhoto)
     _uiState.value = _uiState.value.copy(photos = currentPhotos)
+
+
+    val uri = Uri.parse(myPhoto)
+
+    viewModelScope.launch {
+      try {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return@launch
+        val downloadUrl = imageRepository.uploadReviewPhoto(userId, uri)
+        /* val storageRef = FirebaseStorage.getInstance().reference
+                          .child("review_photos/${userId}_${System.currentTimeMillis()}.jpg")
+
+                      // Upload file
+                      storageRef.putFile(uri).await()
+
+                      // Get download URL
+                      val downloadUrl = storageRef.downloadUrl.await().toString()
+
+
+
+
+                      // Add the Firebase Storage URL to the review
+                      val currentPhotos = _uiState.value.photos.toMutableList()
+                      currentPhotos.add(downloadUrl)
+        */
+        val updated = _uiState.value.photos + downloadUrl
+        _uiState.value = _uiState.value.copy(photos = updated)
+      } catch (e: Exception) {
+        _uiState.value = _uiState.value.copy(errorMsg = "Failed to upload photo: ${e.message}")
+      }
+
+
+    }
+
+     */
   }
 
   /** Removes a photo from the current list of photos in the UI state. */
   fun removePhoto(myPhoto: String) {
-    val currentPhotos = _uiState.value.photos.toMutableList()
-    currentPhotos.remove(myPhoto)
-    _uiState.value = _uiState.value.copy(photos = currentPhotos)
+    // val currentPhotos = _uiState.value.photos.toMutableList()
+    // currentPhotos.remove(myPhoto)
+    // _uiState.value = _uiState.value.copy(photos = currentPhotos)
+
+    // remove photo from Firebase Storage
+    viewModelScope.launch {
+      try {
+        // val storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(myPhoto)
+        // storageRef.delete().await()
+        // imageRepository.deleteReviewPhoto(myPhoto)
+        imageRepository.deleteReviewPhoto(myPhoto)
+
+        val updated = _uiState.value.photos - myPhoto
+        _uiState.value = _uiState.value.copy(photos = updated)
+      } catch (e: Exception) {
+        _uiState.value = _uiState.value.copy(errorMsg = "Failed to delete image: ${e.message}")
+      }
+    }
   }
 
   /** Updates the rating in the UI state. */
