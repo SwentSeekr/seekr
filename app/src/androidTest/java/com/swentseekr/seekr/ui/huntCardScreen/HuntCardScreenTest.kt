@@ -164,11 +164,11 @@ class HuntCardScreenTest {
     val huntWithImages =
         createFakeHunt()
             .copy(
-                mainImageUrl = "https://example.com/example1.jpg",
+                mainImageUrl = HuntCardScreenConstantStrings.MainImageUrlWithDots,
                 otherImagesUrls =
                     listOf(
-                        "https://example.com/example2.jpg",
-                        "https://example.com/example3.jpg",
+                        HuntCardScreenConstantStrings.OtherImageUrl2WithDots,
+                        HuntCardScreenConstantStrings.OtherImageUrl3WithDots,
                     ),
             )
 
@@ -184,7 +184,7 @@ class HuntCardScreenTest {
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.IMAGE_INDICATOR_ROW).assertIsDisplayed()
 
     // 3 dots (1 main + 2 others)
-    (0 until 3).forEach { index ->
+    (0 until HuntCardScreenConstantNumbers.ImageCount).forEach { index ->
       composeTestRule
           .onNodeWithTag(HuntCardScreenTestTags.IMAGE_INDICATOR_DOT_PREFIX + index)
           .assertIsDisplayed()
@@ -196,7 +196,7 @@ class HuntCardScreenTest {
     val singleImageHunt =
         createFakeHunt()
             .copy(
-                mainImageUrl = "https://example.com/example1.jpg",
+                mainImageUrl = HuntCardScreenConstantStrings.SingleImageUrl,
                 otherImagesUrls = emptyList(),
             )
 
@@ -217,7 +217,7 @@ class HuntCardScreenTest {
     val huntWithImage =
         createFakeHunt()
             .copy(
-                mainImageUrl = "https://example.com/example.jpg",
+                mainImageUrl = HuntCardScreenConstantStrings.FullscreenImageUrl,
                 otherImagesUrls = emptyList(),
             )
 
@@ -225,7 +225,9 @@ class HuntCardScreenTest {
 
     // Click center page (index 0)
     composeTestRule
-        .onNodeWithTag(HuntCardScreenTestTags.IMAGE_PAGE_PREFIX + 0)
+        .onNodeWithTag(
+            HuntCardScreenTestTags.IMAGE_PAGE_PREFIX +
+                HuntCardScreenConstantNumbers.FirstImageIndex)
         .assertIsDisplayed()
         .performClick()
 
