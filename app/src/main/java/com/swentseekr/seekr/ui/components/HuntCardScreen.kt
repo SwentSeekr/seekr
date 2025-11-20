@@ -108,7 +108,7 @@ fun HuntCardScreen(
       beginHunt = beginHunt,
       addReview = addReview,
       editHunt = editHunt,
-  )
+      currentUserId = currentUserId)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -121,6 +121,7 @@ private fun HuntCardScaffold(
     huntId: String,
     huntCardViewModel: HuntCardViewModel,
     reviewViewModel: ReviewHuntViewModel,
+    currentUserId: String?,
     modifier: Modifier = Modifier,
     onGoBack: () -> Unit = {},
     beginHunt: () -> Unit = {},
@@ -154,7 +155,7 @@ private fun HuntCardScaffold(
             huntId = huntId,
             huntCardViewModel = huntCardViewModel,
             reviewViewModel = reviewViewModel,
-            currentUserId = huntCardViewModel.uiState.value.currentUserId,
+            currentUserId = currentUserId,
             buttonFunctionEdit = buttonFunctionEdit,
             buttonText = buttonText,
             modifier = modifier,
