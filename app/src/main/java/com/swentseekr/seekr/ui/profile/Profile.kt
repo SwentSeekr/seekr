@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
@@ -54,6 +55,7 @@ import com.swentseekr.seekr.ui.components.MAX_RATING
 import com.swentseekr.seekr.ui.components.Rating
 import com.swentseekr.seekr.ui.components.RatingType
 import com.swentseekr.seekr.ui.theme.*
+import kotlinx.serialization.Serializable
 
 object ProfileTestTags {
   const val PROFILE_SCREEN = "PROFILE_SCREEN"
@@ -111,6 +113,7 @@ data class TabItem(val tab: ProfileTab, val testTag: String, val icon: ImageVect
  * @property doneHunts Hunts completed by the user.
  * @property likedHunts Hunts liked by the user.
  */
+@Serializable
 data class Profile(
     val uid: String = "",
     val author: Author = Author(),
@@ -143,6 +146,8 @@ fun ProfileScreen(
     testMode: Boolean = false,
     testProfile: Profile? = null,
 ) {
+
+  val context = LocalContext.current
   val uiState by viewModel.uiState.collectAsState()
 
   val profile =
@@ -150,7 +155,7 @@ fun ProfileScreen(
         testProfile ?: mockProfileData()
       } else {
 
-        LaunchedEffect(userId) { viewModel.loadProfile(userId) }
+        LaunchedEffect(userId) { viewModel.loadProfile(userId,context) }
         uiState.profile
 
         AnimatedVisibility(visible = uiState.isLoading, enter = fadeIn(), exit = fadeOut()) {
