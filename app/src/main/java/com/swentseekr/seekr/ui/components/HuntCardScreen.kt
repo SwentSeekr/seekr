@@ -55,6 +55,7 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.swentseekr.seekr.model.hunt.DifficultyColor
+import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
@@ -76,28 +77,61 @@ fun HuntCardScreen(
   val uiState by huntCardViewModel.uiState.collectAsState()
 
   // Load when arriving / when id changes
-  LaunchedEffect(huntId) { huntCardViewModel.loadHunt(huntId) }
-  val hunt2 = uiState.hunt
-  val authorId = hunt2?.authorId ?: ""
+  LaunchedEffect(huntId) {
+    huntCardViewModel.loadHunt(huntId)
+    huntCardViewModel.loadOtherReview(huntId)
+  }
+
+  val hunt = uiState.hunt
+  val authorId = hunt?.authorId ?: ""
 
   LaunchedEffect(authorId) { huntCardViewModel.loadAuthorProfile(authorId) }
-  val authorProfile = uiState.authorProfile
-
-  LaunchedEffect(huntId) { huntCardViewModel.loadOtherReview(huntId) }
-  val reviews = uiState.reviewList
-
   LaunchedEffect(Unit) { huntCardViewModel.loadCurrentUserID() }
+
+  val authorProfile = uiState.authorProfile
+  val reviews = uiState.reviewList
   val currentUserId = uiState.currentUserId
 
-  val isCurrentId = currentUserId == authorId // verify if current user is author
-  val buttonFunctionEdit = if (isCurrentId) editHunt else addReview
-  val buttonText =
-      if (isCurrentId) HuntCardScreenStrings.EditHunt else HuntCardScreenStrings.AddReview
+  val isCurrentAuthor = currentUserId == authorId
+  val authorName = authorProfile?.author?.pseudonym ?: HuntCardScreenStrings.UnknownAuthor
 
-  val author = authorProfile?.author?.pseudonym ?: HuntCardScreenStrings.UnknownAuthor
+  HuntCardScaffold(
+      hunt = hunt,
+      authorName = authorName,
+      reviews = reviews,
+      isCurrentAuthor = isCurrentAuthor,
+      huntId = huntId,
+      huntCardViewModel = huntCardViewModel,
+      reviewViewModel = reviewViewModel,
+      modifier = modifier,
+      onGoBack = onGoBack,
+      beginHunt = beginHunt,
+      addReview = addReview,
+      editHunt = editHunt,
+  )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HuntCardScaffold(
+    hunt: Hunt?,
+    authorName: String,
+    reviews: List<HuntReview>?,
+    isCurrentAuthor: Boolean,
+    huntId: String,
+    huntCardViewModel: HuntCardViewModel,
+    reviewViewModel: ReviewHuntViewModel,
+    modifier: Modifier = Modifier,
+    onGoBack: () -> Unit = {},
+    beginHunt: () -> Unit = {},
+    addReview: () -> Unit = {},
+    editHunt: () -> Unit = {},
+) {
+  val buttonFunctionEdit = if (isCurrentAuthor) editHunt else addReview
+  val buttonText =
+      if (isCurrentAuthor) HuntCardScreenStrings.EditHunt else HuntCardScreenStrings.AddReview
 
   Scaffold(
-      // BAR GOBACK ARROW
       topBar = {
         TopAppBar(
             title = { Text("") },
@@ -113,151 +147,186 @@ fun HuntCardScreen(
             modifier = Modifier.background(HuntCardScreenDefaults.TopBarColor))
       },
       modifier = modifier.fillMaxSize()) { innerPadding ->
-        val hunt = hunt2
-        if (hunt == null) {
-          Box(Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-          }
-        } else {
-
-          // COLUMN FOR INFORMATIONS
-          LazyColumn {
-            item {
-              Card(
-                  modifier =
-                      modifier
-                          .fillMaxWidth()
-                          .padding(innerPadding)
-                          .padding(horizontal = HuntCardScreenDefaults.ScreenPaddingHorizontal)
-                          .padding(
-                              top = HuntCardScreenDefaults.ScreenPaddingTop,
-                              bottom = HuntCardScreenDefaults.ScreenPaddingBottom)
-                          .border(
-                              HuntCardScreenDefaults.CardBorderWidth,
-                              MaterialTheme.colorScheme.primary,
-                              RoundedCornerShape(HuntCardScreenDefaults.CornerRadius))
-                          .height(HuntCardScreenDefaults.ScreenHuntCardHeight),
-                  colors =
-                      CardDefaults.cardColors(
-                          containerColor = HuntCardScreenDefaults.CardBackgroundColor),
-                  shape = RoundedCornerShape(HuntCardScreenDefaults.CornerRadius)) {
-                    Column(
-                        modifier =
-                            Modifier.padding(HuntCardScreenDefaults.CardInnerPadding)
-                                .fillMaxWidth()
-                                .verticalScroll(rememberScrollState()),
-                        verticalArrangement =
-                            Arrangement.spacedBy(HuntCardScreenDefaults.InfoColumnPadding)) {
-                          // ROW WITH IMAGE, TITLE, AUTHOR, DIFFICULTY, DISTANCE, TIME
-
-                          HuntHeaderSection(
-                              hunt = hunt,
-                              authorName = author,
-                              huntId = huntId,
-                              huntCardViewModel = huntCardViewModel,
-                              modifier = modifier,
-                          )
-
-                          // DESCRIPTION
-
-                          HuntDescriptionSection(hunt.description)
-
-                          // MAP WITH START POINT
-
-                          var mapLoaded by remember { mutableStateOf(true) }
-
-                          if (mapLoaded) {
-                            val startPosition = LatLng(hunt.start.latitude, hunt.start.longitude)
-                            val cameraPositionState = rememberCameraPositionState {
-                              position =
-                                  CameraPosition.fromLatLngZoom(
-                                      startPosition, HuntCardScreenDefaults.MapZoom)
-                            }
-
-                            Box(
-                                modifier =
-                                    Modifier.fillMaxWidth()
-                                        .height(HuntCardScreenDefaults.MapHeight)
-                                        .padding(HuntCardScreenDefaults.MapPadding)
-                                        .testTag(HuntCardScreenTestTags.MAP_CONTAINER)) {
-                                  GoogleMap(
-                                      modifier = Modifier.matchParentSize(),
-                                      cameraPositionState = cameraPositionState) {
-                                        Marker(
-                                            state = MarkerState(position = startPosition),
-                                            title =
-                                                "${HuntCardScreenStrings.ReviewMarkerTitlePrefix} ${hunt.start.name}",
-                                            snippet = HuntCardScreenStrings.ReviewHint)
-                                      }
-                                }
-                          }
-
-                          // BOUTON BEGIN HUNT
-
-                          Row(
-                              modifier = modifier.fillMaxWidth(),
-                              horizontalArrangement = Arrangement.SpaceEvenly,
-                          ) {
-                            Button(
-                                beginHunt,
-                                modifier =
-                                    modifier
-                                        .defaultMinSize(
-                                            minWidth = HuntCardScreenDefaults.ButtonWidth)
-                                        .wrapContentWidth()
-                                        .testTag(HuntCardScreenTestTags.BEGIN_BUTTON)) {
-                                  Text(HuntCardScreenStrings.BeginHunt)
-                                }
-                            Button(
-                                buttonFunctionEdit,
-                                modifier =
-                                    modifier
-                                        .defaultMinSize(
-                                            minWidth = HuntCardScreenDefaults.ButtonWidth)
-                                        .wrapContentWidth()
-                                        .testTag(HuntCardScreenTestTags.REVIEW_BUTTON)) {
-                                  Text(
-                                      buttonText,
-                                      Modifier.padding(HuntCardScreenDefaults.InfoTextPadding))
-                                }
-                          }
-                        }
-                  }
-            }
-
-            item {
-              Text(
-                  HuntCardScreenStrings.Reviews,
-                  fontSize = MaterialTheme.typography.headlineSmall.fontSize,
-                  fontWeight = FontWeight.Bold,
-                  textAlign = TextAlign.Center,
-                  modifier =
-                      Modifier.fillMaxWidth()
-                          .padding(
-                              top = HuntCardScreenDefaults.ReviewCardPadding,
-                              bottom = HuntCardScreenDefaults.ReviewCardVerticalPadding))
-            }
-            if (reviews == null || reviews.isEmpty()) {
-              item {
-                Text(
-                    HuntCardScreenStrings.NoReviews,
-                    fontSize = MaterialTheme.typography.bodyLarge.fontSize,
-                    fontWeight = FontWeight.Normal,
-                    textAlign = TextAlign.Center,
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .padding(
-                                top = HuntCardScreenDefaults.NoReviewPadding,
-                                bottom = HuntCardScreenDefaults.NoReviewPadding))
-              }
-            } else {
-              items(reviews) { review ->
-                ReviewCard(review, reviewViewModel, huntCardViewModel, currentUserId)
-              }
-            }
-          }
-        }
+        HuntCardBody(
+            hunt = hunt,
+            reviews = reviews,
+            authorName = authorName,
+            huntId = huntId,
+            huntCardViewModel = huntCardViewModel,
+            reviewViewModel = reviewViewModel,
+            currentUserId = huntCardViewModel.uiState.value.currentUserId,
+            buttonFunctionEdit = buttonFunctionEdit,
+            buttonText = buttonText,
+            modifier = modifier,
+            innerPadding = innerPadding,
+        )
       }
+}
+
+@Composable
+private fun HuntCardBody(
+    hunt: Hunt?,
+    reviews: List<HuntReview>?,
+    authorName: String,
+    huntId: String,
+    huntCardViewModel: HuntCardViewModel,
+    reviewViewModel: ReviewHuntViewModel,
+    currentUserId: String?,
+    buttonFunctionEdit: () -> Unit,
+    buttonText: String,
+    modifier: Modifier,
+    innerPadding: androidx.compose.foundation.layout.PaddingValues,
+    beginHunt: () -> Unit = {},
+) {
+  if (hunt == null) {
+    Box(
+        Modifier.fillMaxSize().padding(innerPadding),
+        contentAlignment = Alignment.Center,
+    ) {
+      CircularProgressIndicator()
+    }
+    return
+  }
+
+  LazyColumn {
+    item {
+      Card(
+          modifier =
+              modifier
+                  .fillMaxWidth()
+                  .padding(innerPadding)
+                  .padding(horizontal = HuntCardScreenDefaults.ScreenPaddingHorizontal)
+                  .padding(
+                      top = HuntCardScreenDefaults.ScreenPaddingTop,
+                      bottom = HuntCardScreenDefaults.ScreenPaddingBottom)
+                  .border(
+                      HuntCardScreenDefaults.CardBorderWidth,
+                      MaterialTheme.colorScheme.primary,
+                      RoundedCornerShape(HuntCardScreenDefaults.CornerRadius))
+                  .height(HuntCardScreenDefaults.ScreenHuntCardHeight),
+          colors =
+              CardDefaults.cardColors(containerColor = HuntCardScreenDefaults.CardBackgroundColor),
+          shape = RoundedCornerShape(HuntCardScreenDefaults.CornerRadius)) {
+            Column(
+                modifier =
+                    Modifier.padding(HuntCardScreenDefaults.CardInnerPadding)
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+                verticalArrangement =
+                    Arrangement.spacedBy(HuntCardScreenDefaults.InfoColumnPadding)) {
+                  HuntHeaderSection(
+                      hunt = hunt,
+                      authorName = authorName,
+                      huntId = huntId,
+                      huntCardViewModel = huntCardViewModel,
+                      modifier = modifier,
+                  )
+
+                  HuntDescriptionSection(hunt.description)
+
+                  HuntStartMap(hunt)
+
+                  HuntActionsRow(
+                      modifier = modifier,
+                      beginHunt = beginHunt,
+                      buttonFunctionEdit = buttonFunctionEdit,
+                      buttonText = buttonText,
+                  )
+                }
+          }
+    }
+
+    item {
+      Text(
+          HuntCardScreenStrings.Reviews,
+          fontSize = MaterialTheme.typography.headlineSmall.fontSize,
+          fontWeight = FontWeight.Bold,
+          textAlign = TextAlign.Center,
+          modifier =
+              Modifier.fillMaxWidth()
+                  .padding(
+                      top = HuntCardScreenDefaults.ReviewCardPadding,
+                      bottom = HuntCardScreenDefaults.ReviewCardVerticalPadding))
+    }
+
+    if (reviews == null || reviews.isEmpty()) {
+      item {
+        Text(
+            HuntCardScreenStrings.NoReviews,
+            fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+            fontWeight = FontWeight.Normal,
+            textAlign = TextAlign.Center,
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(
+                        top = HuntCardScreenDefaults.NoReviewPadding,
+                        bottom = HuntCardScreenDefaults.NoReviewPadding))
+      }
+    } else {
+      items(reviews) { review ->
+        ReviewCard(review, reviewViewModel, huntCardViewModel, currentUserId)
+      }
+    }
+  }
+}
+
+@Composable
+private fun HuntStartMap(hunt: Hunt) {
+  var mapLoaded by remember { mutableStateOf(true) }
+
+  if (!mapLoaded) return
+
+  val startPosition = LatLng(hunt.start.latitude, hunt.start.longitude)
+  val cameraPositionState = rememberCameraPositionState {
+    position = CameraPosition.fromLatLngZoom(startPosition, HuntCardScreenDefaults.MapZoom)
+  }
+
+  Box(
+      modifier =
+          Modifier.fillMaxWidth()
+              .height(HuntCardScreenDefaults.MapHeight)
+              .padding(HuntCardScreenDefaults.MapPadding)
+              .testTag(HuntCardScreenTestTags.MAP_CONTAINER)) {
+        GoogleMap(
+            modifier = Modifier.matchParentSize(), cameraPositionState = cameraPositionState) {
+              Marker(
+                  state = MarkerState(position = startPosition),
+                  title = "${HuntCardScreenStrings.ReviewMarkerTitlePrefix} ${hunt.start.name}",
+                  snippet = HuntCardScreenStrings.ReviewHint)
+            }
+      }
+}
+
+@Composable
+private fun HuntActionsRow(
+    modifier: Modifier,
+    beginHunt: () -> Unit,
+    buttonFunctionEdit: () -> Unit,
+    buttonText: String,
+) {
+  Row(
+      modifier = modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.SpaceEvenly,
+  ) {
+    Button(
+        beginHunt,
+        modifier =
+            modifier
+                .defaultMinSize(minWidth = HuntCardScreenDefaults.ButtonWidth)
+                .wrapContentWidth()
+                .testTag(HuntCardScreenTestTags.BEGIN_BUTTON)) {
+          Text(HuntCardScreenStrings.BeginHunt)
+        }
+    Button(
+        buttonFunctionEdit,
+        modifier =
+            modifier
+                .defaultMinSize(minWidth = HuntCardScreenDefaults.ButtonWidth)
+                .wrapContentWidth()
+                .testTag(HuntCardScreenTestTags.REVIEW_BUTTON)) {
+          Text(buttonText, Modifier.padding(HuntCardScreenDefaults.InfoTextPadding))
+        }
+  }
 }
 
 @Composable
@@ -359,7 +428,7 @@ fun ReviewCard(
 
 @Composable
 fun HuntHeaderSection(
-    hunt: com.swentseekr.seekr.model.hunt.Hunt,
+    hunt: Hunt,
     authorName: String,
     huntId: String,
     huntCardViewModel: HuntCardViewModel,
@@ -380,7 +449,6 @@ fun HuntHeaderSection(
                       .testTag(HuntCardScreenTestTags.TITLE_TEXT),
           )
 
-          // Like button next to the title – this is what your test clicks
           LikeButton(
               huntCardViewModel = huntCardViewModel,
               huntId = huntId,
@@ -400,7 +468,6 @@ fun HuntHeaderSection(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth(),
         ) {
-          // IMAGE CAROUSEL (keep your new design)
           HuntImageCarousel(
               hunt = hunt,
               modifier =
@@ -408,7 +475,6 @@ fun HuntHeaderSection(
                       .padding(end = HuntCardScreenDefaults.ImageCarouselPadding),
           )
 
-          // STATS
           Column(
               modifier = Modifier.weight(HuntCardScreenDefaults.StatsColumnWeight),
               horizontalAlignment = Alignment.CenterHorizontally,
