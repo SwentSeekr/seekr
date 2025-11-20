@@ -221,11 +221,13 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
 
       if (showStopHuntDialog) {
         AlertDialog(
+            modifier = Modifier.testTag(MapScreenTestTags.STOP_POPUP),
             onDismissRequest = { showStopHuntDialog = false },
             title = { Text(MapScreenStrings.StopHuntTitle) },
             text = { Text(MapScreenStrings.StopHuntMessage) },
             confirmButton = {
               TextButton(
+                  modifier = Modifier.testTag(MapScreenTestTags.CONFIRM),
                   onClick = {
                     showStopHuntDialog = false
                     viewModel.onBackToAllHunts()

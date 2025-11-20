@@ -202,4 +202,54 @@ class MapTest {
         .onNodeWithTag(MapScreenTestTags.PROGRESS)
         .assertTextContains("0 / 2", substring = true)
   }
+
+  @Test
+  fun stopHuntButtonShowsConfirmationDialog() {
+    val h = hunt("1")
+    val vm = MapViewModel(repository = repo(h))
+    composeRule.setContent { MapScreen(viewModel = vm) }
+    composeRule.runOnIdle { vm.onMarkerClick(h) }
+
+    composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_VIEW).performClick()
+    composeRule.onNodeWithTag(MapScreenTestTags.START).performClick()
+
+    composeRule
+        .onNodeWithTag(MapScreenTestTags.BUTTON_BACK)
+        .assertIsDisplayed()
+        .assertTextContains(MapScreenStrings.StopHunt)
+
+    composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_BACK).performClick()
+
+    composeRule.onNodeWithTag(MapScreenTestTags.STOP_POPUP).assertIsDisplayed()
+    composeRule.onNodeWithTag(MapScreenTestTags.CONFIRM).assertIsDisplayed()
+    composeRule
+        .onNodeWithTag(MapScreenTestTags.CONFIRM)
+        .assertTextContains(MapScreenStrings.ConfirmStopHunt)
+  }
+
+  @Test
+  fun confirmingStopHuntResetsStateToInitial() {
+    val h = hunt("1")
+    val vm = MapViewModel(repository = repo(h))
+    composeRule.setContent { MapScreen(viewModel = vm) }
+
+    composeRule.runOnIdle { vm.onMarkerClick(h) }
+    composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_VIEW).performClick()
+
+    composeRule.onNodeWithTag(MapScreenTestTags.START).performClick()
+    composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_BACK).performClick()
+    composeRule.onNodeWithTag(MapScreenTestTags.CONFIRM).performClick()
+
+    composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_BACK).assertDoesNotExist()
+    composeRule.onNodeWithTag(MapScreenTestTags.POPUP_CARD).assertDoesNotExist()
+    composeRule.onNodeWithTag(MapScreenTestTags.GOOGLE_MAP_SCREEN).assertIsDisplayed()
+
+    composeRule.runOnIdle {
+      val state = vm.uiState.value
+      assert(!state.isFocused)
+      assert(!state.isHuntStarted)
+      assert(state.validatedCount == 0)
+      assert(state.selectedHunt == null)
+    }
+  }
 }

@@ -68,4 +68,6 @@ object MapScreenTestTags {
   const val PROGRESS = "progress"
   const val VALIDATE = "validate"
   const val FINISH = "finish"
+  const val STOP_POPUP = "stopPopup"
+  const val CONFIRM = "confirm"
 }
