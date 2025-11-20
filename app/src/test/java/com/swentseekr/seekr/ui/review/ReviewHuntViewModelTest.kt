@@ -162,6 +162,55 @@ class ReviewHuntViewModelTest {
     // Check that it was removed
     assertFalse(viewModel.uiState.value.photos.contains(photo))
   }
+  /*
+  @Test
+  fun addPhoto_addsPhotoToList() = runTest {
+    val fakeUserId = "user123"
+    val inputPhoto = "somepath/image.jpg"
+
+    viewModel.addPhoto(inputPhoto, fakeUserId)
+    advanceUntilIdle()
+
+    val photos = viewModel.uiState.value.photos
+
+    assertEquals(1, photos.size)
+    assertTrue(photos.first().startsWith("local://review_image/user123"))
+  }
+
+   */
+
+  @Test
+  fun removePhoto_updatesUiState() = runTest {
+    val photo = "photo_to_remove.jpg"
+
+    // Put a photo in the UI state manually
+    viewModel.uiState.value.copy(photos = listOf(photo))
+
+    // Call removePhoto
+    viewModel.removePhoto(photo)
+
+    // Let coroutine finish
+    testScheduler.advanceUntilIdle()
+
+    // The photo should be removed
+    assertFalse(viewModel.uiState.value.photos.contains(photo))
+
+    // No error should be set
+    assertNull(viewModel.uiState.value.errorMsg)
+  }
+
+  @Test
+  fun removePhoto_removesFromList1() = runTest {
+    val photo = "photo_to_remove.jpg"
+
+    // Correct: assign updated state
+    viewModel.setPhotosForTest(listOf(photo))
+
+    viewModel.removePhoto(photo)
+    advanceUntilIdle()
+
+    assertFalse(viewModel.uiState.value.photos.contains(photo))
+  }
 
   @Test
   fun submitReviewHunt_withInvalidData_setsError() = runTest {

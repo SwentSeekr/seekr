@@ -18,6 +18,8 @@ import com.swentseekr.seekr.model.hunt.ReviewImageRepositoryProvider
 import com.swentseekr.seekr.model.profile.ProfileRepository
 import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
 import com.swentseekr.seekr.ui.profile.Profile
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,7 +48,8 @@ open class ReviewHuntViewModel(
     private val repositoryHunt: HuntsRepository = HuntRepositoryProvider.repository,
     private val repositoryReview: HuntReviewRepository = HuntReviewRepositoryProvider.repository,
     private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository,
-    private val imageRepository: IReviewImageRepository = ReviewImageRepositoryProvider.repository
+    val imageRepository: IReviewImageRepository = ReviewImageRepositoryProvider.repository,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(ReviewHuntUIState())
@@ -58,6 +61,10 @@ open class ReviewHuntViewModel(
   /** Sets an error message in the UI state. */
   fun setErrorMsg(error: String) {
     _uiState.value = _uiState.value.copy(errorMsg = error)
+  }
+
+  fun setPhotosForTest(list: List<String>) {
+    _uiState.value = _uiState.value.copy(photos = list)
   }
 
   /** Loads a hunt by its ID and updates the UI state. */
@@ -175,7 +182,7 @@ open class ReviewHuntViewModel(
     val uid = userId ?: FirebaseAuth.getInstance().currentUser?.uid ?: return
     val uri = Uri.parse(myPhoto)
 
-    viewModelScope.launch {
+    viewModelScope.launch(dispatcher) {
       try {
         val downloadUrl = imageRepository.uploadReviewPhoto(uid, uri)
         val updated = _uiState.value.photos + downloadUrl
