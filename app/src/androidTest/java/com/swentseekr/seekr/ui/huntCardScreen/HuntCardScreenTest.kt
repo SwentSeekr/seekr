@@ -2,8 +2,6 @@ package com.swentseekr.seekr.ui.huntCardScreen
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -18,9 +16,6 @@ import junit.framework.TestCase.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import com.swentseekr.seekr.ui.huntCardScreen.FakeHuntCardViewModel
-import com.swentseekr.seekr.ui.huntCardScreen.HuntCardScreenConstantNumbers
-import com.swentseekr.seekr.ui.huntCardScreen.HuntCardScreenConstantStrings
 
 @RunWith(AndroidJUnit4::class)
 class HuntCardScreenTest {
