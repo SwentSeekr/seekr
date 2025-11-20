@@ -11,27 +11,22 @@ import org.junit.Test
 
 class OfflineRequiredScreenTest {
 
-    @get:Rule
-    val composeRule = createAndroidComposeRule<ComponentActivity>()
+  @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()
 
-    @Test
-    fun offlineRequiredScreen_displaysAllTexts_andInvokesCallbackOnClick() {
-        var callbackInvoked = false
+  @Test
+  fun offlineRequiredScreen_displaysAllTexts_andInvokesCallbackOnClick() {
+    var callbackInvoked = false
 
-        composeRule.setContent {
-            MaterialTheme {
-                OfflineRequiredScreen(
-                    onOpenSettings = { callbackInvoked = true }
-                )
-            }
-        }
-
-        composeRule.onNodeWithText(OfflineConstants.OFFLINE_TITLE).assertExists()
-        composeRule.onNodeWithText(OfflineConstants.OFFLINE_MESSAGE).assertExists()
-        composeRule.onNodeWithText(OfflineConstants.OPEN_SETTINGS_BUTTON).assertExists()
-
-        composeRule.onNodeWithText(OfflineConstants.OPEN_SETTINGS_BUTTON).performClick()
-
-        assertTrue(callbackInvoked)
+    composeRule.setContent {
+      MaterialTheme { OfflineRequiredScreen(onOpenSettings = { callbackInvoked = true }) }
     }
+
+    composeRule.onNodeWithText(OfflineConstants.OFFLINE_TITLE).assertExists()
+    composeRule.onNodeWithText(OfflineConstants.OFFLINE_MESSAGE).assertExists()
+    composeRule.onNodeWithText(OfflineConstants.OPEN_SETTINGS_BUTTON).assertExists()
+
+    composeRule.onNodeWithText(OfflineConstants.OPEN_SETTINGS_BUTTON).performClick()
+
+    assertTrue(callbackInvoked)
+  }
 }
