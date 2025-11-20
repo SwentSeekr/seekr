@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.profile
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -13,6 +14,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+
+const val LOGIN_USER_ERROR = "User not logged in"
 
 /** Represents the UI state for the Profile screen. */
 data class ProfileUIState(
@@ -60,7 +63,7 @@ class ProfileViewModel(
           val reviews = HuntReviewRepositoryProvider.repository.getHuntReviews(hunt.uid)
           total += reviews.size
         } catch (e: Exception) {
-          // updateUiState { it.copy(errorMsg = "Failed to load reviews for hunt ${hunt.uid}") }
+          Log.e("ProfileViewModel", "Failed to load reviews for hunt ${hunt.uid}", e)
         }
       }
       _totalReviews.value = total
@@ -70,7 +73,7 @@ class ProfileViewModel(
   fun loadProfile(userId: String? = null) {
     val uidToLoad = userId ?: currentUid
     if (uidToLoad == null) {
-      updateUiState { it.copy(errorMsg = "User not logged in") }
+      updateUiState { it.copy(errorMsg = LOGIN_USER_ERROR) }
       return
     }
     viewModelScope.launch {
@@ -154,7 +157,7 @@ class ProfileViewModel(
     viewModelScope.launch {
       val uid = currentUid
       if (uid == null) {
-        updateUiState { it.copy(errorMsg = "User not logged in") }
+        updateUiState { it.copy(errorMsg = LOGIN_USER_ERROR) }
         return@launch
       }
 
@@ -162,7 +165,7 @@ class ProfileViewModel(
         repository.updateProfile(profile.copy(uid = uid))
         loadProfile(uid)
       } catch (e: Exception) {
-        updateUiState { it.copy(errorMsg = "User not logged in") }
+        updateUiState { it.copy(errorMsg = LOGIN_USER_ERROR) }
       }
     }
   }

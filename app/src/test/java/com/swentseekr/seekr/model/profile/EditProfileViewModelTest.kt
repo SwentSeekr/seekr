@@ -1,9 +1,13 @@
 package com.swentseekr.seekr.ui.profile
 
+import android.net.Uri
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.profile.ProfileRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -16,7 +20,6 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class EditProfileViewModelTest {
-
   companion object {
     private const val TEST_USER_ID = "user123"
     private const val OLD_PSEUDONYM = "Old Name"
@@ -27,26 +30,37 @@ class EditProfileViewModelTest {
     private const val PROFILE_PICTURE_NEW = 123
     private const val REVIEW_RATE = 5.0
     private const val SPORT_RATE = 4.0
-    private const val MAX_PSEUDONYM_LENGTH = 30
-    private const val MAX_BIO_LENGTH = 200
+    private const val OLD_URL = "https://old.url/image.jpg"
+    private const val NEW_URL = "https://new.url/image.jpg"
   }
 
-  private val test_dispatcher = StandardTestDispatcher()
+  private val testDispatcher = StandardTestDispatcher()
   private lateinit var repository: ProfileRepository
-  private lateinit var view_model: EditProfileViewModel
+  private lateinit var auth: FirebaseAuth
+  private lateinit var mockUser: FirebaseUser
+  private lateinit var viewModel: EditProfileViewModel
 
   private val dummy_profile =
       Profile(
           uid = TEST_USER_ID,
           author =
               Author(
-                  pseudonym = OLD_PSEUDONYM, bio = OLD_BIO, profilePicture = PROFILE_PICTURE_OLD))
+                  pseudonym = OLD_PSEUDONYM,
+                  bio = OLD_BIO,
+                  profilePicture = PROFILE_PICTURE_OLD,
+                  profilePictureUrl = OLD_URL))
 
   @Before
   fun setup_test() {
-    Dispatchers.setMain(test_dispatcher)
+    Dispatchers.setMain(testDispatcher)
     repository = mockk()
-    view_model = EditProfileViewModel(repository)
+    auth = mockk()
+    mockUser = mockk()
+
+    every { auth.currentUser } returns mockUser
+    every { mockUser.uid } returns TEST_USER_ID
+
+    viewModel = EditProfileViewModel(repository, auth)
   }
 
   @After
@@ -54,12 +68,59 @@ class EditProfileViewModelTest {
     Dispatchers.resetMain()
   }
 
+  private fun mockProfile(profile: Profile = dummy_profile) {
+    coEvery { repository.getProfile(TEST_USER_ID) } returns profile
+  }
+
+  private fun loadProfile(profile: Profile? = dummy_profile, throwException: Exception? = null) {
+    when {
+      throwException != null ->
+          coEvery { repository.getProfile(TEST_USER_ID) } throws throwException
+      profile != null -> coEvery { repository.getProfile(TEST_USER_ID) } returns profile
+      profile == null ->
+          coEvery { repository.getProfile(TEST_USER_ID) } returns null // <--- add this
+    }
+    viewModel.loadProfile()
+    testDispatcher.scheduler.advanceUntilIdle()
+  }
+
+  private fun updatePseudonym(name: String) {
+    viewModel.updatePseudonym(name)
+  }
+
+  private fun updateBio(bio: String) {
+    viewModel.updateBio(bio)
+  }
+
+  private fun updateProfilePicture(pic: Int) {
+    viewModel.updateProfilePicture(pic)
+  }
+
+  private fun updateProfilePictureUri(uri: Uri?) {
+    viewModel.updateProfilePictureUri(uri)
+  }
+
+  private fun saveProfile() {
+    viewModel.saveProfile()
+    testDispatcher.scheduler.advanceUntilIdle()
+  }
+
+  private fun cancelChanges() {
+    viewModel.cancelChanges()
+  }
+
+  private suspend fun getState() = viewModel.uiState.first()
+
+  @Test
+  fun viewModel_startsWithLoadingTrue() = runTest {
+    val state = getState()
+    assertTrue(state.isLoading)
+  }
+
   @Test
   fun load_profile_successfully_sets_ui_state() = runTest {
-    coEvery { repository.getProfile(TEST_USER_ID) } returns dummy_profile
-    view_model.loadProfile(TEST_USER_ID)
-    test_dispatcher.scheduler.advanceUntilIdle()
-    val state = view_model.uiState.first()
+    loadProfile()
+    val state = getState()
     assertEquals(OLD_PSEUDONYM, state.pseudonym)
     assertEquals(OLD_BIO, state.bio)
     assertEquals(PROFILE_PICTURE_OLD, state.profilePicture)
@@ -70,21 +131,46 @@ class EditProfileViewModelTest {
   }
 
   @Test
-  fun load_profile_missing_profile_sets_error_msg() = runTest {
+  fun loadProfile_exception_setsErrorMsg() = runTest {
+    loadProfile(throwException = Exception("Network error"))
+    val state = getState()
+    assertEquals("Network error", state.errorMsg)
+    assertFalse(state.isLoading)
+  }
+
+  @Test
+  fun loadProfile_missingProfile_setsErrorMsg() = runTest {
+    loadProfile(profile = null)
+    val state = getState()
+    assertEquals("Profile not found", state.errorMsg)
+    assertFalse(state.isLoading)
+  }
+
+  @Test
+  fun saveProfile_missingProfile_setsError() = runTest {
     coEvery { repository.getProfile(TEST_USER_ID) } returns null
-    view_model.loadProfile(TEST_USER_ID)
-    test_dispatcher.scheduler.advanceUntilIdle()
-    val state = view_model.uiState.first()
+
+    updatePseudonym(NEW_PSEUDONYM)
+    saveProfile()
+    val state = getState()
+    assertFalse(state.success)
     assertEquals("Profile not found", state.errorMsg)
   }
 
   @Test
+  fun loadProfile_noCurrentUser_doesNothing() = runTest {
+    every { auth.currentUser } returns null
+    viewModel.loadProfile()
+    testDispatcher.scheduler.advanceUntilIdle()
+    val state = getState()
+    assertTrue(state.isLoading)
+  }
+
+  @Test
   fun update_pseudonym_updates_flags() = runTest {
-    view_model.loadProfile(TEST_USER_ID)
-    coEvery { repository.getProfile(TEST_USER_ID) } returns dummy_profile
-    test_dispatcher.scheduler.advanceUntilIdle()
-    view_model.updatePseudonym(NEW_PSEUDONYM)
-    val state = view_model.uiState.first()
+    loadProfile()
+    updatePseudonym(NEW_PSEUDONYM)
+    val state = getState()
     assertEquals(NEW_PSEUDONYM, state.pseudonym)
     assertTrue(state.hasChanges)
     assertTrue(state.canSave)
@@ -92,11 +178,9 @@ class EditProfileViewModelTest {
 
   @Test
   fun update_bio_updates_flags() = runTest {
-    view_model.loadProfile(TEST_USER_ID)
-    coEvery { repository.getProfile(TEST_USER_ID) } returns dummy_profile
-    test_dispatcher.scheduler.advanceUntilIdle()
-    view_model.updateBio(VALID_BIO)
-    val state = view_model.uiState.first()
+    loadProfile()
+    updateBio(VALID_BIO)
+    val state = getState()
     assertEquals(VALID_BIO, state.bio)
     assertTrue(state.hasChanges)
     assertTrue(state.canSave)
@@ -104,24 +188,39 @@ class EditProfileViewModelTest {
 
   @Test
   fun update_profile_picture_updates_flags() = runTest {
-    view_model.loadProfile(TEST_USER_ID)
-    coEvery { repository.getProfile(TEST_USER_ID) } returns dummy_profile
-    test_dispatcher.scheduler.advanceUntilIdle()
-    view_model.updateProfilePicture(PROFILE_PICTURE_NEW)
-    val state = view_model.uiState.first()
+    loadProfile()
+    updateProfilePicture(PROFILE_PICTURE_NEW)
+    val state = getState()
     assertEquals(PROFILE_PICTURE_NEW, state.profilePicture)
     assertTrue(state.hasChanges)
     assertTrue(state.canSave)
   }
 
   @Test
+  fun updateProfilePictureUri_updatesFlags() = runTest {
+    val testUri = mockk<Uri>()
+    loadProfile()
+    updateProfilePictureUri(testUri)
+    val state = getState()
+    assertEquals(testUri, state.profilePictureUri)
+    assertTrue(state.hasChanges)
+    assertTrue(state.canSave)
+  }
+
+  @Test
+  fun updateProfilePictureUri_null_updatesFlags() = runTest {
+    loadProfile()
+    updateProfilePictureUri(null)
+    val state = getState()
+    assertNull(state.profilePictureUri)
+  }
+
+  @Test
   fun cancel_changes_reverts_to_last_saved() = runTest {
-    coEvery { repository.getProfile(TEST_USER_ID) } returns dummy_profile
-    view_model.loadProfile(TEST_USER_ID)
-    test_dispatcher.scheduler.advanceUntilIdle()
-    view_model.updatePseudonym(NEW_PSEUDONYM)
-    view_model.cancelChanges()
-    val state = view_model.uiState.first()
+    loadProfile()
+    updatePseudonym(NEW_PSEUDONYM)
+    cancelChanges()
+    val state = getState()
     assertEquals(OLD_PSEUDONYM, state.pseudonym)
     assertFalse(state.hasChanges)
     assertFalse(state.canSave)
@@ -129,55 +228,33 @@ class EditProfileViewModelTest {
 
   @Test
   fun save_profile_success_sets_success_flag() = runTest {
-    coEvery { repository.getProfile(TEST_USER_ID) } returns dummy_profile
+    loadProfile()
+    updatePseudonym(NEW_PSEUDONYM)
     coEvery { repository.updateProfile(any()) } returns Unit
-    view_model.loadProfile(TEST_USER_ID)
-    test_dispatcher.scheduler.advanceUntilIdle()
-    view_model.updatePseudonym(NEW_PSEUDONYM)
-    view_model.saveProfile()
-    test_dispatcher.scheduler.advanceUntilIdle()
-    val state = view_model.uiState.first()
+    saveProfile()
+    val state = getState()
     assertTrue(state.success)
     assertFalse(state.isSaving)
     coVerify { repository.updateProfile(match { it.author.pseudonym == NEW_PSEUDONYM }) }
   }
 
   @Test
-  fun save_profile_missing_profile_sets_error() = runTest {
-    coEvery { repository.getProfile(TEST_USER_ID) } returns null
-    view_model.loadProfile(TEST_USER_ID)
-    test_dispatcher.scheduler.advanceUntilIdle()
-    view_model.updatePseudonym(NEW_PSEUDONYM)
-    view_model.saveProfile()
-    test_dispatcher.scheduler.advanceUntilIdle()
-    val state = view_model.uiState.first()
-    assertFalse(state.success)
-    assertEquals("Profile not found", state.errorMsg)
-  }
-
-  @Test
   fun save_profile_repository_exception_sets_error() = runTest {
-    coEvery { repository.getProfile(TEST_USER_ID) } returns dummy_profile
+    loadProfile()
+    updatePseudonym(NEW_PSEUDONYM)
     coEvery { repository.updateProfile(any()) } throws Exception("Firestore error")
-    view_model.loadProfile(TEST_USER_ID)
-    test_dispatcher.scheduler.advanceUntilIdle()
-    view_model.updatePseudonym(NEW_PSEUDONYM)
-    view_model.saveProfile()
-    test_dispatcher.scheduler.advanceUntilIdle()
-    val state = view_model.uiState.first()
+    saveProfile()
+    val state = getState()
     assertFalse(state.success)
     assertEquals("Firestore error", state.errorMsg)
   }
 
   @Test
   fun save_profile_with_invalid_pseudonym_does_not_save() = runTest {
-    coEvery { repository.getProfile(TEST_USER_ID) } returns dummy_profile
-    view_model.loadProfile(TEST_USER_ID)
-    test_dispatcher.scheduler.advanceUntilIdle()
-    view_model.updatePseudonym("")
-    view_model.saveProfile()
-    test_dispatcher.scheduler.advanceUntilIdle()
-    val state = view_model.uiState.first()
+    loadProfile()
+    updatePseudonym("")
+    saveProfile()
+    val state = getState()
     assertFalse(state.canSave)
     coVerify(exactly = 0) { repository.updateProfile(any()) }
   }
@@ -190,17 +267,10 @@ class EditProfileViewModelTest {
             myHunts = mutableListOf(mockk()),
             doneHunts = mutableListOf(mockk()),
             likedHunts = mutableListOf(mockk()))
-
-    coEvery { repository.getProfile(TEST_USER_ID) } returns fullProfile
+    loadProfile(fullProfile)
+    updatePseudonym(NEW_PSEUDONYM)
     coEvery { repository.updateProfile(any()) } returns Unit
-
-    view_model.loadProfile(TEST_USER_ID)
-    test_dispatcher.scheduler.advanceUntilIdle()
-
-    view_model.updatePseudonym(NEW_PSEUDONYM)
-    view_model.saveProfile()
-    test_dispatcher.scheduler.advanceUntilIdle()
-
+    saveProfile()
     coVerify {
       repository.updateProfile(
           match {
@@ -216,48 +286,150 @@ class EditProfileViewModelTest {
 
   @Test
   fun pseudonym_blank_disables_canSave() = runTest {
-    coEvery { repository.getProfile("user123") } returns dummy_profile
-    view_model.loadProfile("user123")
-    test_dispatcher.scheduler.advanceUntilIdle()
-
-    view_model.updatePseudonym("")
-    val state = view_model.uiState.first()
+    loadProfile()
+    updatePseudonym("")
+    val state = getState()
     assertFalse(state.canSave)
   }
 
   @Test
   fun pseudonym_too_long_disables_canSave() = runTest {
-    coEvery { repository.getProfile(TEST_USER_ID) } returns dummy_profile
-    view_model.loadProfile(TEST_USER_ID)
-    test_dispatcher.scheduler.advanceUntilIdle()
-
-    val longName = "a".repeat(31)
-    view_model.updatePseudonym(longName)
-    val state = view_model.uiState.first()
+    loadProfile()
+    updatePseudonym("a".repeat(31))
+    val state = getState()
     assertFalse(state.canSave)
   }
 
   @Test
   fun bio_too_long_disables_canSave() = runTest {
-    coEvery { repository.getProfile(TEST_USER_ID) } returns dummy_profile
-    view_model.loadProfile(TEST_USER_ID)
-    test_dispatcher.scheduler.advanceUntilIdle()
-
-    val longBio = "b".repeat(201)
-    view_model.updateBio(longBio)
-    val state = view_model.uiState.first()
+    loadProfile()
+    updateBio("b".repeat(201))
+    val state = getState()
     assertFalse(state.canSave)
   }
 
   @Test
   fun valid_pseudonym_and_bio_enables_canSave() = runTest {
-    coEvery { repository.getProfile(TEST_USER_ID) } returns dummy_profile
-    view_model.loadProfile(TEST_USER_ID)
-    test_dispatcher.scheduler.advanceUntilIdle()
-
-    view_model.updatePseudonym(NEW_PSEUDONYM)
-    view_model.updateBio(VALID_BIO)
-    val state = view_model.uiState.first()
+    loadProfile()
+    updatePseudonym(NEW_PSEUDONYM)
+    updateBio(VALID_BIO)
+    val state = getState()
     assertTrue(state.canSave)
+  }
+
+  @Test
+  fun removeProfilePicture_clearsAllPictureFields() = runTest {
+    val profileWithPicture =
+        dummy_profile.copy(
+            author =
+                dummy_profile.author.copy(
+                    profilePicture = 5, profilePictureUrl = "https://example.com/pic.jpg"))
+    loadProfile(profileWithPicture)
+    viewModel.removeProfilePicture()
+    val state = getState()
+    assertEquals(0, state.profilePicture)
+    assertEquals("", state.profilePictureUrl)
+    assertNull(state.profilePictureUri)
+    assertTrue(state.hasChanges)
+    assertTrue(state.canSave)
+  }
+
+  @Test
+  fun multipleUpdates_maintainsCorrectState() = runTest {
+    loadProfile()
+    updatePseudonym("First")
+    updatePseudonym("Second")
+    updateBio("Bio1")
+    updateBio("Bio2")
+    val state = getState()
+    assertEquals("Second", state.pseudonym)
+    assertEquals("Bio2", state.bio)
+    assertTrue(state.hasChanges)
+    assertTrue(state.canSave)
+  }
+
+  @Test
+  fun saveProfile_noCurrentUser_setsError() = runTest {
+    every { auth.currentUser } returns null
+    saveProfile()
+    val state = getState()
+    assertFalse(state.success)
+    assertEquals("User not loaded", state.errorMsg)
+  }
+
+  @Test
+  fun saveProfile_cannotSave_doesNothing() = runTest {
+    loadProfile()
+    saveProfile()
+    coVerify(exactly = 0) { repository.updateProfile(any()) }
+  }
+
+  @Test
+  fun saveProfile_repositoryException_setsError() = runTest {
+    loadProfile()
+    coEvery { repository.updateProfile(any()) } throws Exception("Firestore error")
+    updatePseudonym(NEW_PSEUDONYM)
+    saveProfile()
+    val state = getState()
+    assertFalse(state.success)
+    assertEquals("Firestore error", state.errorMsg)
+  }
+
+  @Test
+  fun saveProfile_preservesRatingsAndHunts() = runTest {
+    val fullProfile =
+        dummy_profile.copy(
+            author = dummy_profile.author.copy(reviewRate = 5.0, sportRate = 4.0),
+            myHunts = mutableListOf(mockk()),
+            doneHunts = mutableListOf(mockk()),
+            likedHunts = mutableListOf(mockk()))
+    loadProfile(fullProfile)
+    coEvery { repository.updateProfile(any()) } returns Unit
+    updatePseudonym(NEW_PSEUDONYM)
+    saveProfile()
+    coVerify {
+      repository.updateProfile(
+          match {
+            it.author.pseudonym == NEW_PSEUDONYM &&
+                it.author.reviewRate == 5.0 &&
+                it.author.sportRate == 4.0 &&
+                it.myHunts.size == 1 &&
+                it.doneHunts.size == 1 &&
+                it.likedHunts.size == 1
+          })
+    }
+  }
+
+  @Test
+  fun saveProfile_emptyUrlAndPicture_clearsProfilePicture() = runTest {
+    loadProfile()
+    coEvery { repository.updateProfile(any()) } returns Unit
+    viewModel.removeProfilePicture()
+    updatePseudonym(NEW_PSEUDONYM)
+    saveProfile()
+    coVerify { repository.updateProfile(match { it.author.profilePictureUrl == "" }) }
+  }
+
+  @Test
+  fun saveProfile_withNewUri_savesUrlToFirestore() = runTest {
+    val testUri = mockk<Uri>()
+    loadProfile()
+    coEvery { repository.uploadProfilePicture(TEST_USER_ID, testUri) } returns NEW_URL
+    coEvery { repository.updateProfile(any()) } returns Unit
+    updateProfilePictureUri(testUri)
+    saveProfile()
+
+    coVerify { repository.updateProfile(match { it.author.profilePictureUrl == NEW_URL }) }
+  }
+
+  @Test
+  fun multipleUriUpdates_onlyLastOneUsed() = runTest {
+    val uri1 = mockk<Uri>(name = "uri1")
+    val uri2 = mockk<Uri>(name = "uri2")
+    loadProfile()
+    updateProfilePictureUri(uri1)
+    updateProfilePictureUri(uri2)
+    val state = getState()
+    assertEquals(uri2, state.profilePictureUri)
   }
 }

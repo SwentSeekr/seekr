@@ -1,9 +1,11 @@
 package com.swentseekr.seekr.model.profile
 
+import android.net.Uri
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
@@ -16,7 +18,8 @@ import kotlinx.coroutines.tasks.await
 class ProfileRepositoryFirestore(
     private val db: FirebaseFirestore,
     private val auth: FirebaseAuth,
-    private val huntsRepository: HuntsRepositoryFirestore = HuntsRepositoryFirestore(db)
+    private val huntsRepository: HuntsRepositoryFirestore = HuntsRepositoryFirestore(db),
+    private val storage: FirebaseStorage
 ) : ProfileRepository {
 
   companion object {
@@ -171,7 +174,8 @@ class ProfileRepositoryFirestore(
                     ProfileRepositoryFirestoreConstants.DEFAULT_USER_BIO,
                     ProfileRepositoryFirestoreConstants.DEFAULT_PROFILE_PICTURE,
                     ProfileRepositoryFirestoreConstants.DEFAULT_REVIEW_RATE,
-                    ProfileRepositoryFirestoreConstants.DEFAULT_SPORT_RATE),
+                    ProfileRepositoryFirestoreConstants.DEFAULT_SPORT_RATE,
+                    profilePictureUrl = ""),
             myHunts = mutableListOf(),
             doneHunts = mutableListOf(),
             likedHunts = mutableListOf())
@@ -184,7 +188,17 @@ class ProfileRepositoryFirestore(
     Log.i(
         ProfileRepositoryFirestoreConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
         "Writing profile for UID=${currentUser.uid}")
-    profilesCollection.document(currentUser.uid).set(profile).await()
+    val userDocRef = profilesCollection.document(currentUser.uid)
+    userDocRef
+        .update(
+            mapOf(
+                "author.pseudonym" to profile.author.pseudonym,
+                "author.bio" to profile.author.bio,
+                "author.profilePicture" to profile.author.profilePicture,
+                "author.profilePictureUrl" to profile.author.profilePictureUrl,
+                "author.reviewRate" to profile.author.reviewRate,
+                "author.sportRate" to profile.author.sportRate))
+        .await()
   }
 
   override suspend fun getMyHunts(userId: String): List<Hunt> {
@@ -194,6 +208,21 @@ class ProfileRepositoryFirestore(
             .get()
             .await()
     return snapshot.documents.mapNotNull { documentToHunt(it) }
+  }
+
+  override suspend fun uploadProfilePicture(userId: String, uri: Uri): String {
+    val storageRef = storage.reference.child("profilePictures/$userId.jpg")
+    val docRef = db.collection("profiles").document(userId)
+
+    return try {
+      storageRef.putFile(uri).await()
+      val url = storageRef.downloadUrl.await().toString()
+      docRef.update("author.profilePictureUrl", url).await()
+      url
+    } catch (e: Exception) {
+      Log.e("UploadProfilePicture", "Failed to upload or update profile picture", e)
+      throw e
+    }
   }
 
   override suspend fun getDoneHunts(userId: String): List<Hunt> {
@@ -338,7 +367,8 @@ class ProfileRepositoryFirestore(
             bio = authorMap["bio"] as? String ?: "",
             profilePicture = (authorMap["profilePicture"] as? Long ?: 0L).toInt(),
             reviewRate = authorMap["reviewRate"] as? Double ?: 0.0,
-            sportRate = authorMap["sportRate"] as? Double ?: 0.0)
+            sportRate = authorMap["sportRate"] as? Double ?: 0.0,
+            profilePictureUrl = authorMap["profilePictureUrl"] as? String ?: "")
 
     // Fetch associated hunts only for this user
     val myHunts = huntsRepository.getAllHunts().filter { it.authorId == uid }.toMutableList()
