@@ -1,11 +1,10 @@
 package com.swentseekr.seekr.model.profile
 
 import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.MAX_BIO_LENGTH
+import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.MAX_PSEUDONYM_LENGTH
+import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.MIN_PSEUDONYM_LENGTH
 import com.swentseekr.seekr.ui.profile.Profile
-
-const val MIN_PSEUDONYM_LENGTH = 3
-const val MAX_PSEUDONYM_LENGTH = 20
-const val MAX_BIO_LENGTH = 150
 
 class ProfileUtils {
 

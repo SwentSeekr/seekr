@@ -241,7 +241,9 @@ fun ProfileScreen(
                                 horizontal = ProfileConstants.SIZE_SMALL,
                                 vertical = ProfileConstants.PADDING_ROW),
                     verticalAlignment = Alignment.CenterVertically) {
-                      ProfilePicture(profilePictureRes = profile.author.profilePicture)
+                      ProfilePicture(
+                          profilePictureRes = profile.author.profilePicture,
+                          profilePictureUrl = profile.author.profilePictureUrl)
                       Column(Modifier.weight(1f)) {
                         Text(
                             text = profile.author.pseudonym,

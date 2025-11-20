@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.model.profile
 
+import android.net.Uri
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.ui.profile.Profile
 
@@ -18,4 +19,6 @@ interface ProfileRepository {
   suspend fun getLikedHunts(userId: String): List<Hunt>
 
   suspend fun addDoneHunt(userId: String, hunt: Hunt)
+
+  suspend fun uploadProfilePicture(userId: String, uri: Uri): String
 }

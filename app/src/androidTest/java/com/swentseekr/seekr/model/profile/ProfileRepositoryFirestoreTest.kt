@@ -1,7 +1,9 @@
 package com.swentseekr.seekr.model.profile
 
+import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
@@ -23,6 +25,9 @@ import org.junit.Test
 class ProfileRepositoryFirestoreTest {
   private lateinit var repository: ProfileRepository
   private lateinit var auth: FirebaseAuth
+
+  private lateinit var db: FirebaseFirestore
+  private lateinit var storage: FirebaseStorage
   private val hunt =
       Hunt(
           uid = "hunt1",
@@ -48,9 +53,30 @@ class ProfileRepositoryFirestoreTest {
       }
       auth = FirebaseAuth.getInstance()
       auth.signInAnonymously().await()
+      db = FirebaseFirestore.getInstance()
+      storage = FirebaseStorage.getInstance()
 
       repository = ProfileRepositoryProvider.repository
     }
+  }
+
+  @Test
+  fun createProfile_successfully() = runTest {
+    val uid = auth.currentUser!!.uid
+    val profile =
+        Profile(
+            uid = uid,
+            author = Author("Tester", "This is a bio", 0, 4.5, 4.0),
+            myHunts = mutableListOf(),
+            doneHunts = mutableListOf(),
+            likedHunts = mutableListOf())
+
+    repository.createProfile(profile)
+
+    val retrieved = repository.getProfile(uid)
+    assertNotNull("Profile should be retrieved after creation", retrieved)
+    assertEquals(uid, retrieved?.uid)
+    assertEquals("Tester", retrieved?.author?.pseudonym)
   }
 
   @Test
@@ -170,13 +196,37 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
+  fun updateProfile_preservesProfilePictureUrl() = runTest {
+    val uid = auth.currentUser!!.uid
+    val profile =
+        Profile(
+            uid = uid,
+            author = Author("User", "Bio", 0, 4.0, 3.0, "https://old.url/pic.jpg"),
+            myHunts = mutableListOf(),
+            doneHunts = mutableListOf(),
+            likedHunts = mutableListOf())
+
+    repository.createProfile(profile)
+
+    val updated =
+        profile.copy(
+            author =
+                profile.author.copy(
+                    pseudonym = "NewName", profilePictureUrl = "https://new.url/pic.jpg"))
+    repository.updateProfile(updated)
+
+    val retrieved = repository.getProfile(uid)
+    assertEquals("https://new.url/pic.jpg", retrieved?.author?.profilePictureUrl)
+  }
+
+  @Test
   fun documentToProfile_returnsNull_whenDocumentMissingAuthor() = runTest {
     val uid = auth.currentUser!!.uid
     val db = FirebaseFirestore.getInstance()
     val docRef = db.collection("profiles").document(uid)
     docRef.set(mapOf("someField" to "no author")).await()
 
-    val repo = ProfileRepositoryFirestore(db, auth)
+    val repo = ProfileRepositoryFirestore(db, auth, storage = storage)
     val result = repo.getProfile(uid)
     assertNull("Profile should be null if author field is missing", result)
   }
@@ -204,7 +254,7 @@ class ProfileRepositoryFirestoreTest {
 
     huntsCol.document("hunt1").set(huntData).await()
 
-    val repo = ProfileRepositoryFirestore(db, auth)
+    val repo = ProfileRepositoryFirestore(db, auth, storage = storage)
     val hunts = repo.getMyHunts(uid)
 
     assertNotNull(hunts)
@@ -221,7 +271,7 @@ class ProfileRepositoryFirestoreTest {
     val docRef = db.collection("hunts").document("invalidHunt")
     docRef.set(mapOf("title" to null)).await()
 
-    val repo = ProfileRepositoryFirestore(db, auth)
+    val repo = ProfileRepositoryFirestore(db, auth, storage = storage)
     val result = repo.getDoneHunts(auth.currentUser!!.uid)
     assertNotNull(result)
   }
@@ -346,5 +396,11 @@ class ProfileRepositoryFirestoreTest {
     assertEquals(Difficulty.EASY, hunt?.difficulty)
     assertEquals(HuntStatus.FUN, hunt?.status)
     assertEquals("author1", hunt?.authorId)
+  }
+
+  @Test
+  fun uploadProfilePicture_updatesUrlInFirestore() = runTest {
+    val uid = auth.currentUser!!.uid
+    val testUri = Uri.parse("content://test/image.jpg")
   }
 }
