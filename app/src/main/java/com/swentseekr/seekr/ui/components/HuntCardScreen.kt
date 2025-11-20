@@ -160,6 +160,7 @@ private fun HuntCardScaffold(
             buttonText = buttonText,
             modifier = modifier,
             innerPadding = innerPadding,
+            beginHunt = beginHunt,
         )
       }
 }
