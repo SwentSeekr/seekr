@@ -43,30 +43,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
-import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.DifficultyColor
-import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import com.swentseekr.seekr.ui.profile.ProfilePicture
 import com.swentseekr.seekr.ui.theme.RedLike
-import kotlin.text.ifEmpty
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,7 +72,6 @@ fun HuntCardScreen(
     beginHunt: () -> Unit = {},
     addReview: () -> Unit = {},
     editHunt: () -> Unit = {},
-    testmode: Boolean = false,
 ) {
   val uiState by huntCardViewModel.uiState.collectAsState()
 
@@ -102,7 +94,7 @@ fun HuntCardScreen(
   val buttonText =
       if (isCurrentId) HuntCardScreenStrings.EditHunt else HuntCardScreenStrings.AddReview
 
-  val author = authorProfile?.author?.pseudonym ?: (HuntCardScreenStrings.UnknownAuthor)
+  val author = authorProfile?.author?.pseudonym ?: HuntCardScreenStrings.UnknownAuthor
 
   Scaffold(
       // BAR GOBACK ARROW
@@ -157,7 +149,15 @@ fun HuntCardScreen(
                         verticalArrangement =
                             Arrangement.spacedBy(HuntCardScreenDefaults.InfoColumnPadding)) {
                           // ROW WITH IMAGE, TITLE, AUTHOR, DIFFICULTY, DISTANCE, TIME
-                          HuntHeaderSection(hunt, author, huntId, huntCardViewModel)
+
+                          HuntHeaderSection(
+                              hunt = hunt,
+                              authorName = author,
+                              huntId = huntId,
+                              huntCardViewModel = huntCardViewModel,
+                              modifier = modifier,
+                          )
+
                           // DESCRIPTION
 
                           HuntDescriptionSection(hunt.description)
@@ -288,65 +288,6 @@ fun HuntDescriptionSection(description: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun HuntHeaderSection(
-    hunt: Hunt,
-    authorName: String,
-    huntId: String,
-    huntCardViewModel: HuntCardViewModel,
-    modifier: Modifier = Modifier
-) {
-  Column(
-      modifier =
-          modifier.padding(HuntCardScreenDefaults.InfoColumnPadding).fillMaxWidth().fillMaxSize()) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          Text(
-              hunt.title,
-              fontSize = HuntCardScreenDefaults.TitleFontSize,
-              fontWeight = FontWeight.Bold,
-              textAlign = TextAlign.Center,
-              modifier =
-                  Modifier.weight(HuntCardScreenDefaults.TitleWeight)
-                      .padding(HuntCardScreenDefaults.InfoTextPadding)
-                      .testTag(HuntCardScreenTestTags.TITLE_TEXT))
-          LikeButton(huntCardViewModel, huntId)
-        }
-        Text(
-            "${HuntCardScreenStrings.By} $authorName",
-            modifier =
-                Modifier.padding(horizontal = HuntCardScreenDefaults.InfoTextPadding)
-                    .testTag(HuntCardScreenTestTags.AUTHOR_TEXT))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          AsyncImage(
-              model = hunt.mainImageUrl.ifEmpty { R.drawable.empty_image },
-              contentDescription = HuntCardScreenStrings.HuntPictureDescription,
-              modifier =
-                  Modifier.padding(horizontal = HuntCardScreenDefaults.BadgePadding)
-                      .size(HuntCardScreenDefaults.ImageSize)
-                      .clip(RectangleShape)
-                      .testTag(HuntCardScreenTestTags.IMAGE),
-              placeholder = painterResource(R.drawable.empty_image),
-              error = painterResource(R.drawable.empty_image))
-          Column(
-              modifier = Modifier.fillMaxWidth(),
-              horizontalAlignment = Alignment.CenterHorizontally,
-              verticalArrangement = Arrangement.Center) {
-                StatsBox(hunt.difficulty.toString(), DifficultyColor(hunt.difficulty), modifier)
-                Spacer(modifier = modifier.height(HuntCardScreenDefaults.BadgePadding))
-                StatsBox(
-                    "${hunt.distance} ${HuntCardScreenStrings.DistanceUnit}",
-                    MaterialTheme.colorScheme.onPrimary,
-                    modifier)
-                Spacer(modifier = modifier.height(HuntCardScreenDefaults.BadgePadding))
-                StatsBox(
-                    "${hunt.time} ${HuntCardScreenStrings.TimeUnit}",
-                    MaterialTheme.colorScheme.onPrimary,
-                    modifier)
-              }
-        }
-      }
-}
-
-@Composable
 fun ReviewCard(
     review: HuntReview,
     reviewHuntViewModel: ReviewHuntViewModel,
@@ -383,7 +324,10 @@ fun ReviewCard(
             modifier = Modifier.size(HuntCardScreenDefaults.ProfilePictureSize))
         Spacer(modifier = Modifier.padding(horizontal = HuntCardScreenDefaults.SmallSpacerPadding))
 
-        Text("by ${author}", fontWeight = FontWeight.Bold)
+        Text(
+            "${HuntCardScreenStrings.By} $author",
+            fontWeight = FontWeight.Bold,
+        )
         Spacer(modifier = Modifier.padding(horizontal = HuntCardScreenDefaults.BigSpacerPadding))
         if (isCurrentId) {
           IconButton(
@@ -413,11 +357,89 @@ fun ReviewCard(
   }
 }
 
+@Composable
+fun HuntHeaderSection(
+    hunt: com.swentseekr.seekr.model.hunt.Hunt,
+    authorName: String,
+    huntId: String,
+    huntCardViewModel: HuntCardViewModel,
+    modifier: Modifier = Modifier,
+) {
+  Column(
+      modifier =
+          modifier.padding(HuntCardScreenDefaults.InfoColumnPadding).fillMaxWidth().fillMaxSize()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Text(
+              hunt.title,
+              fontSize = HuntCardScreenDefaults.TitleFontSize,
+              fontWeight = FontWeight.Bold,
+              textAlign = TextAlign.Center,
+              modifier =
+                  Modifier.weight(HuntCardScreenDefaults.TitleWeight)
+                      .padding(HuntCardScreenDefaults.InfoTextPadding)
+                      .testTag(HuntCardScreenTestTags.TITLE_TEXT),
+          )
+
+          // Like button next to the title – this is what your test clicks
+          LikeButton(
+              huntCardViewModel = huntCardViewModel,
+              huntId = huntId,
+          )
+        }
+
+        Text(
+            "${HuntCardScreenStrings.By} $authorName",
+            modifier =
+                Modifier.padding(horizontal = HuntCardScreenDefaults.InfoTextPadding)
+                    .testTag(HuntCardScreenTestTags.AUTHOR_TEXT),
+        )
+
+        Spacer(modifier = Modifier.height(HuntCardScreenDefaults.AuthorImageSpacing))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+          // IMAGE CAROUSEL (keep your new design)
+          HuntImageCarousel(
+              hunt = hunt,
+              modifier =
+                  Modifier.weight(HuntCardScreenDefaults.ImageCarouselWeight)
+                      .padding(end = HuntCardScreenDefaults.ImageCarouselPadding),
+          )
+
+          // STATS
+          Column(
+              modifier = Modifier.weight(HuntCardScreenDefaults.StatsColumnWeight),
+              horizontalAlignment = Alignment.CenterHorizontally,
+              verticalArrangement =
+                  Arrangement.spacedBy(
+                      HuntCardScreenDefaults.BadgePadding, Alignment.CenterVertically),
+          ) {
+            StatsBox(
+                hunt.difficulty.toString(),
+                DifficultyColor(hunt.difficulty),
+                modifier = Modifier,
+            )
+            StatsBox(
+                "${hunt.distance} ${HuntCardScreenStrings.DistanceUnit}",
+                HuntCardScreenDefaults.NeutralBadgeColor,
+                modifier = Modifier,
+            )
+            StatsBox(
+                "${hunt.time} ${HuntCardScreenStrings.HourUnit}",
+                HuntCardScreenDefaults.NeutralBadgeColor,
+                modifier = Modifier,
+            )
+          }
+        }
+      }
+}
+
 @Preview
 @Composable
 fun HuntCardScreenPreview() {
   HuntCardScreen(
       huntId = "hunt123",
-      testmode = true,
   )
 }
