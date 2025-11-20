@@ -24,8 +24,6 @@ import com.swentseekr.seekr.ui.components.Rating
 import com.swentseekr.seekr.ui.components.RatingType
 import com.swentseekr.seekr.ui.profile.Profile
 import com.swentseekr.seekr.ui.theme.GrayDislike
-import com.swentseekr.seekr.ui.theme.Green
-import com.swentseekr.seekr.ui.theme.White
 
 private enum class OfflineProfileTab {
   MY_HUNTS,
@@ -162,7 +160,9 @@ private fun OfflineProfileTabs(
                 Icons.Filled.Favorite))
 
     tabs.forEach { (tab, description, icon) ->
-      val bgColor = if (selectedTab == tab) Green else White
+      val bgColor =
+          if (selectedTab == tab) MaterialTheme.colorScheme.primary
+          else MaterialTheme.colorScheme.onPrimary
       Icon(
           imageVector = icon,
           contentDescription = description,
