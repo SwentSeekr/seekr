@@ -13,6 +13,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
+import com.swentseekr.seekr.FakeHuntCardViewModel
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
 import com.swentseekr.seekr.model.profile.createHunt
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
@@ -461,7 +462,14 @@ class SeekrNavigationTest {
 
     withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
       // Re-compose with fake repo.
-      compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
+      compose.runOnUiThread {
+        compose.activity.setContent {
+          SeekrMainNavHost(
+              testMode = true,
+              huntCardViewModelFactory = { FakeHuntCardViewModel(hunt) },
+              reviewViewModelFactory = { FakeReviewHuntViewModel() })
+        }
+      }
 
       // Wait for the overview list to appear.
       waitUntilTrue(MED) {
@@ -491,6 +499,7 @@ class SeekrNavigationTest {
 
       // BEST EFFORT: tap an "Add review" style control to trigger HuntCardScreen.addReview
       // callback.
+
       val didClickAddReview =
           listOf<(Unit) -> Boolean>(
                   {
@@ -516,6 +525,16 @@ class SeekrNavigationTest {
               .any { it(Unit) }
 
       check(didClickAddReview) { "Could not find Add Review control on HuntCardScreen." }
+
+      // Tap the review button to trigger HuntCardScreen.addReview
+      /*compose.waitForIdle()
+      compose
+          .onNodeWithTag(HuntCardScreenTestTags.REVIEW_BUTTON)
+          .assertExists()
+          .assertIsDisplayed()
+          .performClick()
+
+       */
 
       // Wait until AddReview wrapper is present.
       waitUntilTrue(MED) {

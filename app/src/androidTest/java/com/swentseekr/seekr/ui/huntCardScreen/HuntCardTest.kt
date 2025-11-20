@@ -56,7 +56,7 @@ class HuntCardTest {
 
     composeTestRule.onNodeWithText(hunt.difficulty.toString()).assertIsDisplayed()
     composeTestRule.onNodeWithText("${hunt.distance} km").assertIsDisplayed()
-    composeTestRule.onNodeWithText("${hunt.time} min").assertIsDisplayed()
+    composeTestRule.onNodeWithText("${hunt.time} h").assertIsDisplayed()
   }
 
   @Test
