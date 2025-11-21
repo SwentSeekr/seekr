@@ -17,4 +17,5 @@ object Constants {
   const val VALID_LNG = 20.0
   const val INVALID_LAT = 46.54
   const val INVALID_LNG = 6.64
+  const val FAKE = "Fake Hunt"
 }

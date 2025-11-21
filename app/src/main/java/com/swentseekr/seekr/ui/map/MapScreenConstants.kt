@@ -6,14 +6,17 @@ import androidx.compose.ui.unit.dp
 
 object MapScreenDefaults {
 
+  const val Base = 0
   const val UnitPointSize = 1
   const val MaxLines = 2
+  const val MinScore = 2
   const val UserLocationZoom = 16f
   const val FocusedZoom = 15f
   const val BoundsPadding = 100
   const val RouteStrokeWidth = 12f
   val OverlayScrimColor: Color = Color(0x80000000)
   val OverlayPadding: Dp = 32.dp
+  val OverlayDoublePadding: Dp = 64.dp
   val OverlayInnerPadding: Dp = 24.dp
   val CardPadding: Dp = 16.dp
   val CardCornerRadius: Dp = 16.dp
@@ -35,6 +38,12 @@ object MapScreenStrings {
   const val StartHunt = "Start Hunt"
   const val Validate = "Validate"
   const val FinishHunt = "Finish hunt"
+  const val StopHunt = "Stop hunt"
+  const val StopHuntTitle = "Stop current hunt?"
+  const val StopHuntMessage =
+      "Are you sure you want to stop this hunt? Your current progress will be lost."
+  const val ConfirmStopHunt = "Stop"
+  const val Fail = "Failed to add done hunt"
 }
 
 /**
@@ -63,4 +72,6 @@ object MapScreenTestTags {
   const val PROGRESS = "progress"
   const val VALIDATE = "validate"
   const val FINISH = "finish"
+  const val STOP_POPUP = "stopPopup"
+  const val CONFIRM = "confirm"
 }
