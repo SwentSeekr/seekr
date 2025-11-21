@@ -262,7 +262,9 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
                 modifier = Modifier.padding(MapScreenDefaults.CardPadding).fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally) {
                   val hunt = selectedHunt
-                  val totalPoints = (hunt?.middlePoints?.size ?: 0) + 2
+                  val totalPoints =
+                      (hunt?.middlePoints?.size ?: MapScreenDefaults.Base) +
+                          MapScreenDefaults.MinScore
                   val validated = uiState.validatedCount
 
                   Row(
@@ -332,7 +334,10 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
                                             ProfileRepositoryProvider.repository.addDoneHunt(
                                                 userId, finished)
                                           } catch (e: Exception) {
-                                            Log.e("MapScreen", "Failed to add done hunt", e)
+                                            Log.e(
+                                                MapScreenTestTags.MAP_SCREEN,
+                                                MapScreenStrings.Fail,
+                                                e)
                                           }
                                         }
                                       })

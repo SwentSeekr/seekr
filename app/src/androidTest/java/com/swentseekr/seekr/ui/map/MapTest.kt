@@ -65,9 +65,30 @@ class MapTest {
         override fun getNewUid(): String = "x"
       }
 
+  private fun setupMapWithSingleHunt(testMode: Boolean = false): Pair<MapViewModel, Hunt> {
+    val h = hunt(Constants.HUNT_UID_1)
+    val vm = MapViewModel(repository = repo(h))
+    composeRule.setContent { MapScreen(viewModel = vm, testMode = testMode) }
+    return vm to h
+  }
+
+  private fun focusHunt(vm: MapViewModel, h: Hunt) {
+    composeRule.runOnIdle { vm.onMarkerClick(h) }
+  }
+
+  private fun openHunt(vm: MapViewModel, h: Hunt) {
+    focusHunt(vm, h)
+    composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_VIEW).performClick()
+  }
+
+  private fun startHuntFromMap(vm: MapViewModel, h: Hunt) {
+    openHunt(vm, h)
+    composeRule.onNodeWithTag(MapScreenTestTags.START).performClick()
+  }
+
   @Test
   fun mapScreenShowsMapAndNoPopupInitially() {
-    val vm = MapViewModel(repository = repo(hunt("1"), hunt("2")))
+    val vm = MapViewModel(repository = repo(hunt(Constants.HUNT_UID_1), hunt(Constants.HUNT_UID_2)))
     composeRule.setContent { MapScreen(viewModel = vm) }
 
     composeRule.onNodeWithTag(MapScreenTestTags.GOOGLE_MAP_SCREEN).assertIsDisplayed()
@@ -77,45 +98,38 @@ class MapTest {
 
   @Test
   fun selectingHuntShowsPopupWithAllTaggedElements() {
-    val h = hunt("1", "Fake Hunt")
+    val h = hunt(Constants.HUNT_UID_1, Constants.FAKE)
     val vm = MapViewModel(repository = repo(h))
     composeRule.setContent { MapScreen(viewModel = vm) }
 
-    composeRule.runOnIdle { vm.onMarkerClick(h) }
+    focusHunt(vm, h)
 
     composeRule.onNodeWithTag(MapScreenTestTags.POPUP_CARD).assertIsDisplayed()
     composeRule.onNodeWithTag(MapScreenTestTags.POPUP_TITLE).assertIsDisplayed()
     composeRule.onNodeWithTag(MapScreenTestTags.POPUP_DESC).assertIsDisplayed()
     composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_CANCEL).assertIsDisplayed()
     composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_VIEW).assertIsDisplayed()
-    composeRule.onNodeWithText("Fake Hunt").assertIsDisplayed()
-    composeRule.onNodeWithText("Cancel").assertIsDisplayed()
-    composeRule.onNodeWithText("View Hunt").assertIsDisplayed()
+    composeRule.onNodeWithText(Constants.FAKE).assertIsDisplayed()
+    composeRule.onNodeWithText(MapScreenStrings.Cancel).assertIsDisplayed()
+    composeRule.onNodeWithText(MapScreenStrings.ViewHunt).assertIsDisplayed()
   }
 
   @Test
   fun pressingViewHuntHidesPopupAndShowsBackButton() {
-    val h = hunt("1")
-    val vm = MapViewModel(repository = repo(h))
-    composeRule.setContent { MapScreen(viewModel = vm) }
+    val (vm, h) = setupMapWithSingleHunt()
 
-    composeRule.runOnIdle { vm.onMarkerClick(h) }
-    composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_VIEW).performClick()
+    openHunt(vm, h)
 
     composeRule.onNodeWithTag(MapScreenTestTags.POPUP_CARD).assertDoesNotExist()
     composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_BACK).assertIsDisplayed()
-    composeRule.onNodeWithText("Back to all hunts").assertIsDisplayed()
+    composeRule.onNodeWithText(MapScreenStrings.BackToAllHunts).assertIsDisplayed()
   }
 
   @Test
   fun pressingBackToAllHuntsRemovesBackButtonAndPopupStaysHidden() {
-    val h = hunt("1")
-    val vm = MapViewModel(repository = repo(h))
-    composeRule.setContent { MapScreen(viewModel = vm) }
+    val (vm, h) = setupMapWithSingleHunt()
 
-    composeRule.runOnIdle { vm.onMarkerClick(h) }
-    composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_VIEW).performClick()
-
+    openHunt(vm, h)
     composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_BACK).performClick()
 
     composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_BACK).assertDoesNotExist()
@@ -125,11 +139,9 @@ class MapTest {
 
   @Test
   fun pressingCancelHidesPopupAndLeavesAllHuntsMode() {
-    val h = hunt("1")
-    val vm = MapViewModel(repository = repo(h))
-    composeRule.setContent { MapScreen(viewModel = vm) }
+    val (vm, h) = setupMapWithSingleHunt()
 
-    composeRule.runOnIdle { vm.onMarkerClick(h) }
+    focusHunt(vm, h)
     composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_CANCEL).performClick()
 
     composeRule.onNodeWithTag(MapScreenTestTags.POPUP_CARD).assertDoesNotExist()
@@ -139,22 +151,19 @@ class MapTest {
 
   @Test
   fun mapIsDisplayedOnLocationGranted() {
-    val vm = MapViewModel(repository = repo(hunt("1")))
-    composeRule.setContent { MapScreen(viewModel = vm, true) }
+    val (vm, _) = setupMapWithSingleHunt(testMode = true)
     composeRule.onNodeWithTag(MapScreenTestTags.GOOGLE_MAP_SCREEN).assertIsDisplayed()
   }
 
   @Test
   fun permissionRequestPopupIsShownWhenPermissionDenied() {
-    val vm = MapViewModel(repository = repo(hunt("1")))
-    composeRule.setContent { MapScreen(viewModel = vm, true) }
+    val (vm, _) = setupMapWithSingleHunt(testMode = true)
     composeRule.onNodeWithTag(MapScreenTestTags.PERMISSION_POPUP).assertIsDisplayed()
   }
 
   @Test
   fun locationPermissionRequestIsRetriggeredOnButtonClick() {
-    val vm = MapViewModel(repository = repo(hunt("1")))
-    composeRule.setContent { MapScreen(viewModel = vm, true) }
+    val (vm, _) = setupMapWithSingleHunt(testMode = true)
     composeRule.onNodeWithTag(MapScreenTestTags.PERMISSION_POPUP).assertIsDisplayed()
     composeRule.onNodeWithTag(MapScreenTestTags.GRANT_LOCATION_PERMISSION).performClick()
     composeRule.onNodeWithTag(MapScreenTestTags.GOOGLE_MAP_SCREEN).assertIsDisplayed()
@@ -162,8 +171,7 @@ class MapTest {
 
   @Test
   fun permissionPopupNotShownWhenPermissionGranted() {
-    val vm = MapViewModel(repository = repo(hunt("1")))
-    composeRule.setContent { MapScreen(viewModel = vm) }
+    val (vm, _) = setupMapWithSingleHunt()
     composeRule.waitForIdle()
     composeRule.onNodeWithTag(MapScreenTestTags.GOOGLE_MAP_SCREEN).assertIsDisplayed()
     composeRule.onNodeWithTag(MapScreenTestTags.PERMISSION_POPUP).assertDoesNotExist()
@@ -171,10 +179,8 @@ class MapTest {
 
   @Test
   fun startHuntButtonDisplaysAndStartsHunt() {
-    val h = hunt("1")
-    val vm = MapViewModel(repository = repo(h))
-    composeRule.setContent { MapScreen(viewModel = vm) }
-    composeRule.runOnIdle { vm.onMarkerClick(h) }
+    val (vm, h) = setupMapWithSingleHunt()
+    focusHunt(vm, h)
 
     composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_VIEW).performClick()
     composeRule.onNodeWithTag(MapScreenTestTags.START).assertIsDisplayed()
@@ -186,13 +192,9 @@ class MapTest {
 
   @Test
   fun validateButtonDoesNotWorkIfUserTooFar() {
-    val h = hunt("1")
-    val vm = MapViewModel(repository = repo(h))
-    composeRule.setContent { MapScreen(viewModel = vm) }
-    composeRule.runOnIdle { vm.onMarkerClick(h) }
+    val (vm, h) = setupMapWithSingleHunt()
 
-    composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_VIEW).performClick()
-    composeRule.onNodeWithTag(MapScreenTestTags.START).performClick()
+    startHuntFromMap(vm, h)
 
     composeRule
         .onNodeWithTag(MapScreenTestTags.PROGRESS)
@@ -205,13 +207,9 @@ class MapTest {
 
   @Test
   fun stopHuntButtonShowsConfirmationDialog() {
-    val h = hunt("1")
-    val vm = MapViewModel(repository = repo(h))
-    composeRule.setContent { MapScreen(viewModel = vm) }
-    composeRule.runOnIdle { vm.onMarkerClick(h) }
+    val (vm, h) = setupMapWithSingleHunt()
 
-    composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_VIEW).performClick()
-    composeRule.onNodeWithTag(MapScreenTestTags.START).performClick()
+    startHuntFromMap(vm, h)
 
     composeRule
         .onNodeWithTag(MapScreenTestTags.BUTTON_BACK)
@@ -229,14 +227,9 @@ class MapTest {
 
   @Test
   fun confirmingStopHuntResetsStateToInitial() {
-    val h = hunt("1")
-    val vm = MapViewModel(repository = repo(h))
-    composeRule.setContent { MapScreen(viewModel = vm) }
+    val (vm, h) = setupMapWithSingleHunt()
 
-    composeRule.runOnIdle { vm.onMarkerClick(h) }
-    composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_VIEW).performClick()
-
-    composeRule.onNodeWithTag(MapScreenTestTags.START).performClick()
+    startHuntFromMap(vm, h)
     composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_BACK).performClick()
     composeRule.onNodeWithTag(MapScreenTestTags.CONFIRM).performClick()
 

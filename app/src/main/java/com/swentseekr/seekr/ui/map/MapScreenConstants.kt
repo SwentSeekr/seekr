@@ -6,8 +6,10 @@ import androidx.compose.ui.unit.dp
 
 object MapScreenDefaults {
 
+  const val Base = 0
   const val UnitPointSize = 1
   const val MaxLines = 2
+  const val MinScore = 2
   const val UserLocationZoom = 16f
   const val FocusedZoom = 15f
   const val BoundsPadding = 100
@@ -41,6 +43,7 @@ object MapScreenStrings {
   const val StopHuntMessage =
       "Are you sure you want to stop this hunt? Your current progress will be lost."
   const val ConfirmStopHunt = "Stop"
+  const val Fail = "Failed to add done hunt"
 }
 
 /**
