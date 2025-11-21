@@ -5,6 +5,8 @@ import android.widget.Toast
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.ui.hunt.preview.PreviewHuntScreen
+import com.swentseekr.seekr.ui.hunt.preview.PreviewHuntViewModel
 
 @Composable
 fun BaseHuntScreen(
@@ -17,6 +19,9 @@ fun BaseHuntScreen(
 ) {
   val uiState by vm.uiState.collectAsState()
   val context = LocalContext.current
+
+  // Preview dialog state
+  var showPreview by remember { mutableStateOf(false) }
 
   // Test mode
   if (testMode) {
@@ -38,6 +43,15 @@ fun BaseHuntScreen(
       Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
       vm.clearErrorMsg()
     }
+  }
+
+  // Preview Screen before submitting
+  if (showPreview) {
+    val previewVm = remember { PreviewHuntViewModel(vm.uiState) }
+
+    PreviewHuntScreen(
+        viewModel = previewVm, onConfirm = { vm.submit() }, onGoBack = { showPreview = false })
+    return
   }
 
   // Map : point selection
@@ -66,7 +80,7 @@ fun BaseHuntScreen(
         onSelectOtherImages = vm::updateOtherImagesUris,
         onRemoveOtherImage = vm::removeOtherImage, // <-- images locales (URIs)
         onRemoveExistingImage = vm::removeExistingOtherImage, // <-- images URL (Firestore)
-        onSave = { vm.submit() },
+        onSave = { showPreview = true },
         onGoBack = onGoBack,
     )
   }

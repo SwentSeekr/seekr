@@ -54,7 +54,7 @@ abstract class BaseHuntViewModel(
 ) : ViewModel() {
 
   protected val _uiState = MutableStateFlow(HuntUIState())
-  val uiState: StateFlow<HuntUIState> = _uiState.asStateFlow()
+  open val uiState: StateFlow<HuntUIState> = _uiState.asStateFlow()
 
   private var testMode: Boolean = false
 
