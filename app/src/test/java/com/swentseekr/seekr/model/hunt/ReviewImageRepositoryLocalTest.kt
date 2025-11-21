@@ -15,7 +15,7 @@ class ReviewImageRepositoryLocalTest {
   }
 
   @Test
-  fun `uploadReviewPhoto returns expected local URL`() = runTest {
+  fun uploadReviewPhoto_returns_expected_local_URL() = runTest {
     val userId = "user123"
     val fakeUri = ("content://fake/path").toUri() // non-null fake Uri
 
@@ -29,7 +29,7 @@ class ReviewImageRepositoryLocalTest {
   }
 
   @Test
-  fun `deleteReviewPhoto does not throw`() = runTest {
+  fun deleteReviewPhoto_does_not_throw() = runTest {
     val fakeUrl = "local://review_image/user123_0"
     try {
       repository.deleteReviewPhoto(fakeUrl)

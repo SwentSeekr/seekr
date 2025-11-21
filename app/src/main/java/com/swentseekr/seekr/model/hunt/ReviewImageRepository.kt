@@ -18,6 +18,7 @@ class ReviewImageRepository(private val storage: FirebaseStorage = FirebaseStora
 
   override suspend fun deleteReviewPhoto(url: String) {
     val ref = storage.fromDownloadUrl(url)
+    // val ref = storage.getReferenceFromUrl(url)
     ref.delete().await()
   }
 }

@@ -97,13 +97,7 @@ class ReviewImageRepositoryTest {
             repository.uploadReviewPhoto(userId, uri1), repository.uploadReviewPhoto(userId, uri2))
 
     // Delete all uploaded files
-    urls.forEach { url ->
-      try {
-        repository.deleteReviewPhoto(url)
-      } catch (_: Exception) {
-        // ignore: might already be deleted
-      }
-    }
+    urls.forEach { url -> repository.deleteReviewPhoto(url) }
 
     // Attempt to delete again — should not crash
     urls.forEach { url ->

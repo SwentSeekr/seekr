@@ -59,7 +59,10 @@ object AddReviewScreenStrings {
   const val ErrorDeleteHunt = "Error deleting Review for hunt"
   const val ReviewNotEmpty = "The review cannot be empty"
   const val InvalidRating = "Rating must be between 1 and 5"
+  const val ErrorDeletingPhoto = "Error deleting photo:"
 
+  const val ErrorAddingPhoto = "Failed to upload photo:"
+  const val ErrorDeletingImages = "Failed to delete image:"
   const val ErrorClearSubmitReview = "Cannot clear form, review not submitted successfully."
 
   fun ratingSummary(rating: Int, maxStars: Int): String = "$RatingPrefix$rating /$maxStars"

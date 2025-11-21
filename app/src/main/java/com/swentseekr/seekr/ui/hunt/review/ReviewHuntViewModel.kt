@@ -48,7 +48,7 @@ open class ReviewHuntViewModel(
     private val repositoryHunt: HuntsRepository = HuntRepositoryProvider.repository,
     private val repositoryReview: HuntReviewRepository = HuntReviewRepositoryProvider.repository,
     private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository,
-    val imageRepository: IReviewImageRepository = ReviewImageRepositoryProvider.repository,
+    private val imageRepository: IReviewImageRepository = ReviewImageRepositoryProvider.repository,
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) : ViewModel() {
 
@@ -133,7 +133,14 @@ open class ReviewHuntViewModel(
           val review = repositoryReview.getReviewHunt(reviewID)
           val photosToDelete = review.photos
           for (photoUrl in photosToDelete) {
-            imageRepository.deleteReviewPhoto(photoUrl)
+            try {
+              imageRepository.deleteReviewPhoto(photoUrl)
+            } catch (e: Exception) {
+              Log.e(
+                  AddReviewScreenStrings.ReviewViewModel,
+                  "${AddReviewScreenStrings.ErrorDeletingPhoto} $photoUrl",
+                  e)
+            }
           }
           repositoryReview.deleteReviewHunt(reviewId = reviewID)
         } else {
@@ -180,7 +187,7 @@ open class ReviewHuntViewModel(
   /** Adds a photo to the current list of photos in the UI state. */
   fun addPhoto(myPhoto: String, userId: String? = null) {
     val uid = userId ?: FirebaseAuth.getInstance().currentUser?.uid ?: return
-    val uri = myPhoto.toUri() // Uri.parse(myPhoto)
+    val uri = myPhoto.toUri()
 
     viewModelScope.launch(dispatcher) {
       try {
@@ -188,20 +195,24 @@ open class ReviewHuntViewModel(
         val updated = _uiState.value.photos + downloadUrl
         _uiState.value = _uiState.value.copy(photos = updated)
       } catch (e: Exception) {
-        _uiState.value = _uiState.value.copy(errorMsg = "Failed to upload photo: ${e.message}")
+        _uiState.value =
+            _uiState.value.copy(
+                errorMsg = "${AddReviewScreenStrings.ErrorAddingPhoto} ${e.message}")
       }
     }
   }
 
   /** Removes a photo from the current list of photos in the UI state. */
   fun removePhoto(myPhoto: String) {
-    viewModelScope.launch {
+    viewModelScope.launch(dispatcher) {
       try {
         imageRepository.deleteReviewPhoto(myPhoto)
         val updated = _uiState.value.photos - myPhoto
         _uiState.value = _uiState.value.copy(photos = updated)
       } catch (e: Exception) {
-        _uiState.value = _uiState.value.copy(errorMsg = "Failed to delete image: ${e.message}")
+        _uiState.value =
+            _uiState.value.copy(
+                errorMsg = "${AddReviewScreenStrings.ErrorDeletingImages} ${e.message}")
       }
     }
   }
