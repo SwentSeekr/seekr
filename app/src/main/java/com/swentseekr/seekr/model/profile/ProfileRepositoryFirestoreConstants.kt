@@ -19,7 +19,6 @@ object ProfileRepositoryFirestoreConstants {
   const val DEFAULT_PROFILE_PICTURE = 0
   const val DEFAULT_REVIEW_RATE = 0.0
   const val DEFAULT_SPORT_RATE = 0.0
-
   // Default hunt values
   const val DEFAULT_HUNT_TIME = 0.0
   const val DEFAULT_HUNT_DISTANCE = 0.0

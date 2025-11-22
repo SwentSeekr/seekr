@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
@@ -11,8 +12,13 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.authentication.AuthRepository
 import com.swentseekr.seekr.model.authentication.AuthRepositoryFirebase
+import com.swentseekr.seekr.model.profile.ProfileRepository
+import com.swentseekr.seekr.model.profile.ProfileRepositoryFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -22,11 +28,17 @@ data class AuthUIState(
     val isLoading: Boolean = false,
     val user: FirebaseUser? = null,
     val errorMsg: String? = null,
-    val signedOut: Boolean = false
+    val signedOut: Boolean = false,
+    val needsOnboarding: Boolean = false
 )
 
 class AuthViewModel(
     private val repository: AuthRepository = AuthRepositoryFirebase(),
+    private val profileRepository: ProfileRepository = ProfileRepositoryFirestore(
+        db = FirebaseFirestore.getInstance(),
+        auth = FirebaseAuth.getInstance(),
+        storage = FirebaseStorage.getInstance()
+    ),
     private val auth: FirebaseAuth = Firebase.auth
 ) : ViewModel() {
 
@@ -57,7 +69,7 @@ class AuthViewModel(
   private fun getSignInOptions(context: Context) =
       GetSignInWithGoogleOption.Builder(
               serverClientId =
-                  context.getString(com.swentseekr.seekr.R.string.default_web_client_id))
+                  context.getString(R.string.default_web_client_id))
           .build()
 
   private fun signInRequest(signInOptions: GetSignInWithGoogleOption) =
@@ -85,6 +97,13 @@ class AuthViewModel(
           _uiState.update {
             it.copy(isLoading = false, user = user, errorMsg = null, signedOut = false)
           }
+
+            user.uid.let { uid ->
+                viewModelScope.launch {
+                    val needs = profileRepository.checkUserNeedsOnboarding(uid)
+                    _uiState.update { it.copy(needsOnboarding = needs) }
+                }
+            }
         }) { failure ->
           _uiState.update {
             it.copy(
@@ -98,7 +117,7 @@ class AuthViewModel(
         _uiState.update {
           it.copy(isLoading = false, errorMsg = "Sign-in cancelled", signedOut = true, user = null)
         }
-      } catch (e: androidx.credentials.exceptions.GetCredentialException) {
+      } catch (e: GetCredentialException) {
         _uiState.update {
           it.copy(
               isLoading = false,
@@ -117,4 +136,10 @@ class AuthViewModel(
       }
     }
   }
+    fun completeOnboarding(userId: String, pseudonym: String, bio: String) {
+        viewModelScope.launch {
+            profileRepository.completeOnboarding(userId, pseudonym, bio)
+            _uiState.update { it.copy(needsOnboarding = false) }
+        }
+    }
 }
