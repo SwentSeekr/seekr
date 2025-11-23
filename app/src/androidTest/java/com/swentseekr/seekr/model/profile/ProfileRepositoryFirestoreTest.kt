@@ -66,7 +66,7 @@ class ProfileRepositoryFirestoreTest {
     val profile =
         Profile(
             uid = uid,
-            author = Author("Tester", "This is a bio", 0, 4.5, 4.0),
+            author = Author(hasCompletedOnboarding = true, hasAcceptedTerms = true,"Tester", "This is a bio", 0, 4.5, 4.0),
             myHunts = mutableListOf(),
             doneHunts = mutableListOf(),
             likedHunts = mutableListOf())
@@ -91,7 +91,7 @@ class ProfileRepositoryFirestoreTest {
     val profile =
         Profile(
             uid = uid,
-            author = Author("Tester", "This is a bio", 0, 4.5, 4.0),
+            author = Author(hasCompletedOnboarding = true, hasAcceptedTerms = true,"Tester", "This is a bio", 0, 4.5, 4.0),
             myHunts = mutableListOf(),
             doneHunts = mutableListOf(),
             likedHunts = mutableListOf())
@@ -114,7 +114,7 @@ class ProfileRepositoryFirestoreTest {
     val profile =
         Profile(
             uid = uid,
-            author = Author("OldName", "Old bio", 0, 3.0, 3.0),
+            author = Author(hasCompletedOnboarding = true, hasAcceptedTerms = true,"OldName", "Old bio", 0, 3.0, 3.0),
             myHunts = mutableListOf(),
             doneHunts = mutableListOf(),
             likedHunts = mutableListOf())
@@ -160,7 +160,7 @@ class ProfileRepositoryFirestoreTest {
     val profile =
         Profile(
             uid = uid,
-            author = Author("CompleteUser", "Complete bio", 5, 4.5, 4.8),
+            author = Author(hasCompletedOnboarding = true, hasAcceptedTerms = true,"CompleteUser", "Complete bio", 5, 4.5, 4.8),
             myHunts = mutableListOf(),
             doneHunts = mutableListOf(),
             likedHunts = mutableListOf())
@@ -181,7 +181,7 @@ class ProfileRepositoryFirestoreTest {
     val profile =
         Profile(
             uid = uid,
-            author = Author("AuthUser", "Auth bio", 0, 4.0, 3.0),
+            author = Author(hasCompletedOnboarding = true, hasAcceptedTerms = true,"AuthUser", "Auth bio", 0, 4.0, 3.0),
             myHunts = mutableListOf(),
             doneHunts = mutableListOf(),
             likedHunts = mutableListOf())
@@ -201,7 +201,7 @@ class ProfileRepositoryFirestoreTest {
     val profile =
         Profile(
             uid = uid,
-            author = Author("User", "Bio", 0, 4.0, 3.0, "https://old.url/pic.jpg"),
+            author = Author(hasCompletedOnboarding = true, hasAcceptedTerms = true,"User", "Bio", 0, 4.0, 3.0, "https://old.url/pic.jpg"),
             myHunts = mutableListOf(),
             doneHunts = mutableListOf(),
             likedHunts = mutableListOf())
@@ -403,4 +403,37 @@ class ProfileRepositoryFirestoreTest {
     val uid = auth.currentUser!!.uid
     val testUri = Uri.parse("content://test/image.jpg")
   }
+
+    @Test
+    fun checkUserNeedsOnboarding_returnsTrue_whenProfileMissingOrNotCompleted() = runTest {
+        val uid = "new_user_test"
+
+        val needs = repository.checkUserNeedsOnboarding(uid)
+
+        assertTrue("User without profile should need onboarding", needs)
+
+        val created = repository.getProfile(uid)
+
+        assertNotNull(created)
+        assertFalse(created!!.author.hasCompletedOnboarding)
+    }
+
+    @Test
+    fun completeOnboarding_updatesFirestoreFieldsCorrectly() = runTest {
+        val uid = auth.currentUser!!.uid
+
+        val profile = repository.getProfile(uid)
+        assertNotNull("Profile should exist or be auto-created", profile)
+        assertFalse("User should not have completed onboarding initially", profile!!.author.hasCompletedOnboarding)
+
+        repository.completeOnboarding(uid, "NewPseudo", "New bio")
+
+        val updated = repository.getProfile(uid)
+
+        assertNotNull(updated)
+        assertEquals(true, updated!!.author.hasCompletedOnboarding)
+        assertEquals(true, updated.author.hasAcceptedTerms)
+        assertEquals("NewPseudo", updated.author.pseudonym)
+        assertEquals("New bio", updated.author.bio)
+    }
 }

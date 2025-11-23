@@ -221,4 +221,43 @@ class AuthViewModelTest {
         assertFalse(s.isLoading)
         assertSame(user, s.user)
       }
+
+  @Test
+  fun signInSuccess_setsNeedsOnboardingTrue_forNewUser() =
+    runTest(dispatcher) {
+
+      val cred = mockk<Credential>()
+      val user = mockk<FirebaseUser>()
+
+      every { user.uid } returns "newUser123"
+
+      every { auth.currentUser } returns null
+      every { auth.addAuthStateListener(any()) } answers {}
+
+      // NEW USER → onboarding required
+      coEvery { profileRepo.checkUserNeedsOnboarding("newUser123") } returns true
+
+      val vm = AuthViewModel(repository, profileRepo, auth)
+
+      coEvery {
+        credentialManager.getCredential(context, any<GetCredentialRequest>())
+      } returns makeResponseWith(cred)
+
+
+      coEvery { repository.signInWithGoogle(cred) } returns Result.success(user)
+
+      vm.signIn(context, credentialManager)
+
+      advanceUntilIdle() // finish sign-in coroutine
+      advanceUntilIdle() // finish onboarding-check coroutine
+
+      val s = vm.uiState.value
+
+      assertSame(user, s.user)
+      assertTrue("New user should need onboarding", s.needsOnboarding)
+      assertNull(s.errorMsg)
+      assertFalse(s.signedOut)
+    }
+
+
 }
