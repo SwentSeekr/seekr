@@ -365,6 +365,8 @@ class ProfileRepositoryFirestore(
             ?: return null
     val author =
         Author(
+            hasCompletedOnboarding = authorMap["hasCompletedOnboarding"] as? Boolean ?: false,
+            hasAcceptedTerms = authorMap["hasAcceptedTerms"] as? Boolean ?: false,
             pseudonym = authorMap["pseudonym"] as? String ?: "",
             bio = authorMap["bio"] as? String ?: "",
             profilePicture = (authorMap["profilePicture"] as? Long ?: 0L).toInt(),
@@ -401,24 +403,20 @@ class ProfileRepositoryFirestore(
         likedHunts = likedHunts)
   }
 
-    override suspend fun checkUserNeedsOnboarding(userId: String): Boolean {
-        val profile = getProfile(userId)
+  override suspend fun checkUserNeedsOnboarding(userId: String): Boolean {
+    val profile = getProfile(userId)
 
-        return !(profile?.author?.hasCompletedOnboarding ?: false)
-    }
+    return !(profile?.author?.hasCompletedOnboarding ?: false)
+  }
 
-    override suspend fun completeOnboarding(
-        userId: String,
-        pseudonym: String,
-        bio: String
-    ) {
-        val updates = mapOf(
+  override suspend fun completeOnboarding(userId: String, pseudonym: String, bio: String) {
+    val updates =
+        mapOf(
             "author.hasCompletedOnboarding" to true,
             "author.hasAcceptedTerms" to true,
             "author.pseudonym" to pseudonym,
-            "author.bio" to bio
-        )
+            "author.bio" to bio)
 
-        profilesCollection.document(userId).update(updates).await()
-    }
+    profilesCollection.document(userId).update(updates).await()
+  }
 }

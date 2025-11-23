@@ -21,6 +21,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.firebase.auth.FirebaseUser
 import com.swentseekr.seekr.ui.auth.AuthViewModel
+import com.swentseekr.seekr.ui.auth.OnboardingFlow
 import com.swentseekr.seekr.ui.components.HuntCardScreen
 import com.swentseekr.seekr.ui.hunt.add.AddHuntScreen
 import com.swentseekr.seekr.ui.hunt.edit.EditHuntScreen
@@ -123,18 +124,13 @@ fun SeekrMainNavHost(
     testMode: Boolean = false
 ) {
 
+  // Onboarding check
+  val authViewModel: AuthViewModel = viewModel()
+  val uiState by authViewModel.uiState.collectAsState()
 
-    // Onboarding check
-    val authViewModel: AuthViewModel = viewModel()
-    val uiState by authViewModel.uiState.collectAsState()
-
-    if (uiState.needsOnboarding && user != null) {
-        OnboardingFlow(
-            userId = user.uid,
-            authViewModel = authViewModel
-        )
-    }
-
+  if (uiState.needsOnboarding && user != null) {
+    OnboardingFlow(userId = user.uid, authViewModel = authViewModel)
+  }
 
   var lastHuntId by rememberSaveable { mutableStateOf<String?>(null) }
   val navBackStackEntry by navController.currentBackStackEntryAsState()

@@ -70,4 +70,12 @@ class ProfileRepositoryLocal : ProfileRepository {
     updateProfile(updatedProfile)
     return fakeUrl
   }
+
+  override suspend fun checkUserNeedsOnboarding(userId: String): Boolean {
+    TODO("Not yet implemented")
+  }
+
+  override suspend fun completeOnboarding(userId: String, pseudonym: String, bio: String) {
+    TODO("Not yet implemented")
+  }
 }

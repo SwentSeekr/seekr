@@ -34,11 +34,11 @@ data class AuthUIState(
 
 class AuthViewModel(
     private val repository: AuthRepository = AuthRepositoryFirebase(),
-    private val profileRepository: ProfileRepository = ProfileRepositoryFirestore(
-        db = FirebaseFirestore.getInstance(),
-        auth = FirebaseAuth.getInstance(),
-        storage = FirebaseStorage.getInstance()
-    ),
+    private val profileRepository: ProfileRepository =
+        ProfileRepositoryFirestore(
+            db = FirebaseFirestore.getInstance(),
+            auth = FirebaseAuth.getInstance(),
+            storage = FirebaseStorage.getInstance()),
     private val auth: FirebaseAuth = Firebase.auth
 ) : ViewModel() {
 
@@ -68,8 +68,7 @@ class AuthViewModel(
 
   private fun getSignInOptions(context: Context) =
       GetSignInWithGoogleOption.Builder(
-              serverClientId =
-                  context.getString(R.string.default_web_client_id))
+              serverClientId = context.getString(R.string.default_web_client_id))
           .build()
 
   private fun signInRequest(signInOptions: GetSignInWithGoogleOption) =
@@ -98,12 +97,12 @@ class AuthViewModel(
             it.copy(isLoading = false, user = user, errorMsg = null, signedOut = false)
           }
 
-            user.uid.let { uid ->
-                viewModelScope.launch {
-                    val needs = profileRepository.checkUserNeedsOnboarding(uid)
-                    _uiState.update { it.copy(needsOnboarding = needs) }
-                }
+          user.uid.let { uid ->
+            viewModelScope.launch {
+              val needs = profileRepository.checkUserNeedsOnboarding(uid)
+              _uiState.update { it.copy(needsOnboarding = needs) }
             }
+          }
         }) { failure ->
           _uiState.update {
             it.copy(
@@ -136,10 +135,11 @@ class AuthViewModel(
       }
     }
   }
-    fun completeOnboarding(userId: String, pseudonym: String, bio: String) {
-        viewModelScope.launch {
-            profileRepository.completeOnboarding(userId, pseudonym, bio)
-            _uiState.update { it.copy(needsOnboarding = false) }
-        }
+
+  fun completeOnboarding(userId: String, pseudonym: String, bio: String) {
+    viewModelScope.launch {
+      profileRepository.completeOnboarding(userId, pseudonym, bio)
+      _uiState.update { it.copy(needsOnboarding = false) }
     }
+  }
 }
