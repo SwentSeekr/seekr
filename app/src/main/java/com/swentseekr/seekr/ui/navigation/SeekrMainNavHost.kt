@@ -129,7 +129,7 @@ fun SeekrMainNavHost(
   val uiState by authViewModel.uiState.collectAsState()
 
   if (uiState.needsOnboarding && user != null) {
-    OnboardingFlow(userId = user.uid, authViewModel = authViewModel)
+    OnboardingFlow(userId = user.uid, onboardingHandler = authViewModel)
   }
 
   var lastHuntId by rememberSaveable { mutableStateOf<String?>(null) }

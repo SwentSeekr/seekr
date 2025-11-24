@@ -17,6 +17,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.authentication.AuthRepository
 import com.swentseekr.seekr.model.authentication.AuthRepositoryFirebase
+import com.swentseekr.seekr.model.authentication.OnboardingHandler
 import com.swentseekr.seekr.model.profile.ProfileRepository
 import com.swentseekr.seekr.model.profile.ProfileRepositoryFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,7 +41,7 @@ class AuthViewModel(
             auth = FirebaseAuth.getInstance(),
             storage = FirebaseStorage.getInstance()),
     private val auth: FirebaseAuth = Firebase.auth
-) : ViewModel() {
+) : ViewModel(), OnboardingHandler {
 
   private val _uiState = MutableStateFlow(AuthUIState())
   val uiState: StateFlow<AuthUIState> = _uiState
@@ -136,7 +137,7 @@ class AuthViewModel(
     }
   }
 
-  fun completeOnboarding(userId: String, pseudonym: String, bio: String) {
+  override fun completeOnboarding(userId: String, pseudonym: String, bio: String) {
     viewModelScope.launch {
       profileRepository.completeOnboarding(userId, pseudonym, bio)
       _uiState.update { it.copy(needsOnboarding = false) }
