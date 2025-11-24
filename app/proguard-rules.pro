@@ -19,3 +19,22 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Keep Firebase model classes
+-keep class com.swentseekr.seekr.model.** { *; }
+-keepclassmembers class com.swentseekr.seekr.model.** { *; }
+
+# Keep the Profile data class
+-keep class com.swentseekr.seekr.ui.profile.Profile { *; }
+
+# Keep Kotlinx serialization runtime
+-keep class kotlinx.serialization.** { *; }
+-dontwarn kotlinx.serialization.**
+
+# Keep generated serializers
+-keepclassmembers class **$$serializer { *; }
+
+# Keep any class annotated with @Serializable and its members
+-keepclasseswithmembers class * {
+    @kotlinx.serialization.Serializable *;
+}
