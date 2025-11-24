@@ -72,10 +72,10 @@ class ProfileRepositoryLocal : ProfileRepository {
   }
 
   override suspend fun checkUserNeedsOnboarding(userId: String): Boolean {
-    TODO("Not yet implemented")
+    return true
   }
 
   override suspend fun completeOnboarding(userId: String, pseudonym: String, bio: String) {
-    TODO("Not yet implemented")
+    return
   }
 }

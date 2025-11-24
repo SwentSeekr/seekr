@@ -2,6 +2,18 @@ package com.swentseekr.seekr.ui.auth
 
 import androidx.compose.ui.unit.dp
 
+object OnboardingFlowTestTags {
+  const val WELCOME_DIALOG = "welcome_dialog"
+  const val TERMS_DIALOG = "terms_dialog"
+  const val PROFILE_SETUP_DIALOG = "profile_setup_dialog"
+
+  const val CONTINUE_BUTTON = "continue_button"
+  const val I_AGREE_BUTTON = "i_agree_button"
+  const val FINISH_BUTTON = "finish_button"
+
+  const val CHECKBOX_AGREE = "checkbox_agree"
+}
+
 object OnboardingFlowStrings {
 
   // Welcome Dialog

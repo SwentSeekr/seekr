@@ -15,6 +15,7 @@ import com.swentseekr.seekr.ui.auth.OnboardingFlowTestTags.I_AGREE_BUTTON
 import com.swentseekr.seekr.ui.auth.OnboardingFlowTestTags.PROFILE_SETUP_DIALOG
 import com.swentseekr.seekr.ui.auth.OnboardingFlowTestTags.TERMS_DIALOG
 import com.swentseekr.seekr.ui.auth.OnboardingFlowTestTags.WELCOME_DIALOG
+import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -155,10 +156,10 @@ class OnboardingFlowScreenTest {
     composeTestRule.onNodeWithTag(FINISH_BUTTON).performClick()
 
     // Assertions
-    assert(handler.called)
-    assert(handler.userId == userId)
-    assert(handler.pseudo == pseudo)
-    assert(handler.bio == bio)
+    assertTrue("onboarding handler should be called", handler.called)
+    assertEquals("userId mismatch", userId, handler.userId)
+    assertEquals("pseudonym mismatch", pseudo, handler.pseudo)
+    assertEquals("bio mismatch", bio, handler.bio)
   }
 
   // -------------------------------------------------------------
@@ -177,8 +178,8 @@ class OnboardingFlowScreenTest {
     composeTestRule.onNode(hasText("Pseudonym")).performTextInput("UserNoBio")
     composeTestRule.onNodeWithTag(FINISH_BUTTON).performClick()
 
-    assert(handler.called)
-    assert(handler.pseudo == "UserNoBio")
+    assertTrue(handler.called)
+    assertEquals("UserNoBio", handler.pseudo)
   }
 
   // -------------------------------------------------------------
@@ -211,8 +212,8 @@ class OnboardingFlowScreenTest {
     composeTestRule.onNode(hasText("Bio")).performTextInput("Some bio")
     composeTestRule.onNodeWithTag(FINISH_BUTTON).performClick()
 
-    // Wait for onDone() to execute (UI thread)
-    composeTestRule.waitUntil(timeoutMillis = 5_000) { done }
+    done
+    assertTrue(done)
 
     composeTestRule.onNodeWithTag(WELCOME_DIALOG, useUnmergedTree = true).assertDoesNotExist()
     composeTestRule.onNodeWithTag(TERMS_DIALOG, useUnmergedTree = true).assertDoesNotExist()

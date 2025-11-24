@@ -113,6 +113,7 @@ class AuthViewModelTest {
         advanceUntilIdle()
 
         val s = vm.uiState.value
+        assertFalse(s.isLoading)
         assertSame(user, s.user)
         assertNull(s.errorMsg)
         assertFalse(s.signedOut)

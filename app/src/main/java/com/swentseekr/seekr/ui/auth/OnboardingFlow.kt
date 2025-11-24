@@ -13,30 +13,24 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.swentseekr.seekr.model.authentication.OnboardingHandler
 
-object OnboardingFlowTestTags {
-  const val WELCOME_DIALOG = "welcome_dialog"
-  const val TERMS_DIALOG = "terms_dialog"
-  const val PROFILE_SETUP_DIALOG = "profile_setup_dialog"
-
-  const val CONTINUE_BUTTON = "continue_button"
-  const val I_AGREE_BUTTON = "i_agree_button"
-  const val FINISH_BUTTON = "finish_button"
-
-  const val CHECKBOX_AGREE = "checkbox_agree"
-}
-
 @Composable
-fun OnboardingFlow(userId: String, onboardingHandler: OnboardingHandler, onDone: () -> Unit = {}) {
-  var step by remember { mutableStateOf(1) }
+fun OnboardingFlow(
+    userId: String,
+    onboardingHandler: OnboardingHandler,
+    vm: OnboardingViewModel = viewModel(),
+    onDone: () -> Unit = {}
+) {
+  val state by vm.state.collectAsState()
 
-  when (step) {
-    1 -> WelcomeDialog(onContinue = { step = 2 })
-    2 -> TermsDialog(onAccepted = { step = 3 })
+  when (state.step) {
+    1 -> WelcomeDialog(onContinue = vm::nextStep)
+    2 -> TermsDialog(onAccepted = vm::nextStep)
     3 ->
-        ProfileSetupDialog { pseudonym, bio ->
-          onboardingHandler.completeOnboarding(userId, pseudonym, bio)
+        ProfileSetupDialog { pseudo, bio ->
+          onboardingHandler.completeOnboarding(userId, pseudo, bio)
           onDone()
         }
   }
