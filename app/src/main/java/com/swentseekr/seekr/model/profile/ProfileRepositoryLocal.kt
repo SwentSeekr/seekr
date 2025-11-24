@@ -2,6 +2,7 @@ package com.swentseekr.seekr.model.profile
 
 import android.net.Uri
 import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants
 import com.swentseekr.seekr.ui.profile.Profile
 
 class ProfileRepositoryLocal : ProfileRepository {
@@ -69,5 +70,22 @@ class ProfileRepositoryLocal : ProfileRepository {
     val updatedProfile = profile.copy(author = profile.author.copy(profilePictureUrl = fakeUrl))
     updateProfile(updatedProfile)
     return fakeUrl
+  }
+
+  override suspend fun deleteCurrentProfilePicture(userId: String, url: String) {
+    val profile =
+        profiles.find { it.uid == userId }
+            ?: throw IllegalArgumentException("Profile with ID $userId not found")
+
+    if (profile.author.profilePictureUrl == url) {
+      val updatedProfile =
+          profile.copy(
+              author =
+                  profile.author.copy(
+                      profilePictureUrl = "",
+                      profilePicture = EditProfileNumberConstants.PROFILE_PIC_DEFAULT))
+
+      updateProfile(updatedProfile)
+    }
   }
 }

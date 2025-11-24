@@ -211,7 +211,7 @@ class ProfileRepositoryFirestore(
   }
 
   override suspend fun uploadProfilePicture(userId: String, uri: Uri): String {
-    val storageRef = storage.reference.child("profilePictures/$userId.jpg")
+    val storageRef = storage.reference.child("profile_pictures/$userId.jpg")
     val docRef = db.collection("profiles").document(userId)
 
     return try {
@@ -222,6 +222,16 @@ class ProfileRepositoryFirestore(
     } catch (e: Exception) {
       Log.e("UploadProfilePicture", "Failed to upload or update profile picture", e)
       throw e
+    }
+  }
+
+  override suspend fun deleteCurrentProfilePicture(userId: String, url: String) {
+    if (url.isNotEmpty()) {
+      try {
+        storage.getReferenceFromUrl(url).delete().await()
+      } catch (e: Exception) {
+        Log.e("ProfileRepository", "Failed to delete profile picture: ${e.message}")
+      }
     }
   }
 

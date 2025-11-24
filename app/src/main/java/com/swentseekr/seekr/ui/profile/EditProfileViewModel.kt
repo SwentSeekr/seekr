@@ -138,6 +138,10 @@ class EditProfileViewModel(
         val finalProfilePictureUrl =
             when {
               profilePictureUri != null -> {
+                val oldUrl = currentProfile.author.profilePictureUrl
+                if (oldUrl.isNotEmpty()) {
+                  repository.deleteCurrentProfilePicture(uid, oldUrl)
+                }
                 repository.uploadProfilePicture(uid, profilePictureUri)
               }
               profilePictureUrlState.isEmpty() &&
@@ -198,11 +202,34 @@ class EditProfileViewModel(
   }
 
   fun removeProfilePicture() {
-    val newState =
-        _uiState.value.copy(
-            profilePicture = EditProfileNumberConstants.PROFILE_PIC_DEFAULT,
-            profilePictureUri = null,
-            profilePictureUrl = EditProfileStrings.EMPTY_STRING)
-    updateChangesFlags(newState)
+    viewModelScope.launch {
+      val uid = auth.currentUser?.uid ?: return@launch
+      val currentUrl = _uiState.value.profilePictureUrl
+
+      if (currentUrl.isNotEmpty()) {
+        repository.deleteCurrentProfilePicture(uid, currentUrl)
+      }
+
+      val updatedProfile =
+          lastSavedFullProfile?.copy(
+              author =
+                  lastSavedFullProfile!!
+                      .author
+                      .copy(
+                          profilePicture = EditProfileNumberConstants.PROFILE_PIC_DEFAULT,
+                          profilePictureUrl = EditProfileStrings.EMPTY_STRING))
+
+      if (updatedProfile != null) {
+        repository.updateProfile(updatedProfile)
+        lastSavedFullProfile = updatedProfile
+      }
+
+      val newState =
+          _uiState.value.copy(
+              profilePicture = EditProfileNumberConstants.PROFILE_PIC_DEFAULT,
+              profilePictureUri = null,
+              profilePictureUrl = EditProfileStrings.EMPTY_STRING)
+      updateChangesFlags(newState)
+    }
   }
 }
