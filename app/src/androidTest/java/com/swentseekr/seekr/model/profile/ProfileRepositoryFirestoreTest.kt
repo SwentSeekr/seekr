@@ -399,12 +399,6 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun uploadProfilePicture_updatesUrlInFirestore() = runTest {
-    val uid = auth.currentUser!!.uid
-    val testUri = Uri.parse("content://test/image.jpg")
-  }
-
-  @Test
   fun deleteCurrentProfilePicture_withEmptyUrl_doesNothing() = runTest {
     val uid = auth.currentUser!!.uid
 

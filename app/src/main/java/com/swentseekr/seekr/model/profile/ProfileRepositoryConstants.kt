@@ -4,10 +4,10 @@ import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
 
 /**
- * Constants used in [ProfileRepositoryFirestore] to avoid magic values and centralize
- * configuration.
+ * Constants used in [ProfileRepositoryFirestore] and [ProfileRepositoryProvider] to avoid magic
+ * values and centralize configuration.
  */
-object ProfileRepositoryFirestoreConstants {
+object ProfileRepositoryConstants {
 
   // Firestore Collection names
   const val PROFILES_COLLECTION = "profiles"
@@ -37,9 +37,7 @@ object ProfileRepositoryFirestoreConstants {
 
   // Error messages and logging
   const val FIRESTORE_WRITE_FAILED_LOG_TAG = "ProfileRepo"
-  const val FIRESTORE_WRITE_FAILED_MESSAGE = "Firestore write failed"
-  const val FIRESTORE_READ_FAILED_LOG_TAG = "ProfileRepo"
-  const val FIRESTORE_READ_FAILED_MESSAGE = "Failed to read data from Firestore"
+  const val UPLOAD_FAILED_LOG_TAG = "UploadProfilePicture"
 
   // Other constants
   const val PROFILE_FIELD_AUTHOR = "author"
@@ -62,4 +60,18 @@ object ProfileRepositoryFirestoreConstants {
   const val LOCATION_FIELD_LATITUDE = "latitude"
   const val LOCATION_FIELD_LONGITUDE = "longitude"
   const val LOCATION_FIELD_NAME = "name"
+  const val LOCAL_PROFILE_PICTURE_PREFIX = "local://profile-picture/"
+  const val DEFAULT_EMPTY_VALUE = ""
+}
+
+/**
+ * String templates used in [ProfileRepositoryFirestore] and [ProfileRepositoryProvider] for error
+ * messages and logging.
+ */
+object ProfileRepositoryStrings {
+  const val PROFILE_NOT_FOUND = "Profile with ID %s not found"
+  const val PROFILE_ALREADY_EXISTS = "Profile with ID %s already exists"
+  const val UPLOAD_FAILED = "Failed to upload or update profile picture"
+  const val DELETE_FAILED = "Failed to delete profile picture: %s"
+  const val FIRESTORE_WRITE_FAILED_MESSAGE = "Firestore write failed"
 }

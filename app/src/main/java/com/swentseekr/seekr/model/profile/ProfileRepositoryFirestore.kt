@@ -12,6 +12,7 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestore
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.model.profile.ProfileRepositoryConstants.DEFAULT_EMPTY_VALUE
 import com.swentseekr.seekr.ui.profile.Profile
 import kotlinx.coroutines.tasks.await
 
@@ -60,49 +61,50 @@ class ProfileRepositoryFirestore(
      *   information.
      */
     fun mapToHunt(map: Map<*, *>): Hunt? {
-      val uid = map[ProfileRepositoryFirestoreConstants.HUNT_FIELD_UID] as? String ?: ""
-      val title =
-          map[ProfileRepositoryFirestoreConstants.HUNT_FIELD_TITLE] as? String ?: return null
+      val uid = map[ProfileRepositoryConstants.HUNT_FIELD_UID] as? String ?: DEFAULT_EMPTY_VALUE
+      val title = map[ProfileRepositoryConstants.HUNT_FIELD_TITLE] as? String ?: return null
       val description =
-          map[ProfileRepositoryFirestoreConstants.HUNT_FIELD_DESCRIPTION] as? String ?: return null
+          map[ProfileRepositoryConstants.HUNT_FIELD_DESCRIPTION] as? String ?: return null
       val time =
-          (map[ProfileRepositoryFirestoreConstants.HUNT_FIELD_TIME] as? Number)?.toDouble()
-              ?: ProfileRepositoryFirestoreConstants.DEFAULT_HUNT_TIME
+          (map[ProfileRepositoryConstants.HUNT_FIELD_TIME] as? Number)?.toDouble()
+              ?: ProfileRepositoryConstants.DEFAULT_HUNT_TIME
       val distance =
-          (map[ProfileRepositoryFirestoreConstants.HUNT_FIELD_DISTANCE] as? Number)?.toDouble()
-              ?: ProfileRepositoryFirestoreConstants.DEFAULT_HUNT_DISTANCE
+          (map[ProfileRepositoryConstants.HUNT_FIELD_DISTANCE] as? Number)?.toDouble()
+              ?: ProfileRepositoryConstants.DEFAULT_HUNT_DISTANCE
       val reviewRate =
-          (map[ProfileRepositoryFirestoreConstants.HUNT_FIELD_REVIEW_RATE] as? Number)?.toDouble()
-              ?: ProfileRepositoryFirestoreConstants.DEFAULT_HUNT_REVIEW_RATE
+          (map[ProfileRepositoryConstants.HUNT_FIELD_REVIEW_RATE] as? Number)?.toDouble()
+              ?: ProfileRepositoryConstants.DEFAULT_HUNT_REVIEW_RATE
       val mainImageUrl =
-          map[ProfileRepositoryFirestoreConstants.HUNT_FIELD_MAIN_IMAGE_URL] as? String
-              ?: ProfileRepositoryFirestoreConstants.DEFAULT_HUNT_MAIN_IMAGE_URL
+          map[ProfileRepositoryConstants.HUNT_FIELD_MAIN_IMAGE_URL] as? String
+              ?: ProfileRepositoryConstants.DEFAULT_HUNT_MAIN_IMAGE_URL
 
       val start =
-          (map[ProfileRepositoryFirestoreConstants.HUNT_FIELD_START] as? Map<*, *>)?.toLocation()
+          (map[ProfileRepositoryConstants.HUNT_FIELD_START] as? Map<*, *>)?.toLocation()
               ?: Location(
-                  ProfileRepositoryFirestoreConstants.DEFAULT_LOCATION_LAT,
-                  ProfileRepositoryFirestoreConstants.DEFAULT_LOCATION_LNG,
-                  ProfileRepositoryFirestoreConstants.DEFAULT_LOCATION_NAME)
+                  ProfileRepositoryConstants.DEFAULT_LOCATION_LAT,
+                  ProfileRepositoryConstants.DEFAULT_LOCATION_LNG,
+                  ProfileRepositoryConstants.DEFAULT_LOCATION_NAME)
       val end =
-          (map[ProfileRepositoryFirestoreConstants.HUNT_FIELD_END] as? Map<*, *>)?.toLocation()
+          (map[ProfileRepositoryConstants.HUNT_FIELD_END] as? Map<*, *>)?.toLocation()
               ?: Location(
-                  ProfileRepositoryFirestoreConstants.DEFAULT_LOCATION_LAT,
-                  ProfileRepositoryFirestoreConstants.DEFAULT_LOCATION_LNG,
-                  ProfileRepositoryFirestoreConstants.DEFAULT_LOCATION_NAME)
+                  ProfileRepositoryConstants.DEFAULT_LOCATION_LAT,
+                  ProfileRepositoryConstants.DEFAULT_LOCATION_LNG,
+                  ProfileRepositoryConstants.DEFAULT_LOCATION_NAME)
       val middlePoints =
-          (map[ProfileRepositoryFirestoreConstants.HUNT_FIELD_MIDDLE_POINTS] as? List<Map<*, *>>)
-              ?.map { it.toLocation() } ?: emptyList()
+          (map[ProfileRepositoryConstants.HUNT_FIELD_MIDDLE_POINTS] as? List<Map<*, *>>)?.map {
+            it.toLocation()
+          } ?: emptyList()
 
       val difficulty =
-          map[ProfileRepositoryFirestoreConstants.HUNT_FIELD_DIFFICULTY]?.let {
+          map[ProfileRepositoryConstants.HUNT_FIELD_DIFFICULTY]?.let {
             Difficulty.valueOf(it as String)
-          } ?: ProfileRepositoryFirestoreConstants.DEFAULT_DIFFICULTY
+          } ?: ProfileRepositoryConstants.DEFAULT_DIFFICULTY
       val status =
-          map[ProfileRepositoryFirestoreConstants.HUNT_FIELD_STATUS]?.let {
+          map[ProfileRepositoryConstants.HUNT_FIELD_STATUS]?.let {
             HuntStatus.valueOf(it as String)
-          } ?: ProfileRepositoryFirestoreConstants.DEFAULT_STATUS
-      val authorId = map[ProfileRepositoryFirestoreConstants.HUNT_FIELD_AUTHOR_ID] as? String ?: ""
+          } ?: ProfileRepositoryConstants.DEFAULT_STATUS
+      val authorId =
+          map[ProfileRepositoryConstants.HUNT_FIELD_AUTHOR_ID] as? String ?: DEFAULT_EMPTY_VALUE
 
       return Hunt(
           uid = uid,
@@ -129,26 +131,25 @@ class ProfileRepositoryFirestore(
     private fun Map<*, *>.toLocation(): Location =
         Location(
             latitude =
-                this[ProfileRepositoryFirestoreConstants.LOCATION_FIELD_LATITUDE] as? Double
-                    ?: ProfileRepositoryFirestoreConstants.DEFAULT_LOCATION_LAT,
+                this[ProfileRepositoryConstants.LOCATION_FIELD_LATITUDE] as? Double
+                    ?: ProfileRepositoryConstants.DEFAULT_LOCATION_LAT,
             longitude =
-                this[ProfileRepositoryFirestoreConstants.LOCATION_FIELD_LONGITUDE] as? Double
-                    ?: ProfileRepositoryFirestoreConstants.DEFAULT_LOCATION_LNG,
+                this[ProfileRepositoryConstants.LOCATION_FIELD_LONGITUDE] as? Double
+                    ?: ProfileRepositoryConstants.DEFAULT_LOCATION_LNG,
             name =
-                this[ProfileRepositoryFirestoreConstants.LOCATION_FIELD_NAME] as? String
-                    ?: ProfileRepositoryFirestoreConstants.DEFAULT_LOCATION_NAME)
+                this[ProfileRepositoryConstants.LOCATION_FIELD_NAME] as? String
+                    ?: ProfileRepositoryConstants.DEFAULT_LOCATION_NAME)
   }
 
-  private val profilesCollection =
-      db.collection(ProfileRepositoryFirestoreConstants.PROFILES_COLLECTION)
+  private val profilesCollection = db.collection(ProfileRepositoryConstants.PROFILES_COLLECTION)
 
   override suspend fun createProfile(profile: Profile) {
     try {
       profilesCollection.document(profile.uid).set(profile).await()
     } catch (e: Exception) {
       Log.e(
-          ProfileRepositoryFirestoreConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
-          ProfileRepositoryFirestoreConstants.FIRESTORE_WRITE_FAILED_MESSAGE,
+          ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
+          ProfileRepositoryStrings.FIRESTORE_WRITE_FAILED_MESSAGE,
           e)
       throw e
     }
@@ -170,12 +171,12 @@ class ProfileRepositoryFirestore(
             uid = userId,
             author =
                 Author(
-                    ProfileRepositoryFirestoreConstants.DEFAULT_USER_NAME,
-                    ProfileRepositoryFirestoreConstants.DEFAULT_USER_BIO,
-                    ProfileRepositoryFirestoreConstants.DEFAULT_PROFILE_PICTURE,
-                    ProfileRepositoryFirestoreConstants.DEFAULT_REVIEW_RATE,
-                    ProfileRepositoryFirestoreConstants.DEFAULT_SPORT_RATE,
-                    profilePictureUrl = ""),
+                    ProfileRepositoryConstants.DEFAULT_USER_NAME,
+                    ProfileRepositoryConstants.DEFAULT_USER_BIO,
+                    ProfileRepositoryConstants.DEFAULT_PROFILE_PICTURE,
+                    ProfileRepositoryConstants.DEFAULT_REVIEW_RATE,
+                    ProfileRepositoryConstants.DEFAULT_SPORT_RATE,
+                    profilePictureUrl = DEFAULT_EMPTY_VALUE),
             myHunts = mutableListOf(),
             doneHunts = mutableListOf(),
             likedHunts = mutableListOf())
@@ -186,7 +187,7 @@ class ProfileRepositoryFirestore(
   override suspend fun updateProfile(profile: Profile) {
     val currentUser = auth.currentUser ?: return
     Log.i(
-        ProfileRepositoryFirestoreConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
+        ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
         "Writing profile for UID=${currentUser.uid}")
     val userDocRef = profilesCollection.document(currentUser.uid)
     userDocRef
@@ -203,8 +204,8 @@ class ProfileRepositoryFirestore(
 
   override suspend fun getMyHunts(userId: String): List<Hunt> {
     val snapshot =
-        db.collection(ProfileRepositoryFirestoreConstants.HUNTS_COLLECTION)
-            .whereEqualTo(ProfileRepositoryFirestoreConstants.HUNT_FIELD_AUTHOR_ID, userId)
+        db.collection(ProfileRepositoryConstants.HUNTS_COLLECTION)
+            .whereEqualTo(ProfileRepositoryConstants.HUNT_FIELD_AUTHOR_ID, userId)
             .get()
             .await()
     return snapshot.documents.mapNotNull { documentToHunt(it) }
@@ -220,7 +221,10 @@ class ProfileRepositoryFirestore(
       docRef.update("author.profilePictureUrl", url).await()
       url
     } catch (e: Exception) {
-      Log.e("UploadProfilePicture", "Failed to upload or update profile picture", e)
+      Log.e(
+          ProfileRepositoryConstants.UPLOAD_FAILED_LOG_TAG,
+          ProfileRepositoryStrings.UPLOAD_FAILED,
+          e)
       throw e
     }
   }
@@ -230,7 +234,9 @@ class ProfileRepositoryFirestore(
       try {
         storage.getReferenceFromUrl(url).delete().await()
       } catch (e: Exception) {
-        Log.e("ProfileRepository", "Failed to delete profile picture: ${e.message}")
+        Log.e(
+            ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
+            String.format(ProfileRepositoryStrings.DELETE_FAILED, e.message))
       }
     }
   }
@@ -240,7 +246,7 @@ class ProfileRepositoryFirestore(
 
     @Suppress("UNCHECKED_CAST")
     val doneHuntsData =
-        snapshot.get(ProfileRepositoryFirestoreConstants.PROFILE_FIELD_DONE_HUNTS)
+        snapshot.get(ProfileRepositoryConstants.PROFILE_FIELD_DONE_HUNTS)
             as? List<Map<String, Any?>> ?: emptyList()
 
     return doneHuntsData.mapNotNull { mapToHunt(it) }
@@ -251,7 +257,7 @@ class ProfileRepositoryFirestore(
 
     @Suppress("UNCHECKED_CAST")
     val likedHuntsData =
-        snapshot.get(ProfileRepositoryFirestoreConstants.PROFILE_FIELD_LIKED_HUNTS)
+        snapshot.get(ProfileRepositoryConstants.PROFILE_FIELD_LIKED_HUNTS)
             as? List<Map<String, Any?>> ?: emptyList()
 
     return likedHuntsData.mapNotNull { mapToHunt(it) }
@@ -264,14 +270,14 @@ class ProfileRepositoryFirestore(
 
       @Suppress("UNCHECKED_CAST")
       val currentList =
-          snapshot.get(ProfileRepositoryFirestoreConstants.PROFILE_FIELD_DONE_HUNTS)
+          snapshot.get(ProfileRepositoryConstants.PROFILE_FIELD_DONE_HUNTS)
               as? List<Map<String, Any?>> ?: emptyList()
 
       val isAlreadyAdded =
-          currentList.any { it[ProfileRepositoryFirestoreConstants.HUNT_FIELD_UID] == hunt.uid }
+          currentList.any { it[ProfileRepositoryConstants.HUNT_FIELD_UID] == hunt.uid }
       if (isAlreadyAdded) {
         Log.i(
-            ProfileRepositoryFirestoreConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
+            ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
             "Hunt '${hunt.title}' is already in the doneHunts list for user $userId")
         return
       }
@@ -279,15 +285,13 @@ class ProfileRepositoryFirestore(
       val huntData = huntToMap(hunt)
       val updatedList = currentList + huntData
 
-      userDocRef
-          .update(ProfileRepositoryFirestoreConstants.PROFILE_FIELD_DONE_HUNTS, updatedList)
-          .await()
+      userDocRef.update(ProfileRepositoryConstants.PROFILE_FIELD_DONE_HUNTS, updatedList).await()
       Log.i(
-          ProfileRepositoryFirestoreConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
+          ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
           "Added done hunt '${hunt.title}' for user $userId")
     } catch (e: Exception) {
       Log.e(
-          ProfileRepositoryFirestoreConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
+          ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
           "Failed to add done hunt for user $userId",
           e)
       throw e
@@ -297,53 +301,48 @@ class ProfileRepositoryFirestore(
   private fun documentToHunt(document: DocumentSnapshot): Hunt? {
     return try {
       val uid = document.id
-      val title =
-          document.getString(ProfileRepositoryFirestoreConstants.HUNT_FIELD_TITLE) ?: return null
+      val title = document.getString(ProfileRepositoryConstants.HUNT_FIELD_TITLE) ?: return null
       val description =
-          document.getString(ProfileRepositoryFirestoreConstants.HUNT_FIELD_DESCRIPTION)
-              ?: return null
+          document.getString(ProfileRepositoryConstants.HUNT_FIELD_DESCRIPTION) ?: return null
       val time =
-          document.getDouble(ProfileRepositoryFirestoreConstants.HUNT_FIELD_TIME)
-              ?: ProfileRepositoryFirestoreConstants.DEFAULT_HUNT_TIME
+          document.getDouble(ProfileRepositoryConstants.HUNT_FIELD_TIME)
+              ?: ProfileRepositoryConstants.DEFAULT_HUNT_TIME
       val distance =
-          document.getDouble(ProfileRepositoryFirestoreConstants.HUNT_FIELD_DISTANCE)
-              ?: ProfileRepositoryFirestoreConstants.DEFAULT_HUNT_DISTANCE
+          document.getDouble(ProfileRepositoryConstants.HUNT_FIELD_DISTANCE)
+              ?: ProfileRepositoryConstants.DEFAULT_HUNT_DISTANCE
       val reviewRate =
-          document.getDouble(ProfileRepositoryFirestoreConstants.HUNT_FIELD_REVIEW_RATE)
-              ?: ProfileRepositoryFirestoreConstants.DEFAULT_HUNT_REVIEW_RATE
+          document.getDouble(ProfileRepositoryConstants.HUNT_FIELD_REVIEW_RATE)
+              ?: ProfileRepositoryConstants.DEFAULT_HUNT_REVIEW_RATE
       val mainImageUrl =
-          document.getString(ProfileRepositoryFirestoreConstants.HUNT_FIELD_MAIN_IMAGE_URL)
-              ?: ProfileRepositoryFirestoreConstants.DEFAULT_HUNT_MAIN_IMAGE_URL
+          document.getString(ProfileRepositoryConstants.HUNT_FIELD_MAIN_IMAGE_URL)
+              ?: ProfileRepositoryConstants.DEFAULT_HUNT_MAIN_IMAGE_URL
 
       val start =
-          (document.get(ProfileRepositoryFirestoreConstants.HUNT_FIELD_START) as? Map<*, *>)
-              ?.toLocation()
+          (document.get(ProfileRepositoryConstants.HUNT_FIELD_START) as? Map<*, *>)?.toLocation()
               ?: Location(
-                  ProfileRepositoryFirestoreConstants.DEFAULT_LOCATION_LAT,
-                  ProfileRepositoryFirestoreConstants.DEFAULT_LOCATION_LNG,
-                  ProfileRepositoryFirestoreConstants.DEFAULT_LOCATION_NAME)
+                  ProfileRepositoryConstants.DEFAULT_LOCATION_LAT,
+                  ProfileRepositoryConstants.DEFAULT_LOCATION_LNG,
+                  ProfileRepositoryConstants.DEFAULT_LOCATION_NAME)
       val end =
-          (document.get(ProfileRepositoryFirestoreConstants.HUNT_FIELD_END) as? Map<*, *>)
-              ?.toLocation()
+          (document.get(ProfileRepositoryConstants.HUNT_FIELD_END) as? Map<*, *>)?.toLocation()
               ?: Location(
-                  ProfileRepositoryFirestoreConstants.DEFAULT_LOCATION_LAT,
-                  ProfileRepositoryFirestoreConstants.DEFAULT_LOCATION_LNG,
-                  ProfileRepositoryFirestoreConstants.DEFAULT_LOCATION_NAME)
+                  ProfileRepositoryConstants.DEFAULT_LOCATION_LAT,
+                  ProfileRepositoryConstants.DEFAULT_LOCATION_LNG,
+                  ProfileRepositoryConstants.DEFAULT_LOCATION_NAME)
       val middlePoints =
-          (document.get(ProfileRepositoryFirestoreConstants.HUNT_FIELD_MIDDLE_POINTS)
-                  as? List<Map<*, *>>)
+          (document.get(ProfileRepositoryConstants.HUNT_FIELD_MIDDLE_POINTS) as? List<Map<*, *>>)
               ?.map { it.toLocation() } ?: emptyList()
 
       val difficulty =
-          document.getString(ProfileRepositoryFirestoreConstants.HUNT_FIELD_DIFFICULTY)?.let {
+          document.getString(ProfileRepositoryConstants.HUNT_FIELD_DIFFICULTY)?.let {
             Difficulty.valueOf(it)
-          } ?: ProfileRepositoryFirestoreConstants.DEFAULT_DIFFICULTY
+          } ?: ProfileRepositoryConstants.DEFAULT_DIFFICULTY
       val status =
-          document.getString(ProfileRepositoryFirestoreConstants.HUNT_FIELD_STATUS)?.let {
+          document.getString(ProfileRepositoryConstants.HUNT_FIELD_STATUS)?.let {
             HuntStatus.valueOf(it)
-          } ?: ProfileRepositoryFirestoreConstants.DEFAULT_STATUS
+          } ?: ProfileRepositoryConstants.DEFAULT_STATUS
       val authorId =
-          document.getString(ProfileRepositoryFirestoreConstants.HUNT_FIELD_AUTHOR_ID) ?: ""
+          document.getString(ProfileRepositoryConstants.HUNT_FIELD_AUTHOR_ID) ?: DEFAULT_EMPTY_VALUE
 
       Hunt(
           uid = uid,
@@ -369,23 +368,28 @@ class ProfileRepositoryFirestore(
 
     val uid = document.id
     val authorMap =
-        document.get(ProfileRepositoryFirestoreConstants.PROFILE_FIELD_AUTHOR) as? Map<*, *>
-            ?: return null
+        document.get(ProfileRepositoryConstants.PROFILE_FIELD_AUTHOR) as? Map<*, *> ?: return null
     val author =
         Author(
-            pseudonym = authorMap["pseudonym"] as? String ?: "",
-            bio = authorMap["bio"] as? String ?: "",
-            profilePicture = (authorMap["profilePicture"] as? Long ?: 0L).toInt(),
-            reviewRate = authorMap["reviewRate"] as? Double ?: 0.0,
-            sportRate = authorMap["sportRate"] as? Double ?: 0.0,
-            profilePictureUrl = authorMap["profilePictureUrl"] as? String ?: "")
+            pseudonym = authorMap["pseudonym"] as? String ?: DEFAULT_EMPTY_VALUE,
+            bio = authorMap["bio"] as? String ?: ProfileRepositoryConstants.DEFAULT_USER_BIO,
+            profilePicture =
+                (authorMap["profilePicture"] as? Long
+                        ?: ProfileRepositoryConstants.DEFAULT_PROFILE_PICTURE.toLong())
+                    .toInt(),
+            reviewRate =
+                authorMap["reviewRate"] as? Double
+                    ?: ProfileRepositoryConstants.DEFAULT_REVIEW_RATE,
+            sportRate =
+                authorMap["sportRate"] as? Double ?: ProfileRepositoryConstants.DEFAULT_SPORT_RATE,
+            profilePictureUrl = authorMap["profilePictureUrl"] as? String ?: DEFAULT_EMPTY_VALUE)
 
     // Fetch associated hunts only for this user
     val myHunts = huntsRepository.getAllHunts().filter { it.authorId == uid }.toMutableList()
     val doneHunts =
         db.collection("users")
             .document(uid)
-            .collection(ProfileRepositoryFirestoreConstants.PROFILE_FIELD_DONE_HUNTS)
+            .collection(ProfileRepositoryConstants.PROFILE_FIELD_DONE_HUNTS)
             .get()
             .await()
             .documents
@@ -394,7 +398,7 @@ class ProfileRepositoryFirestore(
     val likedHunts =
         db.collection("users")
             .document(uid)
-            .collection(ProfileRepositoryFirestoreConstants.PROFILE_FIELD_LIKED_HUNTS)
+            .collection(ProfileRepositoryConstants.PROFILE_FIELD_LIKED_HUNTS)
             .get()
             .await()
             .documents
