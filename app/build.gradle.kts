@@ -165,6 +165,9 @@ dependencies {
     implementation("androidx.credentials:credentials-play-services-auth:1.2.2")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
+    // Android Annotations
+    implementation("androidx.annotation:annotation:1.9.1")
+
     // Firebase Authentication
     implementation("com.google.firebase:firebase-auth")
 
