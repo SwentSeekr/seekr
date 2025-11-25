@@ -25,7 +25,15 @@ class ProfileViewModelTest {
   private val profileAlice =
       Profile(
           uid = "user1",
-          author = Author("Alice", "Bio", 0, 4.0, 3.5),
+          author =
+              Author(
+                  hasCompletedOnboarding = true,
+                  hasAcceptedTerms = true,
+                  pseudonym = "Alice",
+                  bio = "Bio",
+                  profilePicture = 0,
+                  reviewRate = 4.0,
+                  sportRate = 3.5),
           myHunts = mutableListOf(),
           doneHunts = mutableListOf(),
           likedHunts = mutableListOf())
@@ -113,7 +121,15 @@ class ProfileViewModelTest {
     val profileBob =
         Profile(
             uid = "user2",
-            author = Author("Bob", "Bio", 0, 4.0, 3.5),
+            author =
+                Author(
+                    hasCompletedOnboarding = true,
+                    hasAcceptedTerms = true,
+                    "Bob",
+                    "Bio",
+                    0,
+                    4.0,
+                    3.5),
             myHunts = mutableListOf(),
             doneHunts = mutableListOf(),
             likedHunts = mutableListOf())
