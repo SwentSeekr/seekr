@@ -4,20 +4,25 @@ import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.swentseekr.seekr.R
@@ -43,7 +48,6 @@ fun SignInScreen(
   val context = LocalContext.current
   val uiState by viewModel.uiState.collectAsState()
 
-  // Handle error messages
   LaunchedEffect(uiState.errorMsg) {
     uiState.errorMsg?.let {
       Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
@@ -51,39 +55,41 @@ fun SignInScreen(
     }
   }
 
-  // Handle successful login
   LaunchedEffect(uiState.user) {
     uiState.user?.let {
-      Toast.makeText(context, "Login successful: ${it.email}", Toast.LENGTH_SHORT).show()
+      Toast.makeText(context, SignInScreenStrings.successMessage(it.email), Toast.LENGTH_SHORT)
+          .show()
       onSignedIn()
     }
   }
 
   Scaffold { padding ->
     Column(
-        modifier = Modifier.fillMaxSize().background(Color(0xFF60BA37)).padding(padding),
+        modifier =
+            Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primary).padding(padding),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top) {
-          Spacer(modifier = Modifier.height(120.dp))
+          Spacer(modifier = Modifier.height(SignInScreenDimensions.TopSpacing))
 
-          // Center logo
           Image(
               painter = painterResource(id = R.drawable.logo_seekr),
-              contentDescription = "App Logo",
+              contentDescription = SignInScreenStrings.AppLogoDescription,
               modifier =
-                  Modifier.size(180.dp)
-                      .clip(RoundedCornerShape(64.dp))
+                  Modifier.size(SignInScreenDimensions.LogoSize)
+                      .clip(RoundedCornerShape(SignInScreenDimensions.LogoCornerRadius))
                       .testTag(SignInScreenTestTags.APP_LOGO))
 
-          Spacer(modifier = Modifier.height(300.dp))
+          Spacer(modifier = Modifier.height(SignInScreenDimensions.SpacerAfterLogo))
 
-          // Bottom section
           Column(
               horizontalAlignment = Alignment.CenterHorizontally,
               verticalArrangement = Arrangement.Bottom,
-              modifier = Modifier.fillMaxWidth().padding(bottom = 64.dp)) {
+              modifier =
+                  Modifier.fillMaxWidth().padding(bottom = SignInScreenDimensions.BottomPadding)) {
                 if (uiState.isLoading) {
-                  CircularProgressIndicator(color = Color.White, modifier = Modifier.size(48.dp))
+                  CircularProgressIndicator(
+                      color = MaterialTheme.colorScheme.onPrimary,
+                      modifier = Modifier.size(SignInScreenDimensions.LoaderSize))
                 } else {
                   GoogleSignInButton(
                       onSignInClick = { viewModel.signIn(context, credentialManager) })
@@ -103,13 +109,15 @@ fun SignInScreen(
 fun GoogleSignInButton(onSignInClick: () -> Unit) {
   Button(
       onClick = onSignInClick,
-      colors = ButtonDefaults.buttonColors(containerColor = Color.White),
-      shape = RoundedCornerShape(12.dp),
-      border = BorderStroke(1.dp, Color.LightGray),
+      colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.background),
+      shape = RoundedCornerShape(SignInScreenDimensions.ButtonCornerRadius),
+      border =
+          BorderStroke(
+              SignInScreenDimensions.ButtonBorderWidth, MaterialTheme.colorScheme.tertiary),
       modifier =
-          Modifier.padding(horizontal = 32.dp)
-              .height(48.dp)
-              .fillMaxWidth(0.7f)
+          Modifier.padding(horizontal = SignInScreenDimensions.ButtonHorizontalPadding)
+              .height(SignInScreenDimensions.ButtonHeight)
+              .fillMaxWidth(SignInScreenDimensions.ButtonWidthFraction)
               .testTag(SignInScreenTestTags.LOGIN_BUTTON)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -117,13 +125,15 @@ fun GoogleSignInButton(onSignInClick: () -> Unit) {
             modifier = Modifier.fillMaxWidth()) {
               Image(
                   painter = painterResource(id = R.drawable.google_logo),
-                  contentDescription = "Google Logo",
-                  modifier = Modifier.size(24.dp).padding(end = 8.dp))
+                  contentDescription = SignInScreenStrings.GoogleLogoDescription,
+                  modifier =
+                      Modifier.size(SignInScreenDimensions.ButtonIconSize)
+                          .padding(end = SignInScreenDimensions.ButtonIconPaddingEnd))
 
               Text(
-                  text = "Sign in with Google",
-                  color = Color.Gray,
-                  fontSize = 16.sp,
+                  text = SignInScreenStrings.SignInButtonLabel,
+                  color = MaterialTheme.colorScheme.onBackground,
+                  fontSize = SignInScreenTypography.ButtonFontSize,
                   fontWeight = FontWeight.Medium)
             }
       }

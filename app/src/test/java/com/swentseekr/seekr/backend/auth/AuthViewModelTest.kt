@@ -13,6 +13,7 @@ import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.authentication.AuthRepository
 import com.swentseekr.seekr.model.profile.ProfileRepository
 import com.swentseekr.seekr.ui.auth.AuthViewModel
+import com.swentseekr.seekr.ui.auth.AuthViewModelMessages
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.every
@@ -154,7 +155,7 @@ class AuthViewModelTest {
         val s = vm.uiState.value
         assertFalse(s.isLoading)
         assertNull(s.user)
-        assertEquals("Sign-in cancelled", s.errorMsg)
+        assertEquals(AuthViewModelMessages.SIGN_IN_CANCELLED, s.errorMsg)
         assertTrue(s.signedOut)
       }
 
@@ -172,7 +173,7 @@ class AuthViewModelTest {
         val s = vm.uiState.value
         assertFalse(s.isLoading)
         assertNull(s.user)
-        assertTrue(s.errorMsg?.startsWith("Failed to get credentials:") == true)
+        assertEquals(AuthViewModelMessages.NO_GOOGLE_ACCOUNT, s.errorMsg)
         assertTrue(s.signedOut)
       }
 
@@ -189,7 +190,7 @@ class AuthViewModelTest {
         val s = vm.uiState.value
         assertFalse(s.isLoading)
         assertNull(s.user)
-        assertTrue(s.errorMsg?.startsWith("Unexpected error:") == true)
+        assertTrue(s.errorMsg?.startsWith(AuthViewModelMessages.UNEXPECTED_ERROR_PREFIX) == true)
         assertTrue(s.signedOut)
       }
 

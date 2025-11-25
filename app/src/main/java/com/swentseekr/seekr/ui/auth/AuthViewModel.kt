@@ -5,6 +5,7 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
@@ -20,6 +21,12 @@ import com.swentseekr.seekr.model.authentication.AuthRepositoryFirebase
 import com.swentseekr.seekr.model.authentication.OnboardingHandler
 import com.swentseekr.seekr.model.profile.ProfileRepository
 import com.swentseekr.seekr.model.profile.ProfileRepositoryFirestore
+import com.swentseekr.seekr.ui.auth.AuthViewModelMessages.DEFAULT_SIGN_IN_FAILURE
+import com.swentseekr.seekr.ui.auth.AuthViewModelMessages.NO_GOOGLE_ACCOUNT
+import com.swentseekr.seekr.ui.auth.AuthViewModelMessages.NO_PROVIDER_AVAILABLE
+import com.swentseekr.seekr.ui.auth.AuthViewModelMessages.SIGN_IN_CANCELLED
+import com.swentseekr.seekr.ui.auth.AuthViewModelMessages.credentialFailure
+import com.swentseekr.seekr.ui.auth.AuthViewModelMessages.unexpectedFailure
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -105,31 +112,34 @@ class AuthViewModel(
             }
           }
         }) { failure ->
+          val message = failure.localizedMessage ?: DEFAULT_SIGN_IN_FAILURE
           _uiState.update {
-            it.copy(
-                isLoading = false,
-                errorMsg = failure.localizedMessage,
-                signedOut = true,
-                user = null)
+            it.copy(isLoading = false, errorMsg = message, signedOut = true, user = null)
           }
         }
       } catch (e: GetCredentialCancellationException) {
         _uiState.update {
-          it.copy(isLoading = false, errorMsg = "Sign-in cancelled", signedOut = true, user = null)
+          it.copy(isLoading = false, errorMsg = SIGN_IN_CANCELLED, signedOut = true, user = null)
+        }
+      } catch (e: NoCredentialException) {
+        _uiState.update {
+          it.copy(isLoading = false, errorMsg = NO_GOOGLE_ACCOUNT, signedOut = true, user = null)
         }
       } catch (e: GetCredentialException) {
+        val message =
+            when {
+              e.localizedMessage?.contains("no provider", ignoreCase = true) == true ->
+                  NO_PROVIDER_AVAILABLE
+              else -> credentialFailure(e.localizedMessage)
+            }
         _uiState.update {
-          it.copy(
-              isLoading = false,
-              errorMsg = "Failed to get credentials: ${e.localizedMessage}",
-              signedOut = true,
-              user = null)
+          it.copy(isLoading = false, errorMsg = message, signedOut = true, user = null)
         }
       } catch (e: Exception) {
         _uiState.update {
           it.copy(
               isLoading = false,
-              errorMsg = "Unexpected error: ${e.localizedMessage}",
+              errorMsg = unexpectedFailure(e.localizedMessage),
               signedOut = true,
               user = null)
         }
