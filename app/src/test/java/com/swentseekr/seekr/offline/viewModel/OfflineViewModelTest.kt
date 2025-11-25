@@ -25,8 +25,8 @@ class OfflineViewModelTest {
 
     // Counts and ratings should match the profile
     assertEquals(profile.doneHunts.size, viewModel.doneHuntsCount)
-    assertEquals(profile.author.reviewRate, viewModel.reviewRate, 0.0)
-    assertEquals(profile.author.sportRate, viewModel.sportRate, 0.0)
+    assertEquals(profile.author.reviewRate, viewModel.reviewRate, OfflineConstants.DEFAULT_DOUBLE)
+    assertEquals(profile.author.sportRate, viewModel.sportRate, OfflineConstants.DEFAULT_DOUBLE)
   }
 
   @Test
@@ -58,9 +58,11 @@ class OfflineViewModelTest {
     assertEquals(OfflineProfileTab.MY_HUNTS, viewModel.selectedTab)
 
     // All derived values should be safe defaults
-    assertEquals(0, viewModel.doneHuntsCount)
-    assertEquals(0.0, viewModel.reviewRate, 0.0)
-    assertEquals(0.0, viewModel.sportRate, 0.0)
+    assertEquals(OfflineConstants.DEFAULT_INT, viewModel.doneHuntsCount)
+    assertEquals(
+        OfflineConstants.DEFAULT_DOUBLE, viewModel.reviewRate, OfflineConstants.DEFAULT_DOUBLE)
+    assertEquals(
+        OfflineConstants.DEFAULT_DOUBLE, viewModel.sportRate, OfflineConstants.DEFAULT_DOUBLE)
     assertTrue(viewModel.huntsToDisplay.isEmpty())
   }
 
