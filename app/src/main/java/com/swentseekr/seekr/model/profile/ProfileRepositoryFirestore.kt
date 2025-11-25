@@ -170,11 +170,13 @@ class ProfileRepositoryFirestore(
             uid = userId,
             author =
                 Author(
-                    ProfileRepositoryFirestoreConstants.DEFAULT_USER_NAME,
-                    ProfileRepositoryFirestoreConstants.DEFAULT_USER_BIO,
-                    ProfileRepositoryFirestoreConstants.DEFAULT_PROFILE_PICTURE,
-                    ProfileRepositoryFirestoreConstants.DEFAULT_REVIEW_RATE,
-                    ProfileRepositoryFirestoreConstants.DEFAULT_SPORT_RATE,
+                    hasCompletedOnboarding = false,
+                    hasAcceptedTerms = false,
+                    pseudonym = ProfileRepositoryFirestoreConstants.DEFAULT_USER_NAME,
+                    bio = ProfileRepositoryFirestoreConstants.DEFAULT_USER_BIO,
+                    profilePicture = ProfileRepositoryFirestoreConstants.DEFAULT_PROFILE_PICTURE,
+                    reviewRate = ProfileRepositoryFirestoreConstants.DEFAULT_REVIEW_RATE,
+                    sportRate = ProfileRepositoryFirestoreConstants.DEFAULT_SPORT_RATE,
                     profilePictureUrl = ""),
             myHunts = mutableListOf(),
             doneHunts = mutableListOf(),
@@ -363,6 +365,8 @@ class ProfileRepositoryFirestore(
             ?: return null
     val author =
         Author(
+            hasCompletedOnboarding = authorMap["hasCompletedOnboarding"] as? Boolean ?: false,
+            hasAcceptedTerms = authorMap["hasAcceptedTerms"] as? Boolean ?: false,
             pseudonym = authorMap["pseudonym"] as? String ?: "",
             bio = authorMap["bio"] as? String ?: "",
             profilePicture = (authorMap["profilePicture"] as? Long ?: 0L).toInt(),
@@ -397,5 +401,22 @@ class ProfileRepositoryFirestore(
         myHunts = myHunts,
         doneHunts = doneHunts,
         likedHunts = likedHunts)
+  }
+
+  override suspend fun checkUserNeedsOnboarding(userId: String): Boolean {
+    val profile = getProfile(userId)
+
+    return !(profile?.author?.hasCompletedOnboarding ?: false)
+  }
+
+  override suspend fun completeOnboarding(userId: String, pseudonym: String, bio: String) {
+    val updates =
+        mapOf(
+            "author.hasCompletedOnboarding" to true,
+            "author.hasAcceptedTerms" to true,
+            "author.pseudonym" to pseudonym,
+            "author.bio" to bio)
+
+    profilesCollection.document(userId).update(updates).await()
   }
 }

@@ -21,4 +21,8 @@ interface ProfileRepository {
   suspend fun addDoneHunt(userId: String, hunt: Hunt)
 
   suspend fun uploadProfilePicture(userId: String, uri: Uri): String
+
+  suspend fun checkUserNeedsOnboarding(userId: String): Boolean
+
+  suspend fun completeOnboarding(userId: String, pseudonym: String, bio: String)
 }
