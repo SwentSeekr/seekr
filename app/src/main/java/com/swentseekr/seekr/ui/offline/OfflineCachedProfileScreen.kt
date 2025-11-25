@@ -13,11 +13,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.model.profile.mockProfileData
 import com.swentseekr.seekr.ui.components.HuntCard
 import com.swentseekr.seekr.ui.components.MAX_RATING
 import com.swentseekr.seekr.ui.components.Rating
@@ -25,7 +28,7 @@ import com.swentseekr.seekr.ui.components.RatingType
 import com.swentseekr.seekr.ui.profile.Profile
 import com.swentseekr.seekr.ui.theme.GrayDislike
 
-private enum class OfflineProfileTab {
+enum class OfflineProfileTab {
   MY_HUNTS,
   DONE_HUNTS,
   LIKED_HUNTS
@@ -33,8 +36,11 @@ private enum class OfflineProfileTab {
 
 @Composable
 fun OfflineCachedProfileScreen(profile: Profile?, modifier: Modifier = Modifier) {
+  val offlineViewModel = remember(profile) { OfflineViewModel(profile) }
+  val currentProfile = offlineViewModel.profile
+
   Surface(modifier = modifier.fillMaxSize()) {
-    if (profile == null) {
+    if (currentProfile == null) {
       Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(
             text = OfflineProfileConstants.OFFLINE_NO_PROFILE,
@@ -44,11 +50,11 @@ fun OfflineCachedProfileScreen(profile: Profile?, modifier: Modifier = Modifier)
       return@Surface
     }
 
-    var selectedTab by remember { mutableStateOf(OfflineProfileTab.MY_HUNTS) }
-
-    val doneHuntsCount = profile.doneHunts.size
-    val reviewRate = profile.author.reviewRate
-    val sportRate = profile.author.sportRate
+    val selectedTab = offlineViewModel.selectedTab
+    val doneHuntsCount = offlineViewModel.doneHuntsCount
+    val reviewRate = offlineViewModel.reviewRate
+    val sportRate = offlineViewModel.sportRate
+    val huntsToDisplay: List<Hunt> = offlineViewModel.huntsToDisplay
 
     Column(
         modifier =
@@ -56,6 +62,8 @@ fun OfflineCachedProfileScreen(profile: Profile?, modifier: Modifier = Modifier)
                 .padding(
                     horizontal = OfflineProfileConstants.SCREEN_HORIZONTAL_PADDING,
                     vertical = OfflineProfileConstants.SCREEN_VERTICAL_PADDING)) {
+
+          // Header / author section
           Row(
               modifier =
                   Modifier.fillMaxWidth()
@@ -63,7 +71,7 @@ fun OfflineCachedProfileScreen(profile: Profile?, modifier: Modifier = Modifier)
               verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(OfflineProfileConstants.COLUMN_WEIGHT)) {
                   Text(
-                      text = profile.author.pseudonym,
+                      text = currentProfile.author.pseudonym,
                       fontSize = OfflineProfileConstants.TEXT_SIZE_PSEUDONYM,
                       fontWeight = FontWeight.Bold)
 
@@ -91,9 +99,9 @@ fun OfflineCachedProfileScreen(profile: Profile?, modifier: Modifier = Modifier)
                 }
               }
 
-          if (profile.author.bio.isNotBlank()) {
+          if (currentProfile.author.bio.isNotBlank()) {
             Text(
-                text = profile.author.bio,
+                text = currentProfile.author.bio,
                 fontSize = OfflineProfileConstants.TEXT_SIZE_BODY,
                 modifier =
                     Modifier.fillMaxWidth()
@@ -102,16 +110,10 @@ fun OfflineCachedProfileScreen(profile: Profile?, modifier: Modifier = Modifier)
 
           Spacer(modifier = Modifier.height(OfflineProfileConstants.SECTION_TOP_PADDING))
 
-          OfflineProfileTabs(selectedTab = selectedTab, onTabSelected = { selectedTab = it })
+          OfflineProfileTabs(
+              selectedTab = selectedTab, onTabSelected = { offlineViewModel.selectTab(it) })
 
           Spacer(modifier = Modifier.height(OfflineProfileConstants.SMALL_PADDING))
-
-          val huntsToDisplay: List<Hunt> =
-              when (selectedTab) {
-                OfflineProfileTab.MY_HUNTS -> profile.myHunts
-                OfflineProfileTab.DONE_HUNTS -> profile.doneHunts
-                OfflineProfileTab.LIKED_HUNTS -> profile.likedHunts
-              }
 
           if (huntsToDisplay.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
@@ -174,4 +176,10 @@ private fun OfflineProfileTabs(
                   .clickable { onTabSelected(tab) })
     }
   }
+}
+
+@Preview
+@Composable
+fun OfflineCachedProfileScreenPreview() {
+  OfflineCachedProfileScreen(profile = mockProfileData())
 }
