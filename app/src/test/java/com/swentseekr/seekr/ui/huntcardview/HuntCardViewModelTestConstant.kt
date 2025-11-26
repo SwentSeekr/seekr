@@ -23,7 +23,7 @@ object HuntCardViewModelTestConstantsString {
   const val Comment2 = "Nice!"
   const val Comment3 = "someone_else"
   const val Start = "Start"
-    const val End = "End"
+  const val End = "End"
 
   const val MessageErrorStart = "Hunt with ID"
   const val MessageErrorEnd = "is not found"

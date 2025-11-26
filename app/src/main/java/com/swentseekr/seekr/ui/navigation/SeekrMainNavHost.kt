@@ -161,7 +161,6 @@ fun SeekrMainNavHost(
             startDestination = SeekrDestination.Overview.route,
             modifier = Modifier.padding(innerPadding)) {
 
-
               // Overview
               composable(SeekrDestination.Overview.route) {
                 Surface(
@@ -311,24 +310,18 @@ fun SeekrMainNavHost(
                     }
               }
 
-
-            // Review Images Screen
-            composable("reviewImages") {
+              // Review Images Screen
+              composable("reviewImages") {
                 val reviewImageViewModel: ReviewImageViewModel = viewModel()
                 val reviewHuntViewModel: ReviewHuntViewModel = viewModel()
-                Surface (modifier = Modifier.fillMaxSize().testTag( "IMAGE_REVIEW_SCREEN")){
-                    ReviewImagesScreen(
-                        photoUrls= reviewImageViewModel.uiState.collectAsState().value.photos,
-                        //reviewHuntViewModel= reviewHuntViewModel,
-                        //reviewImageViewModel= reviewImageViewModel,
-                        onGoBack = { navController.popBackStack() } )
+                Surface(modifier = Modifier.fillMaxSize().testTag("IMAGE_REVIEW_SCREEN")) {
+                  ReviewImagesScreen(
+                      photoUrls = reviewImageViewModel.uiState.collectAsState().value.photos,
+                      // reviewHuntViewModel= reviewHuntViewModel,
+                      // reviewImageViewModel= reviewImageViewModel,
+                      onGoBack = { navController.popBackStack() })
                 }
-            }
-
-
-
-
-
+              }
 
               // Edit Profile (new)
               composable(SeekrDestination.EditProfile.route) {

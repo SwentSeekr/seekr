@@ -28,5 +28,5 @@ object HuntCardViewModelConstants {
   const val Empty = ""
   const val ErrorOnDonClick = "Error marking hunt done"
   const val ErrorOnDoneClickSetMsg = "Failed to mark hunt as done:"
-  const val ErrorDeletingPhotoSetMsg= "Failed to delete photo"
+  const val ErrorDeletingPhotoSetMsg = "Failed to delete photo"
 }
