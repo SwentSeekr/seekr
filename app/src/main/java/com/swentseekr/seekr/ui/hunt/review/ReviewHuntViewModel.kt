@@ -30,10 +30,10 @@ import kotlinx.coroutines.launch
 
 data class ReviewHuntUIState(
     val hunt: Hunt? = null,
-    val huntId: String = "",
-    val userId: String = "",
-    val reviewText: String = "",
-    val rating: Double = 0.0,
+    val huntId: String = AddReviewScreenStrings.Empty,
+    val userId: String = AddReviewScreenStrings.Empty,
+    val reviewText: String = AddReviewScreenStrings.Empty,
+    val rating: Double = AddReviewScreenDefaults.Rating,
     val isSubmitted: Boolean = false,
     val photos: List<String> = emptyList(),
     val errorMsg: String? = null,
@@ -228,6 +228,11 @@ open class ReviewHuntViewModel(
     _uiState.value = _uiState.value.copy(rating = newRating)
   }
 
+    fun loadReviewImages(photoUrls: List<String>) {
+    _uiState.value = _uiState.value.copy(photos = photoUrls)
+
+
+    }
   /** Clears the review form if the review was submitted successfully. */
   fun clearForm() {
     if (_uiState.value.saveSuccessful) {
@@ -237,12 +242,28 @@ open class ReviewHuntViewModel(
     }
   }
 
+    /** Clears the review form and deletes any selected photos without submitting the review. */
+  fun clearFormNoSubmission() {
+    for (photo in _uiState.value.photos) {
+      viewModelScope.launch(dispatcher) {
+        try {
+          imageRepository.deleteReviewPhoto(photo)
+        } catch (e: Exception) {
+          _uiState.value =
+              _uiState.value.copy(
+                  errorMsg = "${AddReviewScreenStrings.ErrorCancleImage} ${e.message}")
+        }
+      }
+    }
+    clearFormCancel()
+  }
+
   /** Clears the review form when click on cancel */
   fun clearFormCancel() {
     _uiState.value =
         _uiState.value.copy(
-            reviewText = "",
-            rating = 0.0,
+            reviewText = AddReviewScreenStrings.Empty,
+            rating = AddReviewScreenDefaults.Rating,
             photos = emptyList(),
             isSubmitted = false,
             saveSuccessful = false,

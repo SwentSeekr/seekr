@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -44,11 +46,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.BlendMode.Companion.Screen
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberAsyncImagePainter
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -57,7 +68,11 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.swentseekr.seekr.model.hunt.DifficultyColor
 import com.swentseekr.seekr.model.hunt.HuntReview
+import com.swentseekr.seekr.ui.hunt.preview.PreviewHuntScreen
+import com.swentseekr.seekr.ui.hunt.preview.PreviewHuntViewModel
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
+import com.swentseekr.seekr.ui.hunt.review.ReviewImageViewModel
+import com.swentseekr.seekr.ui.hunt.review.ReviewImagesScreen
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import com.swentseekr.seekr.ui.profile.ProfilePicture
 import com.swentseekr.seekr.ui.theme.RedLike
@@ -74,6 +89,8 @@ fun HuntCardScreen(
     beginHunt: () -> Unit = {},
     addReview: () -> Unit = {},
     editHunt: () -> Unit = {},
+    //goImages: () -> Unit = {}
+    navController: NavHostController
 ) {
   val uiState by huntCardViewModel.uiState.collectAsState()
 
@@ -147,7 +164,7 @@ fun HuntCardScreen(
                         modifier =
                             Modifier.padding(HuntCardScreenDefaults.CardInnerPadding)
                                 .fillMaxWidth()
-                                .verticalScroll(rememberScrollState()),
+                            .verticalScroll(rememberScrollState()),
                         verticalArrangement =
                             Arrangement.spacedBy(HuntCardScreenDefaults.InfoColumnPadding)) {
                           // ROW WITH IMAGE, TITLE, AUTHOR, DIFFICULTY, DISTANCE, TIME
@@ -255,7 +272,7 @@ fun HuntCardScreen(
               }
             } else {
               items(reviews) { review ->
-                ReviewCard(review, reviewViewModel, huntCardViewModel, currentUserId)
+                ReviewCard(review, reviewViewModel, huntCardViewModel, currentUserId, navController)
               }
             }
           }
@@ -295,69 +312,91 @@ fun ReviewCard(
     review: HuntReview,
     reviewHuntViewModel: ReviewHuntViewModel,
     huntCardViewModel: HuntCardViewModel,
-    currentUserId: String?
+    currentUserId: String?,
+    //goImages: () -> Unit = {},
+    navController: NavHostController
 ) {
 
-  val uiState by reviewHuntViewModel.uiState.collectAsState()
-  // Load when arriving / when id changes
-  LaunchedEffect(review.huntId) { reviewHuntViewModel.loadHunt(review.huntId) }
-  val authorId = review.authorId
-  LaunchedEffect(authorId) { reviewHuntViewModel.loadAuthorProfile(authorId) }
-  val authorProfile = uiState.authorProfile
 
-  val isCurrentId = currentUserId == authorId
+    val reviewImageViewModel: ReviewImageViewModel = viewModel()
+    val uiState by reviewHuntViewModel.uiState.collectAsState()
+    // Load when arriving / when id changes
+    LaunchedEffect(review.huntId) { reviewHuntViewModel.loadHunt(review.huntId) }
+    val authorId = review.authorId
+    LaunchedEffect(authorId) { reviewHuntViewModel.loadAuthorProfile(authorId) }
+    val authorProfile = uiState.authorProfile
 
-  Card(
-      modifier =
-          Modifier.fillMaxWidth()
-              .padding(vertical = HuntCardScreenDefaults.ReviewCardVerticalPadding)
-              .border(
-                  HuntCardScreenDefaults.CardBorderWidth,
-                  HuntCardScreenDefaults.PrimaryBorderColor,
-                  RoundedCornerShape(HuntCardScreenDefaults.CornerRadius))
-              .testTag(HuntCardScreenTestTags.REVIEW_CARD),
-      colors = CardDefaults.cardColors(containerColor = HuntCardScreenDefaults.CardBackgroundColor),
-  ) {
-    Column(modifier = Modifier.padding(HuntCardScreenDefaults.ReviewCardPadding)) {
-      val author = authorProfile?.author?.pseudonym ?: ("Unknown Author")
-      Row(verticalAlignment = Alignment.CenterVertically) {
-        ProfilePicture(
-            profilePictureRes =
-                authorProfile?.author?.profilePicture ?: HuntCardScreenDefaults.NoPicture,
-            modifier = Modifier.size(HuntCardScreenDefaults.ProfilePictureSize))
-        Spacer(modifier = Modifier.padding(horizontal = HuntCardScreenDefaults.SmallSpacerPadding))
+    val isCurrentId = currentUserId == authorId
+    Card(
+        modifier =
+            Modifier.fillMaxWidth()
+                .padding(vertical = HuntCardScreenDefaults.ReviewCardVerticalPadding)
+                .padding(horizontal = HuntCardScreenDefaults.ScreenPaddingHorizontal)
+                .border(
+                    HuntCardScreenDefaults.CardBorderWidth,
+                    HuntCardScreenDefaults.PrimaryBorderColor,
+                    RoundedCornerShape(HuntCardScreenDefaults.CornerRadius)
+                )
+                .testTag(HuntCardScreenTestTags.REVIEW_CARD),
+        colors = CardDefaults.cardColors(containerColor = HuntCardScreenDefaults.CardBackgroundColor),
+    ) {
+        Column(modifier = Modifier.padding(HuntCardScreenDefaults.ReviewCardPadding)) {
+            val author = authorProfile?.author?.pseudonym ?: ("Unknown Author")
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                ProfilePicture(
+                    profilePictureRes =
+                        authorProfile?.author?.profilePicture ?: HuntCardScreenDefaults.NoPicture,
+                    modifier = Modifier.size(HuntCardScreenDefaults.ProfilePictureSize)
+                )
+                Spacer(modifier = Modifier.padding(horizontal = HuntCardScreenDefaults.SmallSpacerPadding))
 
-        Text(
-            "${HuntCardScreenStrings.By} $author",
-            fontWeight = FontWeight.Bold,
-        )
-        Spacer(modifier = Modifier.padding(horizontal = HuntCardScreenDefaults.BigSpacerPadding))
-        if (isCurrentId) {
-          IconButton(
-              onClick = {
-                huntCardViewModel.deleteReview(
-                    review.huntId, review.reviewId, review.authorId, currentUserId)
-              },
-          ) {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = HuntCardScreenStrings.ReviewDeleteButton,
-                modifier =
-                    Modifier.size(HuntCardScreenDefaults.DeleteReviewButtonSize)
-                        .padding(start = HuntCardScreenDefaults.DeleteReviewButtonPadding)
-                        .testTag(HuntCardScreenTestTags.DELETE_REVIEW_BUTTON))
-          }
+                Text(
+                    "${HuntCardScreenStrings.By} $author",
+                    fontWeight = FontWeight.Bold,
+                )
+                Spacer(modifier = Modifier.padding(horizontal = HuntCardScreenDefaults.BigSpacerPadding))
+                if (isCurrentId) {
+                    IconButton(
+                        onClick = {
+                            huntCardViewModel.deleteReview(
+                                review.huntId, review.reviewId, review.authorId, currentUserId
+                            )
+                        },
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = HuntCardScreenStrings.ReviewDeleteButton,
+                            modifier =
+                                Modifier.size(HuntCardScreenDefaults.DeleteReviewButtonSize)
+                                    .padding(start = HuntCardScreenDefaults.DeleteReviewButtonPadding)
+                                    .testTag(HuntCardScreenTestTags.DELETE_REVIEW_BUTTON)
+                        )
+                    }
+                }
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("${HuntCardScreenStrings.ReviewTitlePrefix}", fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.padding(horizontal = HuntCardScreenDefaults.SmallSpacerPadding))
+                Rating(review.rating, RatingType.STAR)
+            }
+
+            Text(review.comment)
+            Text(review.photos.size.toString())
+
+
+            if (review.photos.isNotEmpty()) {
+                Button(onClick = {
+                    //reviewImageViewModel.setPhotos(review.photos)
+                    reviewHuntViewModel.loadReviewImages(review.photos)
+                    navController.navigate("reviewImages")
+                }, modifier = Modifier.align(Alignment.End)) { Text("See Pictures") }
+            }
+
+
+
         }
-      }
-      Row(verticalAlignment = Alignment.CenterVertically) {
-        Text("${HuntCardScreenStrings.ReviewTitlePrefix}", fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.padding(horizontal = HuntCardScreenDefaults.SmallSpacerPadding))
-        Rating(review.rating, RatingType.STAR)
-      }
 
-      Text(review.comment)
     }
-  }
 }
 
 @Composable
@@ -440,7 +479,7 @@ fun HuntHeaderSection(
         }
       }
 }
-
+/*
 @Preview
 @Composable
 fun HuntCardScreenPreview() {
@@ -448,3 +487,5 @@ fun HuntCardScreenPreview() {
       huntId = "hunt123",
   )
 }
+
+ */

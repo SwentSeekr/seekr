@@ -1,0 +1,32 @@
+package com.swentseekr.seekr.ui.huntcardview
+
+object HuntCardViewModelConstants {
+  const val HuntCardTag = "HuntCardViewModel"
+  const val ReviewHuntTag = "ReviewHuntViewModel"
+
+  const val ErrorLoadingProfil = "Error loading user profile for User ID:"
+  const val ErrorLoadingProfileSetMsg = "Unable to load author profile."
+  const val UnknownUser = "unknown"
+  const val ErrorLoadingCurrentUser = "Error loading current user ID"
+  const val ErrorLodingCurrentUserSetMsg = "Unable to load your account information."
+  const val ErrorLoadingOtherReviews = "Error loading reviews for Hunt ID:"
+  const val ErrorLoadingOtherReviewsSetMsg = "Failed to load reviews."
+  const val ErrorLoadingHunt = "Error loading Hunt by ID:"
+  const val ErrorLoadingHuntSetMsg = "Failed to load hunt details."
+  const val ErrorLoadingHuntAuthor = "Error loading Author by ID:"
+  const val ErrorLOadingHuntAuthorSetMsg = "Unable to load hunt author."
+  const val ErrorDeleteHunt = "Error in deleting Hunt by ID:"
+  const val ErrorDeleteHuntSetMsg = "Failed to delete hunt."
+  const val NoUser = "None (B2)"
+  const val ErrorDeletingPhoto = "Error deleting photo:"
+  const val ErrorDeleteReviewSetMsg = "You can only delete your own review."
+  const val ErrorDeletingReview = "Error deleting Review for hunt"
+  const val ErrorDeletingReviewSetMsg = "Failed to delete Hunt:"
+  const val ErrorEditHunt = "Error in editing Hunt by ID:"
+  const val ErrorEditHuntSetMsg = "Failed to update hunt."
+  const val ErrorOnDoneLoading = "Hunt data is not loaded."
+  const val Empty = ""
+  const val ErrorOnDonClick = "Error marking hunt done"
+  const val ErrorOnDoneClickSetMsg = "Failed to mark hunt as done:"
+  const val ErrorDeletingPhotoSetMsg= "Failed to delete photo"
+}
