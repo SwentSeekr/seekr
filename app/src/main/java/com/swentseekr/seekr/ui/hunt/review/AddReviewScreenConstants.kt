@@ -17,7 +17,7 @@ object AddReviewScreenDefaults {
   val CommentFieldCornerRadius: Dp = 12.dp
   val CommentFieldWidthFraction = 0.9f
   val TitleFontSize = 24.sp
-  val CloseImageSize: Dp = 24.dp
+  val CloseImageSize: Dp = 48.dp
   val SubtitleFontSize = 14.sp
   const val MaxStars = 5
   val CommentFieldHeight: Dp = 350.dp

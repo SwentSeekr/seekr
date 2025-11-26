@@ -347,12 +347,9 @@ fun SeekrMainNavHost(
               // Review Images Screen
               composable("reviewImages") {
                 val reviewImageViewModel: ReviewImageViewModel = viewModel()
-                val reviewHuntViewModel: ReviewHuntViewModel = viewModel()
                 Surface(modifier = Modifier.fillMaxSize().testTag("IMAGE_REVIEW_SCREEN")) {
                   ReviewImagesScreen(
                       photoUrls = reviewImageViewModel.uiState.collectAsState().value.photos,
-                      // reviewHuntViewModel= reviewHuntViewModel,
-                      // reviewImageViewModel= reviewImageViewModel,
                       onGoBack = { navController.popBackStack() })
                 }
               }
