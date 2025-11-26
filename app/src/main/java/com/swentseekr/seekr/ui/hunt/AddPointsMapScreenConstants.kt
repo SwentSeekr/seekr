@@ -15,4 +15,5 @@ object AddPointsMapScreenTestTags {
   const val MAP_VIEW = "MapView"
   const val CANCEL_BUTTON = "CancelButton"
   const val POINT_NAME_FIELD = "PointNameField"
+  const val POINT_DESCRIPTION_FIELD = "PointDescriptionField"
 }

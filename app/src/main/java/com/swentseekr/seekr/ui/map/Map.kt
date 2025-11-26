@@ -150,14 +150,18 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
                 state =
                     MarkerState(LatLng(selectedHunt.start.latitude, selectedHunt.start.longitude)),
                 title = "${MapScreenStrings.StartPrefix}${selectedHunt.start.name}",
+                snippet = selectedHunt.start.description,
                 icon = bitmapDescriptorFromVector(LocalContext.current, R.drawable.ic_start_marker))
             selectedHunt.middlePoints.forEachIndexed { idx, point ->
               Marker(
-                  state = MarkerState(LatLng(point.latitude, point.longitude)), title = point.name)
+                  state = MarkerState(LatLng(point.latitude, point.longitude)),
+                  title = point.name,
+                  snippet = point.description)
             }
             Marker(
                 state = MarkerState(LatLng(selectedHunt.end.latitude, selectedHunt.end.longitude)),
                 title = "${MapScreenStrings.EndPrefix}${selectedHunt.end.name}",
+                snippet = selectedHunt.end.description,
                 icon = bitmapDescriptorFromVector(LocalContext.current, R.drawable.ic_end_marker))
             if (uiState.route.isNotEmpty()) {
               Polyline(

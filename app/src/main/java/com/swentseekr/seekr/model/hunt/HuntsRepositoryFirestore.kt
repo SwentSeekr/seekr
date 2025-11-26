@@ -117,7 +117,8 @@ class HuntsRepositoryFirestore(
             Location(
                 latitude = it["latitude"] as? Double ?: 0.0,
                 longitude = it["longitude"] as? Double ?: 0.0,
-                name = it["name"] as? String ?: "")
+                name = it["name"] as? String ?: "",
+                description = it["description"] as? String ?: "")
           } ?: Location(0.0, 0.0, "")
 
       val endData = document.get("end") as? Map<*, *>
@@ -126,7 +127,8 @@ class HuntsRepositoryFirestore(
             Location(
                 latitude = it["latitude"] as? Double ?: 0.0,
                 longitude = it["longitude"] as? Double ?: 0.0,
-                name = it["name"] as? String ?: "")
+                name = it["name"] as? String ?: "",
+                description = it["description"] as? String ?: "")
           } ?: Location(0.0, 0.0, "")
       val middlePointsData = document.get("middlePoints") as? List<Map<*, *>>
       val middlePoints =
@@ -134,7 +136,8 @@ class HuntsRepositoryFirestore(
             Location(
                 latitude = it["latitude"] as? Double ?: 0.0,
                 longitude = it["longitude"] as? Double ?: 0.0,
-                name = it["name"] as? String ?: "")
+                name = it["name"] as? String ?: "",
+                description = it["description"] as? String ?: "")
           } ?: emptyList()
       val statusString = document.getString("status") ?: return null
       val status = HuntStatus.valueOf(statusString)
