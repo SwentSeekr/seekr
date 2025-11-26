@@ -2,6 +2,8 @@ package com.swentseekr.seekr.model.profile
 
 import android.net.Uri
 import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants
+import com.swentseekr.seekr.ui.profile.EditProfileStrings.EMPTY_STRING
 import com.swentseekr.seekr.ui.profile.Profile
 
 class ProfileRepositoryLocal : ProfileRepository {
@@ -15,7 +17,7 @@ class ProfileRepositoryLocal : ProfileRepository {
 
   override suspend fun createProfile(profile: Profile) {
     require(!(profiles.any { it.uid == profile.uid })) {
-      "Profile with ID ${profile.uid} already exists"
+      String.format(ProfileRepositoryStrings.PROFILE_ALREADY_EXISTS, profile.uid)
     }
     profiles.add(profile)
   }
@@ -26,7 +28,8 @@ class ProfileRepositoryLocal : ProfileRepository {
         return profiles[i]
       }
     }
-    throw IllegalArgumentException("Profile with ID $userId not found")
+    throw IllegalArgumentException(
+        String.format(ProfileRepositoryStrings.PROFILE_NOT_FOUND, userId))
   }
 
   override suspend fun updateProfile(profile: Profile) {
@@ -36,7 +39,8 @@ class ProfileRepositoryLocal : ProfileRepository {
         return
       }
     }
-    throw IllegalArgumentException("Profile with ID ${profile.uid} is not found")
+    throw IllegalArgumentException(
+        String.format(ProfileRepositoryStrings.PROFILE_NOT_FOUND, profile.uid))
   }
 
   override suspend fun getMyHunts(userId: String): List<Hunt> {
@@ -54,21 +58,40 @@ class ProfileRepositoryLocal : ProfileRepository {
   override suspend fun addDoneHunt(userId: String, hunt: Hunt) {
     val profile =
         profiles.find { it.uid == userId }
-            ?: throw IllegalArgumentException("Profile with ID $userId not found")
-
+            ?: throw IllegalArgumentException(
+                String.format(ProfileRepositoryStrings.PROFILE_NOT_FOUND, userId))
     if (profile.doneHunts.none { it.uid == hunt.uid }) {
       profile.doneHunts.add(hunt)
     }
   }
 
   override suspend fun uploadProfilePicture(userId: String, uri: Uri): String {
-    val fakeUrl = "local://profile-picture/$userId"
+    val fakeUrl = ProfileRepositoryConstants.LOCAL_PROFILE_PICTURE_PREFIX + userId
     val profile =
         profiles.find { it.uid == userId }
-            ?: throw IllegalArgumentException("Profile with ID $userId not found")
+            ?: throw IllegalArgumentException(
+                String.format(ProfileRepositoryStrings.PROFILE_NOT_FOUND, userId))
     val updatedProfile = profile.copy(author = profile.author.copy(profilePictureUrl = fakeUrl))
     updateProfile(updatedProfile)
     return fakeUrl
+  }
+
+  override suspend fun deleteCurrentProfilePicture(userId: String, url: String) {
+    val profile =
+        profiles.find { it.uid == userId }
+            ?: throw IllegalArgumentException(
+                String.format(ProfileRepositoryStrings.PROFILE_NOT_FOUND, userId))
+
+    if (profile.author.profilePictureUrl == url) {
+      val updatedProfile =
+          profile.copy(
+              author =
+                  profile.author.copy(
+                      profilePictureUrl = EMPTY_STRING,
+                      profilePicture = EditProfileNumberConstants.PROFILE_PIC_DEFAULT))
+
+      updateProfile(updatedProfile)
+    }
   }
 
   override suspend fun checkUserNeedsOnboarding(userId: String): Boolean {
