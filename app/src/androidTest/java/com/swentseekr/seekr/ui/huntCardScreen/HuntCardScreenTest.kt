@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.swentseekr.seekr.FakeReviewHuntViewModel
 import com.swentseekr.seekr.model.hunt.Difficulty
@@ -63,7 +64,7 @@ class HuntCardScreenTest {
           onGoBack = onGoBack,
           beginHunt = beginHunt,
           addReview = addReview,
-      )
+          navController = rememberNavController())
     }
   }
 
@@ -75,7 +76,8 @@ class HuntCardScreenTest {
           huntCardViewModel = FakeHuntCardViewModel(createFakeHunt()),
           onGoBack = {},
           beginHunt = {},
-          addReview = {})
+          addReview = {},
+          navController = rememberNavController())
     }
 
     // Verifies the presence of principal UI elements
@@ -101,7 +103,8 @@ class HuntCardScreenTest {
           huntCardViewModel = FakeHuntCardViewModel(createFakeHunt()),
           onGoBack = { goBackClicked = true },
           beginHunt = { beginClicked = true },
-          addReview = { reviewClicked = true })
+          addReview = { reviewClicked = true },
+          navController = rememberNavController())
     }
 
     // Click on boutons
@@ -120,7 +123,10 @@ class HuntCardScreenTest {
     val fakeVm = FakeHuntCardViewModel(createFakeHunt())
 
     composeTestRule.setContent {
-      HuntCardScreen(huntId = HuntCardScreenConstantStrings.TestHunt, huntCardViewModel = fakeVm)
+      HuntCardScreen(
+          huntId = HuntCardScreenConstantStrings.TestHunt,
+          huntCardViewModel = fakeVm,
+          navController = rememberNavController())
     }
 
     // Initially: not liked
@@ -147,7 +153,8 @@ class HuntCardScreenTest {
       HuntCardScreen(
           huntId = HuntCardScreenConstantStrings.TestHunt,
           huntCardViewModel = fakeVm,
-          reviewViewModel = fakeReviewVm)
+          reviewViewModel = fakeReviewVm,
+          navController = rememberNavController())
     }
 
     composeTestRule.waitForIdle()
@@ -161,7 +168,10 @@ class HuntCardScreenTest {
             hunt = createFakeHunt().copy(authorId = HuntCardScreenConstantStrings.AuthorId))
 
     composeTestRule.setContent {
-      HuntCardScreen(huntId = HuntCardScreenConstantStrings.TestHunt, huntCardViewModel = fakeVm)
+      HuntCardScreen(
+          huntId = HuntCardScreenConstantStrings.TestHunt,
+          huntCardViewModel = fakeVm,
+          navController = rememberNavController())
     }
 
     composeTestRule.onNodeWithText(HuntCardScreenConstantStrings.AddReview).assertIsDisplayed()
@@ -172,7 +182,8 @@ class HuntCardScreenTest {
     composeTestRule.setContent {
       HuntCardScreen(
           huntId = HuntCardScreenConstantStrings.TestHunt,
-          huntCardViewModel = FakeHuntCardViewModel(createFakeHunt()))
+          huntCardViewModel = FakeHuntCardViewModel(createFakeHunt()),
+          navController = rememberNavController())
     }
 
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.MAP_CONTAINER).assertIsDisplayed()
