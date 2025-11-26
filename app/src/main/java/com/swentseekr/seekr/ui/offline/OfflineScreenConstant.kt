@@ -13,8 +13,8 @@ object OfflineConstants {
 
   const val OFFLINE_MAP_MESSAGE = "Map is unavailable while you're offline."
   const val OFFLINE_OVERVIEW_MESSAGE =
-      "Overview is unavailable while you're offline.\nYou can still see your downloaded hunts."
-  const val SHOW_DOWNLOADED_HUNTS_BUTTON = "Show downloaded hunts"
+      "No internet? No problem. You can still access your saved hunts."
+  const val SHOW_DOWNLOADED_HUNTS_BUTTON = "Continue without connection"
 
   val ICON_SPACING = 16.dp
   val MESSAGE_SPACING = 8.dp
@@ -29,8 +29,8 @@ object OfflineConstants {
   val DEFAULT_HUNT_LIST = emptyList<com.swentseekr.seekr.model.hunt.Hunt>()
 
   // --- Card styling ---
-  val LIGHT_GREEN_BACKGROUND = Color(0xFFDFF5E3)
-  val OFFLINE_CARD_HEIGHT = 200.dp
+  val LIGHT_GREEN_BACKGROUND = Color(0xFFDAEFD0)
+  val OFFLINE_CARD_HEIGHT = 450.dp
   val OFFLINE_CARD_WIDTH_RATIO = 0.8f
   val CARD_SHAPE = RoundedCornerShape(16.dp)
   val OFFLINE_ICON_SIZE = 48.dp
