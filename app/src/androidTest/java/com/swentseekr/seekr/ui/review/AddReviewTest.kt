@@ -10,6 +10,9 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.swentseekr.seekr.ui.hunt.review.AddReviewScreen
 import com.swentseekr.seekr.ui.hunt.review.AddReviewScreenTestTags
+import com.swentseekr.seekr.ui.hunt.review.ReviewHuntUIState
+import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -98,50 +101,24 @@ class HuntCardReviewScreenTest {
     composeRule.onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON).performClick()
   }
 
-  /*
   @Test
-  fun lazyRow_photosAreDisplayed_andRemoveClickCallsViewModel() {
-    // Fake ViewModel with observable list
-    val viewModel = ReviewHuntViewModel()
+  fun photos_lazyRow_isDisplayed_whenPhotosExist() {
+    // Create a fake ViewModel
+    val fakeViewModel =
+        object : ReviewHuntViewModel() {
+          override val uiState =
+              MutableStateFlow(
+                  ReviewHuntUIState(
+                      photos = listOf("photo1", "photo2"),
+                      rating = 0.0,
+                  ))
+        }
 
-    // Prepopulate photos
-    val photoUrls = listOf("photo1", "photo2")
-    viewModel.loadReviewImages(photoUrls)
-
-    // Set content
     composeRule.setContent {
-      AddReviewScreen(
-        huntId = "hunt123",
-        reviewViewModel = viewModel,
-        onGoBack = {},
-        onDone = {},
-        onCancel = {}
-      )
+      MaterialTheme { AddReviewScreen(huntId = "hunt123", reviewViewModel = fakeViewModel) }
     }
 
-    // Assert that each photo is displayed
-    photoUrls.forEachIndexed { index, _ ->
-      composeRule
-        .onNodeWithContentDescription(
-          "${AddReviewScreenStrings.SelectedImageContentDescriptionPrefix}$index"
-        )
-        .assertIsDisplayed()
-    }
-
-    // Click on the "close" icon of the first photo
-    composeRule
-      .onNodeWithContentDescription(AddReviewScreenStrings.RemovePhotoContentDescription)
-      .performClick()
-    composeRule
-      .onNodeWithTag("RemovePhoto0")
-      .performScrollTo()
-      .performClick()
-
-    composeRule.waitForIdle()
-    // Assert the photo was removed from ViewModel
-    assert(viewModel.uiState.value.photos.size == photoUrls.size - 1)
-    assert(!viewModel.uiState.value.photos.contains("photo1"))
+    // Assert that the LazyRow is displayed
+    composeRule.onNodeWithTag("PhotosLazyRow").assertExists()
   }
-
-   */
 }

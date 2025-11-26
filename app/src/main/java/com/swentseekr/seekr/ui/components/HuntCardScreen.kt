@@ -58,7 +58,6 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.swentseekr.seekr.model.hunt.DifficultyColor
 import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
-import com.swentseekr.seekr.ui.hunt.review.ReviewImageViewModel
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import com.swentseekr.seekr.ui.profile.ProfilePicture
 import com.swentseekr.seekr.ui.theme.RedLike
@@ -303,7 +302,6 @@ fun ReviewCard(
     navController: NavHostController
 ) {
 
-  val reviewImageViewModel: ReviewImageViewModel = viewModel()
   val uiState by reviewHuntViewModel.uiState.collectAsState()
   // Load when arriving / when id changes
   LaunchedEffect(review.huntId) { reviewHuntViewModel.loadHunt(review.huntId) }
@@ -367,7 +365,6 @@ fun ReviewCard(
       if (review.photos.isNotEmpty()) {
         Button(
             onClick = {
-              // reviewImageViewModel.setPhotos(review.photos)
               reviewHuntViewModel.loadReviewImages(review.photos)
               navController.navigate("reviewImages")
             },
