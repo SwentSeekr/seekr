@@ -137,7 +137,9 @@ class ProfileRepositoryFirestore(
                     ?: ProfileRepositoryConstants.DEFAULT_LOCATION_LNG,
             name =
                 this[ProfileRepositoryConstants.LOCATION_FIELD_NAME] as? String
-                    ?: ProfileRepositoryConstants.DEFAULT_LOCATION_NAME)
+                    ?: ProfileRepositoryConstants.DEFAULT_LOCATION_NAME,
+            description =
+                this[ProfileRepositoryConstants.LOCATION_FIELD_DESCRIPTION] as? String ?: "")
   }
 
   private val profilesCollection = db.collection(ProfileRepositoryConstants.PROFILES_COLLECTION)

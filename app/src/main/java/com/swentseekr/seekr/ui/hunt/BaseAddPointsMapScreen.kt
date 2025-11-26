@@ -81,8 +81,8 @@ fun BaseAddPointsMapScreen(
   PointNameDialog(
       show = showNameDialog && tempLatLng != null,
       onDismiss = { showNameDialog = false },
-      onConfirm = { name ->
-        tempLatLng?.let { points = points + Location(it.latitude, it.longitude, name) }
+      onConfirm = { name, description ->
+        tempLatLng?.let { points = points + Location(it.latitude, it.longitude, name, description) }
         showNameDialog = false
       })
 }

@@ -90,10 +90,17 @@ class AddPointsMapScreenTest {
   @Test
   fun pointNameDialog_validationLogic_works() {
     var confirmedName: String? = null
+    var confirmedDescription: String? = null
 
     composeRule.setContent {
       MaterialTheme {
-        PointNameDialog(show = true, onDismiss = {}, onConfirm = { confirmedName = it })
+        PointNameDialog(
+            show = true,
+            onDismiss = {},
+            onConfirm = { name, description ->
+              confirmedName = name
+              confirmedDescription = description
+            })
       }
     }
 
@@ -115,9 +122,13 @@ class AddPointsMapScreenTest {
     composeRule
         .onNodeWithTag(AddPointsMapScreenTestTags.POINT_NAME_FIELD)
         .performTextInput("Louvre Museum")
+    composeRule
+        .onNodeWithTag(AddPointsMapScreenTestTags.POINT_DESCRIPTION_FIELD)
+        .performTextInput("Paris Museum")
     composeRule.onNodeWithText("Add").performClick()
 
     composeRule.waitForIdle()
     assertEquals("Louvre Museum", confirmedName)
+    assertEquals("Paris Museum", confirmedDescription)
   }
 }

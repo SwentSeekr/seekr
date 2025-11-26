@@ -17,17 +17,18 @@ import androidx.compose.ui.platform.testTag
 
 /** Dialog composable extracted for easier testing and cleaner code. */
 @Composable
-fun PointNameDialog(show: Boolean, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
+fun PointNameDialog(show: Boolean, onDismiss: () -> Unit, onConfirm: (String, String) -> Unit) {
   if (!show) return
 
   var pointName by remember { mutableStateOf("") }
+  var pointDescription by remember { mutableStateOf("") }
   var hasTypedBefore by remember { mutableStateOf(false) }
 
   val isError = hasTypedBefore && pointName.isBlank()
 
   AlertDialog(
       onDismissRequest = onDismiss,
-      title = { Text("Enter new point's name") },
+      title = { Text("Give your checkpoint a name and an optional description.") },
       text = {
         Column {
           OutlinedTextField(
@@ -47,11 +48,20 @@ fun PointNameDialog(show: Boolean, onDismiss: () -> Unit, onConfirm: (String) ->
               },
               modifier =
                   Modifier.fillMaxWidth().testTag(AddPointsMapScreenTestTags.POINT_NAME_FIELD))
+
+          OutlinedTextField(
+              value = pointDescription,
+              onValueChange = { pointDescription = it },
+              label = { Text("Description") },
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .testTag(AddPointsMapScreenTestTags.POINT_DESCRIPTION_FIELD))
         }
       },
       confirmButton = {
         TextButton(
-            onClick = { onConfirm(pointName.trim()) }, enabled = pointName.trim().isNotBlank()) {
+            onClick = { onConfirm(pointName.trim(), pointDescription.trim()) },
+            enabled = pointName.trim().isNotBlank()) {
               Text("Add")
             }
       },
