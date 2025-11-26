@@ -25,18 +25,12 @@ import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReviewImagesScreen( // reviewImageViewModel: ReviewImageViewModel,
-    // reviewHuntViewModel: ReviewHuntViewModel,
+fun ReviewImagesScreen(
     photoUrls: List<String>,
     onGoBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
 
-  // val uiState =  reviewImageViewModel.uiState.collectAsState()
-  // val photoUrls = uiState.value.photos
-
-  // val uiState by reviewHuntViewModel.uiState.collectAsState()
-  // val photoUrls = uiState.photos
   val scroll = rememberScrollState()
   Scaffold(
       topBar = {

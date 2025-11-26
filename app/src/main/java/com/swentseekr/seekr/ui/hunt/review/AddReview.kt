@@ -198,7 +198,8 @@ fun AddReviewScreen(
                         Arrangement.spacedBy(AddReviewScreenDefaults.PhotosSpacing),
                     modifier =
                         Modifier.fillMaxWidth()
-                            .padding(horizontal = AddReviewScreenDefaults.SpacePadding)) {
+                            .padding(horizontal = AddReviewScreenDefaults.SpacePadding)
+                            .testTag("PhotosLazyRow")) {
                       items(uiState.photos.size) { index ->
                         AsyncImage(
                             model = uiState.photos[index],
