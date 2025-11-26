@@ -13,24 +13,17 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class OfflineMapTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
-    @Test
-    fun offlineMapScreen_displaysOfflineMapMessage() {
-        composeTestRule.setContent {
-            TestOfflineMapScreen()
-        }
+  @Test
+  fun offlineMapScreen_displaysOfflineMapMessage() {
+    composeTestRule.setContent { TestOfflineMapScreen() }
 
-        composeTestRule
-            .onNodeWithText(OfflineConstants.OFFLINE_MAP_MESSAGE)
-            .assertIsDisplayed()
-    }
+    composeTestRule.onNodeWithText(OfflineConstants.OFFLINE_MAP_MESSAGE).assertIsDisplayed()
+  }
 }
 
 @Composable
 private fun TestOfflineMapScreen() {
-    MaterialTheme {
-        OfflineMapScreen()
-    }
+  MaterialTheme { OfflineMapScreen() }
 }
