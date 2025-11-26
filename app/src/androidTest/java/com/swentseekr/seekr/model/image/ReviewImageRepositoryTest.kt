@@ -9,6 +9,7 @@ import com.swentseekr.seekr.model.hunt.ReviewImageRepository
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment
 import java.io.File
 import junit.framework.TestCase.assertTrue
+import junit.framework.TestCase.fail
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import org.junit.After
@@ -20,9 +21,6 @@ class ReviewImageRepositoryTest {
   private lateinit var repository: ReviewImageRepository
   private lateinit var storage: FirebaseStorage
   private val userId = "test_user"
-
-  private fun FirebaseStorage.fromDownloadUrl(url: String) =
-      this.getReference(url.substringAfter("/o/").substringBefore("?").replace("%2F", "/"))
 
   @Before
   fun setup() = runBlocking {
@@ -71,20 +69,25 @@ class ReviewImageRepositoryTest {
   }
 
   @Test
-  fun deleteReviewPhoto_removesUploadedPhoto() = runBlocking {
-    val uri = createTempUri("delete")
-    val url = repository.uploadReviewPhoto(userId, uri)
+  fun deleteReviewPhoto_removesUploadedPhoto_firebase() = runBlocking {
+    val storage = FirebaseStorage.getInstance()
+    val repository = ReviewImageRepository(storage)
+    val uri = createTempUri("photo")
+    val ref = storage.reference.child("test/${System.currentTimeMillis()}.jpg")
 
-    // Delete uploaded file
-    repository.deleteReviewPhoto(url)
+    // Upload
+    ref.putFile(uri).await()
+    val url = ref.downloadUrl.await()
+
+    // Delete using repo
+    repository.deleteReviewPhoto(url.toString())
 
     // Verify deletion
-    val ref = storage.fromDownloadUrl(url)
     try {
-      ref.metadata.await()
-      assertTrue("File should have been deleted", false) // should not reach here
+      storage.getReferenceFromUrl(url.toString()).metadata.await()
+      fail("File should have been deleted")
     } catch (e: Exception) {
-      assertTrue(true) // expected: file does not exist
+      // expected
     }
   }
 

@@ -7,6 +7,7 @@ import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryLocal
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryLocal
+import com.swentseekr.seekr.model.hunt.ReviewImageRepositoryLocal
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.model.profile.ProfileRepositoryLocal
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModelTestConstantsString.TEST_AUTHOR_ID
@@ -28,6 +29,7 @@ class HuntCardViewModelTest {
   private lateinit var fakeRepository: HuntsRepositoryLocal
   private lateinit var fakeRevRepository: HuntReviewRepositoryLocal
   private lateinit var fakeProRepository: ProfileRepositoryLocal
+  private lateinit var fakeImageReviewRepository: ReviewImageRepositoryLocal
   private val testDispatcher = StandardTestDispatcher()
 
   private val testHunt =
@@ -37,12 +39,12 @@ class HuntCardViewModelTest {
               Location(
                   HuntCardViewModelTestConstantsNumeric.Location1,
                   HuntCardViewModelTestConstantsNumeric.Location2,
-                  "Start"),
+                  HuntCardViewModelTestConstantsString.Start),
           end =
               Location(
                   HuntCardViewModelTestConstantsNumeric.Location3,
                   HuntCardViewModelTestConstantsNumeric.Location4,
-                  "End"),
+                  HuntCardViewModelTestConstantsString.End),
           middlePoints = emptyList(),
           status = HuntStatus.FUN,
           title = HuntCardViewModelTestConstantsString.TestTile,
@@ -61,8 +63,11 @@ class HuntCardViewModelTest {
     fakeRepository.addHunt(testHunt)
     fakeRevRepository = HuntReviewRepositoryLocal()
     fakeProRepository = ProfileRepositoryLocal()
+    fakeImageReviewRepository = ReviewImageRepositoryLocal()
 
-    viewModel = HuntCardViewModel(fakeRepository, fakeRevRepository, fakeProRepository)
+    viewModel =
+        HuntCardViewModel(
+            fakeRepository, fakeRevRepository, fakeProRepository, fakeImageReviewRepository)
 
     advanceUntilIdle()
   }
@@ -146,6 +151,19 @@ class HuntCardViewModelTest {
 
     assertTrue(true)
   }
+    @Test
+    fun loadHunt_withUserDoneHunts_marksAchieved() = runTest {
+        val userId = "user_done"
+        fakeProRepository.addProfile(Profile(uid = userId))
+        fakeProRepository.addDoneHunt(userId, testHunt)
+
+        viewModel.initialize(userId, testHunt)
+        viewModel.loadHunt(testHunt.uid)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertTrue(state.isAchieved)
+    }
 
   /** Test that check that the load Author does not crash not really implemented yet */
   @Test
@@ -195,6 +213,76 @@ class HuntCardViewModelTest {
     assertTrue(reviews.isEmpty())
   }
 
+    /** Test that deleteReview deletes photos and review, and handles exceptions */
+    @Test
+    fun deleteReview_repositoryThrows_setsErrorMsg() = runTest {
+        // Arrange: review with photo
+        val review =
+            HuntReview(
+                reviewId = "rev-exception",
+                authorId = "user1",
+                huntId = TEST_HUNT_ID,
+                rating = 5.0,
+                comment = "comment",
+                photos = listOf("photo1"))
+        fakeRevRepository.addReviewHunt(review)
+
+        // Replace image repository with one that throws
+        val failingImageRepo = object : ReviewImageRepositoryLocal() {
+            override suspend fun deleteReviewPhoto(url: String) {
+                throw RuntimeException("Failed to delete")
+            }
+        }
+
+        viewModel = HuntCardViewModel(
+            fakeRepository,
+            fakeRevRepository,
+            fakeProRepository,
+            failingImageRepo
+        )
+
+        viewModel.deleteReview(
+            huntID = TEST_HUNT_ID,
+            reviewID = review.reviewId,
+            userID = review.authorId,
+            currentUserId = review.authorId
+        )
+
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertTrue(state.errorMsg?.contains("Failed to delete") == true)
+    }
+
+    /** Test that deleteReview handles non-existing review */
+    @Test
+    fun deleteReview_reviewRepositoryThrows_setsErrorMsg() = runTest {
+
+        viewModel = HuntCardViewModel(
+            fakeRepository,
+            fakeRevRepository,
+            fakeProRepository,
+            ReviewImageRepositoryLocal()
+        )
+
+        //attempt to delete a non-existing review
+        viewModel.deleteReview(
+            huntID = TEST_HUNT_ID,
+            reviewID = "missing-review",
+            userID = "user1",
+            currentUserId = "user1"
+        )
+
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+
+        assertTrue(
+            state.errorMsg?.contains(
+                HuntCardViewModelConstants.ErrorDeletingReviewSetMsg
+            ) == true
+        )
+    }
   /** Test that check the change of the hunt state from dislike to like and from like to dislike */
   @Test
   fun onLikeClick_isLiked() = runTest {

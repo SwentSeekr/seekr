@@ -27,6 +27,8 @@ import com.swentseekr.seekr.ui.hunt.add.AddHuntScreen
 import com.swentseekr.seekr.ui.hunt.edit.EditHuntScreen
 import com.swentseekr.seekr.ui.hunt.review.AddReviewScreen
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
+import com.swentseekr.seekr.ui.hunt.review.ReviewImageViewModel
+import com.swentseekr.seekr.ui.hunt.review.ReviewImagesScreen
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import com.swentseekr.seekr.ui.map.MapScreen
 import com.swentseekr.seekr.ui.overview.OverviewScreen
@@ -159,6 +161,7 @@ fun SeekrMainNavHost(
             startDestination = SeekrDestination.Overview.route,
             modifier = Modifier.padding(innerPadding)) {
 
+
               // Overview
               composable(SeekrDestination.Overview.route) {
                 Surface(
@@ -222,7 +225,8 @@ fun SeekrMainNavHost(
                         },
                         huntCardViewModel = huntCardVm,
                         reviewViewModel = reviewVm,
-                        modifier = Modifier.testTag(NavigationTestTags.HUNTCARD_SCREEN))
+                        modifier = Modifier.testTag(NavigationTestTags.HUNTCARD_SCREEN),
+                        navController = navController)
                   }
 
               // Add Hunt
@@ -306,6 +310,25 @@ fun SeekrMainNavHost(
                           })
                     }
               }
+
+
+            // Review Images Screen
+            composable("reviewImages") {
+                val reviewImageViewModel: ReviewImageViewModel = viewModel()
+                val reviewHuntViewModel: ReviewHuntViewModel = viewModel()
+                Surface (modifier = Modifier.fillMaxSize().testTag( "IMAGE_REVIEW_SCREEN")){
+                    ReviewImagesScreen(
+                        photoUrls= reviewImageViewModel.uiState.collectAsState().value.photos,
+                        //reviewHuntViewModel= reviewHuntViewModel,
+                        //reviewImageViewModel= reviewImageViewModel,
+                        onGoBack = { navController.popBackStack() } )
+                }
+            }
+
+
+
+
+
 
               // Edit Profile (new)
               composable(SeekrDestination.EditProfile.route) {
