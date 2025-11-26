@@ -216,9 +216,11 @@ fun AddReviewScreen(
                             contentDescription =
                                 AddReviewScreenStrings.RemovePhotoContentDescription,
                             modifier =
-                                Modifier.size(AddReviewScreenDefaults.CloseImageSize).clickable {
-                                  reviewViewModel.removePhoto(uiState.photos[index])
-                                })
+                                Modifier.size(AddReviewScreenDefaults.CloseImageSize)
+                                    .clickable {
+                                      reviewViewModel.removePhoto(uiState.photos[index])
+                                    }
+                                    .testTag("RemovePhoto$index"))
                       }
                     }
               }

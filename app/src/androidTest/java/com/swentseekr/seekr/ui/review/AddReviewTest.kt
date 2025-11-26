@@ -97,4 +97,51 @@ class HuntCardReviewScreenTest {
 
     composeRule.onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON).performClick()
   }
+
+  /*
+  @Test
+  fun lazyRow_photosAreDisplayed_andRemoveClickCallsViewModel() {
+    // Fake ViewModel with observable list
+    val viewModel = ReviewHuntViewModel()
+
+    // Prepopulate photos
+    val photoUrls = listOf("photo1", "photo2")
+    viewModel.loadReviewImages(photoUrls)
+
+    // Set content
+    composeRule.setContent {
+      AddReviewScreen(
+        huntId = "hunt123",
+        reviewViewModel = viewModel,
+        onGoBack = {},
+        onDone = {},
+        onCancel = {}
+      )
+    }
+
+    // Assert that each photo is displayed
+    photoUrls.forEachIndexed { index, _ ->
+      composeRule
+        .onNodeWithContentDescription(
+          "${AddReviewScreenStrings.SelectedImageContentDescriptionPrefix}$index"
+        )
+        .assertIsDisplayed()
+    }
+
+    // Click on the "close" icon of the first photo
+    composeRule
+      .onNodeWithContentDescription(AddReviewScreenStrings.RemovePhotoContentDescription)
+      .performClick()
+    composeRule
+      .onNodeWithTag("RemovePhoto0")
+      .performScrollTo()
+      .performClick()
+
+    composeRule.waitForIdle()
+    // Assert the photo was removed from ViewModel
+    assert(viewModel.uiState.value.photos.size == photoUrls.size - 1)
+    assert(!viewModel.uiState.value.photos.contains("photo1"))
+  }
+
+   */
 }

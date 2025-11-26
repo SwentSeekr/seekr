@@ -454,13 +454,3 @@ fun HuntHeaderSection(
         }
       }
 }
-/*
-@Preview
-@Composable
-fun HuntCardScreenPreview() {
-  HuntCardScreen(
-      huntId = "hunt123",
-  )
-}
-
- */
