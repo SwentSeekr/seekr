@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.settings
 
+import android.content.Context
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.ViewModel
@@ -7,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.swentseekr.seekr.BuildConfig
 import com.swentseekr.seekr.model.authentication.AuthRepository
 import com.swentseekr.seekr.model.authentication.AuthRepositoryFirebase
+import com.swentseekr.seekr.model.notifications.NotificationHelper
 import com.swentseekr.seekr.model.settings.SettingsRepositoryFirestore
 import com.swentseekr.seekr.model.settings.SettingsRepositoryProvider
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,9 +69,15 @@ class SettingsViewModel(
     _uiState.update { it.copy(appVersion = version) }
   }
 
-  fun updateNotifications(enabled: Boolean) =
+  fun updateNotifications(enabled: Boolean, context: Context?) =
       viewModelScope.launch {
         repository.updateField(SettingsScreenStrings.NOTIFICATION_FIELD, enabled)
+
+        // Send a test notification when enabled
+        if (enabled && context != null) {
+          NotificationHelper.sendNotification(
+              context, "Notifications enabled", "You will now receive app notifications")
+        }
       }
 
   fun updatePictures(enabled: Boolean) =

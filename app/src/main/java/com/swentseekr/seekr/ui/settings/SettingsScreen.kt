@@ -55,6 +55,7 @@ fun SettingsScreen(
   val uiState by viewModel.uiState.collectAsState()
   val scope = rememberCoroutineScope()
   val settings by viewModel.settingsFlow.collectAsState()
+  val context = LocalContext.current
 
   LaunchedEffect(uiState.signedOut) { if (uiState.signedOut) onSignedOut() }
 
@@ -83,7 +84,7 @@ fun SettingsScreen(
             onEditProfileClick = onEditProfile,
             onLogoutClick = { scope.launch { viewModel.signOut(credentialManager) } },
             uiState = settings,
-            onNotificationsChange = { viewModel.updateNotifications(it) },
+            onNotificationsChange = { enabled -> viewModel.updateNotifications(enabled, context) },
             onPicturesChange = { viewModel.updatePictures(it) },
             onLocalisationChange = { viewModel.updateLocalisation(it) })
       }
