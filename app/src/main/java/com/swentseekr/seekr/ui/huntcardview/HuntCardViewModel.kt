@@ -188,7 +188,7 @@ open class HuntCardViewModel(
                   HuntCardViewModelConstants.ReviewHuntTag,
                   "${HuntCardViewModelConstants.ErrorDeletingPhoto} $photoUrl",
                   e)
-                setErrorMsg("${HuntCardViewModelConstants.ErrorDeletingPhotoSetMsg} ${e.message}")
+              setErrorMsg("${HuntCardViewModelConstants.ErrorDeletingPhotoSetMsg} ${e.message}")
             }
           }
           reviewRepository.deleteReviewHunt(reviewId = reviewID)

@@ -228,11 +228,9 @@ open class ReviewHuntViewModel(
     _uiState.value = _uiState.value.copy(rating = newRating)
   }
 
-    fun loadReviewImages(photoUrls: List<String>) {
+  fun loadReviewImages(photoUrls: List<String>) {
     _uiState.value = _uiState.value.copy(photos = photoUrls)
-
-
-    }
+  }
   /** Clears the review form if the review was submitted successfully. */
   fun clearForm() {
     if (_uiState.value.saveSuccessful) {
@@ -242,7 +240,7 @@ open class ReviewHuntViewModel(
     }
   }
 
-    /** Clears the review form and deletes any selected photos without submitting the review. */
+  /** Clears the review form and deletes any selected photos without submitting the review. */
   fun clearFormNoSubmission() {
     for (photo in _uiState.value.photos) {
       viewModelScope.launch(dispatcher) {
