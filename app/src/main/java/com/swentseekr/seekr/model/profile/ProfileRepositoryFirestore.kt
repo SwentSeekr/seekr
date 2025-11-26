@@ -91,9 +91,9 @@ class ProfileRepositoryFirestore(
                   ProfileRepositoryConstants.DEFAULT_LOCATION_LNG,
                   ProfileRepositoryConstants.DEFAULT_LOCATION_NAME)
       val middlePoints =
-          (map[ProfileRepositoryConstants.HUNT_FIELD_MIDDLE_POINTS] as? List<Map<*, *>>)?.map {
-            it.toLocation()
-          } ?: emptyList()
+          (map[ProfileRepositoryConstants.HUNT_FIELD_MIDDLE_POINTS] as? List<*>)
+              ?.filterIsInstance<Map<*, *>>()
+              ?.map { it.toLocation() } ?: emptyList()
       val difficulty =
           map[ProfileRepositoryConstants.HUNT_FIELD_DIFFICULTY]?.let {
             Difficulty.valueOf(it as String)
@@ -247,8 +247,8 @@ class ProfileRepositoryFirestore(
 
     @Suppress("UNCHECKED_CAST")
     val doneHuntsData =
-        snapshot.get(ProfileRepositoryConstants.PROFILE_FIELD_DONE_HUNTS)
-            as? List<Map<String, Any?>> ?: emptyList()
+        snapshot[ProfileRepositoryConstants.PROFILE_FIELD_DONE_HUNTS] as? List<Map<String, Any?>>
+            ?: emptyList()
 
     return doneHuntsData.mapNotNull { mapToHunt(it) }
   }
@@ -258,8 +258,8 @@ class ProfileRepositoryFirestore(
 
     @Suppress("UNCHECKED_CAST")
     val likedHuntsData =
-        snapshot.get(ProfileRepositoryConstants.PROFILE_FIELD_LIKED_HUNTS)
-            as? List<Map<String, Any?>> ?: emptyList()
+        snapshot[ProfileRepositoryConstants.PROFILE_FIELD_LIKED_HUNTS] as? List<Map<String, Any?>>
+            ?: emptyList()
 
     return likedHuntsData.mapNotNull { mapToHunt(it) }
   }
@@ -271,8 +271,8 @@ class ProfileRepositoryFirestore(
 
       @Suppress("UNCHECKED_CAST")
       val currentList =
-          snapshot.get(ProfileRepositoryConstants.PROFILE_FIELD_DONE_HUNTS)
-              as? List<Map<String, Any?>> ?: emptyList()
+          snapshot[ProfileRepositoryConstants.PROFILE_FIELD_DONE_HUNTS] as? List<Map<String, Any?>>
+              ?: emptyList()
 
       val isAlreadyAdded =
           currentList.any { it[ProfileRepositoryConstants.HUNT_FIELD_UID] == hunt.uid }
@@ -319,19 +319,20 @@ class ProfileRepositoryFirestore(
               ?: ProfileRepositoryConstants.DEFAULT_HUNT_MAIN_IMAGE_URL
 
       val start =
-          (document.get(ProfileRepositoryConstants.HUNT_FIELD_START) as? Map<*, *>)?.toLocation()
+          (document[ProfileRepositoryConstants.HUNT_FIELD_START] as? Map<*, *>)?.toLocation()
               ?: Location(
                   ProfileRepositoryConstants.DEFAULT_LOCATION_LAT,
                   ProfileRepositoryConstants.DEFAULT_LOCATION_LNG,
                   ProfileRepositoryConstants.DEFAULT_LOCATION_NAME)
       val end =
-          (document.get(ProfileRepositoryConstants.HUNT_FIELD_END) as? Map<*, *>)?.toLocation()
+          (document[ProfileRepositoryConstants.HUNT_FIELD_END] as? Map<*, *>)?.toLocation()
               ?: Location(
                   ProfileRepositoryConstants.DEFAULT_LOCATION_LAT,
                   ProfileRepositoryConstants.DEFAULT_LOCATION_LNG,
                   ProfileRepositoryConstants.DEFAULT_LOCATION_NAME)
       val middlePoints =
-          (document.get(ProfileRepositoryConstants.HUNT_FIELD_MIDDLE_POINTS) as? List<Map<*, *>>)
+          (document[ProfileRepositoryConstants.HUNT_FIELD_MIDDLE_POINTS] as? List<*>)
+              ?.filterIsInstance<Map<*, *>>()
               ?.map { it.toLocation() } ?: emptyList()
 
       val difficulty =
@@ -369,7 +370,7 @@ class ProfileRepositoryFirestore(
 
     val uid = document.id
     val authorMap =
-        document.get(ProfileRepositoryConstants.PROFILE_FIELD_AUTHOR) as? Map<*, *> ?: return null
+        document[ProfileRepositoryConstants.PROFILE_FIELD_AUTHOR] as? Map<*, *> ?: return null
     val author =
         Author(
             hasCompletedOnboarding = authorMap["hasCompletedOnboarding"] as? Boolean ?: false,
