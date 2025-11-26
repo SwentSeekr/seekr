@@ -448,9 +448,13 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun uploadProfilePicture_updatesUrlInFirestore() = runTest {
+  fun deleteCurrentProfilePicture_withEmptyUrl_doesNothing() = runTest {
     val uid = auth.currentUser!!.uid
-    val testUri = Uri.parse("content://test/image.jpg")
+    repository.deleteCurrentProfilePicture(uid, "")
+
+    val profile = repository.getProfile(uid)
+    assertNotNull(profile)
+    println("deleteCurrentProfilePicture with empty URL passed")
   }
 
   @Test
@@ -486,5 +490,30 @@ class ProfileRepositoryFirestoreTest {
     assertEquals(true, updated.author.hasAcceptedTerms)
     assertEquals("NewPseudo", updated.author.pseudonym)
     assertEquals("New bio", updated.author.bio)
+  }
+
+  @Test
+  fun uploadProfilePicture_withInvalidUri_throwsException() = runTest {
+    val uid = auth.currentUser!!.uid
+    val invalidUri = Uri.parse("content://invalid/path.jpg")
+
+    try {
+      repository.uploadProfilePicture(uid, invalidUri)
+      fail("Expected upload to fail with invalid URI")
+    } catch (e: Exception) {
+      println("Caught expected exception: ${e.message}")
+    }
+  }
+
+  @Test
+  fun deleteCurrentProfilePicture_withNonExistentFile_logsError() = runTest {
+    val uid = auth.currentUser!!.uid
+    val fakeUrl = "https://firebasestorage.googleapis.com/v0/b/fakebucket/o/nonexistent.jpg"
+
+    repository.deleteCurrentProfilePicture(uid, fakeUrl)
+
+    val profile = repository.getProfile(uid)
+    assertNotNull(profile)
+    println("deleteCurrentProfilePicture with non-existent file passed")
   }
 }

@@ -14,7 +14,21 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** UI state for editing a profile */
+/**
+ * UI state for editing a profile.
+ *
+ * @property pseudonym The user's pseudonym.
+ * @property bio The user's biography.
+ * @property profilePicture Resource ID for the profile picture.
+ * @property isSaving Whether the profile is currently being saved.
+ * @property hasChanges Whether there are unsaved changes.
+ * @property canSave Whether the current state can be saved.
+ * @property errorMsg Optional error message to display in the UI.
+ * @property success Whether the last save operation was successful.
+ * @property profilePictureUri URI of a selected profile picture from gallery or camera.
+ * @property profilePictureUrl URL of the profile picture stored in the backend (e.g., Firestore).
+ * @property isLoading Whether the profile is currently being loaded.
+ */
 data class EditProfileUIState(
     val pseudonym: String = EditProfileStrings.EMPTY_STRING,
     val bio: String = EditProfileStrings.EMPTY_STRING,
@@ -29,7 +43,14 @@ data class EditProfileUIState(
     val isLoading: Boolean = false
 )
 
-/** ViewModel for editing the current user's profile */
+/**
+ * ViewModel for managing the UI state of editing the current user's profile. Handles loading,
+ * updating, and saving profile data using [ProfileRepository] and manages UI state via
+ * [EditProfileUIState] with [StateFlow].
+ *
+ * @property repository The repository to read/write profiles.
+ * @property auth FirebaseAuth instance to obtain the current user's UID.
+ */
 class EditProfileViewModel(
     private val repository: ProfileRepository = ProfileRepositoryProvider.repository,
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -94,6 +115,7 @@ class EditProfileViewModel(
     updateChangesFlags(newState)
   }
 
+  /** Updates the profile picture URI selected from gallery or camera */
   fun updateProfilePictureUri(uri: Uri?) {
     val newState = _uiState.value.copy(profilePictureUri = uri)
     updateChangesFlags(newState)
@@ -138,6 +160,10 @@ class EditProfileViewModel(
         val finalProfilePictureUrl =
             when {
               profilePictureUri != null -> {
+                val oldUrl = currentProfile.author.profilePictureUrl
+                if (oldUrl.isNotEmpty()) {
+                  repository.deleteCurrentProfilePicture(uid, oldUrl)
+                }
                 repository.uploadProfilePicture(uid, profilePictureUri)
               }
               profilePictureUrlState.isEmpty() &&
@@ -196,13 +222,38 @@ class EditProfileViewModel(
     _uiState.value =
         newState.copy(hasChanges = hasChanges, canSave = canSave, success = false, errorMsg = null)
   }
-
+  /**
+   * Removes the current profile picture, resetting it to the default and updates the repository and
+   * UI state accordingly
+   */
   fun removeProfilePicture() {
-    val newState =
-        _uiState.value.copy(
-            profilePicture = EditProfileNumberConstants.PROFILE_PIC_DEFAULT,
-            profilePictureUri = null,
-            profilePictureUrl = EditProfileStrings.EMPTY_STRING)
-    updateChangesFlags(newState)
+    viewModelScope.launch {
+      val uid = auth.currentUser?.uid ?: return@launch
+      val currentUrl = _uiState.value.profilePictureUrl
+
+      if (currentUrl.isNotEmpty()) {
+        repository.deleteCurrentProfilePicture(uid, currentUrl)
+      }
+
+      val updatedProfile =
+          lastSavedFullProfile?.copy(
+              author =
+                  lastSavedFullProfile!!
+                      .author
+                      .copy(
+                          profilePicture = EditProfileNumberConstants.PROFILE_PIC_DEFAULT,
+                          profilePictureUrl = EditProfileStrings.EMPTY_STRING))
+
+      if (updatedProfile != null) {
+        repository.updateProfile(updatedProfile)
+        lastSavedFullProfile = updatedProfile
+      }
+      val newState =
+          _uiState.value.copy(
+              profilePicture = EditProfileNumberConstants.PROFILE_PIC_DEFAULT,
+              profilePictureUri = null,
+              profilePictureUrl = EditProfileStrings.EMPTY_STRING)
+      updateChangesFlags(newState)
+    }
   }
 }
