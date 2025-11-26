@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.swentseekr.seekr.model.profile.mockProfileData
 import com.swentseekr.seekr.ui.profile.Profile
@@ -70,10 +71,12 @@ fun OfflineOverviewScreen(
                         modifier = Modifier.size(OfflineConstants.OFFLINE_ICON_SIZE)
                     )
                     Spacer(modifier = Modifier.height(OfflineConstants.ICON_SPACING))
-                    // Short descriptive message about offline access to hunts
+                    // Short descriptive message about offline access to hunts, centered in the card
                     Text(
                         text = OfflineConstants.OFFLINE_OVERVIEW_MESSAGE,
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
                     )
                 }
             }
