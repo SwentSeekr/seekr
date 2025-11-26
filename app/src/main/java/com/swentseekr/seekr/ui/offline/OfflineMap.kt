@@ -17,54 +17,49 @@ import androidx.compose.ui.tooling.preview.Preview
 /**
  * Map placeholder screen displayed when the user is offline.
  *
- * Replaces the interactive map with a centered informational card indicating that
- * the map is unavailable without an internet connection.
+ * Replaces the interactive map with a centered informational card indicating that the map is
+ * unavailable without an internet connection.
  *
- * @param modifier Modifier used to adjust layout or apply additional styling
- * from the parent composable.
+ * @param modifier Modifier used to adjust layout or apply additional styling from the parent
+ *   composable.
  */
 @Composable
 fun OfflineMapScreen(modifier: Modifier = Modifier) {
-    Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            // Centered card explaining that map functionality is not available offline
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth(OfflineConstants.OFFLINE_CARD_WIDTH_RATIO)
-                        .height(OfflineConstants.OFFLINE_CARD_HEIGHT)
-                        .background(
-                            color = OfflineConstants.LIGHT_GREEN_BACKGROUND,
-                            shape = OfflineConstants.CARD_SHAPE),
-                contentAlignment = Alignment.Center) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center) {
-                    // Warning icon to visually draw attention to the offline state
-                    Icon(
-                        imageVector = Icons.Default.Warning,
-                        contentDescription = null,
-                        modifier = Modifier.size(OfflineConstants.OFFLINE_ICON_SIZE))
-                    Spacer(modifier = Modifier.height(OfflineConstants.ICON_SPACING))
-                    // Message explaining why the map is currently unavailable
-                    Text(
-                        text = OfflineConstants.OFFLINE_MAP_MESSAGE,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
-                    )
-
+  Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+      // Centered card explaining that map functionality is not available offline
+      Box(
+          modifier =
+              Modifier.fillMaxWidth(OfflineConstants.OFFLINE_CARD_WIDTH_RATIO)
+                  .height(OfflineConstants.OFFLINE_CARD_HEIGHT)
+                  .background(
+                      color = OfflineConstants.LIGHT_GREEN_BACKGROUND,
+                      shape = OfflineConstants.CARD_SHAPE),
+          contentAlignment = Alignment.Center) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center) {
+                  // Warning icon to visually draw attention to the offline state
+                  Icon(
+                      imageVector = Icons.Default.Warning,
+                      contentDescription = null,
+                      modifier = Modifier.size(OfflineConstants.OFFLINE_ICON_SIZE))
+                  Spacer(modifier = Modifier.height(OfflineConstants.ICON_SPACING))
+                  // Message explaining why the map is currently unavailable
+                  Text(
+                      text = OfflineConstants.OFFLINE_MAP_MESSAGE,
+                      style = MaterialTheme.typography.titleMedium,
+                      modifier = Modifier.fillMaxWidth(),
+                      textAlign = TextAlign.Center)
                 }
-            }
-        }
+          }
     }
+  }
 }
 
-/**
- * Design-time preview of [OfflineMapScreen].
- */
+/** Design-time preview of [OfflineMapScreen]. */
 @Preview
 @Composable
 fun OfflineMapScreenPreview() {
-    OfflineMapScreen()
+  OfflineMapScreen()
 }

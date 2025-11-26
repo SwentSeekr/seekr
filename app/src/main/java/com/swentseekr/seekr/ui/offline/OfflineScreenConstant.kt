@@ -13,7 +13,7 @@ object OfflineConstants {
 
   const val OFFLINE_MAP_MESSAGE = "Map is unavailable while you're offline."
   const val OFFLINE_OVERVIEW_MESSAGE =
-    "No internet? No problem. You can still access your saved hunts."
+      "No internet? No problem. You can still access your saved hunts."
   const val SHOW_DOWNLOADED_HUNTS_BUTTON = "Continue without connection"
 
   val ICON_SPACING = 16.dp
