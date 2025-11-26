@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 
 /**
@@ -48,7 +49,11 @@ fun OfflineMapScreen(modifier: Modifier = Modifier) {
                     // Message explaining why the map is currently unavailable
                     Text(
                         text = OfflineConstants.OFFLINE_MAP_MESSAGE,
-                        style = MaterialTheme.typography.titleMedium)
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+
                 }
             }
         }
