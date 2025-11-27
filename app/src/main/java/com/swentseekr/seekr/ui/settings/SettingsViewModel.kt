@@ -16,7 +16,9 @@ import androidx.lifecycle.viewModelScope
 import com.swentseekr.seekr.BuildConfig
 import com.swentseekr.seekr.model.authentication.AuthRepository
 import com.swentseekr.seekr.model.authentication.AuthRepositoryFirebase
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -34,15 +36,21 @@ data class SettingsUIState(
     val notificationPermissionGranted: Boolean = false,
     val galleryPermissionGranted: Boolean = false,
     val locationPermissionGranted: Boolean = false,
-
-    // Permission requests
-    val requestNotificationPermission: Boolean = false,
-    val requestGalleryPermission: Boolean = false,
-    val requestLocationPermission: Boolean = false
 )
+
+sealed interface PermissionEvent {
+  object RequestNotification : PermissionEvent
+
+  object RequestGallery : PermissionEvent
+
+  object RequestLocation : PermissionEvent
+}
 
 class SettingsViewModel(private val authRepository: AuthRepository = AuthRepositoryFirebase()) :
     ViewModel() {
+
+  private val _permissionEvents = MutableSharedFlow<PermissionEvent>()
+  val permissionEvents: SharedFlow<PermissionEvent> = _permissionEvents
 
   private val _uiState = MutableStateFlow(SettingsUIState())
   val uiState: StateFlow<SettingsUIState> = _uiState.asStateFlow()
@@ -101,7 +109,7 @@ class SettingsViewModel(private val authRepository: AuthRepository = AuthReposit
     if (enabled) {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
           !state.notificationPermissionGranted) {
-        _uiState.update { it.copy(requestNotificationPermission = true) }
+        viewModelScope.launch { _permissionEvents.emit(PermissionEvent.RequestNotification) }
       } else {
         openAppSettings(context)
       }
@@ -110,17 +118,12 @@ class SettingsViewModel(private val authRepository: AuthRepository = AuthReposit
     }
   }
 
-  fun consumeNotificationPermissionRequest() {
-    _uiState.update { it.copy(requestNotificationPermission = false) }
-  }
-
   fun onNotificationPermissionResult(granted: Boolean) {
     val effectiveGranted = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || granted
 
     _uiState.update {
       it.copy(
           notificationPermissionGranted = effectiveGranted,
-          requestNotificationPermission = false,
           notificationsEnabled = effectiveGranted || it.notificationsEnabled)
     }
 
@@ -136,22 +139,15 @@ class SettingsViewModel(private val authRepository: AuthRepository = AuthReposit
   fun onPicturesToggleRequested(enabled: Boolean, context: Context) {
     val state = uiState.value
     if (enabled && !state.galleryPermissionGranted) {
-      _uiState.update { it.copy(requestGalleryPermission = true) }
+      viewModelScope.launch { _permissionEvents.emit(PermissionEvent.RequestGallery) }
     } else {
       openAppSettings(context)
     }
   }
 
-  fun consumeGalleryPermissionRequest() {
-    _uiState.update { it.copy(requestGalleryPermission = false) }
-  }
-
   fun onGalleryPermissionResult(granted: Boolean) {
     _uiState.update {
-      it.copy(
-          galleryPermissionGranted = granted,
-          requestGalleryPermission = false,
-          picturesEnabled = it.picturesEnabled || granted)
+      it.copy(galleryPermissionGranted = granted, picturesEnabled = it.picturesEnabled || granted)
     }
     if (granted) {
       updatePictures(true)
@@ -165,21 +161,16 @@ class SettingsViewModel(private val authRepository: AuthRepository = AuthReposit
   fun onLocalisationToggleRequested(enabled: Boolean, context: Context) {
     val state = uiState.value
     if (enabled && !state.locationPermissionGranted) {
-      _uiState.update { it.copy(requestLocationPermission = true) }
+      viewModelScope.launch { _permissionEvents.emit(PermissionEvent.RequestLocation) }
     } else {
       openAppSettings(context)
     }
-  }
-
-  fun consumeLocationPermissionRequest() {
-    _uiState.update { it.copy(requestLocationPermission = false) }
   }
 
   fun onLocationPermissionResult(granted: Boolean) {
     _uiState.update {
       it.copy(
           locationPermissionGranted = granted,
-          requestLocationPermission = false,
           localisationEnabled = it.localisationEnabled || granted)
     }
     if (granted) {
@@ -191,7 +182,7 @@ class SettingsViewModel(private val authRepository: AuthRepository = AuthReposit
     _uiState.update { it.copy(localisationEnabled = enabled) }
   }
 
-  fun signOut(credentialManager: CredentialManager): Unit {
+  fun signOut(credentialManager: CredentialManager) {
     viewModelScope.launch {
       authRepository
           .signOut()
