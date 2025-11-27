@@ -124,4 +124,17 @@ class ReviewImageRepositoryTest {
 
     assertTrue(url1 != url2)
   }
+
+  @Test
+  fun uploadReviewPhoto_invalidUri_throwsException() = runBlocking {
+    val badUri = Uri.fromFile(File("/does/not/exist.jpg"))
+
+    try {
+      repository.uploadReviewPhoto(userId, badUri)
+      fail("Expected an exception but upload succeeded")
+    } catch (e: Exception) {
+      // SUCCESS: the catch block was executed and the exception was rethrown
+      assertTrue("Exception should be thrown for invalid URI", true)
+    }
+  }
 }
