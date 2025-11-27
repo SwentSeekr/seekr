@@ -12,6 +12,8 @@ import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.model.hunt.HuntReviewRepository
 import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryProvider
 import com.swentseekr.seekr.model.hunt.HuntsRepository
+import com.swentseekr.seekr.model.hunt.IReviewImageRepository
+import com.swentseekr.seekr.model.hunt.ReviewImageRepositoryProvider
 import com.swentseekr.seekr.model.profile.ProfileRepository
 import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
 import com.swentseekr.seekr.ui.profile.Profile
@@ -33,7 +35,8 @@ data class HuntCardUiState(
 open class HuntCardViewModel(
     private val huntRepository: HuntsRepository = HuntRepositoryProvider.repository,
     private val reviewRepository: HuntReviewRepository = HuntReviewRepositoryProvider.repository,
-    private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository
+    private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository,
+    private val imageRepository: IReviewImageRepository = ReviewImageRepositoryProvider.repository
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(HuntCardUiState())
@@ -55,8 +58,11 @@ open class HuntCardViewModel(
         val profile = profileRepository.getProfile(userID)
         _uiState.value = _uiState.value.copy(authorProfile = profile)
       } catch (e: Exception) {
-        Log.e("HuntCardViewModel", "Error loading user profile for User ID: $userID", e)
-        setErrorMsg("Unable to load author profile.")
+        Log.e(
+            HuntCardViewModelConstants.HuntCardTag,
+            "${HuntCardViewModelConstants.ErrorLoadingProfil} $userID",
+            e)
+        setErrorMsg(HuntCardViewModelConstants.ErrorLoadingProfileSetMsg)
       }
     }
   }
@@ -65,11 +71,15 @@ open class HuntCardViewModel(
   open fun loadCurrentUserID() {
     viewModelScope.launch {
       try {
-        val userID = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown"
+        val userID =
+            FirebaseAuth.getInstance().currentUser?.uid ?: HuntCardViewModelConstants.UnknownUser
         _uiState.value = _uiState.value.copy(currentUserId = userID)
       } catch (e: Exception) {
-        Log.e("HuntCardViewModel", "Error loading current user ID", e)
-        setErrorMsg("Unable to load your account information.")
+        Log.e(
+            HuntCardViewModelConstants.HuntCardTag,
+            HuntCardViewModelConstants.ErrorLoadingCurrentUser,
+            e)
+        setErrorMsg(HuntCardViewModelConstants.ErrorLodingCurrentUserSetMsg)
       }
     }
   }
@@ -81,8 +91,11 @@ open class HuntCardViewModel(
         val reviews = reviewRepository.getHuntReviews(huntID)
         _uiState.value = _uiState.value.copy(reviewList = reviews)
       } catch (e: Exception) {
-        Log.e("ReviewHuntViewModel", "Error loading reviews for Hunt ID: $huntID", e)
-        setErrorMsg("Failed to load reviews.")
+        Log.e(
+            HuntCardViewModelConstants.ReviewHuntTag,
+            "${HuntCardViewModelConstants.ErrorLoadingOtherReviews} $huntID",
+            e)
+        setErrorMsg(HuntCardViewModelConstants.ErrorLoadingOtherReviewsSetMsg)
       }
     }
   }
@@ -114,8 +127,11 @@ open class HuntCardViewModel(
             _uiState.value.copy(
                 hunt = hunt, isLiked = false, isAchieved = isAchieved, reviewList = reviews)
       } catch (e: Exception) {
-        Log.e("HuntCardViewModel", "Error loading Hunt by ID: $huntID", e)
-        setErrorMsg("Failed to load hunt details.")
+        Log.e(
+            HuntCardViewModelConstants.HuntCardTag,
+            "${HuntCardViewModelConstants.ErrorLoadingHunt} $huntID",
+            e)
+        setErrorMsg(HuntCardViewModelConstants.ErrorLoadingHuntSetMsg)
       }
     }
   }
@@ -128,8 +144,11 @@ open class HuntCardViewModel(
         val authorId = hunt.authorId
         // repositoryAuthor.getPseudo(authorId)
       } catch (e: Exception) {
-        Log.e("HuntCardViewModel", "Error loading Author by ID: $huntID", e)
-        setErrorMsg("Unable to load hunt author.")
+        Log.e(
+            HuntCardViewModelConstants.HuntCardTag,
+            "${HuntCardViewModelConstants.ErrorLoadingHuntAuthor} $huntID",
+            e)
+        setErrorMsg(HuntCardViewModelConstants.ErrorLOadingHuntAuthorSetMsg)
       }
     }
   }
@@ -139,8 +158,11 @@ open class HuntCardViewModel(
       try {
         huntRepository.deleteHunt(huntID)
       } catch (e: Exception) {
-        Log.e("HuntCardViewModel", "Error in deleting Hunt by ID: $huntID", e)
-        setErrorMsg("Failed to delete hunt.")
+        Log.e(
+            HuntCardViewModelConstants.HuntCardTag,
+            "${HuntCardViewModelConstants.ErrorDeleteHunt} $huntID",
+            e)
+        setErrorMsg(HuntCardViewModelConstants.ErrorDeleteHuntSetMsg)
       }
     }
   }
@@ -154,27 +176,47 @@ open class HuntCardViewModel(
   ) {
     viewModelScope.launch {
       try {
-        val currentUid = currentUserId ?: "None (B2)"
+        val currentUid = currentUserId ?: HuntCardViewModelConstants.NoUser
         if (userID == currentUid) {
+          val review = reviewRepository.getReviewHunt(reviewID)
+          val photosToDelete = review.photos
+          for (photoUrl in photosToDelete) {
+            try {
+              imageRepository.deleteReviewPhoto(photoUrl)
+            } catch (e: Exception) {
+              Log.e(
+                  HuntCardViewModelConstants.ReviewHuntTag,
+                  "${HuntCardViewModelConstants.ErrorDeletingPhoto} $photoUrl",
+                  e)
+              setErrorMsg("${HuntCardViewModelConstants.ErrorDeletingPhotoSetMsg} ${e.message}")
+            }
+          }
           reviewRepository.deleteReviewHunt(reviewId = reviewID)
           loadOtherReview(huntID)
         } else {
-          setErrorMsg("You can only delete your own review.")
+          setErrorMsg(HuntCardViewModelConstants.ErrorDeleteReviewSetMsg)
         }
       } catch (e: Exception) {
-        Log.e("ReviewHuntViewModel", "Error deleting Review for hunt", e)
-        setErrorMsg("Failed to delete Hunt: ${e.message}")
+        Log.e(
+            HuntCardViewModelConstants.ReviewHuntTag,
+            HuntCardViewModelConstants.ErrorDeletingReview,
+            e)
+        setErrorMsg("${HuntCardViewModelConstants.ErrorDeletingReviewSetMsg} ${e.message}")
       }
     }
   }
+
   /** Edits a Hunt by its ID. */
   fun editHunt(huntID: String, newValue: Hunt) {
     viewModelScope.launch {
       try {
         huntRepository.editHunt(huntID, newValue)
       } catch (e: Exception) {
-        Log.e("HuntCardViewModel", "Error in editing Hunt by ID: $huntID", e)
-        setErrorMsg("Failed to update hunt.")
+        Log.e(
+            HuntCardViewModelConstants.HuntCardTag,
+            "${HuntCardViewModelConstants.ErrorEditHunt} $huntID",
+            e)
+        setErrorMsg(HuntCardViewModelConstants.ErrorEditHuntSetMsg)
       }
     }
   }
@@ -217,18 +259,19 @@ open class HuntCardViewModel(
     // This will be added to the AchivedList in the profile
     val hunt = currentHuntUiState.hunt
     if (hunt == null) {
-      setErrorMsg("Hunt data is not loaded.")
+      setErrorMsg(HuntCardViewModelConstants.ErrorOnDoneLoading)
     } else {
       viewModelScope.launch {
         try {
           // Call the suspend function inside a coroutine
-          profileRepository.addDoneHunt(currentUserId ?: "", hunt)
+          profileRepository.addDoneHunt(currentUserId ?: HuntCardViewModelConstants.Empty, hunt)
 
           // Update UI state
           _uiState.value = currentHuntUiState.copy(isAchieved = true)
         } catch (e: Exception) {
-          Log.e("HuntCardViewModel", "Error marking hunt done", e)
-          setErrorMsg("Failed to mark hunt as done: ${e.message}")
+          Log.e(
+              HuntCardViewModelConstants.HuntCardTag, HuntCardViewModelConstants.ErrorOnDonClick, e)
+          setErrorMsg("${HuntCardViewModelConstants.ErrorOnDoneClickSetMsg} ${e.message}")
         }
       }
     }
