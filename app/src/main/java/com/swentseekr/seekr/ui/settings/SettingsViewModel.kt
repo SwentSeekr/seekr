@@ -79,7 +79,9 @@ class SettingsViewModel(
           val activity = context as? Activity
           activity?.let {
             ActivityCompat.requestPermissions(
-                it, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001)
+                it,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                SettingsScreenDefaults.NOTIFICATION_REQUEST_CODE)
           }
         }
         repository.updateField(SettingsScreenStrings.NOTIFICATION_FIELD, enabled)
@@ -87,7 +89,9 @@ class SettingsViewModel(
         // Send a test notification when enabled
         if (enabled && context != null) {
           NotificationHelper.sendNotification(
-              context, "Notifications enabled", "You will now receive app notifications")
+              context,
+              SettingsScreenStrings.NOTIFICATION_FIELD_2,
+              SettingsScreenStrings.NOTIFICATION_ACCEPT_MESSAGE)
         }
       }
 

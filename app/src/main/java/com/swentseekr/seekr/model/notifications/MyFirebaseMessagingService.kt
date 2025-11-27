@@ -9,18 +9,23 @@ import com.google.firebase.messaging.RemoteMessage
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
   override fun onMessageReceived(remoteMessage: RemoteMessage) {
-    val title = remoteMessage.notification?.title ?: "New Notification"
-    val body = remoteMessage.notification?.body ?: ""
+    val title =
+        remoteMessage.notification?.title ?: NotificationConstants.DEFAULT_NOTIFICATION_TITLE
+    val body = remoteMessage.notification?.body ?: NotificationConstants.DEFAULT_NOTIFICATION_BODY
     NotificationHelper.sendNotification(this, title, body)
   }
 
   override fun onNewToken(token: String) {
     val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
     FirebaseFirestore.getInstance()
-        .collection("profiles")
+        .collection(NotificationConstants.COLLECTION_PROFILES)
         .document(uid)
-        .update("author.fcmToken", token)
-        .addOnSuccessListener { Log.d("FCM", "Token saved") }
-        .addOnFailureListener { e -> Log.e("FCM", "Failed to save token", e) }
+        .update(NotificationConstants.FIELD_AUTHOR_FCM_TOKEN, token)
+        .addOnSuccessListener {
+          Log.d(NotificationConstants.TAG_FCM, NotificationConstants.LOG_TOKEN_SAVED)
+        }
+        .addOnFailureListener { e ->
+          Log.e(NotificationConstants.TAG_FCM, NotificationConstants.LOG_TOKEN_FAILED, e)
+        }
   }
 }
