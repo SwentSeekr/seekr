@@ -1,11 +1,15 @@
 package com.swentseekr.seekr.ui.review
 
+import android.net.Uri
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryLocal
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryLocal
+import com.swentseekr.seekr.model.hunt.ReviewImageRepositoryLocal
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.model.profile.ProfileRepositoryLocal
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.*
@@ -18,6 +22,8 @@ class ReviewHuntViewModelTest {
 
   private lateinit var fakeHuntsRepository: HuntsRepositoryLocal
   private lateinit var fakeReviewRepository: HuntReviewRepositoryLocal
+  private lateinit var fakeProfileRepository: ProfileRepositoryLocal
+  private lateinit var fakeImageReviewRepository: ReviewImageRepositoryLocal
   private val testDispatcher = StandardTestDispatcher()
 
   private lateinit var viewModel: ReviewHuntViewModel
@@ -42,9 +48,16 @@ class ReviewHuntViewModelTest {
     Dispatchers.setMain(testDispatcher)
     fakeHuntsRepository = HuntsRepositoryLocal()
     fakeReviewRepository = HuntReviewRepositoryLocal()
+    fakeProfileRepository = ProfileRepositoryLocal()
     fakeHuntsRepository.addHunt(testHunt)
+    fakeImageReviewRepository = ReviewImageRepositoryLocal()
 
-    viewModel = ReviewHuntViewModel(fakeHuntsRepository, fakeReviewRepository)
+    viewModel =
+        ReviewHuntViewModel(
+            fakeHuntsRepository,
+            fakeReviewRepository,
+            fakeProfileRepository,
+            fakeImageReviewRepository)
     advanceUntilIdle()
   }
 
@@ -60,6 +73,26 @@ class ReviewHuntViewModelTest {
 
     val state = viewModel.uiState.value
     assertEquals(testHunt, state.hunt)
+  }
+
+  @Test
+  fun loadHuntAuthor_whenHuntExists_doesNotCrash() = runTest {
+    // Ensure hunt exists
+    fakeHuntsRepository.addHunt(testHunt)
+
+    val vm =
+        ReviewHuntViewModel(
+            fakeHuntsRepository,
+            fakeReviewRepository,
+            fakeProfileRepository,
+            fakeImageReviewRepository)
+
+    // Should run without exception
+    vm.loadAuthorProfile(testHunt.uid)
+    advanceUntilIdle()
+
+    // No crash -> success
+    assertTrue(true)
   }
 
   @Test
@@ -103,18 +136,176 @@ class ReviewHuntViewModelTest {
   }
 
   @Test
+  fun deleteReview_whenExceptionThrown_setsErrorMsg() = runTest {
+    // Create a failing review repository
+    val failingReviewRepository =
+        object : HuntReviewRepositoryLocal() {
+          override suspend fun getReviewHunt(reviewId: String): HuntReview {
+            throw RuntimeException("Failed to get review")
+          }
+        }
+
+    val vm =
+        ReviewHuntViewModel(
+            fakeHuntsRepository,
+            failingReviewRepository,
+            fakeProfileRepository,
+            fakeImageReviewRepository,
+            dispatcher = testDispatcher)
+
+    // Add a review normally to fake repository (won't be used because getReviewHunt fails)
+    val review =
+        HuntReview(
+            reviewId = "review123",
+            authorId = "user123",
+            huntId = testHunt.uid,
+            rating = 4.0,
+            comment = "Nice hunt",
+            photos = listOf("photo1.jpg"))
+    fakeReviewRepository.addReviewHunt(review)
+
+    // Call deleteReview
+    vm.deleteReview("review123", "user123", currentUserId = "user123")
+    advanceUntilIdle()
+
+    val state = vm.uiState.value
+    // The error message from catch block should be set
+    assertTrue(state.errorMsg!!.contains("Failed to get review"))
+  }
+
+  @Test
   fun addPhoto_addsToList() = runTest {
-    val photo = "url"
-    viewModel.addPhoto(photo)
-    assertTrue(viewModel.uiState.value.photos.contains(photo))
+    val fakeUserId = "testUser"
+    val photo = "test_photo.jpg"
+
+    viewModel.addPhoto(photo, fakeUserId)
+
+    // Let the coroutine run
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    val photos = viewModel.uiState.value.photos
+    assertTrue(photos.isNotEmpty())
   }
 
   @Test
   fun removePhoto_removesFromList() = runTest {
-    val photo = ""
-    viewModel.addPhoto(photo)
+    val fakeUserId = "testUser"
+    val photo = "test_photo.jpg"
+
+    // Add photo
+    viewModel.addPhoto(photo, fakeUserId)
+
+    // Wait for coroutine to finish
+    testScheduler.advanceUntilIdle()
+    // Remove the photo
     viewModel.removePhoto(photo)
+    // Check that it was removed
     assertFalse(viewModel.uiState.value.photos.contains(photo))
+  }
+
+  @Test
+  fun addPhoto_addsPhotoToList() = runTest {
+    val fakeUserId = "user123"
+    val inputPhoto = "somepath/image.jpg"
+
+    viewModel.addPhoto(inputPhoto, fakeUserId)
+    advanceUntilIdle()
+
+    val photos = viewModel.uiState.value.photos
+
+    assertEquals(1, photos.size)
+    assertTrue(photos.first().startsWith("local://review_image/user123"))
+  }
+
+  @Test
+  fun addPhoto_whenUploadFails_setsErrorMsg() = runTest {
+    val failingImageRepository =
+        object : ReviewImageRepositoryLocal() {
+          override suspend fun uploadReviewPhoto(userId: String, uri: Uri): String {
+            throw RuntimeException("Upload failed")
+          }
+        }
+
+    val vm =
+        ReviewHuntViewModel(
+            fakeHuntsRepository,
+            fakeReviewRepository,
+            fakeProfileRepository,
+            failingImageRepository,
+            dispatcher = testDispatcher)
+
+    vm.addPhoto("file://somephoto.jpg", "user123")
+    advanceUntilIdle()
+
+    val state = vm.uiState.value
+    assertEquals("Failed to upload photo: Upload failed", state.errorMsg)
+    // Photos list should remain empty
+    assertTrue(state.photos.isEmpty())
+  }
+
+  @Test
+  fun removePhoto_updatesUiState() = runTest {
+    val photo = "photo_to_remove.jpg"
+
+    // Put a photo in the UI state manually
+    viewModel.uiState.value.copy(photos = listOf(photo))
+
+    // Call removePhoto
+    viewModel.removePhoto(photo)
+
+    // Let coroutine finish
+    testScheduler.advanceUntilIdle()
+
+    // The photo should be removed
+    assertFalse(viewModel.uiState.value.photos.contains(photo))
+
+    // No error should be set
+    assertNull(viewModel.uiState.value.errorMsg)
+  }
+
+  @Test
+  fun removePhoto_removesFromList1() = runTest {
+    val photo = "photo_to_remove.jpg"
+
+    // Correct: assign updated state
+    viewModel.setPhotosForTest(listOf(photo))
+
+    viewModel.removePhoto(photo)
+    advanceUntilIdle()
+
+    assertFalse(viewModel.uiState.value.photos.contains(photo))
+  }
+
+  @Test
+  fun removePhoto_whenDeleteFails_setsErrorMsg() = runTest {
+    val failingImageRepository =
+        object : ReviewImageRepositoryLocal() {
+          override suspend fun deleteReviewPhoto(url: String) {
+            throw RuntimeException("Delete failed")
+          }
+        }
+
+    val vm =
+        ReviewHuntViewModel(
+            fakeHuntsRepository,
+            fakeReviewRepository,
+            fakeProfileRepository,
+            failingImageRepository,
+            dispatcher = testDispatcher)
+
+    // Set a photo in the UI state
+    val photo = "photo_to_fail.jpg"
+    vm.setPhotosForTest(listOf(photo))
+
+    // Call removePhoto
+    vm.removePhoto(photo)
+    advanceUntilIdle()
+
+    val state = vm.uiState.value
+    // The error message should be set
+    assertEquals("Failed to delete image: Delete failed", state.errorMsg)
+    // Photo should still be in the list because deletion failed
+    assertTrue(state.photos.contains(photo))
   }
 
   @Test

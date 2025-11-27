@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -23,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -54,6 +54,9 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
   var previousCameraPosition by remember { mutableStateOf<CameraPosition?>(null) }
 
   var hasLocationPermission by remember { mutableStateOf(false) }
+
+  var showStopHuntDialog by remember { mutableStateOf(false) }
+
   val permissionLauncher =
       rememberLauncherForActivityResult(
           contract = ActivityResultContracts.RequestMultiplePermissions()) { grants ->
@@ -200,98 +203,156 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
     }
 
     if (uiState.isFocused) {
+
+      val isHuntStarted = uiState.isHuntStarted
+
       Button(
-          onClick = { viewModel.onBackToAllHunts() },
-          colors = ButtonDefaults.textButtonColors(containerColor = Green, contentColor = White),
+          onClick = {
+            if (isHuntStarted) {
+              showStopHuntDialog = true
+            } else {
+              viewModel.onBackToAllHunts()
+            }
+          },
           modifier =
               Modifier.align(Alignment.TopStart)
                   .padding(MapScreenDefaults.BackButtonPadding)
-                  .testTag(MapScreenTestTags.BUTTON_BACK)) {
-            Text(MapScreenStrings.BackToAllHunts)
+                  .testTag(MapScreenTestTags.BUTTON_BACK),
+          colors = ButtonDefaults.textButtonColors(containerColor = Green, contentColor = White)) {
+            Text(
+                text =
+                    if (isHuntStarted) MapScreenStrings.StopHunt
+                    else MapScreenStrings.BackToAllHunts,
+                style = MaterialTheme.typography.bodyMedium)
           }
+
+      if (showStopHuntDialog) {
+        AlertDialog(
+            modifier = Modifier.testTag(MapScreenTestTags.STOP_POPUP),
+            onDismissRequest = { showStopHuntDialog = false },
+            title = { Text(MapScreenStrings.StopHuntTitle) },
+            text = { Text(MapScreenStrings.StopHuntMessage) },
+            confirmButton = {
+              TextButton(
+                  modifier = Modifier.testTag(MapScreenTestTags.CONFIRM),
+                  onClick = {
+                    showStopHuntDialog = false
+                    viewModel.onBackToAllHunts()
+                  }) {
+                    Text(MapScreenStrings.ConfirmStopHunt)
+                  }
+            },
+            dismissButton = {
+              TextButton(onClick = { showStopHuntDialog = false }) { Text(MapScreenStrings.Cancel) }
+            })
+      }
+
       Card(
-          modifier = Modifier.align(Alignment.TopEnd).padding(12.dp),
-          shape = RoundedCornerShape(16.dp),
-          elevation = CardDefaults.cardElevation(8.dp)) {
-            Column(Modifier.padding(12.dp), horizontalAlignment = Alignment.End) {
-              val hunt = selectedHunt
-              val totalPoints = (hunt?.middlePoints?.size ?: 0) + 2
-              val validated = uiState.validatedCount
+          modifier =
+              Modifier.align(Alignment.BottomCenter)
+                  .fillMaxWidth()
+                  .padding(
+                      horizontal = MapScreenDefaults.OverlayDoublePadding,
+                      vertical = MapScreenDefaults.OverlayInnerPadding),
+          shape =
+              RoundedCornerShape(
+                  topStart = MapScreenDefaults.CardPadding, topEnd = MapScreenDefaults.CardPadding),
+          elevation = CardDefaults.cardElevation(MapScreenDefaults.CardElevation)) {
+            Column(
+                modifier = Modifier.padding(MapScreenDefaults.CardPadding).fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                  val hunt = selectedHunt
+                  val totalPoints =
+                      (hunt?.middlePoints?.size ?: MapScreenDefaults.Base) +
+                          MapScreenDefaults.MinScore
+                  val validated = uiState.validatedCount
 
-              Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    modifier = Modifier.testTag(MapScreenTestTags.PROGRESS),
-                    text = MapScreenStrings.Progress + "$validated / $totalPoints",
-                    style = MaterialTheme.typography.bodyMedium)
-              }
-
-              Spacer(Modifier.height(8.dp))
-
-              if (!uiState.isHuntStarted) {
-                Button(
-                    modifier = Modifier.testTag(MapScreenTestTags.START),
-                    onClick = { viewModel.startHunt() },
-                    colors =
-                        ButtonDefaults.buttonColors(containerColor = Green, contentColor = White)) {
-                      Text(MapScreenStrings.StartHunt)
-                    }
-              } else {
-                Row {
-                  TextButton(
-                      modifier = Modifier.testTag(MapScreenTestTags.VALIDATE),
-                      onClick = {
-                        val fineGranted =
-                            ContextCompat.checkSelfPermission(
-                                context, Manifest.permission.ACCESS_FINE_LOCATION) ==
-                                PackageManager.PERMISSION_GRANTED
-                        val coarseGranted =
-                            ContextCompat.checkSelfPermission(
-                                context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
-                                PackageManager.PERMISSION_GRANTED
-
-                        if (!(fineGranted || coarseGranted)) return@TextButton
-
-                        fused.lastLocation.addOnSuccessListener { loc ->
-                          loc?.let {
-                            viewModel.validateCurrentPoint(LatLng(it.latitude, it.longitude))
-                          }
-                        }
-                      },
-                      colors = ButtonDefaults.textButtonColors(contentColor = Green)) {
-                        Text(MapScreenStrings.Validate)
+                  Row(
+                      modifier = Modifier.fillMaxWidth(),
+                      horizontalArrangement = Arrangement.SpaceBetween,
+                      verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = MapScreenStrings.Progress,
+                            style = MaterialTheme.typography.bodyMedium)
+                        Text(
+                            modifier = Modifier.testTag(MapScreenTestTags.PROGRESS),
+                            text = "$validated / $totalPoints",
+                            style = MaterialTheme.typography.bodyMedium)
                       }
 
-                  Spacer(Modifier.width(8.dp))
+                  Spacer(Modifier.height(MapScreenDefaults.BackButtonPadding))
 
-                  val canFinish = validated >= totalPoints
-                  Button(
-                      modifier = Modifier.testTag(MapScreenTestTags.FINISH),
-                      onClick = {
-                        val userId = FirebaseAuth.getInstance().currentUser?.uid
-                        if (userId != null) {
-                          viewModel.finishHunt(
-                              onPersist = { finished ->
-                                scope.launch {
-                                  try {
-                                    ProfileRepositoryProvider.repository.addDoneHunt(
-                                        userId, finished)
-                                  } catch (e: Exception) {
-                                    Log.e("MapScreen", "Failed to add done hunt", e)
+                  if (!uiState.isHuntStarted) {
+                    Button(
+                        modifier = Modifier.testTag(MapScreenTestTags.START),
+                        onClick = { viewModel.startHunt() },
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = Green, contentColor = White)) {
+                          Text(MapScreenStrings.StartHunt)
+                        }
+                  } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically) {
+                          TextButton(
+                              modifier = Modifier.testTag(MapScreenTestTags.VALIDATE),
+                              onClick = {
+                                val fineGranted =
+                                    ContextCompat.checkSelfPermission(
+                                        context, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                                        PackageManager.PERMISSION_GRANTED
+                                val coarseGranted =
+                                    ContextCompat.checkSelfPermission(
+                                        context, Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                                        PackageManager.PERMISSION_GRANTED
+
+                                if (!(fineGranted || coarseGranted)) return@TextButton
+
+                                fused.lastLocation.addOnSuccessListener { loc ->
+                                  loc?.let {
+                                    viewModel.validateCurrentPoint(
+                                        LatLng(it.latitude, it.longitude))
                                   }
                                 }
-                              })
+                              },
+                              colors = ButtonDefaults.textButtonColors(contentColor = Green)) {
+                                Text(MapScreenStrings.Validate)
+                              }
+
+                          val canFinish = validated >= totalPoints
+                          Button(
+                              modifier = Modifier.testTag(MapScreenTestTags.FINISH),
+                              onClick = {
+                                val userId = FirebaseAuth.getInstance().currentUser?.uid
+                                if (userId != null) {
+                                  viewModel.finishHunt(
+                                      onPersist = { finished ->
+                                        scope.launch {
+                                          try {
+                                            ProfileRepositoryProvider.repository.addDoneHunt(
+                                                userId, finished)
+                                          } catch (e: Exception) {
+                                            Log.e(
+                                                MapScreenTestTags.MAP_SCREEN,
+                                                MapScreenStrings.Fail,
+                                                e)
+                                          }
+                                        }
+                                      })
+                                }
+                              },
+                              enabled = canFinish,
+                              colors =
+                                  ButtonDefaults.buttonColors(
+                                      containerColor = if (canFinish) Green else GrayDislike,
+                                      contentColor = White)) {
+                                Text(MapScreenStrings.FinishHunt)
+                              }
                         }
-                      },
-                      enabled = canFinish,
-                      colors =
-                          ButtonDefaults.buttonColors(
-                              containerColor = if (canFinish) Green else GrayDislike,
-                              contentColor = White)) {
-                        Text(MapScreenStrings.FinishHunt)
-                      }
+                  }
                 }
-              }
-            }
           }
     }
   }

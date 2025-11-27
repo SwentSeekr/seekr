@@ -1,6 +1,6 @@
 package com.swentseekr.seekr.model.hunt
 
-class HuntReviewRepositoryLocal : HuntReviewRepository {
+open class HuntReviewRepositoryLocal : HuntReviewRepository {
   private val reviews = mutableListOf<HuntReview>()
   private var id = 0
 

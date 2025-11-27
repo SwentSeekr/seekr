@@ -1,7 +1,10 @@
 package com.swentseekr.seekr.model.profile
 
+import android.net.Uri
 import com.swentseekr.seekr.model.author.Author
+import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants
 import com.swentseekr.seekr.ui.profile.Profile
+import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -207,5 +210,62 @@ class ProfileRepositoryLocalTest {
   fun addDoneHuntThrowsExceptionIfProfileNotFound() = runTest {
     val hunt = createHunt(uid = "hunt1", title = "New City Exploration")
     repository.addDoneHunt("nonExistentUser", hunt)
+  }
+
+  @Test
+  fun createProfile_adds_new_profile_successfully() = runTest {
+    val newProfile = sampleProfileWithPseudonym("user10", "Frank")
+    repository.createProfile(newProfile)
+    val result = repository.getProfile("user10")
+    assertEquals("Frank", result.author.pseudonym)
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun createProfile_throws_for_duplicate_uid() = runTest { repository.createProfile(profileAlice) }
+
+  @Test
+  fun uploadProfilePicture_updates_profile_and_returns_url() = runTest {
+    val fakeUri = mockk<Uri>(relaxed = true)
+
+    val url = repository.uploadProfilePicture("user1", fakeUri)
+    val updatedProfile = repository.getProfile("user1")
+
+    assertEquals("local://profile-picture/user1", url)
+    assertEquals("local://profile-picture/user1", updatedProfile.author.profilePictureUrl)
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun uploadProfilePicture_throws_for_non_existent_user() = runTest {
+    val fakeUri = mockk<Uri>(relaxed = true)
+
+    repository.uploadProfilePicture("ghostUser", fakeUri)
+  }
+
+  @Test
+  fun deleteCurrentProfilePicture_resets_to_default() = runTest {
+    val fakeUri = mockk<Uri>(relaxed = true)
+
+    repository.uploadProfilePicture("user1", fakeUri)
+    val profileBefore = repository.getProfile("user1")
+    assertTrue(profileBefore.author.profilePictureUrl.isNotEmpty())
+
+    repository.deleteCurrentProfilePicture("user1", "local://profile-picture/user1")
+    val profileAfter = repository.getProfile("user1")
+
+    assertEquals("", profileAfter.author.profilePictureUrl)
+    assertEquals(EditProfileNumberConstants.PROFILE_PIC_DEFAULT, profileAfter.author.profilePicture)
+  }
+
+  @Test
+  fun deleteCurrentProfilePicture_does_nothing_if_url_does_not_match() = runTest {
+    val profileBefore = repository.getProfile("user1")
+    repository.deleteCurrentProfilePicture("user1", "wrong-url")
+    val profileAfter = repository.getProfile("user1")
+    assertEquals(profileBefore.author.profilePictureUrl, profileAfter.author.profilePictureUrl)
+  }
+
+  @Test(expected = IllegalArgumentException::class)
+  fun deleteCurrentProfilePicture_throws_for_non_existent_user() = runTest {
+    repository.deleteCurrentProfilePicture("ghostUser", "url")
   }
 }

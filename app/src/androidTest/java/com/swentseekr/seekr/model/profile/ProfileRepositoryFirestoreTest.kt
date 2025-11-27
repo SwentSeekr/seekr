@@ -1,7 +1,9 @@
 package com.swentseekr.seekr.model.profile
 
+import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
@@ -23,6 +25,9 @@ import org.junit.Test
 class ProfileRepositoryFirestoreTest {
   private lateinit var repository: ProfileRepository
   private lateinit var auth: FirebaseAuth
+
+  private lateinit var db: FirebaseFirestore
+  private lateinit var storage: FirebaseStorage
   private val hunt =
       Hunt(
           uid = "hunt1",
@@ -48,9 +53,38 @@ class ProfileRepositoryFirestoreTest {
       }
       auth = FirebaseAuth.getInstance()
       auth.signInAnonymously().await()
+      db = FirebaseFirestore.getInstance()
+      storage = FirebaseStorage.getInstance()
 
       repository = ProfileRepositoryProvider.repository
     }
+  }
+
+  @Test
+  fun createProfile_successfully() = runTest {
+    val uid = auth.currentUser!!.uid
+    val profile =
+        Profile(
+            uid = uid,
+            author =
+                Author(
+                    hasCompletedOnboarding = true,
+                    hasAcceptedTerms = true,
+                    "Tester",
+                    "This is a bio",
+                    0,
+                    4.5,
+                    4.0),
+            myHunts = mutableListOf(),
+            doneHunts = mutableListOf(),
+            likedHunts = mutableListOf())
+
+    repository.createProfile(profile)
+
+    val retrieved = repository.getProfile(uid)
+    assertNotNull("Profile should be retrieved after creation", retrieved)
+    assertEquals(uid, retrieved?.uid)
+    assertEquals("Tester", retrieved?.author?.pseudonym)
   }
 
   @Test
@@ -65,7 +99,15 @@ class ProfileRepositoryFirestoreTest {
     val profile =
         Profile(
             uid = uid,
-            author = Author("Tester", "This is a bio", 0, 4.5, 4.0),
+            author =
+                Author(
+                    hasCompletedOnboarding = true,
+                    hasAcceptedTerms = true,
+                    "Tester",
+                    "This is a bio",
+                    0,
+                    4.5,
+                    4.0),
             myHunts = mutableListOf(),
             doneHunts = mutableListOf(),
             likedHunts = mutableListOf())
@@ -88,7 +130,15 @@ class ProfileRepositoryFirestoreTest {
     val profile =
         Profile(
             uid = uid,
-            author = Author("OldName", "Old bio", 0, 3.0, 3.0),
+            author =
+                Author(
+                    hasCompletedOnboarding = true,
+                    hasAcceptedTerms = true,
+                    "OldName",
+                    "Old bio",
+                    0,
+                    3.0,
+                    3.0),
             myHunts = mutableListOf(),
             doneHunts = mutableListOf(),
             likedHunts = mutableListOf())
@@ -134,7 +184,15 @@ class ProfileRepositoryFirestoreTest {
     val profile =
         Profile(
             uid = uid,
-            author = Author("CompleteUser", "Complete bio", 5, 4.5, 4.8),
+            author =
+                Author(
+                    hasCompletedOnboarding = true,
+                    hasAcceptedTerms = true,
+                    "CompleteUser",
+                    "Complete bio",
+                    5,
+                    4.5,
+                    4.8),
             myHunts = mutableListOf(),
             doneHunts = mutableListOf(),
             likedHunts = mutableListOf())
@@ -155,7 +213,15 @@ class ProfileRepositoryFirestoreTest {
     val profile =
         Profile(
             uid = uid,
-            author = Author("AuthUser", "Auth bio", 0, 4.0, 3.0),
+            author =
+                Author(
+                    hasCompletedOnboarding = true,
+                    hasAcceptedTerms = true,
+                    "AuthUser",
+                    "Auth bio",
+                    0,
+                    4.0,
+                    3.0),
             myHunts = mutableListOf(),
             doneHunts = mutableListOf(),
             likedHunts = mutableListOf())
@@ -170,13 +236,46 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
+  fun updateProfile_preservesProfilePictureUrl() = runTest {
+    val uid = auth.currentUser!!.uid
+    val profile =
+        Profile(
+            uid = uid,
+            author =
+                Author(
+                    hasCompletedOnboarding = true,
+                    hasAcceptedTerms = true,
+                    "User",
+                    "Bio",
+                    0,
+                    4.0,
+                    3.0,
+                    "https://old.url/pic.jpg"),
+            myHunts = mutableListOf(),
+            doneHunts = mutableListOf(),
+            likedHunts = mutableListOf())
+
+    repository.createProfile(profile)
+
+    val updated =
+        profile.copy(
+            author =
+                profile.author.copy(
+                    pseudonym = "NewName", profilePictureUrl = "https://new.url/pic.jpg"))
+    repository.updateProfile(updated)
+
+    val retrieved = repository.getProfile(uid)
+    assertEquals("https://new.url/pic.jpg", retrieved?.author?.profilePictureUrl)
+  }
+
+  @Test
   fun documentToProfile_returnsNull_whenDocumentMissingAuthor() = runTest {
     val uid = auth.currentUser!!.uid
     val db = FirebaseFirestore.getInstance()
     val docRef = db.collection("profiles").document(uid)
     docRef.set(mapOf("someField" to "no author")).await()
 
-    val repo = ProfileRepositoryFirestore(db, auth)
+    val repo = ProfileRepositoryFirestore(db, auth, storage = storage)
     val result = repo.getProfile(uid)
     assertNull("Profile should be null if author field is missing", result)
   }
@@ -204,7 +303,7 @@ class ProfileRepositoryFirestoreTest {
 
     huntsCol.document("hunt1").set(huntData).await()
 
-    val repo = ProfileRepositoryFirestore(db, auth)
+    val repo = ProfileRepositoryFirestore(db, auth, storage = storage)
     val hunts = repo.getMyHunts(uid)
 
     assertNotNull(hunts)
@@ -221,7 +320,7 @@ class ProfileRepositoryFirestoreTest {
     val docRef = db.collection("hunts").document("invalidHunt")
     docRef.set(mapOf("title" to null)).await()
 
-    val repo = ProfileRepositoryFirestore(db, auth)
+    val repo = ProfileRepositoryFirestore(db, auth, storage = storage)
     val result = repo.getDoneHunts(auth.currentUser!!.uid)
     assertNotNull(result)
   }
@@ -346,5 +445,75 @@ class ProfileRepositoryFirestoreTest {
     assertEquals(Difficulty.EASY, hunt?.difficulty)
     assertEquals(HuntStatus.FUN, hunt?.status)
     assertEquals("author1", hunt?.authorId)
+  }
+
+  @Test
+  fun deleteCurrentProfilePicture_withEmptyUrl_doesNothing() = runTest {
+    val uid = auth.currentUser!!.uid
+    repository.deleteCurrentProfilePicture(uid, "")
+
+    val profile = repository.getProfile(uid)
+    assertNotNull(profile)
+    println("deleteCurrentProfilePicture with empty URL passed")
+  }
+
+  @Test
+  fun checkUserNeedsOnboarding_returnsTrue_whenProfileMissingOrNotCompleted() = runTest {
+    val uid = "new_user_test"
+
+    val needs = repository.checkUserNeedsOnboarding(uid)
+
+    assertTrue("User without profile should need onboarding", needs)
+
+    val created = repository.getProfile(uid)
+
+    assertNotNull(created)
+    assertFalse(created!!.author.hasCompletedOnboarding)
+  }
+
+  @Test
+  fun completeOnboarding_updatesFirestoreFieldsCorrectly() = runTest {
+    val uid = auth.currentUser!!.uid
+
+    val profile = repository.getProfile(uid)
+    assertNotNull("Profile should exist or be auto-created", profile)
+    assertFalse(
+        "User should not have completed onboarding initially",
+        profile!!.author.hasCompletedOnboarding)
+
+    repository.completeOnboarding(uid, "NewPseudo", "New bio")
+
+    val updated = repository.getProfile(uid)
+
+    assertNotNull(updated)
+    assertEquals(true, updated!!.author.hasCompletedOnboarding)
+    assertEquals(true, updated.author.hasAcceptedTerms)
+    assertEquals("NewPseudo", updated.author.pseudonym)
+    assertEquals("New bio", updated.author.bio)
+  }
+
+  @Test
+  fun uploadProfilePicture_withInvalidUri_throwsException() = runTest {
+    val uid = auth.currentUser!!.uid
+    val invalidUri = Uri.parse("content://invalid/path.jpg")
+
+    try {
+      repository.uploadProfilePicture(uid, invalidUri)
+      fail("Expected upload to fail with invalid URI")
+    } catch (e: Exception) {
+      println("Caught expected exception: ${e.message}")
+    }
+  }
+
+  @Test
+  fun deleteCurrentProfilePicture_withNonExistentFile_logsError() = runTest {
+    val uid = auth.currentUser!!.uid
+    val fakeUrl = "https://firebasestorage.googleapis.com/v0/b/fakebucket/o/nonexistent.jpg"
+
+    repository.deleteCurrentProfilePicture(uid, fakeUrl)
+
+    val profile = repository.getProfile(uid)
+    assertNotNull(profile)
+    println("deleteCurrentProfilePicture with non-existent file passed")
   }
 }

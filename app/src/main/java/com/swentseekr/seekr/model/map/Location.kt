@@ -1,3 +1,5 @@
 package com.swentseekr.seekr.model.map
 
-data class Location(val latitude: Double, val longitude: Double, val name: String)
+import kotlinx.serialization.Serializable
+
+@Serializable data class Location(val latitude: Double, val longitude: Double, val name: String)

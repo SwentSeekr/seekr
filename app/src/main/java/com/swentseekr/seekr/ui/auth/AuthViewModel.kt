@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
@@ -11,8 +13,20 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.authentication.AuthRepository
 import com.swentseekr.seekr.model.authentication.AuthRepositoryFirebase
+import com.swentseekr.seekr.model.authentication.OnboardingHandler
+import com.swentseekr.seekr.model.profile.ProfileRepository
+import com.swentseekr.seekr.model.profile.ProfileRepositoryFirestore
+import com.swentseekr.seekr.ui.auth.AuthViewModelMessages.DEFAULT_SIGN_IN_FAILURE
+import com.swentseekr.seekr.ui.auth.AuthViewModelMessages.NO_GOOGLE_ACCOUNT
+import com.swentseekr.seekr.ui.auth.AuthViewModelMessages.NO_PROVIDER_AVAILABLE
+import com.swentseekr.seekr.ui.auth.AuthViewModelMessages.SIGN_IN_CANCELLED
+import com.swentseekr.seekr.ui.auth.AuthViewModelMessages.credentialFailure
+import com.swentseekr.seekr.ui.auth.AuthViewModelMessages.unexpectedFailure
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -22,13 +36,19 @@ data class AuthUIState(
     val isLoading: Boolean = false,
     val user: FirebaseUser? = null,
     val errorMsg: String? = null,
-    val signedOut: Boolean = false
+    val signedOut: Boolean = false,
+    val needsOnboarding: Boolean = false
 )
 
 class AuthViewModel(
     private val repository: AuthRepository = AuthRepositoryFirebase(),
+    private val profileRepository: ProfileRepository =
+        ProfileRepositoryFirestore(
+            db = FirebaseFirestore.getInstance(),
+            auth = FirebaseAuth.getInstance(),
+            storage = FirebaseStorage.getInstance()),
     private val auth: FirebaseAuth = Firebase.auth
-) : ViewModel() {
+) : ViewModel(), OnboardingHandler {
 
   private val _uiState = MutableStateFlow(AuthUIState())
   val uiState: StateFlow<AuthUIState> = _uiState
@@ -56,8 +76,7 @@ class AuthViewModel(
 
   private fun getSignInOptions(context: Context) =
       GetSignInWithGoogleOption.Builder(
-              serverClientId =
-                  context.getString(com.swentseekr.seekr.R.string.default_web_client_id))
+              serverClientId = context.getString(R.string.default_web_client_id))
           .build()
 
   private fun signInRequest(signInOptions: GetSignInWithGoogleOption) =
@@ -85,36 +104,53 @@ class AuthViewModel(
           _uiState.update {
             it.copy(isLoading = false, user = user, errorMsg = null, signedOut = false)
           }
+
+          user.uid.let { uid ->
+            viewModelScope.launch {
+              val needs = profileRepository.checkUserNeedsOnboarding(uid)
+              _uiState.update { it.copy(needsOnboarding = needs) }
+            }
+          }
         }) { failure ->
+          val message = failure.localizedMessage ?: DEFAULT_SIGN_IN_FAILURE
           _uiState.update {
-            it.copy(
-                isLoading = false,
-                errorMsg = failure.localizedMessage,
-                signedOut = true,
-                user = null)
+            it.copy(isLoading = false, errorMsg = message, signedOut = true, user = null)
           }
         }
       } catch (e: GetCredentialCancellationException) {
         _uiState.update {
-          it.copy(isLoading = false, errorMsg = "Sign-in cancelled", signedOut = true, user = null)
+          it.copy(isLoading = false, errorMsg = SIGN_IN_CANCELLED, signedOut = true, user = null)
         }
-      } catch (e: androidx.credentials.exceptions.GetCredentialException) {
+      } catch (e: NoCredentialException) {
         _uiState.update {
-          it.copy(
-              isLoading = false,
-              errorMsg = "Failed to get credentials: ${e.localizedMessage}",
-              signedOut = true,
-              user = null)
+          it.copy(isLoading = false, errorMsg = NO_GOOGLE_ACCOUNT, signedOut = true, user = null)
+        }
+      } catch (e: GetCredentialException) {
+        val message =
+            when {
+              e.localizedMessage?.contains("no provider", ignoreCase = true) == true ->
+                  NO_PROVIDER_AVAILABLE
+              else -> credentialFailure(e.localizedMessage)
+            }
+        _uiState.update {
+          it.copy(isLoading = false, errorMsg = message, signedOut = true, user = null)
         }
       } catch (e: Exception) {
         _uiState.update {
           it.copy(
               isLoading = false,
-              errorMsg = "Unexpected error: ${e.localizedMessage}",
+              errorMsg = unexpectedFailure(e.localizedMessage),
               signedOut = true,
               user = null)
         }
       }
+    }
+  }
+
+  override fun completeOnboarding(userId: String, pseudonym: String, bio: String) {
+    viewModelScope.launch {
+      profileRepository.completeOnboarding(userId, pseudonym, bio)
+      _uiState.update { it.copy(needsOnboarding = false) }
     }
   }
 }

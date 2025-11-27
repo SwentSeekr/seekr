@@ -2,6 +2,7 @@ package com.swentseekr.seekr.model.profile
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestore
 
 object ProfileRepositoryProvider {
@@ -9,7 +10,8 @@ object ProfileRepositoryProvider {
     ProfileRepositoryFirestore(
         db = FirebaseFirestore.getInstance(),
         auth = FirebaseAuth.getInstance(),
-        huntsRepository = HuntsRepositoryFirestore(FirebaseFirestore.getInstance()))
+        huntsRepository = HuntsRepositoryFirestore(FirebaseFirestore.getInstance()),
+        storage = FirebaseStorage.getInstance())
   }
 
   var repository: ProfileRepository = _repositoryFirestore

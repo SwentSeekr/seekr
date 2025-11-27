@@ -25,6 +25,7 @@ import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
+import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.REMOVE_BUTTON_TAG_PREFIX
 
 sealed class OtherImage {
   data class Remote(val url: String) : OtherImage()
@@ -144,103 +145,6 @@ fun BaseHuntFieldsScreen(
               OutlinedTextFieldDefaults.colors(
                   unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                   focusedBorderColor = MaterialTheme.colorScheme.primary)
-
-          // IMAGE PICKER + PREVIEW
-          Text(BaseHuntFieldsStrings.MAIN_IMAGE, style = MaterialTheme.typography.titleMedium)
-          Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightSmall))
-
-          Button(
-              onClick = { imagePickerLauncher.launch("image/*") },
-              modifier = Modifier.fillMaxWidth()) {
-                Text(BaseHuntFieldsStrings.BUTTON_CHOOSE_IMAGE)
-              }
-
-          val imageToDisplay = uiState.mainImageUrl
-
-          if (!imageToDisplay.isNullOrBlank()) {
-            Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightMedium))
-            AsyncImage(
-                model = imageToDisplay,
-                contentDescription = BaseHuntFieldsStrings.CONTENT_DESC_SELECTED_IMAGE,
-                modifier =
-                    Modifier.fillMaxWidth()
-                        .height(BaseHuntFieldsUi.ImageHeight)
-                        .clip(RoundedCornerShape(BaseHuntFieldsUi.FieldCornerRadius)),
-                placeholder = painterResource(R.drawable.empty_image),
-                error = painterResource(R.drawable.empty_image))
-          }
-
-          Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeight))
-
-          // OTHER IMAGES SECTION – EDIT + ADD MODE
-
-          Text(BaseHuntFieldsStrings.OTHER_IMAGES, style = MaterialTheme.typography.titleMedium)
-          Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightSmall))
-
-          Button(
-              onClick = { multipleImagesPickerLauncher.launch("image/*") },
-              modifier = Modifier.fillMaxWidth()) {
-                Text(BaseHuntFieldsStrings.BUTTON_CHOOSE_ADDITIONAL_IMAGES)
-              }
-
-          // Combine both existing URLs + newly added URIs
-          val combinedImages: List<OtherImage> =
-              uiState.otherImagesUrls.map { OtherImage.Remote(it) } +
-                  uiState.otherImagesUris.map { OtherImage.Local(it) }
-
-          if (combinedImages.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightMedium))
-
-            Column {
-              combinedImages.forEach { image ->
-                val tagSuffix =
-                    when (image) {
-                      is OtherImage.Remote -> image.url
-                      is OtherImage.Local -> image.uri.toString()
-                    }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween) {
-                      val model =
-                          when (image) {
-                            is OtherImage.Remote -> image.url
-                            is OtherImage.Local -> image.uri
-                          }
-
-                      AsyncImage(
-                          model = model,
-                          contentDescription = BaseHuntFieldsStrings.CONTENT_DESC_SECONDARY_IMAGE,
-                          modifier =
-                              Modifier.testTag("otherImage_$tagSuffix")
-                                  .weight(BaseHuntFieldsUi.ImageWeight)
-                                  .height(
-                                      BaseHuntFieldsUi.ImageHeight /
-                                          BaseHuntFieldsUi.ImageHeightDivisor)
-                                  .clip(RoundedCornerShape(BaseHuntFieldsUi.FieldCornerRadius)),
-                          placeholder = painterResource(R.drawable.empty_image),
-                          error = painterResource(R.drawable.empty_image))
-
-                      Spacer(modifier = Modifier.width(BaseHuntFieldsUi.SpacerHeightSmall))
-
-                      TextButton(
-                          modifier = Modifier.testTag("removeButton_$tagSuffix"),
-                          onClick = {
-                            when (image) {
-                              is OtherImage.Remote -> onRemoveExistingImage(image.url)
-                              is OtherImage.Local -> onRemoveOtherImage(image.uri)
-                            }
-                          }) {
-                            Text(BaseHuntFieldsStrings.REMOVE)
-                          }
-                    }
-
-                Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightSmall))
-              }
-            }
-
-            Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeight))
-          }
 
           // === Form ===
           ValidatedOutlinedField(
@@ -365,6 +269,114 @@ fun BaseHuntFieldsScreen(
                     }
                 Text(label)
               }
+
+          // IMAGE PICKER + PREVIEW
+          Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightSmall))
+
+          Button(
+              onClick = { imagePickerLauncher.launch("image/*") },
+              colors =
+                  ButtonDefaults.buttonColors(
+                      containerColor = MaterialTheme.colorScheme.secondary,
+                      contentColor = MaterialTheme.colorScheme.onSecondary),
+              modifier = Modifier.fillMaxWidth()) {
+                Text(BaseHuntFieldsStrings.BUTTON_CHOOSE_IMAGE)
+              }
+
+          val imageToDisplay = uiState.mainImageUrl
+
+          if (!imageToDisplay.isNullOrBlank()) {
+            Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightMedium))
+            AsyncImage(
+                model = imageToDisplay,
+                contentDescription = BaseHuntFieldsStrings.CONTENT_DESC_SELECTED_IMAGE,
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .height(BaseHuntFieldsUi.ImageHeight)
+                        .clip(RoundedCornerShape(BaseHuntFieldsUi.FieldCornerRadius)),
+                placeholder = painterResource(R.drawable.empty_image),
+                error = painterResource(R.drawable.empty_image))
+          }
+
+          // OTHER IMAGES SECTION – EDIT + ADD MODE
+          Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightSmall))
+
+          Button(
+              onClick = { multipleImagesPickerLauncher.launch("image/*") },
+              colors =
+                  ButtonDefaults.buttonColors(
+                      containerColor = MaterialTheme.colorScheme.secondary,
+                      contentColor = MaterialTheme.colorScheme.onSecondary),
+              modifier = Modifier.fillMaxWidth()) {
+                Text(BaseHuntFieldsStrings.BUTTON_CHOOSE_ADDITIONAL_IMAGES)
+              }
+
+          val combinedImages: List<OtherImage> =
+              uiState.otherImagesUrls.map { OtherImage.Remote(it) } +
+                  uiState.otherImagesUris.map { OtherImage.Local(it) }
+
+          if (combinedImages.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightMedium))
+
+            Column {
+              combinedImages.forEach { image ->
+                val tagSuffix =
+                    when (image) {
+                      is OtherImage.Remote -> image.url
+                      is OtherImage.Local -> image.uri.toString()
+                    }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween) {
+                      val model =
+                          when (image) {
+                            is OtherImage.Remote -> image.url
+                            is OtherImage.Local -> image.uri
+                          }
+
+                      AsyncImage(
+                          model = model,
+                          contentDescription = BaseHuntFieldsStrings.CONTENT_DESC_SECONDARY_IMAGE,
+                          modifier =
+                              Modifier.testTag("otherImage_$tagSuffix")
+                                  .weight(BaseHuntFieldsUi.ImageWeight)
+                                  .height(
+                                      BaseHuntFieldsUi.ImageHeight /
+                                          BaseHuntFieldsUi.ImageHeightDivisor)
+                                  .clip(RoundedCornerShape(BaseHuntFieldsUi.FieldCornerRadius)),
+                          placeholder = painterResource(R.drawable.empty_image),
+                          error = painterResource(R.drawable.empty_image))
+
+                      Spacer(modifier = Modifier.width(BaseHuntFieldsUi.SpacerHeightSmall))
+
+                      TextButton(
+                          modifier = Modifier.testTag("$REMOVE_BUTTON_TAG_PREFIX$tagSuffix"),
+                          onClick = {
+                            when (image) {
+                              is OtherImage.Remote -> onRemoveExistingImage(image.url)
+                              is OtherImage.Local -> onRemoveOtherImage(image.uri)
+                            }
+                          },
+                          colors =
+                              ButtonDefaults.textButtonColors(
+                                  contentColor = MaterialTheme.colorScheme.error)) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_delete),
+                                contentDescription = BaseHuntFieldsStrings.DELETE_ICON_DESC,
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(BaseHuntFieldsUi.IconSizeSmall))
+                            Spacer(modifier = Modifier.width(BaseHuntFieldsUi.SpacerSuperSmall))
+                            Text(BaseHuntFieldsStrings.REMOVE)
+                          }
+                    }
+
+                Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightSmall))
+              }
+            }
+
+            Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeight))
+          }
 
           Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeight))
 
