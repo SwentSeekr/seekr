@@ -29,10 +29,9 @@ object NotificationHelper {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
         context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
             PackageManager.PERMISSION_GRANTED) {
-      // Permission not granted, just return or log
       return
     }
-    createNotificationChannel(context) // <-- IMPORTANT
+    createNotificationChannel(context)
 
     val builder =
         NotificationCompat.Builder(context, CHANNEL_ID)

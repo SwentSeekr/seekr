@@ -311,7 +311,7 @@ class ReviewHuntViewModelTest {
   @Test
   fun submitReviewHunt_withInvalidData_setsError() = runTest {
     val initialState = viewModel.uiState.value
-    viewModel.submitReviewHunt("user123", testHunt)
+    viewModel.submitReviewHunt("user123", testHunt, null)
     advanceUntilIdle()
 
     val state = viewModel.uiState.value
@@ -332,7 +332,7 @@ class ReviewHuntViewModelTest {
     viewModel.setReviewText("Great hunt!")
     viewModel.setRating(4.0)
 
-    viewModel.submitReviewHunt("user123", testHunt)
+    viewModel.submitReviewHunt("user123", testHunt, null)
     advanceUntilIdle()
 
     val state = viewModel.uiState.value
@@ -351,7 +351,7 @@ class ReviewHuntViewModelTest {
     advanceUntilIdle()
     viewModel.setReviewText("Amazing!")
     viewModel.setRating(5.0)
-    viewModel.submitReviewHunt("user123", testHunt)
+    viewModel.submitReviewHunt("user123", testHunt, null)
     advanceUntilIdle()
 
     viewModel.clearForm()
@@ -373,7 +373,7 @@ class ReviewHuntViewModelTest {
     advanceUntilIdle()
     viewModel.setReviewText("Amazing!")
     viewModel.setRating(5.0)
-    viewModel.submitReviewHunt("user123", testHunt)
+    viewModel.submitReviewHunt("user123", testHunt, null)
     advanceUntilIdle()
 
     viewModel.clearFormCancel()
@@ -397,7 +397,7 @@ class ReviewHuntViewModelTest {
   fun deleteReview_whenUserIsAuthor_deletesReviewSuccessfully() = runTest {
     viewModel.setReviewText("Great hunt!")
     viewModel.setRating(5.0)
-    viewModel.submitReviewHunt("user123", testHunt)
+    viewModel.submitReviewHunt("user123", testHunt, null)
     advanceUntilIdle()
 
     val createdReview = fakeReviewRepository.getHuntReviews(testHunt.uid).first()
@@ -415,7 +415,7 @@ class ReviewHuntViewModelTest {
   fun deleteReview_whenUserIsNotAuthor_setsErrorMessage() = runTest {
     viewModel.setReviewText("Nice!")
     viewModel.setRating(4.0)
-    viewModel.submitReviewHunt("user123", testHunt)
+    viewModel.submitReviewHunt("user123", testHunt, null)
     advanceUntilIdle()
 
     val createdReview = fakeReviewRepository.getHuntReviews(testHunt.uid).first()

@@ -115,7 +115,7 @@ open class ReviewHuntViewModel(
         repositoryReview.addReviewHunt(createdReview)
         if (context != null) {
           NotificationHelper.sendNotification(
-              context, "New review added", "Your hunt received a new review!")
+              context, "New review added", "You added a new review!")
         }
         _uiState.value =
             _uiState.value.copy(saveSuccessful = true, errorMsg = null, isSubmitted = true)
