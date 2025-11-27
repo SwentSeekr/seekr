@@ -20,6 +20,7 @@ import io.mockk.unmockkAll
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -106,17 +107,24 @@ class SettingsViewModelTest {
 
   @Test
   @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
-  fun `onNotificationsToggleRequested - enabled and not granted sets request flag`() {
-    // initial: not granted
-    val initial =
-        viewModel.uiState.value.copy(
-            notificationPermissionGranted = false, requestNotificationPermission = false)
-    setUiState(initial)
+  fun `onNotificationsToggleRequested - enabled and not granted emits RequestNotification event`() =
+      runTest {
+        val initial =
+            viewModel.uiState.value.copy(
+                notificationPermissionGranted = false, notificationsEnabled = false)
+        setUiState(initial)
 
-    viewModel.onNotificationsToggleRequested(enabled = true, context = context)
+        val events = mutableListOf<PermissionEvent>()
+        val job = launch { viewModel.permissionEvents.collect { event -> events.add(event) } }
 
-    assertTrue(viewModel.uiState.value.requestNotificationPermission)
-  }
+        viewModel.onNotificationsToggleRequested(enabled = true, context = context)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(1, events.size)
+        assertTrue(events.first() is PermissionEvent.RequestNotification)
+
+        job.cancel()
+      }
 
   @Test
   fun `onNotificationsToggleRequested - disabled opens settings`() {
@@ -137,16 +145,6 @@ class SettingsViewModelTest {
   }
 
   @Test
-  fun `consumeNotificationPermissionRequest clears flag`() {
-    val initial = viewModel.uiState.value.copy(requestNotificationPermission = true)
-    setUiState(initial)
-
-    viewModel.consumeNotificationPermissionRequest()
-
-    assertFalse(viewModel.uiState.value.requestNotificationPermission)
-  }
-
-  @Test
   @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
   fun `onNotificationPermissionResult - granted updates state and notificationsEnabled`() {
     val initial =
@@ -159,7 +157,6 @@ class SettingsViewModelTest {
     val state = viewModel.uiState.value
     assertTrue(state.notificationPermissionGranted)
     assertTrue(state.notificationsEnabled)
-    assertFalse(state.requestNotificationPermission)
   }
 
   @Test
@@ -178,15 +175,21 @@ class SettingsViewModelTest {
   }
 
   @Test
-  fun `onPicturesToggleRequested - enable when not granted sets requestGalleryPermission`() {
+  fun `onPicturesToggleRequested - enable when not granted emits RequestGallery event`() = runTest {
     val initial =
-        viewModel.uiState.value.copy(
-            galleryPermissionGranted = false, requestGalleryPermission = false)
+        viewModel.uiState.value.copy(galleryPermissionGranted = false, picturesEnabled = false)
     setUiState(initial)
 
-    viewModel.onPicturesToggleRequested(enabled = true, context = context)
+    val events = mutableListOf<PermissionEvent>()
+    val job = launch { viewModel.permissionEvents.collect { event -> events.add(event) } }
 
-    assertTrue(viewModel.uiState.value.requestGalleryPermission)
+    viewModel.onPicturesToggleRequested(enabled = true, context = context)
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    assertEquals(1, events.size)
+    assertTrue(events.first() is PermissionEvent.RequestGallery)
+
+    job.cancel()
   }
 
   @Test
@@ -196,16 +199,6 @@ class SettingsViewModelTest {
     viewModel.onPicturesToggleRequested(enabled = false, context = context)
 
     io.mockk.verify { context.startActivity(any()) }
-  }
-
-  @Test
-  fun `consumeGalleryPermissionRequest clears flag`() {
-    val initial = viewModel.uiState.value.copy(requestGalleryPermission = true)
-    setUiState(initial)
-
-    viewModel.consumeGalleryPermissionRequest()
-
-    assertFalse(viewModel.uiState.value.requestGalleryPermission)
   }
 
   @Test
@@ -219,7 +212,6 @@ class SettingsViewModelTest {
     val state = viewModel.uiState.value
     assertTrue(state.galleryPermissionGranted)
     assertTrue(state.picturesEnabled)
-    assertFalse(state.requestGalleryPermission)
   }
 
   @Test
@@ -236,16 +228,24 @@ class SettingsViewModelTest {
   }
 
   @Test
-  fun `onLocalisationToggleRequested - enable when not granted sets requestLocationPermission`() {
-    val initial =
-        viewModel.uiState.value.copy(
-            locationPermissionGranted = false, requestLocationPermission = false)
-    setUiState(initial)
+  fun `onLocalisationToggleRequested - enable when not granted emits RequestLocation event`() =
+      runTest {
+        val initial =
+            viewModel.uiState.value.copy(
+                locationPermissionGranted = false, localisationEnabled = false)
+        setUiState(initial)
 
-    viewModel.onLocalisationToggleRequested(enabled = true, context = context)
+        val events = mutableListOf<PermissionEvent>()
+        val job = launch { viewModel.permissionEvents.collect { event -> events.add(event) } }
 
-    assertTrue(viewModel.uiState.value.requestLocationPermission)
-  }
+        viewModel.onLocalisationToggleRequested(enabled = true, context = context)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(1, events.size)
+        assertTrue(events.first() is PermissionEvent.RequestLocation)
+
+        job.cancel()
+      }
 
   @Test
   fun `onLocalisationToggleRequested - disable opens settings`() {
@@ -254,16 +254,6 @@ class SettingsViewModelTest {
     viewModel.onLocalisationToggleRequested(enabled = false, context = context)
 
     io.mockk.verify { context.startActivity(any()) }
-  }
-
-  @Test
-  fun `consumeLocationPermissionRequest clears flag`() {
-    val initial = viewModel.uiState.value.copy(requestLocationPermission = true)
-    setUiState(initial)
-
-    viewModel.consumeLocationPermissionRequest()
-
-    assertFalse(viewModel.uiState.value.requestLocationPermission)
   }
 
   @Test
@@ -277,7 +267,6 @@ class SettingsViewModelTest {
     val state = viewModel.uiState.value
     assertTrue(state.locationPermissionGranted)
     assertTrue(state.localisationEnabled)
-    assertFalse(state.requestLocationPermission)
   }
 
   @Test
