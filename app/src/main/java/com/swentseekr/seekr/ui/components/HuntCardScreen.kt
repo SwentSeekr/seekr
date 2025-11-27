@@ -44,9 +44,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.google.android.gms.maps.model.CameraPosition
@@ -55,6 +61,7 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.DifficultyColor
 import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
@@ -101,6 +108,7 @@ fun HuntCardScreen(
   val author = authorProfile?.author?.pseudonym ?: HuntCardScreenStrings.UnknownAuthor
 
   Scaffold(
+      // BAR GOBACK ARROW
       topBar = {
         TopAppBar(
             title = { Text("") },
@@ -322,7 +330,6 @@ fun ReviewCard(
       modifier =
           Modifier.fillMaxWidth()
               .padding(vertical = HuntCardScreenDefaults.ReviewCardVerticalPadding)
-              .padding(horizontal = HuntCardScreenDefaults.ScreenPaddingHorizontal)
               .border(
                   HuntCardScreenDefaults.CardBorderWidth,
                   HuntCardScreenDefaults.PrimaryBorderColor,
@@ -387,12 +394,12 @@ fun ReviewCard(
 
 @Composable
 fun HuntHeaderSection(
-    hunt: com.swentseekr.seekr.model.hunt.Hunt,
-    authorName: String,
-    huntId: String,
-    goProfile: (String) -> Unit = {},
-    huntCardViewModel: HuntCardViewModel,
-    modifier: Modifier = Modifier,
+  hunt: com.swentseekr.seekr.model.hunt.Hunt,
+  authorName: String,
+  huntId: String,
+  huntCardViewModel: HuntCardViewModel,
+  goProfile: (String) -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   Column(
       modifier =
@@ -420,8 +427,8 @@ fun HuntHeaderSection(
             "${HuntCardScreenStrings.By} $authorName",
             modifier =
                 Modifier.padding(horizontal = HuntCardScreenDefaults.InfoTextPadding)
-                    .clickable(onClick = { goProfile(hunt.authorId) })
-                    .testTag(HuntCardScreenTestTags.AUTHOR_TEXT),
+                  .clickable { goProfile(hunt.authorId) }
+                  .testTag(HuntCardScreenTestTags.AUTHOR_TEXT),
         )
 
         Spacer(modifier = Modifier.height(HuntCardScreenDefaults.AuthorImageSpacing))
