@@ -17,16 +17,11 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class SettingsScreenTest {
 
-  @get:Rule
-  val composeRule = createAndroidComposeRule<ComponentActivity>()
+  @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()
 
   @Test
   fun screen_displays_all_main_elements() {
-    composeRule.setContent {
-      MaterialTheme {
-        SettingsScreen()
-      }
-    }
+    composeRule.setContent { MaterialTheme { SettingsScreen() } }
 
     composeRule.onNodeWithTag(SettingsScreenTestTags.BACK_BUTTON).assertExists()
     composeRule.onNodeWithTag(SettingsScreenTestTags.APP_VERSION_TEXT).assertExists()
@@ -42,11 +37,7 @@ class SettingsScreenTest {
   fun clicking_back_button_triggers_callback() {
     var backPressed = false
 
-    composeRule.setContent {
-      MaterialTheme {
-        SettingsScreen(onGoBack = { backPressed = true })
-      }
-    }
+    composeRule.setContent { MaterialTheme { SettingsScreen(onGoBack = { backPressed = true }) } }
 
     composeRule.onNodeWithTag(SettingsScreenTestTags.BACK_BUTTON).performClick()
     assertTrue(backPressed)
@@ -61,21 +52,21 @@ class SettingsScreenTest {
     var localisationToggled = false
 
     val uiState =
-      SettingsUIState(
-        appVersion = SettingsScreenStrings.APP_VERSION_1,
-        notificationsEnabled = false,
-        picturesEnabled = false,
-        localisationEnabled = false)
+        SettingsUIState(
+            appVersion = SettingsScreenStrings.APP_VERSION_1,
+            notificationsEnabled = false,
+            picturesEnabled = false,
+            localisationEnabled = false)
 
     composeRule.setContent {
       MaterialTheme {
         SettingsContent(
-          onEditProfileClick = { editProfileClicked = true },
-          onLogoutClick = { logoutClicked = true },
-          uiState = uiState,
-          onNotificationsChange = { notificationsToggled = it },
-          onPicturesChange = { picturesToggled = it },
-          onLocalisationChange = { localisationToggled = it })
+            onEditProfileClick = { editProfileClicked = true },
+            onLogoutClick = { logoutClicked = true },
+            uiState = uiState,
+            onNotificationsChange = { notificationsToggled = it },
+            onPicturesChange = { picturesToggled = it },
+            onLocalisationChange = { localisationToggled = it })
       }
     }
 
@@ -104,9 +95,9 @@ class SettingsScreenTest {
     composeRule.setContent {
       MaterialTheme {
         SettingsContent(
-          onEditProfileClick = { editProfileTriggered = true },
-          onLogoutClick = {},
-          uiState = uiState)
+            onEditProfileClick = { editProfileTriggered = true },
+            onLogoutClick = {},
+            uiState = uiState)
       }
     }
 
@@ -123,9 +114,7 @@ class SettingsScreenTest {
     composeRule.setContent {
       MaterialTheme {
         SettingsContent(
-          onEditProfileClick = {},
-          onLogoutClick = { logoutTriggered = true },
-          uiState = uiState)
+            onEditProfileClick = {}, onLogoutClick = { logoutTriggered = true }, uiState = uiState)
       }
     }
 
@@ -140,10 +129,7 @@ class SettingsScreenTest {
 
     composeRule.setContent {
       MaterialTheme {
-        SettingsContent(
-          onEditProfileClick = {},
-          onLogoutClick = {},
-          uiState = uiState)
+        SettingsContent(onEditProfileClick = {}, onLogoutClick = {}, uiState = uiState)
       }
     }
 
@@ -157,10 +143,7 @@ class SettingsScreenTest {
 
     composeRule.setContent {
       MaterialTheme {
-        SettingsContent(
-          onEditProfileClick = {},
-          onLogoutClick = {},
-          uiState = uiState)
+        SettingsContent(onEditProfileClick = {}, onLogoutClick = {}, uiState = uiState)
       }
     }
 
@@ -171,18 +154,15 @@ class SettingsScreenTest {
   @Test
   fun toggles_reflect_initial_ui_state() {
     val uiState =
-      SettingsUIState(
-        appVersion = SettingsScreenStrings.APP_VERSION_1,
-        notificationsEnabled = true,
-        picturesEnabled = true,
-        localisationEnabled = false)
+        SettingsUIState(
+            appVersion = SettingsScreenStrings.APP_VERSION_1,
+            notificationsEnabled = true,
+            picturesEnabled = true,
+            localisationEnabled = false)
 
     composeRule.setContent {
       MaterialTheme {
-        SettingsContent(
-          onEditProfileClick = {},
-          onLogoutClick = {},
-          uiState = uiState)
+        SettingsContent(onEditProfileClick = {}, onLogoutClick = {}, uiState = uiState)
       }
     }
 
@@ -193,11 +173,7 @@ class SettingsScreenTest {
 
   @Test
   fun top_bar_title_is_displayed() {
-    composeRule.setContent {
-      MaterialTheme {
-        SettingsScreen()
-      }
-    }
+    composeRule.setContent { MaterialTheme { SettingsScreen() } }
 
     composeRule.onNodeWithText(SettingsScreenStrings.TOP_BAR_TITLE).assertExists()
   }
