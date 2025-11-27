@@ -12,13 +12,13 @@ import com.swentseekr.seekr.R
 
 object NotificationHelper {
 
-  private const val CHANNEL_ID = "default_channel"
-
   fun createNotificationChannel(context: Context) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       val channel =
           NotificationChannel(
-              CHANNEL_ID, "General Notifications", NotificationManager.IMPORTANCE_DEFAULT)
+              NotificationConstants.CHANNEL_ID,
+              NotificationConstants.GENERAL_CHANNEL_NAME,
+              NotificationManager.IMPORTANCE_DEFAULT)
 
       val manager = context.getSystemService(NotificationManager::class.java)
       manager.createNotificationChannel(channel)
@@ -34,7 +34,7 @@ object NotificationHelper {
     createNotificationChannel(context)
 
     val builder =
-        NotificationCompat.Builder(context, CHANNEL_ID)
+        NotificationCompat.Builder(context, NotificationConstants.CHANNEL_ID)
             .setSmallIcon(R.drawable.logo_seekr)
             .setContentTitle(title)
             .setContentText(message)
