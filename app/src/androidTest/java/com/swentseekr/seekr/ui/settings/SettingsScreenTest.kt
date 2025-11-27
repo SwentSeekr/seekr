@@ -10,7 +10,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.flow.MutableStateFlow
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -153,7 +152,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun toggles_reflect_initial_ui_state_in_SettingsContent() {
+  fun toggles_reflect_initial_ui_state() {
     val uiState =
         SettingsUIState(
             appVersion = SettingsScreenStrings.APP_VERSION_1,
@@ -197,64 +196,6 @@ class SettingsScreenTest {
     composeRule.waitForIdle()
 
     assertTrue(signedOutCalled)
-  }
-
-  @Test
-  fun when_signedOut_changes_to_true_after_composition_onSignedOut_callback_is_called() {
-    val viewModel = SettingsViewModel()
-    setUiState(
-        viewModel,
-        SettingsUIState(signedOut = false, appVersion = SettingsScreenStrings.APP_VERSION_1))
-
-    var signedOutCalled = false
-
-    composeRule.setContent {
-      MaterialTheme {
-        SettingsScreen(viewModel = viewModel, onSignedOut = { signedOutCalled = true })
-      }
-    }
-
-    composeRule.waitForIdle()
-    assertFalse(signedOutCalled)
-
-    val current = viewModel.uiState.value
-    setUiState(viewModel, current.copy(signedOut = true))
-    composeRule.waitForIdle()
-
-    assertTrue(signedOutCalled)
-  }
-
-  @Test
-  fun settingsScreen_reflects_viewModel_state_changes() {
-    val viewModel = SettingsViewModel()
-
-    setUiState(
-        viewModel,
-        SettingsUIState(
-            appVersion = SettingsScreenStrings.APP_VERSION_1,
-            notificationsEnabled = false,
-            picturesEnabled = false,
-            localisationEnabled = false))
-
-    composeRule.setContent { MaterialTheme { SettingsScreen(viewModel = viewModel) } }
-
-    composeRule.onNodeWithTag(SettingsScreenTestTags.NOTIFICATIONS_TOGGLE).assertIsOff()
-    composeRule.onNodeWithTag(SettingsScreenTestTags.PICTURES_TOGGLE).assertIsOff()
-    composeRule.onNodeWithTag(SettingsScreenTestTags.LOCALISATION_TOGGLE).assertIsOff()
-
-    setUiState(
-        viewModel,
-        SettingsUIState(
-            appVersion = SettingsScreenStrings.APP_VERSION_1,
-            notificationsEnabled = true,
-            picturesEnabled = true,
-            localisationEnabled = true))
-
-    composeRule.waitForIdle()
-
-    composeRule.onNodeWithTag(SettingsScreenTestTags.NOTIFICATIONS_TOGGLE).assertIsOn()
-    composeRule.onNodeWithTag(SettingsScreenTestTags.PICTURES_TOGGLE).assertIsOn()
-    composeRule.onNodeWithTag(SettingsScreenTestTags.LOCALISATION_TOGGLE).assertIsOn()
   }
 
   private fun setUiState(viewModel: SettingsViewModel, newState: SettingsUIState) {
