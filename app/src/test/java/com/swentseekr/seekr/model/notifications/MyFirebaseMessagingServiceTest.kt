@@ -80,7 +80,7 @@ class MyFirebaseMessagingServiceTest {
   }
 
   @Test
-  fun `onNewToken does nothing when user is null`() {
+  fun onNewToken_does_nothing_when_user_is_null() {
     every { mockFirebaseAuth.currentUser } returns null
 
     service.onNewToken("token123")
@@ -91,5 +91,43 @@ class MyFirebaseMessagingServiceTest {
           .document(any<String>())
           .update(any<String>(), any<Any>())
     }
+  }
+
+  @Test
+  fun onNewToken_logs_success_when_firestore_update_succeeds() {
+    every { mockFirebaseUser.uid } returns "uid123"
+
+    val mockTask = mockk<com.google.android.gms.tasks.Task<Void>>()
+    every { mockDocRef.update("author.fcmToken", "token123") } returns mockTask
+    every { mockTask.addOnSuccessListener(any()) } answers
+        {
+          val listener = firstArg<com.google.android.gms.tasks.OnSuccessListener<Void>>()
+          listener.onSuccess(null)
+          mockTask
+        }
+    every { mockTask.addOnFailureListener(any()) } returns mockTask
+
+    service.onNewToken("token123")
+
+    verify { Log.d(NotificationConstants.TAG_FCM, NotificationConstants.LOG_TOKEN_SAVED) }
+  }
+
+  @Test
+  fun onNewToken_logs_error_when_firestore_update_fails() {
+    every { mockFirebaseUser.uid } returns "uid123"
+
+    val mockTask = mockk<com.google.android.gms.tasks.Task<Void>>()
+    every { mockDocRef.update("author.fcmToken", "token123") } returns mockTask
+    every { mockTask.addOnSuccessListener(any()) } returns mockTask
+    every { mockTask.addOnFailureListener(any()) } answers
+        {
+          val listener = firstArg<com.google.android.gms.tasks.OnFailureListener>()
+          listener.onFailure(Exception("fail"))
+          mockTask
+        }
+
+    service.onNewToken("token123")
+
+    verify { Log.e(NotificationConstants.TAG_FCM, NotificationConstants.LOG_TOKEN_FAILED, any()) }
   }
 }
