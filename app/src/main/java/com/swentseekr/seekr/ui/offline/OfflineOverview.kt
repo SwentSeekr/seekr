@@ -15,8 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import com.swentseekr.seekr.model.profile.mockProfileData
-import com.swentseekr.seekr.ui.profile.Profile
 
 /**
  * Overview screen displayed when the user is offline.
@@ -33,7 +31,6 @@ import com.swentseekr.seekr.ui.profile.Profile
  */
 @Composable
 fun OfflineOverviewScreen(
-    profile: Profile?,
     modifier: Modifier = Modifier,
     onShowDownloadedHunts: () -> Unit = {},
 ) {
@@ -42,10 +39,8 @@ fun OfflineOverviewScreen(
         modifier = Modifier.fillMaxSize().padding(horizontal = OfflineConstants.SCREEN_PADDING),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Bottom) {
-          // Top spacer to position the informational card lower on the screen
           Spacer(modifier = Modifier.height(OfflineConstants.OVERVIEW_TOP_SPACER_HEIGHT))
 
-          // Informational card explaining offline behaviour and availability
           Box(
               modifier =
                   Modifier.fillMaxWidth(OfflineConstants.OFFLINE_CARD_WIDTH_RATIO)
@@ -57,14 +52,11 @@ fun OfflineOverviewScreen(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center) {
-                      // Warning icon to visually highlight the offline state
                       Icon(
                           imageVector = Icons.Default.Warning,
-                          contentDescription = null,
+                          contentDescription = OfflineConstants.OVERVIEW_ICON,
                           modifier = Modifier.size(OfflineConstants.OFFLINE_ICON_SIZE))
                       Spacer(modifier = Modifier.height(OfflineConstants.ICON_SPACING))
-                      // Short descriptive message about offline access to hunts, centered in the
-                      // card
                       Text(
                           text = OfflineConstants.OFFLINE_OVERVIEW_MESSAGE,
                           style = MaterialTheme.typography.titleMedium,
@@ -73,10 +65,8 @@ fun OfflineOverviewScreen(
                     }
               }
 
-          // Spacer to push the action button closer to the bottom of the screen
           Spacer(modifier = Modifier.height(OfflineConstants.OVERVIEW_BUTTON_TOP_SPACER_HEIGHT))
 
-          // Primary action allowing the user to continue with downloaded hunts only
           Button(
               onClick = onShowDownloadedHunts,
               shape = OfflineConstants.BUTTON_SHAPE,
@@ -87,7 +77,6 @@ fun OfflineOverviewScreen(
                 Text(text = OfflineConstants.SHOW_DOWNLOADED_HUNTS_BUTTON)
               }
 
-          // Bottom spacer to provide breathing room below the button
           Spacer(modifier = Modifier.height(OfflineConstants.OVERVIEW_BUTTON_BOTTOM_SPACER_HEIGHT))
         }
   }
@@ -97,5 +86,5 @@ fun OfflineOverviewScreen(
 @Preview
 @Composable
 fun OfflineOverviewScreenPreview() {
-  OfflineOverviewScreen(profile = mockProfileData(), onShowDownloadedHunts = {})
+  OfflineOverviewScreen(onShowDownloadedHunts = {})
 }
