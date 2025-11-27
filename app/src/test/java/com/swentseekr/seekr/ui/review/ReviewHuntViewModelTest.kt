@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.review
 
+import android.content.Context
 import android.net.Uri
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
@@ -9,8 +10,16 @@ import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryLocal
 import com.swentseekr.seekr.model.hunt.ReviewImageRepositoryLocal
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.model.notifications.NotificationHelper
 import com.swentseekr.seekr.model.profile.ProfileRepositoryLocal
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.*
 import org.junit.After
@@ -24,9 +33,9 @@ class ReviewHuntViewModelTest {
   private lateinit var fakeReviewRepository: HuntReviewRepositoryLocal
   private lateinit var fakeProfileRepository: ProfileRepositoryLocal
   private lateinit var fakeImageReviewRepository: ReviewImageRepositoryLocal
-  private val testDispatcher = StandardTestDispatcher()
-
   private lateinit var viewModel: ReviewHuntViewModel
+  private val testScheduler = TestCoroutineScheduler()
+  val testDispatcher = StandardTestDispatcher(testScheduler)
   private val testHunt =
       Hunt(
           uid = "hunt123",
@@ -57,7 +66,8 @@ class ReviewHuntViewModelTest {
             fakeHuntsRepository,
             fakeReviewRepository,
             fakeProfileRepository,
-            fakeImageReviewRepository)
+            fakeImageReviewRepository,
+            dispatcher = testDispatcher)
     advanceUntilIdle()
   }
 
@@ -428,5 +438,83 @@ class ReviewHuntViewModelTest {
 
     val reviewsAfterAttempt = fakeReviewRepository.getHuntReviews(testHunt.uid)
     assertEquals(1, reviewsAfterAttempt.size)
+  }
+
+  @Test
+  fun submitReviewHunt_withContext_sendsNotification() = runTest {
+    val context = mockk<Context>(relaxed = true)
+
+    mockkObject(NotificationHelper)
+    every { NotificationHelper.sendNotification(any(), any(), any()) } just Runs
+
+    viewModel.setReviewText("Amazing hunt!")
+    viewModel.setRating(5.0)
+
+    viewModel.submitReviewHunt("user123", testHunt, context)
+
+    testScheduler.advanceUntilIdle()
+
+    verify {
+      NotificationHelper.sendNotification(context, "New review added", "You added a new review!")
+    }
+
+    val reviews = fakeReviewRepository.getHuntReviews(testHunt.uid)
+    assertEquals(1, reviews.size)
+    assertEquals("Amazing hunt!", reviews.first().comment)
+
+    unmockkObject(NotificationHelper)
+  }
+
+  @Test
+  fun submitReviewHunt_notificationFails_doesNotCrash() = runTest {
+    val context = mockk<Context>(relaxed = true)
+
+    mockkObject(NotificationHelper)
+    every { NotificationHelper.sendNotification(any(), any(), any()) } throws
+        RuntimeException("Notification failed")
+
+    viewModel.setReviewText("Great hunt!")
+    viewModel.setRating(5.0)
+
+    viewModel.submitReviewHunt("user123", testHunt, context)
+    advanceUntilIdle()
+
+    val reviews = fakeReviewRepository.getHuntReviews(testHunt.uid)
+    assertEquals(1, reviews.size)
+    assertEquals("Great hunt!", reviews.first().comment)
+
+    unmockkObject(NotificationHelper)
+  }
+
+  @Test
+  fun reviewHuntToRepository_whenThrowsException_setsError() = runTest {
+    viewModel.setReviewText("Great hunt!")
+    viewModel.setRating(5.0)
+
+    val hunt = testHunt
+    val context: Context? = null
+
+    val failingRepository =
+        object : HuntReviewRepositoryLocal() {
+          override suspend fun addReviewHunt(review: HuntReview) {
+            throw RuntimeException("Repo failed")
+          }
+        }
+    val vm =
+        ReviewHuntViewModel(
+            fakeHuntsRepository,
+            failingRepository,
+            fakeProfileRepository,
+            fakeImageReviewRepository,
+            dispatcher = testDispatcher)
+    vm.setReviewText("Great hunt!")
+    vm.setRating(4.0)
+
+    vm.submitReviewHunt("user123", hunt, context)
+    advanceUntilIdle()
+
+    val state = vm.uiState.value
+    assertFalse(state.saveSuccessful)
+    assertEquals("Failed to submit review: Repo failed", state.errorMsg)
   }
 }

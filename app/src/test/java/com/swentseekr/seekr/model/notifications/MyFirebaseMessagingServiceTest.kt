@@ -1,0 +1,95 @@
+package com.swentseekr.seekr.model.notifications
+
+import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.RemoteMessage
+import io.mockk.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class MyFirebaseMessagingServiceTest {
+
+  private lateinit var service: MyFirebaseMessagingService
+  private val mockFirebaseAuth = mockk<FirebaseAuth>(relaxed = true)
+  private val mockFirebaseUser = mockk<FirebaseUser>()
+  private val mockFirestore = mockk<FirebaseFirestore>(relaxed = true)
+  private val mockDocRef = mockk<DocumentReference>(relaxed = true)
+
+  @Before
+  fun setup() {
+    service = spyk(MyFirebaseMessagingService(), recordPrivateCalls = true)
+
+    mockkStatic(FirebaseAuth::class)
+    every { FirebaseAuth.getInstance() } returns mockFirebaseAuth
+    every { mockFirebaseAuth.currentUser } returns mockFirebaseUser
+
+    mockkStatic(FirebaseFirestore::class)
+    every { FirebaseFirestore.getInstance() } returns mockFirestore
+    every { mockFirestore.collection("profiles").document(any()) } returns mockDocRef
+
+    mockkStatic(Log::class)
+    every { Log.d(any(), any()) } returns 0
+    every { Log.e(any(), any(), any()) } returns 0
+
+    mockkObject(NotificationHelper)
+    every { NotificationHelper.sendNotification(any(), any(), any()) } just Runs
+  }
+
+  @After
+  fun tearDown() {
+    unmockkAll()
+  }
+
+  @Test
+  fun onMessageReceived_sends_notification_with_title_and_body() {
+    val remoteMessage = mockk<RemoteMessage>(relaxed = true)
+    val notification = mockk<RemoteMessage.Notification>()
+    every { notification.title } returns "Hello"
+    every { notification.body } returns "World"
+    every { remoteMessage.notification } returns notification
+
+    service.onMessageReceived(remoteMessage)
+
+    verify { NotificationHelper.sendNotification(service, "Hello", "World") }
+  }
+
+  @Test
+  fun onMessageReceived_sends_notification_with_default_title_when_null() {
+    val remoteMessage = mockk<RemoteMessage>(relaxed = true)
+    every { remoteMessage.notification } returns null
+
+    service.onMessageReceived(remoteMessage)
+
+    verify { NotificationHelper.sendNotification(service, "New Notification", "") }
+  }
+
+  @Test
+  fun onNewToken_updates_firestore_when_user_exists() {
+    every { mockFirebaseUser.uid } returns "uid123"
+    every { mockDocRef.update("author.fcmToken", "token123") } returns mockk(relaxed = true)
+
+    service.onNewToken("token123")
+
+    verify { mockDocRef.update("author.fcmToken", "token123") }
+  }
+
+  @Test
+  fun `onNewToken does nothing when user is null`() {
+    every { mockFirebaseAuth.currentUser } returns null
+
+    service.onNewToken("token123")
+
+    verify(exactly = 0) {
+      mockFirestore
+          .collection(any<String>())
+          .document(any<String>())
+          .update(any<String>(), any<Any>())
+    }
+  }
+}
