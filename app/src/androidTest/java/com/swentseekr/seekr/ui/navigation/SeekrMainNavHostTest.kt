@@ -11,21 +11,15 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.swentseekr.seekr.FakeReviewHuntViewModel
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
-import com.swentseekr.seekr.model.hunt.HuntReview
-import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryLocal
 import com.swentseekr.seekr.model.profile.createHunt
 import com.swentseekr.seekr.ui.huntCardScreen.FakeHuntCardViewModel
-import com.swentseekr.seekr.ui.huntCardScreen.FakeReviewHuntViewModelWithPictures
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
 import com.swentseekr.seekr.ui.profile.ProfileTestTags
 import com.swentseekr.seekr.utils.FakeRepoSuccess
-import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -462,12 +456,10 @@ class SeekrNavigationTest {
     node(NavigationTestTags.PROFILE_TAB).assertIsDisplayed()
   }
 
-
   @Test
   fun huntcard_addReview_navigates_to_add_review_and_back_restores_huntcard() {
     // Seed repo with a single hunt that will appear in Overview and then in HuntCard.
     val hunt = createHunt(uid = "review-123", title = "Reviewable Hunt")
-
 
     withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
       // Re-compose with fake repo.
@@ -593,74 +585,74 @@ class SeekrNavigationTest {
       node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
     }
   }
-/*
-    @Test
-    fun huntcard_navigates_to_reviewImages_and_back() {
-        // Seed repo with a single hunt that will appear in Overview and then in HuntCard.
-        val hunt = createHunt(uid = "review-123", title = "Reviewable Hunt")
+  /*
+     @Test
+     fun huntcard_navigates_to_reviewImages_and_back() {
+         // Seed repo with a single hunt that will appear in Overview and then in HuntCard.
+         val hunt = createHunt(uid = "review-123", title = "Reviewable Hunt")
 
-        val review = HuntReview( reviewId = "1", huntId= "review-123", authorId = "2", rating = 5.0, comment = "Great hunt!", photos = listOf("url1", "url2"))
-        // Use the local repository
-        val fakeReviewRepo = HuntReviewRepositoryLocal().apply {
-            runBlocking { addReviewHunt(review) }
-        }
-        withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
-            // Re-compose with fake repo.
-            compose.runOnUiThread {
-                compose.activity.setContent {
-                    SeekrMainNavHost(
-                        testMode = true,
-                        huntCardViewModelFactory = { FakeHuntCardViewModel(hunt) },
-                        reviewViewModelFactory = { FakeReviewHuntViewModelWithPictures(review) })
-                }
-            }
+         val review = HuntReview( reviewId = "1", huntId= "review-123", authorId = "2", rating = 5.0, comment = "Great hunt!", photos = listOf("url1", "url2"))
+         // Use the local repository
+         val fakeReviewRepo = HuntReviewRepositoryLocal().apply {
+             runBlocking { addReviewHunt(review) }
+         }
+         withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
+             // Re-compose with fake repo.
+             compose.runOnUiThread {
+                 compose.activity.setContent {
+                     SeekrMainNavHost(
+                         testMode = true,
+                         huntCardViewModelFactory = { FakeHuntCardViewModel(hunt) },
+                         reviewViewModelFactory = { FakeReviewHuntViewModelWithPictures(review) })
+                 }
+             }
 
-            // Wait for the overview list to appear.
-            waitUntilTrue(MED) {
-                compose
-                    .onNodeWithTag(OverviewScreenTestTags.HUNT_LIST, useUnmergedTree = true)
-                    .assertExists()
-                true
-            }
+             // Wait for the overview list to appear.
+             waitUntilTrue(MED) {
+                 compose
+                     .onNodeWithTag(OverviewScreenTestTags.HUNT_LIST, useUnmergedTree = true)
+                     .assertExists()
+                 true
+             }
 
-            // Open the hunt card screen.
-            compose
-                .onAllNodesWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
-                .onFirst()
-                .assertExists()
-                .performClick()
+             // Open the hunt card screen.
+             compose
+                 .onAllNodesWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
+                 .onFirst()
+                 .assertExists()
+                 .performClick()
 
-            // Wait for HuntCard wrapper to exist.
-            waitUntilTrue(MED) {
-                compose
-                    .onAllNodesWithTag(NavigationTestTags.HUNTCARD_SCREEN, useUnmergedTree = true)
-                    .fetchSemanticsNodes()
-                    .isNotEmpty()
-            }
+             // Wait for HuntCard wrapper to exist.
+             waitUntilTrue(MED) {
+                 compose
+                     .onAllNodesWithTag(NavigationTestTags.HUNTCARD_SCREEN, useUnmergedTree = true)
+                     .fetchSemanticsNodes()
+                     .isNotEmpty()
+             }
 
-            val listNode = compose.onNodeWithTag("HUNTCARD_REVIEW_LIST", useUnmergedTree = true)
-            waitUntilTrue(MED) {
+             val listNode = compose.onNodeWithTag("HUNTCARD_REVIEW_LIST", useUnmergedTree = true)
+             waitUntilTrue(MED) {
 
-            }
+             }
 
-            // Scroll until the review card with "See Pictures" is visible
-            listNode.performScrollToNode(hasTestTag("SEE_PICTURES_BUTTON"))
+             // Scroll until the review card with "See Pictures" is visible
+             listNode.performScrollToNode(hasTestTag("SEE_PICTURES_BUTTON"))
 
-            // Now click the button
-            compose.onNodeWithTag("SEE_PICTURES_BUTTON", useUnmergedTree = true)
-                .assertExists()
-                .performClick()
+             // Now click the button
+             compose.onNodeWithTag("SEE_PICTURES_BUTTON", useUnmergedTree = true)
+                 .assertExists()
+                 .performClick()
 
-            // Wait for ReviewImagesScreen
-            waitUntilTrue(MED) {
-                compose.onAllNodesWithTag("REVIEW_IMAGES_COLUMN", useUnmergedTree = true)
-                    .fetchSemanticsNodes().isNotEmpty()
-            }
+             // Wait for ReviewImagesScreen
+             waitUntilTrue(MED) {
+                 compose.onAllNodesWithTag("REVIEW_IMAGES_COLUMN", useUnmergedTree = true)
+                     .fetchSemanticsNodes().isNotEmpty()
+             }
 
-        }
+         }
 
-    }
+     }
 
- */
+  */
 
 }
