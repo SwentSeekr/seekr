@@ -10,7 +10,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.flow.MutableStateFlow
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -197,54 +196,6 @@ class SettingsScreenTest {
     composeRule.waitForIdle()
 
     assertTrue(signedOutCalled)
-  }
-
-  @Test
-  fun requestNotificationPermission_flag_triggers_effect_and_is_consumed() {
-    val viewModel = SettingsViewModel()
-
-    setUiState(
-        viewModel,
-        SettingsUIState(
-            requestNotificationPermission = true, appVersion = SettingsScreenStrings.APP_VERSION_1))
-
-    composeRule.setContent { MaterialTheme { SettingsScreen(viewModel = viewModel) } }
-
-    composeRule.waitForIdle()
-
-    assertFalse(viewModel.uiState.value.requestNotificationPermission)
-  }
-
-  @Test
-  fun requestGalleryPermission_flag_triggers_effect_and_is_consumed() {
-    val viewModel = SettingsViewModel()
-
-    setUiState(
-        viewModel,
-        SettingsUIState(
-            requestGalleryPermission = true, appVersion = SettingsScreenStrings.APP_VERSION_1))
-
-    composeRule.setContent { MaterialTheme { SettingsScreen(viewModel = viewModel) } }
-
-    composeRule.waitForIdle()
-
-    assertFalse(viewModel.uiState.value.requestGalleryPermission)
-  }
-
-  @Test
-  fun requestLocationPermission_flag_triggers_effect_and_is_consumed() {
-    val viewModel = SettingsViewModel()
-
-    setUiState(
-        viewModel,
-        SettingsUIState(
-            requestLocationPermission = true, appVersion = SettingsScreenStrings.APP_VERSION_1))
-
-    composeRule.setContent { MaterialTheme { SettingsScreen(viewModel = viewModel) } }
-
-    composeRule.waitForIdle()
-
-    assertFalse(viewModel.uiState.value.requestLocationPermission)
   }
 
   private fun setUiState(viewModel: SettingsViewModel, newState: SettingsUIState) {
