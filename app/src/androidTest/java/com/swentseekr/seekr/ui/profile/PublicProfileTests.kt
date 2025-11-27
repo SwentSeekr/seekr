@@ -3,10 +3,12 @@ package com.swentseekr.seekr.ui.profile
 import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.runner.AndroidJUnit4
 import com.google.firebase.FirebaseApp
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
 import com.swentseekr.seekr.model.profile.createHunt
