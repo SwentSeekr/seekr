@@ -1,5 +1,9 @@
 package com.swentseekr.seekr.ui.settings
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,7 +30,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.swentseekr.seekr.model.settings.UserSettings
 import com.swentseekr.seekr.ui.settings.SettingsScreenDefaults.COLUMN_WEIGHT
 import com.swentseekr.seekr.ui.theme.Green
 import com.swentseekr.seekr.ui.theme.LightError
@@ -54,9 +57,66 @@ fun SettingsScreen(
 ) {
   val uiState by viewModel.uiState.collectAsState()
   val scope = rememberCoroutineScope()
-  val settings by viewModel.settingsFlow.collectAsState()
+  val context = LocalContext.current
+
+  LaunchedEffect(Unit) { viewModel.refreshPermissions(context) }
 
   LaunchedEffect(uiState.signedOut) { if (uiState.signedOut) onSignedOut() }
+
+  val notificationPermissionLauncher =
+      rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
+          isGranted ->
+        viewModel.onNotificationPermissionResult(isGranted)
+      }
+
+  val galleryPermission =
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        Manifest.permission.READ_MEDIA_IMAGES
+      } else {
+        Manifest.permission.READ_EXTERNAL_STORAGE
+      }
+
+  val galleryPermissionLauncher =
+      rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
+          isGranted ->
+        viewModel.onGalleryPermissionResult(isGranted)
+      }
+
+  val locationPermissionLauncher =
+      rememberLauncherForActivityResult(
+          contract = ActivityResultContracts.RequestMultiplePermissions()) { result ->
+            val granted =
+                result[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                    result[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+            viewModel.onLocationPermissionResult(granted)
+          }
+
+  LaunchedEffect(uiState.requestNotificationPermission) {
+    if (uiState.requestNotificationPermission) {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+      } else {
+        viewModel.onNotificationPermissionResult(true)
+      }
+      viewModel.consumeNotificationPermissionRequest()
+    }
+  }
+
+  LaunchedEffect(uiState.requestGalleryPermission) {
+    if (uiState.requestGalleryPermission) {
+      galleryPermissionLauncher.launch(galleryPermission)
+      viewModel.consumeGalleryPermissionRequest()
+    }
+  }
+
+  LaunchedEffect(uiState.requestLocationPermission) {
+    if (uiState.requestLocationPermission) {
+      locationPermissionLauncher.launch(
+          arrayOf(
+              Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
+      viewModel.consumeLocationPermissionRequest()
+    }
+  }
 
   Scaffold(
       topBar = {
@@ -79,13 +139,12 @@ fun SettingsScreen(
       }) { padding ->
         SettingsContent(
             modifier = Modifier.padding(padding).fillMaxSize(),
-            appVersion = uiState.appVersion,
             onEditProfileClick = onEditProfile,
             onLogoutClick = { scope.launch { viewModel.signOut(credentialManager) } },
-            uiState = settings,
-            onNotificationsChange = { viewModel.updateNotifications(it) },
-            onPicturesChange = { viewModel.updatePictures(it) },
-            onLocalisationChange = { viewModel.updateLocalisation(it) })
+            uiState = uiState,
+            onNotificationsChange = { viewModel.onNotificationsToggleRequested(it, context) },
+            onPicturesChange = { viewModel.onPicturesToggleRequested(it, context) },
+            onLocalisationChange = { viewModel.onLocalisationToggleRequested(it, context) })
       }
 }
 
@@ -93,7 +152,6 @@ fun SettingsScreen(
  * Composable that lays out all the settings content.
  *
  * @param modifier Optional [Modifier] for styling and layout adjustments.
- * @param appVersion The current app version to display.
  * @param onEditProfileClick Callback triggered when the "Edit Profile" button is clicked.
  * @param onLogoutClick Callback triggered when the "Logout" button is clicked.
  * @param uiState Current state of settings UI.
@@ -104,10 +162,9 @@ fun SettingsScreen(
 @Composable
 fun SettingsContent(
     modifier: Modifier = Modifier,
-    appVersion: String?,
     onEditProfileClick: () -> Unit,
     onLogoutClick: () -> Unit,
-    uiState: UserSettings = UserSettings(),
+    uiState: SettingsUIState,
     onNotificationsChange: (Boolean) -> Unit = {},
     onPicturesChange: (Boolean) -> Unit = {},
     onLocalisationChange: (Boolean) -> Unit = {},
@@ -117,7 +174,7 @@ fun SettingsContent(
       item {
         SettingsItem(
             title = SettingsScreenStrings.VERSION_LABEL,
-            value = appVersion ?: SettingsScreenStrings.UNKNOWN_VERSION,
+            value = uiState.appVersion ?: SettingsScreenStrings.UNKNOWN_VERSION,
             modifier = Modifier.testTag(SettingsScreenTestTags.APP_VERSION_TEXT))
       }
 
