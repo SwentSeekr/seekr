@@ -27,7 +27,6 @@ import com.swentseekr.seekr.ui.hunt.add.AddHuntScreen
 import com.swentseekr.seekr.ui.hunt.edit.EditHuntScreen
 import com.swentseekr.seekr.ui.hunt.review.AddReviewScreen
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
-import com.swentseekr.seekr.ui.hunt.review.ReviewImageViewModel
 import com.swentseekr.seekr.ui.hunt.review.ReviewImagesScreen
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import com.swentseekr.seekr.ui.map.MapScreen
@@ -345,12 +344,20 @@ fun SeekrMainNavHost(
               }
 
               // Review Images Screen
-              composable("reviewImages") {
-                val reviewImageViewModel: ReviewImageViewModel = viewModel()
+              composable("reviewImages") { backStackEntry ->
+
+                // accéder au même ViewModel que celui utilisé dans HuntCardScreen
+                val parentEntry =
+                    remember(backStackEntry) {
+                      navController.getBackStackEntry(SeekrDestination.HuntCard.route)
+                    }
+                val reviewHuntViewModel: ReviewHuntViewModel = viewModel(parentEntry)
+
+                val uiState by reviewHuntViewModel.uiState.collectAsState()
+
                 Surface(modifier = Modifier.fillMaxSize().testTag("IMAGE_REVIEW_SCREEN")) {
                   ReviewImagesScreen(
-                      photoUrls = reviewImageViewModel.uiState.collectAsState().value.photos,
-                      onGoBack = { navController.popBackStack() })
+                      photoUrls = uiState.photos, onGoBack = { navController.popBackStack() })
                 }
               }
 
