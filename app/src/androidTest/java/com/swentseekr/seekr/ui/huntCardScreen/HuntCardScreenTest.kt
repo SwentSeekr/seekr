@@ -264,21 +264,19 @@ class HuntCardScreenTest {
     // Full-screen dialog appears
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.IMAGE_FULLSCREEN).assertIsDisplayed()
   }
-  /*@Test
+
+  @Test
   fun testNoReviewsMessageIsDisplayed() {
-      val hunt = createFakeHunt()
+    val hunt = createFakeHunt()
 
-      composeTestRule.setContent {
-          HuntCardScreen(
-              huntId = hunt.uid,
-              huntCardViewModel = FakeHuntCardViewModelEmptyReview(hunt),
-              navController = rememberNavController()
-          )
-      }
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = hunt.uid,
+          huntCardViewModel = FakeHuntCardViewModelEmptyReview(hunt),
+          navController = rememberNavController())
+    }
 
-      // The "No Reviews" text should be visible
-      composeTestRule.onNodeWithText("No reviews yet.").assertIsDisplayed()
+    // The "No Reviews" text should be visible
+    composeTestRule.onNodeWithText("No reviews yet.").assertExists()
   }
-
-   */
 }

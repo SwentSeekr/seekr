@@ -257,7 +257,15 @@ fun HuntCardScreen(
               }
             } else {
               items(reviews) { review ->
-                ReviewCard(review, reviewViewModel, huntCardViewModel, currentUserId, navController)
+                ReviewCard(
+                    review,
+                    reviewViewModel,
+                    currentUserId,
+                    navController,
+                    onDeleteReview = { reviewId ->
+                      huntCardViewModel.deleteReview(
+                          review.huntId, reviewId, review.authorId, currentUserId)
+                    })
               }
             }
           }
@@ -296,10 +304,10 @@ fun HuntDescriptionSection(description: String, modifier: Modifier = Modifier) {
 fun ReviewCard(
     review: HuntReview,
     reviewHuntViewModel: ReviewHuntViewModel,
-    huntCardViewModel: HuntCardViewModel,
     currentUserId: String?,
     // goImages: () -> Unit = {},
-    navController: NavHostController
+    navController: NavHostController,
+    onDeleteReview: (String) -> Unit
 ) {
 
   val uiState by reviewHuntViewModel.uiState.collectAsState()
@@ -339,8 +347,9 @@ fun ReviewCard(
         if (isCurrentId) {
           IconButton(
               onClick = {
-                huntCardViewModel.deleteReview(
-                    review.huntId, review.reviewId, review.authorId, currentUserId)
+                onDeleteReview(review.reviewId)
+                // huntCardViewModel.deleteReview(
+                //    review.huntId, review.reviewId, review.authorId, currentUserId)
               },
           ) {
             Icon(
