@@ -326,6 +326,7 @@ fun ReviewCard(
   val authorProfile = uiState.authorProfile
 
   val isCurrentId = currentUserId == authorId
+
   Card(
       modifier =
           Modifier.fillMaxWidth()
@@ -394,12 +395,12 @@ fun ReviewCard(
 
 @Composable
 fun HuntHeaderSection(
-  hunt: com.swentseekr.seekr.model.hunt.Hunt,
-  authorName: String,
-  huntId: String,
-  huntCardViewModel: HuntCardViewModel,
-  goProfile: (String) -> Unit,
-  modifier: Modifier = Modifier,
+    hunt: com.swentseekr.seekr.model.hunt.Hunt,
+    authorName: String,
+    huntId: String,
+    goProfile: (String) -> Unit = {},
+    huntCardViewModel: HuntCardViewModel,
+    modifier: Modifier = Modifier,
 ) {
   Column(
       modifier =
@@ -427,8 +428,8 @@ fun HuntHeaderSection(
             "${HuntCardScreenStrings.By} $authorName",
             modifier =
                 Modifier.padding(horizontal = HuntCardScreenDefaults.InfoTextPadding)
-                  .clickable { goProfile(hunt.authorId) }
-                  .testTag(HuntCardScreenTestTags.AUTHOR_TEXT),
+                    .clickable(onClick = { goProfile(hunt.authorId) })
+                    .testTag(HuntCardScreenTestTags.AUTHOR_TEXT),
         )
 
         Spacer(modifier = Modifier.height(HuntCardScreenDefaults.AuthorImageSpacing))
