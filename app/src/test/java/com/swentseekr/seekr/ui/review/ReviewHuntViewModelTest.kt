@@ -415,7 +415,7 @@ class ReviewHuntViewModelTest {
   fun deleteReview_whenUserIsAuthor_deletesReviewSuccessfully() = runTest {
     viewModel.setReviewText(ReviewHuntViewModelTestConstantsStrings.ReviewMsg2)
     viewModel.setRating(5.0)
-    viewModel.submitReviewHunt(ReviewHuntViewModelTestConstantsStrings.AuthorId, testHunt, null)
+    viewModel.submitReviewHunt(ReviewHuntViewModelTestConstantsStrings.UserId, testHunt, null)
     advanceUntilIdle()
 
     val createdReview = fakeReviewRepository.getHuntReviews(testHunt.uid).first()
