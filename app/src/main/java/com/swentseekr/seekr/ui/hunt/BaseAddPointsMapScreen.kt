@@ -67,7 +67,8 @@ fun BaseAddPointsMapScreen(
               points.forEach { point ->
                 Marker(
                     state = MarkerState(position = LatLng(point.latitude, point.longitude)),
-                    title = point.name)
+                    title = point.name,
+                    snippet = point.description.ifBlank { null })
               }
 
               if (points.size >= 2) {
