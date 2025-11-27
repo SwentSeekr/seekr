@@ -16,7 +16,11 @@ class ReviewImagesScreenTest {
   @Test
   fun reviewImagesScreen_displaysAllImages_andBackButtonWorks() {
     // Sample photo URLs
-    val photos = listOf("photo1", "photo2", "photo3")
+    val photos =
+        listOf(
+            ReviewImagesScreenConstantStings.Photo1,
+            ReviewImagesScreenConstantStings.Photo2,
+            ReviewImagesScreenConstantStings.Photo3)
     var backClicked = false
 
     // Set content
@@ -25,16 +29,19 @@ class ReviewImagesScreenTest {
     }
 
     // Assert that the top bar is displayed
-    composeRule.onNodeWithTag("REVIEW_IMAGES_SCREEN").assertIsDisplayed()
+    composeRule.onNodeWithTag(ReviewImagesScreenConstantStings.TestTagImage).assertIsDisplayed()
 
     // Assert that back button is displayed and clickable
-    composeRule.onNodeWithTag("back_button").assertIsDisplayed().performClick()
-    assert(backClicked) { "Back button should have triggered onGoBack" }
+    composeRule
+        .onNodeWithTag(ReviewImagesScreenConstantStings.BackButtonTag)
+        .assertIsDisplayed()
+        .performClick()
+    assert(backClicked) { ReviewImagesScreenConstantStings.TexteButton }
 
     // Assert that all images are displayed
-    composeRule.onAllNodesWithText("2").apply {
+    composeRule.onAllNodesWithText(ReviewImagesScreenConstantStings.TestNumber).apply {
       assert(this.fetchSemanticsNodes().size == photos.size) {
-        "Expected ${photos.size} images, found ${this.fetchSemanticsNodes().size}"
+        "${ReviewImagesScreenConstantStings.Expected} ${photos.size} ${ReviewImagesScreenConstantStings.TextMiddle} ${this.fetchSemanticsNodes().size}"
       }
     }
   }

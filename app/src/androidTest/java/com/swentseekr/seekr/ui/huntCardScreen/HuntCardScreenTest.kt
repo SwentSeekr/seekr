@@ -277,6 +277,6 @@ class HuntCardScreenTest {
     }
 
     // The "No Reviews" text should be visible
-    composeTestRule.onNodeWithText("No reviews yet.").assertExists()
+    composeTestRule.onNodeWithText(HuntCardScreenConstantStrings.NoReviews).assertExists()
   }
 }
