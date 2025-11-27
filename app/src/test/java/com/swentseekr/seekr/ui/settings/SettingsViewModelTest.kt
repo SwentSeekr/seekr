@@ -4,6 +4,7 @@ import androidx.credentials.CredentialManager
 import com.swentseekr.seekr.model.authentication.AuthRepository
 import com.swentseekr.seekr.model.settings.SettingsRepositoryFirestore
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -57,6 +58,7 @@ class SettingsViewModelTest {
   @Test
   fun signOut_success_updates_signedOut_true() = runTest {
     coEvery { authRepository.signOut() } returns Result.success(Unit)
+    coEvery { credentialManager.clearCredentialState(any()) } returns Unit
 
     viewModel.signOut(credentialManager)
     advanceUntilIdle()
@@ -101,5 +103,35 @@ class SettingsViewModelTest {
 
     val state = viewModel.uiState.first()
     assertEquals("9.9.9", state.appVersion)
+  }
+
+  @Test
+  fun updateNotifications_disabled_updates_field_only() = runTest {
+    coEvery { repository.updateField(SettingsScreenStrings.NOTIFICATION_FIELD, false) } returns Unit
+
+    viewModel.updateNotifications(false, null)
+    advanceUntilIdle()
+
+    coVerify { repository.updateField(SettingsScreenStrings.NOTIFICATION_FIELD, false) }
+  }
+
+  @Test
+  fun updatePictures_updates_repository_field() = runTest {
+    coEvery { repository.updateField(SettingsScreenStrings.PICTURES_FIELD, true) } returns Unit
+
+    viewModel.updatePictures(true)
+    advanceUntilIdle()
+
+    coVerify { repository.updateField(SettingsScreenStrings.PICTURES_FIELD, true) }
+  }
+
+  @Test
+  fun updateLocalisation_updates_repository_field() = runTest {
+    coEvery { repository.updateField(SettingsScreenStrings.LOCALISATION_FIELD, false) } returns Unit
+
+    viewModel.updateLocalisation(false)
+    advanceUntilIdle()
+
+    coVerify { repository.updateField(SettingsScreenStrings.LOCALISATION_FIELD, false) }
   }
 }
