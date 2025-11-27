@@ -29,18 +29,18 @@ class ReviewHuntViewModelTest {
   private lateinit var viewModel: ReviewHuntViewModel
   private val testHunt =
       Hunt(
-          uid = "hunt123",
-          start = Location(1.0, 2.0, "Start"),
-          end = Location(3.0, 4.0, "End"),
+          uid = ReviewHuntViewModelTestConstantsStrings.TestHuntId,
+          start = Location(1.0, 2.0, ReviewHuntViewModelTestConstantsStrings.Start),
+          end = Location(3.0, 4.0, ReviewHuntViewModelTestConstantsStrings.End),
           middlePoints = emptyList(),
           status = HuntStatus.FUN,
-          title = "Test Hunt",
-          description = "Test Description",
+          title = ReviewHuntViewModelTestConstantsStrings.HuntTitle,
+          description = ReviewHuntViewModelTestConstantsStrings.HuntDescription,
           time = 1.0,
           distance = 5.0,
           difficulty = Difficulty.EASY,
-          authorId = "author123",
-          mainImageUrl = "",
+          authorId = ReviewHuntViewModelTestConstantsStrings.AuthorId,
+          mainImageUrl = ReviewHuntViewModelTestConstantsStrings.ImageURL,
           reviewRate = 4.0)
 
   @Before
@@ -97,8 +97,9 @@ class ReviewHuntViewModelTest {
 
   @Test
   fun setErrorMsg_and_clearErrorMsg() = runTest {
-    viewModel.setErrorMsg("Something went wrong")
-    assertEquals("Something went wrong", viewModel.uiState.value.errorMsg)
+    viewModel.setErrorMsg(ReviewHuntViewModelTestConstantsStrings.ErrorWrong)
+    assertEquals(
+        ReviewHuntViewModelTestConstantsStrings.ErrorWrong, viewModel.uiState.value.errorMsg)
 
     viewModel.clearErrorMsg()
     assertNull(viewModel.uiState.value.errorMsg)
@@ -106,21 +107,23 @@ class ReviewHuntViewModelTest {
 
   @Test
   fun setReviewText_blank_setsInvalidMessage() = runTest {
-    viewModel.setReviewText("")
+    viewModel.setReviewText(ReviewHuntViewModelTestConstantsStrings.ReviewMsg)
     val state = viewModel.uiState.value
-    assertEquals("The review cannot be empty", state.invalidReviewText)
+    assertEquals(ReviewHuntViewModelTestConstantsStrings.ReviewErrorMsg, state.invalidReviewText)
   }
 
   @Test
   fun setReviewText_valid_clearsInvalidMessage() = runTest {
-    viewModel.setReviewText("Nice hunt!")
+    viewModel.setReviewText(ReviewHuntViewModelTestConstantsStrings.ReviewMessageGood)
     assertNull(viewModel.uiState.value.invalidReviewText)
   }
 
   @Test
   fun setRating_invalid_setsError() = runTest {
     viewModel.setRating(6.0)
-    assertEquals("Rating must be between 1 and 5", viewModel.uiState.value.invalidRating)
+    assertEquals(
+        ReviewHuntViewModelTestConstantsStrings.RatingErrorMsg,
+        viewModel.uiState.value.invalidRating)
   }
 
   @Test
@@ -141,7 +144,7 @@ class ReviewHuntViewModelTest {
     val failingReviewRepository =
         object : HuntReviewRepositoryLocal() {
           override suspend fun getReviewHunt(reviewId: String): HuntReview {
-            throw RuntimeException("Failed to get review")
+            throw RuntimeException(ReviewHuntViewModelTestConstantsStrings.FailGetReview)
           }
         }
 
@@ -156,8 +159,8 @@ class ReviewHuntViewModelTest {
     // Add a review normally to fake repository (won't be used because getReviewHunt fails)
     val review =
         HuntReview(
-            reviewId = "review123",
-            authorId = "user123",
+            reviewId = ReviewHuntViewModelTestConstantsStrings.ReviewId,
+            authorId = ReviewHuntViewModelTestConstantsStrings.AuthorId,
             huntId = testHunt.uid,
             rating = 4.0,
             comment = "Nice hunt",
@@ -165,18 +168,21 @@ class ReviewHuntViewModelTest {
     fakeReviewRepository.addReviewHunt(review)
 
     // Call deleteReview
-    vm.deleteReview("review123", "user123", currentUserId = "user123")
+    vm.deleteReview(
+        ReviewHuntViewModelTestConstantsStrings.ReviewId,
+        ReviewHuntViewModelTestConstantsStrings.AuthorId,
+        currentUserId = ReviewHuntViewModelTestConstantsStrings.AuthorId)
     advanceUntilIdle()
 
     val state = vm.uiState.value
     // The error message from catch block should be set
-    assertTrue(state.errorMsg!!.contains("Failed to get review"))
+    assertTrue(state.errorMsg!!.contains(ReviewHuntViewModelTestConstantsStrings.FailGetReview))
   }
 
   @Test
   fun addPhoto_addsToList() = runTest {
-    val fakeUserId = "testUser"
-    val photo = "test_photo.jpg"
+    val fakeUserId = ReviewHuntViewModelTestConstantsStrings.FakeUserId
+    val photo = ReviewHuntViewModelTestConstantsStrings.Photo
 
     viewModel.addPhoto(photo, fakeUserId)
 
@@ -189,8 +195,8 @@ class ReviewHuntViewModelTest {
 
   @Test
   fun removePhoto_removesFromList() = runTest {
-    val fakeUserId = "testUser"
-    val photo = "test_photo.jpg"
+    val fakeUserId = ReviewHuntViewModelTestConstantsStrings.FakeUserId
+    val photo = ReviewHuntViewModelTestConstantsStrings.Photo
 
     // Add photo
     viewModel.addPhoto(photo, fakeUserId)
@@ -205,8 +211,8 @@ class ReviewHuntViewModelTest {
 
   @Test
   fun addPhoto_addsPhotoToList() = runTest {
-    val fakeUserId = "user123"
-    val inputPhoto = "somepath/image.jpg"
+    val fakeUserId = ReviewHuntViewModelTestConstantsStrings.UserId
+    val inputPhoto = ReviewHuntViewModelTestConstantsStrings.InputPhoto
 
     viewModel.addPhoto(inputPhoto, fakeUserId)
     advanceUntilIdle()
@@ -214,7 +220,7 @@ class ReviewHuntViewModelTest {
     val photos = viewModel.uiState.value.photos
 
     assertEquals(1, photos.size)
-    assertTrue(photos.first().startsWith("local://review_image/user123"))
+    assertTrue(photos.first().startsWith(ReviewHuntViewModelTestConstantsStrings.Path))
   }
 
   @Test
@@ -222,7 +228,7 @@ class ReviewHuntViewModelTest {
     val failingImageRepository =
         object : ReviewImageRepositoryLocal() {
           override suspend fun uploadReviewPhoto(userId: String, uri: Uri): String {
-            throw RuntimeException("Upload failed")
+            throw RuntimeException(ReviewHuntViewModelTestConstantsStrings.UploadPhotoFail)
           }
         }
 
@@ -234,18 +240,20 @@ class ReviewHuntViewModelTest {
             failingImageRepository,
             dispatcher = testDispatcher)
 
-    vm.addPhoto("file://somephoto.jpg", "user123")
+    vm.addPhoto(
+        ReviewHuntViewModelTestConstantsStrings.MyPhoto,
+        ReviewHuntViewModelTestConstantsStrings.UserId)
     advanceUntilIdle()
 
     val state = vm.uiState.value
-    assertEquals("Failed to upload photo: Upload failed", state.errorMsg)
+    assertEquals(ReviewHuntViewModelTestConstantsStrings.FailUplaodPhotoTest, state.errorMsg)
     // Photos list should remain empty
     assertTrue(state.photos.isEmpty())
   }
 
   @Test
   fun removePhoto_updatesUiState() = runTest {
-    val photo = "photo_to_remove.jpg"
+    val photo = ReviewHuntViewModelTestConstantsStrings.AnotherPhoto
 
     // Put a photo in the UI state manually
     viewModel.uiState.value.copy(photos = listOf(photo))
@@ -265,7 +273,7 @@ class ReviewHuntViewModelTest {
 
   @Test
   fun removePhoto_removesFromList1() = runTest {
-    val photo = "photo_to_remove.jpg"
+    val photo = ReviewHuntViewModelTestConstantsStrings.AnotherPhoto
 
     // Correct: assign updated state
     viewModel.setPhotosForTest(listOf(photo))
@@ -281,7 +289,7 @@ class ReviewHuntViewModelTest {
     val failingImageRepository =
         object : ReviewImageRepositoryLocal() {
           override suspend fun deleteReviewPhoto(url: String) {
-            throw RuntimeException("Delete failed")
+            throw RuntimeException(ReviewHuntViewModelTestConstantsStrings.DeletePhotoFail)
           }
         }
 
@@ -294,7 +302,7 @@ class ReviewHuntViewModelTest {
             dispatcher = testDispatcher)
 
     // Set a photo in the UI state
-    val photo = "photo_to_fail.jpg"
+    val photo = ReviewHuntViewModelTestConstantsStrings.FailPhoto
     vm.setPhotosForTest(listOf(photo))
 
     // Call removePhoto
@@ -303,7 +311,7 @@ class ReviewHuntViewModelTest {
 
     val state = vm.uiState.value
     // The error message should be set
-    assertEquals("Failed to delete image: Delete failed", state.errorMsg)
+    assertEquals(ReviewHuntViewModelTestConstantsStrings.FailDeletePhotoTest, state.errorMsg)
     // Photo should still be in the list because deletion failed
     assertTrue(state.photos.contains(photo))
   }
@@ -311,14 +319,14 @@ class ReviewHuntViewModelTest {
   @Test
   fun submitReviewHunt_withInvalidData_setsError() = runTest {
     val initialState = viewModel.uiState.value
-    viewModel.submitReviewHunt("user123", testHunt)
+    viewModel.submitReviewHunt(ReviewHuntViewModelTestConstantsStrings.UserId, testHunt)
     advanceUntilIdle()
 
     val state = viewModel.uiState.value
-    assertEquals("At least one field is not valid", state.errorMsg)
-    assertEquals("", state.huntId)
-    assertEquals("", state.userId)
-    assertEquals("", state.reviewText)
+    assertEquals(ReviewHuntViewModelTestConstantsStrings.NotValidSubmission, state.errorMsg)
+    assertEquals(ReviewHuntViewModelTestConstantsStrings.Empty, state.huntId)
+    assertEquals(ReviewHuntViewModelTestConstantsStrings.Empty, state.userId)
+    assertEquals(ReviewHuntViewModelTestConstantsStrings.Empty, state.reviewText)
     assertEquals(0.0, state.rating, 0.0)
     assertFalse(state.isSubmitted)
     assertFalse(state.saveSuccessful)
@@ -329,10 +337,10 @@ class ReviewHuntViewModelTest {
 
   @Test
   fun submitReviewHunt_withValidData_savesReview() = runTest {
-    viewModel.setReviewText("Great hunt!")
+    viewModel.setReviewText(ReviewHuntViewModelTestConstantsStrings.ReviewMsg2)
     viewModel.setRating(4.0)
 
-    viewModel.submitReviewHunt("user123", testHunt)
+    viewModel.submitReviewHunt(ReviewHuntViewModelTestConstantsStrings.UserId, testHunt)
     advanceUntilIdle()
 
     val state = viewModel.uiState.value
@@ -341,7 +349,7 @@ class ReviewHuntViewModelTest {
 
     val reviews = fakeReviewRepository.getHuntReviews(testHunt.uid)
     assertEquals(1, reviews.size)
-    assertEquals("Great hunt!", reviews.first().comment)
+    assertEquals(ReviewHuntViewModelTestConstantsStrings.ReviewMsg2, reviews.first().comment)
     assertEquals(4.0, reviews.first().rating, 0.0)
   }
 
@@ -349,37 +357,37 @@ class ReviewHuntViewModelTest {
   fun clearForm_afterSuccess_resetsForm() = runTest {
     viewModel.loadHunt(testHunt.uid)
     advanceUntilIdle()
-    viewModel.setReviewText("Amazing!")
+    viewModel.setReviewText(ReviewHuntViewModelTestConstantsStrings.ReviewMsg3)
     viewModel.setRating(5.0)
-    viewModel.submitReviewHunt("user123", testHunt)
+    viewModel.submitReviewHunt(ReviewHuntViewModelTestConstantsStrings.UserId, testHunt)
     advanceUntilIdle()
 
     viewModel.clearForm()
     val state = viewModel.uiState.value
     assertEquals(testHunt, state.hunt)
-    assertEquals("", state.reviewText)
+    assertEquals(ReviewHuntViewModelTestConstantsStrings.Empty, state.reviewText)
   }
 
   @Test
   fun clearForm_whenNotSuccessful_setsErrorMsg() = runTest {
     viewModel.clearForm()
     assertEquals(
-        "Cannot clear form, review not submitted successfully.", viewModel.uiState.value.errorMsg)
+        ReviewHuntViewModelTestConstantsStrings.ErrorSubmission, viewModel.uiState.value.errorMsg)
   }
 
   @Test
   fun clearForm_afterCancel_resetsForm() = runTest {
     viewModel.loadHunt(testHunt.uid)
     advanceUntilIdle()
-    viewModel.setReviewText("Amazing!")
+    viewModel.setReviewText(ReviewHuntViewModelTestConstantsStrings.ReviewMsg3)
     viewModel.setRating(5.0)
-    viewModel.submitReviewHunt("user123", testHunt)
+    viewModel.submitReviewHunt(ReviewHuntViewModelTestConstantsStrings.UserId, testHunt)
     advanceUntilIdle()
 
     viewModel.clearFormCancel()
     val state = viewModel.uiState.value
     assertEquals(testHunt, state.hunt)
-    assertEquals("", state.reviewText)
+    assertEquals(ReviewHuntViewModelTestConstantsStrings.Empty, state.reviewText)
   }
 
   @Test
@@ -390,21 +398,24 @@ class ReviewHuntViewModelTest {
     viewModel.clearFormCancel()
     val state = viewModel.uiState.value
     assertEquals(testHunt, state.hunt)
-    assertEquals("", state.reviewText)
+    assertEquals(ReviewHuntViewModelTestConstantsStrings.Empty, state.reviewText)
   }
 
   @Test
   fun deleteReview_whenUserIsAuthor_deletesReviewSuccessfully() = runTest {
-    viewModel.setReviewText("Great hunt!")
+    viewModel.setReviewText(ReviewHuntViewModelTestConstantsStrings.ReviewMsg2)
     viewModel.setRating(5.0)
-    viewModel.submitReviewHunt("user123", testHunt)
+    viewModel.submitReviewHunt(ReviewHuntViewModelTestConstantsStrings.UserId, testHunt)
     advanceUntilIdle()
 
     val createdReview = fakeReviewRepository.getHuntReviews(testHunt.uid).first()
-    assertEquals("user123", createdReview.authorId)
+    assertEquals(ReviewHuntViewModelTestConstantsStrings.UserId, createdReview.authorId)
 
     // Inject currentUserId manually
-    viewModel.deleteReview(createdReview.reviewId, "user123", currentUserId = "user123")
+    viewModel.deleteReview(
+        createdReview.reviewId,
+        ReviewHuntViewModelTestConstantsStrings.UserId,
+        currentUserId = ReviewHuntViewModelTestConstantsStrings.UserId)
     advanceUntilIdle()
 
     val reviewsAfterDelete = fakeReviewRepository.getHuntReviews(testHunt.uid)
@@ -413,20 +424,67 @@ class ReviewHuntViewModelTest {
 
   @Test
   fun deleteReview_whenUserIsNotAuthor_setsErrorMessage() = runTest {
-    viewModel.setReviewText("Nice!")
+    viewModel.setReviewText(ReviewHuntViewModelTestConstantsStrings.ReviewMsg4)
     viewModel.setRating(4.0)
-    viewModel.submitReviewHunt("user123", testHunt)
+    viewModel.submitReviewHunt(ReviewHuntViewModelTestConstantsStrings.UserId, testHunt)
     advanceUntilIdle()
 
     val createdReview = fakeReviewRepository.getHuntReviews(testHunt.uid).first()
 
-    viewModel.deleteReview(createdReview.reviewId, "user123", currentUserId = "otherUser456")
+    viewModel.deleteReview(
+        createdReview.reviewId,
+        ReviewHuntViewModelTestConstantsStrings.UserId,
+        currentUserId = ReviewHuntViewModelTestConstantsStrings.OtherUserId)
     advanceUntilIdle()
 
     val state = viewModel.uiState.value
-    assertEquals("You can only delete your own review.", state.errorMsg)
+    assertEquals(ReviewHuntViewModelTestConstantsStrings.FailDeleteReview, state.errorMsg)
 
     val reviewsAfterAttempt = fakeReviewRepository.getHuntReviews(testHunt.uid)
     assertEquals(1, reviewsAfterAttempt.size)
+  }
+
+  @Test
+  fun clearFormNoSubmission_clears_photos() = runTest {
+    // Arrange: set initial photos via public helper
+    viewModel.setPhotosForTest(listOf("photo1", "photo2"))
+
+    // Act
+    viewModel.clearFormNoSubmission()
+    testScheduler.advanceUntilIdle()
+
+    // Assert: photos are cleared
+    val state = viewModel.uiState.value
+    assertTrue(state.photos.isEmpty())
+    assertNull(state.errorMsg)
+  }
+
+  @Test
+  fun clearFormNoSubmission_sets_errorMsg_on_failure() = runTest {
+    // Arrange: failing repository
+    val failingRepository =
+        object : ReviewImageRepositoryLocal() {
+          override suspend fun deleteReviewPhoto(url: String) {
+            throw RuntimeException("Simulated failure")
+          }
+        }
+
+    val viewModel =
+        ReviewHuntViewModel(
+            fakeHuntsRepository,
+            fakeReviewRepository,
+            fakeProfileRepository,
+            failingRepository,
+            dispatcher = StandardTestDispatcher(testScheduler))
+
+    viewModel.setPhotosForTest(listOf("photo1"))
+
+    viewModel.clearFormNoSubmission()
+
+    testScheduler.advanceUntilIdle()
+
+    // Assert
+    val state = viewModel.uiState.value
+    assertEquals(ReviewHuntViewModelTestConstantsStrings.FailCancle, state.errorMsg)
   }
 }
