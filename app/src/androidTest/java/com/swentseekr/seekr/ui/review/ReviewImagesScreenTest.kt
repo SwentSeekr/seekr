@@ -25,7 +25,7 @@ class ReviewImagesScreenTest {
     }
 
     // Assert that the top bar is displayed
-    composeRule.onNodeWithTag("TOP_BAR_TEST_TAG").assertIsDisplayed()
+    composeRule.onNodeWithTag("REVIEW_IMAGES_SCREEN").assertIsDisplayed()
 
     // Assert that back button is displayed and clickable
     composeRule.onNodeWithTag("back_button").assertIsDisplayed().performClick()

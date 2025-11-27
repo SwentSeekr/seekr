@@ -374,7 +374,7 @@ fun ReviewCard(
               reviewHuntViewModel.loadReviewImages(review.photos)
               navController.navigate("reviewImages")
             },
-            modifier = Modifier.align(Alignment.End)) {
+            modifier = Modifier.align(Alignment.End).testTag("SEE_PICTURES_BUTTON")) {
               Text("See Pictures")
             }
       }
