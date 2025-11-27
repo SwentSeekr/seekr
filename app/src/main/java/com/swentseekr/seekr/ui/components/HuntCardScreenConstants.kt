@@ -107,8 +107,7 @@ object HuntCardScreenStrings {
   const val ReviewTitlePrefix = "Rating:"
   const val FullScreenImageDescription = "Full-screen hunt image"
   const val HuntPicturePageDescriptionPrefix = "Hunt picture "
-  const val ReviewHint = "Point de départ de la chasse"
-  const val ReviewMarkerTitlePrefix = "Départ : "
+  const val ReviewMarkerTitlePrefix = "Start: "
   const val UnknownAuthor = "Unknown Author"
 }
 
