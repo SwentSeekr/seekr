@@ -49,7 +49,6 @@ private fun TestOfflineOverviewScreen(onShowDownloadedHunts: () -> Unit) {
   // Provide a MaterialTheme so OfflineOverviewScreen can use MaterialTheme.colorScheme safely
   MaterialTheme {
     OfflineOverviewScreen(
-        profile = null,
         onShowDownloadedHunts = onShowDownloadedHunts,
     )
   }
