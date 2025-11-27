@@ -1,6 +1,10 @@
 package com.swentseekr.seekr.ui.settings
 
+import android.Manifest
+import android.app.Activity
 import android.content.Context
+import android.os.Build
+import androidx.core.app.ActivityCompat
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.ViewModel
@@ -71,6 +75,13 @@ class SettingsViewModel(
 
   fun updateNotifications(enabled: Boolean, context: Context?) =
       viewModelScope.launch {
+        if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+          val activity = context as? Activity
+          activity?.let {
+            ActivityCompat.requestPermissions(
+                it, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001)
+          }
+        }
         repository.updateField(SettingsScreenStrings.NOTIFICATION_FIELD, enabled)
 
         // Send a test notification when enabled
