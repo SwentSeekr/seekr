@@ -366,7 +366,7 @@ fun HuntHeaderSection(
     hunt: com.swentseekr.seekr.model.hunt.Hunt,
     authorName: String,
     huntId: String,
-    goProfile: (String) -> Unit = {}, 
+    goProfile: (String) -> Unit = {},
     huntCardViewModel: HuntCardViewModel,
     modifier: Modifier = Modifier,
 ) {
@@ -382,7 +382,6 @@ fun HuntHeaderSection(
               modifier =
                   Modifier.weight(HuntCardScreenDefaults.TitleWeight)
                       .padding(HuntCardScreenDefaults.InfoTextPadding)
-                      .clickable(onClick = { goProfile(hunt.authorId) })
                       .testTag(HuntCardScreenTestTags.TITLE_TEXT),
           )
 
@@ -397,6 +396,7 @@ fun HuntHeaderSection(
             "${HuntCardScreenStrings.By} $authorName",
             modifier =
                 Modifier.padding(horizontal = HuntCardScreenDefaults.InfoTextPadding)
+                    .clickable(onClick = { goProfile(hunt.authorId) })
                     .testTag(HuntCardScreenTestTags.AUTHOR_TEXT),
         )
 
