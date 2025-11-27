@@ -103,7 +103,7 @@ class SettingsViewModel(private val authRepository: AuthRepository = AuthReposit
           !state.notificationPermissionGranted) {
         _uiState.update { it.copy(requestNotificationPermission = true) }
       } else {
-          openAppSettings(context)
+        openAppSettings(context)
       }
     } else {
       openAppSettings(context)
