@@ -9,7 +9,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.swentseekr.seekr.model.settings.UserSettings
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -45,25 +45,26 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun clicking_callbacks_work() {
-    var backPressed = false
+  fun clicking_callbacks_work_in_SettingsContent() {
     var editProfileClicked = false
     var logoutClicked = false
     var notificationsToggled = false
     var picturesToggled = false
     var localisationToggled = false
 
+    val uiState =
+        SettingsUIState(
+            appVersion = SettingsScreenStrings.APP_VERSION_1,
+            notificationsEnabled = false,
+            picturesEnabled = false,
+            localisationEnabled = false)
+
     composeRule.setContent {
       MaterialTheme {
         SettingsContent(
-            appVersion = SettingsScreenStrings.APP_VERSION_1,
             onEditProfileClick = { editProfileClicked = true },
             onLogoutClick = { logoutClicked = true },
-            uiState =
-                UserSettings(
-                    notificationsEnabled = false,
-                    picturesEnabled = false,
-                    localisationEnabled = false),
+            uiState = uiState,
             onNotificationsChange = { notificationsToggled = it },
             onPicturesChange = { picturesToggled = it },
             onLocalisationChange = { localisationToggled = it })
@@ -77,18 +78,26 @@ class SettingsScreenTest {
     assertTrue(notificationsToggled)
     assertTrue(picturesToggled)
     assertTrue(localisationToggled)
+
+    composeRule.onNodeWithTag(SettingsScreenTestTags.EDIT_PROFILE_BUTTON).performClick()
+    composeRule.onNodeWithTag(SettingsScreenTestTags.LOGOUT_BUTTON).performClick()
+
+    assertTrue(editProfileClicked)
+    assertTrue(logoutClicked)
   }
 
   @Test
   fun clicking_edit_profile_button_triggers_callback() {
     var editProfileTriggered = false
 
+    val uiState = SettingsUIState(appVersion = SettingsScreenStrings.APP_VERSION_1)
+
     composeRule.setContent {
       MaterialTheme {
         SettingsContent(
-            appVersion = SettingsScreenStrings.APP_VERSION_1,
             onEditProfileClick = { editProfileTriggered = true },
-            onLogoutClick = {})
+            onLogoutClick = {},
+            uiState = uiState)
       }
     }
 
@@ -100,12 +109,12 @@ class SettingsScreenTest {
   fun clicking_logout_button_triggers_callback() {
     var logoutTriggered = false
 
+    val uiState = SettingsUIState(appVersion = SettingsScreenStrings.APP_VERSION_1)
+
     composeRule.setContent {
       MaterialTheme {
         SettingsContent(
-            appVersion = SettingsScreenStrings.APP_VERSION_1,
-            onEditProfileClick = {},
-            onLogoutClick = { logoutTriggered = true })
+            onEditProfileClick = {}, onLogoutClick = { logoutTriggered = true }, uiState = uiState)
       }
     }
 
@@ -116,32 +125,25 @@ class SettingsScreenTest {
   @Test
   fun app_version_is_displayed_correctly() {
     val expectedVersion = SettingsScreenStrings.APP_VERSION_2
+    val uiState = SettingsUIState(appVersion = expectedVersion)
+
     composeRule.setContent {
       MaterialTheme {
-        SettingsContent(appVersion = expectedVersion, onEditProfileClick = {}, onLogoutClick = {})
+        SettingsContent(onEditProfileClick = {}, onLogoutClick = {}, uiState = uiState)
       }
     }
+
     composeRule.onNodeWithText(SettingsScreenStrings.VERSION_LABEL).assertExists()
     composeRule.onNodeWithText(expectedVersion).assertExists()
   }
 
   @Test
   fun app_version_is_unknown_when_null() {
+    val uiState = SettingsUIState(appVersion = null)
+
     composeRule.setContent {
       MaterialTheme {
-        SettingsContent(appVersion = null, onEditProfileClick = {}, onLogoutClick = {})
-      }
-    }
-
-    composeRule.onNodeWithText(SettingsScreenStrings.VERSION_LABEL).assertExists()
-    composeRule.onNodeWithText(SettingsScreenStrings.UNKNOWN_VERSION).assertExists()
-  }
-
-  @Test
-  fun unknown_app_version_displayed() {
-    composeRule.setContent {
-      MaterialTheme {
-        SettingsContent(appVersion = null, onEditProfileClick = {}, onLogoutClick = {})
+        SettingsContent(onEditProfileClick = {}, onLogoutClick = {}, uiState = uiState)
       }
     }
 
@@ -151,17 +153,16 @@ class SettingsScreenTest {
 
   @Test
   fun toggles_reflect_initial_ui_state() {
+    val uiState =
+        SettingsUIState(
+            appVersion = SettingsScreenStrings.APP_VERSION_1,
+            notificationsEnabled = true,
+            picturesEnabled = true,
+            localisationEnabled = false)
+
     composeRule.setContent {
       MaterialTheme {
-        SettingsContent(
-            appVersion = SettingsScreenStrings.APP_VERSION_1,
-            onEditProfileClick = {},
-            onLogoutClick = {},
-            uiState =
-                UserSettings(
-                    notificationsEnabled = true,
-                    picturesEnabled = true,
-                    localisationEnabled = false))
+        SettingsContent(onEditProfileClick = {}, onLogoutClick = {}, uiState = uiState)
       }
     }
 
@@ -175,5 +176,33 @@ class SettingsScreenTest {
     composeRule.setContent { MaterialTheme { SettingsScreen() } }
 
     composeRule.onNodeWithText(SettingsScreenStrings.TOP_BAR_TITLE).assertExists()
+  }
+
+  @Test
+  fun when_signedOut_true_onSignedOut_callback_is_called() {
+    val viewModel = SettingsViewModel()
+    setUiState(
+        viewModel,
+        SettingsUIState(signedOut = true, appVersion = SettingsScreenStrings.APP_VERSION_1))
+
+    var signedOutCalled = false
+
+    composeRule.setContent {
+      MaterialTheme {
+        SettingsScreen(viewModel = viewModel, onSignedOut = { signedOutCalled = true })
+      }
+    }
+
+    composeRule.waitForIdle()
+
+    assertTrue(signedOutCalled)
+  }
+
+  private fun setUiState(viewModel: SettingsViewModel, newState: SettingsUIState) {
+    val field = SettingsViewModel::class.java.getDeclaredField("_uiState")
+    field.isAccessible = true
+    @Suppress("UNCHECKED_CAST")
+    val mutableStateFlow = field.get(viewModel) as MutableStateFlow<SettingsUIState>
+    mutableStateFlow.value = newState
   }
 }
