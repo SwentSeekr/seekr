@@ -27,7 +27,6 @@ import androidx.compose.ui.tooling.preview.Preview
 fun OfflineMapScreen(modifier: Modifier = Modifier) {
   Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-      // Centered card explaining that map functionality is not available offline
       Box(
           modifier =
               Modifier.fillMaxWidth(OfflineConstants.OFFLINE_CARD_WIDTH_RATIO)
@@ -39,13 +38,11 @@ fun OfflineMapScreen(modifier: Modifier = Modifier) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center) {
-                  // Warning icon to visually draw attention to the offline state
                   Icon(
                       imageVector = Icons.Default.Warning,
-                      contentDescription = null,
+                      contentDescription = OfflineConstants.MAP_ICON,
                       modifier = Modifier.size(OfflineConstants.OFFLINE_ICON_SIZE))
                   Spacer(modifier = Modifier.height(OfflineConstants.ICON_SPACING))
-                  // Message explaining why the map is currently unavailable
                   Text(
                       text = OfflineConstants.OFFLINE_MAP_MESSAGE,
                       style = MaterialTheme.typography.titleMedium,
