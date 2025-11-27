@@ -44,15 +44,16 @@ fun ReviewImagesScreen(
               }
             })
       },
-      //modifier = Modifier.testTag("TOP_BAR_TEST_TAG")
-              modifier = Modifier.testTag("REVIEW_IMAGES_SCREEN")) { innerPadding ->
+      // modifier = Modifier.testTag("TOP_BAR_TEST_TAG")
+      modifier = Modifier.testTag("REVIEW_IMAGES_SCREEN")) { innerPadding ->
         Column(
             modifier =
                 modifier
                     .fillMaxWidth()
                     .padding(16.dp)
                     .padding(innerPadding)
-                    .verticalScroll(scroll).testTag("REVIEW_IMAGES_COLUMN")) {
+                    .verticalScroll(scroll)
+                    .testTag("REVIEW_IMAGES_COLUMN")) {
               Text("Bug")
               Text(photoUrls.size.toString())
               photoUrls.forEach { url ->
