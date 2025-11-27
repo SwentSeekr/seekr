@@ -3,6 +3,17 @@ package com.swentseekr.seekr.ui.profile
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Centralized constants, strings, and test tags used across both the Profile screen and Edit
+ * Profile screen.
+ *
+ * NOTE: Despite the "EditProfile" prefix in object names, these objects are referenced in multiple
+ * places, not just the edit screen.
+ *
+ * This file is intentionally not split to avoid breaking existing usage across many references in
+ * the project.
+ */
+
 /** Centralized constants for UI dimensions. */
 object EditProfileNumberConstants {
   val PROFILE_PICTURE_SIZE = 80.dp
