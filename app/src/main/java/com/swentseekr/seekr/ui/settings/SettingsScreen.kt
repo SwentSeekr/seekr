@@ -22,13 +22,13 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.credentials.CredentialManager
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.swentseekr.seekr.ui.settings.SettingsScreenDefaults.COLUMN_WEIGHT
 import com.swentseekr.seekr.ui.theme.Green
@@ -37,15 +37,6 @@ import com.swentseekr.seekr.ui.theme.LightOnError
 import com.swentseekr.seekr.ui.theme.White
 import kotlinx.coroutines.launch
 
-/**
- * The main settings screen displaying app information and configurable settings.
- *
- * @param viewModel The [SettingsViewModel] to manage state and actions.
- * @param onSignedOut Callback invoked when the user signs out.
- * @param onGoBack Callback invoked when the back navigation is pressed.
- * @param onEditProfile Callback invoked when "Edit Profile" is clicked.
- * @param credentialManager [CredentialManager] used for sign-out functionality.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -55,13 +46,48 @@ fun SettingsScreen(
     onEditProfile: () -> Unit = {},
     credentialManager: CredentialManager = CredentialManager.create(LocalContext.current)
 ) {
-  val uiState by viewModel.uiState.collectAsState()
+  val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   val scope = rememberCoroutineScope()
   val context = LocalContext.current
 
-  LaunchedEffect(Unit) { viewModel.refreshPermissions(context) }
-
   LaunchedEffect(uiState.signedOut) { if (uiState.signedOut) onSignedOut() }
+
+  HandlePermissions(viewModel = viewModel)
+
+  Scaffold(
+      topBar = {
+        TopAppBar(
+            title = { Text(SettingsScreenStrings.TOP_BAR_TITLE) },
+            navigationIcon = {
+              IconButton(
+                  onClick = onGoBack,
+                  modifier = Modifier.testTag(SettingsScreenTestTags.BACK_BUTTON)) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = SettingsScreenStrings.BACK_CONTENT_DESCRIPTION)
+                  }
+            },
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = Green,
+                    titleContentColor = White,
+                    navigationIconContentColor = White))
+      }) { padding ->
+        SettingsContent(
+            modifier = Modifier.padding(padding).fillMaxSize(),
+            onEditProfileClick = onEditProfile,
+            onLogoutClick = { scope.launch { viewModel.signOut(credentialManager) } },
+            uiState = uiState,
+            onNotificationsChange = { viewModel.onNotificationsToggleRequested(it, context) },
+            onPicturesChange = { viewModel.onPicturesToggleRequested(it, context) },
+            onLocalisationChange = { viewModel.onLocalisationToggleRequested(it, context) },
+        )
+      }
+}
+
+@Composable
+private fun HandlePermissions(viewModel: SettingsViewModel) {
+  val context = LocalContext.current
 
   val notificationPermissionLauncher =
       rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
@@ -91,74 +117,32 @@ fun SettingsScreen(
             viewModel.onLocationPermissionResult(granted)
           }
 
-  LaunchedEffect(uiState.requestNotificationPermission) {
-    if (uiState.requestNotificationPermission) {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-      } else {
-        viewModel.onNotificationPermissionResult(true)
+  LaunchedEffect(Unit) { viewModel.refreshPermissions(context) }
+
+  LaunchedEffect(Unit) {
+    viewModel.permissionEvents.collect { event ->
+      when (event) {
+        PermissionEvent.RequestNotification -> {
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+          } else {
+            viewModel.onNotificationPermissionResult(true)
+          }
+        }
+        PermissionEvent.RequestGallery -> {
+          galleryPermissionLauncher.launch(galleryPermission)
+        }
+        PermissionEvent.RequestLocation -> {
+          locationPermissionLauncher.launch(
+              arrayOf(
+                  Manifest.permission.ACCESS_FINE_LOCATION,
+                  Manifest.permission.ACCESS_COARSE_LOCATION))
+        }
       }
-      viewModel.consumeNotificationPermissionRequest()
     }
   }
-
-  LaunchedEffect(uiState.requestGalleryPermission) {
-    if (uiState.requestGalleryPermission) {
-      galleryPermissionLauncher.launch(galleryPermission)
-      viewModel.consumeGalleryPermissionRequest()
-    }
-  }
-
-  LaunchedEffect(uiState.requestLocationPermission) {
-    if (uiState.requestLocationPermission) {
-      locationPermissionLauncher.launch(
-          arrayOf(
-              Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
-      viewModel.consumeLocationPermissionRequest()
-    }
-  }
-
-  Scaffold(
-      topBar = {
-        TopAppBar(
-            title = { Text(SettingsScreenStrings.TOP_BAR_TITLE) },
-            navigationIcon = {
-              IconButton(
-                  onClick = onGoBack,
-                  modifier = Modifier.testTag(SettingsScreenTestTags.BACK_BUTTON)) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = SettingsScreenStrings.BACK_CONTENT_DESCRIPTION)
-                  }
-            },
-            colors =
-                TopAppBarDefaults.topAppBarColors(
-                    containerColor = Green,
-                    titleContentColor = White,
-                    navigationIconContentColor = White))
-      }) { padding ->
-        SettingsContent(
-            modifier = Modifier.padding(padding).fillMaxSize(),
-            onEditProfileClick = onEditProfile,
-            onLogoutClick = { scope.launch { viewModel.signOut(credentialManager) } },
-            uiState = uiState,
-            onNotificationsChange = { viewModel.onNotificationsToggleRequested(it, context) },
-            onPicturesChange = { viewModel.onPicturesToggleRequested(it, context) },
-            onLocalisationChange = { viewModel.onLocalisationToggleRequested(it, context) })
-      }
 }
 
-/**
- * Composable that lays out all the settings content.
- *
- * @param modifier Optional [Modifier] for styling and layout adjustments.
- * @param onEditProfileClick Callback triggered when the "Edit Profile" button is clicked.
- * @param onLogoutClick Callback triggered when the "Logout" button is clicked.
- * @param uiState Current state of settings UI.
- * @param onNotificationsChange Callback when notifications toggle changes.
- * @param onPicturesChange Callback when pictures toggle changes.
- * @param onLocalisationChange Callback when localisation toggle changes.
- */
 @Composable
 fun SettingsContent(
     modifier: Modifier = Modifier,
