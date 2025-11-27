@@ -54,6 +54,7 @@ object HuntCardScreenStrings {
 }
 
 object HuntCardScreenTestTags {
+  const val HUNTCARD_SCREEN = "HuntCardScreen"
   const val GO_BACK_BUTTON = "GoBackButton"
   const val TITLE_TEXT = "TitleText"
   const val AUTHOR_TEXT = "AuthorText"

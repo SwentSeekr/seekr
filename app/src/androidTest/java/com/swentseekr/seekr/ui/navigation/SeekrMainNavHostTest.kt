@@ -34,7 +34,7 @@ class SeekrNavigationTest {
           android.Manifest.permission.ACCESS_COARSE_LOCATION)
 
   // --- timeouts (ms) ---
-  private companion object {
+  companion object {
     const val SHORT = 3_000L
     const val MED = 5_000L
     const val LONG = 10_000L

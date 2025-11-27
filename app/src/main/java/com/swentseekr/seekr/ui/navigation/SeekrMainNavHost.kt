@@ -39,7 +39,11 @@ sealed class SeekrDestination(
 
   object Map : SeekrDestination("map", "Map", Icons.Filled.Place)
 
-  object Profile : SeekrDestination("profile", "Profile", Icons.Filled.Person)
+  object Profile : SeekrDestination("profile", "Profile", Icons.Filled.Person) {
+    fun createRoute(userId: String) = "profile/$userId"
+
+    const val ARG_USER_ID = "userId"
+  }
 
   object HuntCard : SeekrDestination("hunt/{huntId}", "Hunt", Icons.Filled.List) {
     fun createRoute(huntId: String) = "hunt/$huntId"
@@ -177,6 +181,30 @@ fun SeekrMainNavHost(
                     onSettings = { navController.navigate(SeekrDestination.Settings.route) },
                     testMode = testMode)
               }
+              // Public profile
+              composable(
+                  route = "profile/{${SeekrDestination.Profile.ARG_USER_ID}}",
+                  arguments =
+                      listOf(
+                          navArgument(SeekrDestination.Profile.ARG_USER_ID) {
+                            type = NavType.StringType
+                          })) { backStackEntry ->
+                    val userId =
+                        backStackEntry.arguments?.getString(SeekrDestination.Profile.ARG_USER_ID)
+
+                    ProfileScreen(
+                        userId = userId,
+                        onAddHunt = {},
+                        onMyHuntClick = { huntId ->
+                          lastHuntId = huntId
+                          navController.navigate(SeekrDestination.HuntCard.createRoute(huntId)) {
+                            launchSingleTop = true
+                          }
+                        },
+                        onSettings = {},
+                        onGoBack = { navController.popBackStack() },
+                        testMode = testMode)
+                  }
 
               // Hunt card (details)
               composable(
@@ -193,6 +221,12 @@ fun SeekrMainNavHost(
                     HuntCardScreen(
                         huntId = huntId,
                         onGoBack = { navController.popBackStack() },
+                        goProfile = { clickedUserId ->
+                          navController.navigate(
+                              SeekrDestination.Profile.createRoute(clickedUserId)) {
+                                launchSingleTop = true
+                              }
+                        },
                         beginHunt = { /* wire if needed */},
                         addReview = {
                           navController.navigate(SeekrDestination.AddReview.createRoute(huntId)) {

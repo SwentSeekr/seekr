@@ -3,13 +3,19 @@ package com.swentseekr.seekr.utils
 import android.net.Uri
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntsRepository
+import com.swentseekr.seekr.ui.profile.Profile
 
-class FakeRepoSuccess(private val hunts: List<Hunt>) : HuntsRepository {
+class FakeRepoSuccess(
+    private val hunts: List<Hunt>,
+    private val profiles: List<Profile> = emptyList()
+) : HuntsRepository {
   override suspend fun addHunt(hunt: Hunt, mainImageUri: Uri?, otherImageUris: List<Uri>) = Unit
 
   override suspend fun getAllHunts(): List<Hunt> = hunts
 
   override suspend fun getHunt(uid: String): Hunt = hunts.first { it.uid == uid }
+
+  suspend fun getProfile(uid: String) = profiles.find { it.uid == uid }
 
   override suspend fun getAllMyHunts(authorID: String): List<Hunt> {
     return hunts.filter { it.authorId == authorID }

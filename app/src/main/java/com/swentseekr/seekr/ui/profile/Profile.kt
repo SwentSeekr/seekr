@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
@@ -69,6 +70,7 @@ object ProfileTestTags {
   const val PROFILE_HUNTS_LIST = "PROFILE_HUNTS_LIST"
   const val EMPTY_HUNTS_MESSAGE = "PROFILE_EMPTY_HUNTS_MESSAGE"
   const val SETTINGS = "SETTINGS"
+  const val GO_BACK = "GO_BACK"
   const val ADD_HUNT = "ADD_HUNT"
   const val TAB_MY_HUNTS = "TAB_MY_HUNTS"
   const val TAB_DONE_HUNTS = "TAB_DONE_HUNTS"
@@ -140,6 +142,7 @@ fun ProfileScreen(
     onAddHunt: () -> Unit = {},
     onSettings: () -> Unit = {},
     onMyHuntClick: (String) -> Unit = {},
+    onGoBack: () -> Unit = {},
     testMode: Boolean = false,
     testProfile: Profile? = null,
 ) {
@@ -229,6 +232,24 @@ fun ProfileScreen(
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = ProfileConstants.SETTINGS_DESCRIPTION,
+                        tint = Green,
+                        modifier =
+                            Modifier.padding(ProfileConstants.PADDING_ICON_INTERNAL).size(40.dp))
+                  }
+                } else {
+                  IconButton(
+                      onClick = onGoBack,
+                      modifier =
+                          Modifier.align(Alignment.TopEnd)
+                              .background(
+                                  color = White.copy(alpha = 0.9f),
+                                  shape = androidx.compose.foundation.shape.CircleShape)
+                              .padding(ProfileConstants.SIZE_SMALL)
+                              .testTag(ProfileTestTags.GO_BACK),
+                  ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Go Back",
                         tint = Green,
                         modifier =
                             Modifier.padding(ProfileConstants.PADDING_ICON_INTERNAL).size(40.dp))
