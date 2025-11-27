@@ -186,8 +186,8 @@ fun HuntCardScreen(
                                         Marker(
                                             state = MarkerState(position = startPosition),
                                             title =
-                                                "${HuntCardScreenStrings.ReviewMarkerTitlePrefix} ${hunt.start.name}",
-                                            snippet = HuntCardScreenStrings.ReviewHint)
+                                                "${HuntCardScreenStrings.ReviewMarkerTitlePrefix}${hunt.start.name}",
+                                            snippet = hunt.start.name.ifBlank { null })
                                       }
                                 }
                           }
