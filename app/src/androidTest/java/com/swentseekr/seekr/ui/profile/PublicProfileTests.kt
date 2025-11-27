@@ -18,7 +18,10 @@ import com.swentseekr.seekr.ui.navigation.SeekrNavigationTest.Companion.MED
 import com.swentseekr.seekr.ui.navigation.SeekrNavigationTest.Companion.XLONG
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
 import com.swentseekr.seekr.utils.FakeRepoSuccess
+import junit.framework.TestCase.assertTrue
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.resetMain
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -53,8 +56,8 @@ class OpenPublicProfileTests {
     composeRule.waitUntil(timeoutMillis = timeout) { runCatching { block() }.getOrNull() == true }
   }
 
-  @Before
-  fun setUp() {
+
+  private fun setUp() {
     composeRule.runOnUiThread { composeRule.activity.setContent { SeekrMainNavHost() } }
     waitUntilTrue(MED) {
       composeRule
@@ -64,8 +67,49 @@ class OpenPublicProfileTests {
     }
   }
 
+  private fun tearDown() {
+    Dispatchers.resetMain()
+  }
+
+
+  @Test
+  fun opensProfile_checks_button () {
+    tearDown()
+
+    val myProfile = sampleProfileWithPseudonym(
+      uid = "current-user",
+      pseudonym = "Me"
+    )
+
+    val authorProfile = sampleProfileWithPseudonym(
+      uid = "author-123",
+      pseudonym = "John The Hunter"
+    )
+
+    val hunt = createHunt(
+      uid = "hunt-001",
+      title = "Treasure in Paris"
+    ).copy(authorId = authorProfile.uid)
+
+    withFakeRepo(FakeRepoSuccess(listOf(hunt),listOf(authorProfile, myProfile))) {
+      var isBack = false
+      composeRule.setContent {
+        ProfileScreen(
+          userId = authorProfile.uid,
+          onGoBack = {isBack = true},
+          testMode = true,
+          testPublic = true
+        )
+      }
+      composeRule.onNodeWithTag(ProfileTestTags.GO_BACK).performClick()
+      assertTrue(isBack)
+    }
+  }
+
   @Test
   fun overview_click_navigates_to_huntcard_nagigates_to_profile() {
+
+    setUp()
     // Use createHunt() to seed repository
 
     val myProfile = sampleProfileWithPseudonym(uid = "current-user", pseudonym = "Me")
@@ -110,36 +154,6 @@ class OpenPublicProfileTests {
     }
   }
 
-  /*
-  @Test
-  fun opensProfile_checks_button () {
 
-    val myProfile = sampleProfileWithPseudonym(
-      uid = "current-user",
-      pseudonym = "Me"
-    )
-
-    val authorProfile = sampleProfileWithPseudonym(
-      uid = "author-123",
-      pseudonym = "John The Hunter"
-    )
-
-    val hunt = createHunt(
-      uid = "hunt-001",
-      title = "Treasure in Paris"
-    ).copy(authorId = authorProfile.uid)
-
-    withFakeRepo(FakeRepoSuccess(listOf(hunt),listOf(authorProfile, myProfile))) {
-      var isBack = false
-      composeRule.setContent {
-        ProfileScreen(
-          userId = authorProfile.uid,
-          onGoBack = {isBack = true}
-        )
-      }
-      composeRule.onNodeWithTag(ProfileTestTags.GO_BACK).performClick()
-      assertTrue(isBack)
-    }
-  }*/
 
 }

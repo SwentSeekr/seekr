@@ -144,6 +144,7 @@ fun ProfileScreen(
     onMyHuntClick: (String) -> Unit = {},
     onGoBack: () -> Unit = {},
     testMode: Boolean = false,
+    testPublic: Boolean = false,
     testProfile: Profile? = null,
 ) {
   val uiState by viewModel.uiState.collectAsState()
@@ -218,7 +219,7 @@ fun ProfileScreen(
                       .padding(
                           horizontal = ProfileConstants.SIZE_MEDIUM_DP,
                           vertical = ProfileConstants.PADDING_VERTICAL)) {
-                if (isMyProfile) {
+                if (isMyProfile && !testPublic) {
                   IconButton(
                       onClick = onSettings,
                       modifier =
