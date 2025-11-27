@@ -42,8 +42,6 @@ class OpenPublicProfileTests {
     }
   }
 
-  private fun node(tag: String) = composeRule.onNodeWithTag(tag, useUnmergedTree = true)
-
   @Before
   fun setupFirebase() = runBlocking {
     val context = ApplicationProvider.getApplicationContext<Context>()
