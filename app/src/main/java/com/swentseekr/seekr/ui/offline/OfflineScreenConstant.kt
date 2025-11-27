@@ -1,8 +1,10 @@
 package com.swentseekr.seekr.ui.offline
 
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.ui.theme.EasyGreen
+import com.swentseekr.seekr.ui.theme.Green
 
 object OfflineConstants {
 
@@ -15,6 +17,8 @@ object OfflineConstants {
   const val OFFLINE_OVERVIEW_MESSAGE =
       "No internet? No problem. You can still access your saved hunts."
   const val SHOW_DOWNLOADED_HUNTS_BUTTON = "Continue without connection"
+  const val MAP_ICON = "Offline Map Icon"
+  const val OVERVIEW_ICON = "Offline Overview Icon"
 
   val ICON_SPACING = 16.dp
   val MESSAGE_SPACING = 8.dp
@@ -26,10 +30,11 @@ object OfflineConstants {
   const val DEFAULT_DOUBLE = 0.0
 
   // --- Empty list default (typed for Hunt) ---
-  val DEFAULT_HUNT_LIST = emptyList<com.swentseekr.seekr.model.hunt.Hunt>()
+  val DEFAULT_HUNT_LIST: List<Hunt> = emptyList()
 
   // --- Card styling ---
-  val LIGHT_GREEN_BACKGROUND = Color(0xFFDAEFD0)
+  // Use themed "easy" green for offline card background
+  val LIGHT_GREEN_BACKGROUND = EasyGreen
   val OFFLINE_CARD_HEIGHT = 450.dp
   const val OFFLINE_CARD_WIDTH_RATIO = 0.8f
   val CARD_SHAPE = RoundedCornerShape(16.dp)
@@ -43,5 +48,6 @@ object OfflineConstants {
   // --- Button styling ---
   val BUTTON_SHAPE = RoundedCornerShape(50)
   const val BUTTON_WIDTH_RATIO = 0.7f
-  val BUTTON_CONTAINER_COLOR = Color(0xFF60BA37)
+  // Use primary green from theme for the offline CTA button
+  val BUTTON_CONTAINER_COLOR = Green
 }
