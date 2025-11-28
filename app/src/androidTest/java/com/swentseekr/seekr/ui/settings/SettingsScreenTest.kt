@@ -176,4 +176,36 @@ class SettingsScreenTest {
 
     composeRule.onNodeWithText(SettingsScreenStrings.TOP_BAR_TITLE).assertExists()
   }
+
+  @Test
+  fun toggles_in_settings_screen_invoke_callbacks() {
+    var notificationsToggled = false
+    var picturesToggled = false
+    var localisationToggled = false
+
+    composeRule.setContent {
+      MaterialTheme {
+        SettingsContent(
+            appVersion = "1.0.0",
+            onEditProfileClick = {},
+            onLogoutClick = {},
+            uiState =
+                UserSettings(
+                    notificationsEnabled = false,
+                    picturesEnabled = false,
+                    localisationEnabled = false),
+            onNotificationsChange = { notificationsToggled = it },
+            onPicturesChange = { picturesToggled = it },
+            onLocalisationChange = { localisationToggled = it })
+      }
+    }
+
+    composeRule.onNodeWithTag(SettingsScreenTestTags.NOTIFICATIONS_TOGGLE).performClick()
+    composeRule.onNodeWithTag(SettingsScreenTestTags.PICTURES_TOGGLE).performClick()
+    composeRule.onNodeWithTag(SettingsScreenTestTags.LOCALISATION_TOGGLE).performClick()
+
+    assertTrue(notificationsToggled)
+    assertTrue(picturesToggled)
+    assertTrue(localisationToggled)
+  }
 }

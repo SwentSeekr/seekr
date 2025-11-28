@@ -11,6 +11,10 @@ object SettingsScreenDefaults {
   val COMPONENTS_PADDING = 12.dp
 
   val COLUMN_WEIGHT = 1f
+  const val NOTIFICATION_REQUEST_CODE = 1001
+  const val TEST_VERIFICATION_TIMES_NULL = 0
+  const val TEST_VERIFICATION_TIMES_NOT_NULL = 1
+  const val TEST_CALL_ORDER_SIZE = 2
 }
 
 object SettingsScreenStrings {
@@ -29,12 +33,18 @@ object SettingsScreenStrings {
   const val NOTIFICATION_FIELD = "notificationsEnabled"
   const val PICTURES_FIELD = "picturesEnabled"
   const val LOCALISATION_FIELD = "localisationEnabled"
+  const val NOTIFICATION_FIELD_2 = "Notifications enabled"
+
   const val DOCUMENT_TEST_TEXT = "Document should be created automatically"
   const val FIREBASE_TEST_ERROR = "FirebaseAuth currentUser should not be null"
   const val SIGN_IN_ERROR = "User not signed in"
+  const val NOTIFICATION_ACCEPT_MESSAGE = "You will now receive app notifications"
 
   const val APP_VERSION_1 = "1.0.0"
   const val APP_VERSION_2 = "1.2.3"
+
+  const val TEST_NOTIFICATION = "notification"
+  const val TEST_REPOSITORY = "repository"
 }
 
 object SettingsScreenTestTags {

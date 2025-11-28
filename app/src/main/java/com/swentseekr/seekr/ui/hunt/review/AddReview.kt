@@ -44,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -83,7 +84,8 @@ fun AddReviewScreen(
             uris.forEach { uri -> reviewViewModel.addPhoto(uri.toString()) }
           })
 
-  val author = authorProfile?.author?.pseudonym ?: (AddReviewScreenStrings.UnknownAuthor)
+  val author = authorProfile?.author?.pseudonym ?: ("Unknown Author")
+  val context = LocalContext.current
 
   Scaffold(
       topBar = {
@@ -243,7 +245,7 @@ fun AddReviewScreen(
                         }
                     Button(
                         onClick = {
-                          hunt?.let { reviewViewModel.submitCurrentUserReview(it) }
+                          hunt?.let { reviewViewModel.submitCurrentUserReview(it, context) }
                           onDone()
                         },
                         enabled = uiState.isValid,

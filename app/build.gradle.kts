@@ -180,6 +180,8 @@ dependencies {
     //Firebase storage
     implementation("com.google.firebase:firebase-storage-ktx")
 
+    implementation("com.google.firebase:firebase-messaging-ktx")
+
     implementation("com.google.protobuf:protobuf-javalite:3.21.12")
     testImplementation("com.google.protobuf:protobuf-javalite:3.21.12")
     androidTestImplementation("com.google.protobuf:protobuf-javalite:3.21.12")

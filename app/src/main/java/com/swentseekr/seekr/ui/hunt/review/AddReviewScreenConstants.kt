@@ -71,6 +71,9 @@ object AddReviewScreenStrings {
   const val ErrorClearSubmitReview = "Cannot clear form, review not submitted successfully."
   const val Empty = ""
 
+  const val NEW_REVIEW_TITLE = "New review added"
+  const val NEW_REVIEW_MESSAGE = "You added a new review!"
+
   fun ratingSummary(rating: Int, maxStars: Int): String = "$RatingPrefix$rating /$maxStars"
 }
 
