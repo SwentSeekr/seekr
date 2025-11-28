@@ -17,17 +17,18 @@ import androidx.compose.ui.platform.testTag
 
 /** Dialog composable extracted for easier testing and cleaner code. */
 @Composable
-fun PointNameDialog(show: Boolean, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
+fun PointNameDialog(show: Boolean, onDismiss: () -> Unit, onConfirm: (String, String) -> Unit) {
   if (!show) return
 
   var pointName by remember { mutableStateOf("") }
+  var pointDescription by remember { mutableStateOf("") }
   var hasTypedBefore by remember { mutableStateOf(false) }
 
   val isError = hasTypedBefore && pointName.isBlank()
 
   AlertDialog(
       onDismissRequest = onDismiss,
-      title = { Text("Enter new point's name") },
+      title = { Text(AddPointsMapScreenDefaults.dialogTitle) },
       text = {
         Column {
           OutlinedTextField(
@@ -36,24 +37,35 @@ fun PointNameDialog(show: Boolean, onDismiss: () -> Unit, onConfirm: (String) ->
                 if (it.isNotBlank()) hasTypedBefore = true
                 pointName = it
               },
-              placeholder = { Text("e.g. Louvre museum") },
+              placeholder = { Text(AddPointsMapScreenDefaults.placeholder) },
               singleLine = true,
               isError = isError,
-              label = { Text("Point's name") },
+              label = { Text(AddPointsMapScreenDefaults.pointsName) },
               supportingText = {
                 if (isError) {
-                  Text("The name cannot be empty", color = MaterialTheme.colorScheme.error)
+                  Text(AddPointsMapScreenDefaults.notEmpty, color = MaterialTheme.colorScheme.error)
                 }
               },
               modifier =
                   Modifier.fillMaxWidth().testTag(AddPointsMapScreenTestTags.POINT_NAME_FIELD))
+
+          OutlinedTextField(
+              value = pointDescription,
+              onValueChange = { pointDescription = it },
+              label = { Text(AddPointsMapScreenDefaults.description) },
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .testTag(AddPointsMapScreenTestTags.POINT_DESCRIPTION_FIELD))
         }
       },
       confirmButton = {
         TextButton(
-            onClick = { onConfirm(pointName.trim()) }, enabled = pointName.trim().isNotBlank()) {
-              Text("Add")
+            onClick = { onConfirm(pointName.trim(), pointDescription.trim()) },
+            enabled = pointName.trim().isNotBlank()) {
+              Text(AddPointsMapScreenDefaults.add)
             }
       },
-      dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } })
+      dismissButton = {
+        TextButton(onClick = onDismiss) { Text(AddPointsMapScreenDefaults.cancel) }
+      })
 }

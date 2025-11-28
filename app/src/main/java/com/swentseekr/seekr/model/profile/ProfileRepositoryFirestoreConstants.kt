@@ -59,6 +59,7 @@ object ProfileRepositoryConstants {
   const val LOCATION_FIELD_LATITUDE = "latitude"
   const val LOCATION_FIELD_LONGITUDE = "longitude"
   const val LOCATION_FIELD_NAME = "name"
+  const val LOCATION_FIELD_DESCRIPTION = "description"
   const val LOCAL_PROFILE_PICTURE_PREFIX = "local://profile-picture/"
   const val DEFAULT_EMPTY_VALUE = ""
 }

@@ -150,14 +150,18 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
                 state =
                     MarkerState(LatLng(selectedHunt.start.latitude, selectedHunt.start.longitude)),
                 title = "${MapScreenStrings.StartPrefix}${selectedHunt.start.name}",
+                snippet = selectedHunt.start.description.ifBlank { null },
                 icon = bitmapDescriptorFromVector(LocalContext.current, R.drawable.ic_start_marker))
             selectedHunt.middlePoints.forEachIndexed { idx, point ->
               Marker(
-                  state = MarkerState(LatLng(point.latitude, point.longitude)), title = point.name)
+                  state = MarkerState(LatLng(point.latitude, point.longitude)),
+                  title = point.name,
+                  snippet = point.description.ifBlank { null })
             }
             Marker(
                 state = MarkerState(LatLng(selectedHunt.end.latitude, selectedHunt.end.longitude)),
                 title = "${MapScreenStrings.EndPrefix}${selectedHunt.end.name}",
+                snippet = selectedHunt.end.description.ifBlank { null },
                 icon = bitmapDescriptorFromVector(LocalContext.current, R.drawable.ic_end_marker))
             if (uiState.route.isNotEmpty()) {
               Polyline(
@@ -267,6 +271,19 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
                           MapScreenDefaults.MinScore
                   val validated = uiState.validatedCount
 
+                  val currentCheckpointInfo: Pair<String, String>? =
+                      hunt?.let { currentHunt ->
+                        val ordered = buildList {
+                          add(currentHunt.start)
+                          currentHunt.middlePoints.forEach { add(it) }
+                          add(currentHunt.end)
+                        }
+
+                        ordered.getOrNull(validated)?.let { checkpoint ->
+                          checkpoint.name to checkpoint.description
+                        }
+                      }
+
                   Row(
                       modifier = Modifier.fillMaxWidth(),
                       horizontalArrangement = Arrangement.SpaceBetween,
@@ -279,6 +296,11 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
                             text = "$validated / $totalPoints",
                             style = MaterialTheme.typography.bodyMedium)
                       }
+
+                  currentCheckpointInfo?.let { (name, description) ->
+                    Text(text = "Next stop: $name", style = MaterialTheme.typography.bodyMedium)
+                    Text(text = description, style = MaterialTheme.typography.bodyMedium)
+                  }
 
                   Spacer(Modifier.height(MapScreenDefaults.BackButtonPadding))
 

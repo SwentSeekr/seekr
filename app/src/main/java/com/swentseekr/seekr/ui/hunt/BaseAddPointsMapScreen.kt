@@ -67,7 +67,8 @@ fun BaseAddPointsMapScreen(
               points.forEach { point ->
                 Marker(
                     state = MarkerState(position = LatLng(point.latitude, point.longitude)),
-                    title = point.name)
+                    title = point.name,
+                    snippet = point.description.ifBlank { null })
               }
 
               if (points.size >= 2) {
@@ -81,8 +82,8 @@ fun BaseAddPointsMapScreen(
   PointNameDialog(
       show = showNameDialog && tempLatLng != null,
       onDismiss = { showNameDialog = false },
-      onConfirm = { name ->
-        tempLatLng?.let { points = points + Location(it.latitude, it.longitude, name) }
+      onConfirm = { name, description ->
+        tempLatLng?.let { points = points + Location(it.latitude, it.longitude, name, description) }
         showNameDialog = false
       })
 }
