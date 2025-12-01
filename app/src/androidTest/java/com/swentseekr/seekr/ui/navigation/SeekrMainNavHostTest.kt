@@ -16,6 +16,7 @@ import androidx.test.rule.GrantPermissionRule
 import com.swentseekr.seekr.FakeReviewHuntViewModel
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
 import com.swentseekr.seekr.model.profile.createHunt
+import com.swentseekr.seekr.ui.components.HuntCardScreenTestTags
 import com.swentseekr.seekr.ui.huntCardScreen.FakeHuntCardViewModel
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
 import com.swentseekr.seekr.ui.profile.ProfileTestTags
@@ -583,6 +584,67 @@ class SeekrNavigationTest {
           .onFirst()
           .assertIsDisplayed()
       node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
+    }
+  }
+
+  @Test
+  fun huntcard_click_author_navigates_to_author_profile() {
+    // Seed repo with a hunt that has a specific author
+    val authorId = "author-456"
+    val hunt =
+        createHunt(uid = "hunt-with-author", title = "Adventure Hunt").copy(authorId = authorId)
+
+    withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
+      // Re-compose with fake repo and ViewModels
+      compose.runOnUiThread {
+        compose.activity.setContent {
+          SeekrMainNavHost(
+              testMode = true,
+              huntCardViewModelFactory = { FakeHuntCardViewModel(hunt) },
+              reviewViewModelFactory = { FakeReviewHuntViewModel() })
+        }
+      }
+
+      // Wait for the overview list to appear
+      waitUntilTrue(MED) {
+        compose
+            .onNodeWithTag(OverviewScreenTestTags.HUNT_LIST, useUnmergedTree = true)
+            .assertExists()
+        true
+      }
+
+      // Click on the hunt card to open HuntCardScreen
+      compose
+          .onAllNodesWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
+          .onFirst()
+          .assertExists()
+          .performClick()
+
+      // Wait for HuntCard screen to appear
+      waitUntilTrue(MED) {
+        compose
+            .onAllNodesWithTag(NavigationTestTags.HUNTCARD_SCREEN, useUnmergedTree = true)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+      }
+
+      // Click on the author's name to navigate to their profile
+      compose
+          .onNodeWithTag(HuntCardScreenTestTags.AUTHOR_TEXT, useUnmergedTree = true)
+          .assertExists()
+          .assertIsDisplayed()
+          .performClick()
+
+      // Wait for Profile screen to appear with the author's profile
+      waitUntilTrue(MED) {
+        compose.onNodeWithTag(ProfileTestTags.PROFILE_SCREEN, useUnmergedTree = true).assertExists()
+        true
+      }
+
+      // Verify we're on the profile screen
+      compose
+          .onNodeWithTag(ProfileTestTags.PROFILE_SCREEN, useUnmergedTree = true)
+          .assertIsDisplayed()
     }
   }
 }
