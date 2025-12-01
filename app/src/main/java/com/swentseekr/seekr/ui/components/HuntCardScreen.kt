@@ -2,6 +2,7 @@ package com.swentseekr.seekr.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -69,6 +70,7 @@ fun HuntCardScreen(
     huntCardViewModel: HuntCardViewModel = viewModel(),
     reviewViewModel: ReviewHuntViewModel = viewModel(),
     onGoBack: () -> Unit = {},
+    goProfile: (String) -> Unit = {},
     beginHunt: () -> Unit = {},
     addReview: () -> Unit = {},
     editHunt: () -> Unit = {},
@@ -114,7 +116,8 @@ fun HuntCardScreen(
             },
             modifier = Modifier.background(HuntCardScreenDefaults.TopBarColor))
       },
-      modifier = modifier.fillMaxSize()) { innerPadding ->
+      modifier = modifier.fillMaxSize().testTag(HuntCardScreenTestTags.HUNTCARD_SCREEN)) {
+          innerPadding ->
         val hunt = hunt2
         if (hunt == null) {
           Box(Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
@@ -157,6 +160,7 @@ fun HuntCardScreen(
                               authorName = author,
                               huntId = huntId,
                               huntCardViewModel = huntCardViewModel,
+                              goProfile = goProfile,
                               modifier = modifier,
                           )
 
@@ -387,6 +391,7 @@ fun HuntHeaderSection(
     hunt: com.swentseekr.seekr.model.hunt.Hunt,
     authorName: String,
     huntId: String,
+    goProfile: (String) -> Unit = {},
     huntCardViewModel: HuntCardViewModel,
     modifier: Modifier = Modifier,
 ) {
@@ -416,6 +421,7 @@ fun HuntHeaderSection(
             "${HuntCardScreenStrings.By} $authorName",
             modifier =
                 Modifier.padding(horizontal = HuntCardScreenDefaults.InfoTextPadding)
+                    .clickable(onClick = { goProfile(hunt.authorId) })
                     .testTag(HuntCardScreenTestTags.AUTHOR_TEXT),
         )
 

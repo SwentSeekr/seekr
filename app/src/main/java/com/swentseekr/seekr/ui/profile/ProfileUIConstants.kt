@@ -13,6 +13,11 @@ import androidx.compose.ui.unit.sp
  * This file is intentionally not split to avoid breaking existing usage across many references in
  * the project.
  */
+object ProfileScreenConstants {
+  val ICON_BUTTON_SIZE_DP = 40.dp
+  const val ICON_BUTTON_WHITE_ALPHA = 0.9f
+  const val ICON_BUTTON_GOBACK = "Go Back"
+}
 
 /** Centralized constants for UI dimensions. */
 object EditProfileNumberConstants {
