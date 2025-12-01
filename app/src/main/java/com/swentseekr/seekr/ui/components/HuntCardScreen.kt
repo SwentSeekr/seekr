@@ -99,7 +99,6 @@ fun HuntCardScreen(
   val author = authorProfile?.author?.pseudonym ?: HuntCardScreenStrings.UnknownAuthor
 
   Scaffold(
-      // BAR GOBACK ARROW
       topBar = {
         TopAppBar(
             title = { Text("") },
