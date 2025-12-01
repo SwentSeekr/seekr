@@ -21,6 +21,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Button
@@ -213,6 +214,16 @@ fun AddReviewScreen(
                                             AddReviewScreenDefaults.CommentFieldCornerRadius)),
                             placeholder = painterResource(R.drawable.empty_image),
                             error = painterResource(R.drawable.empty_image))
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription =
+                                AddReviewScreenStrings.RemovePhotoContentDescription,
+                            modifier =
+                                Modifier.size(AddReviewScreenDefaults.CloseImageSize)
+                                    .clickable {
+                                      reviewViewModel.removePhoto(uiState.photos[index])
+                                    }
+                                    .testTag("RemovePhoto$index"))
                       }
                     }
               }
@@ -226,7 +237,7 @@ fun AddReviewScreen(
                   horizontalArrangement = Arrangement.SpaceEvenly) {
                     Button(
                         onClick = {
-                          reviewViewModel.clearFormCancel()
+                          reviewViewModel.clearFormNoSubmission()
                           onCancel()
                         },
                         modifier = modifier.testTag(AddReviewScreenTestTags.CANCEL_BUTTON)) {

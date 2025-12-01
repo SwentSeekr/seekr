@@ -319,11 +319,11 @@ fun ReviewCard(
   val authorProfile = uiState.authorProfile
 
   val isCurrentId = currentUserId == authorId
-
   Card(
       modifier =
           Modifier.fillMaxWidth()
               .padding(vertical = HuntCardScreenDefaults.ReviewCardVerticalPadding)
+              .padding(horizontal = HuntCardScreenDefaults.ScreenPaddingHorizontal)
               .border(
                   HuntCardScreenDefaults.CardBorderWidth,
                   HuntCardScreenDefaults.PrimaryBorderColor,
