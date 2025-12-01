@@ -42,6 +42,7 @@ fun MapContent(
           myLocationButtonEnabled = true,
           scrollGesturesEnabled = true,
           zoomGesturesEnabled = true,
+          zoomControlsEnabled = false,
           tiltGesturesEnabled = true,
           rotationGesturesEnabled = true)
 
