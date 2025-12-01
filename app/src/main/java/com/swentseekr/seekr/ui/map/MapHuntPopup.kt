@@ -4,11 +4,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import coil.compose.AsyncImage
+import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.DifficultyColor
 import com.swentseekr.seekr.model.hunt.Hunt
@@ -29,20 +33,29 @@ fun HuntPopup(
         shape = RoundedCornerShape(MapScreenDefaults.CardCornerRadius),
         elevation = CardDefaults.cardElevation(MapScreenDefaults.CardElevation)
     ) {
-        Column {
+        Row(
+            modifier = Modifier
+                .padding(MapScreenDefaults.CardPadding),
+                    verticalAlignment = Alignment.CenterVertically
+        ) {
 
             AsyncImage(
                 model = hunt.mainImageUrl,
                 contentDescription = hunt.title + MapScreenStrings.HuntImageDescriptionSuffix,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(MapScreenDefaults.PopupImageHeight)
+                    .size(MapScreenDefaults.PopupImageSize)
+                    .clip(RoundedCornerShape(MapScreenDefaults.PopupImageCornerRadius))
                     .testTag(MapScreenTestTags.POPUP_IMAGE),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
+                error  = painterResource(R.drawable.empty_image),
             )
 
-            Column(Modifier.padding(MapScreenDefaults.CardPadding)) {
+            Spacer(Modifier.width(MapScreenDefaults.PopupSpacing))
 
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+            ) {
                 Text(
                     hunt.title,
                     style = MaterialTheme.typography.titleMedium,
