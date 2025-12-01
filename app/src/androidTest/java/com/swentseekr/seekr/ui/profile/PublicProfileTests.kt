@@ -75,13 +75,21 @@ class OpenPublicProfileTests {
   fun opensProfile_checks_button() {
     tearDown()
 
-    val myProfile = sampleProfileWithPseudonym(uid = "current-user", pseudonym = "Me")
+    val myProfile =
+        sampleProfileWithPseudonym(
+            uid = ProfileTestsConstants.EXAMPLE_MY_USER_ID,
+            pseudonym = ProfileTestsConstants.EXAMPLE_MY_PSEUDONYM)
 
     val authorProfile =
-        sampleProfileWithPseudonym(uid = "author-123", pseudonym = "John The Hunter")
+        sampleProfileWithPseudonym(
+            uid = ProfileTestsConstants.EXAMPLE_OTHER_USER_ID,
+            pseudonym = ProfileTestsConstants.EXAMPLE_OTHER_PSEUDONYM)
 
     val hunt =
-        createHunt(uid = "hunt-001", title = "Treasure in Paris").copy(authorId = authorProfile.uid)
+        createHunt(
+                uid = ProfileTestsConstants.EXAMPLE_HUNT_ID,
+                title = ProfileTestsConstants.EXAMPLE_HUNT_TITLE)
+            .copy(authorId = authorProfile.uid)
 
     withFakeRepo(FakeRepoSuccess(listOf(hunt), listOf(authorProfile, myProfile))) {
       var isBack = false
@@ -100,13 +108,21 @@ class OpenPublicProfileTests {
   @Test
   fun opensHuntCard_checks_button() {
 
-    val myProfile = sampleProfileWithPseudonym(uid = "current-user", pseudonym = "Me")
+    val myProfile =
+        sampleProfileWithPseudonym(
+            uid = ProfileTestsConstants.EXAMPLE_MY_USER_ID,
+            pseudonym = ProfileTestsConstants.EXAMPLE_MY_PSEUDONYM)
 
     val authorProfile =
-        sampleProfileWithPseudonym(uid = "author-123", pseudonym = "John The Hunter")
+        sampleProfileWithPseudonym(
+            uid = ProfileTestsConstants.EXAMPLE_OTHER_USER_ID,
+            pseudonym = ProfileTestsConstants.EXAMPLE_OTHER_PSEUDONYM)
 
     val hunt =
-        createHunt(uid = "hunt-001", title = "Treasure in Paris").copy(authorId = authorProfile.uid)
+        createHunt(
+                uid = ProfileTestsConstants.EXAMPLE_HUNT_ID,
+                title = ProfileTestsConstants.EXAMPLE_HUNT_TITLE)
+            .copy(authorId = authorProfile.uid)
 
     withFakeRepo(FakeRepoSuccess(listOf(hunt), listOf(authorProfile, myProfile))) {
       var isBack = false

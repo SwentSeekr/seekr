@@ -590,9 +590,12 @@ class SeekrNavigationTest {
   @Test
   fun huntcard_click_author_navigates_to_author_profile() {
     // Seed repo with a hunt that has a specific author
-    val authorId = "author-456"
+    val authorId = NavHostPublicProfileTestConstants.EXAMPLE_AUTHOR_ID
     val hunt =
-        createHunt(uid = "hunt-with-author", title = "Adventure Hunt").copy(authorId = authorId)
+        createHunt(
+                uid = NavHostPublicProfileTestConstants.EXAMPLE_HUNT_ID,
+                title = NavHostPublicProfileTestConstants.EXAMPLE_HUNT_TITLE)
+            .copy(authorId = authorId)
 
     withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
       // Re-compose with fake repo and ViewModels

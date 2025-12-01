@@ -248,17 +248,20 @@ fun ProfileScreen(
                       modifier =
                           Modifier.align(Alignment.TopEnd)
                               .background(
-                                  color = White.copy(alpha = 0.9f),
+                                  color =
+                                      White.copy(
+                                          alpha = ProfileScreenConstants.ICON_BUTTON_WHITE_ALPHA),
                                   shape = androidx.compose.foundation.shape.CircleShape)
                               .padding(ProfileConstants.SIZE_SMALL)
                               .testTag(ProfileTestTags.GO_BACK),
                   ) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Go Back",
+                        contentDescription = ProfileScreenConstants.ICON_BUTTON_GOBACK,
                         tint = Green,
                         modifier =
-                            Modifier.padding(ProfileConstants.PADDING_ICON_INTERNAL).size(40.dp))
+                            Modifier.padding(ProfileConstants.PADDING_ICON_INTERNAL)
+                                .size(ProfileScreenConstants.ICON_BUTTON_SIZE_DP))
                   }
                 }
                 Row(
