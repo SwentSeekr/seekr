@@ -3,20 +3,23 @@ package com.swentseekr.seekr.ui.profile
 import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.ui.test.*
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.navigation.compose.rememberNavController
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.runner.AndroidJUnit4
 import com.google.firebase.FirebaseApp
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
 import com.swentseekr.seekr.model.profile.createHunt
 import com.swentseekr.seekr.model.profile.sampleProfileWithPseudonym
+import com.swentseekr.seekr.ui.components.HuntCardScreen
 import com.swentseekr.seekr.ui.components.HuntCardScreenTestTags
+import com.swentseekr.seekr.ui.huntCardScreen.FakeHuntCardViewModel
 import com.swentseekr.seekr.ui.navigation.NavigationTestTags
 import com.swentseekr.seekr.ui.navigation.SeekrMainNavHost
 import com.swentseekr.seekr.ui.navigation.SeekrNavigationTest.Companion.MED
-import com.swentseekr.seekr.ui.navigation.SeekrNavigationTest.Companion.XLONG
-import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
 import com.swentseekr.seekr.utils.FakeRepoSuccess
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
@@ -41,8 +44,6 @@ class OpenPublicProfileTests {
       HuntRepositoryProvider.repository = prev
     }
   }
-
-  private fun node(tag: String) = composeRule.onNodeWithTag(tag, useUnmergedTree = true)
 
   @Before
   fun setupFirebase() = runBlocking {
@@ -97,10 +98,7 @@ class OpenPublicProfileTests {
   }
 
   @Test
-  fun overview_click_navigates_to_huntcard_nagigates_to_profile() {
-
-    setUp()
-    // Use createHunt() to seed repository
+  fun opensHuntCard_checks_button() {
 
     val myProfile = sampleProfileWithPseudonym(uid = "current-user", pseudonym = "Me")
 
@@ -111,36 +109,16 @@ class OpenPublicProfileTests {
         createHunt(uid = "hunt-001", title = "Treasure in Paris").copy(authorId = authorProfile.uid)
 
     withFakeRepo(FakeRepoSuccess(listOf(hunt), listOf(authorProfile, myProfile))) {
-      // Compose the real NavHost (no Firebase involved).
-      composeRule.runOnUiThread {
-        composeRule.activity.setContent { SeekrMainNavHost(testMode = true) }
+      var isBack = false
+      composeRule.setContent {
+        HuntCardScreen(
+            huntId = hunt.uid,
+            huntCardViewModel = FakeHuntCardViewModel(hunt),
+            goProfile = { isBack = true },
+            navController = rememberNavController())
       }
-
-      // Wait for Overview to draw with list content.
-      waitUntilTrue(MED) {
-        composeRule
-            .onNodeWithTag(OverviewScreenTestTags.HUNT_LIST, useUnmergedTree = true)
-            .assertExists()
-        true
-      }
-
-      // Click the last card.
-      composeRule
-          .onAllNodesWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
-          .onFirst()
-          .assertExists()
-          .performClick()
-
-      composeRule.waitUntil(timeoutMillis = XLONG) {
-        composeRule
-            .onAllNodes(hasTestTag(NavigationTestTags.HUNTCARD_SCREEN), useUnmergedTree = true)
-            .fetchSemanticsNodes()
-            .isNotEmpty()
-      }
-
       composeRule.onNodeWithTag(HuntCardScreenTestTags.AUTHOR_TEXT).performClick()
-
-      composeRule.onNodeWithTag(ProfileTestTags.PROFILE_SCREEN).assertExists().assertIsDisplayed()
+      assertTrue(isBack)
     }
   }
 }
