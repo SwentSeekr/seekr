@@ -5,9 +5,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
+import coil.compose.AsyncImage
+import com.swentseekr.seekr.model.hunt.Difficulty
+import com.swentseekr.seekr.model.hunt.DifficultyColor
 import com.swentseekr.seekr.model.hunt.Hunt
-import com.swentseekr.seekr.ui.theme.Green
+import com.swentseekr.seekr.model.hunt.HuntStatus
+import com.swentseekr.seekr.model.hunt.StatusColor
 
 @Composable
 fun HuntPopup(
@@ -16,46 +22,123 @@ fun HuntPopup(
     onDismiss: () -> Unit
 ) {
     Card(
-        modifier =
-            Modifier.fillMaxWidth()
-                .padding(MapScreenDefaults.CardPadding)
-                .testTag(MapScreenTestTags.POPUP_CARD),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(MapScreenDefaults.CardPadding)
+            .testTag(MapScreenTestTags.POPUP_CARD),
         shape = RoundedCornerShape(MapScreenDefaults.CardCornerRadius),
         elevation = CardDefaults.cardElevation(MapScreenDefaults.CardElevation)
     ) {
-        Column(Modifier.padding(MapScreenDefaults.CardPadding)) {
-            Text(
-                hunt.title,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.testTag(MapScreenTestTags.POPUP_TITLE)
+        Column {
+
+            AsyncImage(
+                model = hunt.mainImageUrl,
+                contentDescription = hunt.title + MapScreenStrings.HuntImageDescriptionSuffix,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(MapScreenDefaults.PopupImageHeight)
+                    .testTag(MapScreenTestTags.POPUP_IMAGE),
+                contentScale = ContentScale.Crop
             )
-            Text(
-                hunt.description,
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = MapScreenDefaults.MaxLines,
-                modifier = Modifier.testTag(MapScreenTestTags.POPUP_DESC)
-            )
-            Spacer(Modifier.height(MapScreenDefaults.PopupSpacing))
-            Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                TextButton(
-                    onClick = onDismiss,
-                    colors = ButtonDefaults.textButtonColors(contentColor = Green),
-                    modifier = Modifier.testTag(MapScreenTestTags.BUTTON_CANCEL)
+
+            Column(Modifier.padding(MapScreenDefaults.CardPadding)) {
+
+                Text(
+                    hunt.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.testTag(MapScreenTestTags.POPUP_TITLE)
+                )
+
+                Text(
+                    hunt.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = MapScreenDefaults.MaxLines,
+                    modifier = Modifier.testTag(MapScreenTestTags.POPUP_DESC)
+                )
+
+                Spacer(Modifier.height(MapScreenDefaults.PopupSpacing))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag(MapScreenTestTags.POPUP_META_ROW),
+                    horizontalArrangement = Arrangement.spacedBy(MapScreenDefaults.PopupSpacing)
                 ) {
-                    Text(MapScreenStrings.Cancel)
+                    StatusChip(hunt.status)
+                    DifficultyChip(hunt.difficulty)
                 }
-                Button(
-                    onClick = onViewClick,
-                    colors =
-                        ButtonDefaults.textButtonColors(
-                            containerColor = Green,
-                            contentColor = androidx.compose.ui.graphics.Color.White
-                        ),
-                    modifier = Modifier.testTag(MapScreenTestTags.BUTTON_VIEW)
+
+                Spacer(Modifier.height(MapScreenDefaults.PopupSpacing))
+
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(MapScreenStrings.ViewHunt)
+                    TextButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.testTag(MapScreenTestTags.BUTTON_CANCEL)
+                    ) {
+                        Text(MapScreenStrings.Cancel)
+                    }
+
+                    Button(
+                        onClick = onViewClick,
+                        modifier = Modifier.testTag(MapScreenTestTags.BUTTON_VIEW)
+                    ) {
+                        Text(MapScreenStrings.ViewHunt)
+                    }
                 }
             }
         }
     }
 }
+
+@Composable
+private fun StatusChip(status: HuntStatus) {
+    val baseColor = Color(StatusColor(status))
+    val readableText = baseColor.darken(MapScreenDefaults.ChipContentDarkenFactor)
+
+    Surface(
+        color = baseColor.copy(alpha = MapScreenDefaults.ChipBackgroundAlpha),
+        contentColor = readableText,
+        shape = RoundedCornerShape(MapScreenDefaults.ChipCornerRadius)
+    ) {
+        Text(
+            text = status.name.lowercase().replaceFirstChar { it.uppercase() },
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.padding(
+                horizontal = MapScreenDefaults.ChipHorizontalPadding,
+                vertical = MapScreenDefaults.ChipVerticalPadding
+            )
+        )
+    }
+}
+
+@Composable
+private fun DifficultyChip(difficulty: Difficulty) {
+    val baseColor = DifficultyColor(difficulty)
+    val readableText = baseColor.darken(MapScreenDefaults.ChipContentDarkenFactor)
+
+    Surface(
+        color = baseColor.copy(alpha = MapScreenDefaults.ChipBackgroundAlpha),
+        contentColor = readableText,
+        shape = RoundedCornerShape(MapScreenDefaults.ChipCornerRadius)
+    ) {
+        Text(
+            text = difficulty.name.lowercase().replaceFirstChar { it.uppercase() },
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.padding(
+                horizontal = MapScreenDefaults.ChipHorizontalPadding,
+                vertical = MapScreenDefaults.ChipVerticalPadding
+            )
+        )
+    }
+}
+
+private fun Color.darken(factor: Float): Color =
+    Color(
+        red = (this.red * factor).coerceIn(0f, 1f),
+        green = (this.green * factor).coerceIn(0f, 1f),
+        blue = (this.blue * factor).coerceIn(0f, 1f),
+        alpha = 1f
+    )

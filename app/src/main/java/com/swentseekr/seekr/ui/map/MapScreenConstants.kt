@@ -5,7 +5,18 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 object MapScreenDefaults {
-  const val Base = 0
+
+  val PopupImageHeight: Dp = 120.dp
+  val CardPadding: Dp = 12.dp
+  val PopupSpacing: Dp = 6.dp
+
+  // Chips
+  const val ChipBackgroundAlpha: Float = 0.25f  // darker background
+  const val ChipContentDarkenFactor: Float = 0.7f // darken text for readability
+
+  val ChipHorizontalPadding: Dp = 8.dp
+  val ChipVerticalPadding: Dp = 4.dp
+  val ChipCornerRadius: Dp = 50.dp
   const val UnitPointSize = 1
   const val MaxLines = 2
   const val MinScore = 2
@@ -19,11 +30,9 @@ object MapScreenDefaults {
   val OverlayPadding: Dp = 32.dp
   val OverlayDoublePadding: Dp = 64.dp
   val OverlayInnerPadding: Dp = 24.dp
-  val CardPadding: Dp = 16.dp
   val CardCornerRadius: Dp = 16.dp
   val CardElevation: Dp = 8.dp
   val BackButtonPadding: Dp = 12.dp
-  val PopupSpacing: Dp = 8.dp
 }
 
 /**
@@ -49,7 +58,7 @@ object MapConfig {
 object MapScreenStrings {
   const val StartPrefix = "Start: "
   const val EndPrefix = "End: "
-
+  const val HuntImageDescriptionSuffix = " image"
   const val PermissionExplanation =
     "Seekr needs access to your location to display hunts near you on the map!"
   const val GrantPermission = "Grant Location Permission"
@@ -86,6 +95,8 @@ object MapScreenTestTags {
   const val POPUP_CARD = "huntPopupCard"
   const val POPUP_TITLE = "huntPopupTitle"
   const val POPUP_DESC = "huntPopupDesc"
+  const val POPUP_IMAGE = "huntPopupImage"
+  const val POPUP_META_ROW = "huntPopupMetaRow"
   const val BUTTON_CANCEL = "huntPopupCancel"
   const val BUTTON_VIEW = "huntPopupView"
   const val BUTTON_BACK = "backToAllHunts"
@@ -99,4 +110,5 @@ object MapScreenTestTags {
   const val FINISH = "finish"
   const val STOP_POPUP = "stopPopup"
   const val CONFIRM = "confirm"
+
 }
