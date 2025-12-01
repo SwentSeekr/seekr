@@ -5,12 +5,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 object MapScreenDefaults {
-
-  val PopupImageHeight: Dp = 120.dp
-  val CardPadding: Dp = 12.dp
+  val CardPadding: Dp = 6.dp
   val PopupSpacing: Dp = 6.dp
-
-  // Chips
+  val PopupImageSize: Dp = 125.dp
+  val PopupImageCornerRadius: Dp = 8.dp
   const val ChipBackgroundAlpha: Float = 0.25f  // darker background
   const val ChipContentDarkenFactor: Float = 0.7f // darken text for readability
 
@@ -25,6 +23,9 @@ object MapScreenDefaults {
   const val FocusedZoom = 15f
   const val BoundsPadding = 100
   const val RouteStrokeWidth = 12f
+
+  val MarkerImageSize = 50.dp
+  val MarkerCornerRadius = 8.dp
 
   val OverlayScrimColor: Color = Color(0x80000000)
   val OverlayPadding: Dp = 32.dp
