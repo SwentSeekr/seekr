@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.swentseekr.seekr.model.notifications.NotificationHelper
 import com.swentseekr.seekr.ui.settings.SettingsScreenDefaults.COLUMN_WEIGHT
 import com.swentseekr.seekr.ui.theme.Green
 import com.swentseekr.seekr.ui.theme.LightError
@@ -93,6 +94,13 @@ private fun HandlePermissions(viewModel: SettingsViewModel) {
       rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
           isGranted ->
         viewModel.onNotificationPermissionResult(isGranted)
+
+        if (isGranted) {
+          NotificationHelper.sendNotification(
+              context,
+              SettingsScreenStrings.NOTIFICATION_FIELD_2,
+              SettingsScreenStrings.NOTIFICATION_ACCEPT_MESSAGE)
+        }
       }
 
   val galleryPermission =
@@ -127,6 +135,10 @@ private fun HandlePermissions(viewModel: SettingsViewModel) {
             notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
           } else {
             viewModel.onNotificationPermissionResult(true)
+            NotificationHelper.sendNotification(
+                context,
+                SettingsScreenStrings.NOTIFICATION_FIELD_2,
+                SettingsScreenStrings.NOTIFICATION_ACCEPT_MESSAGE)
           }
         }
         PermissionEvent.RequestGallery -> {
