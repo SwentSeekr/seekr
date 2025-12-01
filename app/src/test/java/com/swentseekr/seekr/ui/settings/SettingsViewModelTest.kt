@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.settings
 
+import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -107,6 +108,39 @@ class SettingsViewModelTest {
 
   @Test
   @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
+  fun `refreshPermissions - tiramisu requires POST_NOTIFICATIONS permission`() {
+    val notificationManager = mockk<NotificationManagerCompat>()
+
+    every { NotificationManagerCompat.from(context) } returns notificationManager
+    every { notificationManager.areNotificationsEnabled() } returns true
+
+    every {
+      ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+    } returns PackageManager.PERMISSION_DENIED
+    every {
+      ContextCompat.checkSelfPermission(context, Manifest.permission.READ_MEDIA_IMAGES)
+    } returns PackageManager.PERMISSION_GRANTED
+    every {
+      ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+    } returns PackageManager.PERMISSION_GRANTED
+    every {
+      ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION)
+    } returns PackageManager.PERMISSION_DENIED
+
+    viewModel.refreshPermissions(context)
+
+    val state = viewModel.uiState.value
+    // POST_NOTIFICATIONS denied -> notifications not granted, even if system allows them
+    assertFalse(state.notificationPermissionGranted)
+    assertTrue(state.galleryPermissionGranted)
+    assertTrue(state.locationPermissionGranted)
+    assertFalse(state.notificationsEnabled)
+    assertTrue(state.picturesEnabled)
+    assertTrue(state.localisationEnabled)
+  }
+
+  @Test
+  @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
   fun `onNotificationsToggleRequested - enabled and not granted emits RequestNotification event`() =
       runTest {
         val initial =
@@ -134,6 +168,27 @@ class SettingsViewModelTest {
     every { context.startActivity(any()) } just runs
 
     viewModel.onNotificationsToggleRequested(enabled = false, context = context)
+
+    io.mockk.verify {
+      context.startActivity(
+          match { intent ->
+            intent.action == Settings.ACTION_APPLICATION_DETAILS_SETTINGS &&
+                intent.data?.scheme == "package"
+          })
+    }
+  }
+
+  @Test
+  @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
+  fun `onNotificationsToggleRequested - enabled and already granted opens settings`() {
+    val initial =
+        viewModel.uiState.value.copy(
+            notificationPermissionGranted = true, notificationsEnabled = true)
+    setUiState(initial)
+
+    every { context.startActivity(any()) } just runs
+
+    viewModel.onNotificationsToggleRequested(enabled = true, context = context)
 
     io.mockk.verify {
       context.startActivity(
@@ -175,6 +230,37 @@ class SettingsViewModelTest {
   }
 
   @Test
+  @Config(sdk = [Build.VERSION_CODES.S])
+  fun `onNotificationPermissionResult - preTiramisu always treated as granted`() {
+    val initial =
+        viewModel.uiState.value.copy(
+            notificationPermissionGranted = false, notificationsEnabled = false)
+    setUiState(initial)
+
+    viewModel.onNotificationPermissionResult(granted = false)
+
+    val state = viewModel.uiState.value
+    assertTrue(state.notificationPermissionGranted)
+    assertTrue(state.notificationsEnabled)
+  }
+
+  @Test
+  @Config(sdk = [Build.VERSION_CODES.TIRAMISU])
+  fun `onNotificationPermissionResult - keeps notificationsEnabled when already true`() {
+    val initial =
+        viewModel.uiState.value.copy(
+            notificationPermissionGranted = false, notificationsEnabled = true)
+    setUiState(initial)
+
+    viewModel.onNotificationPermissionResult(granted = false)
+
+    val state = viewModel.uiState.value
+    assertFalse(state.notificationPermissionGranted)
+    // notificationsEnabled should remain true because of logical OR with previous value
+    assertTrue(state.notificationsEnabled)
+  }
+
+  @Test
   fun `onPicturesToggleRequested - enable when not granted emits RequestGallery event`() = runTest {
     val initial =
         viewModel.uiState.value.copy(galleryPermissionGranted = false, picturesEnabled = false)
@@ -197,6 +283,19 @@ class SettingsViewModelTest {
     every { context.startActivity(any()) } just runs
 
     viewModel.onPicturesToggleRequested(enabled = false, context = context)
+
+    io.mockk.verify { context.startActivity(any()) }
+  }
+
+  @Test
+  fun `onPicturesToggleRequested - enable when already granted opens settings`() {
+    val initial =
+        viewModel.uiState.value.copy(galleryPermissionGranted = true, picturesEnabled = true)
+    setUiState(initial)
+
+    every { context.startActivity(any()) } just runs
+
+    viewModel.onPicturesToggleRequested(enabled = true, context = context)
 
     io.mockk.verify { context.startActivity(any()) }
   }
@@ -225,6 +324,20 @@ class SettingsViewModelTest {
     val state = viewModel.uiState.value
     assertFalse(state.galleryPermissionGranted)
     assertFalse(state.picturesEnabled)
+  }
+
+  @Test
+  fun `onGalleryPermissionResult - denied leaves picturesEnabled true when already true`() {
+    val initial =
+        viewModel.uiState.value.copy(galleryPermissionGranted = false, picturesEnabled = true)
+    setUiState(initial)
+
+    viewModel.onGalleryPermissionResult(granted = false)
+
+    val state = viewModel.uiState.value
+    assertFalse(state.galleryPermissionGranted)
+    // picturesEnabled should remain true
+    assertTrue(state.picturesEnabled)
   }
 
   @Test
@@ -257,6 +370,19 @@ class SettingsViewModelTest {
   }
 
   @Test
+  fun `onLocalisationToggleRequested - enable when already granted opens settings`() {
+    val initial =
+        viewModel.uiState.value.copy(locationPermissionGranted = true, localisationEnabled = true)
+    setUiState(initial)
+
+    every { context.startActivity(any()) } just runs
+
+    viewModel.onLocalisationToggleRequested(enabled = true, context = context)
+
+    io.mockk.verify { context.startActivity(any()) }
+  }
+
+  @Test
   fun `onLocationPermissionResult - granted updates state and localisationEnabled`() {
     val initial =
         viewModel.uiState.value.copy(locationPermissionGranted = false, localisationEnabled = false)
@@ -280,6 +406,19 @@ class SettingsViewModelTest {
     val state = viewModel.uiState.value
     assertFalse(state.locationPermissionGranted)
     assertFalse(state.localisationEnabled)
+  }
+
+  @Test
+  fun `onLocationPermissionResult - denied leaves localisationEnabled true when already true`() {
+    val initial =
+        viewModel.uiState.value.copy(locationPermissionGranted = false, localisationEnabled = true)
+    setUiState(initial)
+
+    viewModel.onLocationPermissionResult(granted = false)
+
+    val state = viewModel.uiState.value
+    assertFalse(state.locationPermissionGranted)
+    assertTrue(state.localisationEnabled)
   }
 
   @Test
