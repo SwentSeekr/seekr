@@ -9,7 +9,7 @@ object MapScreenDefaults {
   val PopupSpacing: Dp = 6.dp
   val PopupImageSize: Dp = 125.dp
   val PopupImageCornerRadius: Dp = 8.dp
-  const val ChipBackgroundAlpha: Float = 0.25f  // darker background
+  const val ChipBackgroundAlpha: Float = 0.25f // darker background
   const val ChipContentDarkenFactor: Float = 0.7f // darken text for readability
 
   val ChipHorizontalPadding: Dp = 8.dp
@@ -36,9 +36,7 @@ object MapScreenDefaults {
   val BackButtonPadding: Dp = 12.dp
 }
 
-/**
- * Pure configuration / domain constants used by the Map feature.
- */
+/** Pure configuration / domain constants used by the Map feature. */
 object MapConfig {
   // Default target (Lausanne)
   const val DefaultLat = 46.519962
@@ -61,7 +59,7 @@ object MapScreenStrings {
   const val EndPrefix = "End: "
   const val HuntImageDescriptionSuffix = " image"
   const val PermissionExplanation =
-    "Seekr needs access to your location to display hunts near you on the map!"
+      "Seekr needs access to your location to display hunts near you on the map!"
   const val GrantPermission = "Grant Location Permission"
   const val BackToAllHunts = "Back to all hunts"
   const val Cancel = "Cancel"
@@ -74,7 +72,7 @@ object MapScreenStrings {
 
   const val StopHuntTitle = "Stop current hunt?"
   const val StopHuntMessage =
-    "Are you sure you want to stop this hunt? Your current progress will be lost."
+      "Are you sure you want to stop this hunt? Your current progress will be lost."
   const val ConfirmStopHunt = "Stop"
 
   const val NextStopPrefix = "Next stop: "
@@ -88,9 +86,7 @@ object MapScreenStrings {
   const val Fail = "Failed to add done hunt"
 }
 
-/**
- * Test tags used by instrumented tests to target key UI elements on the Map screen.
- */
+/** Test tags used by instrumented tests to target key UI elements on the Map screen. */
 object MapScreenTestTags {
   const val GOOGLE_MAP_SCREEN = "mapScreen"
   const val POPUP_CARD = "huntPopupCard"
@@ -111,5 +107,4 @@ object MapScreenTestTags {
   const val FINISH = "finish"
   const val STOP_POPUP = "stopPopup"
   const val CONFIRM = "confirm"
-
 }

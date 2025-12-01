@@ -11,11 +11,11 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
 import com.swentseekr.seekr.model.hunt.HuntsRepository
 import com.swentseekr.seekr.model.map.Location
-import kotlinx.coroutines.CoroutineDispatcher
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,20 +26,22 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 data class MapUIState(
-  val target: LatLng = LatLng(MapConfig.DefaultLat, MapConfig.DefaultLng),
-  val hunts: List<Hunt> = emptyList(),
-  val selectedHunt: Hunt? = null,
-  val isFocused: Boolean = false,
-  val errorMsg: String? = null,
-  val route: List<LatLng> = emptyList(),
-  val isRouteLoading: Boolean = false,
-  val isHuntStarted: Boolean = false,
-  val validatedCount: Int = MapConfig.DefaultValidatedCount,
-  val validationRadiusMeters: Int = MapConfig.ValidationRadiusMeters
+    val target: LatLng = LatLng(MapConfig.DefaultLat, MapConfig.DefaultLng),
+    val hunts: List<Hunt> = emptyList(),
+    val selectedHunt: Hunt? = null,
+    val isFocused: Boolean = false,
+    val errorMsg: String? = null,
+    val route: List<LatLng> = emptyList(),
+    val isRouteLoading: Boolean = false,
+    val isHuntStarted: Boolean = false,
+    val validatedCount: Int = MapConfig.DefaultValidatedCount,
+    val validationRadiusMeters: Int = MapConfig.ValidationRadiusMeters
 )
 
-class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvider.repository,private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO) :
-    ViewModel() {
+class MapViewModel(
+    private val repository: HuntsRepository = HuntRepositoryProvider.repository,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+) : ViewModel() {
 
   private val _uiState = MutableStateFlow(MapUIState())
   val uiState: StateFlow<MapUIState> = _uiState.asStateFlow()
@@ -76,13 +78,12 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
 
   fun onBackToAllHunts() {
     _uiState.value =
-      _uiState.value.copy(
-        isFocused = false,
-        selectedHunt = null,
-        route = emptyList(),
-        isHuntStarted = false,
-        validatedCount = MapConfig.DefaultValidatedCount
-      )
+        _uiState.value.copy(
+            isFocused = false,
+            selectedHunt = null,
+            route = emptyList(),
+            isHuntStarted = false,
+            validatedCount = MapConfig.DefaultValidatedCount)
   }
 
   private fun fetchHunts() {
@@ -90,9 +91,8 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
       try {
         val hunts = repository.getAllHunts()
         val targetLocation =
-          hunts.firstOrNull()?.start ?: Location(
-            MapConfig.DefaultLat, MapConfig.DefaultLng, MapConfig.DefaultCityName
-          )
+            hunts.firstOrNull()?.start
+                ?: Location(MapConfig.DefaultLat, MapConfig.DefaultLng, MapConfig.DefaultCityName)
         _uiState.value = MapUIState(target = targetLocation.toLatLng(), hunts = hunts)
       } catch (e: Exception) {
         setErrorMsg(MapScreenStrings.ErrorLoadHuntsPrefix + (e.message ?: ""))
@@ -101,22 +101,22 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
   }
 
   private suspend fun computeRouteForSelectedHunt(
-    travelMode: String = MapConfig.TravelModeWalking
+      travelMode: String = MapConfig.TravelModeWalking
   ) {
     val hunt = _uiState.value.selectedHunt ?: return
     _uiState.value = _uiState.value.copy(isRouteLoading = true)
 
     try {
       val points =
-        withContext(ioDispatcher) {
-          requestDirectionsPolyline(
-            originLat = hunt.start.latitude,
-            originLng = hunt.start.longitude,
-            destLat = hunt.end.latitude,
-            destLng = hunt.end.longitude,
-            waypoints = hunt.middlePoints.map { it.latitude to it.longitude },
-            travelMode = travelMode)
-        }
+          withContext(ioDispatcher) {
+            requestDirectionsPolyline(
+                originLat = hunt.start.latitude,
+                originLng = hunt.start.longitude,
+                destLat = hunt.end.latitude,
+                destLng = hunt.end.longitude,
+                waypoints = hunt.middlePoints.map { it.latitude to it.longitude },
+                travelMode = travelMode)
+          }
       setErrorMsg("")
       _uiState.value = _uiState.value.copy(route = points, isRouteLoading = false)
     } catch (e: Exception) {
@@ -126,12 +126,12 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
   }
 
   private fun requestDirectionsPolyline(
-    originLat: Double,
-    originLng: Double,
-    destLat: Double,
-    destLng: Double,
-    waypoints: List<Pair<Double, Double>>,
-    travelMode: String
+      originLat: Double,
+      originLng: Double,
+      destLat: Double,
+      destLng: Double,
+      waypoints: List<Pair<Double, Double>>,
+      travelMode: String
   ): List<LatLng> {
     val url = buildDirectionsUrl(originLat, originLng, destLat, destLng, waypoints, travelMode)
     val conn = openDirectionsConnection(url)
@@ -144,50 +144,48 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
   }
 
   private fun buildDirectionsUrl(
-    originLat: Double,
-    originLng: Double,
-    destLat: Double,
-    destLng: Double,
-    waypoints: List<Pair<Double, Double>>,
-    travelMode: String
+      originLat: Double,
+      originLng: Double,
+      destLat: Double,
+      destLng: Double,
+      waypoints: List<Pair<Double, Double>>,
+      travelMode: String
   ): URL {
     val origin = "$originLat,$originLng"
     val destination = "$destLat,$destLng"
 
     val waypointParam =
-      if (waypoints.isNotEmpty()) {
-        waypoints.joinToString(separator = "|") { (lat, lng) -> "via:$lat,$lng" }
-      } else {
-        null
-      }
+        if (waypoints.isNotEmpty()) {
+          waypoints.joinToString(separator = "|") { (lat, lng) -> "via:$lat,$lng" }
+        } else {
+          null
+        }
 
     val base = MapConfig.DirectionsBaseUrl
     val params =
-      buildList {
-        add("origin=" + URLEncoder.encode(origin, StandardCharsets.UTF_8.name()))
-        add("destination=" + URLEncoder.encode(destination, StandardCharsets.UTF_8.name()))
-        add("mode=" + URLEncoder.encode(travelMode, StandardCharsets.UTF_8.name()))
-        waypointParam?.let {
-          add("waypoints=" + URLEncoder.encode(it, StandardCharsets.UTF_8.name()))
-        }
-        add(
-          "key=" + URLEncoder.encode(
-            BuildConfig.MAPS_API_KEY,
-            StandardCharsets.UTF_8.name()
-          )
-        )
-      }.joinToString("&")
+        buildList {
+              add("origin=" + URLEncoder.encode(origin, StandardCharsets.UTF_8.name()))
+              add("destination=" + URLEncoder.encode(destination, StandardCharsets.UTF_8.name()))
+              add("mode=" + URLEncoder.encode(travelMode, StandardCharsets.UTF_8.name()))
+              waypointParam?.let {
+                add("waypoints=" + URLEncoder.encode(it, StandardCharsets.UTF_8.name()))
+              }
+              add(
+                  "key=" +
+                      URLEncoder.encode(BuildConfig.MAPS_API_KEY, StandardCharsets.UTF_8.name()))
+            }
+            .joinToString("&")
 
     return URL("$base?$params")
   }
 
   private fun openDirectionsConnection(url: URL): HttpURLConnection =
-    (url.openConnection() as HttpURLConnection).apply {
-      requestMethod = "GET"
-      connectTimeout = MapConfig.DirectionsConnectTimeoutMs
-      readTimeout = MapConfig.DirectionsReadTimeoutMs
-      doInput = true
-    }
+      (url.openConnection() as HttpURLConnection).apply {
+        requestMethod = "GET"
+        connectTimeout = MapConfig.DirectionsConnectTimeoutMs
+        readTimeout = MapConfig.DirectionsReadTimeoutMs
+        doInput = true
+      }
 
   private fun parseDirectionsResponse(json: JSONObject): List<LatLng> {
     ensureStatusOk(json)
@@ -242,11 +240,11 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
   fun startHunt() {
     _uiState.value.selectedHunt ?: return
     _uiState.value =
-      _uiState.value.copy(
-        isFocused = true,
-        route = emptyList(),
-        isHuntStarted = true,
-        validatedCount = MapConfig.DefaultValidatedCount)
+        _uiState.value.copy(
+            isFocused = true,
+            route = emptyList(),
+            isHuntStarted = true,
+            validatedCount = MapConfig.DefaultValidatedCount)
     viewModelScope.launch { computeRouteForSelectedHunt(travelMode = MapConfig.TravelModeWalking) }
   }
 
@@ -266,12 +264,12 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
 
     val nextPoint = ordered[nextIdx]
     val within =
-      try {
-        com.google.maps.android.SphericalUtil.computeDistanceBetween(
-          currentLocation, nextPoint) <= state.validationRadiusMeters
-      } catch (e: Exception) {
-        false
-      }
+        try {
+          com.google.maps.android.SphericalUtil.computeDistanceBetween(
+              currentLocation, nextPoint) <= state.validationRadiusMeters
+        } catch (e: Exception) {
+          false
+        }
 
     if (within) _uiState.value = state.copy(validatedCount = state.validatedCount + 1)
   }
@@ -289,12 +287,12 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
       try {
         onPersist(hunt)
         _uiState.value =
-          state.copy(
-            isHuntStarted = false,
-            validatedCount = MapConfig.DefaultValidatedCount,
-            isFocused = false,
-            selectedHunt = null,
-            route = emptyList())
+            state.copy(
+                isHuntStarted = false,
+                validatedCount = MapConfig.DefaultValidatedCount,
+                isFocused = false,
+                selectedHunt = null,
+                route = emptyList())
       } catch (e: Exception) {
         setErrorMsg(MapScreenStrings.ErrorFinishHuntPrefix + (e.message ?: ""))
       }

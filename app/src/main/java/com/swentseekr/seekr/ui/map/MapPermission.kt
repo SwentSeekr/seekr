@@ -13,42 +13,37 @@ import com.swentseekr.seekr.ui.theme.Green
 
 @Composable
 fun PermissionRequestPopup(onRequestPermission: () -> Unit) {
-    Box(
-        modifier =
-            Modifier.fillMaxSize()
-                .background(MapScreenDefaults.OverlayScrimColor)
-                .padding(MapScreenDefaults.OverlayPadding)
-                .testTag(MapScreenTestTags.PERMISSION_POPUP),
-        contentAlignment = Alignment.Center
-    ) {
+  Box(
+      modifier =
+          Modifier.fillMaxSize()
+              .background(MapScreenDefaults.OverlayScrimColor)
+              .padding(MapScreenDefaults.OverlayPadding)
+              .testTag(MapScreenTestTags.PERMISSION_POPUP),
+      contentAlignment = Alignment.Center) {
         Card(
             modifier = Modifier.fillMaxWidth().padding(MapScreenDefaults.CardPadding),
             shape = RoundedCornerShape(MapScreenDefaults.CardCornerRadius),
-            elevation = CardDefaults.cardElevation(MapScreenDefaults.CardElevation)
-        ) {
-            Column(
-                modifier = Modifier.padding(MapScreenDefaults.OverlayInnerPadding).fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = MapScreenStrings.PermissionExplanation,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color.Black,
-                    modifier =
-                        Modifier.padding(bottom = MapScreenDefaults.CardPadding)
-                            .testTag(MapScreenTestTags.EXPLAIN)
-                )
-                TextButton(
-                    onClick = onRequestPermission,
-                    colors = ButtonDefaults.buttonColors(containerColor = Green),
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .padding(top = MapScreenDefaults.PopupSpacing)
-                            .testTag(MapScreenTestTags.GRANT_LOCATION_PERMISSION)
-                ) {
-                    Text(MapScreenStrings.GrantPermission, color = Color.White)
-                }
+            elevation = CardDefaults.cardElevation(MapScreenDefaults.CardElevation)) {
+              Column(
+                  modifier = Modifier.padding(MapScreenDefaults.OverlayInnerPadding).fillMaxWidth(),
+                  horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = MapScreenStrings.PermissionExplanation,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.Black,
+                        modifier =
+                            Modifier.padding(bottom = MapScreenDefaults.CardPadding)
+                                .testTag(MapScreenTestTags.EXPLAIN))
+                    TextButton(
+                        onClick = onRequestPermission,
+                        colors = ButtonDefaults.buttonColors(containerColor = Green),
+                        modifier =
+                            Modifier.fillMaxWidth()
+                                .padding(top = MapScreenDefaults.PopupSpacing)
+                                .testTag(MapScreenTestTags.GRANT_LOCATION_PERMISSION)) {
+                          Text(MapScreenStrings.GrantPermission, color = Color.White)
+                        }
+                  }
             }
-        }
-    }
+      }
 }
