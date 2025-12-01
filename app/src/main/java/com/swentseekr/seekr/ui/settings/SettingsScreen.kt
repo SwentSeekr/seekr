@@ -1,5 +1,9 @@
 package com.swentseekr.seekr.ui.settings
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,15 +22,15 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.credentials.CredentialManager
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.swentseekr.seekr.model.settings.UserSettings
+import com.swentseekr.seekr.model.notifications.NotificationHelper
 import com.swentseekr.seekr.ui.settings.SettingsScreenDefaults.COLUMN_WEIGHT
 import com.swentseekr.seekr.ui.theme.Green
 import com.swentseekr.seekr.ui.theme.LightError
@@ -34,15 +38,6 @@ import com.swentseekr.seekr.ui.theme.LightOnError
 import com.swentseekr.seekr.ui.theme.White
 import kotlinx.coroutines.launch
 
-/**
- * The main settings screen displaying app information and configurable settings.
- *
- * @param viewModel The [SettingsViewModel] to manage state and actions.
- * @param onSignedOut Callback invoked when the user signs out.
- * @param onGoBack Callback invoked when the back navigation is pressed.
- * @param onEditProfile Callback invoked when "Edit Profile" is clicked.
- * @param credentialManager [CredentialManager] used for sign-out functionality.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -52,12 +47,13 @@ fun SettingsScreen(
     onEditProfile: () -> Unit = {},
     credentialManager: CredentialManager = CredentialManager.create(LocalContext.current)
 ) {
-  val uiState by viewModel.uiState.collectAsState()
+  val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   val scope = rememberCoroutineScope()
-  val settings by viewModel.settingsFlow.collectAsState()
   val context = LocalContext.current
 
   LaunchedEffect(uiState.signedOut) { if (uiState.signedOut) onSignedOut() }
+
+  HandlePermissions(viewModel = viewModel)
 
   Scaffold(
       topBar = {
@@ -80,35 +76,91 @@ fun SettingsScreen(
       }) { padding ->
         SettingsContent(
             modifier = Modifier.padding(padding).fillMaxSize(),
-            appVersion = uiState.appVersion,
             onEditProfileClick = onEditProfile,
             onLogoutClick = { scope.launch { viewModel.signOut(credentialManager) } },
-            uiState = settings,
-            onNotificationsChange = { enabled -> viewModel.updateNotifications(enabled, context) },
-            onPicturesChange = { viewModel.updatePictures(it) },
-            onLocalisationChange = { viewModel.updateLocalisation(it) })
+            uiState = uiState,
+            onNotificationsChange = { viewModel.onNotificationsToggleRequested(it, context) },
+            onPicturesChange = { viewModel.onPicturesToggleRequested(it, context) },
+            onLocalisationChange = { viewModel.onLocalisationToggleRequested(it, context) },
+        )
       }
 }
 
-/**
- * Composable that lays out all the settings content.
- *
- * @param modifier Optional [Modifier] for styling and layout adjustments.
- * @param appVersion The current app version to display.
- * @param onEditProfileClick Callback triggered when the "Edit Profile" button is clicked.
- * @param onLogoutClick Callback triggered when the "Logout" button is clicked.
- * @param uiState Current state of settings UI.
- * @param onNotificationsChange Callback when notifications toggle changes.
- * @param onPicturesChange Callback when pictures toggle changes.
- * @param onLocalisationChange Callback when localisation toggle changes.
- */
+@Composable
+private fun HandlePermissions(viewModel: SettingsViewModel) {
+  val context = LocalContext.current
+
+  val notificationPermissionLauncher =
+      rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
+          isGranted ->
+        viewModel.onNotificationPermissionResult(isGranted)
+
+        if (isGranted) {
+          NotificationHelper.sendNotification(
+              context,
+              SettingsScreenStrings.NOTIFICATION_FIELD_2,
+              SettingsScreenStrings.NOTIFICATION_ACCEPT_MESSAGE)
+        }
+      }
+
+  val galleryPermission =
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        Manifest.permission.READ_MEDIA_IMAGES
+      } else {
+        Manifest.permission.READ_EXTERNAL_STORAGE
+      }
+
+  val galleryPermissionLauncher =
+      rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
+          isGranted ->
+        viewModel.onGalleryPermissionResult(isGranted)
+      }
+
+  val locationPermissionLauncher =
+      rememberLauncherForActivityResult(
+          contract = ActivityResultContracts.RequestMultiplePermissions()) { result ->
+            val granted =
+                result[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                    result[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+            viewModel.onLocationPermissionResult(granted)
+          }
+
+  LaunchedEffect(Unit) { viewModel.refreshPermissions(context) }
+
+  LaunchedEffect(Unit) {
+    viewModel.permissionEvents.collect { event ->
+      when (event) {
+        PermissionEvent.RequestNotification -> {
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+          } else {
+            viewModel.onNotificationPermissionResult(true)
+            NotificationHelper.sendNotification(
+                context,
+                SettingsScreenStrings.NOTIFICATION_FIELD_2,
+                SettingsScreenStrings.NOTIFICATION_ACCEPT_MESSAGE)
+          }
+        }
+        PermissionEvent.RequestGallery -> {
+          galleryPermissionLauncher.launch(galleryPermission)
+        }
+        PermissionEvent.RequestLocation -> {
+          locationPermissionLauncher.launch(
+              arrayOf(
+                  Manifest.permission.ACCESS_FINE_LOCATION,
+                  Manifest.permission.ACCESS_COARSE_LOCATION))
+        }
+      }
+    }
+  }
+}
+
 @Composable
 fun SettingsContent(
     modifier: Modifier = Modifier,
-    appVersion: String?,
     onEditProfileClick: () -> Unit,
     onLogoutClick: () -> Unit,
-    uiState: UserSettings = UserSettings(),
+    uiState: SettingsUIState,
     onNotificationsChange: (Boolean) -> Unit = {},
     onPicturesChange: (Boolean) -> Unit = {},
     onLocalisationChange: (Boolean) -> Unit = {},
@@ -118,7 +170,7 @@ fun SettingsContent(
       item {
         SettingsItem(
             title = SettingsScreenStrings.VERSION_LABEL,
-            value = appVersion ?: SettingsScreenStrings.UNKNOWN_VERSION,
+            value = uiState.appVersion ?: SettingsScreenStrings.UNKNOWN_VERSION,
             modifier = Modifier.testTag(SettingsScreenTestTags.APP_VERSION_TEXT))
       }
 
