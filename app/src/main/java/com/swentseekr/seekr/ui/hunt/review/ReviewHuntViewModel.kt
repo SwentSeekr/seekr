@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.hunt.review
 
+import android.content.Context
 import android.util.Log
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
@@ -15,6 +16,7 @@ import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryProvider
 import com.swentseekr.seekr.model.hunt.HuntsRepository
 import com.swentseekr.seekr.model.hunt.IReviewImageRepository
 import com.swentseekr.seekr.model.hunt.ReviewImageRepositoryProvider
+import com.swentseekr.seekr.model.notifications.NotificationHelper
 import com.swentseekr.seekr.model.profile.ProfileRepository
 import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
 import com.swentseekr.seekr.ui.profile.Profile
@@ -28,10 +30,10 @@ import kotlinx.coroutines.launch
 
 data class ReviewHuntUIState(
     val hunt: Hunt? = null,
-    val huntId: String = "",
-    val userId: String = "",
-    val reviewText: String = "",
-    val rating: Double = 0.0,
+    val huntId: String = AddReviewScreenStrings.Empty,
+    val userId: String = AddReviewScreenStrings.Empty,
+    val reviewText: String = AddReviewScreenStrings.Empty,
+    val rating: Double = AddReviewScreenDefaults.Rating,
     val isSubmitted: Boolean = false,
     val photos: List<String> = emptyList(),
     val errorMsg: String? = null,
@@ -99,7 +101,7 @@ open class ReviewHuntViewModel(
   }
 
   /** Submits the review to the repository. */
-  private fun reviewHuntToRepository(id: String, hunt: Hunt) {
+  private fun reviewHuntToRepository(id: String, hunt: Hunt, context: Context?) {
     viewModelScope.launch {
       try {
         val createdReview =
@@ -111,6 +113,12 @@ open class ReviewHuntViewModel(
                 comment = _uiState.value.reviewText,
                 photos = _uiState.value.photos)
         repositoryReview.addReviewHunt(createdReview)
+        if (context != null) {
+          NotificationHelper.sendNotification(
+              context,
+              AddReviewScreenStrings.NEW_REVIEW_TITLE,
+              AddReviewScreenStrings.NEW_REVIEW_MESSAGE)
+        }
         _uiState.value =
             _uiState.value.copy(saveSuccessful = true, errorMsg = null, isSubmitted = true)
       } catch (e: Exception) {
@@ -174,14 +182,14 @@ open class ReviewHuntViewModel(
    * Handles the submit button click event. Validates the input and submits the review to the
    * repository.
    */
-  fun submitReviewHunt(userId: String, hunt: Hunt) {
+  fun submitReviewHunt(userId: String, hunt: Hunt, context: Context?) {
     val state = _uiState.value
     if (!state.isValid) {
       setErrorMsg(AddReviewScreenStrings.ErrorSubmisson)
       return
     }
     _uiState.value = _uiState.value.copy(isSubmitted = true)
-    reviewHuntToRepository(userId, hunt)
+    reviewHuntToRepository(userId, hunt, context)
   }
 
   /** Adds a photo to the current list of photos in the UI state. */
@@ -222,6 +230,9 @@ open class ReviewHuntViewModel(
     _uiState.value = _uiState.value.copy(rating = newRating)
   }
 
+  fun loadReviewImages(photoUrls: List<String>) {
+    _uiState.value = _uiState.value.copy(photos = photoUrls)
+  }
   /** Clears the review form if the review was submitted successfully. */
   fun clearForm() {
     if (_uiState.value.saveSuccessful) {
@@ -231,12 +242,28 @@ open class ReviewHuntViewModel(
     }
   }
 
+  /** Clears the review form and deletes any selected photos without submitting the review. */
+  fun clearFormNoSubmission() {
+    for (photo in _uiState.value.photos) {
+      viewModelScope.launch(dispatcher) {
+        try {
+          imageRepository.deleteReviewPhoto(photo)
+        } catch (e: Exception) {
+          _uiState.value =
+              _uiState.value.copy(
+                  errorMsg = "${AddReviewScreenStrings.ErrorCancleImage} ${e.message}")
+        }
+      }
+    }
+    clearFormCancel()
+  }
+
   /** Clears the review form when click on cancel */
   fun clearFormCancel() {
     _uiState.value =
         _uiState.value.copy(
-            reviewText = "",
-            rating = 0.0,
+            reviewText = AddReviewScreenStrings.Empty,
+            rating = AddReviewScreenDefaults.Rating,
             photos = emptyList(),
             isSubmitted = false,
             saveSuccessful = false,
@@ -246,8 +273,8 @@ open class ReviewHuntViewModel(
   }
 
   /** Submits the current user's review for the given hunt. */
-  fun submitCurrentUserReview(hunt: Hunt) {
+  fun submitCurrentUserReview(hunt: Hunt, context: Context?) {
     val userId = FirebaseAuth.getInstance().currentUser?.uid ?: AddReviewScreenStrings.User0
-    submitReviewHunt(userId, hunt)
+    submitReviewHunt(userId, hunt, context)
   }
 }

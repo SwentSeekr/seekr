@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun OfflineRequiredScreen(modifier: Modifier = Modifier, onOpenSettings: () -> Unit) {
@@ -34,4 +35,10 @@ fun OfflineRequiredScreen(modifier: Modifier = Modifier, onOpenSettings: () -> U
           Button(onClick = onOpenSettings) { Text(OfflineConstants.OPEN_SETTINGS_BUTTON) }
         }
   }
+}
+
+@Preview
+@Composable
+fun OfflineRequiredScreenPreview() {
+  OfflineRequiredScreen(onOpenSettings = {})
 }

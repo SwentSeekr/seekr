@@ -10,6 +10,9 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.swentseekr.seekr.ui.hunt.review.AddReviewScreen
 import com.swentseekr.seekr.ui.hunt.review.AddReviewScreenTestTags
+import com.swentseekr.seekr.ui.hunt.review.ReviewHuntUIState
+import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -21,7 +24,9 @@ class HuntCardReviewScreenTest {
 
   @Test
   fun screen_displays_all_elements() {
-    composeRule.setContent { MaterialTheme { AddReviewScreen(huntId = "hunt123") } }
+    composeRule.setContent {
+      MaterialTheme { AddReviewScreen(huntId = AddReviewTestConstantStings.TestHuntId) }
+    }
 
     composeRule.onNodeWithTag(AddReviewScreenTestTags.GO_BACK_BUTTON).assertExists()
     composeRule.onNodeWithTag(AddReviewScreenTestTags.INFO_COLUMN).assertExists()
@@ -34,15 +39,19 @@ class HuntCardReviewScreenTest {
 
   @Test
   fun typing_in_fields_updates_text() {
-    composeRule.setContent { MaterialTheme { AddReviewScreen(huntId = "hunt123") } }
+    composeRule.setContent {
+      MaterialTheme { AddReviewScreen(huntId = AddReviewTestConstantStings.TestHuntId) }
+    }
     composeRule
         .onNodeWithTag(AddReviewScreenTestTags.COMMENT_TEXT_FIELD)
-        .performTextInput("Great hunt!")
+        .performTextInput(AddReviewTestConstantStings.Comment)
   }
 
   @Test
   fun star_rating_can_be_selected() {
-    composeRule.setContent { MaterialTheme { AddReviewScreen(huntId = "hunt123") } }
+    composeRule.setContent {
+      MaterialTheme { AddReviewScreen(huntId = AddReviewTestConstantStings.TestHuntId) }
+    }
     val starTag = AddReviewScreenTestTags.starTag(3)
     composeRule.onNodeWithTag(starTag).performClick()
     composeRule.onNodeWithTag(starTag).assertExists()
@@ -57,7 +66,7 @@ class HuntCardReviewScreenTest {
     composeRule.setContent {
       MaterialTheme {
         AddReviewScreen(
-            huntId = "hunt123",
+            huntId = AddReviewTestConstantStings.TestHuntId,
             onGoBack = { backCalled = true },
             onDone = { doneCalled = true },
             onCancel = { cancelCalled = true })
@@ -70,7 +79,7 @@ class HuntCardReviewScreenTest {
     composeRule.onNodeWithTag(starTag).performClick()
     composeRule
         .onNodeWithTag(AddReviewScreenTestTags.COMMENT_TEXT_FIELD)
-        .performTextInput("Hello world")
+        .performTextInput(AddReviewTestConstantStings.TextInput)
     composeRule.onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON).performClick()
 
     assertTrue(backCalled)
@@ -80,14 +89,18 @@ class HuntCardReviewScreenTest {
 
   @Test
   fun topAppBar_displays_back_button() {
-    composeRule.setContent { MaterialTheme { AddReviewScreen(huntId = "hunt123") } }
+    composeRule.setContent {
+      MaterialTheme { AddReviewScreen(huntId = AddReviewTestConstantStings.TestHuntId) }
+    }
 
     composeRule.onNodeWithTag(AddReviewScreenTestTags.GO_BACK_BUTTON).assertExists()
   }
 
   @Test
   fun info_column_scrolls_to_bottom() {
-    composeRule.setContent { MaterialTheme { AddReviewScreen(huntId = "hunt123") } }
+    composeRule.setContent {
+      MaterialTheme { AddReviewScreen(huntId = AddReviewTestConstantStings.TestHuntId) }
+    }
 
     composeRule.onNodeWithTag(AddReviewScreenTestTags.INFO_COLUMN).assertExists()
     composeRule.onNodeWithTag(AddReviewScreenTestTags.BUTTONS_ROW).performScrollTo()
@@ -96,5 +109,32 @@ class HuntCardReviewScreenTest {
     composeRule.onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON).assertExists()
 
     composeRule.onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON).performClick()
+  }
+
+  @Test
+  fun photos_lazyRow_isDisplayed_whenPhotosExist() {
+    // Create a fake ViewModel
+    val fakeViewModel =
+        object : ReviewHuntViewModel() {
+          override val uiState =
+              MutableStateFlow(
+                  ReviewHuntUIState(
+                      photos =
+                          listOf(
+                              AddReviewTestConstantStings.Photo1,
+                              AddReviewTestConstantStings.Photo2),
+                      rating = 0.0,
+                  ))
+        }
+
+    composeRule.setContent {
+      MaterialTheme {
+        AddReviewScreen(
+            huntId = AddReviewTestConstantStings.TestHuntId, reviewViewModel = fakeViewModel)
+      }
+    }
+
+    // Assert that the LazyRow is displayed
+    composeRule.onNodeWithTag(AddReviewTestConstantStings.TestTagLazyRow).assertExists()
   }
 }

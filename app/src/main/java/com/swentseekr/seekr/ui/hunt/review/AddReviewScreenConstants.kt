@@ -17,6 +17,7 @@ object AddReviewScreenDefaults {
   val CommentFieldCornerRadius: Dp = 12.dp
   val CommentFieldWidthFraction = 0.9f
   val TitleFontSize = 24.sp
+  val CloseImageSize: Dp = 48.dp
   val SubtitleFontSize = 14.sp
   const val MaxStars = 5
   val CommentFieldHeight: Dp = 350.dp
@@ -25,9 +26,11 @@ object AddReviewScreenDefaults {
   val TopBarBackgroundColor: Color = Color.LightGray
   val CommentLineHeight = 20.sp
   const val CommentMaxLines = 15
+  const val Rating: Double = 0.0
 }
 
 object AddReviewScreenStrings {
+  const val UnknownAuthor = "Unknown Author"
   const val Title = "Add Review Hunt"
   const val BackContentDescription = "Back"
   const val RateThisHunt = "Rate this Hunt:"
@@ -44,6 +47,7 @@ object AddReviewScreenStrings {
   const val StarContentDescriptionPrefix = "Star "
   const val By = "by"
   const val ReviewViewModel = "ReviewHuntViewModel"
+  const val RemovePhotoContentDescription = "Remove photo"
 
   const val User0 = "0"
 
@@ -63,7 +67,12 @@ object AddReviewScreenStrings {
 
   const val ErrorAddingPhoto = "Failed to upload photo:"
   const val ErrorDeletingImages = "Failed to delete image:"
+  const val ErrorCancleImage = "Failed to cancel image selection."
   const val ErrorClearSubmitReview = "Cannot clear form, review not submitted successfully."
+  const val Empty = ""
+
+  const val NEW_REVIEW_TITLE = "New review added"
+  const val NEW_REVIEW_MESSAGE = "You added a new review!"
 
   fun ratingSummary(rating: Int, maxStars: Int): String = "$RatingPrefix$rating /$maxStars"
 }

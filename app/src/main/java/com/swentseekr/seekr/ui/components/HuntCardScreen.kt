@@ -46,8 +46,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -72,6 +72,8 @@ fun HuntCardScreen(
     beginHunt: () -> Unit = {},
     addReview: () -> Unit = {},
     editHunt: () -> Unit = {},
+    // goImages: () -> Unit = {}
+    navController: NavHostController
 ) {
   val uiState by huntCardViewModel.uiState.collectAsState()
 
@@ -186,8 +188,8 @@ fun HuntCardScreen(
                                         Marker(
                                             state = MarkerState(position = startPosition),
                                             title =
-                                                "${HuntCardScreenStrings.ReviewMarkerTitlePrefix} ${hunt.start.name}",
-                                            snippet = HuntCardScreenStrings.ReviewHint)
+                                                "${HuntCardScreenStrings.ReviewMarkerTitlePrefix}${hunt.start.name}",
+                                            snippet = hunt.start.name.ifBlank { null })
                                       }
                                 }
                           }
@@ -252,7 +254,15 @@ fun HuntCardScreen(
               }
             } else {
               items(reviews) { review ->
-                ReviewCard(review, reviewViewModel, huntCardViewModel, currentUserId)
+                ReviewCard(
+                    review,
+                    reviewViewModel,
+                    currentUserId,
+                    navController,
+                    onDeleteReview = { reviewId ->
+                      huntCardViewModel.deleteReview(
+                          review.huntId, reviewId, review.authorId, currentUserId)
+                    })
               }
             }
           }
@@ -291,8 +301,10 @@ fun HuntDescriptionSection(description: String, modifier: Modifier = Modifier) {
 fun ReviewCard(
     review: HuntReview,
     reviewHuntViewModel: ReviewHuntViewModel,
-    huntCardViewModel: HuntCardViewModel,
-    currentUserId: String?
+    currentUserId: String?,
+    // goImages: () -> Unit = {},
+    navController: NavHostController,
+    onDeleteReview: (String) -> Unit
 ) {
 
   val uiState by reviewHuntViewModel.uiState.collectAsState()
@@ -303,11 +315,11 @@ fun ReviewCard(
   val authorProfile = uiState.authorProfile
 
   val isCurrentId = currentUserId == authorId
-
   Card(
       modifier =
           Modifier.fillMaxWidth()
               .padding(vertical = HuntCardScreenDefaults.ReviewCardVerticalPadding)
+              .padding(horizontal = HuntCardScreenDefaults.ScreenPaddingHorizontal)
               .border(
                   HuntCardScreenDefaults.CardBorderWidth,
                   HuntCardScreenDefaults.PrimaryBorderColor,
@@ -332,8 +344,9 @@ fun ReviewCard(
         if (isCurrentId) {
           IconButton(
               onClick = {
-                huntCardViewModel.deleteReview(
-                    review.huntId, review.reviewId, review.authorId, currentUserId)
+                onDeleteReview(review.reviewId)
+                // huntCardViewModel.deleteReview(
+                //    review.huntId, review.reviewId, review.authorId, currentUserId)
               },
           ) {
             Icon(
@@ -353,6 +366,18 @@ fun ReviewCard(
       }
 
       Text(review.comment)
+      Text(review.photos.size.toString())
+
+      if (review.photos.isNotEmpty()) {
+        Button(
+            onClick = {
+              reviewHuntViewModel.loadReviewImages(review.photos)
+              navController.navigate("reviewImages")
+            },
+            modifier = Modifier.align(Alignment.End).testTag("SEE_PICTURES_BUTTON")) {
+              Text("See Pictures")
+            }
+      }
     }
   }
 }
@@ -434,12 +459,4 @@ fun HuntHeaderSection(
           }
         }
       }
-}
-
-@Preview
-@Composable
-fun HuntCardScreenPreview() {
-  HuntCardScreen(
-      huntId = "hunt123",
-  )
 }

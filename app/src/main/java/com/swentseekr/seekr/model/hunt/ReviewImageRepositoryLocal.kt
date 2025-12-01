@@ -5,7 +5,7 @@ open class ReviewImageRepositoryLocal : IReviewImageRepository {
 
   override suspend fun uploadReviewPhoto(userId: String, uri: android.net.Uri): String {
     // In a local repository, we can simulate the upload by returning a fake URL.
-    return "local://review_image/${userId}_${id++}"
+    return "${ReviewImageRepositoryConstants.PATH_LOCALE}${userId}_${id++}"
   }
 
   override suspend fun deleteReviewPhoto(url: String) {

@@ -15,6 +15,7 @@ object HuntCardScreenConstantStrings {
   const val OtherImageUrl3WithDots = "https://example.com/example3.jpg"
   const val SingleImageUrl = "https://example.com/example1.jpg"
   const val FullscreenImageUrl = "https://example.com/example.jpg"
+  const val NoReviews = "No reviews yet."
 }
 
 object HuntCardScreenConstantNumbers {

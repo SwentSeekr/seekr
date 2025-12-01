@@ -1,10 +1,13 @@
-package com.swentseekr.seekr.ui.profile
+package com.swentseekr.seekr.model.profile
 
 import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.swentseekr.seekr.model.author.Author
-import com.swentseekr.seekr.model.profile.ProfileRepository
+import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants
+import com.swentseekr.seekr.ui.profile.EditProfileStrings.EMPTY_STRING
+import com.swentseekr.seekr.ui.profile.EditProfileViewModel
+import com.swentseekr.seekr.ui.profile.Profile
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -325,13 +328,18 @@ class EditProfileViewModelTest {
                 dummy_profile.author.copy(
                     profilePicture = 5, profilePictureUrl = "https://example.com/pic.jpg"))
     loadProfile(profileWithPicture)
+    coEvery { repository.deleteCurrentProfilePicture(TEST_USER_ID, any()) } returns Unit
+    coEvery { repository.updateProfile(any()) } returns Unit
     viewModel.removeProfilePicture()
+    testDispatcher.scheduler.advanceUntilIdle()
     val state = getState()
     assertEquals(0, state.profilePicture)
     assertEquals("", state.profilePictureUrl)
     assertNull(state.profilePictureUri)
     assertTrue(state.hasChanges)
     assertTrue(state.canSave)
+    coVerify { repository.deleteCurrentProfilePicture(TEST_USER_ID, "https://example.com/pic.jpg") }
+    coVerify { repository.updateProfile(match { it.author.profilePicture == 0 }) }
   }
 
   @Test
@@ -404,10 +412,13 @@ class EditProfileViewModelTest {
   fun saveProfile_emptyUrlAndPicture_clearsProfilePicture() = runTest {
     loadProfile()
     coEvery { repository.updateProfile(any()) } returns Unit
+    coEvery { repository.deleteCurrentProfilePicture(TEST_USER_ID, OLD_URL) } returns Unit
     viewModel.removeProfilePicture()
     updatePseudonym(NEW_PSEUDONYM)
     saveProfile()
+    testDispatcher.scheduler.advanceUntilIdle()
     coVerify { repository.updateProfile(match { it.author.profilePictureUrl == "" }) }
+    coVerify { repository.deleteCurrentProfilePicture(TEST_USER_ID, OLD_URL) }
   }
 
   @Test
@@ -415,11 +426,13 @@ class EditProfileViewModelTest {
     val testUri = mockk<Uri>()
     loadProfile()
     coEvery { repository.uploadProfilePicture(TEST_USER_ID, testUri) } returns NEW_URL
+    coEvery { repository.deleteCurrentProfilePicture(TEST_USER_ID, OLD_URL) } returns Unit
     coEvery { repository.updateProfile(any()) } returns Unit
     updateProfilePictureUri(testUri)
     saveProfile()
 
     coVerify { repository.updateProfile(match { it.author.profilePictureUrl == NEW_URL }) }
+    coVerify { repository.deleteCurrentProfilePicture(TEST_USER_ID, OLD_URL) }
   }
 
   @Test
@@ -431,5 +444,50 @@ class EditProfileViewModelTest {
     updateProfilePictureUri(uri2)
     val state = getState()
     assertEquals(uri2, state.profilePictureUri)
+  }
+
+  @Test
+  fun deleteCurrentProfilePicture_withValidUrl_callsStorageDelete() = runTest {
+    val testUrl = "https://firebasestorage.googleapis.com/v0/b/testbucket/o/user123.jpg"
+
+    coEvery { repository.deleteCurrentProfilePicture(TEST_USER_ID, testUrl) } returns Unit
+
+    repository.deleteCurrentProfilePicture(TEST_USER_ID, testUrl)
+
+    coVerify(exactly = 1) { repository.deleteCurrentProfilePicture(TEST_USER_ID, testUrl) }
+  }
+
+  @Test
+  fun deleteCurrentProfilePicture_withEmptyUrl_doesNothing() = runTest {
+    val emptyUrl = EMPTY_STRING
+
+    coEvery { repository.deleteCurrentProfilePicture(TEST_USER_ID, emptyUrl) } returns Unit
+
+    repository.deleteCurrentProfilePicture(TEST_USER_ID, emptyUrl)
+
+    coVerify(exactly = 1) { repository.deleteCurrentProfilePicture(TEST_USER_ID, emptyUrl) }
+  }
+
+  @Test
+  fun removeProfilePicture_callsDeleteAndUpdatesState() = runTest {
+    val profileWithUrl =
+        dummy_profile.copy(author = dummy_profile.author.copy(profilePictureUrl = OLD_URL))
+    loadProfile(profileWithUrl)
+
+    coEvery { repository.deleteCurrentProfilePicture(TEST_USER_ID, OLD_URL) } returns Unit
+    coEvery { repository.updateProfile(any()) } returns Unit
+
+    viewModel.removeProfilePicture()
+    testDispatcher.scheduler.advanceUntilIdle()
+
+    val state = getState()
+    assertEquals(EditProfileNumberConstants.PROFILE_PIC_DEFAULT, state.profilePicture)
+    assertEquals(EMPTY_STRING, state.profilePictureUrl)
+    assertNull(state.profilePictureUri)
+    assertTrue(state.hasChanges)
+    assertTrue(state.canSave)
+
+    coVerify { repository.deleteCurrentProfilePicture(TEST_USER_ID, OLD_URL) }
+    coVerify { repository.updateProfile(any()) }
   }
 }
