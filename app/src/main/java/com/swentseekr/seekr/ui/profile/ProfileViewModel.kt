@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryProvider
 import com.swentseekr.seekr.model.profile.ProfileRepository
 import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
@@ -51,6 +52,9 @@ class ProfileViewModel(
 
   private val _totalReviews = MutableStateFlow(0)
   val totalReviews: StateFlow<Int> = _totalReviews.asStateFlow()
+
+    private val _reviewsState = MutableStateFlow<List<HuntReview>>(emptyList())
+    val reviewsState: StateFlow<List<HuntReview>> = _reviewsState.asStateFlow()
 
   private fun updateUiState(transform: (ProfileUIState) -> ProfileUIState) {
     _uiState.value = transform(_uiState.value)
@@ -205,4 +209,24 @@ class ProfileViewModel(
         doneHunts = profile.doneHunts,
         likedHunts = profile.likedHunts)
   }
+    fun loadAllReviewsForProfile(profile: Profile) {
+        viewModelScope.launch {
+            val allReviews = profile.myHunts.flatMap { hunt ->
+                try {
+                    HuntReviewRepositoryProvider.repository.getHuntReviews(hunt.uid)
+                } catch (_: Exception) { emptyList() }
+            }
+            _reviewsState.value = allReviews
+            _totalReviews.value = allReviews.size
+
+            val newReviewRate = if (allReviews.isEmpty()) 0.0 else allReviews.map { it.rating }.average()
+
+            _uiState.value = _uiState.value.copy(
+                profile = _uiState.value.profile?.copy(
+                    author = _uiState.value.profile!!.author.copy(reviewRate = newReviewRate)
+                )
+            )
+        }
+    }
+
 }

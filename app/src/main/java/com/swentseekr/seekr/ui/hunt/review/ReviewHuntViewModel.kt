@@ -277,4 +277,14 @@ open class ReviewHuntViewModel(
     val userId = FirebaseAuth.getInstance().currentUser?.uid ?: AddReviewScreenStrings.User0
     submitReviewHunt(userId, hunt, context)
   }
+
+    fun loadReview(reviewId: String) = viewModelScope.launch {
+        try {
+            val review = repositoryReview.getReviewHunt(reviewId)
+            _uiState.update { it.copy(photos = review.photos) }
+        } catch (e: Exception) {
+            Log.e("ReviewHuntViewModel", "Failed to load review $reviewId", e)
+        }
+    }
+
 }
