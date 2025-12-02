@@ -1,6 +1,5 @@
 package com.swentseekr.seekr.ui.map
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -16,7 +15,6 @@ fun PermissionRequestPopup(onRequestPermission: () -> Unit) {
   Box(
       modifier =
           Modifier.fillMaxSize()
-              .background(MapScreenDefaults.OverlayScrimColor)
               .padding(MapScreenDefaults.OverlayPadding)
               .testTag(MapScreenTestTags.PERMISSION_POPUP),
       contentAlignment = Alignment.Center) {
