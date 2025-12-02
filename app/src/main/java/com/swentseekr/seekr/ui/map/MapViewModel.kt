@@ -5,16 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
-import com.google.maps.android.PolyUtil
 import com.swentseekr.seekr.BuildConfig
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
 import com.swentseekr.seekr.model.hunt.HuntsRepository
 import com.swentseekr.seekr.model.map.Location
-import java.net.HttpURLConnection
-import java.net.URL
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,8 +17,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
-import org.json.JSONObject
 
 data class MapUIState(
     val target: LatLng = LatLng(MapConfig.DefaultLat, MapConfig.DefaultLng),
@@ -35,7 +28,8 @@ data class MapUIState(
     val isRouteLoading: Boolean = false,
     val isHuntStarted: Boolean = false,
     val validatedCount: Int = MapConfig.DefaultValidatedCount,
-    val validationRadiusMeters: Int = MapConfig.ValidationRadiusMeters
+    val validationRadiusMeters: Int = MapConfig.ValidationRadiusMeters,
+    val currentDistanceToNextMeters: Int? = null
 )
 
 class MapViewModel(
@@ -55,12 +49,12 @@ class MapViewModel(
     }
   }
 
-  private fun setErrorMsg(errorMsg: String) {
+  private fun setErrorMsg(errorMsg: String?) {
     _uiState.value = _uiState.value.copy(errorMsg = errorMsg)
   }
 
   fun clearErrorMsg() {
-    _uiState.value = _uiState.value.copy(errorMsg = null)
+    setErrorMsg(null)
   }
 
   fun refreshUIState() {
@@ -83,7 +77,8 @@ class MapViewModel(
             selectedHunt = null,
             route = emptyList(),
             isHuntStarted = false,
-            validatedCount = MapConfig.DefaultValidatedCount)
+            validatedCount = MapConfig.DefaultValidatedCount,
+            currentDistanceToNextMeters = null)
   }
 
   private fun fetchHunts() {
@@ -93,6 +88,7 @@ class MapViewModel(
         val targetLocation =
             hunts.firstOrNull()?.start
                 ?: Location(MapConfig.DefaultLat, MapConfig.DefaultLng, MapConfig.DefaultCityName)
+
         _uiState.value = MapUIState(target = targetLocation.toLatLng(), hunts = hunts)
       } catch (e: Exception) {
         setErrorMsg(MapScreenStrings.ErrorLoadHuntsPrefix + (e.message ?: ""))
@@ -115,9 +111,11 @@ class MapViewModel(
                 destLat = hunt.end.latitude,
                 destLng = hunt.end.longitude,
                 waypoints = hunt.middlePoints.map { it.latitude to it.longitude },
-                travelMode = travelMode)
+                travelMode = travelMode,
+                apiKey = BuildConfig.MAPS_API_KEY)
           }
-      setErrorMsg("")
+
+      clearErrorMsg()
       _uiState.value = _uiState.value.copy(route = points, isRouteLoading = false)
     } catch (e: Exception) {
       setErrorMsg(MapScreenStrings.ErrorRoutePrefix + (e.message ?: ""))
@@ -125,116 +123,15 @@ class MapViewModel(
     }
   }
 
-  private fun requestDirectionsPolyline(
-      originLat: Double,
-      originLng: Double,
-      destLat: Double,
-      destLng: Double,
-      waypoints: List<Pair<Double, Double>>,
-      travelMode: String
-  ): List<LatLng> {
-    val url = buildDirectionsUrl(originLat, originLng, destLat, destLng, waypoints, travelMode)
-    val conn = openDirectionsConnection(url)
+  fun updateCurrentDistanceToNext(currentLocation: LatLng) {
+    val state = _uiState.value
+    val hunt = state.selectedHunt ?: return
 
-    return conn.inputStream.use { stream ->
-      val body = stream.bufferedReader().readText()
-      val json = JSONObject(body)
-      parseDirectionsResponse(json)
-    }
-  }
+    val distance =
+        computeDistanceToNextPoint(
+            hunt = hunt, validatedCount = state.validatedCount, currentLocation = currentLocation)
 
-  private fun buildDirectionsUrl(
-      originLat: Double,
-      originLng: Double,
-      destLat: Double,
-      destLng: Double,
-      waypoints: List<Pair<Double, Double>>,
-      travelMode: String
-  ): URL {
-    val origin = "$originLat,$originLng"
-    val destination = "$destLat,$destLng"
-
-    val waypointParam =
-        if (waypoints.isNotEmpty()) {
-          waypoints.joinToString(separator = "|") { (lat, lng) -> "via:$lat,$lng" }
-        } else {
-          null
-        }
-
-    val base = MapConfig.DirectionsBaseUrl
-    val params =
-        buildList {
-              add("origin=" + URLEncoder.encode(origin, StandardCharsets.UTF_8.name()))
-              add("destination=" + URLEncoder.encode(destination, StandardCharsets.UTF_8.name()))
-              add("mode=" + URLEncoder.encode(travelMode, StandardCharsets.UTF_8.name()))
-              waypointParam?.let {
-                add("waypoints=" + URLEncoder.encode(it, StandardCharsets.UTF_8.name()))
-              }
-              add(
-                  "key=" +
-                      URLEncoder.encode(BuildConfig.MAPS_API_KEY, StandardCharsets.UTF_8.name()))
-            }
-            .joinToString("&")
-
-    return URL("$base?$params")
-  }
-
-  private fun openDirectionsConnection(url: URL): HttpURLConnection =
-      (url.openConnection() as HttpURLConnection).apply {
-        requestMethod = "GET"
-        connectTimeout = MapConfig.DirectionsConnectTimeoutMs
-        readTimeout = MapConfig.DirectionsReadTimeoutMs
-        doInput = true
-      }
-
-  private fun parseDirectionsResponse(json: JSONObject): List<LatLng> {
-    ensureStatusOk(json)
-
-    val routes = json.getJSONArray("routes")
-    if (routes.length() == 0) return emptyList()
-
-    val firstRoute = routes.getJSONObject(0)
-    val legs = firstRoute.getJSONArray("legs")
-
-    val fullPath = buildFullPath(legs)
-    if (fullPath.isNotEmpty()) return fullPath
-
-    val overview = firstRoute.getJSONObject("overview_polyline").getString("points")
-    return PolyUtil.decode(overview)
-  }
-
-  private fun ensureStatusOk(json: JSONObject) {
-    val status = json.optString("status")
-    if (status != "OK") {
-      val message = json.optString("error_message", status)
-      throw IllegalStateException("Directions API error: $message")
-    }
-  }
-
-  private fun buildFullPath(legs: JSONArray): List<LatLng> {
-    val fullPath = mutableListOf<LatLng>()
-
-    for (i in 0 until legs.length()) {
-      val leg = legs.getJSONObject(i)
-      val steps = leg.getJSONArray("steps")
-      appendStepsToPath(steps, fullPath)
-    }
-
-    return fullPath
-  }
-
-  private fun appendStepsToPath(steps: JSONArray, fullPath: MutableList<LatLng>) {
-    for (j in 0 until steps.length()) {
-      val step = steps.getJSONObject(j)
-      val poly = step.getJSONObject("polyline").getString("points")
-      val stepPoints = PolyUtil.decode(poly).toList() // immutable as per earlier Sonar hint
-
-      if (fullPath.isNotEmpty()) {
-        fullPath.addAll(stepPoints.drop(1))
-      } else {
-        fullPath.addAll(stepPoints)
-      }
-    }
+    _uiState.value = state.copy(currentDistanceToNextMeters = distance)
   }
 
   fun startHunt() {
@@ -244,7 +141,9 @@ class MapViewModel(
             isFocused = true,
             route = emptyList(),
             isHuntStarted = true,
-            validatedCount = MapConfig.DefaultValidatedCount)
+            validatedCount = MapConfig.DefaultValidatedCount,
+            currentDistanceToNextMeters = null)
+
     viewModelScope.launch { computeRouteForSelectedHunt(travelMode = MapConfig.TravelModeWalking) }
   }
 
@@ -253,32 +152,76 @@ class MapViewModel(
     val hunt = state.selectedHunt ?: return
     if (!state.isHuntStarted) return
 
-    val ordered = buildList {
-      add(LatLng(hunt.start.latitude, hunt.start.longitude))
-      hunt.middlePoints.forEach { add(LatLng(it.latitude, it.longitude)) }
-      add(LatLng(hunt.end.latitude, hunt.end.longitude))
-    }
+    val nextPoint = nextPointFor(hunt, state.validatedCount) ?: return
 
-    val nextIdx = state.validatedCount
-    if (nextIdx >= ordered.size) return
-
-    val nextPoint = ordered[nextIdx]
-    val within =
+    val distanceMetersDouble: Double =
         try {
-          com.google.maps.android.SphericalUtil.computeDistanceBetween(
-              currentLocation, nextPoint) <= state.validationRadiusMeters
-        } catch (e: Exception) {
-          false
+          computeDistanceMetersRaw(currentLocation, nextPoint)
+        } catch (_: Exception) {
+          return
         }
 
-    if (within) _uiState.value = state.copy(validatedCount = state.validatedCount + 1)
+    val distanceInt = distanceMetersDouble.toInt()
+    val within = distanceMetersDouble <= state.validationRadiusMeters
+
+    if (within) {
+      val newValidated = state.validatedCount + 1
+      val newDistance =
+          computeDistanceToNextPoint(
+              hunt = hunt, validatedCount = newValidated, currentLocation = currentLocation)
+
+      _uiState.value =
+          state.copy(
+              validatedCount = newValidated,
+              currentDistanceToNextMeters = newDistance,
+              errorMsg = null)
+    } else {
+      _uiState.value =
+          state.copy(
+              currentDistanceToNextMeters = distanceInt,
+              errorMsg =
+                  MapScreenStrings.ErrorTooFarPrefix +
+                      MapConfig.ValidationRadiusMeters +
+                      MapScreenStrings.DistanceMetersSuffix)
+    }
+  }
+
+  fun routeFromCurrentToNext(currentLocation: LatLng) {
+    val state = _uiState.value
+    val hunt = state.selectedHunt ?: return
+
+    val nextPoint = nextPointFor(hunt, state.validatedCount) ?: return
+
+    _uiState.value = state.copy(isRouteLoading = true)
+
+    viewModelScope.launch {
+      try {
+        val points =
+            withContext(ioDispatcher) {
+              requestDirectionsPolyline(
+                  originLat = currentLocation.latitude,
+                  originLng = currentLocation.longitude,
+                  destLat = nextPoint.latitude,
+                  destLng = nextPoint.longitude,
+                  waypoints = emptyList(),
+                  travelMode = MapConfig.TravelModeWalking,
+                  apiKey = BuildConfig.MAPS_API_KEY)
+            }
+
+        _uiState.value =
+            _uiState.value.copy(route = points, isRouteLoading = false, errorMsg = null)
+      } catch (e: Exception) {
+        setErrorMsg(MapScreenStrings.ErrorRoutePrefix + (e.message ?: ""))
+        _uiState.value = _uiState.value.copy(isRouteLoading = false, route = emptyList())
+      }
+    }
   }
 
   fun finishHunt(onPersist: suspend (Hunt) -> Unit = {}) {
     val state = _uiState.value
     val hunt = state.selectedHunt ?: return
-    val total = 2 + hunt.middlePoints.size
-    if (state.validatedCount < total) {
+
+    if (!isHuntFullyValidated(hunt, state.validatedCount)) {
       setErrorMsg(MapScreenStrings.ErrorIncompleteHunt)
       return
     }
@@ -292,7 +235,8 @@ class MapViewModel(
                 validatedCount = MapConfig.DefaultValidatedCount,
                 isFocused = false,
                 selectedHunt = null,
-                route = emptyList())
+                route = emptyList(),
+                currentDistanceToNextMeters = null)
       } catch (e: Exception) {
         setErrorMsg(MapScreenStrings.ErrorFinishHuntPrefix + (e.message ?: ""))
       }
