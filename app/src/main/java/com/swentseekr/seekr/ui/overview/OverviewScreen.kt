@@ -34,7 +34,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -58,90 +57,78 @@ fun OverviewScreen(
     onHuntClick: (String) -> Unit = {},
 ) {
 
-    val uiState by overviewViewModel.uiState.collectAsState()
-    val query = overviewViewModel.searchQuery
-    val hunts = uiState.hunts
+  val uiState by overviewViewModel.uiState.collectAsState()
+  val query = overviewViewModel.searchQuery
+  val hunts = uiState.hunts
 
-    LaunchedEffect(Unit) { overviewViewModel.refreshUIState() }
+  LaunchedEffect(Unit) { overviewViewModel.refreshUIState() }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color(0xFFF8F9FA))
+  Box(modifier = modifier.fillMaxSize().background(Color(0xFFF8F9FA))) {
+    Column(
+        modifier = Modifier.fillMaxWidth().testTag(OverviewScreenTestTags.OVERVIEW_SCREEN),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(OverviewScreenTestTags.OVERVIEW_SCREEN),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            // MODERN HEADER WITH TITLE
-            ModernHeader()
+      // MODERN HEADER WITH TITLE
+      ModernHeader()
 
-            // MODERN SEARCH BAR
-            ModernSearchBar(
-                query = query,
-                onQueryChange = { overviewViewModel.onSearchChange(it) },
-                onSearch = { overviewViewModel.onSearchChange(it) },
-                onActiveChange = onActiveBar,
-                onClear = { overviewViewModel.onClearSearch() },
-                modifier = modifier
-            )
+      // MODERN SEARCH BAR
+      ModernSearchBar(
+          query = query,
+          onQueryChange = { overviewViewModel.onSearchChange(it) },
+          onSearch = { overviewViewModel.onSearchChange(it) },
+          onActiveChange = onActiveBar,
+          onClear = { overviewViewModel.onClearSearch() },
+          modifier = modifier)
 
-            // MODERN FILTER BAR
-            ModernFilterBar(
-                selectedStatus = uiState.selectedStatus,
-                selectedDifficulty = uiState.selectedDifficulty,
-                onStatusSelected = { overviewViewModel.onStatusFilterSelect(it) },
-                onDifficultySelected = { overviewViewModel.onDifficultyFilterSelect(it) }
-            )
+      // MODERN FILTER BAR
+      ModernFilterBar(
+          selectedStatus = uiState.selectedStatus,
+          selectedDifficulty = uiState.selectedDifficulty,
+          onStatusSelected = { overviewViewModel.onStatusFilterSelect(it) },
+          onDifficultySelected = { overviewViewModel.onDifficultyFilterSelect(it) })
 
-            // HUNTS LIST
-            LazyColumn(
-                modifier = modifier
-                    .testTag(OverviewScreenTestTags.HUNT_LIST)
-                    .fillMaxWidth(),
-                contentPadding = PaddingValues(bottom = 16.dp)
-            ) {
-                items(hunts.size) { index ->
-                    val hunt = hunts[index]
-                    HuntCard(
-                        hunt.hunt,
-                        modifier = modifier
-                            .testTag(
-                                if (index == (hunts.size - 1)) OverviewScreenTestTags.LAST_HUNT_CARD
-                                else OverviewScreenTestTags.HUNT_CARD
-                            )
-                            .clickable { onHuntClick(hunt.hunt.uid) },
-                    )
-                    Spacer(modifier = Modifier.height(OverviewScreenDefaults.ListItemSpacing))
-                }
+      // HUNTS LIST
+      LazyColumn(
+          modifier = modifier.testTag(OverviewScreenTestTags.HUNT_LIST).fillMaxWidth(),
+          contentPadding = PaddingValues(bottom = 16.dp),
+          horizontalAlignment = Alignment.CenterHorizontally) {
+            items(hunts.size) { index ->
+              val hunt = hunts[index]
+
+              HuntCard(
+                  hunt.hunt,
+                  modifier =
+                      modifier
+                          .testTag(
+                              if (index == hunts.size - 1) OverviewScreenTestTags.LAST_HUNT_CARD
+                              else OverviewScreenTestTags.HUNT_CARD)
+                          .clickable { onHuntClick(hunt.hunt.uid) })
+
+              Spacer(modifier = Modifier.height(OverviewScreenDefaults.ListItemSpacing))
             }
-        }
+          }
     }
+  }
 }
 
 @Composable
 fun ModernHeader() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-            .padding(horizontal = 20.dp, vertical = 16.dp)
-    ) {
+  Column(
+      modifier =
+          Modifier.fillMaxWidth()
+              .background(Color.White)
+              .padding(horizontal = 20.dp, vertical = 16.dp)) {
         Text(
             text = "Discover",
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF1A1A1A)
-        )
+            color = Color(0xFF1A1A1A))
         Text(
             text = "Find your next adventure",
             fontSize = 16.sp,
             color = Color(0xFF666666),
-            modifier = Modifier.padding(top = 4.dp)
-        )
-    }
+            modifier = Modifier.padding(top = 4.dp))
+      }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -154,50 +141,41 @@ fun ModernSearchBar(
     onClear: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    SearchBar(
-        query = query,
-        onQueryChange = onQueryChange,
-        onSearch = onSearch,
-        active = true,
-        onActiveChange = onActiveChange,
-        placeholder = {
-            Text(
-                OverviewScreenStrings.SearchPlaceholder,
-                color = Color(0xFF999999)
-            )
-        },
-        leadingIcon = {
-            if (query.isEmpty()) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = OverviewScreenStrings.SearchIconDescription,
-                    tint = Color(0xFF666666)
-                )
-            } else null
-        },
-        trailingIcon = {
-            if (query.isNotEmpty()) {
-                Icon(
-                    imageVector = Icons.Default.Clear,
-                    contentDescription = OverviewScreenStrings.ClearIconDescription,
-                    tint = Color(0xFF666666),
-                    modifier = Modifier.clickable { onClear() }
-                )
-            } else null
-        },
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 12.dp)
-            .height(56.dp)
-            .testTag(OverviewScreenTestTags.SEARCH_BAR),
-        shape = RoundedCornerShape(16.dp),
-        colors = SearchBarDefaults.colors(
-            containerColor = Color.White,
-            dividerColor = Color.Transparent
-        ),
-        shadowElevation = 4.dp,
-        content = {}
-    )
+  SearchBar(
+      query = query,
+      onQueryChange = onQueryChange,
+      onSearch = onSearch,
+      active = true,
+      onActiveChange = onActiveChange,
+      placeholder = { Text(OverviewScreenStrings.SearchPlaceholder, color = Color(0xFF999999)) },
+      leadingIcon = {
+        if (query.isEmpty()) {
+          Icon(
+              imageVector = Icons.Default.Search,
+              contentDescription = OverviewScreenStrings.SearchIconDescription,
+              tint = Color(0xFF666666))
+        } else null
+      },
+      trailingIcon = {
+        if (query.isNotEmpty()) {
+          Icon(
+              imageVector = Icons.Default.Clear,
+              contentDescription = OverviewScreenStrings.ClearIconDescription,
+              tint = Color(0xFF666666),
+              modifier = Modifier.clickable { onClear() })
+        } else null
+      },
+      modifier =
+          modifier
+              .fillMaxWidth()
+              .padding(horizontal = 20.dp, vertical = 12.dp)
+              .height(70.dp)
+              .testTag(OverviewScreenTestTags.SEARCH_BAR),
+      shape = RoundedCornerShape(16.dp),
+      colors =
+          SearchBarDefaults.colors(containerColor = Color.White, dividerColor = Color.Transparent),
+      shadowElevation = 4.dp,
+      content = {})
 }
 
 @Composable
@@ -208,63 +186,54 @@ fun ModernFilterBar(
     onDifficultySelected: (Difficulty?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-            .padding(vertical = 12.dp),
-        horizontalAlignment = Alignment.Start,
-    ) {
-        // SECTION TITLE
-        Text(
-            text = "Filter by",
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = Color(0xFF666666),
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
-        )
+  Column(
+      modifier = Modifier.fillMaxWidth().background(Color.White).padding(vertical = 12.dp),
+      horizontalAlignment = Alignment.Start,
+  ) {
+    // SECTION TITLE
+    Text(
+        text = "Filter by",
+        fontSize = 14.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = Color(0xFF666666),
+        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
 
-        val huntStatuses = remember { HuntStatus.values() }
-        val difficulties = remember { Difficulty.values() }
+    val huntStatuses = remember { HuntStatus.values() }
+    val difficulties = remember { Difficulty.values() }
 
-        LazyRow(
-            modifier = modifier
-                .fillMaxWidth()
-                .testTag(OverviewScreenTestTags.FILTER_BAR),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(horizontal = 20.dp)
-        ) {
-            // STATUS FILTERS
-            items(huntStatuses.size) { index ->
-                val status = huntStatuses[index]
-                ModernFilterChip(
-                    text = status.name,
-                    isSelected = (selectedStatus == status),
-                    color = getStatusColor(status),
-                    modifier = Modifier.testTag("${OverviewScreenTestTags.FILTER_BUTTON}_$index")
-                ) {
-                    onStatusSelected(status)
+    LazyRow(
+        modifier = modifier.fillMaxWidth().testTag(OverviewScreenTestTags.FILTER_BAR),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = 20.dp)) {
+          // STATUS FILTERS
+          items(huntStatuses.size) { index ->
+            val status = huntStatuses[index]
+            ModernFilterChip(
+                text = status.name,
+                isSelected = (selectedStatus == status),
+                color = getStatusColor(status),
+                modifier = Modifier.testTag("${OverviewScreenTestTags.FILTER_BUTTON}_$index")) {
+                  onStatusSelected(status)
                 }
-            }
+          }
 
-            // DIFFICULTY FILTERS
-            items(difficulties.size) { index ->
-                val difficulty = difficulties[index]
-                ModernFilterChip(
-                    text = difficulty.name,
-                    isSelected = (selectedDifficulty == difficulty),
-                    color = getDifficultyColor(difficulty),
-                    modifier = Modifier.testTag(
-                        "${OverviewScreenTestTags.FILTER_BUTTON}_${index + OverviewScreenDefaults.DifficultyFilterOffset}"
-                    )
-                ) {
-                    onDifficultySelected(difficulty)
+          // DIFFICULTY FILTERS
+          items(difficulties.size) { index ->
+            val difficulty = difficulties[index]
+            ModernFilterChip(
+                text = difficulty.name,
+                isSelected = (selectedDifficulty == difficulty),
+                color = getDifficultyColor(difficulty),
+                modifier =
+                    Modifier.testTag(
+                        "${OverviewScreenTestTags.FILTER_BUTTON}_${index + OverviewScreenDefaults.DifficultyFilterOffset}")) {
+                  onDifficultySelected(difficulty)
                 }
-            }
+          }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-    }
+    Spacer(modifier = Modifier.height(8.dp))
+  }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -276,56 +245,55 @@ fun ModernFilterChip(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    FilterChip(
-        selected = isSelected,
-        onClick = onClick,
-        label = {
-            Text(
-                text = text,
-                fontSize = 13.sp,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-            )
-        },
-        modifier = modifier,
-        colors = FilterChipDefaults.filterChipColors(
-            containerColor = Color.White,
-            selectedContainerColor = color.copy(alpha = 0.2f),
-            labelColor = Color(0xFF666666),
-            selectedLabelColor = color
-        ),
-        border = FilterChipDefaults.filterChipBorder(
-            borderColor = if (isSelected) color else Color(0xFFE0E0E0),
-            selectedBorderColor = color,
-            borderWidth = if (isSelected) 2.dp else 1.dp,
-            enabled = true,
-            selected = true
-        ),
-        shape = RoundedCornerShape(12.dp),
-    )
+  FilterChip(
+      selected = isSelected,
+      onClick = onClick,
+      label = {
+        Text(
+            text = text,
+            fontSize = 13.sp,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium)
+      },
+      modifier = modifier,
+      colors =
+          FilterChipDefaults.filterChipColors(
+              containerColor = Color.White,
+              selectedContainerColor = color.copy(alpha = 0.2f),
+              labelColor = Color(0xFF666666),
+              selectedLabelColor = color),
+      border =
+          FilterChipDefaults.filterChipBorder(
+              borderColor = if (isSelected) color else Color(0xFFE0E0E0),
+              selectedBorderColor = color,
+              borderWidth = if (isSelected) 2.dp else 1.dp,
+              enabled = true,
+              selected = true),
+      shape = RoundedCornerShape(12.dp),
+  )
 }
 
 // Helper function for status colors
 fun getStatusColor(status: HuntStatus): Color {
-    return when (status) {
-        HuntStatus.FUN -> Color(0xFF9C27B0)      // Purple
-        HuntStatus.DISCOVER -> Color(0xFF2196F3)  // Blue
-        HuntStatus.SPORT -> Color(0xFFFF5722)    // Orange-red
-    }
+  return when (status) {
+    HuntStatus.FUN -> Color(0xFF9C27B0) // Purple
+    HuntStatus.DISCOVER -> Color(0xFF2196F3) // Blue
+    HuntStatus.SPORT -> Color(0xFFFF5722) // Orange-red
+  }
 }
 
 // Helper function for difficulty colors
 fun getDifficultyColor(difficulty: Difficulty): Color {
-    return when (difficulty) {
-        Difficulty.EASY -> Color(0xFF4CAF50)     // Green
-        Difficulty.INTERMEDIATE -> Color(0xFFFFA726)   // Orange
-        Difficulty.DIFFICULT -> Color(0xFFEF5350) // Red
-    }
+  return when (difficulty) {
+    Difficulty.EASY -> Color(0xFF4CAF50) // Green
+    Difficulty.INTERMEDIATE -> Color(0xFFFFA726) // Orange
+    Difficulty.DIFFICULT -> Color(0xFFEF5350) // Red
+  }
 }
 
 @Preview
 @Composable
 fun OverviewScreenPreview() {
-    OverviewScreen()
+  OverviewScreen()
 }
 
 // Keep the old FilterButton for compatibility if needed
@@ -336,14 +304,14 @@ fun FilterButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    Button(
-        onClick = onClick,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.onSecondary
-        ),
-        modifier = modifier.padding(OverviewScreenDefaults.FilterItemPadding)
-    ) {
+  Button(
+      onClick = onClick,
+      colors =
+          ButtonDefaults.buttonColors(
+              containerColor =
+                  if (isSelected) MaterialTheme.colorScheme.primary
+                  else MaterialTheme.colorScheme.onSecondary),
+      modifier = modifier.padding(OverviewScreenDefaults.FilterItemPadding)) {
         Text(text)
-    }
+      }
 }
