@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.map
 
+import androidx.annotation.VisibleForTesting
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.PolyUtil
 import com.google.maps.android.SphericalUtil
@@ -103,13 +104,17 @@ private fun buildDirectionsUrl(
   return URL("${MapConfig.DirectionsBaseUrl}?$params")
 }
 
-private fun openDirectionsConnection(url: URL): HttpURLConnection =
-    (url.openConnection() as HttpURLConnection).apply {
-      requestMethod = HttpConstants.REQUEST_METHOD_GET
-      connectTimeout = MapConfig.DirectionsConnectTimeoutMs
-      readTimeout = MapConfig.DirectionsReadTimeoutMs
-      doInput = true
-    }
+@VisibleForTesting
+var directionsConnectionFactory: (URL) -> HttpURLConnection = { url ->
+  (url.openConnection() as HttpURLConnection).apply {
+    requestMethod = HttpConstants.REQUEST_METHOD_GET
+    connectTimeout = MapConfig.DirectionsConnectTimeoutMs
+    readTimeout = MapConfig.DirectionsReadTimeoutMs
+    doInput = true
+  }
+}
+
+private fun openDirectionsConnection(url: URL): HttpURLConnection = directionsConnectionFactory(url)
 
 private fun parseDirectionsResponse(json: JSONObject): List<LatLng> {
   ensureStatusOk(json)
