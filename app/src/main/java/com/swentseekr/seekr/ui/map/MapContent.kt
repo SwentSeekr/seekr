@@ -7,7 +7,6 @@ import android.graphics.drawable.Drawable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.toArgb
@@ -75,7 +74,6 @@ private fun OverviewMarkers(hunts: List<Hunt>, onMarkerClick: (Hunt) -> Unit) {
   hunts.forEach { hunt -> HuntImageMarker(hunt = hunt, onMarkerClick = onMarkerClick) }
 }
 
-/** Marker that uses the hunt main image as a square rounded icon. */
 @Composable
 private fun HuntImageMarker(hunt: Hunt, onMarkerClick: (Hunt) -> Unit) {
   val context = LocalContext.current
@@ -83,9 +81,8 @@ private fun HuntImageMarker(hunt: Hunt, onMarkerClick: (Hunt) -> Unit) {
 
   val (icon, setIcon) = remember(hunt.uid) { mutableStateOf<BitmapDescriptor?>(null) }
 
-  // Load and build the rounded bitmap once per hunt
   LaunchedEffect(hunt.mainImageUrl) {
-    val imageUrl = hunt.mainImageUrl ?: return@LaunchedEffect
+    val imageUrl = hunt.mainImageUrl
 
     val sizePx = with(density) { MapScreenDefaults.MarkerImageSize.toPx().roundToInt() }
     val cornerRadiusPx = with(density) { MapScreenDefaults.MarkerCornerRadius.toPx() }
@@ -96,7 +93,7 @@ private fun HuntImageMarker(hunt: Hunt, onMarkerClick: (Hunt) -> Unit) {
         ImageRequest.Builder(context)
             .data(imageUrl)
             .allowHardware(false)
-            .size(sizePx) // let Coil scale appropriately
+            .size(sizePx)
             .scale(Scale.FILL)
             .build()
 
@@ -114,7 +111,7 @@ private fun HuntImageMarker(hunt: Hunt, onMarkerClick: (Hunt) -> Unit) {
       state = MarkerState(LatLng(hunt.start.latitude, hunt.start.longitude)),
       title = hunt.title,
       snippet = hunt.description,
-      icon = icon, // null initially -> Google default, then replaced when loaded
+      icon = icon,
       onClick = {
         onMarkerClick(hunt)
         true
@@ -123,7 +120,7 @@ private fun HuntImageMarker(hunt: Hunt, onMarkerClick: (Hunt) -> Unit) {
 
 @Composable
 private fun FocusedHuntMarkers(uiState: MapUIState, selectedHunt: Hunt) {
-  val context = androidx.compose.ui.platform.LocalContext.current
+  val context = LocalContext.current
 
   Marker(
       state = MarkerState(LatLng(selectedHunt.start.latitude, selectedHunt.start.longitude)),
@@ -171,7 +168,6 @@ private suspend fun CameraPositionState.animateToHunt(hunt: Hunt, isFocused: Boo
   }
 }
 
-/** Creates a square bitmap with rounded corners from a [Drawable]. */
 private fun createRoundedMarkerBitmap(
     drawable: Drawable,
     sizePx: Int,
@@ -180,9 +176,6 @@ private fun createRoundedMarkerBitmap(
   val output = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
   val canvas = Canvas(output)
 
-  val clipPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-
-  // Rounded clip path
   val path =
       android.graphics.Path().apply {
         addRoundRect(
@@ -195,22 +188,18 @@ private fun createRoundedMarkerBitmap(
             android.graphics.Path.Direction.CW)
       }
 
-  // Clip canvas to rounded shape
   canvas.clipPath(path)
 
-  // Draw image
   drawable.setBounds(0, 0, sizePx, sizePx)
   drawable.draw(canvas)
 
-  // Draw green border
   val borderPaint =
       Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
-        strokeWidth = 5f // Adjust thickness here
+        strokeWidth = 5f
         color = com.swentseekr.seekr.ui.theme.Green.toArgb()
       }
 
-  // Draw the rounded border AFTER clipping
   canvas.drawRoundRect(
       0f, 0f, sizePx.toFloat(), sizePx.toFloat(), cornerRadiusPx, cornerRadiusPx, borderPaint)
 
