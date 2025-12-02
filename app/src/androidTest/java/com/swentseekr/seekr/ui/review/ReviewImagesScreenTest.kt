@@ -92,20 +92,17 @@ class ReviewImagesScreenTest {
     val pager = composeRule.onNodeWithTag("ReviewImagePager")
     pager.assertIsDisplayed()
 
-    // Check initial state (Image 1)
+    // Check initial state
     composeRule.onNodeWithTag("ReviewImageIndexText").assertTextEquals("Image #1/${photos.size}")
 
-    // Swipe left to go to second image
     pager.performTouchInput { swipeLeft() }
 
-    // Wait for animation to complete
     composeRule.mainClock.advanceTimeBy(500)
     composeRule.waitForIdle()
 
     // Check second image
     composeRule.onNodeWithTag("ReviewImageIndexText").assertTextEquals("Image #2/${photos.size}")
 
-    // Swipe left again to go to third image
     pager.performTouchInput { swipeLeft() }
 
     composeRule.mainClock.advanceTimeBy(500)
@@ -148,7 +145,7 @@ class ReviewImagesScreenTest {
     composeRule.mainClock.advanceTimeBy(500)
     composeRule.waitForIdle()
 
-    // Click on the first image box (which is clickable)
+    // Click on the first image box
     composeRule.onNodeWithTag("ReviewImageBox_0").performClick()
 
     composeRule.waitForIdle()
@@ -164,7 +161,6 @@ class ReviewImagesScreenTest {
     composeRule.mainClock.advanceTimeBy(500)
     composeRule.waitForIdle()
 
-    // Verify we can still interact with fullscreen (it's still open)
     fullscreenPager.assertExists()
 
     // Close fullscreen
@@ -174,7 +170,6 @@ class ReviewImagesScreenTest {
     composeRule.mainClock.advanceTimeBy(500)
     composeRule.waitForIdle()
 
-    // Verify it's closed
     composeRule.onNodeWithTag("FullScreenImageDialog", useUnmergedTree = true).assertDoesNotExist()
   }
 
@@ -199,17 +194,14 @@ class ReviewImagesScreenTest {
     composeRule.mainClock.advanceTimeBy(500)
     composeRule.waitForIdle()
 
-    // Verify fullscreen is open (use unmerged tree)
     val fullscreenPager = composeRule.onNodeWithTag("FullScreenImagePager", useUnmergedTree = true)
     fullscreenPager.assertExists()
 
-    // Swipe left in fullscreen
     fullscreenPager.performTouchInput { swipeLeft() }
 
     composeRule.mainClock.advanceTimeBy(500)
     composeRule.waitForIdle()
 
-    // Verify we can still interact with fullscreen (it's still open)
     fullscreenPager.assertExists()
 
     // Close fullscreen
@@ -219,7 +211,6 @@ class ReviewImagesScreenTest {
     composeRule.mainClock.advanceTimeBy(500)
     composeRule.waitForIdle()
 
-    // Verify it's closed
     composeRule.onNodeWithTag("FullScreenImageDialog", useUnmergedTree = true).assertDoesNotExist()
   }
 
@@ -237,14 +228,13 @@ class ReviewImagesScreenTest {
     composeRule.mainClock.advanceTimeBy(500)
     composeRule.waitForIdle()
 
-    // First, swipe to the second image in the main pager
+    // swipe to the second image in the main pager
     val mainPager = composeRule.onNodeWithTag("ReviewImagePager")
     mainPager.performTouchInput { swipeLeft() }
 
     composeRule.mainClock.advanceTimeBy(500)
     composeRule.waitForIdle()
 
-    // Verify we're on the second image
     composeRule.onNodeWithTag("ReviewImageIndexText").assertTextEquals("Image #2/${photos.size}")
 
     // Click on the second image box to open fullscreen
@@ -254,14 +244,12 @@ class ReviewImagesScreenTest {
     composeRule.mainClock.advanceTimeBy(500)
     composeRule.waitForIdle()
 
-    // Verify fullscreen dialog opened (use unmerged tree)
+    // Verify fullscreen dialog opened
     composeRule.onNodeWithTag("FullScreenImageDialog", useUnmergedTree = true).assertExists()
 
-    // The fullscreen pager should start at index 1 (second image)
-    // We can verify this by checking it exists
+    // The fullscreen pager should start at index 1
     composeRule.onNodeWithTag("FullScreenImagePager", useUnmergedTree = true).assertExists()
 
-    // Close the dialog
     composeRule.onNodeWithTag("FullScreenImageDialog", useUnmergedTree = true).performClick()
 
     composeRule.waitForIdle()

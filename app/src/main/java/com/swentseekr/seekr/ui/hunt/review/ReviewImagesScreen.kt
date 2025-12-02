@@ -34,7 +34,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
@@ -81,22 +80,28 @@ fun ReviewImagesScreen(
                     .testTag(ReviewImagesScreenConstantsStrings.ReviewImagesColumnTestTag),
         ) {
           Text(
-              "Total Images shared in this review is ${photoUrls.size} swipe to view other images.",
+              "${ReviewImagesScreenConstantsStrings.StartTopText} ${photoUrls.size} ${ReviewImagesScreenConstantsStrings.EndTopText}",
               fontSize = AddReviewScreenDefaults.TitleFontSize,
               fontWeight = FontWeight.Bold,
               style = MaterialTheme.typography.titleLarge,
-              modifier = Modifier.padding(bottom = 8.dp).testTag("ReviewImagesInfoText"))
+              modifier =
+                  Modifier.padding(bottom = ReviewImagesScreenConstants.TextBottomPadding)
+                      .testTag(ReviewImagesScreenConstantsStrings.ReviewImageInfoTexteTestTag))
 
           val index = pagerState.currentPage + 1
           HorizontalPager(
               state = pagerState,
-              modifier = Modifier.fillMaxWidth().height(500.dp).testTag("ReviewImagePager")) { page
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .height(ReviewImagesScreenConstants.PagerHeight)
+                      .testTag(ReviewImagesScreenConstantsStrings.ReviewImagePagerTestTag)) { page
                 ->
                 Box(
                     modifier =
                         Modifier.fillMaxSize()
-                            .clip(RoundedCornerShape(16.dp))
-                            .testTag("ReviewImageBox_$page")
+                            .clip(RoundedCornerShape(ReviewImagesScreenConstants.RoundShape))
+                            .testTag(
+                                "${ReviewImagesScreenConstantsStrings.ReviewImageBoxTestTag}$page")
                             .clickable {
                               fullscreenIndex = page
                               showFullScreen = true
@@ -106,12 +111,13 @@ fun ReviewImagesScreen(
                           contentDescription = null,
                           modifier =
                               Modifier.fillMaxWidth()
-                                  .height(400.dp)
+                                  .height(ReviewImagesScreenConstants.ImageSize)
                                   .padding(vertical = ReviewImagesScreenConstants.PaddingImage)
                                   .clip(
                                       RoundedCornerShape(
                                           ReviewImagesScreenConstants.ImageCornerRadius))
-                                  .testTag("ReviewImage_$page"),
+                                  .testTag(
+                                      "${ReviewImagesScreenConstantsStrings.ReviewImageAsycTestTag}$page"),
                           contentScale = ContentScale.Fit,
                           placeholder = painterResource(R.drawable.logo_seekr),
                           error = painterResource(R.drawable.logo_seekr),
@@ -125,7 +131,10 @@ fun ReviewImagesScreen(
               fontWeight = FontWeight.Bold,
               style = MaterialTheme.typography.titleLarge,
               modifier =
-                  Modifier.padding(top = 8.dp, bottom = 4.dp).testTag("ReviewImageIndexText"))
+                  Modifier.padding(
+                          top = ReviewImagesScreenConstants.TextTopPadding,
+                          bottom = ReviewImagesScreenConstants.TextBottomPadding)
+                      .testTag(ReviewImagesScreenConstantsStrings.ReviewImageTextBottomTestTag))
         }
       }
   if (showFullScreen) {
@@ -149,16 +158,22 @@ fun FullScreenImageViewer(
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.background)
                     .clickable { onClose() }
-                    .testTag("FullScreenImageDialog")) {
+                    .testTag(
+                        ReviewImagesScreenConstantsStrings.ReviewImageFullScreenDialogTestTag)) {
               val pagerState =
                   rememberPagerState(initialPage = startIndex, pageCount = { images.size })
 
               HorizontalPager(
                   state = pagerState,
-                  modifier = Modifier.fillMaxSize().testTag("FullScreenImagePager")) { page ->
+                  modifier =
+                      Modifier.fillMaxSize()
+                          .testTag(
+                              ReviewImagesScreenConstantsStrings
+                                  .ReviewImageFullScreenPagerTestTag)) { page ->
                     AsyncImage(
                         model = images[page],
-                        contentDescription = "Fullscreen image ${page + 1}",
+                        contentDescription =
+                            "${ReviewImagesScreenConstantsStrings.ReviewImageFullScreenImageDescription} ${page + 1}",
                         modifier = Modifier.fillMaxSize(),
                     )
                   }
