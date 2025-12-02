@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.preview
 
+import android.net.Uri
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -25,6 +26,13 @@ class PreviewHuntScreenTest {
 
   @Test
   fun previewScreen_displaysAllFields_andConfirmEnabled() {
+    val current = vm.uiState.value
+    vm.updateState(
+        current.copy(
+            otherImagesUris =
+                listOf(
+                    Uri.parse("https://example.com/image1"),
+                    Uri.parse("https://example.com/image2"))))
 
     composeTestRule.setContent { PreviewHuntScreen(viewModel = vm, onConfirm = {}, onGoBack = {}) }
 
