@@ -149,6 +149,7 @@ fun ProfileScreen(
     testMode: Boolean = false,
     testPublic: Boolean = false,
     testProfile: Profile? = null,
+    onReviewsClick: () -> Unit = {}
 ) {
 
   val context = LocalContext.current
@@ -202,7 +203,9 @@ fun ProfileScreen(
   var selectedTab by remember { mutableStateOf(ProfileTab.MY_HUNTS) }
   val reviewCount by viewModel.totalReviews.collectAsState()
   LaunchedEffect(profile.myHunts) { viewModel.loadTotalReviewsForProfile(profile) }
-
+    LaunchedEffect(profile) {
+        profile.let { viewModel.loadAllReviewsForProfile(it) }
+    }
   Scaffold(
       floatingActionButton = {
         if (isMyProfile) {
@@ -284,23 +287,25 @@ fun ProfileScreen(
                                     .testTag(ProfileTestTags.PROFILE_PSEUDONYM))
                         Row {
                           Text(
-                              text = "${profile.author.reviewRate}/${MAX_RATING}",
+                              text = "${String.format("%.1f",profile.author.reviewRate)}/${MAX_RATING}",
                               modifier =
                                   Modifier.padding(ProfileConstants.SIZE_SMALL)
                                       .testTag(ProfileTestTags.PROFILE_REVIEW_RATING))
                           Rating(rating = profile.author.reviewRate, RatingType.STAR)
                           Text(
-                              text = "- $reviewCount reviews",
+                              text = if (reviewCount == 1) "- $reviewCount review " else "- $reviewCount reviews",
                               fontSize = ProfileConstants.TEXT_SIZE_REVIEWS,
                               color = GrayDislike,
                               modifier =
                                   Modifier.padding(start = ProfileConstants.SIZE_SMALL)
-                                      .testTag(ProfileTestTags.PROFILE_REVIEWS_COUNT))
+                                      .testTag(ProfileTestTags.PROFILE_REVIEWS_COUNT)
+                                      .clickable{onReviewsClick()}
+                          )
                         }
                         val doneHuntsCount = profile.doneHunts.size
                         Row {
                           Text(
-                              text = "${profile.author.sportRate}/${MAX_RATING}",
+                              text = "${String.format("%.1f", profile.author.sportRate)}/${MAX_RATING}",
                               modifier =
                                   Modifier.padding(ProfileConstants.SIZE_SMALL)
                                       .testTag(ProfileTestTags.PROFILE_SPORT_RATING))
