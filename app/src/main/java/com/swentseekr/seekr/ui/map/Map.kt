@@ -261,8 +261,9 @@ private fun ContinuousDistanceUpdateEffect(
 
     try {
       val request =
-          LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 3_000L)
-              .setMinUpdateIntervalMillis(1_500L)
+          LocationRequest.Builder(
+                  Priority.PRIORITY_HIGH_ACCURACY, MapConfig.LOCATION_UPDATE_INTERVAL_MS)
+              .setMinUpdateIntervalMillis(MapConfig.LOCATION_FASTEST_INTERVAL_MS)
               .build()
 
       fused.requestLocationUpdates(request, callback, Looper.getMainLooper())

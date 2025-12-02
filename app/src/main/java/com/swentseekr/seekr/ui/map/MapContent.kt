@@ -196,7 +196,7 @@ private fun createRoundedMarkerBitmap(
   val borderPaint =
       Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
-        strokeWidth = 5f
+        strokeWidth = MapScreenDefaults.CustomMarkerBorderWidth
         color = com.swentseekr.seekr.ui.theme.Green.toArgb()
       }
 

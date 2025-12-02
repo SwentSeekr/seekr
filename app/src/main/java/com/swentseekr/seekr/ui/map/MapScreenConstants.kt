@@ -34,6 +34,7 @@ object MapScreenDefaults {
   val ProgressBarHeight: Dp = 6.dp
   val ProgressTickSpacing: Dp = 4.dp
   val ProgressSegmentCornerRadius: Dp = 4.dp
+  val CustomMarkerBorderWidth: Float = 5f
 }
 
 object MapConfig {
@@ -48,6 +49,8 @@ object MapConfig {
 
   const val DefaultValidatedCount = 0
   const val ValidationRadiusMeters = 25
+  const val LOCATION_UPDATE_INTERVAL_MS = 2000L
+  const val LOCATION_FASTEST_INTERVAL_MS = 1000L
 }
 
 object MapScreenStrings {
