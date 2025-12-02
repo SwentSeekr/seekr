@@ -28,7 +28,11 @@ class PreviewHuntScreenTest {
 
     composeTestRule.setContent { PreviewHuntScreen(viewModel = vm, onConfirm = {}, onGoBack = {}) }
 
+    // Root screen + all main fields
+    composeTestRule.onNodeWithTag(PreviewHuntScreenTestTags.PREVIEW_HUNT_SCREEN).assertIsDisplayed()
+
     composeTestRule.onNodeWithTag(PreviewHuntScreenTestTags.HUNT_TITLE).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(PreviewHuntScreenTestTags.HUNT_AUTHOR_PREVIEW).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PreviewHuntScreenTestTags.HUNT_DESCRIPTION).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PreviewHuntScreenTestTags.HUNT_TIME).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PreviewHuntScreenTestTags.HUNT_DISTANCE).assertIsDisplayed()
@@ -36,6 +40,7 @@ class PreviewHuntScreenTest {
     composeTestRule.onNodeWithTag(PreviewHuntScreenTestTags.HUNT_STATUS).assertIsDisplayed()
     composeTestRule.onNodeWithTag(PreviewHuntScreenTestTags.HUNT_POINTS).assertIsDisplayed()
 
+    // Confirm button enabled with initial valid state
     composeTestRule.onNodeWithTag(PreviewHuntScreenTestTags.CONFIRM_BUTTON).assertIsEnabled()
   }
 
