@@ -3,6 +3,7 @@ package com.swentseekr.seekr.ui.map
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Looper
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
@@ -14,10 +15,15 @@ import androidx.compose.ui.platform.testTag
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.firebase.auth.FirebaseAuth
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -48,6 +54,22 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
       fused = fused,
       cameraPositionState = cameraPositionState,
       scope = scope)
+
+  ContinuousDistanceUpdateEffect(
+      hasLocationPermission = permissionState.hasPermission,
+      uiState = uiState,
+      context = context,
+      fused = fused,
+      viewModel = viewModel)
+
+  RouteAndZoomToNextPointEffect(
+      hasLocationPermission = permissionState.hasPermission,
+      uiState = uiState,
+      context = context,
+      fused = fused,
+      cameraPositionState = cameraPositionState,
+      scope = scope,
+      viewModel = viewModel)
 
   Box(modifier = Modifier.fillMaxSize().testTag(MapScreenTestTags.MAP_SCREEN)) {
     MapContent(
@@ -162,7 +184,7 @@ private fun MoveCameraToUserLocationEffect(
         }
       }
     } catch (_: SecurityException) {
-      // Permission was revoked between the check and this call, ignore safely
+      return@LaunchedEffect
     }
   }
 }
@@ -198,7 +220,7 @@ private fun validateCurrentLocationIfPermitted(
       loc?.let { viewModel.validateCurrentPoint(LatLng(it.latitude, it.longitude)) }
     }
   } catch (_: SecurityException) {
-    // Permission was revoked between the check and this call, ignore safely
+    return
   }
 }
 
@@ -207,4 +229,96 @@ private fun finishHuntIfLoggedIn(onPersist: (suspend (Hunt) -> Unit)?, viewModel
   if (userId != null && onPersist != null) {
     viewModel.finishHunt(onPersist = onPersist)
   }
+}
+
+@Composable
+private fun ContinuousDistanceUpdateEffect(
+    hasLocationPermission: Boolean,
+    uiState: MapUIState,
+    context: Context,
+    fused: FusedLocationProviderClient,
+    viewModel: MapViewModel
+) {
+  DisposableEffect(hasLocationPermission, uiState.isFocused, uiState.selectedHunt?.uid) {
+    val shouldTrack =
+        hasLocationPermission &&
+            uiState.isFocused &&
+            uiState.selectedHunt != null &&
+            isLocationPermissionGranted(context)
+
+    if (!shouldTrack) {
+      return@DisposableEffect onDispose {}
+    }
+
+    val callback =
+        object : LocationCallback() {
+          override fun onLocationResult(result: LocationResult) {
+
+            val loc = result.lastLocation ?: return
+            viewModel.updateCurrentDistanceToNext(LatLng(loc.latitude, loc.longitude))
+          }
+        }
+
+    try {
+      val request =
+          LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 3_000L)
+              .setMinUpdateIntervalMillis(1_500L)
+              .build()
+
+      fused.requestLocationUpdates(request, callback, Looper.getMainLooper())
+    } catch (_: SecurityException) {
+      return@DisposableEffect onDispose { fused.removeLocationUpdates(callback) }
+    }
+
+    onDispose { fused.removeLocationUpdates(callback) }
+  }
+}
+
+@Composable
+private fun RouteAndZoomToNextPointEffect(
+    hasLocationPermission: Boolean,
+    uiState: MapUIState,
+    context: Context,
+    fused: FusedLocationProviderClient,
+    cameraPositionState: CameraPositionState,
+    scope: CoroutineScope,
+    viewModel: MapViewModel
+) {
+  LaunchedEffect(
+      hasLocationPermission,
+      uiState.isHuntStarted,
+      uiState.validatedCount,
+      uiState.selectedHunt?.uid) {
+        val hunt = uiState.selectedHunt
+        val shouldAdjust =
+            hasLocationPermission &&
+                uiState.isHuntStarted &&
+                hunt != null &&
+                isLocationPermissionGranted(context)
+
+        if (!shouldAdjust) return@LaunchedEffect
+
+        try {
+          fused.lastLocation.addOnSuccessListener { location ->
+            val loc = location ?: return@addOnSuccessListener
+
+            val currentLatLng = LatLng(loc.latitude, loc.longitude)
+
+            val next = nextPointFor(hunt, uiState.validatedCount) ?: return@addOnSuccessListener
+
+            val nextLatLng = LatLng(next.latitude, next.longitude)
+
+            viewModel.routeFromCurrentToNext(currentLatLng)
+
+            val bounds = LatLngBounds.Builder().include(currentLatLng).include(nextLatLng).build()
+
+            scope.launch {
+              cameraPositionState.animate(
+                  CameraUpdateFactory.newLatLngBounds(bounds, MapScreenDefaults.BoundsPadding))
+            }
+          }
+        } catch (_: SecurityException) {
+          return@LaunchedEffect
+        }
+      }
 }
