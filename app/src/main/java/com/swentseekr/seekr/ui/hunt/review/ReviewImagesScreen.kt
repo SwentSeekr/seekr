@@ -39,6 +39,14 @@ import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 
+/**
+ * Displays a screen allowing the user to review a list of images with a paging UI
+ * * and optional full-screen viewing.
+ *
+ * @param photoUrls the list of image URLs to display in this screen pager.
+ * @param onGoBack callback when the user cancels or navigates back.
+ * @param modifier a modifier
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReviewImagesScreen(
@@ -50,7 +58,7 @@ fun ReviewImagesScreen(
   val scroll = rememberScrollState()
   val pagerState = rememberPagerState(pageCount = { photoUrls.size })
   var showFullScreen by remember { mutableStateOf(false) }
-  var fullscreenIndex by remember { mutableStateOf(0) }
+  var fullscreenIndex by remember { mutableStateOf(ReviewImagesScreenConstants.StartIndex) }
 
   Scaffold(
       topBar = {
@@ -88,7 +96,7 @@ fun ReviewImagesScreen(
                   Modifier.padding(bottom = ReviewImagesScreenConstants.TextBottomPadding)
                       .testTag(ReviewImagesScreenConstantsStrings.ReviewImageInfoTexteTestTag))
 
-          val index = pagerState.currentPage + 1
+          val index = pagerState.currentPage + ReviewImagesScreenConstants.One
           HorizontalPager(
               state = pagerState,
               modifier =
@@ -143,6 +151,13 @@ fun ReviewImagesScreen(
   }
 }
 
+/**
+ * Displays a full-screen dialog that allows the user to swipe through a collection of images.
+ *
+ * @param images the list of image URLs to display in the full-screen pager.
+ * @param startIndex the index of the image that should be shown first when the full-screen opens.
+ * @param onClose callback invoked when the user dismisses the dialog (by tipping on the screen)
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FullScreenImageViewer(
@@ -155,7 +170,6 @@ fun FullScreenImageViewer(
         Box(
             modifier =
                 Modifier.fillMaxSize()
-                    .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.background)
                     .clickable { onClose() }
                     .testTag(
@@ -173,7 +187,7 @@ fun FullScreenImageViewer(
                     AsyncImage(
                         model = images[page],
                         contentDescription =
-                            "${ReviewImagesScreenConstantsStrings.ReviewImageFullScreenImageDescription} ${page + 1}",
+                            "${ReviewImagesScreenConstantsStrings.ReviewImageFullScreenImageDescription} ${page + ReviewImagesScreenConstants.One}",
                         modifier = Modifier.fillMaxSize(),
                     )
                   }

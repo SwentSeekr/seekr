@@ -2,6 +2,7 @@ package com.swentseekr.seekr.ui.hunt.review
 
 import androidx.compose.ui.unit.dp
 
+/** Constant string and test tag used in ReviewImagesScreen */
 object ReviewImagesScreenConstantsStrings {
   const val Title = "Images Review"
   const val BackButtonTag = "back_button"
@@ -22,6 +23,7 @@ object ReviewImagesScreenConstantsStrings {
   const val EndTopText = "swipe to view other images."
 }
 
+/** Constant number used in ReviewImagesScreen */
 object ReviewImagesScreenConstants {
   val PaddingColumn = 16.dp
   val PaddingImage = 8.dp
@@ -31,4 +33,6 @@ object ReviewImagesScreenConstants {
   val RoundShape = 16.dp
   val ImageSize = 400.dp
   val TextTopPadding = 8.dp
+  const val StartIndex = 0
+  const val One = 1
 }
