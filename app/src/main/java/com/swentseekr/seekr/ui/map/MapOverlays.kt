@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.map
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
@@ -28,7 +30,6 @@ fun BoxScope.FocusedHuntControls(
 ) {
   val isHuntStarted = uiState.isHuntStarted
 
-  // Top-left button: Back / Stop
   Button(
       onClick = { if (isHuntStarted) onShowStopHuntDialog() else onBackToAllHunts() },
       modifier =
@@ -42,7 +43,6 @@ fun BoxScope.FocusedHuntControls(
             style = MaterialTheme.typography.bodyMedium)
       }
 
-  // Bottom card
   FocusedHuntBottomCard(
       uiState = uiState,
       selectedHunt = selectedHunt,
@@ -61,69 +61,172 @@ private fun BoxScope.FocusedHuntBottomCard(
 ) {
   val totalPoints = selectedHunt.middlePoints.size + MapScreenDefaults.MinScore
   val validated = uiState.validatedCount
+  val distanceToNext = uiState.currentDistanceToNextMeters
+  val currentCheckpointInfo = calculateCurrentCheckpointInfo(selectedHunt, validated)
 
-  val currentCheckpointInfo: Pair<String, String>? = run {
-    val ordered = buildList {
-      add(selectedHunt.start)
-      selectedHunt.middlePoints.forEach { add(it) }
-      add(selectedHunt.end)
-    }
-    ordered.getOrNull(validated)?.let { checkpoint -> checkpoint.name to checkpoint.description }
+  Box(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape =
+            RoundedCornerShape(
+                topStart = MapScreenDefaults.CardCornerRadius,
+                topEnd = MapScreenDefaults.CardCornerRadius),
+        elevation = CardDefaults.cardElevation(MapScreenDefaults.CardElevation)) {
+          Column(
+              modifier = Modifier.fillMaxWidth().padding(MapScreenDefaults.OverlayInnerPadding),
+              horizontalAlignment = Alignment.Start) {
+                ProgressSection(validated = validated, totalPoints = totalPoints)
+
+                currentCheckpointInfo?.let { (name, description) ->
+                  NextCheckpointSection(
+                      checkpointName = name,
+                      checkpointDescription = description,
+                      distanceToNext = distanceToNext)
+                }
+
+                ErrorMessage(uiState.errorMsg)
+
+                Spacer(Modifier.height(MapScreenDefaults.BackButtonPadding))
+
+                HuntPrimaryAction(
+                    isHuntStarted = uiState.isHuntStarted,
+                    validated = validated,
+                    totalPoints = totalPoints,
+                    onStartHunt = onStartHunt,
+                    onValidateCurrentLocation = onValidateCurrentLocation,
+                    onFinishHunt = onFinishHunt)
+              }
+        }
+  }
+}
+
+private fun calculateCurrentCheckpointInfo(
+    selectedHunt: Hunt,
+    validated: Int
+): Pair<String, String>? {
+  val ordered = buildList {
+    add(selectedHunt.start)
+    selectedHunt.middlePoints.forEach { add(it) }
+    add(selectedHunt.end)
   }
 
-  Card(
-      modifier =
-          Modifier.align(Alignment.BottomCenter)
-              .fillMaxWidth()
-              .padding(
-                  horizontal = MapScreenDefaults.OverlayDoublePadding,
-                  vertical = MapScreenDefaults.OverlayInnerPadding),
-      shape =
-          RoundedCornerShape(
-              topStart = MapScreenDefaults.CardPadding, topEnd = MapScreenDefaults.CardPadding),
-      elevation = CardDefaults.cardElevation(MapScreenDefaults.CardElevation)) {
-        Column(
-            modifier = Modifier.padding(MapScreenDefaults.CardPadding).fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally) {
-              Row(
-                  modifier = Modifier.fillMaxWidth(),
-                  horizontalArrangement = Arrangement.SpaceBetween,
-                  verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = MapScreenStrings.Progress,
-                        style = MaterialTheme.typography.bodyMedium)
-                    Text(
-                        modifier = Modifier.testTag(MapScreenTestTags.PROGRESS),
-                        text = "$validated / $totalPoints",
-                        style = MaterialTheme.typography.bodyMedium)
-                  }
+  return ordered.getOrNull(validated)?.let { checkpoint ->
+    checkpoint.name to checkpoint.description
+  }
+}
 
-              currentCheckpointInfo?.let { (name, description) ->
-                Text(
-                    text = "${MapScreenStrings.NextStopPrefix}$name",
-                    style = MaterialTheme.typography.bodyMedium)
-                Text(text = description, style = MaterialTheme.typography.bodyMedium)
-              }
+private fun buildDistanceSuffix(distanceToNext: Int?): String =
+    distanceToNext?.let {
+      " in $it${MapScreenStrings.DistanceMetersSuffix} / " +
+          "${MapConfig.ValidationRadiusMeters}${MapScreenStrings.DistanceMetersSuffix}"
+    } ?: ""
 
-              Spacer(Modifier.height(MapScreenDefaults.BackButtonPadding))
+@Composable
+private fun ProgressSection(validated: Int, totalPoints: Int) {
+  ProgressHeader(validated = validated, totalPoints = totalPoints)
 
-              if (!uiState.isHuntStarted) {
-                Button(
-                    modifier = Modifier.testTag(MapScreenTestTags.START),
-                    onClick = onStartHunt,
-                    colors =
-                        ButtonDefaults.buttonColors(containerColor = Green, contentColor = White)) {
-                      Text(MapScreenStrings.StartHunt)
-                    }
-              } else {
-                HuntActionsRow(
-                    canFinish = validated >= totalPoints,
-                    onValidateCurrentLocation = onValidateCurrentLocation,
-                    onFinishHunt = onFinishHunt,
-                )
-              }
-            }
+  Spacer(Modifier.height(MapScreenDefaults.PopupSpacing))
+
+  SegmentedProgressBar(validated = validated, totalPoints = totalPoints)
+}
+
+@Composable
+private fun ProgressHeader(validated: Int, totalPoints: Int) {
+  Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically) {
+        Text(text = MapScreenStrings.Progress, style = MaterialTheme.typography.bodyMedium)
+        Text(
+            modifier = Modifier.testTag(MapScreenTestTags.PROGRESS),
+            text = "$validated / $totalPoints",
+            style = MaterialTheme.typography.bodyMedium)
       }
+}
+
+@Composable
+private fun SegmentedProgressBar(validated: Int, totalPoints: Int) {
+  Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    repeat(totalPoints) { index ->
+      val isCompleted = index < validated
+
+      Box(
+          modifier =
+              Modifier.weight(1f)
+                  .height(MapScreenDefaults.ProgressBarHeight)
+                  .clip(RoundedCornerShape(MapScreenDefaults.ProgressSegmentCornerRadius))
+                  .background(
+                      if (isCompleted) MaterialTheme.colorScheme.primary
+                      else MaterialTheme.colorScheme.onSecondary))
+
+      if (index != totalPoints - 1) {
+        Spacer(Modifier.width(MapScreenDefaults.ProgressTickSpacing))
+      }
+    }
+  }
+}
+
+@Composable
+private fun NextCheckpointSection(
+    checkpointName: String,
+    checkpointDescription: String,
+    distanceToNext: Int?
+) {
+  Spacer(Modifier.height(MapScreenDefaults.PopupSpacing))
+
+  val distanceSuffix = buildDistanceSuffix(distanceToNext)
+
+  Text(
+      text = "${MapScreenStrings.NextStopPrefix}$checkpointName$distanceSuffix",
+      style = MaterialTheme.typography.titleSmall)
+
+  if (checkpointDescription.isNotBlank()) {
+    Text(text = checkpointDescription, style = MaterialTheme.typography.bodySmall)
+  }
+}
+
+@Composable
+private fun ErrorMessage(errorMsg: String?) {
+  val message = errorMsg?.takeIf { it.isNotBlank() } ?: return
+
+  Spacer(Modifier.height(MapScreenDefaults.PopupSpacing))
+
+  Text(
+      text = message,
+      color = MaterialTheme.colorScheme.error,
+      style = MaterialTheme.typography.bodySmall)
+}
+
+@Composable
+private fun HuntPrimaryAction(
+    isHuntStarted: Boolean,
+    validated: Int,
+    totalPoints: Int,
+    onStartHunt: () -> Unit,
+    onValidateCurrentLocation: () -> Unit,
+    onFinishHunt: ((suspend (Hunt) -> Unit)?) -> Unit,
+) {
+  if (!isHuntStarted) {
+    StartHuntButton(onStartHunt = onStartHunt)
+  } else {
+    HuntActionsRow(
+        canFinish = validated >= totalPoints,
+        onValidateCurrentLocation = onValidateCurrentLocation,
+        onFinishHunt = onFinishHunt,
+    )
+  }
+}
+
+@Composable
+private fun StartHuntButton(onStartHunt: () -> Unit) {
+  Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+    Button(
+        modifier = Modifier.testTag(MapScreenTestTags.START),
+        onClick = onStartHunt,
+        colors = ButtonDefaults.buttonColors(containerColor = Green, contentColor = White)) {
+          Text(MapScreenStrings.StartHunt)
+        }
+  }
 }
 
 @Composable
