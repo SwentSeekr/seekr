@@ -4,9 +4,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 object PreviewHuntStrings {
-  const val PREVIEW_TITLE = "Preview Hunt: "
+  const val PREVIEW_TITLE = "Preview hunt"
   const val HUNT_TITLE = "Hunt Title: "
-  const val HUNT_DESCRIPTION = "Hunt Description: "
+  const val HUNT_DESCRIPTION = "Hunt Description"
   const val HUNT_TIME = "Estimated Time: "
   const val HUNT_DISTANCE = "Distance in Km: "
   const val HUNT_DIFFICULTY = "Difficulty: "
@@ -15,25 +15,30 @@ object PreviewHuntStrings {
   const val OTHER_IMAGES = "Other Images: "
   const val NOT_SET = "Not set"
 
+  const val HUNT_TITLE_FALLBACK = "Untitled hunt"
+  const val AUTHOR_PREVIEW = "you"
+  const val NO_DESCRIPTION = "No description provided yet."
+  const val BACK_CONTENT_DESC = "Go back"
+
   const val CONFIRM_BUTTON = "Confirm"
 }
 
 object PreviewHuntUi {
-  val COLUMM_PADDING: Dp = 16.dp
-  val IMAGE_CARD_HEIGHT: Dp = 200.dp
-  val OTHER_IMAGE_CARD_HEIGHT: Dp = 120.dp
-  val IMAGE_CARD_ELEVATION: Dp = 4.dp
-  val BIG_SPACER_HEIGHT: Dp = 24.dp
-  val MEDIUM_SPACER_HEIGHT: Dp = 16.dp
+  // Only keep what is actually used in PreviewHuntScreen:
   val SMALL_SPACER_HEIGHT: Dp = 8.dp
-  val CARD_PADDING: Dp = 4.dp
+
+  // Thumbnails:
+  val THUMBNAIL_SIZE: Dp = 56.dp
+  val THUMBNAIL_SPACING: Dp = 8.dp
 }
 
 object PreviewHuntScreenTestTags {
   const val PREVIEW_HUNT_SCREEN = "previewHuntScreen"
   const val BACK_BUTTON = "previewHuntBackButton"
   const val CONFIRM_BUTTON = "previewHuntConfirmButton"
+
   const val HUNT_TITLE = "previewHuntTitle"
+  const val HUNT_AUTHOR_PREVIEW = "previewHuntAuthor"
   const val HUNT_DESCRIPTION = "previewHuntDescription"
   const val HUNT_TIME = "previewHuntTime"
   const val HUNT_DISTANCE = "previewHuntDistance"
