@@ -1,6 +1,5 @@
 package com.swentseekr.seekr.ui.map
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -9,8 +8,8 @@ object MapScreenDefaults {
   val PopupSpacing: Dp = 6.dp
   val PopupImageSize: Dp = 125.dp
   val PopupImageCornerRadius: Dp = 8.dp
-  const val ChipBackgroundAlpha: Float = 0.25f // darker background
-  const val ChipContentDarkenFactor: Float = 0.7f // darken text for readability
+  const val ChipBackgroundAlpha: Float = 0.25f
+  const val ChipContentDarkenFactor: Float = 0.7f
 
   val ChipHorizontalPadding: Dp = 8.dp
   val ChipVerticalPadding: Dp = 4.dp
@@ -27,29 +26,26 @@ object MapScreenDefaults {
   val MarkerImageSize = 50.dp
   val MarkerCornerRadius = 8.dp
 
-  val OverlayScrimColor: Color = Color(0x80000000)
   val OverlayPadding: Dp = 32.dp
-  val OverlayDoublePadding: Dp = 64.dp
   val OverlayInnerPadding: Dp = 24.dp
   val CardCornerRadius: Dp = 16.dp
   val CardElevation: Dp = 8.dp
   val BackButtonPadding: Dp = 12.dp
+  val ProgressBarHeight: Dp = 6.dp
+  val ProgressTickSpacing: Dp = 4.dp
+  val ProgressSegmentCornerRadius: Dp = 4.dp
 }
 
-/** Pure configuration / domain constants used by the Map feature. */
 object MapConfig {
-  // Default target (Lausanne)
   const val DefaultLat = 46.519962
   const val DefaultLng = 6.633597
   const val DefaultCityName = "Lausanne"
 
-  // Directions API
   const val DirectionsConnectTimeoutMs = 15_000
   const val DirectionsReadTimeoutMs = 15_000
   const val DirectionsBaseUrl = "https://maps.googleapis.com/maps/api/directions/json"
   const val TravelModeWalking = "walking"
 
-  // Hunt validation
   const val DefaultValidatedCount = 0
   const val ValidationRadiusMeters = 25
 }
@@ -76,8 +72,9 @@ object MapScreenStrings {
   const val ConfirmStopHunt = "Stop"
 
   const val NextStopPrefix = "Next stop: "
+  const val DistanceMetersSuffix = " m"
+  const val ErrorTooFarPrefix = "You are too far from the checkpoint. Minimum distance: "
 
-  // Error strings / prefixes
   const val ErrorLoadHuntsPrefix = "Failed to load hunts: "
   const val ErrorRoutePrefix = "Failed to get route: "
   const val ErrorFinishHuntPrefix = "Failed to finish hunt: "
@@ -86,7 +83,6 @@ object MapScreenStrings {
   const val Fail = "Failed to add done hunt"
 }
 
-/** Test tags used by instrumented tests to target key UI elements on the Map screen. */
 object MapScreenTestTags {
   const val GOOGLE_MAP_SCREEN = "mapScreen"
   const val POPUP_CARD = "huntPopupCard"
