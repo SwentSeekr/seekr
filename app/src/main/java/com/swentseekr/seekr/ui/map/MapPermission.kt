@@ -10,6 +10,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import com.swentseekr.seekr.ui.theme.Green
 
+/**
+ * A full-screen overlay popup that prompts the user to grant location permissions.
+ *
+ * This popup is displayed when:
+ * - Location permission is required for map features (e.g., showing user's position)
+ * - The user has not yet granted location access
+ *
+ * The popup contains:
+ * - A message explaining why permissions are needed
+ * - A button for requesting the required permission
+ *
+ * It uses accessibility and test-friendly tags for UI testing.
+ *
+ * @param onRequestPermission callback invoked when the user presses **Grant Permission**.
+ */
 @Composable
 fun PermissionRequestPopup(onRequestPermission: () -> Unit) {
   Box(
@@ -32,6 +47,7 @@ fun PermissionRequestPopup(onRequestPermission: () -> Unit) {
                         modifier =
                             Modifier.padding(bottom = MapScreenDefaults.CardPadding)
                                 .testTag(MapScreenTestTags.EXPLAIN))
+
                     TextButton(
                         onClick = onRequestPermission,
                         colors = ButtonDefaults.buttonColors(containerColor = Green),
