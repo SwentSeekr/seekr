@@ -35,6 +35,15 @@ import com.swentseekr.seekr.ui.profile.EditProfileScreen
 import com.swentseekr.seekr.ui.profile.ProfileReviewsScreen
 import com.swentseekr.seekr.ui.profile.ProfileScreen
 import com.swentseekr.seekr.ui.settings.SettingsScreen
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 
 // Destinations as sealed class
 sealed class SeekrDestination(
@@ -97,36 +106,72 @@ fun SeekrNavigationBar(
     currentDestination: SeekrDestination,
     onTabSelected: (SeekrDestination) -> Unit
 ) {
-  val containerColor = SeekrNavigationDefaults.BottomBarContainerColor
-  val iconColor = SeekrNavigationDefaults.BottomBarIconColor
+    val containerColor = MaterialTheme.colorScheme.onPrimary
+    val iconColor = MaterialTheme.colorScheme.primary
 
-  NavigationBar(
-      containerColor = containerColor,
-      modifier = Modifier.testTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU)) {
+    NavigationBar(
+        containerColor = containerColor,
+        modifier = Modifier.testTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU)) {
         SeekrDestination.all.forEach { dest ->
-          val testTag =
-              when (dest) {
-                is SeekrDestination.Overview -> NavigationTestTags.OVERVIEW_TAB
-                is SeekrDestination.Map -> NavigationTestTags.MAP_TAB
-                is SeekrDestination.Profile -> NavigationTestTags.PROFILE_TAB
-                else -> SeekrNavigationDefaults.IgnoredTestTag
-              }
+            val testTag =
+                when (dest) {
+                    is SeekrDestination.Overview -> NavigationTestTags.OVERVIEW_TAB
+                    is SeekrDestination.Map -> NavigationTestTags.MAP_TAB
+                    is SeekrDestination.Profile -> NavigationTestTags.PROFILE_TAB
+                    else -> SeekrNavigationDefaults.IgnoredTestTag
+                }
 
-          NavigationBarItem(
-              selected = currentDestination.route == dest.route,
-              onClick = { onTabSelected(dest) },
-              icon = { Icon(dest.icon, contentDescription = dest.label, tint = iconColor) },
-              label = { Text(dest.label, color = iconColor) },
-              modifier = Modifier.testTag(testTag),
-              colors =
-                  NavigationBarItemDefaults.colors(
-                      selectedIconColor = iconColor,
-                      unselectedIconColor = iconColor,
-                      selectedTextColor = iconColor,
-                      unselectedTextColor = iconColor,
-                      indicatorColor = containerColor))
+            val isSelected = currentDestination.route == dest.route
+
+            NavigationBarItem(
+                selected = isSelected,
+                onClick = { onTabSelected(dest) },
+                icon = {
+                    if (isSelected) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.size(48.dp)
+                        ) {
+                            // Only the shadow, no background halo
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .shadow(
+                                        elevation = 12.dp,
+                                        shape = CircleShape,
+                                        clip = false
+                                    )
+                            )
+
+                            Icon(
+                                dest.icon,
+                                contentDescription = dest.label,
+                                tint = iconColor,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    } else {
+                        Icon(
+                            dest.icon,
+                            contentDescription = dest.label,
+                            tint = iconColor
+                        )
+                    }
+
+        },
+                label = { Text(dest.label, color = iconColor) },
+                modifier = Modifier.testTag(testTag),
+                colors =
+                    NavigationBarItemDefaults.colors(
+                        selectedIconColor = iconColor,
+                        unselectedIconColor = iconColor,
+                        selectedTextColor = iconColor,
+                        unselectedTextColor = iconColor,
+                        indicatorColor = Color.Transparent // Remove default indicator
+                    )
+            )
         }
-      }
+    }
 }
 
 // Main App Scaffold
