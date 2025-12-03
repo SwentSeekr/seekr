@@ -8,8 +8,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.swentseekr.seekr.ui.overview.FilterBar
 import com.swentseekr.seekr.ui.overview.FilterButton
+import com.swentseekr.seekr.ui.overview.ModernFilterBar
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
 import java.lang.reflect.Modifier
 import org.junit.Rule
@@ -60,7 +60,7 @@ class OverviewScreenTest {
   @Test
   fun filterBar_displaysAllFilterButtons() {
     composeTestRule.setContent {
-      FilterBar(
+      ModernFilterBar(
           selectedStatus = null,
           selectedDifficulty = null,
           onStatusSelected = {},
