@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.swentseekr.seekr.FakeReviewHuntViewModel
@@ -166,7 +167,7 @@ class SeekrNavigationTest {
     goToProfileTab()
 
     // first MyHunt card
-    firstNode("HUNT_CARD_0").performClick()
+    firstNode("HUNT_CARD_hunt123").performClick()
 
     // wait for EditHunt wrapper tag
     waitUntilTrue(SHORT) {
@@ -317,7 +318,7 @@ class SeekrNavigationTest {
       goToProfileTab()
 
       // Open the first My Hunt card -> navigates to EditHunt(hunt123).
-      firstNode("HUNT_CARD_0").assertIsDisplayed().performClick()
+      firstNode("HUNT_CARD_hunt123").assertIsDisplayed().performClick()
       waitUntilTrue(MED) {
         node(NavigationTestTags.EDIT_HUNT_SCREEN).assertIsDisplayed()
         true
@@ -463,7 +464,6 @@ class SeekrNavigationTest {
     val hunt = createHunt(uid = "review-123", title = "Reviewable Hunt")
 
     withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
-      // Re-compose with fake repo.
       compose.runOnUiThread {
         compose.activity.setContent {
           SeekrMainNavHost(
@@ -473,7 +473,7 @@ class SeekrNavigationTest {
         }
       }
 
-      // Wait for the overview list to appear.
+      // Wait for overview list
       waitUntilTrue(MED) {
         compose
             .onNodeWithTag(OverviewScreenTestTags.HUNT_LIST, useUnmergedTree = true)
@@ -481,14 +481,14 @@ class SeekrNavigationTest {
         true
       }
 
-      // Open the hunt card screen.
+      // Open HuntCard
       compose
           .onAllNodesWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
           .onFirst()
           .assertExists()
           .performClick()
 
-      // Wait for HuntCard wrapper to exist.
+      // Wait for HuntCard screen
       waitUntilTrue(MED) {
         compose
             .onAllNodesWithTag(NavigationTestTags.HUNTCARD_SCREEN, useUnmergedTree = true)
@@ -496,93 +496,49 @@ class SeekrNavigationTest {
             .isNotEmpty()
       }
 
-      // Still ensure we're on a non-tab route (bottom bar hidden).
       node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
 
-      // BEST EFFORT: tap an "Add review" style control to trigger HuntCardScreen.addReview
-      // callback.
-
-      val didClickAddReview =
-          listOf<(Unit) -> Boolean>(
-                  {
-                    listOf(
-                            "ADD_REVIEW",
-                            "ADD_REVIEW_BUTTON",
-                            "HUNT_ADD_REVIEW",
-                            "HUNTCARD_ADD_REVIEW",
-                            "REVIEW_HUNT")
-                        .any { tag -> tryClickByTag(tag) }
-                  },
-                  {
-                    arrayOf("Add review", "Add Review", "Write review", "Write a review").any { d ->
-                      tryClickByDesc(d)
-                    }
-                  },
-                  {
-                    arrayOf("Add review", "Add Review", "Write review", "Write a review").any { t ->
-                      tryClickByText(t)
-                    }
-                  },
-              )
-              .any { it(Unit) }
-
-      check(didClickAddReview) { "Could not find Add Review control on HuntCardScreen." }
-
-      // Tap the review button to trigger HuntCardScreen.addReview
-      /*compose.waitForIdle()
       compose
-          .onNodeWithTag(HuntCardScreenTestTags.REVIEW_BUTTON)
+          .onNodeWithTag("HUNT_CARD_LIST", useUnmergedTree = true)
+          .performScrollToNode(hasTestTag(HuntCardScreenTestTags.REVIEW_BUTTON))
+
+      // --- CLICK THE REAL BUTTON (Add review or Edit hunt) ---
+      compose
+          .onNodeWithTag(HuntCardScreenTestTags.REVIEW_BUTTON, useUnmergedTree = true)
           .assertExists()
           .assertIsDisplayed()
           .performClick()
 
-       */
-
-      // Wait until AddReview wrapper is present.
+      // Wait for AddReview screen
       waitUntilTrue(MED) {
         compose
             .onAllNodesWithTag(NavigationTestTags.REVIEW_HUNT_SCREEN, useUnmergedTree = true)
             .fetchSemanticsNodes()
             .isNotEmpty()
       }
+
       compose
-          .onAllNodesWithTag(NavigationTestTags.REVIEW_HUNT_SCREEN, useUnmergedTree = true)
-          .onFirst()
+          .onNodeWithTag(NavigationTestTags.REVIEW_HUNT_SCREEN, useUnmergedTree = true)
           .assertIsDisplayed()
       node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
 
-      // Try any in-screen back / cancel / done action wired inside AddReviewScreen.
-      runCatching {
-            clickAny(
-                {
-                  tryClickByTag(
-                      "REVIEW_DONE", "REVIEW_SUBMIT", "SUBMIT_REVIEW", "REVIEW_CANCEL", "CANCEL")
-                },
-                { tryClickByDesc("Back", "Cancel", "Navigate up") },
-                { tryClickByText("Back", "Cancel", "Done", "Submit") },
-            )
-          }
-          .getOrNull()
+      // Press system back
+      compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
 
-      // After leaving AddReview, we should be back on HuntCard (still no bottom bar).
-      waitUntilTrue(LONG) {
-        val reviewGone =
-            compose
-                .onAllNodesWithTag(NavigationTestTags.REVIEW_HUNT_SCREEN, useUnmergedTree = true)
-                .fetchSemanticsNodes()
-                .isEmpty()
-        val huntCardPresent =
-            compose
-                .onAllNodesWithTag(NavigationTestTags.HUNTCARD_SCREEN, useUnmergedTree = true)
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        reviewGone && huntCardPresent
+      // Back to HuntCard
+      waitUntilTrue(MED) {
+        compose
+            .onAllNodesWithTag(NavigationTestTags.REVIEW_HUNT_SCREEN, useUnmergedTree = true)
+            .fetchSemanticsNodes()
+            .isEmpty()
       }
 
       compose
           .onAllNodesWithTag(NavigationTestTags.HUNTCARD_SCREEN, useUnmergedTree = true)
           .onFirst()
           .assertIsDisplayed()
+
+      // Bottom bar still hidden (expected)
       node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
     }
   }
