@@ -25,8 +25,10 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
  * @return a [BitmapDescriptor] suitable for use in `MarkerOptions.icon()`.
  */
 fun bitmapDescriptorFromVector(context: Context, vectorResId: Int): BitmapDescriptor {
-  val vectorDrawable = ContextCompat.getDrawable(context, vectorResId)
-  vectorDrawable!!.setBounds(0, 0, vectorDrawable.intrinsicWidth, vectorDrawable.intrinsicHeight)
+  val vectorDrawable =
+      ContextCompat.getDrawable(context, vectorResId)
+          ?: error("Resource ID $vectorResId could not be loaded as a drawable.")
+  vectorDrawable.setBounds(0, 0, vectorDrawable.intrinsicWidth, vectorDrawable.intrinsicHeight)
 
   val bitmap = createBitmap(vectorDrawable.intrinsicWidth, vectorDrawable.intrinsicHeight)
 
