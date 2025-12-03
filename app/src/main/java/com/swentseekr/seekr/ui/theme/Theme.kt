@@ -14,7 +14,7 @@ private val LightColorScheme =
     lightColorScheme(
         primary = Green,
         onPrimary = White,
-        secondary = MediumYellow,
+        secondary = Salmon,
         onSecondary = GrayDislike,
         tertiary = GrayBackgound,
         onTertiary = Black,

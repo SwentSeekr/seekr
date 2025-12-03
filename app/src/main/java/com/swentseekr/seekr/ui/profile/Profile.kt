@@ -26,7 +26,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -34,6 +33,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -212,7 +212,7 @@ fun ProfileScreen(
           FloatingActionButton(
               onClick = onAddHunt,
               modifier = Modifier.testTag(ProfileTestTags.ADD_HUNT),
-              containerColor = Color(0xFF00C853),
+              containerColor = MaterialTheme.colorScheme.primary,
               contentColor = Color.White,
               shape = CircleShape) {
                 Icon(
@@ -222,7 +222,7 @@ fun ProfileScreen(
               }
         }
       },
-      containerColor = Color(0xFFF8F9FA),
+      containerColor = MaterialTheme.colorScheme.onPrimary,
       modifier = Modifier.testTag(ProfileTestTags.PROFILE_SCREEN)) { padding ->
         Column(
             modifier = Modifier.fillMaxSize().padding(padding),
@@ -282,7 +282,8 @@ fun ModernProfileHeader(
       modifier =
           Modifier.fillMaxWidth()
               .background(
-                  Brush.verticalGradient(colors = listOf(Color(0xFF00C853), Color(0xFF00A843))))) {
+                  Brush.verticalGradient(
+                      colors = listOf(MaterialTheme.colorScheme.primary, Color(0xFFE8847C))))) {
         Column(modifier = Modifier.fillMaxWidth().padding(20.dp)) {
           // Settings or Go Back button
           Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {

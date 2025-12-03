@@ -1,16 +1,24 @@
 package com.swentseekr.seekr.ui.navigation
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -34,15 +42,6 @@ import com.swentseekr.seekr.ui.overview.OverviewScreen
 import com.swentseekr.seekr.ui.profile.EditProfileScreen
 import com.swentseekr.seekr.ui.profile.ProfileScreen
 import com.swentseekr.seekr.ui.settings.SettingsScreen
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 
 // Destinations as sealed class
 sealed class SeekrDestination(
@@ -95,72 +94,59 @@ fun SeekrNavigationBar(
     currentDestination: SeekrDestination,
     onTabSelected: (SeekrDestination) -> Unit
 ) {
-    val containerColor = MaterialTheme.colorScheme.onPrimary
-    val iconColor = MaterialTheme.colorScheme.primary
+  val containerColor = MaterialTheme.colorScheme.onPrimary
+  val iconColor = MaterialTheme.colorScheme.primary
 
-    NavigationBar(
-        containerColor = containerColor,
-        modifier = Modifier.testTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU)) {
+  NavigationBar(
+      containerColor = containerColor,
+      modifier = Modifier.testTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU)) {
         SeekrDestination.all.forEach { dest ->
-            val testTag =
-                when (dest) {
-                    is SeekrDestination.Overview -> NavigationTestTags.OVERVIEW_TAB
-                    is SeekrDestination.Map -> NavigationTestTags.MAP_TAB
-                    is SeekrDestination.Profile -> NavigationTestTags.PROFILE_TAB
-                    else -> SeekrNavigationDefaults.IgnoredTestTag
+          val testTag =
+              when (dest) {
+                is SeekrDestination.Overview -> NavigationTestTags.OVERVIEW_TAB
+                is SeekrDestination.Map -> NavigationTestTags.MAP_TAB
+                is SeekrDestination.Profile -> NavigationTestTags.PROFILE_TAB
+                else -> SeekrNavigationDefaults.IgnoredTestTag
+              }
+
+          val isSelected = currentDestination.route == dest.route
+
+          NavigationBarItem(
+              selected = isSelected,
+              onClick = { onTabSelected(dest) },
+              icon = {
+                if (isSelected) {
+                  // Icon with shadow halo effect when selected
+                  Box(contentAlignment = Alignment.Center, modifier = Modifier.size(48.dp)) {
+                    // Shadow/halo background
+                    Box(
+                        modifier =
+                            Modifier.size(40.dp)
+                                .background(
+                                    color = iconColor.copy(alpha = 0.12f), shape = CircleShape))
+                    Icon(
+                        dest.icon,
+                        contentDescription = dest.label,
+                        tint = iconColor,
+                        modifier = Modifier.size(24.dp))
+                  }
+                } else {
+                  // Normal icon when not selected
+                  Icon(dest.icon, contentDescription = dest.label, tint = iconColor)
                 }
-
-            val isSelected = currentDestination.route == dest.route
-
-            NavigationBarItem(
-                selected = isSelected,
-                onClick = { onTabSelected(dest) },
-                icon = {
-                    if (isSelected) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.size(48.dp)
-                        ) {
-                            // Only the shadow, no background halo
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .shadow(
-                                        elevation = 12.dp,
-                                        shape = CircleShape,
-                                        clip = false
-                                    )
-                            )
-
-                            Icon(
-                                dest.icon,
-                                contentDescription = dest.label,
-                                tint = iconColor,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                    } else {
-                        Icon(
-                            dest.icon,
-                            contentDescription = dest.label,
-                            tint = iconColor
-                        )
-                    }
-
-        },
-                label = { Text(dest.label, color = iconColor) },
-                modifier = Modifier.testTag(testTag),
-                colors =
-                    NavigationBarItemDefaults.colors(
-                        selectedIconColor = iconColor,
-                        unselectedIconColor = iconColor,
-                        selectedTextColor = iconColor,
-                        unselectedTextColor = iconColor,
-                        indicatorColor = Color.Transparent // Remove default indicator
-                    )
-            )
+              },
+              label = { Text(dest.label, color = iconColor) },
+              modifier = Modifier.testTag(testTag),
+              colors =
+                  NavigationBarItemDefaults.colors(
+                      selectedIconColor = iconColor,
+                      unselectedIconColor = iconColor,
+                      selectedTextColor = iconColor,
+                      unselectedTextColor = iconColor,
+                      indicatorColor = Color.Transparent // Remove default indicator
+                      ))
         }
-    }
+      }
 }
 
 // Main App Scaffold
