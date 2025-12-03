@@ -276,6 +276,7 @@ private fun HuntImagePage(
                 cameraDistance = cameraDistancePx
               }
               .fillMaxSize()
+              .testTag(HuntCardScreenTestTags.IMAGE_PAGE_PREFIX + page)
               .clickable(enabled = isCurrentPage) { onClickCurrent() }) {
 
         // IMAGE
