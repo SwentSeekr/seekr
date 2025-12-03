@@ -399,10 +399,9 @@ fun ModernEmptyReviewsState() {
               modifier = Modifier.size(48.dp),
               tint = Color(0xFFCCCCCC))
           Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = HuntCardScreenStrings.NoReviews,
-                modifier = Modifier.testTag("NO_REVIEWS_TEXT")
-            )
+          Text(
+              text = HuntCardScreenStrings.NoReviews,
+              modifier = Modifier.testTag("NO_REVIEWS_TEXT"))
         }
       }
 }
