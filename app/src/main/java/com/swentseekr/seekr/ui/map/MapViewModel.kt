@@ -5,41 +5,36 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
-import com.google.maps.android.PolyUtil
 import com.swentseekr.seekr.BuildConfig
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
 import com.swentseekr.seekr.model.hunt.HuntsRepository
 import com.swentseekr.seekr.model.map.Location
-import java.net.HttpURLConnection
-import java.net.URL
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONObject
-
-private const val DEFAULT_COUNT = 0
-private const val VALIDATION_RADIUS = 25
 
 /**
- * Immutable UI model for the Map screen.
+ * UI state for the entire map screen.
  *
- * @property target Map camera target used for the initial/overview position. Defaults to Lausanne.
- * @property hunts All hunts currently available for display on the map.
- * @property selectedHunt The hunt selected in overview mode (null when none is selected).
- * @property isFocused Whether the UI shows only the selected hunt’s route (start/middle/end).
- * @property errorMsg Optional human-readable error for transient failures (e.g., loading).
- * @property route Decoded list of [LatLng] points forming the street-following path returned by the
- *   Google Directions API.
- * @property isRouteLoading Whether the Directions API request is in progress for the selected hunt.
+ * @property target initial camera target position on the map.
+ * @property hunts list of hunts available to display.
+ * @property selectedHunt the currently selected hunt (from marker or popup).
+ * @property isFocused whether the UI is currently showing a focused hunt view.
+ * @property errorMsg a user-facing error message to display, or null if none.
+ * @property route polyline points representing the current route (overview or next checkpoint).
+ * @property isRouteLoading whether route generation is in progress.
+ * @property isHuntStarted whether the user has begun performing the selected hunt.
+ * @property validatedCount number of checkpoints validated so far.
+ * @property validationRadiusMeters threshold for validating checkpoint proximity.
+ * @property currentDistanceToNextMeters distance from user to next checkpoint in meters.
  */
 data class MapUIState(
-    val target: LatLng = LatLng(46.519962, 6.633597),
+    val target: LatLng = LatLng(MapConfig.DefaultLat, MapConfig.DefaultLng),
     val hunts: List<Hunt> = emptyList(),
     val selectedHunt: Hunt? = null,
     val isFocused: Boolean = false,
@@ -47,42 +42,40 @@ data class MapUIState(
     val route: List<LatLng> = emptyList(),
     val isRouteLoading: Boolean = false,
     val isHuntStarted: Boolean = false,
-    val validatedCount: Int = DEFAULT_COUNT,
-    val validationRadiusMeters: Int = VALIDATION_RADIUS
+    val validatedCount: Int = MapConfig.DefaultValidatedCount,
+    val validationRadiusMeters: Int = MapConfig.ValidationRadiusMeters,
+    val currentDistanceToNextMeters: Int? = null
 )
 
 /**
- * ViewModel orchestrating map data and UI state transitions.
+ * ViewModel for the map screen.
  *
- * Responsibilities:
- * - Fetch hunts from a [HuntsRepository] and expose them via [uiState].
- * - Observe authentication changes to refresh data upon login.
- * - Handle map interactions: marker selection, “View Hunt”, and “Back to all hunts”.
+ * Responsible for:
+ * - Loading hunts from the repository
+ * - Managing hunt selection & focus mode
+ * - Computing routes using the Directions API
+ * - Validating user progress through checkpoints
+ * - Tracking distance to next checkpoint
  *
- * Construction:
- * - By default uses [HuntRepositoryProvider.repository], but any [HuntsRepository] can be injected
- *   in tests.
+ * The ViewModel exposes state via [uiState] and performs all asynchronous data operations using
+ * [viewModelScope].
  *
- * Threading:
- * - All data loading is launched in [viewModelScope]; UI state updates are emitted to a
- *   [MutableStateFlow] and exposed as [StateFlow].
- *
- * @param repository Source of truth for hunts; defaults to the shared app repository provider.
+ * @param repository repository providing hunts data (defaults to app provider).
+ * @param ioDispatcher dispatcher used for network/disk IO.
  */
-class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvider.repository) :
-    ViewModel() {
-
-  companion object {
-    private fun toLatLng(location: Location): LatLng {
-      return LatLng(location.latitude, location.longitude)
-    }
-  }
+class MapViewModel(
+    private val repository: HuntsRepository = HuntRepositoryProvider.repository,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+) : ViewModel() {
 
   private val _uiState = MutableStateFlow(MapUIState())
+  /** Immutable UI state exposed to UI. */
   val uiState: StateFlow<MapUIState> = _uiState.asStateFlow()
 
   init {
     fetchHunts()
+
+    // Reload hunts when authentication state changes (e.g., user logs in).
     Firebase.auth.addAuthStateListener {
       if (it.currentUser != null) {
         fetchHunts()
@@ -90,48 +83,37 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
     }
   }
 
-  /** Sets a transient error message in the UI state. */
-  private fun setErrorMsg(errorMsg: String) {
+  /** Updates the UI error message. */
+  private fun setErrorMsg(errorMsg: String?) {
     _uiState.value = _uiState.value.copy(errorMsg = errorMsg)
   }
 
-  /** Clears any existing error message from the UI state. */
+  /** Clears any displayed error message. */
   fun clearErrorMsg() {
-    _uiState.value = _uiState.value.copy(errorMsg = null)
+    setErrorMsg(null)
   }
 
-  /** Forces a data reload (e.g., pull-to-refresh from UI). */
+  /** Refreshes all hunt content by re-fetching from repository. */
   fun refreshUIState() {
     fetchHunts()
   }
 
   /**
-   * Handles a marker selection in overview mode.
+   * Selects a hunt when a marker is clicked.
    *
-   * Sets [MapUIState.selectedHunt] to the tapped hunt; the map composable reacts by showing a
-   * preview popup and animating the camera to the hunt’s start.
+   * @param hunt the hunt the user clicked.
    */
   fun onMarkerClick(hunt: Hunt) {
     _uiState.value = _uiState.value.copy(selectedHunt = hunt)
   }
 
-  /**
-   * Enters focused mode for the current [MapUIState.selectedHunt].
-   *
-   * In focused mode, only start/middle/end markers for the selected hunt are rendered and the
-   * camera fits all checkpoints.
-   */
+  /** Enters focused mode for the selected hunt and triggers route computation. */
   fun onViewHuntClick() {
     _uiState.value = _uiState.value.copy(isFocused = true, route = emptyList())
-    viewModelScope.launch { computeRouteForSelectedHunt(travelMode = "walking") }
+    viewModelScope.launch { computeRouteForSelectedHunt(travelMode = MapConfig.TravelModeWalking) }
   }
 
-  /**
-   * Leaves focused/preview state and clears any current selection.
-   *
-   * After this call the map returns to the overview rendering (one marker per hunt). Camera
-   * movement is controlled by the composable (e.g., no forced reset).
-   */
+  /** Exits focused mode and resets hunt-related state. */
   fun onBackToAllHunts() {
     _uiState.value =
         _uiState.value.copy(
@@ -139,237 +121,191 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
             selectedHunt = null,
             route = emptyList(),
             isHuntStarted = false,
-            validatedCount = DEFAULT_COUNT)
+            validatedCount = MapConfig.DefaultValidatedCount,
+            currentDistanceToNextMeters = null)
   }
 
   /**
-   * Loads hunts from the repository and updates [uiState].
+   * Retrieves all hunts from the repository and updates map state.
    *
-   * Success:
-   * - Updates [MapUIState.hunts].
-   * - Sets [MapUIState.target] to the start of the first hunt, or Lausanne when no hunts exist.
-   *
-   * Failure:
-   * - Populates [MapUIState.errorMsg] with a user-facing message.
+   * If no hunts are available, the default target location is used.
    */
   private fun fetchHunts() {
     viewModelScope.launch {
       try {
         val hunts = repository.getAllHunts()
-        val target = hunts.firstOrNull()?.start ?: Location(46.519962, 6.633597, "Lausanne")
-        _uiState.value = MapUIState(target = toLatLng(target), hunts = hunts)
+
+        val targetLocation =
+            hunts.firstOrNull()?.start
+                ?: Location(MapConfig.DefaultLat, MapConfig.DefaultLng, MapConfig.DefaultCityName)
+
+        _uiState.value = MapUIState(target = targetLocation.toLatLng(), hunts = hunts)
       } catch (e: Exception) {
-        setErrorMsg("Failed to load hunts: ${e.message}")
+        setErrorMsg(MapScreenStrings.ErrorLoadHuntsPrefix + (e.message ?: ""))
       }
     }
   }
 
   /**
-   * Computes the street-following route for the currently selected hunt using the Google Directions
-   * API.
-   * - Builds a request based on the hunt’s start, middle checkpoints, and end coordinates.
-   * - Launches the network call on [Dispatchers.IO] to avoid blocking the main thread.
-   * - On success, updates [MapUIState.route] with a decoded polyline following real roads and sets
-   *   [MapUIState.isRouteLoading] to false.
-   * - On failure, catches the exception, sets [MapUIState.errorMsg], clears any existing route, and
-   *   resets the loading flag.
+   * Computes the route for the currently selected hunt (full hunt path).
    *
-   * @param travelMode Travel mode for the route (e.g., "walking" or "driving").
+   * @param travelMode mode used by Directions API (e.g., "walking").
    */
-  private suspend fun computeRouteForSelectedHunt(travelMode: String = "walking") {
+  private suspend fun computeRouteForSelectedHunt(
+      travelMode: String = MapConfig.TravelModeWalking
+  ) {
     val hunt = _uiState.value.selectedHunt ?: return
     _uiState.value = _uiState.value.copy(isRouteLoading = true)
 
     try {
       val points =
-          withContext(Dispatchers.IO) {
+          withContext(ioDispatcher) {
             requestDirectionsPolyline(
                 originLat = hunt.start.latitude,
                 originLng = hunt.start.longitude,
                 destLat = hunt.end.latitude,
                 destLng = hunt.end.longitude,
                 waypoints = hunt.middlePoints.map { it.latitude to it.longitude },
-                travelMode = travelMode)
+                travelMode = travelMode,
+                apiKey = BuildConfig.MAPS_API_KEY)
           }
-      setErrorMsg("")
+
+      clearErrorMsg()
       _uiState.value = _uiState.value.copy(route = points, isRouteLoading = false)
     } catch (e: Exception) {
-      setErrorMsg("Failed to get route: ${e.message}")
+      setErrorMsg(MapScreenStrings.ErrorRoutePrefix + (e.message ?: ""))
       _uiState.value = _uiState.value.copy(isRouteLoading = false, route = emptyList())
     }
   }
 
   /**
-   * Performs a synchronous call to the Google Directions REST API and decodes the resulting route
-   * polyline.
-   * - Constructs the API request URL with origin, destination, waypoints, and travel mode.
-   * - Executes an HTTP GET request via [HttpURLConnection].
-   * - Parses the JSON response and handles API error statuses.
-   * - Decodes detailed step-level polylines from each leg for high-precision paths.
-   * - Falls back to the overview polyline if step data is unavailable.
-   * - Returns a list of [LatLng] points representing the route in map order.
+   * Updates the distance between the user and the next checkpoint.
    *
-   * @param originLat Latitude of the route start.
-   * @param originLng Longitude of the route start.
-   * @param destLat Latitude of the route end.
-   * @param destLng Longitude of the route end.
-   * @param waypoints Ordered list of intermediate checkpoint coordinates (may be empty).
-   * @param travelMode Travel mode to request from Directions API (e.g., "walking", "driving").
-   * @return List of [LatLng] points forming the decoded route polyline.
-   * @throws IllegalStateException if the API response contains an error status.
+   * Called continuously when location updates are received.
+   *
+   * @param currentLocation the user's current coordinates.
    */
-  private fun requestDirectionsPolyline(
-      originLat: Double,
-      originLng: Double,
-      destLat: Double,
-      destLng: Double,
-      waypoints: List<Pair<Double, Double>>,
-      travelMode: String
-  ): List<LatLng> {
+  fun updateCurrentDistanceToNext(currentLocation: LatLng) {
+    val state = _uiState.value
+    val hunt = state.selectedHunt ?: return
 
-    val origin = "${originLat},${originLng}"
-    val destination = "${destLat},${destLng}"
+    val distance =
+        computeDistanceToNextPoint(
+            hunt = hunt, validatedCount = state.validatedCount, currentLocation = currentLocation)
 
-    val waypointParam =
-        if (waypoints.isNotEmpty()) {
-          waypoints.joinToString(separator = "|") { (lat, lng) -> "via:$lat,$lng" }
-        } else null
-
-    val base = "https://maps.googleapis.com/maps/api/directions/json"
-    val params =
-        buildList {
-              add("origin=" + URLEncoder.encode(origin, StandardCharsets.UTF_8.name()))
-              add("destination=" + URLEncoder.encode(destination, StandardCharsets.UTF_8.name()))
-              add("mode=" + URLEncoder.encode(travelMode, StandardCharsets.UTF_8.name()))
-              waypointParam?.let {
-                add("waypoints=" + URLEncoder.encode(it, StandardCharsets.UTF_8.name()))
-              }
-              add(
-                  "key=" +
-                      URLEncoder.encode(BuildConfig.MAPS_API_KEY, StandardCharsets.UTF_8.name()))
-            }
-            .joinToString("&")
-
-    val url = URL("$base?$params")
-    val conn =
-        (url.openConnection() as HttpURLConnection).apply {
-          requestMethod = "GET"
-          connectTimeout = 15000
-          readTimeout = 15000
-          doInput = true
-        }
-
-    conn.inputStream.use { stream ->
-      val body = stream.bufferedReader().readText()
-      val json = JSONObject(body)
-
-      val status = json.optString("status")
-      if (status != "OK") {
-        val message = json.optString("error_message", status)
-        throw IllegalStateException("Directions API error: $message")
-      }
-
-      val routes = json.getJSONArray("routes")
-      if (routes.length() == 0) return emptyList()
-
-      val firstRoute = routes.getJSONObject(0)
-      val legs = firstRoute.getJSONArray("legs")
-
-      val fullPath = mutableListOf<LatLng>()
-
-      for (i in 0 until legs.length()) {
-        val leg = legs.getJSONObject(i)
-        val steps = leg.getJSONArray("steps")
-        for (j in 0 until steps.length()) {
-          val step = steps.getJSONObject(j)
-          val poly = step.getJSONObject("polyline").getString("points")
-          val stepPoints = PolyUtil.decode(poly)
-
-          if (fullPath.isNotEmpty()) {
-            fullPath.addAll(stepPoints.drop(1))
-          } else {
-            fullPath.addAll(stepPoints)
-          }
-        }
-      }
-
-      if (fullPath.isEmpty()) {
-        val overview = firstRoute.getJSONObject("overview_polyline").getString("points")
-        return PolyUtil.decode(overview)
-      }
-
-      return fullPath
-    }
+    _uiState.value = state.copy(currentDistanceToNextMeters = distance)
   }
 
-  /**
-   * Starts the hunt by changing the UI state to focused mode and initializing route calculation.
-   *
-   * This method sets the hunt as started, clears the existing route, and begins calculating the
-   * route using the [computeRouteForSelectedHunt] method.
-   */
+  /** Starts the selected hunt and computes the route from start to end. */
   fun startHunt() {
     _uiState.value.selectedHunt ?: return
+
     _uiState.value =
         _uiState.value.copy(
             isFocused = true,
             route = emptyList(),
             isHuntStarted = true,
-            validatedCount = DEFAULT_COUNT)
-    viewModelScope.launch { computeRouteForSelectedHunt(travelMode = "walking") }
+            validatedCount = MapConfig.DefaultValidatedCount,
+            currentDistanceToNextMeters = null)
+
+    viewModelScope.launch { computeRouteForSelectedHunt(travelMode = MapConfig.TravelModeWalking) }
   }
 
   /**
-   * Validates the user's current location against the next checkpoint in the hunt.
+   * Validates whether the user is close enough to the next checkpoint.
    *
-   * This method checks if the user's current location is within the validation radius of the next
-   * checkpoint in the hunt and updates the validation count if the point is validated. If the
-   * validation fails, an error message is displayed.
-   *
-   * @param currentLocation the user's current location to validate against the next checkpoint.
+   * Updates:
+   * - validatedCount (if success)
+   * - currentDistanceToNextMeters
+   * - error message if too far
    */
   fun validateCurrentPoint(currentLocation: LatLng) {
     val state = _uiState.value
     val hunt = state.selectedHunt ?: return
     if (!state.isHuntStarted) return
 
-    val ordered = buildList {
-      add(LatLng(hunt.start.latitude, hunt.start.longitude))
-      hunt.middlePoints.forEach { add(LatLng(it.latitude, it.longitude)) }
-      add(LatLng(hunt.end.latitude, hunt.end.longitude))
-    }
+    val nextPoint = nextPointFor(hunt, state.validatedCount) ?: return
 
-    val nextIdx = state.validatedCount
-    if (nextIdx >= ordered.size) return
-
-    val nextPoint = ordered[nextIdx]
-    val within =
+    val distanceMetersDouble =
         try {
-          com.google.maps.android.SphericalUtil.computeDistanceBetween(
-              currentLocation, nextPoint) <= state.validationRadiusMeters
-        } catch (e: Exception) {
-          false
+          computeDistanceMetersRaw(currentLocation, nextPoint)
+        } catch (_: Exception) {
+          return
         }
 
-    if (within) _uiState.value = state.copy(validatedCount = state.validatedCount + 1)
+    val distanceInt = distanceMetersDouble.toInt()
+    val within = distanceMetersDouble <= state.validationRadiusMeters
+
+    if (within) {
+      val newValidated = state.validatedCount + 1
+      val newDistance =
+          computeDistanceToNextPoint(
+              hunt = hunt, validatedCount = newValidated, currentLocation = currentLocation)
+
+      _uiState.value =
+          state.copy(
+              validatedCount = newValidated,
+              currentDistanceToNextMeters = newDistance,
+              errorMsg = null)
+    } else {
+      _uiState.value =
+          state.copy(
+              currentDistanceToNextMeters = distanceInt,
+              errorMsg =
+                  MapScreenStrings.ErrorTooFarPrefix +
+                      MapConfig.ValidationRadiusMeters +
+                      MapScreenStrings.DistanceMetersSuffix)
+    }
   }
 
   /**
-   * Finishes the hunt after validating all checkpoints and saves the hunt progress.
+   * Computes and updates a route from the user's current location to the next checkpoint.
    *
-   * This method checks if all checkpoints have been validated. If not, an error message is
-   * displayed. If all checkpoints are validated, it calls the [onPersist] callback to save the hunt
-   * as completed.
+   * Used during active hunts when navigation between points is needed.
    *
-   * @param onPersist a callback invoked to persist the completed hunt (e.g., saving to the
-   *   repository).
+   * @param currentLocation user's current map position.
+   */
+  fun routeFromCurrentToNext(currentLocation: LatLng) {
+    val state = _uiState.value
+    val hunt = state.selectedHunt ?: return
+    val nextPoint = nextPointFor(hunt, state.validatedCount) ?: return
+
+    _uiState.value = state.copy(isRouteLoading = true)
+
+    viewModelScope.launch {
+      try {
+        val points =
+            withContext(ioDispatcher) {
+              requestDirectionsPolyline(
+                  originLat = currentLocation.latitude,
+                  originLng = currentLocation.longitude,
+                  destLat = nextPoint.latitude,
+                  destLng = nextPoint.longitude,
+                  waypoints = emptyList(),
+                  travelMode = MapConfig.TravelModeWalking,
+                  apiKey = BuildConfig.MAPS_API_KEY)
+            }
+
+        _uiState.value =
+            _uiState.value.copy(route = points, isRouteLoading = false, errorMsg = null)
+      } catch (e: Exception) {
+        setErrorMsg(MapScreenStrings.ErrorRoutePrefix + (e.message ?: ""))
+        _uiState.value = _uiState.value.copy(isRouteLoading = false, route = emptyList())
+      }
+    }
+  }
+
+  /**
+   * Completes a hunt only if all checkpoints have been validated.
+   *
+   * @param onPersist optional persistence operation for saving completion to a database.
    */
   fun finishHunt(onPersist: suspend (Hunt) -> Unit = {}) {
     val state = _uiState.value
     val hunt = state.selectedHunt ?: return
-    val total = 2 + hunt.middlePoints.size
-    if (state.validatedCount < total) {
-      setErrorMsg("You still have checkpoints to validate.")
+
+    if (!isHuntFullyValidated(hunt, state.validatedCount)) {
+      setErrorMsg(MapScreenStrings.ErrorIncompleteHunt)
       return
     }
 
@@ -379,12 +315,13 @@ class MapViewModel(private val repository: HuntsRepository = HuntRepositoryProvi
         _uiState.value =
             state.copy(
                 isHuntStarted = false,
-                validatedCount = DEFAULT_COUNT,
+                validatedCount = MapConfig.DefaultValidatedCount,
                 isFocused = false,
                 selectedHunt = null,
-                route = emptyList())
+                route = emptyList(),
+                currentDistanceToNextMeters = null)
       } catch (e: Exception) {
-        setErrorMsg("Failed to finish hunt: ${e.message}")
+        setErrorMsg(MapScreenStrings.ErrorFinishHuntPrefix + (e.message ?: ""))
       }
     }
   }
