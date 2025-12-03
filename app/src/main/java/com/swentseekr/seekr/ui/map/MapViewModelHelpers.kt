@@ -162,15 +162,25 @@ private fun buildDirectionsUrl(
 
   val params =
       buildList {
-            add("${UrlParams.ORIGIN}=" + URLEncoder.encode(origin, HttpConstants.UTF_8))
-            add("${UrlParams.DESTINATION}=" + URLEncoder.encode(destination, HttpConstants.UTF_8))
-            add("${UrlParams.MODE}=" + URLEncoder.encode(travelMode, HttpConstants.UTF_8))
+            add(
+                "${UrlParams.ORIGIN}${UrlParams.EQUAL}" +
+                    URLEncoder.encode(origin, HttpConstants.UTF_8))
+            add(
+                "${UrlParams.DESTINATION}${UrlParams.EQUAL}" +
+                    URLEncoder.encode(destination, HttpConstants.UTF_8))
+            add(
+                "${UrlParams.MODE}${UrlParams.EQUAL}" +
+                    URLEncoder.encode(travelMode, HttpConstants.UTF_8))
             waypointParam?.let {
-              add("${UrlParams.WAYPOINTS}=" + URLEncoder.encode(it, HttpConstants.UTF_8))
+              add(
+                  "${UrlParams.WAYPOINTS}${UrlParams.EQUAL}" +
+                      URLEncoder.encode(it, HttpConstants.UTF_8))
             }
-            add("${UrlParams.KEY}=" + URLEncoder.encode(apiKey, HttpConstants.UTF_8))
+            add(
+                "${UrlParams.KEY}${UrlParams.EQUAL}" +
+                    URLEncoder.encode(apiKey, HttpConstants.UTF_8))
           }
-          .joinToString("&")
+          .joinToString(UrlParams.AND)
 
   return URL("${MapConfig.DirectionsBaseUrl}?$params")
 }

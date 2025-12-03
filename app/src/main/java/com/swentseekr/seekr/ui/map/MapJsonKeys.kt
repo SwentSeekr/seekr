@@ -20,6 +20,8 @@ object JsonErrorMessages {
 }
 
 object UrlParams {
+  const val AND = "&"
+  const val EQUAL = "="
   const val ORIGIN = "origin"
   const val DESTINATION = "destination"
   const val MODE = "mode"
