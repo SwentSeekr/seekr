@@ -1,6 +1,7 @@
 package com.swentseekr.seekr.ui.profile
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -102,5 +103,29 @@ class ProfileReviewsScreenTest {
     }
 
     composeTestRule.onNodeWithTag(ProfileReviewsTestTags.SCREEN).assertIsDisplayed()
+  }
+
+  @Test
+  fun testRatingTextSingularReview() {
+    val singleReview =
+        listOf(createReview(reviewId = "review1", huntId = sampleProfile.myHunts[0].uid))
+
+    val testProfile = sampleProfile.copy(author = sampleProfile.author.copy(reviewRate = 4.5))
+
+    composeTestRule.setContent {
+      val navController = rememberNavController()
+      ProfileReviewsScreen(
+          userId = testProfile.uid,
+          profileViewModel = ProfileViewModel(),
+          onGoBack = {},
+          navController = navController,
+          testProfile = testProfile,
+          testReviews = singleReview)
+    }
+
+    composeTestRule
+        .onNodeWithTag(ProfileReviewsTestTags.RATING_TEXT)
+        .assertIsDisplayed()
+        .assertTextContains("4.5/5.0 - 1 review")
   }
 }
