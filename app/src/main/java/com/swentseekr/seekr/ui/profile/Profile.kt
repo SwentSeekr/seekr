@@ -90,7 +90,7 @@ object ProfileTestTags {
   const val TAB_DONE_HUNTS = "TAB_DONE_HUNTS"
   const val TAB_LIKED_HUNTS = "TAB_LIKED_HUNTS"
 
-  fun getTestTagForHuntCard(hunt: Hunt, index: Int): String = "HUNT_CARD_$index"
+  fun getTestTagForHuntCard(hunt: Hunt, index: Int): String = "HUNT_CARD_${hunt.uid}"
 }
 
 object ProfileConstants {

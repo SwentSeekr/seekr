@@ -10,6 +10,7 @@ class FakeHuntCardViewModelEmptyReview(hunt: Hunt) : HuntCardViewModel() {
   private val _uiState =
       MutableStateFlow(HuntCardUiState(hunt = hunt, isLiked = false, reviewList = emptyList()))
   override val uiState: StateFlow<HuntCardUiState> = _uiState
+
   override fun onLikeClick(huntID: String) {
     val curr = _uiState.value
     _uiState.value = curr.copy(isLiked = !curr.isLiked)
