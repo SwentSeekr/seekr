@@ -29,6 +29,7 @@ object AddReviewScreenDefaults {
   val ButtonElevation: Dp = 4.dp
 
   val TextPadding: Dp = 12.dp
+  val TitleFontSize = 24.sp
 
   val ImageSize: Dp = 120.dp
   val ImageCorners: Dp = 12.dp
