@@ -308,7 +308,8 @@ fun ReviewCard(
     currentUserId: String?,
     // goImages: () -> Unit = {},
     navController: NavHostController,
-    onDeleteReview: (String) -> Unit
+    onDeleteReview: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
 
   val uiState by reviewHuntViewModel.uiState.collectAsState()

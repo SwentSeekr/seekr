@@ -278,13 +278,13 @@ open class ReviewHuntViewModel(
     submitReviewHunt(userId, hunt, context)
   }
 
-    fun loadReview(reviewId: String) = viewModelScope.launch {
+  fun loadReview(reviewId: String) =
+      viewModelScope.launch {
         try {
-            val review = repositoryReview.getReviewHunt(reviewId)
-            _uiState.update { it.copy(photos = review.photos) }
+          val review = repositoryReview.getReviewHunt(reviewId)
+          _uiState.update { it.copy(photos = review.photos) }
         } catch (e: Exception) {
-            Log.e("ReviewHuntViewModel", "Failed to load review $reviewId", e)
+          Log.e("ReviewHuntViewModel", "Failed to load review $reviewId", e)
         }
-    }
-
+      }
 }

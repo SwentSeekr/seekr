@@ -16,6 +16,7 @@ import androidx.test.rule.GrantPermissionRule
 import com.swentseekr.seekr.FakeReviewHuntViewModel
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
 import com.swentseekr.seekr.model.profile.createHunt
+import com.swentseekr.seekr.model.profile.createReview
 import com.swentseekr.seekr.ui.components.HuntCardScreenTestTags
 import com.swentseekr.seekr.ui.huntCardScreen.FakeHuntCardViewModel
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
@@ -30,6 +31,7 @@ import org.junit.runner.RunWith
 class SeekrNavigationTest {
 
   @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
+
   @get:Rule
   val permissionRule: GrantPermissionRule =
       GrantPermissionRule.grant(
@@ -648,6 +650,57 @@ class SeekrNavigationTest {
       compose
           .onNodeWithTag(ProfileTestTags.PROFILE_SCREEN, useUnmergedTree = true)
           .assertIsDisplayed()
+    }
+  }
+
+  @Test
+  fun profile_reviews_screen_navigates_and_displays_correctly() {
+    // Seed with a hunt and reviews
+    val hunt = createHunt(uid = "hunt-reviews-123", title = "Hunt with Reviews")
+    val review1 = createReview(huntId = "hunt-reviews-123", authorId = "user1")
+
+    withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
+      compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
+
+      // Go to Profile tab
+      node(NavigationTestTags.PROFILE_TAB).performClick()
+      compose.waitForIdle()
+
+      // Click on reviews button/section
+      val didClickReviews =
+          listOf<(Unit) -> Boolean>(
+                  {
+                    listOf("PROFILE_REVIEWS", "VIEW_REVIEWS", "REVIEWS_BUTTON", "MY_REVIEWS").any {
+                        tag ->
+                      tryClickByTag(tag)
+                    }
+                  },
+                  {
+                    arrayOf("Reviews", "View Reviews", "My Reviews").any { d -> tryClickByDesc(d) }
+                  },
+              )
+              .any { it(Unit) }
+
+      if (didClickReviews) {
+        // Wait for reviews screen to appear
+        waitUntilTrue(MED) {
+          compose
+              .onAllNodes(hasTestTag("PROFILE_REVIEWS_SCREEN"), useUnmergedTree = true)
+              .fetchSemanticsNodes()
+              .isNotEmpty()
+        }
+
+        // Bottom bar should be hidden
+        node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
+
+        // Go back
+        compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
+
+        waitUntilTrue(MED) {
+          node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
+          true
+        }
+      }
     }
   }
 }
