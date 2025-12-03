@@ -4,6 +4,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 object MapScreenDefaults {
+  const val ZERO_FLOAT: Float = 0f
+  const val ZERO_INT: Int = 0
   val CardPadding: Dp = 6.dp
   val PopupSpacing: Dp = 6.dp
   val PopupImageSize: Dp = 125.dp

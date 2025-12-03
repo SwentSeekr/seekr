@@ -252,8 +252,8 @@ private fun createRoundedMarkerBitmap(
   val path =
       android.graphics.Path().apply {
         addRoundRect(
-            0f,
-            0f,
+            MapScreenDefaults.ZERO_FLOAT,
+            MapScreenDefaults.ZERO_FLOAT,
             sizePx.toFloat(),
             sizePx.toFloat(),
             cornerRadiusPx,
@@ -263,7 +263,7 @@ private fun createRoundedMarkerBitmap(
 
   canvas.clipPath(path)
 
-  drawable.setBounds(0, 0, sizePx, sizePx)
+  drawable.setBounds(MapScreenDefaults.ZERO_INT, MapScreenDefaults.ZERO_INT, sizePx, sizePx)
   drawable.draw(canvas)
 
   // Add border
@@ -275,7 +275,13 @@ private fun createRoundedMarkerBitmap(
       }
 
   canvas.drawRoundRect(
-      0f, 0f, sizePx.toFloat(), sizePx.toFloat(), cornerRadiusPx, cornerRadiusPx, borderPaint)
+      MapScreenDefaults.ZERO_FLOAT,
+      MapScreenDefaults.ZERO_FLOAT,
+      sizePx.toFloat(),
+      sizePx.toFloat(),
+      cornerRadiusPx,
+      cornerRadiusPx,
+      borderPaint)
 
   return output
 }
