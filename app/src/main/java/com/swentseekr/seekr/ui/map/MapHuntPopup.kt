@@ -57,7 +57,7 @@ fun HuntPopup(hunt: Hunt, onViewClick: () -> Unit, onDismiss: () -> Unit) {
 
               Spacer(Modifier.width(MapScreenDefaults.PopupSpacing))
 
-              Column(modifier = Modifier.weight(1f)) {
+              Column(modifier = Modifier.weight(MapScreenDefaults.ONE_FLOAT)) {
                 Text(
                     hunt.title,
                     style = MaterialTheme.typography.titleMedium,
@@ -99,6 +99,30 @@ fun HuntPopup(hunt: Hunt, onViewClick: () -> Unit, onDismiss: () -> Unit) {
 }
 
 /**
+ * Global chip used for both status and difficulty.
+ *
+ * @param label text to display inside the chip.
+ * @param baseColor base color from which background and content colors are derived.
+ */
+@Composable
+private fun HuntMetaChip(label: String, baseColor: Color) {
+  val readableText = baseColor.darken(MapScreenDefaults.ChipContentDarkenFactor)
+
+  Surface(
+      color = baseColor.copy(alpha = MapScreenDefaults.ChipBackgroundAlpha),
+      contentColor = readableText,
+      shape = RoundedCornerShape(MapScreenDefaults.ChipCornerRadius)) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            modifier =
+                Modifier.padding(
+                    horizontal = MapScreenDefaults.ChipHorizontalPadding,
+                    vertical = MapScreenDefaults.ChipVerticalPadding))
+      }
+}
+
+/**
  * Displays a chip representing the current status of a hunt.
  *
  * The chip uses a background color derived from the hunt's status and adjusts text color for
@@ -109,20 +133,9 @@ fun HuntPopup(hunt: Hunt, onViewClick: () -> Unit, onDismiss: () -> Unit) {
 @Composable
 private fun StatusChip(status: HuntStatus) {
   val baseColor = Color(StatusColor(status))
-  val readableText = baseColor.darken(MapScreenDefaults.ChipContentDarkenFactor)
+  val label = status.name.lowercase().replaceFirstChar { it.uppercase() }
 
-  Surface(
-      color = baseColor.copy(alpha = MapScreenDefaults.ChipBackgroundAlpha),
-      contentColor = readableText,
-      shape = RoundedCornerShape(MapScreenDefaults.ChipCornerRadius)) {
-        Text(
-            text = status.name.lowercase().replaceFirstChar { it.uppercase() },
-            style = MaterialTheme.typography.labelMedium,
-            modifier =
-                Modifier.padding(
-                    horizontal = MapScreenDefaults.ChipHorizontalPadding,
-                    vertical = MapScreenDefaults.ChipVerticalPadding))
-      }
+  HuntMetaChip(label = label, baseColor = baseColor)
 }
 
 /**
@@ -136,20 +149,9 @@ private fun StatusChip(status: HuntStatus) {
 @Composable
 private fun DifficultyChip(difficulty: Difficulty) {
   val baseColor = DifficultyColor(difficulty)
-  val readableText = baseColor.darken(MapScreenDefaults.ChipContentDarkenFactor)
+  val label = difficulty.name.lowercase().replaceFirstChar { it.uppercase() }
 
-  Surface(
-      color = baseColor.copy(alpha = MapScreenDefaults.ChipBackgroundAlpha),
-      contentColor = readableText,
-      shape = RoundedCornerShape(MapScreenDefaults.ChipCornerRadius)) {
-        Text(
-            text = difficulty.name.lowercase().replaceFirstChar { it.uppercase() },
-            style = MaterialTheme.typography.labelMedium,
-            modifier =
-                Modifier.padding(
-                    horizontal = MapScreenDefaults.ChipHorizontalPadding,
-                    vertical = MapScreenDefaults.ChipVerticalPadding))
-      }
+  HuntMetaChip(label = label, baseColor = baseColor)
 }
 
 /**
@@ -160,7 +162,12 @@ private fun DifficultyChip(difficulty: Difficulty) {
  */
 private fun Color.darken(factor: Float): Color =
     Color(
-        red = (this.red * factor).coerceIn(0f, 1f),
-        green = (this.green * factor).coerceIn(0f, 1f),
-        blue = (this.blue * factor).coerceIn(0f, 1f),
-        alpha = 1f)
+        red =
+            (this.red * factor).coerceIn(MapScreenDefaults.ZERO_FLOAT, MapScreenDefaults.ONE_FLOAT),
+        green =
+            (this.green * factor).coerceIn(
+                MapScreenDefaults.ZERO_FLOAT, MapScreenDefaults.ONE_FLOAT),
+        blue =
+            (this.blue * factor).coerceIn(
+                MapScreenDefaults.ZERO_FLOAT, MapScreenDefaults.ONE_FLOAT),
+        alpha = MapScreenDefaults.ONE_FLOAT)
