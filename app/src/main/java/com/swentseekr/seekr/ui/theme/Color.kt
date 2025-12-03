@@ -22,6 +22,8 @@ val EasyGreen = Color(0xFFB0D4B1)
 val MediumYellow = Color(0xFFFFDFAD)
 val DifficultRed = Color(0xFFFFC1C1)
 
+val Salmon = Color(0xFFE8847C)
+
 val GrayDislike = Color(0xFF666666)
 val RedLike = Color(0xFFF90606)
 

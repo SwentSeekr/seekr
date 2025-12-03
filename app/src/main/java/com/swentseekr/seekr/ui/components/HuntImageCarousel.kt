@@ -2,14 +2,12 @@ package com.swentseekr.seekr.ui.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -17,8 +15,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
@@ -32,7 +30,6 @@ import com.swentseekr.seekr.R
 import com.swentseekr.seekr.ui.components.HuntCardScreenDefaults.ImageCarouselRotationCenterDegrees
 import com.swentseekr.seekr.ui.components.HuntCardScreenDefaults.ImageIndicatorLastIndexOffset
 import com.swentseekr.seekr.ui.theme.Black
-import com.swentseekr.seekr.ui.theme.White
 import kotlin.math.absoluteValue
 
 /**
@@ -78,7 +75,6 @@ fun HuntImageCarousel(
       currentImage = images[pagerState.currentPage],
       onDismiss = { showFullScreen = false },
   )
-
   Box(
       modifier = modifier.testTag(HuntCardScreenTestTags.IMAGE_CAROUSEL_CONTAINER),
   ) {
@@ -155,13 +151,7 @@ private fun HuntImagePager(
 ) {
   HorizontalPager(
       state = pagerState,
-      modifier =
-          Modifier.fillMaxWidth()
-              .height(HuntCardScreenDefaults.ImageCarouselHeight)
-              .testTag(HuntCardScreenTestTags.IMAGE_PAGER),
-      contentPadding =
-          PaddingValues(horizontal = HuntCardScreenDefaults.ImageCarouselPagerContentPadding),
-      pageSpacing = HuntCardScreenDefaults.ImageCarouselPageSpacing,
+      modifier = Modifier.fillMaxSize().testTag(HuntCardScreenTestTags.IMAGE_PAGER),
   ) { page ->
     // Compute animations / transforms based on current page and scroll offset.
     val transforms = rememberPageTransforms(page = page, pagerState = pagerState)
@@ -279,46 +269,33 @@ private fun HuntImagePage(
 
   Box(
       modifier =
-          Modifier
-              // 3D transform application: scale + Y-axis rotation + camera distance.
-              .graphicsLayer {
+          Modifier.graphicsLayer {
                 scaleX = transforms.scale
                 scaleY = transforms.scale
                 rotationY = transforms.rotationY
                 cameraDistance = cameraDistancePx
               }
-              .shadow(
-                  elevation = HuntCardScreenDefaults.ImageCarouselShadowElevation,
-                  shape = RoundedCornerShape(HuntCardScreenDefaults.ImageCarouselCornerRadius),
-              )
-              .clip(RoundedCornerShape(HuntCardScreenDefaults.ImageCarouselCornerRadius))
-              // White frame behind the image.
-              .background(White)
-              .border(
-                  width = HuntCardScreenDefaults.ImageCarouselWhiteFrame,
-                  color = White,
-                  shape = RoundedCornerShape(HuntCardScreenDefaults.ImageCarouselCornerRadius),
-              )
-              .testTag(HuntCardScreenTestTags.IMAGE_PAGE_PREFIX + page)
-              // Only the currently centered page is clickable to open full screen.
-              .clickable(enabled = isCurrentPage) { onClickCurrent() },
-  ) {
-    AsyncImage(
-        model = image,
-        contentDescription = HuntCardScreenStrings.HuntPicturePageDescriptionPrefix + page,
-        modifier = Modifier.fillMaxSize(),
-        placeholder = painterResource(R.drawable.empty_image),
-        error = painterResource(R.drawable.empty_image),
-        // Crop in carousel to fully fill the card and keep the visual impact.
-        contentScale = ContentScale.Crop,
-    )
+              .fillMaxSize()
+              .clickable(enabled = isCurrentPage) { onClickCurrent() }) {
 
-    // Dark overlay whose alpha depends on the distance from the center page.
-    Box(
-        modifier =
-            Modifier.matchParentSize().background(Black.copy(alpha = transforms.overlayAlpha)),
-    )
-  }
+        // IMAGE
+        AsyncImage(
+            model = image,
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            placeholder = painterResource(R.drawable.empty_image),
+            error = painterResource(R.drawable.empty_image),
+            contentScale =
+                ContentScale.FillBounds // revien CROP maintenant que gradient est intégré !
+            )
+        Box(
+            modifier =
+                Modifier.fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f)),
+                            startY = 200f))) {}
+      }
 }
 
 /**
