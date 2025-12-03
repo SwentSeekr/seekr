@@ -18,6 +18,24 @@ import com.swentseekr.seekr.ui.theme.Green
 import com.swentseekr.seekr.ui.theme.White
 import kotlinx.coroutines.launch
 
+/**
+ * Displays all overlay controls when a hunt is in "focused" mode.
+ *
+ * Includes:
+ * - A top-left back/stop button
+ * - A bottom card showing progress, next checkpoint, and actions (start, validate, finish)
+ *
+ * This composable is scoped to a [BoxScope] for easy positioning on top of the map.
+ *
+ * @param uiState current UI state of the map including progress and distance.
+ * @param selectedHunt the hunt currently being viewed.
+ * @param onStartHunt callback when user chooses to begin the hunt.
+ * @param onValidateCurrentLocation callback for validating proximity to the next checkpoint.
+ * @param onFinishHunt callback that receives an optional persistence lambda used to store hunt
+ *   completion.
+ * @param onBackToAllHunts invoked when the user exits the focused hunt view.
+ * @param onShowStopHuntDialog invoked to show the dialog that confirms stopping the hunt.
+ */
 @Composable
 fun BoxScope.FocusedHuntControls(
     uiState: MapUIState,
@@ -51,6 +69,21 @@ fun BoxScope.FocusedHuntControls(
       onFinishHunt = onFinishHunt)
 }
 
+/**
+ * Bottom overlay card shown during a focused hunt.
+ *
+ * Displays:
+ * - Progress section
+ * - Next checkpoint information
+ * - Error messages
+ * - Hunt action buttons (start, validate, finish)
+ *
+ * @param uiState the current UI state for the map.
+ * @param selectedHunt the hunt being performed.
+ * @param onStartHunt callback when the user begins the hunt.
+ * @param onValidateCurrentLocation callback for validating proximity to next point.
+ * @param onFinishHunt callback to finish the hunt with optional persistence logic.
+ */
 @Composable
 private fun BoxScope.FocusedHuntBottomCard(
     uiState: MapUIState,
@@ -100,6 +133,13 @@ private fun BoxScope.FocusedHuntBottomCard(
   }
 }
 
+/**
+ * Determines the next checkpoint based on validated progress.
+ *
+ * @param selectedHunt the hunt in progress.
+ * @param validated number of checkpoints already validated.
+ * @return Pair of (checkpointName, checkpointDescription) or null if index is out of range.
+ */
 private fun calculateCurrentCheckpointInfo(
     selectedHunt: Hunt,
     validated: Int
@@ -115,12 +155,25 @@ private fun calculateCurrentCheckpointInfo(
   }
 }
 
+/**
+ * Builds a formatted distance string showing distance to the next checkpoint and the validation
+ * radius.
+ *
+ * @param distanceToNext distance in meters to the next checkpoint.
+ * @return a formatted subtitle or an empty string if distance is null.
+ */
 private fun buildDistanceSuffix(distanceToNext: Int?): String =
     distanceToNext?.let {
       " in $it${MapScreenStrings.DistanceMetersSuffix} / " +
           "${MapConfig.ValidationRadiusMeters}${MapScreenStrings.DistanceMetersSuffix}"
     } ?: ""
 
+/**
+ * Combined progress header + segmented bar for hunt progression.
+ *
+ * @param validated checkpoints completed.
+ * @param totalPoints total number of checkpoints in the hunt.
+ */
 @Composable
 private fun ProgressSection(validated: Int, totalPoints: Int) {
   ProgressHeader(validated = validated, totalPoints = totalPoints)
@@ -130,6 +183,12 @@ private fun ProgressSection(validated: Int, totalPoints: Int) {
   SegmentedProgressBar(validated = validated, totalPoints = totalPoints)
 }
 
+/**
+ * Displays a header row showing "Progress" and a fraction like "2 / 5".
+ *
+ * @param validated completed checkpoints.
+ * @param totalPoints total checkpoints.
+ */
 @Composable
 private fun ProgressHeader(validated: Int, totalPoints: Int) {
   Row(
@@ -144,6 +203,12 @@ private fun ProgressHeader(validated: Int, totalPoints: Int) {
       }
 }
 
+/**
+ * Displays a segmented progress bar where each segment represents a checkpoint.
+ *
+ * @param validated number of completed checkpoints.
+ * @param totalPoints total checkpoints.
+ */
 @Composable
 private fun SegmentedProgressBar(validated: Int, totalPoints: Int) {
   Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -166,6 +231,13 @@ private fun SegmentedProgressBar(validated: Int, totalPoints: Int) {
   }
 }
 
+/**
+ * Displays the name and optional description of the next checkpoint.
+ *
+ * @param checkpointName name of upcoming checkpoint.
+ * @param checkpointDescription optional description text.
+ * @param distanceToNext distance to next checkpoint in meters.
+ */
 @Composable
 private fun NextCheckpointSection(
     checkpointName: String,
@@ -185,6 +257,11 @@ private fun NextCheckpointSection(
   }
 }
 
+/**
+ * Displays an error message if the hunt produces one (e.g., validation errors).
+ *
+ * @param errorMsg nullable message string.
+ */
 @Composable
 private fun ErrorMessage(errorMsg: String?) {
   val message = errorMsg?.takeIf { it.isNotBlank() } ?: return
@@ -197,6 +274,18 @@ private fun ErrorMessage(errorMsg: String?) {
       style = MaterialTheme.typography.bodySmall)
 }
 
+/**
+ * Chooses and displays the correct primary action button(s) based on hunt progress:
+ * - If not started → "Start Hunt"
+ * - If started → "Validate" and "Finish" (when all checkpoints are validated)
+ *
+ * @param isHuntStarted whether hunt is active.
+ * @param validated checkpoints completed.
+ * @param totalPoints total checkpoints.
+ * @param onStartHunt begins the hunt.
+ * @param onValidateCurrentLocation validates next checkpoint.
+ * @param onFinishHunt finalizes hunt on completion.
+ */
 @Composable
 private fun HuntPrimaryAction(
     isHuntStarted: Boolean,
@@ -212,11 +301,15 @@ private fun HuntPrimaryAction(
     HuntActionsRow(
         canFinish = validated >= totalPoints,
         onValidateCurrentLocation = onValidateCurrentLocation,
-        onFinishHunt = onFinishHunt,
-    )
+        onFinishHunt = onFinishHunt)
   }
 }
 
+/**
+ * Button displayed before the hunt is started.
+ *
+ * @param onStartHunt callback to start the hunt.
+ */
 @Composable
 private fun StartHuntButton(onStartHunt: () -> Unit) {
   Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -229,6 +322,15 @@ private fun StartHuntButton(onStartHunt: () -> Unit) {
   }
 }
 
+/**
+ * Row containing "Validate" and "Finish" actions shown during active hunts.
+ * - Validate: checks current location proximity.
+ * - Finish: completes the hunt once all checkpoints validated.
+ *
+ * @param canFinish whether all checkpoints have been completed.
+ * @param onValidateCurrentLocation callback to validate the next point.
+ * @param onFinishHunt callback that receives a suspend lambda for persisting the finished hunt.
+ */
 @Composable
 private fun HuntActionsRow(
     canFinish: Boolean,
@@ -274,6 +376,12 @@ private fun HuntActionsRow(
       }
 }
 
+/**
+ * Confirmation dialog for stopping an active hunt prematurely.
+ *
+ * @param onConfirm invoked when user confirms stopping the hunt.
+ * @param onDismiss invoked when user cancels the dialog.
+ */
 @Composable
 fun StopHuntDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
   AlertDialog(
