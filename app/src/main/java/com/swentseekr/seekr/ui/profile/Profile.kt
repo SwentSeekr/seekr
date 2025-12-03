@@ -49,9 +49,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.semantics
@@ -59,6 +61,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.profile.mockProfileData
@@ -350,7 +353,7 @@ fun ModernProfileHeader(
           // Stats Cards
           Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             ModernStatCard(
-                icon = Icons.Filled.Star,
+                icon = painterResource(R.drawable.full_star),
                 value = "${profile.author.reviewRate}",
                 label = "$reviewCount reviews",
                 modifier = Modifier.weight(1f),
@@ -360,7 +363,7 @@ fun ModernProfileHeader(
             Spacer(modifier = Modifier.width(12.dp))
 
             ModernStatCard(
-                icon = Icons.Filled.Check,
+                icon = painterResource(R.drawable.full_sport),
                 value = "${profile.author.sportRate}",
                 label = "${profile.doneHunts.size} Hunts done",
                 modifier = Modifier.weight(1f),
@@ -373,7 +376,7 @@ fun ModernProfileHeader(
 
 @Composable
 fun ModernStatCard(
-    icon: ImageVector,
+    icon: Painter,
     value: String,
     label: String,
     modifier: Modifier = Modifier,
@@ -388,9 +391,9 @@ fun ModernStatCard(
             modifier = Modifier.fillMaxWidth().padding(12.dp),
             verticalAlignment = Alignment.CenterVertically) {
               Icon(
-                  imageVector = icon,
+                  painter = icon,
                   contentDescription = null,
-                  tint = Color.White,
+                  tint = Color.Unspecified,
                   modifier = Modifier.size(20.dp))
               Spacer(modifier = Modifier.width(8.dp))
               Column {
