@@ -19,6 +19,19 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.hunt.StatusColor
 
+/**
+ * Displays a popup card presenting a summary of a hunt.
+ *
+ * This popup appears when a hunt marker is selected in the map overview. It includes:
+ * - Hunt image
+ * - Title and short description
+ * - Status and difficulty chips
+ * - "Cancel" and "View Hunt" actions
+ *
+ * @param hunt the hunt being displayed in the popup.
+ * @param onViewClick invoked when the user selects the “View Hunt” button.
+ * @param onDismiss invoked when the user selects the “Cancel” button.
+ */
 @Composable
 fun HuntPopup(hunt: Hunt, onViewClick: () -> Unit, onDismiss: () -> Unit) {
   Card(
@@ -85,6 +98,14 @@ fun HuntPopup(hunt: Hunt, onViewClick: () -> Unit, onDismiss: () -> Unit) {
       }
 }
 
+/**
+ * Displays a chip representing the current status of a hunt.
+ *
+ * The chip uses a background color derived from the hunt's status and adjusts text color for
+ * readability by darkening the base color.
+ *
+ * @param status the current status of the hunt (e.g., AVAILABLE, IN_PROGRESS, COMPLETED).
+ */
 @Composable
 private fun StatusChip(status: HuntStatus) {
   val baseColor = Color(StatusColor(status))
@@ -104,6 +125,14 @@ private fun StatusChip(status: HuntStatus) {
       }
 }
 
+/**
+ * Displays a chip representing a hunt’s difficulty.
+ *
+ * The chip color is derived from the difficulty level using [DifficultyColor]. Text color is
+ * adjusted by darkening the base color to maintain contrast.
+ *
+ * @param difficulty the difficulty level of the hunt.
+ */
 @Composable
 private fun DifficultyChip(difficulty: Difficulty) {
   val baseColor = DifficultyColor(difficulty)
@@ -123,6 +152,12 @@ private fun DifficultyChip(difficulty: Difficulty) {
       }
 }
 
+/**
+ * Creates a darker version of the color by multiplying each RGB component by the provided factor.
+ *
+ * @param factor a value between 0f and 1f; lower values result in a darker color.
+ * @return a new darkened [Color] instance.
+ */
 private fun Color.darken(factor: Float): Color =
     Color(
         red = (this.red * factor).coerceIn(0f, 1f),
