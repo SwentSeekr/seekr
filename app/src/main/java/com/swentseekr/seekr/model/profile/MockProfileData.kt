@@ -113,3 +113,20 @@ fun createHuntWithRateAndDifficulty(
       otherImagesUrls = emptyList(),
       reviewRate = reviewRate)
 }
+
+fun createReview(
+    reviewId: String = "review123",
+    authorId: String = "user123",
+    huntId: String = "hunt123",
+    rating: Double = 4.5,
+    comment: String = "Great hunt! Really enjoyed the experience.",
+    photos: List<String> = emptyList()
+): HuntReview {
+  return HuntReview(
+      reviewId = reviewId,
+      authorId = authorId,
+      huntId = huntId,
+      rating = rating,
+      comment = comment,
+      photos = photos)
+}
