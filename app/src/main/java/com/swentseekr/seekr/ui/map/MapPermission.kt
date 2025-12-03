@@ -6,9 +6,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import com.swentseekr.seekr.ui.theme.Green
 
 /**
  * A full-screen overlay popup that prompts the user to grant location permissions.
@@ -43,19 +41,23 @@ fun PermissionRequestPopup(onRequestPermission: () -> Unit) {
                     Text(
                         text = MapScreenStrings.PermissionExplanation,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.onSurface,
                         modifier =
                             Modifier.padding(bottom = MapScreenDefaults.CardPadding)
                                 .testTag(MapScreenTestTags.EXPLAIN))
 
                     TextButton(
                         onClick = onRequestPermission,
-                        colors = ButtonDefaults.buttonColors(containerColor = Green),
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary),
                         modifier =
                             Modifier.fillMaxWidth()
                                 .padding(top = MapScreenDefaults.PopupSpacing)
                                 .testTag(MapScreenTestTags.GRANT_LOCATION_PERMISSION)) {
-                          Text(MapScreenStrings.GrantPermission, color = Color.White)
+                          Text(
+                              MapScreenStrings.GrantPermission,
+                              color = MaterialTheme.colorScheme.onSurface)
                         }
                   }
             }
