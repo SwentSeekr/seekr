@@ -1,7 +1,6 @@
 package com.swentseekr.seekr.ui.profile
 
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 /**
  * Centralized constants, strings, and test tags used across both the Profile screen and Edit
@@ -21,15 +20,47 @@ object ProfileScreenConstants {
 
 /** Centralized constants for UI dimensions. */
 object EditProfileNumberConstants {
-  val PROFILE_PICTURE_SIZE = 80.dp
+  val ALPHA_CHANGE = 0.3f
+  val ALPHA_MID = 0.5f
+
+  val PROFILE_PICTURE_SIZE = 140.dp
+  val PROFILE_PICTURE_SHADOW = 12.dp
+  val PROFILE_SURFACE = 40.dp
+  val PROFILE_ELEVATION = 6.dp
+
+  val ICON_PADDING = 8.dp
+
   val BIO_FIELD_MIN_HEIGHT = 120.dp
   val SCREEN_PADDING = 24.dp
+
+  val SPACER_TINY = 4.dp
   val SPACER_MEDIUM = 12.dp
   val SPACER_LARGE = 16.dp
-  val ADD_ICON_FONT_SIZE = 24.sp
   val SPACER_SMALL = 8.dp
+
+  val PADDING_GIGANTIC = 20.dp
+  val PADDING_BIG = 16.dp
   val PADDING_SMALL = 4.dp
-  const val PROFILE_PICTURE_SIZE_DP = 100
+
+  val VERTICAL_ARR = 12.dp
+  val VERTICAL_ARR_MEDIUM = 16.dp
+  val VERTICAL_ARR_LARGE = 20.dp
+  val HORIZONTAL_ARR = 12.dp
+
+  val BUTTON_HEIGHT_DP = 50.dp
+  val BUTTON_HEIGHT = 52.dp
+  val BUTTON_WEIGHT = 1f
+
+  val ROUND_CORNER_BIG = 20.dp
+  val ROUND_CORNER_MID = 12.dp
+
+  val PROGRESS_INDIC = 32.dp
+  val PROGRESS_STROKE = 3.dp
+
+  val ELEVATION_SMALL = 2.dp
+  val ELEVATION_MEDIUM = 4.dp
+
+  const val PROFILE_PICTURE_SIZE_DP = 140
 
   const val PROFILE_PIC_DEFAULT = 0
   const val MAX_PSEUDONYM_LENGTH = 30

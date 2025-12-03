@@ -31,17 +31,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.swentseekr.seekr.model.notifications.NotificationHelper
 import com.swentseekr.seekr.ui.settings.SettingsScreenDefaults.COLUMN_WEIGHT
 import kotlinx.coroutines.launch
+
+val UI_SET = SettingsScreenDefaults
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -183,15 +183,18 @@ fun SettingsContent(
                       colors =
                           listOf(
                               MaterialTheme.colorScheme.background,
-                              MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))))
-              .padding(20.dp)) {
+                              MaterialTheme.colorScheme.surfaceVariant.copy(
+                                  alpha = UI_SET.ALPHA_CHANGE))))
+              .padding(UI_SET.PADDING_MID)) {
         LazyColumn(modifier = Modifier.weight(COLUMN_WEIGHT)) {
           item {
             Text(
                 "App Info",
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp))
+                modifier =
+                    Modifier.padding(
+                        vertical = UI_SET.PADDING_TINY, horizontal = UI_SET.PADDING_MINI))
           }
 
           item {
@@ -201,14 +204,16 @@ fun SettingsContent(
                 modifier = Modifier.testTag(SettingsScreenTestTags.APP_VERSION_TEXT))
           }
 
-          item { Spacer(modifier = Modifier.height(24.dp)) }
+          item { Spacer(modifier = Modifier.height(UI_SET.SPACER_HEIGHT)) }
 
           item {
             Text(
                 "Permissions",
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp))
+                modifier =
+                    Modifier.padding(
+                        vertical = UI_SET.PADDING_TINY, horizontal = UI_SET.PADDING_MINI))
           }
 
           item {
@@ -235,14 +240,16 @@ fun SettingsContent(
                 modifier = Modifier.testTag(SettingsScreenTestTags.LOCALISATION_TOGGLE))
           }
 
-          item { Spacer(modifier = Modifier.height(24.dp)) }
+          item { Spacer(modifier = Modifier.height(UI_SET.SPACER_HEIGHT)) }
 
           item {
             Text(
                 "Account",
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp))
+                modifier =
+                    Modifier.padding(
+                        vertical = UI_SET.PADDING_TINY, horizontal = UI_SET.PADDING_MINI))
           }
 
           item {
@@ -252,14 +259,16 @@ fun SettingsContent(
                 modifier = Modifier.testTag(SettingsScreenTestTags.EDIT_PROFILE_BUTTON))
           }
 
-          item { Spacer(modifier = Modifier.height(16.dp)) }
+          item { Spacer(modifier = Modifier.height(UI_SET.SPACER_HEIGHT_SMALL)) }
 
           item {
             Text(
                 "Legal",
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp))
+                modifier =
+                    Modifier.padding(
+                        vertical = UI_SET.PADDING_TINY, horizontal = UI_SET.PADDING_MINI))
           }
 
           item {
@@ -269,7 +278,7 @@ fun SettingsContent(
           }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(UI_SET.SPACER_HEIGHT_SMALL))
 
         Button(
             onClick = onLogoutClick,
@@ -277,17 +286,16 @@ fun SettingsContent(
                 ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.errorContainer,
                     contentColor = MaterialTheme.colorScheme.onErrorContainer),
-            shape = RoundedCornerShape(16.dp),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp),
+            shape = RoundedCornerShape(UI_SET.ROUND_CORNER),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = UI_SET.ELEVATION),
             modifier =
                 Modifier.fillMaxWidth()
-                    .height(56.dp)
-                    .shadow(8.dp, RoundedCornerShape(16.dp))
+                    .height(UI_SET.BUTTON_HEIGHT)
                     .testTag(SettingsScreenTestTags.LOGOUT_BUTTON)) {
               Icon(
                   imageVector = Icons.Filled.AccountCircle,
                   contentDescription = null,
-                  modifier = Modifier.padding(end = 8.dp))
+                  modifier = Modifier.padding(end = UI_SET.PADDING_TINY))
               Text(
                   text = SettingsScreenStrings.LOGOUT_LABEL,
                   style = MaterialTheme.typography.titleMedium)

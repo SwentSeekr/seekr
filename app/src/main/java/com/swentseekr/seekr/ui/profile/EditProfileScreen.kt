@@ -33,7 +33,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.MAX_BIO_LENGTH
 import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.MAX_PSEUDONYM_LENGTH
@@ -52,6 +51,8 @@ import com.swentseekr.seekr.ui.profile.EditProfileStrings.ERROR_PSEUDONYM_MAX
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.FIELD_LABEL_BIO
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.FIELD_LABEL_PSEUDONYM
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.SUCCESS_UPDATE
+
+val UI_C = EditProfileNumberConstants
 
 @Composable
 fun EditProfileScreen(
@@ -119,31 +120,31 @@ fun EditProfileScreen(
         text = { Text(DIALOG_MESSAGE) },
         confirmButton = {
           Column(
-              modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-              verticalArrangement = Arrangement.spacedBy(12.dp)) {
+              modifier = Modifier.fillMaxWidth().padding(horizontal = UI_C.PADDING_BIG),
+              verticalArrangement = Arrangement.spacedBy(UI_C.VERTICAL_ARR)) {
                 FilledTonalButton(
                     modifier =
                         Modifier.fillMaxWidth()
-                            .height(50.dp)
+                            .height(UI_C.BUTTON_HEIGHT_DP)
                             .testTag(EditProfileTestTags.GALLERY_BUTTON),
                     onClick = {
                       galleryLauncher.launch(EditProfileStrings.IMAGE)
                       showDialog = false
                     },
-                    shape = RoundedCornerShape(12.dp)) {
+                    shape = RoundedCornerShape(UI_C.ROUND_CORNER_MID)) {
                       Text(BUTTON_GALLERY)
                     }
 
                 FilledTonalButton(
                     modifier =
                         Modifier.fillMaxWidth()
-                            .height(50.dp)
+                            .height(UI_C.BUTTON_HEIGHT_DP)
                             .testTag(EditProfileTestTags.CAMERA_BUTTON),
                     onClick = {
                       launchCamera()
                       showDialog = false
                     },
-                    shape = RoundedCornerShape(12.dp)) {
+                    shape = RoundedCornerShape(UI_C.ROUND_CORNER_MID)) {
                       Text(BUTTON_CAMERA)
                     }
 
@@ -151,8 +152,8 @@ fun EditProfileScreen(
                     uiState.profilePictureUri != null ||
                     uiState.profilePictureUrl.isNotEmpty()) {
                   Button(
-                      modifier = Modifier.fillMaxWidth().height(50.dp),
-                      shape = RoundedCornerShape(12.dp),
+                      modifier = Modifier.fillMaxWidth().height(UI_C.BUTTON_HEIGHT_DP),
+                      shape = RoundedCornerShape(UI_C.ROUND_CORNER_MID),
                       colors =
                           ButtonDefaults.buttonColors(
                               containerColor = MaterialTheme.colorScheme.errorContainer),
@@ -166,15 +167,15 @@ fun EditProfileScreen(
                       }
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(UI_C.SPACER_TINY))
 
                 OutlinedButton(
                     modifier =
                         Modifier.fillMaxWidth()
-                            .height(50.dp)
+                            .height(UI_C.BUTTON_HEIGHT_DP)
                             .testTag(EditProfileTestTags.DIALOG_CANCEL_BUTTON),
                     onClick = { showDialog = false },
-                    shape = RoundedCornerShape(12.dp)) {
+                    shape = RoundedCornerShape(UI_C.ROUND_CORNER_MID)) {
                       Text(BUTTON_CANCEL)
                     }
               }
@@ -236,18 +237,19 @@ fun EditProfileContent(
                       colors =
                           listOf(
                               MaterialTheme.colorScheme.surface,
-                              MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))))
-              .padding(24.dp)
+                              MaterialTheme.colorScheme.surfaceVariant.copy(
+                                  alpha = UI_C.ALPHA_CHANGE))))
+              .padding(UI_C.SCREEN_PADDING)
               .testTag(EditProfileTestTags.SCREEN),
       horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Spacer(modifier = Modifier.height(16.dp))
+      verticalArrangement = Arrangement.spacedBy(UI_C.VERTICAL_ARR_LARGE)) {
+        Spacer(modifier = Modifier.height(UI_C.SPACER_LARGE))
 
         Box(
             modifier =
-                Modifier.size(140.dp)
+                Modifier.size(UI_C.PROFILE_PICTURE_SIZE)
                     .scale(scale)
-                    .shadow(12.dp, CircleShape)
+                    .shadow(UI_C.PROFILE_PICTURE_SHADOW, CircleShape)
                     .clickable { onProfilePictureChange() }
                     .testTag(EditProfileTestTags.PROFILE_PICTURE)) {
               ProfilePicture(
@@ -258,30 +260,31 @@ fun EditProfileContent(
 
               if (isLoading) {
                 CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center).size(32.dp), strokeWidth = 3.dp)
+                    modifier = Modifier.align(Alignment.Center).size(UI_C.PROGRESS_INDIC),
+                    strokeWidth = UI_C.PROGRESS_STROKE)
               } else {
                 Surface(
-                    modifier = Modifier.align(Alignment.BottomEnd).size(40.dp),
+                    modifier = Modifier.align(Alignment.BottomEnd).size(UI_C.PROFILE_SURFACE),
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.primary,
-                    shadowElevation = 6.dp) {
+                    shadowElevation = UI_C.PROFILE_ELEVATION) {
                       Icon(
                           imageVector = Icons.Filled.Create,
                           contentDescription = "Edit",
                           tint = MaterialTheme.colorScheme.onPrimary,
-                          modifier = Modifier.padding(8.dp))
+                          modifier = Modifier.padding(UI_C.ICON_PADDING))
                     }
               }
             }
 
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
+            shape = RoundedCornerShape(UI_C.ROUND_CORNER_BIG),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
+            elevation = CardDefaults.cardElevation(defaultElevation = UI_C.ELEVATION_SMALL)) {
               Column(
-                  modifier = Modifier.padding(20.dp),
-                  verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                  modifier = Modifier.padding(UI_C.PADDING_GIGANTIC),
+                  verticalArrangement = Arrangement.spacedBy(UI_C.VERTICAL_ARR_MEDIUM)) {
                     OutlinedTextField(
                         value = uiState.pseudonym,
                         onValueChange = { newValue ->
@@ -300,24 +303,22 @@ fun EditProfileContent(
                         isError = pseudonymError != null,
                         modifier =
                             Modifier.fillMaxWidth().testTag(EditProfileTestTags.PSEUDONYM_FIELD),
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(UI_C.ROUND_CORNER_MID),
                         colors =
                             OutlinedTextFieldDefaults.colors(
                                 unfocusedBorderColor =
-                                    MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                                    MaterialTheme.colorScheme.outline.copy(alpha = UI_C.ALPHA_MID),
                                 focusedBorderColor = MaterialTheme.colorScheme.primary))
 
                     AnimatedVisibility(
                         visible = pseudonymError != null,
                         enter = fadeIn() + scaleIn(),
                         exit = fadeOut() + scaleOut()) {
-                          pseudonymError?.let {
-                            Text(
-                                text = it,
-                                color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(start = 4.dp))
-                          }
+                          Text(
+                              text = pseudonymError ?: "",
+                              color = MaterialTheme.colorScheme.error,
+                              style = MaterialTheme.typography.bodySmall,
+                              modifier = Modifier.padding(start = UI_C.PADDING_SMALL))
                         }
 
                     OutlinedTextField(
@@ -336,13 +337,13 @@ fun EditProfileContent(
                         enabled = !isLoading,
                         modifier =
                             Modifier.fillMaxWidth()
-                                .heightIn(min = 120.dp)
+                                .heightIn(min = UI_C.BIO_FIELD_MIN_HEIGHT)
                                 .testTag(EditProfileTestTags.BIO_FIELD),
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(UI_C.ROUND_CORNER_MID),
                         colors =
                             OutlinedTextFieldDefaults.colors(
                                 unfocusedBorderColor =
-                                    MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                                    MaterialTheme.colorScheme.outline.copy(alpha = UI_C.ALPHA_MID),
                                 focusedBorderColor = MaterialTheme.colorScheme.primary))
 
                     AnimatedVisibility(
@@ -354,28 +355,30 @@ fun EditProfileContent(
                                 text = it,
                                 color = MaterialTheme.colorScheme.error,
                                 style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(start = 4.dp))
+                                modifier = Modifier.padding(start = UI_C.PADDING_SMALL))
                           }
                         }
                   }
             }
 
-        Spacer(modifier = Modifier.weight(1f))
-
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            horizontalArrangement = Arrangement.spacedBy(UI_C.HORIZONTAL_ARR)) {
               OutlinedButton(
                   modifier =
-                      Modifier.weight(1f).height(52.dp).testTag(EditProfileTestTags.CANCEL_BUTTON),
+                      Modifier.weight(UI_C.BUTTON_WEIGHT)
+                          .height(UI_C.BUTTON_HEIGHT)
+                          .testTag(EditProfileTestTags.CANCEL_BUTTON),
                   onClick = onCancel,
                   enabled = !isLoading,
-                  shape = RoundedCornerShape(12.dp)) {
+                  shape = RoundedCornerShape(UI_C.ROUND_CORNER_MID)) {
                     Text(BUTTON_CANCEL)
                   }
               Button(
                   modifier =
-                      Modifier.weight(1f).height(52.dp).testTag(EditProfileTestTags.SAVE_BUTTON),
+                      Modifier.weight(UI_C.BUTTON_WEIGHT)
+                          .height(UI_C.BUTTON_HEIGHT)
+                          .testTag(EditProfileTestTags.SAVE_BUTTON),
                   onClick = {
                     if (uiState.pseudonym.isBlank()) {
                       localError = ERROR_PSEUDONYM_EMPTY
@@ -389,8 +392,9 @@ fun EditProfileContent(
                           pseudonymError == null &&
                           bioError == null &&
                           !uiState.isSaving,
-                  shape = RoundedCornerShape(12.dp),
-                  elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)) {
+                  shape = RoundedCornerShape(UI_C.ROUND_CORNER_MID),
+                  elevation =
+                      ButtonDefaults.buttonElevation(defaultElevation = UI_C.ELEVATION_MEDIUM)) {
                     Text(if (uiState.isSaving) BUTTON_SAVING else BUTTON_SAVE)
                   }
             }
@@ -409,28 +413,28 @@ fun EditProfileContent(
                                 uiState.success -> MaterialTheme.colorScheme.primaryContainer
                                 else -> MaterialTheme.colorScheme.surface
                               }),
-                  shape = RoundedCornerShape(12.dp)) {
+                  shape = RoundedCornerShape(UI_C.ROUND_CORNER_MID)) {
                     when {
                       localError != null ->
                           Text(
                               text = localError!!,
                               color = MaterialTheme.colorScheme.onErrorContainer,
                               modifier =
-                                  Modifier.padding(16.dp)
+                                  Modifier.padding(UI_C.PADDING_BIG)
                                       .testTag(EditProfileTestTags.ERROR_MESSAGE))
                       uiState.errorMsg != null ->
                           Text(
                               "Error: ${uiState.errorMsg}",
                               color = MaterialTheme.colorScheme.onErrorContainer,
                               modifier =
-                                  Modifier.padding(16.dp)
+                                  Modifier.padding(UI_C.PADDING_BIG)
                                       .testTag(EditProfileTestTags.ERROR_MESSAGE))
                       uiState.success ->
                           Text(
                               SUCCESS_UPDATE,
                               color = MaterialTheme.colorScheme.onPrimaryContainer,
                               modifier =
-                                  Modifier.padding(16.dp)
+                                  Modifier.padding(UI_C.PADDING_BIG)
                                       .testTag(EditProfileTestTags.SUCCESS_MESSAGE))
                     }
                   }

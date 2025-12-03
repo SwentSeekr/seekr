@@ -39,6 +39,8 @@ sealed class OtherImage {
   data class Local(val uri: Uri) : OtherImage()
 }
 
+val UICons = BaseHuntFieldsUi
+
 @Composable
 fun ValidatedOutlinedField(
     value: String = BaseHuntFieldsStrings.TITLE_DEFAULT,
@@ -56,10 +58,11 @@ fun ValidatedOutlinedField(
       errorMsg = errorMsg,
       testTag = testTag,
       modifier = Modifier.fillMaxWidth(),
-      shape = RoundedCornerShape(16.dp),
+      shape = RoundedCornerShape(UICons.FieldCornerRadius),
       colors =
           OutlinedTextFieldDefaults.colors(
-              unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+              unfocusedBorderColor =
+                  MaterialTheme.colorScheme.outline.copy(alpha = UICons.ChangeAlpha),
               focusedBorderColor = MaterialTheme.colorScheme.primary,
               unfocusedContainerColor = MaterialTheme.colorScheme.surface,
               focusedContainerColor = MaterialTheme.colorScheme.surface))
@@ -85,12 +88,10 @@ private fun ValidatedOutlinedField(
       isError = errorMsg != null,
       supportingText = {
         AnimatedVisibility(visible = errorMsg != null, enter = fadeIn(), exit = fadeOut()) {
-          errorMsg?.let {
-            Text(
-                it,
-                modifier = Modifier.testTag(HuntScreenTestTags.ERROR_MESSAGE),
-                color = MaterialTheme.colorScheme.error)
-          }
+          Text(
+              errorMsg ?: "",
+              modifier = Modifier.testTag(HuntScreenTestTags.ERROR_MESSAGE),
+              color = MaterialTheme.colorScheme.error)
         }
       },
       modifier = modifier.testTag(testTag),
@@ -156,18 +157,20 @@ fun BaseHuntFieldsScreen(
                             colors =
                                 listOf(
                                     MaterialTheme.colorScheme.background,
-                                    MaterialTheme.colorScheme.surface.copy(alpha = 0.5f))))
-                    .padding(horizontal = 20.dp)
+                                    MaterialTheme.colorScheme.surface.copy(
+                                        alpha = UICons.ChangeAlpha))))
+                    .padding(horizontal = UICons.ColumnHPadding)
                     .padding(paddingValues)
                     .verticalScroll(scrollState)
                     .testTag(HuntScreenTestTags.COLLUMN_HUNT_FIELDS),
-            verticalArrangement = Arrangement.spacedBy(16.dp)) {
-              Spacer(modifier = Modifier.height(8.dp))
+            verticalArrangement = Arrangement.spacedBy(UICons.ColumnVArrangement)) {
+              Spacer(modifier = Modifier.height(UICons.SpacerHeightSmall))
 
-              val fieldShape = RoundedCornerShape(16.dp)
+              val fieldShape = RoundedCornerShape(UICons.FieldCornerRadius)
               val fieldColors =
                   OutlinedTextFieldDefaults.colors(
-                      unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                      unfocusedBorderColor =
+                          MaterialTheme.colorScheme.outline.copy(alpha = UICons.ChangeAlpha),
                       focusedBorderColor = MaterialTheme.colorScheme.primary,
                       unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                       focusedContainerColor = MaterialTheme.colorScheme.surface)
@@ -187,17 +190,17 @@ fun BaseHuntFieldsScreen(
                   placeholder = BaseHuntFieldsStrings.PLACEHOLDER_DESCRIPTION,
                   errorMsg = uiState.invalidDescriptionMsg,
                   testTag = HuntScreenTestTags.INPUT_HUNT_DESCRIPTION,
-                  modifier = Modifier.fillMaxWidth().height(140.dp),
+                  modifier = Modifier.fillMaxWidth().height(UICons.DescriptionHeight),
                   shape = fieldShape,
                   colors = fieldColors)
 
               Row(
                   modifier = Modifier.fillMaxWidth(),
-                  horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                  horizontalArrangement = Arrangement.spacedBy(UICons.RowHArrangement)) {
                     ExposedDropdownMenuBox(
                         expanded = showStatusDropdown,
                         onExpandedChange = { showStatusDropdown = it },
-                        modifier = Modifier.weight(1f)) {
+                        modifier = Modifier.weight(UICons.WeightTextField)) {
                           OutlinedTextField(
                               value = uiState.status?.name ?: "",
                               onValueChange = {},
@@ -233,7 +236,7 @@ fun BaseHuntFieldsScreen(
                     ExposedDropdownMenuBox(
                         expanded = showDifficultyDropdown,
                         onExpandedChange = { showDifficultyDropdown = it },
-                        modifier = Modifier.weight(1f)) {
+                        modifier = Modifier.weight(UICons.WeightTextField)) {
                           OutlinedTextField(
                               value = uiState.difficulty?.name ?: "",
                               onValueChange = {},
@@ -270,7 +273,7 @@ fun BaseHuntFieldsScreen(
 
               Row(
                   modifier = Modifier.fillMaxWidth(),
-                  horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                  horizontalArrangement = Arrangement.spacedBy(UICons.RowHArrangement)) {
                     ValidatedOutlinedField(
                         value = uiState.time,
                         onValueChange = onTimeChange,
@@ -278,7 +281,7 @@ fun BaseHuntFieldsScreen(
                         placeholder = BaseHuntFieldsStrings.PLACEHOLDER_TIME,
                         errorMsg = uiState.invalidTimeMsg,
                         testTag = HuntScreenTestTags.INPUT_HUNT_TIME,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(UICons.WeightTextField),
                         shape = fieldShape,
                         colors = fieldColors)
 
@@ -289,7 +292,7 @@ fun BaseHuntFieldsScreen(
                         placeholder = BaseHuntFieldsStrings.PLACEHOLDER_DISTANCE,
                         errorMsg = uiState.invalidDistanceMsg,
                         testTag = HuntScreenTestTags.INPUT_HUNT_DISTANCE,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(UICons.WeightTextField),
                         shape = fieldShape,
                         colors = fieldColors)
                   }
@@ -298,9 +301,9 @@ fun BaseHuntFieldsScreen(
                   onClick = onSelectLocations,
                   modifier =
                       Modifier.fillMaxWidth()
-                          .height(56.dp)
+                          .height(UICons.ButtonHeight)
                           .testTag(HuntScreenTestTags.BUTTON_SELECT_LOCATION),
-                  shape = RoundedCornerShape(16.dp),
+                  shape = RoundedCornerShape(UICons.ButtonCornerRadius),
                   colors =
                       ButtonDefaults.elevatedButtonColors(
                           containerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -317,14 +320,15 @@ fun BaseHuntFieldsScreen(
 
               Card(
                   modifier = Modifier.fillMaxWidth(),
-                  shape = RoundedCornerShape(20.dp),
+                  shape = RoundedCornerShape(UICons.CardCornerRadius),
                   colors =
                       CardDefaults.cardColors(
                           containerColor =
-                              MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))) {
+                              MaterialTheme.colorScheme.surfaceVariant.copy(
+                                  alpha = UICons.ChangeAlpha))) {
                     Column(
-                        modifier = Modifier.padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        modifier = Modifier.padding(UICons.CardPadding),
+                        verticalArrangement = Arrangement.spacedBy(UICons.CardVArrangement)) {
                           Text(
                               "Images",
                               style = MaterialTheme.typography.titleMedium,
@@ -332,8 +336,8 @@ fun BaseHuntFieldsScreen(
 
                           OutlinedButton(
                               onClick = { imagePickerLauncher.launch("image/*") },
-                              modifier = Modifier.fillMaxWidth().height(48.dp),
-                              shape = RoundedCornerShape(12.dp)) {
+                              modifier = Modifier.fillMaxWidth().height(UICons.ImageButtonHeight),
+                              shape = RoundedCornerShape(UICons.ImageButtonCornerRadius)) {
                                 Text(
                                     BaseHuntFieldsStrings.BUTTON_CHOOSE_IMAGE,
                                     style = MaterialTheme.typography.bodyLarge)
@@ -348,17 +352,17 @@ fun BaseHuntFieldsScreen(
                                     BaseHuntFieldsStrings.CONTENT_DESC_SELECTED_IMAGE,
                                 modifier =
                                     Modifier.fillMaxWidth()
-                                        .height(200.dp)
-                                        .clip(RoundedCornerShape(16.dp))
-                                        .shadow(4.dp, RoundedCornerShape(16.dp)),
+                                        .height(UICons.ImageHeight)
+                                        .clip(RoundedCornerShape(UICons.ImageCornerRadius))
+                                        .shadow(4.dp, RoundedCornerShape(UICons.ImageCornerRadius)),
                                 placeholder = painterResource(R.drawable.empty_image),
                                 error = painterResource(R.drawable.empty_image))
                           }
 
                           OutlinedButton(
                               onClick = { multipleImagesPickerLauncher.launch("image/*") },
-                              modifier = Modifier.fillMaxWidth().height(48.dp),
-                              shape = RoundedCornerShape(12.dp)) {
+                              modifier = Modifier.fillMaxWidth().height(UICons.ImageButtonHeight),
+                              shape = RoundedCornerShape(UICons.ImageButtonCornerRadius)) {
                                 Text(
                                     BaseHuntFieldsStrings.BUTTON_CHOOSE_ADDITIONAL_IMAGES,
                                     style = MaterialTheme.typography.bodyLarge)
@@ -369,19 +373,24 @@ fun BaseHuntFieldsScreen(
                                   uiState.otherImagesUris.map { OtherImage.Local(it) }
 
                           if (combinedImages.isNotEmpty()) {
-                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                              combinedImages.forEach { image ->
-                                val tagSuffix =
-                                    when (image) {
-                                      is OtherImage.Remote -> image.url
-                                      is OtherImage.Local -> image.uri.toString()
-                                    }
+                            Column(
+                                verticalArrangement =
+                                    Arrangement.spacedBy(UICons.CardVArrangement)) {
+                                  combinedImages.forEach { image ->
+                                    val tagSuffix =
+                                        when (image) {
+                                          is OtherImage.Remote -> image.url
+                                          is OtherImage.Local -> image.uri.toString()
+                                        }
 
-                                Card(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(12.dp)) {
+                                    Card(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = RoundedCornerShape(UICons.CardLittleCornerRadius),
+                                    ) {
                                       Row(
-                                          modifier = Modifier.fillMaxWidth().padding(8.dp),
+                                          modifier =
+                                              Modifier.fillMaxWidth()
+                                                  .padding(UICons.CardRowPadding),
                                           horizontalArrangement = Arrangement.SpaceBetween) {
                                             val model =
                                                 when (image) {
@@ -396,14 +405,18 @@ fun BaseHuntFieldsScreen(
                                                         .CONTENT_DESC_SECONDARY_IMAGE,
                                                 modifier =
                                                     Modifier.testTag("otherImage_$tagSuffix")
-                                                        .weight(1f)
-                                                        .height(100.dp)
-                                                        .clip(RoundedCornerShape(8.dp)),
+                                                        .weight(UICons.ImageWeight)
+                                                        .height(UICons.ImageLittleHeight)
+                                                        .clip(
+                                                            RoundedCornerShape(
+                                                                UICons.ImageLittleCornerRadius)),
                                                 placeholder =
                                                     painterResource(R.drawable.empty_image),
                                                 error = painterResource(R.drawable.empty_image))
 
-                                            Spacer(modifier = Modifier.width(12.dp))
+                                            Spacer(
+                                                modifier =
+                                                    Modifier.width(UICons.SpacerHeightMedium))
 
                                             TextButton(
                                                 modifier =
@@ -423,31 +436,35 @@ fun BaseHuntFieldsScreen(
                                                       contentDescription =
                                                           BaseHuntFieldsStrings.DELETE_ICON_DESC,
                                                       tint = MaterialTheme.colorScheme.error,
-                                                      modifier = Modifier.size(20.dp))
-                                                  Spacer(modifier = Modifier.width(4.dp))
+                                                      modifier = Modifier.size(UICons.IconSize))
+                                                  Spacer(
+                                                      modifier =
+                                                          Modifier.width(UICons.SpacerHeightTiny))
                                                   Text(
                                                       BaseHuntFieldsStrings.REMOVE,
                                                       color = MaterialTheme.colorScheme.error)
                                                 }
                                           }
                                     }
-                              }
-                            }
+                                  }
+                                }
                           }
                         }
                   }
 
-              Spacer(modifier = Modifier.height(8.dp))
+              Spacer(modifier = Modifier.height(UICons.SpacerHeightSmall))
 
               Button(
                   onClick = onSave,
                   modifier =
                       Modifier.fillMaxWidth()
-                          .height(56.dp)
-                          .shadow(8.dp, RoundedCornerShape(16.dp))
+                          .height(UICons.ButtonSaveHeight)
+                          .shadow(
+                              UICons.ButtonShadow,
+                              RoundedCornerShape(UICons.ButtonSaveCornerRadius))
                           .testTag(HuntScreenTestTags.HUNT_SAVE),
                   enabled = uiState.isValid,
-                  shape = RoundedCornerShape(16.dp),
+                  shape = RoundedCornerShape(UICons.ButtonSaveCornerRadius),
                   colors =
                       ButtonDefaults.buttonColors(
                           containerColor = MaterialTheme.colorScheme.primary,
@@ -459,7 +476,7 @@ fun BaseHuntFieldsScreen(
                         style = MaterialTheme.typography.titleMedium)
                   }
 
-              Spacer(modifier = Modifier.height(16.dp))
+              Spacer(modifier = Modifier.height(UICons.SpacerHeight))
             }
       }
 }

@@ -67,11 +67,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
+
+val UICons = AddReviewScreenDefaults
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -134,27 +135,30 @@ fun AddReviewScreen(
             modifier =
                 modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                    .background(
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = UICons.ChangeAlpha))
                     .padding(innerPadding)
-                    .padding(horizontal = 20.dp)
+                    .padding(horizontal = UICons.ColumnPadding)
                     .verticalScroll(rememberScrollState())
                     .testTag(AddReviewScreenTestTags.INFO_COLUMN),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(20.dp)) {
-              Spacer(modifier = modifier.height(8.dp))
+            verticalArrangement = Arrangement.spacedBy(UICons.ColumnVArrangement)) {
+              Spacer(modifier = modifier.height(UICons.SpacerHeightSmall))
 
               Card(
                   modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),
-                  shape = RoundedCornerShape(20.dp),
+                  shape = RoundedCornerShape(UICons.CardCornerRadius),
                   colors =
                       CardDefaults.cardColors(
                           containerColor =
-                              MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)),
-                  elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)) {
+                              MaterialTheme.colorScheme.primaryContainer.copy(
+                                  alpha = UICons.ChangeAlpha)),
+                  elevation =
+                      CardDefaults.cardElevation(defaultElevation = UICons.CardNoElevation)) {
                     Column(
-                        modifier = Modifier.padding(20.dp).fillMaxWidth(),
+                        modifier = Modifier.padding(UICons.ColumnPadding).fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        verticalArrangement = Arrangement.spacedBy(UICons.ColumnLittleVArr)) {
                           Text(
                               text = hunt?.title ?: AddReviewScreenStrings.LoadingPlaceholder,
                               style = MaterialTheme.typography.headlineSmall,
@@ -168,14 +172,15 @@ fun AddReviewScreen(
 
               Card(
                   modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),
-                  shape = RoundedCornerShape(20.dp),
+                  shape = RoundedCornerShape(UICons.CardCornerRadius),
                   colors =
                       CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary),
-                  elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
+                  elevation =
+                      CardDefaults.cardElevation(defaultElevation = UICons.CardLittleElevation)) {
                     Column(
-                        modifier = Modifier.padding(20.dp).fillMaxWidth(),
+                        modifier = Modifier.padding(UICons.ColumnPadding).fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        verticalArrangement = Arrangement.spacedBy(UICons.ColumnMediumVArr)) {
                           Text(
                               AddReviewScreenStrings.RateThisHunt,
                               style = MaterialTheme.typography.titleMedium,
@@ -189,7 +194,7 @@ fun AddReviewScreen(
                               })
 
                           AnimatedVisibility(
-                              visible = uiState.rating > 0,
+                              visible = uiState.rating >= 1.0,
                               enter = fadeIn() + scaleIn(),
                               exit = fadeOut() + scaleOut()) {
                                 Text(
@@ -207,7 +212,7 @@ fun AddReviewScreen(
                   modifier =
                       modifier
                           .fillMaxWidth()
-                          .height(250.dp)
+                          .height(UICons.CommentFieldHeight)
                           .testTag(AddReviewScreenTestTags.COMMENT_TEXT_FIELD),
                   label = { Text(AddReviewScreenStrings.CommentLabel) },
                   placeholder = { Text(AddReviewScreenStrings.CommentPlaceholder) },
@@ -230,24 +235,25 @@ fun AddReviewScreen(
                           lineHeight = AddReviewScreenDefaults.CommentLineHeight),
                   singleLine = false,
                   maxLines = AddReviewScreenDefaults.CommentMaxLines,
-                  shape = RoundedCornerShape(16.dp),
+                  shape = RoundedCornerShape(UICons.CommentFieldCornerRadius),
                   colors =
                       OutlinedTextFieldDefaults.colors(
                           unfocusedBorderColor =
-                              MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                              MaterialTheme.colorScheme.outline.copy(
+                                  alpha = UICons.ChangeAlphaMedium),
                           focusedBorderColor = MaterialTheme.colorScheme.primary,
                           unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                           focusedContainerColor = MaterialTheme.colorScheme.surface))
 
               FilledTonalButton(
                   onClick = { imagePickerLauncher.launch(AddReviewScreenStrings.ImageMimeType) },
-                  modifier = Modifier.fillMaxWidth().height(52.dp),
-                  shape = RoundedCornerShape(12.dp)) {
+                  modifier = Modifier.fillMaxWidth().height(UICons.ButtonTonalHeight),
+                  shape = RoundedCornerShape(UICons.ButtonTonalCornerRadius)) {
                     Icon(
                         imageVector = Icons.Default.AddCircle,
                         contentDescription = AddReviewScreenStrings.AddPhotoContentDescription,
-                        modifier = Modifier.size(20.dp))
-                    Spacer(modifier = Modifier.padding(start = 8.dp))
+                        modifier = Modifier.size(UICons.IconSize))
+                    Spacer(modifier = Modifier.padding(start = UICons.SpacerHeightSmall))
                     Text(
                         AddReviewScreenStrings.AddPicturesButtonLabel,
                         style = MaterialTheme.typography.titleSmall)
@@ -259,18 +265,20 @@ fun AddReviewScreen(
                   exit = fadeOut() + scaleOut()) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(UICons.CardMedCornerRadius),
                         colors =
                             CardDefaults.cardColors(
                                 containerColor =
-                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))) {
-                          Column(modifier = Modifier.padding(16.dp)) {
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(
+                                        alpha = UICons.ChangeAlphaMedium))) {
+                          Column(modifier = Modifier.padding(UICons.ColumnMediumPadding)) {
                             Text(
                                 "Photos (${uiState.photos.size})",
                                 style = MaterialTheme.typography.titleSmall,
-                                modifier = Modifier.padding(bottom = 12.dp))
+                                modifier = Modifier.padding(bottom = UICons.TextPadding))
                             LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                horizontalArrangement =
+                                    Arrangement.spacedBy(UICons.RowHArrangement),
                                 modifier = Modifier.testTag("PhotosLazyRow")) {
                                   items(uiState.photos.size) { index ->
                                     Box {
@@ -279,22 +287,24 @@ fun AddReviewScreen(
                                           contentDescription =
                                               "${AddReviewScreenStrings.SelectedImageContentDescriptionPrefix}$index",
                                           modifier =
-                                              Modifier.size(120.dp)
-                                                  .clip(RoundedCornerShape(12.dp))
-                                                  .shadow(4.dp, RoundedCornerShape(12.dp)),
+                                              Modifier.size(UICons.ImageSize)
+                                                  .clip(RoundedCornerShape(UICons.ImageCorners))
+                                                  .shadow(
+                                                      UICons.ImageShadow,
+                                                      RoundedCornerShape(UICons.ImageCorners)),
                                           placeholder = painterResource(R.drawable.empty_image),
                                           error = painterResource(R.drawable.empty_image))
                                       Surface(
                                           modifier =
                                               Modifier.align(Alignment.TopEnd)
-                                                  .padding(4.dp)
-                                                  .size(28.dp)
+                                                  .padding(UICons.SurfacePadding)
+                                                  .size(UICons.SurfaceSize)
                                                   .clickable {
                                                     reviewViewModel.removePhoto(
                                                         uiState.photos[index])
                                                   }
                                                   .testTag("RemovePhoto$index"),
-                                          shape = RoundedCornerShape(8.dp),
+                                          shape = RoundedCornerShape(UICons.SurfaceCorners),
                                           color = MaterialTheme.colorScheme.errorContainer) {
                                             Icon(
                                                 imageVector = Icons.Default.Close,
@@ -302,7 +312,7 @@ fun AddReviewScreen(
                                                     AddReviewScreenStrings
                                                         .RemovePhotoContentDescription,
                                                 tint = MaterialTheme.colorScheme.onErrorContainer,
-                                                modifier = Modifier.padding(4.dp))
+                                                modifier = Modifier.padding(UICons.SurfacePadding))
                                           }
                                     }
                                   }
@@ -311,11 +321,11 @@ fun AddReviewScreen(
                         }
                   }
 
-              Spacer(modifier = Modifier.height(8.dp))
+              Spacer(modifier = Modifier.height(UICons.SpacerHeightSmall))
 
               Row(
                   modifier = modifier.fillMaxWidth().testTag(AddReviewScreenTestTags.BUTTONS_ROW),
-                  horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                  horizontalArrangement = Arrangement.spacedBy(UICons.RowHArrangement)) {
                     OutlinedButton(
                         onClick = {
                           reviewViewModel.clearFormNoSubmission()
@@ -323,10 +333,10 @@ fun AddReviewScreen(
                         },
                         modifier =
                             modifier
-                                .weight(1f)
-                                .height(52.dp)
+                                .weight(UICons.ButtonWeight)
+                                .height(UICons.ButtonTonalHeight)
                                 .testTag(AddReviewScreenTestTags.CANCEL_BUTTON),
-                        shape = RoundedCornerShape(12.dp)) {
+                        shape = RoundedCornerShape(UICons.ButtonTonalCornerRadius)) {
                           Text(AddReviewScreenStrings.CancelButtonLabel)
                         }
                     Button(
@@ -337,16 +347,18 @@ fun AddReviewScreen(
                         enabled = uiState.isValid,
                         modifier =
                             modifier
-                                .weight(1f)
-                                .height(52.dp)
+                                .weight(UICons.ButtonWeight)
+                                .height(UICons.ButtonTonalHeight)
                                 .testTag(AddReviewScreenTestTags.DONE_BUTTON),
-                        shape = RoundedCornerShape(12.dp),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)) {
+                        shape = RoundedCornerShape(UICons.ButtonTonalCornerRadius),
+                        elevation =
+                            ButtonDefaults.buttonElevation(
+                                defaultElevation = UICons.ButtonElevation)) {
                           Text(AddReviewScreenStrings.DoneButtonLabel)
                         }
                   }
 
-              Spacer(modifier = Modifier.height(16.dp))
+              Spacer(modifier = Modifier.height(UICons.SpacerHeightMedium))
             }
       }
 }
@@ -360,7 +372,7 @@ fun StarRatingBar(
   val starCount = if (maxStars > 0) maxStars else AddReviewScreenDefaults.MaxStars
   Row(
       modifier = Modifier.testTag(AddReviewScreenTestTags.RATING_BAR),
-      horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+      horizontalArrangement = Arrangement.spacedBy(UICons.RowStarArrangement)) {
         for (i in 1..starCount) {
           val scale by
               animateFloatAsState(
@@ -377,7 +389,7 @@ fun StarRatingBar(
                   if (i <= rating) AddReviewScreenDefaults.SelectedStarColor
                   else AddReviewScreenDefaults.UnselectedStarColor,
               modifier =
-                  Modifier.size(40.dp)
+                  Modifier.size(UICons.IconBig)
                       .scale(scale)
                       .clickable {
                         if (i == rating) {

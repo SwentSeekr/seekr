@@ -6,21 +6,49 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 object AddReviewScreenDefaults {
-  val SpacePadding: Dp = 16.dp
-  val InfoVerticalPadding: Dp = 4.dp
-  val FieldVerticalPadding: Dp = 8.dp
-  val PhotoSectionSpacing: Dp = 12.dp
-  val PhotosSpacing: Dp = 8.dp
-  val StarPadding: Dp = 4.dp
-  val AddPhotosIconSize: Dp = 20.dp
+  val ChangeAlpha: Float = 0.3f
+  val ChangeAlphaMedium: Float = 0.5f
+
+  val ColumnPadding: Dp = 20.dp
+  val ColumnMediumPadding: Dp = 16.dp
+  val ColumnVArrangement: Dp = 20.dp
+  val ColumnLittleVArr: Dp = 8.dp
+  val ColumnMediumVArr: Dp = 16.dp
+
+  val RowHArrangement: Dp = 12.dp
+  val RowStarArrangement: Dp = 4.dp
+
+  val CardCornerRadius: Dp = 20.dp
+  val CardMedCornerRadius: Dp = 16.dp
+  val CardNoElevation: Dp = 0.dp
+  val CardLittleElevation: Dp = 2.dp
+
+  val ButtonTonalHeight: Dp = 52.dp
+  val ButtonTonalCornerRadius: Dp = 12.dp
+  val ButtonWeight: Float = 1f
+  val ButtonElevation: Dp = 4.dp
+
+  val TextPadding: Dp = 12.dp
+
   val ImageSize: Dp = 120.dp
-  val CommentFieldCornerRadius: Dp = 12.dp
-  val CommentFieldWidthFraction = 0.9f
-  val TitleFontSize = 24.sp
-  val CloseImageSize: Dp = 48.dp
-  val SubtitleFontSize = 14.sp
+  val ImageCorners: Dp = 12.dp
+  val ImageShadow: Dp = 4.dp
+
+  val SurfacePadding: Dp = 4.dp
+  val SurfaceSize: Dp = 28.dp
+  val SurfaceCorners: Dp = 8.dp
+
+  val IconSize: Dp = 20.dp
+  val IconBig: Dp = 40.dp
+
+  val SpacerHeightSmall: Dp = 8.dp
+  val SpacerHeightMedium: Dp = 16.dp
+
   const val MaxStars = 5
-  val CommentFieldHeight: Dp = 350.dp
+
+  val CommentFieldHeight: Dp = 250.dp
+  val CommentFieldCornerRadius: Dp = 16.dp
+
   val SelectedStarColor = Color(0xFFFFC107)
   val UnselectedStarColor = Color.Gray
   val TopBarBackgroundColor: Color = Color.LightGray
