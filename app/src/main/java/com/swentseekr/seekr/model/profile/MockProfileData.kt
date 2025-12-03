@@ -130,20 +130,3 @@ fun createReview(
       comment = comment,
       photos = photos)
 }
-
-fun createTestProfileWithReviews(reviewRate: Double = 4.5, reviewCount: Int = 2): Profile {
-  val profile =
-      mockProfileData().copy(author = mockProfileData().author.copy(reviewRate = reviewRate))
-
-  val reviews =
-      (1..reviewCount).map { i ->
-        createReview(
-            reviewId = "review$i",
-            authorId = profile.uid,
-            huntId = "hunt$i",
-            rating = reviewRate,
-            comment = "Review #$i")
-      }
-
-  return profile
-}
