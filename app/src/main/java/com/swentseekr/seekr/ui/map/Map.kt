@@ -31,6 +31,19 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+/**
+ * High-level map screen composable for the Seekr app.
+ *
+ * This composable:
+ * - Observes [MapUIState] from [MapViewModel].
+ * - Manages Google Maps camera position and location-related side effects.
+ * - Handles location permission requests and UI popups.
+ * - Controls hunt-related UI (start, validate location, finish, stop dialogs).
+ *
+ * @param viewModel [MapViewModel] used as the source of state and map-related actions.
+ * @param testMode [Boolean] flag indicating whether the screen is in test mode (set to `true` to
+ *   skip automatic permission requests during tests).
+ */
 @Composable
 fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) {
   val uiState by viewModel.uiState.collectAsState()
@@ -125,11 +138,32 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
   }
 }
 
+/**
+ * Simple holder for location permission state and the permission request action.
+ *
+ * @property hasPermission [Boolean] indicating whether the user has granted location permissions
+ *   (fine or coarse).
+ * @property requestPermission function of type `() -> Unit` used to trigger the system permission
+ *   dialog for location permissions.
+ */
 private data class LocationPermissionState(
     val hasPermission: Boolean,
     val requestPermission: () -> Unit
 )
 
+/**
+ * Remembers and manages the location permission state for the map screen.
+ *
+ * This composable:
+ * - Uses an [ActivityResultContracts.RequestMultiplePermissions] launcher.
+ * - Tracks whether fine or coarse location permission has been granted.
+ * - Automatically triggers a permission request on first composition (unless [testMode] is `true`).
+ *
+ * @param testMode [Boolean] flag used to disable automatic permission requests in tests. When
+ *   `true`, no initial permission request is launched.
+ * @return [LocationPermissionState] containing the current permission status and a function to
+ *   request permissions.
+ */
 @Composable
 private fun rememberLocationPermissionState(testMode: Boolean): LocationPermissionState {
   var hasLocationPermission by remember { mutableStateOf(false) }
@@ -160,6 +194,22 @@ private fun rememberLocationPermissionState(testMode: Boolean): LocationPermissi
       })
 }
 
+/**
+ * Side-effect composable that moves the camera to the user's last known location.
+ *
+ * This effect:
+ * - Runs when [hasLocationPermission] or [mapLoaded] changes.
+ * - Checks that location permission is granted.
+ * - Queries the last known location from [FusedLocationProviderClient].
+ * - Animates the [CameraPositionState] to center on the user with a default zoom.
+ *
+ * @param hasLocationPermission [Boolean] whether location permission is currently granted.
+ * @param mapLoaded [Boolean] flag indicating whether the map has finished loading.
+ * @param context [Context] used to check permission state.
+ * @param fused [FusedLocationProviderClient] used to access the last known location.
+ * @param cameraPositionState [CameraPositionState] representing the current map camera.
+ * @param scope [CoroutineScope] used to launch the camera animation.
+ */
 @Composable
 private fun MoveCameraToUserLocationEffect(
     hasLocationPermission: Boolean,
@@ -189,6 +239,15 @@ private fun MoveCameraToUserLocationEffect(
   }
 }
 
+/**
+ * Displays a permission request popup when location permission is not granted.
+ *
+ * Internally shows [PermissionRequestPopup] as long as [LocationPermissionState.hasPermission] is
+ * `false`.
+ *
+ * @param permissionState [LocationPermissionState] current location permission state with a
+ *   function to request permissions.
+ */
 @Composable
 private fun LocationPermissionPopup(permissionState: LocationPermissionState) {
   if (!permissionState.hasPermission) {
@@ -196,6 +255,12 @@ private fun LocationPermissionPopup(permissionState: LocationPermissionState) {
   }
 }
 
+/**
+ * Checks whether either fine or coarse location permission is granted.
+ *
+ * @param context [Context] used to query permission status via [ContextCompat.checkSelfPermission].
+ * @return [Boolean] `true` if fine or coarse location permission is granted, otherwise `false`.
+ */
 private fun isLocationPermissionGranted(context: Context): Boolean {
   val fineGranted =
       ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
@@ -208,6 +273,18 @@ private fun isLocationPermissionGranted(context: Context): Boolean {
   return fineGranted || coarseGranted
 }
 
+/**
+ * Validates the user's current location if location permission is granted.
+ *
+ * This function:
+ * - Checks for location permission via [isLocationPermissionGranted].
+ * - Reads the last known location from [FusedLocationProviderClient].
+ * - Forwards the location as a [LatLng] to [MapViewModel.validateCurrentPoint].
+ *
+ * @param context [Context] used to check location permissions.
+ * @param fused [FusedLocationProviderClient] used to obtain the last known location.
+ * @param viewModel [MapViewModel] that performs validation of the current point.
+ */
 private fun validateCurrentLocationIfPermitted(
     context: Context,
     fused: FusedLocationProviderClient,
@@ -224,6 +301,18 @@ private fun validateCurrentLocationIfPermitted(
   }
 }
 
+/**
+ * Finishes the current hunt only if the user is logged in and a persistence callback is provided.
+ *
+ * This function:
+ * - Retrieves the current Firebase user via [FirebaseAuth].
+ * - If a user ID exists and [onPersist] is non-null, calls [MapViewModel.finishHunt] with the given
+ *   persistence callback.
+ *
+ * @param onPersist optional suspending function of type `suspend (Hunt) -> Unit` that persists the
+ *   finished [Hunt] (or handles its completion).
+ * @param viewModel [MapViewModel] responsible for finalizing the hunt.
+ */
 private fun finishHuntIfLoggedIn(onPersist: (suspend (Hunt) -> Unit)?, viewModel: MapViewModel) {
   val userId = FirebaseAuth.getInstance().currentUser?.uid
   if (userId != null && onPersist != null) {
@@ -231,6 +320,23 @@ private fun finishHuntIfLoggedIn(onPersist: (suspend (Hunt) -> Unit)?, viewModel
   }
 }
 
+/**
+ * Side-effect composable that continuously updates the distance to the next point while a hunt is
+ * focused and location permission is granted.
+ *
+ * This effect:
+ * - Starts listening for location updates via [FusedLocationProviderClient.requestLocationUpdates]
+ *   when the user has permission, the map is focused on a hunt, and a hunt is selected.
+ * - On each location update, calls [MapViewModel.updateCurrentDistanceToNext] with the user's
+ *   current [LatLng].
+ * - Cleans up by removing location updates when the effect leaves the composition.
+ *
+ * @param hasLocationPermission [Boolean] whether location permission is granted.
+ * @param uiState [MapUIState] current UI state, including focus and selected hunt.
+ * @param context [Context] used to verify permission status.
+ * @param fused [FusedLocationProviderClient] used for continuous location updates.
+ * @param viewModel [MapViewModel] which receives distance updates to the next point.
+ */
 @Composable
 private fun ContinuousDistanceUpdateEffect(
     hasLocationPermission: Boolean,
@@ -275,6 +381,27 @@ private fun ContinuousDistanceUpdateEffect(
   }
 }
 
+/**
+ * Side-effect composable that routes and zooms the map between the user's current location and the
+ * next hunt point once a hunt has started.
+ *
+ * This effect:
+ * - Runs when permission, hunt started state, validated count, or selected hunt changes.
+ * - Checks that a hunt is started and permissions are granted.
+ * - Reads the current location from [FusedLocationProviderClient].
+ * - Determines the next point using [nextPointFor].
+ * - Calls [MapViewModel.routeFromCurrentToNext] to calculate the route.
+ * - Adjusts the camera to show both the current location and the next point within a [LatLngBounds]
+ *   with a configured padding.
+ *
+ * @param hasLocationPermission [Boolean] whether location permission is granted.
+ * @param uiState [MapUIState] current map UI state, including hunt status and validated points.
+ * @param context [Context] used to verify permission status.
+ * @param fused [FusedLocationProviderClient] used to obtain the current location.
+ * @param cameraPositionState [CameraPositionState] map camera state to be animated.
+ * @param scope [CoroutineScope] used to launch the camera animation.
+ * @param viewModel [MapViewModel] which performs routing logic between current and next point.
+ */
 @Composable
 private fun RouteAndZoomToNextPointEffect(
     hasLocationPermission: Boolean,
