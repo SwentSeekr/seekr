@@ -87,6 +87,8 @@ object MapScreenStrings {
   const val ErrorIncompleteHunt = "You still have checkpoints to validate."
 
   const val Fail = "Failed to add done hunt"
+  const val IN = " in "
+  const val SLASH = " / "
 }
 
 object MapScreenTestTags {

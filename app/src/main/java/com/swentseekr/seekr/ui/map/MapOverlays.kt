@@ -164,7 +164,7 @@ private fun calculateCurrentCheckpointInfo(
  */
 private fun buildDistanceSuffix(distanceToNext: Int?): String =
     distanceToNext?.let {
-      " in $it${MapScreenStrings.DistanceMetersSuffix} / " +
+      "${MapScreenStrings.IN}$it${MapScreenStrings.DistanceMetersSuffix}${MapScreenStrings.SLASH}" +
           "${MapConfig.ValidationRadiusMeters}${MapScreenStrings.DistanceMetersSuffix}"
     } ?: ""
 
@@ -198,7 +198,7 @@ private fun ProgressHeader(validated: Int, totalPoints: Int) {
         Text(text = MapScreenStrings.Progress, style = MaterialTheme.typography.bodyMedium)
         Text(
             modifier = Modifier.testTag(MapScreenTestTags.PROGRESS),
-            text = "$validated / $totalPoints",
+            text = "$validated${MapScreenStrings.SLASH}$totalPoints",
             style = MaterialTheme.typography.bodyMedium)
       }
 }
@@ -217,7 +217,7 @@ private fun SegmentedProgressBar(validated: Int, totalPoints: Int) {
 
       Box(
           modifier =
-              Modifier.weight(1f)
+              Modifier.weight(MapScreenDefaults.ONE_FLOAT)
                   .height(MapScreenDefaults.ProgressBarHeight)
                   .clip(RoundedCornerShape(MapScreenDefaults.ProgressSegmentCornerRadius))
                   .background(
