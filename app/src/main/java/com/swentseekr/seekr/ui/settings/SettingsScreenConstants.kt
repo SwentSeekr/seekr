@@ -4,11 +4,25 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 object SettingsScreenDefaults {
+  val ALPHA_CHANGE: Float = 0.3f
+
   val SCREEN_PADDING: Dp = 24.dp
+  val PADDING_MID: Dp = 20.dp
+  val PADDING_TINY: Dp = 8.dp
+  val PADDING_MINI: Dp = 4.dp
+
+  val SPACER_HEIGHT: Dp = 24.dp
+  val SPACER_HEIGHT_SMALL: Dp = 16.dp
+
+  val ROUND_CORNER: Dp = 16.dp
+  val ELEVATION: Dp = 4.dp
+
   val LOGOUT_TOP_PADDING: Dp = 32.dp
 
   val ITEMS_SPACING = 56.dp
   val COMPONENTS_PADDING = 12.dp
+
+  val BUTTON_HEIGHT: Dp = 56.dp
 
   val COLUMN_WEIGHT = 1f
   const val NOTIFICATION_REQUEST_CODE = 1001

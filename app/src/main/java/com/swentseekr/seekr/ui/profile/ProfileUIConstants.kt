@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.profile
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -21,15 +22,47 @@ object ProfileScreenConstants {
 
 /** Centralized constants for UI dimensions. */
 object EditProfileNumberConstants {
-  val PROFILE_PICTURE_SIZE = 80.dp
+  val ALPHA_CHANGE = 0.3f
+  val ALPHA_MID = 0.5f
+
+  val PROFILE_PICTURE_SIZE = 140.dp
+  val PROFILE_PICTURE_SHADOW = 12.dp
+  val PROFILE_SURFACE = 40.dp
+  val PROFILE_ELEVATION = 6.dp
+
+  val ICON_PADDING = 8.dp
+
   val BIO_FIELD_MIN_HEIGHT = 120.dp
   val SCREEN_PADDING = 24.dp
+
+  val SPACER_TINY = 4.dp
   val SPACER_MEDIUM = 12.dp
   val SPACER_LARGE = 16.dp
-  val ADD_ICON_FONT_SIZE = 24.sp
   val SPACER_SMALL = 8.dp
+
+  val PADDING_GIGANTIC = 20.dp
+  val PADDING_BIG = 16.dp
   val PADDING_SMALL = 4.dp
-  const val PROFILE_PICTURE_SIZE_DP = 100
+
+  val VERTICAL_ARR = 12.dp
+  val VERTICAL_ARR_MEDIUM = 16.dp
+  val VERTICAL_ARR_LARGE = 20.dp
+  val HORIZONTAL_ARR = 12.dp
+
+  val BUTTON_HEIGHT_DP = 50.dp
+  val BUTTON_HEIGHT = 52.dp
+  val BUTTON_WEIGHT = 1f
+
+  val ROUND_CORNER_BIG = 20.dp
+  val ROUND_CORNER_MID = 12.dp
+
+  val PROGRESS_INDIC = 32.dp
+  val PROGRESS_STROKE = 3.dp
+
+  val ELEVATION_SMALL = 2.dp
+  val ELEVATION_MEDIUM = 4.dp
+
+  const val PROFILE_PICTURE_SIZE_DP = 140
 
   const val PROFILE_PIC_DEFAULT = 0
   const val MAX_PSEUDONYM_LENGTH = 30
@@ -95,4 +128,69 @@ object EditProfileTestTags {
   const val ERROR_MESSAGE = "ERROR_MESSAGE"
   const val SUCCESS_MESSAGE = "SUCCESS_MESSAGE"
   const val DIALOG_CANCEL_BUTTON = "DIALOG_CANCEL_BUTTON"
+}
+
+/**
+ * Centralized UI constants extracted from ProfileScreen to remove hardcoded values while preserving
+ * identical UI for tests.
+ */
+object ProfileUIConstantsDefaults {
+
+  // ---- GENERAL PADDINGS ----
+  val Padding4 = 4.dp
+  val Padding8 = 8.dp
+  val Padding12 = 12.dp
+  val Padding16 = 16.dp
+  val Padding20 = 20.dp
+  val Padding24 = 24.dp
+  val Padding32 = 32.dp
+  val Padding60 = 60.dp
+
+  // ---- SIZES ----
+  val Size2 = 2.dp
+  val Size8 = 8.dp
+  val Size16 = 16.dp
+  val Size20 = 20.dp
+  val Size24 = 24.dp
+  val Size28 = 28.dp
+  val Size40 = 40.dp
+  val Size64 = 64.dp
+  val Size70 = 70.dp
+
+  // ---- FONT SIZES ----
+  val Font12 = 12.sp
+  val Font14 = 14.sp
+  val Font16 = 16.sp
+  val Font18 = 18.sp
+  val Font20 = 20.sp
+  val Font22 = 22.sp
+
+  // ---- COLORS ----
+  val LightGrayBackground = Color(0xFFF8F9FA)
+  val LoadingGray = Color(0xFF666666)
+  val LoadingIndicatorGreen = Color(0xFF00C853)
+  val ErrorRed = Color(0xFFEF5350)
+  val ToolbarGreen = Color(0xFF00C853)
+  val TabInactiveGray = Color(0xFF999999)
+  val IconGray = Color(0xFFCCCCCC)
+
+  // ---- PROFILE HEADER ----
+  val ProfileHeaderGradientEnd = Color(0xFFE8847C)
+
+  // ---- TEST STRINGS ----
+  const val TabMyHuntsLabel = "My Hunts"
+  const val TabDoneLabel = "Done"
+  const val TabLikedLabel = "Liked"
+
+  // ---- EMPTY STATE ----
+  val EmptyIconSize = 64.dp
+  val EmptyTextColor = Color(0xFF999999)
+  const val EmptyText = "No hunts yet"
+
+  // ---- ALPHA VALUES ----
+  const val AlphaLight = 0.1f
+  const val AlphaMedium = 0.85f
+  const val AlphaLow = 0.2f
+  // ---- WEIGHTS ----
+  const val Weight = 1f
 }

@@ -2,7 +2,9 @@ package com.swentseekr.seekr.ui.map
 
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.PolyUtil
-import com.swentseekr.seekr.model.hunt.*
+import com.swentseekr.seekr.model.hunt.Difficulty
+import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.utils.FakeRepoEmpty
 import com.swentseekr.seekr.utils.FakeRepoSuccess
@@ -11,14 +13,13 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.OutputStream
-import java.lang.reflect.InvocationTargetException
+import java.lang.IllegalStateException
+import java.lang.reflect.Field
 import java.net.HttpURLConnection
 import java.net.URL
-import java.net.URLConnection
-import java.net.URLStreamHandler
-import java.net.URLStreamHandlerFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -44,6 +45,7 @@ class MainDispatcherRule(val dispatcher: TestDispatcher = StandardTestDispatcher
 }
 
 class MapViewModelTest {
+
   @get:Rule val mainDispatcherRule = MainDispatcherRule()
 
   private fun sample(
@@ -66,6 +68,10 @@ class MapViewModelTest {
           mainImageUrl = "",
           reviewRate = Constants.REVIEW_RATE)
 
+  // --------------------
+  // Basic initial state
+  // --------------------
+
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun initialStateLoadsHuntsAndTargetsFirstStart() =
@@ -76,6 +82,7 @@ class MapViewModelTest {
                 sample(uid = Constants.HUNT_UID_2))
         val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
 
+        // Let fetchHunts coroutine complete
         advanceUntilIdle()
 
         val state = vm.uiState.value
@@ -86,11 +93,13 @@ class MapViewModelTest {
       }
 
   @Test
-  fun initialStateWithEmptyRepoUsesLausanneFallback() = runTest {
+  fun initialStateWithEmptyRepoUsesDefaultFallback() = runTest {
     val vm = MapViewModel(repository = FakeRepoEmpty())
+
+    // Without advancing, uiState still has default target, which matches fallback constants.
     val state = vm.uiState.value
-    assertEquals(Constants.FALLBACK_LAT, state.target.latitude, 0.0001)
-    assertEquals(Constants.FALLBACK_LNG, state.target.longitude, 0.0001)
+    assertEquals(MapConfig.DefaultLat, state.target.latitude, 1e-6)
+    assertEquals(MapConfig.DefaultLng, state.target.longitude, 1e-6)
     assertTrue(state.hunts.isEmpty())
   }
 
@@ -104,7 +113,7 @@ class MapViewModelTest {
 
         val state = vm.uiState.value
         assertNotNull(state.errorMsg)
-        assertTrue(state.errorMsg!!.contains("Failed to load hunts"))
+        assertTrue(state.errorMsg!!.contains(MapScreenStrings.ErrorLoadHuntsPrefix))
         assertTrue(state.hunts.isEmpty())
       }
 
@@ -122,6 +131,10 @@ class MapViewModelTest {
 
         assertNull(vm.uiState.value.errorMsg)
       }
+
+  // --------------------
+  // Selection / focus
+  // --------------------
 
   @Test
   fun onMarkerClickSelectsHuntAndIsNotFocused() = runTest {
@@ -154,6 +167,7 @@ class MapViewModelTest {
   fun onBackToAllHuntsClearsSelectionAndFocus() = runTest {
     val hunts = listOf(sample(uid = Constants.HUNT_UID_1))
     val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
+
     vm.onMarkerClick(hunts[0])
     vm.onViewHuntClick()
     vm.onBackToAllHunts()
@@ -175,65 +189,37 @@ class MapViewModelTest {
     assertEquals(before, after)
   }
 
-  companion object {
-    object FakeDirections {
-      @Volatile
-      var nextBody: String =
-          """{"status":"OK","routes":[{"legs":[{"steps":[]}],"overview_polyline":{"points":""}}]}"""
-    }
+  // --------------------
+  // Route computation & helpers
+  // --------------------
 
-    private object HttpsFactory : URLStreamHandlerFactory {
-      override fun createURLStreamHandler(protocol: String?): URLStreamHandler? {
-        return if (protocol == "https") {
-          object : URLStreamHandler() {
-            override fun openConnection(u: URL): URLConnection {
-              return object : HttpURLConnection(u) {
-                override fun getInputStream(): InputStream =
-                    ByteArrayInputStream(FakeDirections.nextBody.toByteArray(Charsets.UTF_8))
+  /**
+   * Small fake HttpURLConnection that just returns [body] as its InputStream. Used via
+   * [directionsConnectionFactory] to test requestDirectionsPolyline.
+   */
+  private class FakeHttpURLConnection(private val body: String) :
+      HttpURLConnection(URL("https://example.com")) {
 
-                override fun getOutputStream(): OutputStream = ByteArrayOutputStream()
+    override fun getInputStream(): InputStream =
+        ByteArrayInputStream(body.toByteArray(Charsets.UTF_8))
 
-                override fun usingProxy(): Boolean = false
+    override fun getOutputStream(): OutputStream = ByteArrayOutputStream()
 
-                override fun disconnect() {}
+    override fun usingProxy(): Boolean = false
 
-                override fun connect() {}
-              }
-            }
-          }
-        } else null
-      }
-    }
+    override fun disconnect() {}
 
-    init {
-      try {
-        URL.setURLStreamHandlerFactory(HttpsFactory)
-      } catch (_: Error) {}
-    }
+    override fun connect() {}
   }
 
-  private fun MapViewModel.callRequestDirectionsPolylineSync(): List<LatLng> {
-    val m =
-        MapViewModel::class
-            .java
-            .getDeclaredMethod(
-                "requestDirectionsPolyline",
-                Double::class.javaPrimitiveType,
-                Double::class.javaPrimitiveType,
-                Double::class.javaPrimitiveType,
-                Double::class.javaPrimitiveType,
-                List::class.java,
-                String::class.java)
-    m.isAccessible = true
-    @Suppress("UNCHECKED_CAST")
-    return m.invoke(
-        this,
-        Constants.FALLBACK_LAT,
-        Constants.FALLBACK_LNG,
-        Constants.FALLBACK_LAT + 0.01,
-        Constants.FALLBACK_LNG + 0.01,
-        emptyList<Pair<Double, Double>>(),
-        "walking") as List<LatLng>
+  private fun withFakeDirectionsBody(body: String, block: () -> Unit) {
+    val original = directionsConnectionFactory
+    directionsConnectionFactory = { FakeHttpURLConnection(body) }
+    try {
+      block()
+    } finally {
+      directionsConnectionFactory = original
+    }
   }
 
   @OptIn(ExperimentalCoroutinesApi::class)
@@ -244,6 +230,7 @@ class MapViewModelTest {
 
     advanceUntilIdle()
 
+    // No selected hunt
     vm.onViewHuntClick()
 
     val state = vm.uiState.value
@@ -254,16 +241,15 @@ class MapViewModelTest {
 
   @Test
   fun requestDirectionsPolylineParsesStepPolylinesAndDeduplicates() {
-    val vm = MapViewModel(repository = FakeRepoEmpty())
-
     val step1 = listOf(LatLng(0.0, 0.0), LatLng(0.0, 1.0))
     val step2 = listOf(LatLng(0.0, 1.0), LatLng(1.0, 1.0))
+
     val step1Enc = PolyUtil.encode(step1)
     val step2Enc = PolyUtil.encode(step2)
 
     val overviewEnc = PolyUtil.encode(listOf(step1[0], step1[1], step2[1]))
 
-    FakeDirections.nextBody =
+    val body =
         """
         {
           "status": "OK",
@@ -284,24 +270,32 @@ class MapViewModelTest {
         """
             .trimIndent()
 
-    val points = vm.callRequestDirectionsPolylineSync()
+    withFakeDirectionsBody(body) {
+      val points =
+          requestDirectionsPolyline(
+              originLat = MapConfig.DefaultLat,
+              originLng = MapConfig.DefaultLng,
+              destLat = MapConfig.DefaultLat + 0.01,
+              destLng = MapConfig.DefaultLng + 0.01,
+              waypoints = emptyList(),
+              travelMode = MapConfig.TravelModeWalking,
+              apiKey = "test-key")
 
-    assertEquals(3, points.size)
-    assertEquals(0.0, points[0].latitude, 1e-6)
-    assertEquals(0.0, points[0].longitude, 1e-6)
-    assertEquals(0.0, points[1].latitude, 1e-6)
-    assertEquals(1.0, points[1].longitude, 1e-6)
-    assertEquals(1.0, points[2].latitude, 1e-6)
-    assertEquals(1.0, points[2].longitude, 1e-6)
+      assertEquals(3, points.size)
+      assertEquals(0.0, points[0].latitude, 1e-6)
+      assertEquals(0.0, points[0].longitude, 1e-6)
+      assertEquals(0.0, points[1].latitude, 1e-6)
+      assertEquals(1.0, points[1].longitude, 1e-6)
+      assertEquals(1.0, points[2].latitude, 1e-6)
+      assertEquals(1.0, points[2].longitude, 1e-6)
+    }
   }
 
   @Test
   fun requestDirectionsPolylineFallsBackToOverviewWhenStepsEmpty() {
-    val vm = MapViewModel(repository = FakeRepoEmpty())
-
     val overviewEnc = PolyUtil.encode(listOf(LatLng(2.0, 2.0), LatLng(3.0, 3.0)))
 
-    FakeDirections.nextBody =
+    val body =
         """
         {
           "status": "OK",
@@ -315,20 +309,28 @@ class MapViewModelTest {
         """
             .trimIndent()
 
-    val points = vm.callRequestDirectionsPolylineSync()
+    withFakeDirectionsBody(body) {
+      val points =
+          requestDirectionsPolyline(
+              originLat = MapConfig.DefaultLat,
+              originLng = MapConfig.DefaultLng,
+              destLat = MapConfig.DefaultLat + 0.01,
+              destLng = MapConfig.DefaultLng + 0.01,
+              waypoints = emptyList(),
+              travelMode = MapConfig.TravelModeWalking,
+              apiKey = "test-key")
 
-    assertEquals(2, points.size)
-    assertEquals(2.0, points[0].latitude, 1e-6)
-    assertEquals(2.0, points[0].longitude, 1e-6)
-    assertEquals(3.0, points[1].latitude, 1e-6)
-    assertEquals(3.0, points[1].longitude, 1e-6)
+      assertEquals(2, points.size)
+      assertEquals(2.0, points[0].latitude, 1e-6)
+      assertEquals(2.0, points[0].longitude, 1e-6)
+      assertEquals(3.0, points[1].latitude, 1e-6)
+      assertEquals(3.0, points[1].longitude, 1e-6)
+    }
   }
 
   @Test
   fun requestDirectionsPolylineErrorResponseIsWrappedAndHasCorrectMessage() {
-    val vm = MapViewModel(repository = FakeRepoEmpty())
-
-    FakeDirections.nextBody =
+    val body =
         """
         {
           "status": "REQUEST_DENIED",
@@ -337,35 +339,45 @@ class MapViewModelTest {
         """
             .trimIndent()
 
-    try {
-      vm.callRequestDirectionsPolylineSync()
-      fail("Expected the reflected call to fail with an InvocationTargetException")
-    } catch (e: InvocationTargetException) {
-      val cause = e.cause
-      assertNotNull(cause)
-      assertTrue(cause is IllegalStateException)
-      if (cause != null) {
+    withFakeDirectionsBody(body) {
+      try {
+        requestDirectionsPolyline(
+            originLat = MapConfig.DefaultLat,
+            originLng = MapConfig.DefaultLng,
+            destLat = MapConfig.DefaultLat + 0.01,
+            destLng = MapConfig.DefaultLng + 0.01,
+            waypoints = emptyList(),
+            travelMode = MapConfig.TravelModeWalking,
+            apiKey = "test-key")
+        fail("Expected IllegalStateException for error status")
+      } catch (e: IllegalStateException) {
         assertTrue(
-            cause.message?.contains("Directions API error") == true ||
-                cause.message?.contains("REQUEST_DENIED") == true)
+            e.message?.contains("Directions API error") == true ||
+                e.message?.contains("REQUEST_DENIED") == true)
       }
     }
   }
+
+  // --------------------
+  // Back to all hunts should clear route too
+  // --------------------
 
   @Test
   fun onBackToAllHuntsClearsRoute() = runTest {
     val hunts = listOf(sample(uid = Constants.HUNT_UID_1))
     val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
 
-    val s =
-        vm.uiState.value.copy(route = listOf(LatLng(1.0, 1.0), LatLng(2.0, 2.0)), isFocused = true)
-    val field = MapViewModel::class.java.getDeclaredField("_uiState")
+    val initial =
+        vm.uiState.value.copy(
+            route = listOf(LatLng(1.0, 1.0), LatLng(2.0, 2.0)),
+            isFocused = true,
+            selectedHunt = hunts[0])
+
+    // Use reflection to mutate private _uiState directly (no MockK)
+    val field: Field = MapViewModel::class.java.getDeclaredField("_uiState")
     field.isAccessible = true
-    @Suppress("UNCHECKED_CAST")
-    val mutable = field.get(vm) as kotlinx.coroutines.flow.MutableStateFlow<*>
-    @Suppress("UNCHECKED_CAST")
-    (mutable as kotlinx.coroutines.flow.MutableStateFlow<com.swentseekr.seekr.ui.map.MapUIState>)
-        .value = s
+    @Suppress("UNCHECKED_CAST") val mutable = field.get(vm) as MutableStateFlow<MapUIState>
+    mutable.value = initial
 
     vm.onBackToAllHunts()
 
@@ -374,6 +386,10 @@ class MapViewModelTest {
     assertTrue(after.route.isEmpty())
     assertNull(after.selectedHunt)
   }
+
+  // --------------------
+  // Hunt lifecycle (start / validate / finish)
+  // --------------------
 
   @Test
   fun startHuntUpdatesUIStateCorrectly() = runTest {
@@ -387,7 +403,7 @@ class MapViewModelTest {
     assertTrue(state.isHuntStarted)
     assertTrue(state.isFocused)
     assertEquals(0, state.validatedCount)
-    assertTrue(state.route.isEmpty())
+    assertTrue(state.route.isEmpty()) // route is cleared when starting
   }
 
   @Test
@@ -435,6 +451,7 @@ class MapViewModelTest {
     vm.startHunt()
 
     val validLocation = LatLng(Constants.VALID_LAT, Constants.VALID_LNG)
+    // total checkpoints = 2 (start/end) + middlePoints.size (2) = 4
     repeat(4) { vm.validateCurrentPoint(validLocation) }
 
     assertTrue(vm.uiState.value.validatedCount >= (hunts[0].middlePoints.size + 2))
@@ -462,7 +479,6 @@ class MapViewModelTest {
     val validLocation = LatLng(Constants.VALID_LAT, Constants.VALID_LNG)
     vm.validateCurrentPoint(validLocation)
 
-    var errorMsg: String? = null
     vm.finishHunt {}
 
     val state = vm.uiState.value
@@ -470,8 +486,8 @@ class MapViewModelTest {
     assertNotNull(state.selectedHunt)
     assertEquals(1, state.validatedCount)
 
-    errorMsg = state.errorMsg
+    val errorMsg = state.errorMsg
     assertNotNull(errorMsg)
-    assertTrue(errorMsg!!.contains("You still have checkpoints to validate"))
+    assertTrue(errorMsg!!.contains(MapScreenStrings.ErrorIncompleteHunt))
   }
 }
