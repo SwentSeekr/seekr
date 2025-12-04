@@ -29,8 +29,8 @@ import org.junit.Test
 
 const val UI_WAIT_TIMEOUT = 3_000L
 
-private val SELECTED = ProfileUIConstants.ToolbarGreen
-private val UNSELECTED = ProfileUIConstants.TabInactiveGray
+private val SELECTED = ProfileUIConstantsDefaults.ToolbarGreen
+private val UNSELECTED = ProfileUIConstantsDefaults.TabInactiveGray
 
 fun hasBackgroundColor(expected: Color) = SemanticsMatcher.expectValue(BackgroundColorKey, expected)
 
