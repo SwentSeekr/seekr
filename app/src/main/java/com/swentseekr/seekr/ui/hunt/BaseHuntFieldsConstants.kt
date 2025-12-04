@@ -33,25 +33,46 @@ object BaseHuntFieldsStrings {
 }
 
 object BaseHuntFieldsUi {
-  val FieldCornerRadius: Dp = 12.dp
-  val DescriptionHeight: Dp = 150.dp
+  val FieldCornerRadius: Dp = 16.dp
+  val ChangeAlpha: Float = 0.5f
+  val WeightTextField: Float = 1f
 
-  val ImageHeight: Dp = 180.dp
-  val SaveButtonHeight: Dp = 64.dp
-  val SaveButtonCornerRadius: Dp = 16.dp
-  val ScreenPadding: Dp = 16.dp
-  val SpacerHeight: Dp = 24.dp
+  val ColumnHPadding: Dp = 20.dp
+  val ColumnVArrangement: Dp = 16.dp
+  val RowHArrangement: Dp = 12.dp
 
-  val SpacerHeightMedium: Dp = 12.dp
+  val DescriptionHeight: Dp = 140.dp
 
-  val SpacerHeightSmall: Dp = 8.dp
-
+  val ImageHeight: Dp = 200.dp
+  val ImageLittleHeight: Dp = 100.dp
   val ImageWeight: Float = 1f
+  val ImageCornerRadius: Dp = 16.dp
+  val ImageLittleCornerRadius: Dp = 8.dp
 
-  val ImageHeightDivisor: Float = 1.5f
+  val ButtonHeight: Dp = 64.dp
+  val ButtonCornerRadius: Dp = 16.dp
 
-  val SpacerSuperSmall: Dp = 4.dp
-  val IconSizeSmall: Dp = 15.dp
+  val ButtonSaveHeight: Dp = 56.dp
+  val ButtonSaveCornerRadius: Dp = 16.dp
+
+  val ImageButtonHeight: Dp = 48.dp
+  val ImageButtonCornerRadius: Dp = 12.dp
+
+  val ButtonShadow: Dp = 8.dp
+
+  val CardCornerRadius: Dp = 20.dp
+  val CardLittleCornerRadius: Dp = 12.dp
+  val CardPadding: Dp = 20.dp
+  val CardVArrangement: Dp = 12.dp
+
+  val CardRowPadding: Dp = 8.dp
+
+  val SpacerHeight: Dp = 16.dp
+  val SpacerHeightMedium: Dp = 12.dp
+  val SpacerHeightSmall: Dp = 8.dp
+  val SpacerHeightTiny: Dp = 4.dp
+
+  val IconSize: Dp = 20.dp
 }
 
 object HuntScreenTestTags {
