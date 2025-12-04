@@ -8,6 +8,11 @@ import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.hunt.preview.PreviewHuntScreen
 import com.swentseekr.seekr.ui.hunt.preview.PreviewHuntViewModel
 
+data class DeleteAction(
+    val show: Boolean = false,
+    val onClick: (() -> Unit)? = null,
+)
+
 @Composable
 fun BaseHuntScreen(
     title: String = "Add your Hunt",
@@ -16,8 +21,7 @@ fun BaseHuntScreen(
     onDone: () -> Unit = {},
     testMode: Boolean = false,
     onSelectImage: (Uri?) -> Unit = {},
-    showDeleteAction: Boolean = false,
-    onDeleteClick: (() -> Unit)? = null,
+    deleteAction: DeleteAction = DeleteAction(),
 ) {
   val uiState by vm.uiState.collectAsState()
   val context = LocalContext.current
@@ -52,7 +56,10 @@ fun BaseHuntScreen(
     val previewVm = remember { PreviewHuntViewModel(vm.uiState) }
 
     PreviewHuntScreen(
-        viewModel = previewVm, onConfirm = { vm.submit() }, onGoBack = { showPreview = false })
+        viewModel = previewVm,
+        onConfirm = { vm.submit() },
+        onGoBack = { showPreview = false },
+    )
     return
   }
 
@@ -84,8 +91,8 @@ fun BaseHuntScreen(
         onRemoveExistingImage = vm::removeExistingOtherImage, // <-- images URL (Firestore)
         onSave = { showPreview = true },
         onGoBack = onGoBack,
-        showDeleteAction = showDeleteAction,
-        onDeleteClick = onDeleteClick,
+        showDeleteAction = deleteAction.show,
+        onDeleteClick = deleteAction.onClick,
     )
   }
 }
