@@ -41,6 +41,7 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.profile.mockProfileData
 import com.swentseekr.seekr.ui.components.HuntCard
 import com.swentseekr.seekr.ui.components.MAX_RATING
+import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import com.swentseekr.seekr.ui.profile.ProfileScreenConstants.HUNTS_DONE_LABEL
 import com.swentseekr.seekr.ui.profile.ProfileScreenConstants.MULTIPLE_REVIEWS_LABEL
 import com.swentseekr.seekr.ui.profile.ProfileScreenConstants.ONE_DECIMAL_FORMAT
@@ -130,18 +131,23 @@ fun ProfileScreen(
     testMode: Boolean = false,
     testPublic: Boolean = false,
     testProfile: Profile? = null,
-    onReviewsClick: () -> Unit = {}
+    onReviewsClick: () -> Unit = {},
 ) {
   val context = LocalContext.current
   val uiState by viewModel.uiState.collectAsState()
 
-  val profile =
-      if (testMode) {
-        testProfile ?: mockProfileData()
-      } else {
-        LaunchedEffect(userId) { viewModel.loadProfile(userId, context) }
+    LaunchedEffect(userId) {
+        if (!testMode) viewModel.loadProfile(userId, context)
+    }
 
-        // LOADING UI
+    val profile = if (testMode) {
+        testProfile ?: mockProfileData()
+    } else {
+        uiState.profile
+    }
+
+
+    // LOADING UI
         AnimatedVisibility(visible = uiState.isLoading, enter = fadeIn(), exit = fadeOut()) {
           Box(
               modifier =
@@ -174,7 +180,7 @@ fun ProfileScreen(
         }
 
         uiState.profile
-      }
+
 
   if (profile == null) {
     AnimatedVisibility(visible = !uiState.isLoading, enter = fadeIn(), exit = fadeOut()) {
@@ -228,12 +234,13 @@ fun ProfileScreen(
           ModernCustomToolbar(selectedTab = selectedTab, onTabSelected = { selectedTab = it })
 
           // ---- HUNTS LIST ----
-          val huntsToDisplay =
-              when (selectedTab) {
-                ProfileTab.MY_HUNTS -> profile.myHunts
-                ProfileTab.DONE_HUNTS -> profile.doneHunts
-                ProfileTab.LIKED_HUNTS -> profile.likedHunts
-              }
+
+            val huntsToDisplay =
+                when (selectedTab) {
+                    ProfileTab.MY_HUNTS -> profile.myHunts
+                    ProfileTab.DONE_HUNTS -> profile.doneHunts
+                    ProfileTab.LIKED_HUNTS -> profile.likedHunts
+                }
 
           LazyColumn(
               modifier = Modifier.fillMaxSize().testTag(ProfileTestTags.PROFILE_HUNTS_LIST),
@@ -241,7 +248,7 @@ fun ProfileScreen(
                 if (huntsToDisplay.isEmpty()) {
                   item { ModernEmptyHuntsState(selectedTab) }
                 } else {
-                  items(huntsToDisplay.size) { index ->
+                    items(huntsToDisplay.size, key = { huntsToDisplay[it].uid }) { index ->
                     val hunt = huntsToDisplay[index]
 
                     val base = Modifier.testTag(ProfileTestTags.getTestTagForHuntCard(hunt, index))
@@ -251,7 +258,14 @@ fun ProfileScreen(
                             base.clickable { onMyHuntClick(hunt.uid) }
                         else base
 
-                    HuntCard(hunt = hunt, modifier = clickable)
+                        HuntCard(
+                            hunt = hunt,
+                            isLiked = profile.likedHunts.any { it.uid == hunt.uid },
+                            onLikeClick = { huntId ->
+                                viewModel.toggleLikedHunt(hunt, context)
+                                },
+                            modifier = clickable
+                        )
                   }
                 }
               }
