@@ -1,18 +1,16 @@
 package com.swentseekr.seekr.ui.hunt.preview
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -32,22 +30,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import coil.compose.AsyncImage
-import com.swentseekr.seekr.R
-import com.swentseekr.seekr.model.hunt.DifficultyColor
+import com.swentseekr.seekr.model.hunt.Difficulty
+import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.model.hunt.HuntStatus
+import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.components.HuntCardScreenDefaults
 import com.swentseekr.seekr.ui.components.HuntCardScreenStrings
+import com.swentseekr.seekr.ui.components.HuntImageCarousel
+import com.swentseekr.seekr.ui.components.ModernDifficultyBadge
+import com.swentseekr.seekr.ui.components.ModernMapSection
+import com.swentseekr.seekr.ui.components.ModernStatCard
 import com.swentseekr.seekr.ui.hunt.HuntUIState
 
 val STRINGS = PreviewHuntStrings
-val UI_CONST = PreviewHuntUi
 val TEST_TAGS = PreviewHuntScreenTestTags
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,275 +70,243 @@ fun PreviewHuntScreen(
               }
             })
       },
-      modifier = Modifier.testTag(TEST_TAGS.PREVIEW_HUNT_SCREEN)) { innerPadding ->
+      modifier = Modifier.testTag(TEST_TAGS.PREVIEW_HUNT_SCREEN),
+      containerColor = HuntCardScreenDefaults.ScreenBackground) { innerPadding ->
         Column(
-            modifier =
-                modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(horizontal = HuntCardScreenDefaults.ScreenPaddingHorizontal)
-                    .verticalScroll(scroll),
+            modifier = modifier.fillMaxSize().padding(innerPadding).verticalScroll(scroll),
             verticalArrangement = Arrangement.Top) {
-              // Main card – try to mirror HuntCardScreen’s card
-              Card(
+              // Hero Section with Image Carousel
+              PreviewHeroSection(ui)
+
+              // Stats Section
+              PreviewStatsSection(ui)
+
+              // Description Section
+              PreviewDescriptionCard(ui)
+
+              // Map Section
+              PreviewMapCard(ui)
+
+              // Status and Points Section
+              PreviewStatusPointsCard(ui)
+
+              // Confirm button
+              Row(
                   modifier =
                       Modifier.fillMaxWidth()
                           .padding(
-                              top = HuntCardScreenDefaults.ScreenPaddingTop,
-                              bottom = HuntCardScreenDefaults.ScreenPaddingBottom)
-                          .height(HuntCardScreenDefaults.ScreenHuntCardHeight),
-                  colors =
-                      CardDefaults.cardColors(
-                          containerColor = HuntCardScreenDefaults.CardBackgroundColor),
-                  shape = RoundedCornerShape(HuntCardScreenDefaults.CornerRadius),
-                  elevation = CardDefaults.cardElevation(HuntCardScreenDefaults.CardElevation)) {
-                    Column(
-                        modifier =
-                            Modifier.padding(HuntCardScreenDefaults.CardInnerPadding)
-                                .fillMaxWidth()
-                                .verticalScroll(rememberScrollState()),
-                        verticalArrangement =
-                            Arrangement.spacedBy(HuntCardScreenDefaults.InfoColumnPadding)) {
-                          PreviewHeaderSection(ui)
-
-                          PreviewImageAndStatsSection(ui)
-
-                          PreviewDescriptionSection(ui)
-
-                          PreviewStatusAndPointsSection(ui)
+                              horizontal = HuntCardScreenDefaults.Padding20,
+                              vertical = HuntCardScreenDefaults.Padding12),
+                  horizontalArrangement = Arrangement.End) {
+                    Button(
+                        onClick = onConfirm,
+                        modifier = modifier.testTag(TEST_TAGS.CONFIRM_BUTTON),
+                        enabled = ui.isValid,
+                        shape = RoundedCornerShape(HuntCardScreenDefaults.CornerRadius)) {
+                          Text(STRINGS.CONFIRM_BUTTON)
                         }
                   }
 
-              // Confirm button under the card
-              Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                Button(
-                    onClick = onConfirm,
-                    modifier = modifier.testTag(TEST_TAGS.CONFIRM_BUTTON),
-                    enabled = ui.isValid) {
-                      Text(STRINGS.CONFIRM_BUTTON)
-                    }
-              }
+              Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding40))
             }
       }
 }
 
-/** Title + "by you" header, visually similar to HuntHeaderSection. */
-@Composable
-private fun PreviewHeaderSection(ui: HuntUIState, modifier: Modifier = Modifier) {
-  Column(modifier = modifier.padding(HuntCardScreenDefaults.InfoColumnPadding).fillMaxWidth()) {
-    Text(
-        text = ui.title.ifBlank { STRINGS.HUNT_TITLE_FALLBACK },
-        fontSize = HuntCardScreenDefaults.TitleFontSize,
-        fontWeight = FontWeight.Bold,
-        textAlign = TextAlign.Center,
-        modifier =
-            Modifier.fillMaxWidth()
-                .padding(HuntCardScreenDefaults.InfoTextPadding)
-                .testTag(TEST_TAGS.HUNT_TITLE))
-
-    Text(
-        text = "${HuntCardScreenStrings.By} ${STRINGS.AUTHOR_PREVIEW}",
-        modifier =
-            Modifier.padding(horizontal = HuntCardScreenDefaults.InfoTextPadding)
-                .testTag(TEST_TAGS.HUNT_AUTHOR_PREVIEW),
-        style = MaterialTheme.typography.bodyMedium)
-
-    Spacer(modifier = Modifier.height(HuntCardScreenDefaults.AuthorImageSpacing))
-  }
-}
-
 /**
- * Row with image preview on the left and stats badges on the right (difficulty, distance, time).
+ * Hero section with image carousel, difficulty badge, title and author. Reuses HuntImageCarousel
+ * and ModernDifficultyBadge from HuntCardScreen.
  */
 @Composable
-private fun PreviewImageAndStatsSection(ui: HuntUIState, modifier: Modifier = Modifier) {
-  Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier.fillMaxWidth()) {
-    PreviewImageSection(
-        ui = ui,
+private fun PreviewHeroSection(ui: HuntUIState) {
+  // Convert UIState to Hunt for the carousel
+  val previewHunt = uiStateToHunt(ui)
+
+  Box(modifier = Modifier.fillMaxWidth().aspectRatio(HuntCardScreenDefaults.AspectRatioHero)) {
+    // Reuse the existing HuntImageCarousel
+    HuntImageCarousel(hunt = previewHunt, modifier = Modifier.fillMaxWidth())
+
+    // Difficulty badge overlay
+    ModernDifficultyBadge(
+        difficulty = previewHunt.difficulty,
+        modifier = Modifier.align(Alignment.TopStart).padding(HuntCardScreenDefaults.Padding16))
+
+    // Title and author overlay
+    Column(
         modifier =
-            Modifier.weight(HuntCardScreenDefaults.ImageCarouselWeight)
-                .padding(end = HuntCardScreenDefaults.ImageCarouselPadding))
+            Modifier.align(Alignment.BottomStart).padding(HuntCardScreenDefaults.Padding20)) {
+          Text(
+              text = ui.title.ifBlank { STRINGS.HUNT_TITLE_FALLBACK },
+              fontSize = HuntCardScreenDefaults.TitleFontSize,
+              fontWeight = FontWeight.Bold,
+              color = MaterialTheme.colorScheme.onPrimary,
+              lineHeight = HuntCardScreenDefaults.LineHeight,
+              modifier = Modifier.testTag(TEST_TAGS.HUNT_TITLE))
 
-    PreviewStatsSection(
-        ui = ui, modifier = Modifier.weight(HuntCardScreenDefaults.StatsColumnWeight))
-  }
-}
+          Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding8))
 
-/**
- * Simple “carousel-like” image area:
- * - main image in a big card
- * - other images in a horizontal strip below.
- */
-@Composable
-private fun PreviewImageSection(ui: HuntUIState, modifier: Modifier = Modifier) {
-  val images: List<Any> = buildList {
-    val main = ui.mainImageUrl.takeIf { it.isNotBlank() }
-    if (main != null) {
-      add(main)
-    } else {
-      add(R.drawable.empty_image)
-    }
-
-    ui.otherImagesUris.map { it.toString() }.filter { it.isNotBlank() }.forEach { add(it) }
-  }
-
-  Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-    // Main big image
-    Card(
-        modifier =
-            Modifier.fillMaxWidth()
-                .height(HuntCardScreenDefaults.ImageCarouselHeight)
-                .clip(RoundedCornerShape(HuntCardScreenDefaults.ImageCarouselCornerRadius)),
-        elevation = CardDefaults.cardElevation(HuntCardScreenDefaults.CardElevation)) {
-          val first = images.firstOrNull()
-          if (first is String) {
-            AsyncImage(
-                model = first,
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                placeholder = painterResource(R.drawable.empty_image),
-                error = painterResource(R.drawable.empty_image),
-                contentScale = ContentScale.Crop)
-          } else {
-            Image(
-                painter = painterResource(R.drawable.empty_image),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop)
-          }
+          Text(
+              text = "${HuntCardScreenStrings.By} ${STRINGS.AUTHOR_PREVIEW}",
+              fontSize = HuntCardScreenDefaults.AuthorFontSize,
+              color =
+                  MaterialTheme.colorScheme.onPrimary.copy(alpha = HuntCardScreenDefaults.Alpha),
+              fontWeight = FontWeight.Medium,
+              modifier = Modifier.testTag(TEST_TAGS.HUNT_AUTHOR_PREVIEW))
         }
-
-    // Small thumbnails for other images (if any)
-    if (images.size > 1) {
-      Spacer(modifier = Modifier.height(HuntCardScreenDefaults.SectionSpacing))
-      Row(
-          modifier = Modifier.horizontalScroll(rememberScrollState()),
-          horizontalArrangement = Arrangement.spacedBy(UI_CONST.THUMBNAIL_SPACING)) {
-            images.drop(1).forEach { img ->
-              Card(
-                  modifier = Modifier.size(UI_CONST.THUMBNAIL_SIZE),
-                  elevation = CardDefaults.cardElevation(HuntCardScreenDefaults.CardElevation),
-                  shape = RoundedCornerShape(HuntCardScreenDefaults.ImageCarouselCornerRadius)) {
-                    if (img is String) {
-                      AsyncImage(
-                          model = img,
-                          contentDescription = null,
-                          modifier = Modifier.fillMaxSize(),
-                          placeholder = painterResource(R.drawable.empty_image),
-                          error = painterResource(R.drawable.empty_image),
-                          contentScale = ContentScale.Crop)
-                    } else {
-                      Image(
-                          painter = painterResource(R.drawable.empty_image),
-                          contentDescription = null,
-                          modifier = Modifier.fillMaxSize(),
-                          contentScale = ContentScale.Crop)
-                    }
-                  }
-            }
-          }
-    }
   }
 }
 
-/** Stats badges: difficulty, distance, time – trying to mimic the HuntCard stats column. */
+/** Stats section showing distance and time. Reuses ModernStatCard from HuntCardScreen. */
 @Composable
-private fun PreviewStatsSection(ui: HuntUIState, modifier: Modifier = Modifier) {
-  Column(
-      modifier = modifier,
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement =
-          Arrangement.spacedBy(HuntCardScreenDefaults.BadgePadding, Alignment.CenterVertically)) {
-        val difficultyLabel = ui.difficulty?.name ?: STRINGS.NOT_SET
-        val difficultyColor =
-            ui.difficulty?.let { DifficultyColor(it) } ?: HuntCardScreenDefaults.NeutralBadgeColor
-
-        PreviewStatBox(
-            label = difficultyLabel,
-            color = difficultyColor,
-            modifier = Modifier.testTag(TEST_TAGS.HUNT_DIFFICULTY))
-
-        PreviewStatBox(
-            label =
-                if (ui.distance.isNotBlank()) {
-                  "${ui.distance} ${HuntCardScreenStrings.DistanceUnit}"
-                } else {
-                  STRINGS.NOT_SET
-                },
-            color = HuntCardScreenDefaults.NeutralBadgeColor,
-            modifier = Modifier.testTag(TEST_TAGS.HUNT_DISTANCE))
-
-        PreviewStatBox(
-            label =
-                if (ui.time.isNotBlank()) {
-                  "${ui.time} ${HuntCardScreenStrings.HourUnit}"
-                } else {
-                  STRINGS.NOT_SET
-                },
-            color = HuntCardScreenDefaults.NeutralBadgeColor,
-            modifier = Modifier.testTag(TEST_TAGS.HUNT_TIME))
-      }
-}
-
-/** Small pill-like stat box used only in preview. */
-@Composable
-private fun PreviewStatBox(label: String, color: Color, modifier: Modifier = Modifier) {
-  Box(
+private fun PreviewStatsSection(ui: HuntUIState) {
+  Row(
       modifier =
-          modifier
-              .clip(RoundedCornerShape(HuntCardScreenDefaults.statBoxCornerRadius))
-              .background(color)
-              .padding(HuntCardScreenDefaults.statBoxPadding)
-              .size(
-                  width = HuntCardScreenDefaults.statBoxWidth,
-                  height = HuntCardScreenDefaults.statBoxHeight),
-      contentAlignment = Alignment.Center) {
-        Text(text = label, style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center)
+          Modifier.fillMaxWidth()
+              .padding(
+                  horizontal = HuntCardScreenDefaults.Padding20,
+                  vertical = HuntCardScreenDefaults.Padding20),
+      horizontalArrangement = Arrangement.SpaceEvenly) {
+        ModernStatCard(
+            label = HuntCardScreenStrings.DistanceLabel,
+            value = ui.distance.ifBlank { STRINGS.NOT_SET },
+            unit = if (ui.distance.isNotBlank()) HuntCardScreenStrings.DistanceUnit else "",
+            modifier =
+                Modifier.weight(HuntCardScreenDefaults.CardWeight).testTag(TEST_TAGS.HUNT_DISTANCE))
+
+        Spacer(modifier = Modifier.width(HuntCardScreenDefaults.Padding12))
+
+        ModernStatCard(
+            label = HuntCardScreenStrings.DurationLabel,
+            value = ui.time.ifBlank { STRINGS.NOT_SET },
+            unit = if (ui.time.isNotBlank()) HuntCardScreenStrings.HourUnit else "",
+            modifier =
+                Modifier.weight(HuntCardScreenDefaults.CardWeight).testTag(TEST_TAGS.HUNT_TIME))
       }
 }
 
-/** Description + tags for tests. */
+/** Description card. Reuses ModernDescriptionSection from HuntCardScreen. */
 @Composable
-private fun PreviewDescriptionSection(ui: HuntUIState, modifier: Modifier = Modifier) {
+private fun PreviewDescriptionCard(ui: HuntUIState) {
   val descriptionText = ui.description.ifBlank { STRINGS.NO_DESCRIPTION }
 
-  Text(
-      text = descriptionText,
-      style = MaterialTheme.typography.bodyMedium,
+  Card(
       modifier =
-          modifier
-              .padding(HuntCardScreenDefaults.SectionSpacing)
-              .testTag(TEST_TAGS.HUNT_DESCRIPTION))
-}
+          Modifier.fillMaxWidth()
+              .padding(
+                  horizontal = HuntCardScreenDefaults.Padding20,
+                  vertical = HuntCardScreenDefaults.Padding12)
+              .testTag(TEST_TAGS.HUNT_DESCRIPTION),
+      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary),
+      elevation =
+          CardDefaults.cardElevation(defaultElevation = HuntCardScreenDefaults.CardElevation),
+      shape = RoundedCornerShape(HuntCardScreenDefaults.CornerRadius)) {
+        Column(modifier = Modifier.padding(HuntCardScreenDefaults.Padding20)) {
+          Text(
+              text = HuntCardScreenStrings.DescriptionLabel,
+              fontSize = HuntCardScreenDefaults.SmallFontSize,
+              fontWeight = FontWeight.Bold,
+              color = MaterialTheme.colorScheme.onSurface)
 
-/** Status + number of points. */
-@Composable
-private fun PreviewStatusAndPointsSection(ui: HuntUIState, modifier: Modifier = Modifier) {
-  Column(
-      modifier =
-          modifier.fillMaxWidth().padding(horizontal = HuntCardScreenDefaults.SectionSpacing)) {
-        Row {
-          Text(
-              text = "${STRINGS.HUNT_STATUS} ",
-              fontWeight = FontWeight.SemiBold,
-          )
-          Text(
-              text = ui.status?.name ?: STRINGS.NOT_SET,
-              modifier = Modifier.testTag(TEST_TAGS.HUNT_STATUS),
-          )
-        }
+          Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding12))
 
-        Spacer(modifier = Modifier.height(UI_CONST.SMALL_SPACER_HEIGHT))
-
-        Row {
           Text(
-              text = "${STRINGS.HUNT_POINTS} ",
-              fontWeight = FontWeight.SemiBold,
-          )
-          Text(
-              text = ui.points.size.toString(),
-              modifier = Modifier.testTag(TEST_TAGS.HUNT_POINTS),
-          )
+              text = descriptionText,
+              fontSize = HuntCardScreenDefaults.DescriptionFontSize,
+              lineHeight = HuntCardScreenDefaults.DescriptionLineHeight,
+              color = HuntCardScreenDefaults.ParagraphGray)
         }
       }
+}
+
+/** Map preview card. Reuses ModernMapSection from HuntCardScreen if start point is available. */
+@Composable
+private fun PreviewMapCard(ui: HuntUIState) {
+  // Only show map if there's a valid start point
+  if (ui.points.isNotEmpty()) {
+    val previewHunt = uiStateToHunt(ui)
+    ModernMapSection(hunt = previewHunt)
+  }
+}
+
+/** Status and points information card. */
+@Composable
+private fun PreviewStatusPointsCard(ui: HuntUIState) {
+  Card(
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(
+                  horizontal = HuntCardScreenDefaults.Padding20,
+                  vertical = HuntCardScreenDefaults.Padding12),
+      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary),
+      elevation =
+          CardDefaults.cardElevation(defaultElevation = HuntCardScreenDefaults.CardElevation),
+      shape = RoundedCornerShape(HuntCardScreenDefaults.CornerRadius)) {
+        Column(modifier = Modifier.padding(HuntCardScreenDefaults.Padding20)) {
+          Text(
+              text = "Hunt Details",
+              fontSize = HuntCardScreenDefaults.SmallFontSize,
+              fontWeight = FontWeight.Bold,
+              color = MaterialTheme.colorScheme.onSurface)
+
+          Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding12))
+
+          // Status row
+          Row {
+            Text(
+                text = "${STRINGS.HUNT_STATUS} ",
+                fontWeight = FontWeight.SemiBold,
+                fontSize = HuntCardScreenDefaults.DescriptionFontSize,
+                color = MaterialTheme.colorScheme.onSurface)
+            Text(
+                text = ui.status?.name ?: STRINGS.NOT_SET,
+                fontSize = HuntCardScreenDefaults.DescriptionFontSize,
+                color = HuntCardScreenDefaults.ParagraphGray,
+                modifier = Modifier.testTag(TEST_TAGS.HUNT_STATUS))
+          }
+
+          Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding8))
+
+          // Points row
+          Row {
+            Text(
+                text = "${STRINGS.HUNT_POINTS} ",
+                fontWeight = FontWeight.SemiBold,
+                fontSize = HuntCardScreenDefaults.DescriptionFontSize,
+                color = MaterialTheme.colorScheme.onSurface)
+            Text(
+                text = ui.points.size.toString(),
+                fontSize = HuntCardScreenDefaults.DescriptionFontSize,
+                color = HuntCardScreenDefaults.ParagraphGray,
+                modifier = Modifier.testTag(TEST_TAGS.HUNT_POINTS))
+          }
+        }
+      }
+}
+/**
+ * Helper function to convert HuntUIState to Hunt for reusing existing components. This creates a
+ * temporary Hunt object with the preview data.
+ */
+private fun uiStateToHunt(ui: HuntUIState): Hunt {
+  val defaultLocation = Location(latitude = 0.0, longitude = 0.0, name = "Preview Location")
+
+  val start = ui.points.firstOrNull() ?: defaultLocation
+  val end = ui.points.lastOrNull() ?: defaultLocation
+  val middlePoints =
+      if (ui.points.size > 2) ui.points.subList(1, ui.points.size - 1) else emptyList()
+
+  return Hunt(
+      uid = "preview",
+      start = start,
+      end = end,
+      middlePoints = middlePoints,
+      status = ui.status ?: HuntStatus.FUN, // fallback status for preview
+      title = ui.title.ifBlank { STRINGS.HUNT_TITLE_FALLBACK },
+      description = ui.description.ifBlank { STRINGS.NO_DESCRIPTION },
+      time = ui.time.toDoubleOrNull() ?: 0.0,
+      distance = ui.distance.toDoubleOrNull() ?: 0.0,
+      difficulty = ui.difficulty ?: Difficulty.EASY,
+      authorId = "preview",
+      otherImagesUrls = ui.otherImagesUris.map { it.toString() },
+      mainImageUrl = ui.mainImageUrl,
+      reviewRate = 0.0 // preview has no real rating
+      )
 }
