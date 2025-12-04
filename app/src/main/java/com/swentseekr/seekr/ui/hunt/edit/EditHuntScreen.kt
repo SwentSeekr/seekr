@@ -8,6 +8,15 @@ import com.swentseekr.seekr.ui.hunt.BaseHuntScreen
 import com.swentseekr.seekr.ui.hunt.DeleteAction
 import kotlinx.coroutines.launch
 
+/**
+ * Screen used to edit an existing hunt.
+ *
+ * @param huntId Identifier of the hunt to edit.
+ * @param editHuntViewModel ViewModel providing the hunt data and edit operations.
+ * @param onGoBack Callback invoked when the user navigates back.
+ * @param onDone Callback invoked when the edit flow is successfully completed.
+ * @param testMode When true, configures the screen for instrumentation testing.
+ */
 @Composable
 fun EditHuntScreen(
     huntId: String,
@@ -16,6 +25,7 @@ fun EditHuntScreen(
     onDone: () -> Unit = {},
     testMode: Boolean = false,
 ) {
+  // Load hunt data when a non-blank huntId is provided.
   LaunchedEffect(huntId) {
     if (huntId.isNotBlank()) {
       editHuntViewModel.load(huntId)
@@ -35,6 +45,7 @@ fun EditHuntScreen(
           DeleteAction(
               show = true,
               onClick = {
+                // Delete the current hunt and navigate back when the operation completes.
                 scope.launch {
                   editHuntViewModel.deleteCurrentHunt()
                   onGoBack()
