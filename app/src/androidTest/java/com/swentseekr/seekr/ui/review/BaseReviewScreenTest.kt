@@ -2,6 +2,9 @@ package com.swentseekr.seekr.ui.review
 
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -51,15 +54,16 @@ class BaseReviewScreenTest {
 
   @Test
   fun typing_in_fields_updates_text() {
+    var text by mutableStateOf("")
     composeRule.setContent {
       MaterialTheme {
         BaseReviewScreen(
             title = "Add Review",
             huntTitle = "Some Hunt",
             authorName = "John",
-            reviewText = "",
+            reviewText = text,
             onRatingChanged = {},
-            onReviewTextChanged = {},
+            onReviewTextChanged = { text = it },
             onAddPhotos = {},
             onRemovePhoto = {},
             onGoBack = {},
@@ -67,6 +71,9 @@ class BaseReviewScreenTest {
             onDone = {})
       }
     }
+    composeRule
+        .onNodeWithTag(AddReviewScreenTestTags.COMMENT_TEXT_FIELD)
+        .performTextInput(AddReviewTestConstantStings.Comment)
     composeRule
         .onNodeWithTag(AddReviewScreenTestTags.COMMENT_TEXT_FIELD)
         .performTextInput(AddReviewTestConstantStings.Comment)

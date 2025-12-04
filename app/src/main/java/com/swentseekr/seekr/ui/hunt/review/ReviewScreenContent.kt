@@ -1,14 +1,11 @@
 package com.swentseekr.seekr.ui.hunt.review
 
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
@@ -47,14 +44,10 @@ fun ReviewScreenContent(
   LaunchedEffect(authorId) { huntCardViewModel.loadAuthorProfile(authorId) }
   val authorProfile = uiStateHuntCard.authorProfile
   val hunt = uiState.hunt
-  var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
   val imagePickerLauncher =
       rememberLauncherForActivityResult(
           contract = ActivityResultContracts.GetMultipleContents(),
-          onResult = { uris ->
-            selectedImages = uris
-            uris.forEach { uri -> reviewViewModel.addPhoto(uri.toString()) }
-          })
+          onResult = { uris -> uris.forEach { uri -> reviewViewModel.addPhoto(uri.toString()) } })
 
   val author = authorProfile?.author?.pseudonym ?: ("Unknown Author")
   val context = LocalContext.current
