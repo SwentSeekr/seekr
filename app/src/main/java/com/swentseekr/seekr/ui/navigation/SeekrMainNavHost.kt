@@ -1,14 +1,19 @@
 package com.swentseekr.seekr.ui.navigation
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -86,8 +91,8 @@ fun SeekrNavigationBar(
     currentDestination: SeekrDestination,
     onTabSelected: (SeekrDestination) -> Unit
 ) {
-  val containerColor = SeekrNavigationDefaults.BottomBarContainerColor
-  val iconColor = SeekrNavigationDefaults.BottomBarIconColor
+  val containerColor = MaterialTheme.colorScheme.onPrimary
+  val iconColor = MaterialTheme.colorScheme.primary
 
   NavigationBar(
       containerColor = containerColor,
@@ -101,10 +106,37 @@ fun SeekrNavigationBar(
                 else -> SeekrNavigationDefaults.IgnoredTestTag
               }
 
+          val isSelected = currentDestination.route == dest.route
+
           NavigationBarItem(
-              selected = currentDestination.route == dest.route,
+              selected = isSelected,
               onClick = { onTabSelected(dest) },
-              icon = { Icon(dest.icon, contentDescription = dest.label, tint = iconColor) },
+              icon = {
+                if (isSelected) {
+                  Box(
+                      contentAlignment = Alignment.Center,
+                      modifier = Modifier.size(BottomNavUIConstants.IconContainerSize)) {
+                        Box(
+                            modifier =
+                                Modifier.size(BottomNavUIConstants.IconHaloSize)
+                                    .background(
+                                        color =
+                                            iconColor.copy(alpha = BottomNavUIConstants.HaloAlpha),
+                                        shape = BottomNavUIConstants.HaloShape))
+                        Icon(
+                            dest.icon,
+                            contentDescription = dest.label,
+                            tint = iconColor,
+                            modifier = Modifier.size(BottomNavUIConstants.IconSizeSelected))
+                      }
+                } else {
+                  Icon(
+                      dest.icon,
+                      contentDescription = dest.label,
+                      tint = iconColor,
+                      modifier = Modifier.size(BottomNavUIConstants.IconSizeUnselected))
+                }
+              },
               label = { Text(dest.label, color = iconColor) },
               modifier = Modifier.testTag(testTag),
               colors =
@@ -113,7 +145,7 @@ fun SeekrNavigationBar(
                       unselectedIconColor = iconColor,
                       selectedTextColor = iconColor,
                       unselectedTextColor = iconColor,
-                      indicatorColor = containerColor))
+                      indicatorColor = BottomNavUIConstants.IndicatorColorTransparent))
         }
       }
 }
