@@ -351,9 +351,12 @@ fun ModernProfileHeader(
             ModernStatCard(
                 icon = painterResource(R.drawable.full_star),
                 value = "${String.format("%.1f",profile.author.reviewRate)}",
-                label =  if (reviewCount == 1) "- $reviewCount review "
-                                  else "- $reviewCount reviews",
-                modifier = Modifier.weight(ProfileUIConstantsDefaults.Weight).clickable { onReviewsClick() },
+                label =
+                    if (reviewCount == 1) "- $reviewCount review " else "- $reviewCount reviews",
+                modifier =
+                    Modifier.weight(ProfileUIConstantsDefaults.Weight).clickable {
+                      onReviewsClick()
+                    },
                 testTagValue = ProfileTestTags.PROFILE_REVIEW_RATING,
                 testTagLabel = ProfileTestTags.PROFILE_REVIEWS_COUNT)
 
