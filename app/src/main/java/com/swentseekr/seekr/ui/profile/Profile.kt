@@ -140,16 +140,17 @@ fun ProfileScreen(
           Box(
               modifier =
                   Modifier.fillMaxSize()
-                      .background(ProfileUIConstants.LightGrayBackground)
+                      .background(ProfileUIConstantsDefaults.LightGrayBackground)
                       .testTag(ProfileTestTags.PROFILE_LOADING),
               contentAlignment = Alignment.Center) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center) {
-                      CircularProgressIndicator(color = ProfileUIConstants.LoadingIndicatorGreen)
+                      CircularProgressIndicator(
+                          color = ProfileUIConstantsDefaults.LoadingIndicatorGreen)
                       Text(
                           text = ProfileConstants.LOADING_PROFILE,
-                          color = ProfileUIConstants.LoadingGray,
+                          color = ProfileUIConstantsDefaults.LoadingGray,
                           fontSize = ProfileConstants.TEXT_SIZE_LOADING,
                           modifier = Modifier.padding(top = ProfileConstants.SIZE_MEDIUM_DP))
                     }
@@ -158,9 +159,10 @@ fun ProfileScreen(
 
         if (uiState.errorMsg != null) {
           Box(
-              modifier = Modifier.fillMaxSize().background(ProfileUIConstants.LightGrayBackground),
+              modifier =
+                  Modifier.fillMaxSize().background(ProfileUIConstantsDefaults.LightGrayBackground),
               contentAlignment = Alignment.Center) {
-                Text("Error: ${uiState.errorMsg}", color = ProfileUIConstants.ErrorRed)
+                Text("Error: ${uiState.errorMsg}", color = ProfileUIConstantsDefaults.ErrorRed)
               }
           return
         }
@@ -171,9 +173,10 @@ fun ProfileScreen(
   if (profile == null) {
     AnimatedVisibility(visible = !uiState.isLoading, enter = fadeIn(), exit = fadeOut()) {
       Box(
-          modifier = Modifier.fillMaxSize().background(ProfileUIConstants.LightGrayBackground),
+          modifier =
+              Modifier.fillMaxSize().background(ProfileUIConstantsDefaults.LightGrayBackground),
           contentAlignment = Alignment.Center) {
-            Text(ProfileConstants.NO_PROFILE_FOUND, color = ProfileUIConstants.LoadingGray)
+            Text(ProfileConstants.NO_PROFILE_FOUND, color = ProfileUIConstantsDefaults.LoadingGray)
           }
     }
     return
@@ -197,7 +200,7 @@ fun ProfileScreen(
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = ProfileConstants.ADD_DESCRIPTION,
-                    modifier = Modifier.size(ProfileUIConstants.Size28))
+                    modifier = Modifier.size(ProfileUIConstantsDefaults.Size28))
               }
         }
       },
@@ -266,8 +269,8 @@ fun ModernProfileHeader(
                       colors =
                           listOf(
                               MaterialTheme.colorScheme.primary,
-                              ProfileUIConstants.ProfileHeaderGradientEnd)))) {
-        Column(modifier = Modifier.fillMaxWidth().padding(ProfileUIConstants.Padding20)) {
+                              ProfileUIConstantsDefaults.ProfileHeaderGradientEnd)))) {
+        Column(modifier = Modifier.fillMaxWidth().padding(ProfileUIConstantsDefaults.Padding20)) {
 
           // TOP RIGHT BUTTON : SETTINGS or BACK
           Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
@@ -278,13 +281,13 @@ fun ModernProfileHeader(
                   shape = CircleShape,
                   color =
                       MaterialTheme.colorScheme.onPrimary.copy(
-                          alpha = ProfileUIConstants.AlphaLight)) {
+                          alpha = ProfileUIConstantsDefaults.AlphaLight)) {
                     IconButton(onClick = onSettings) {
                       Icon(
                           imageVector = Icons.Default.Settings,
                           contentDescription = ProfileConstants.SETTINGS_DESCRIPTION,
                           tint = MaterialTheme.colorScheme.onPrimary,
-                          modifier = Modifier.size(ProfileUIConstants.Size24))
+                          modifier = Modifier.size(ProfileUIConstantsDefaults.Size24))
                     }
                   }
             } else {
@@ -294,51 +297,51 @@ fun ModernProfileHeader(
                   shape = CircleShape,
                   color =
                       MaterialTheme.colorScheme.onPrimary.copy(
-                          alpha = ProfileUIConstants.AlphaLight)) {
+                          alpha = ProfileUIConstantsDefaults.AlphaLight)) {
                     IconButton(onClick = onGoBack) {
                       Icon(
                           imageVector = Icons.Default.Close,
                           contentDescription = ProfileScreenConstants.ICON_BUTTON_GOBACK,
                           tint = MaterialTheme.colorScheme.onPrimary,
-                          modifier = Modifier.size(ProfileUIConstants.Size24))
+                          modifier = Modifier.size(ProfileUIConstantsDefaults.Size24))
                     }
                   }
             }
           }
 
-          Spacer(modifier = Modifier.height(ProfileUIConstants.Padding12))
+          Spacer(modifier = Modifier.height(ProfileUIConstantsDefaults.Padding12))
 
           // PROFILE PICTURE + NAME
           Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             ProfilePicture(
                 profilePictureRes = profile.author.profilePicture,
                 profilePictureUrl = profile.author.profilePictureUrl,
-                modifier = Modifier.size(ProfileUIConstants.Size70).clip(CircleShape))
+                modifier = Modifier.size(ProfileUIConstantsDefaults.Size70).clip(CircleShape))
 
-            Spacer(modifier = Modifier.width(ProfileUIConstants.Padding16))
+            Spacer(modifier = Modifier.width(ProfileUIConstantsDefaults.Padding16))
 
-            Column(modifier = Modifier.weight(ProfileUIConstants.Weight)) {
+            Column(modifier = Modifier.weight(ProfileUIConstantsDefaults.Weight)) {
               Text(
                   text = profile.author.pseudonym,
-                  fontSize = ProfileUIConstants.Font22,
+                  fontSize = ProfileUIConstantsDefaults.Font22,
                   fontWeight = FontWeight.Bold,
                   color = MaterialTheme.colorScheme.onPrimary,
                   modifier = Modifier.testTag(ProfileTestTags.PROFILE_PSEUDONYM))
 
-              Spacer(modifier = Modifier.height(ProfileUIConstants.Padding4))
+              Spacer(modifier = Modifier.height(ProfileUIConstantsDefaults.Padding4))
 
               Text(
                   text = profile.author.bio,
-                  fontSize = ProfileUIConstants.Font14,
+                  fontSize = ProfileUIConstantsDefaults.Font14,
                   color =
                       MaterialTheme.colorScheme.onPrimary.copy(
-                          alpha = ProfileUIConstants.AlphaMedium),
+                          alpha = ProfileUIConstantsDefaults.AlphaMedium),
                   maxLines = 2,
                   modifier = Modifier.testTag(ProfileTestTags.PROFILE_BIO))
             }
           }
 
-          Spacer(modifier = Modifier.height(ProfileUIConstants.Padding16))
+          Spacer(modifier = Modifier.height(ProfileUIConstantsDefaults.Padding16))
 
           // STATS CARDS
           Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
@@ -346,17 +349,17 @@ fun ModernProfileHeader(
                 icon = painterResource(R.drawable.full_star),
                 value = "${profile.author.reviewRate}",
                 label = "$reviewCount reviews",
-                modifier = Modifier.weight(ProfileUIConstants.Weight),
+                modifier = Modifier.weight(ProfileUIConstantsDefaults.Weight),
                 testTagValue = ProfileTestTags.PROFILE_REVIEW_RATING,
                 testTagLabel = ProfileTestTags.PROFILE_REVIEWS_COUNT)
 
-            Spacer(modifier = Modifier.width(ProfileUIConstants.Padding12))
+            Spacer(modifier = Modifier.width(ProfileUIConstantsDefaults.Padding12))
 
             ModernStatCard(
                 icon = painterResource(R.drawable.full_sport),
                 value = "${profile.author.sportRate}",
                 label = "${profile.doneHunts.size} Hunts done",
-                modifier = Modifier.weight(ProfileUIConstants.Weight),
+                modifier = Modifier.weight(ProfileUIConstantsDefaults.Weight),
                 testTagValue = ProfileTestTags.PROFILE_SPORT_RATING,
                 testTagLabel = ProfileTestTags.PROFILE_HUNTS_DONE_COUNT)
           }
@@ -378,33 +381,34 @@ fun ModernStatCard(
       colors =
           CardDefaults.cardColors(
               containerColor =
-                  MaterialTheme.colorScheme.onPrimary.copy(alpha = ProfileUIConstants.AlphaLight)),
-      shape = RoundedCornerShape(ProfileUIConstants.Padding12)) {
+                  MaterialTheme.colorScheme.onPrimary.copy(
+                      alpha = ProfileUIConstantsDefaults.AlphaLight)),
+      shape = RoundedCornerShape(ProfileUIConstantsDefaults.Padding12)) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(ProfileUIConstants.Padding12),
+            modifier = Modifier.fillMaxWidth().padding(ProfileUIConstantsDefaults.Padding12),
             verticalAlignment = Alignment.CenterVertically) {
               Icon(
                   painter = icon,
                   contentDescription = null,
                   tint = Color.Unspecified,
-                  modifier = Modifier.size(ProfileUIConstants.Size20))
+                  modifier = Modifier.size(ProfileUIConstantsDefaults.Size20))
 
-              Spacer(modifier = Modifier.width(ProfileUIConstants.Padding8))
+              Spacer(modifier = Modifier.width(ProfileUIConstantsDefaults.Padding8))
 
               Column {
                 Text(
                     text = "$value/${MAX_RATING}",
-                    fontSize = ProfileUIConstants.Font16,
+                    fontSize = ProfileUIConstantsDefaults.Font16,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.testTag(testTagValue))
 
                 Text(
                     text = label,
-                    fontSize = ProfileUIConstants.Font12,
+                    fontSize = ProfileUIConstantsDefaults.Font12,
                     color =
                         MaterialTheme.colorScheme.onPrimary.copy(
-                            alpha = ProfileUIConstants.AlphaMedium),
+                            alpha = ProfileUIConstantsDefaults.AlphaMedium),
                     modifier = Modifier.testTag(testTagLabel))
               }
             }
@@ -422,47 +426,53 @@ fun ModernCustomToolbar(selectedTab: ProfileTab, onTabSelected: (ProfileTab) -> 
   Surface(
       modifier = Modifier.fillMaxWidth(),
       color = MaterialTheme.colorScheme.onPrimary,
-      shadowElevation = ProfileUIConstants.Padding4) {
+      shadowElevation = ProfileUIConstantsDefaults.Padding4) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = ProfileUIConstants.Padding8),
+            modifier =
+                Modifier.fillMaxWidth().padding(vertical = ProfileUIConstantsDefaults.Padding8),
             horizontalArrangement = Arrangement.SpaceEvenly) {
               tabs.forEach { item ->
                 val isSelected = selectedTab == item.tab
                 val color =
-                    if (isSelected) ProfileUIConstants.ToolbarGreen
-                    else ProfileUIConstants.TabInactiveGray
+                    if (isSelected) ProfileUIConstantsDefaults.ToolbarGreen
+                    else ProfileUIConstantsDefaults.TabInactiveGray
 
                 val backgroundColor =
                     if (isSelected)
-                        ProfileUIConstants.ToolbarGreen.copy(alpha = ProfileUIConstants.AlphaLight)
+                        ProfileUIConstantsDefaults.ToolbarGreen.copy(
+                            alpha = ProfileUIConstantsDefaults.AlphaLight)
                     else Color.Transparent
 
                 Surface(
                     modifier =
-                        Modifier.weight(ProfileUIConstants.Weight)
-                            .padding(horizontal = ProfileUIConstants.Padding8)
+                        Modifier.weight(ProfileUIConstantsDefaults.Weight)
+                            .padding(horizontal = ProfileUIConstantsDefaults.Padding8)
                             .clickable { onTabSelected(item.tab) }
                             .semantics { this.backgroundColor = color }
                             .testTag(item.testTag),
-                    shape = RoundedCornerShape(ProfileUIConstants.Padding12),
+                    shape = RoundedCornerShape(ProfileUIConstantsDefaults.Padding12),
                     color = backgroundColor) {
                       Column(
-                          modifier = Modifier.padding(vertical = ProfileUIConstants.Padding12),
+                          modifier =
+                              Modifier.padding(vertical = ProfileUIConstantsDefaults.Padding12),
                           horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(
                                 imageVector = item.icon,
                                 contentDescription = item.tab.name,
                                 tint = color,
-                                modifier = Modifier.size(ProfileUIConstants.Size24))
+                                modifier = Modifier.size(ProfileUIConstantsDefaults.Size24))
 
-                            Spacer(modifier = Modifier.height(ProfileUIConstants.Padding4))
+                            Spacer(modifier = Modifier.height(ProfileUIConstantsDefaults.Padding4))
 
                             Text(
                                 text =
                                     when (item.tab) {
-                                      ProfileTab.MY_HUNTS -> ProfileUIConstants.TabMyHuntsLabel
-                                      ProfileTab.DONE_HUNTS -> ProfileUIConstants.TabDoneLabel
-                                      ProfileTab.LIKED_HUNTS -> ProfileUIConstants.TabLikedLabel
+                                      ProfileTab.MY_HUNTS ->
+                                          ProfileUIConstantsDefaults.TabMyHuntsLabel
+                                      ProfileTab.DONE_HUNTS ->
+                                          ProfileUIConstantsDefaults.TabDoneLabel
+                                      ProfileTab.LIKED_HUNTS ->
+                                          ProfileUIConstantsDefaults.TabLikedLabel
                                     },
                                 fontSize = 12.sp,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
@@ -477,7 +487,7 @@ fun ModernCustomToolbar(selectedTab: ProfileTab, onTabSelected: (ProfileTab) -> 
 @Composable
 fun ModernEmptyHuntsState(selectedTab: ProfileTab) {
   Box(
-      modifier = Modifier.fillMaxWidth().padding(vertical = ProfileUIConstants.Padding60),
+      modifier = Modifier.fillMaxWidth().padding(vertical = ProfileUIConstantsDefaults.Padding60),
       contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
           val icon =
@@ -490,15 +500,15 @@ fun ModernEmptyHuntsState(selectedTab: ProfileTab) {
           Icon(
               imageVector = icon,
               contentDescription = null,
-              modifier = Modifier.size(ProfileUIConstants.EmptyIconSize),
-              tint = ProfileUIConstants.IconGray)
+              modifier = Modifier.size(ProfileUIConstantsDefaults.EmptyIconSize),
+              tint = ProfileUIConstantsDefaults.IconGray)
 
-          Spacer(modifier = Modifier.height(ProfileUIConstants.Padding16))
+          Spacer(modifier = Modifier.height(ProfileUIConstantsDefaults.Padding16))
 
           Text(
               text = ProfileConstants.NO_HUNTS_YET,
-              color = ProfileUIConstants.EmptyTextColor,
-              fontSize = ProfileUIConstants.Font16,
+              color = ProfileUIConstantsDefaults.EmptyTextColor,
+              fontSize = ProfileUIConstantsDefaults.Font16,
               modifier = Modifier.testTag(ProfileTestTags.EMPTY_HUNTS_MESSAGE))
         }
       }
@@ -528,7 +538,7 @@ fun CustomToolbar(selectedTab: ProfileTab, onTabSelected: (ProfileTab) -> Unit =
               Modifier.background(color)
                   .padding(
                       horizontal = ProfileConstants.SIZE_ICON,
-                      vertical = ProfileUIConstants.Padding16)
+                      vertical = ProfileUIConstantsDefaults.Padding16)
                   .clickable { onTabSelected(item.tab) }
                   .semantics { backgroundColor = color }
                   .testTag(item.testTag))
