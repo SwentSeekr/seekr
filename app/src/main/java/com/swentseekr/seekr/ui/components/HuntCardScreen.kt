@@ -105,8 +105,14 @@ fun HuntCardScreen(
 ) {
   val uiState by huntCardViewModel.uiState.collectAsState()
 
-  // Load data
-  LaunchedEffect(huntId) { huntCardViewModel.loadHunt(huntId) }
+    LaunchedEffect(Unit) {
+        huntCardViewModel.loadCurrentUserID()
+    }
+    LaunchedEffect(huntId, uiState.currentUserId) {
+        if (uiState.currentUserId != null) {
+            huntCardViewModel.loadHunt(huntId)
+        }
+    }
   val hunt = uiState.hunt
   val authorId = hunt?.authorId ?: ""
 
@@ -116,7 +122,6 @@ fun HuntCardScreen(
   LaunchedEffect(huntId) { huntCardViewModel.loadOtherReview(huntId) }
   val reviews = uiState.reviewList
 
-  LaunchedEffect(Unit) { huntCardViewModel.loadCurrentUserID() }
   val currentUserId = uiState.currentUserId
 
   val isAuthor = currentUserId == authorId

@@ -30,7 +30,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +46,7 @@ import androidx.navigation.compose.rememberNavController
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.ui.components.HuntCard
+import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Alpha02
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Border1
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Border2
@@ -79,6 +82,7 @@ import com.swentseekr.seekr.ui.overview.OverviewScreenStrings.FilterBy
 fun OverviewScreen(
     modifier: Modifier = Modifier,
     overviewViewModel: OverviewViewModel = viewModel(),
+    huntCardViewModel: HuntCardViewModel = viewModel(),
     navHostController: NavHostController = rememberNavController(),
     onActiveBar: (Boolean) -> Unit = {},
     onHuntClick: (String) -> Unit = {},
@@ -87,8 +91,12 @@ fun OverviewScreen(
   val uiState by overviewViewModel.uiState.collectAsState()
   val query = overviewViewModel.searchQuery
   val hunts = uiState.hunts
+    val currentUserId by remember {
+        mutableStateOf(huntCardViewModel.uiState.value.currentUserId)
+    }
 
-  LaunchedEffect(Unit) { overviewViewModel.refreshUIState() }
+  LaunchedEffect(Unit) { overviewViewModel.refreshUIState()
+      huntCardViewModel.loadCurrentUserID()}
 
   Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.onPrimary)) {
     Column(
@@ -121,6 +129,11 @@ fun OverviewScreen(
           horizontalAlignment = Alignment.CenterHorizontally) {
             items(hunts.size) { index ->
               val hunt = hunts[index]
+                val isLiked = remember(hunt.hunt.uid, currentUserId) {
+                    derivedStateOf {
+                        huntCardViewModel.isHuntLiked(hunt.hunt.uid)
+                    }
+                }.value
 
               HuntCard(
                   hunt.hunt,
@@ -129,7 +142,12 @@ fun OverviewScreen(
                           .testTag(
                               if (index == hunts.size - 1) OverviewScreenTestTags.LAST_HUNT_CARD
                               else OverviewScreenTestTags.HUNT_CARD)
-                          .clickable { onHuntClick(hunt.hunt.uid) })
+                          .clickable { onHuntClick(hunt.hunt.uid) },
+                  isLiked = isLiked,
+                  onLikeClick = { huntId ->
+                      huntCardViewModel.onLikeClick(huntId)
+                      overviewViewModel.refreshUIState()
+                  },)
 
               Spacer(modifier = Modifier.height(OverviewScreenDefaults.ListItemSpacing))
             }

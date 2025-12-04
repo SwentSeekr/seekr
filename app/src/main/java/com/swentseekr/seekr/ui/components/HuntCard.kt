@@ -8,11 +8,14 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
@@ -23,6 +26,7 @@ import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 
 /**
  * Displays a modern, image-focused card preview of a Hunt.
@@ -40,7 +44,7 @@ import com.swentseekr.seekr.model.hunt.Hunt
  * @param modifier Optional modifier for external styling or click handling.
  */
 @Composable
-fun HuntCard(hunt: Hunt, modifier: Modifier = Modifier) {
+fun HuntCard(hunt: Hunt, isLiked: Boolean = false, onLikeClick : (String) -> Unit ={} ,modifier: Modifier = Modifier) {
   Card(
       modifier =
           modifier
@@ -87,7 +91,7 @@ fun HuntCard(hunt: Hunt, modifier: Modifier = Modifier) {
 
                 // LIKE BUTTON (top-right)
                 IconButton(
-                    onClick = {},
+                    onClick = {onLikeClick(hunt.uid)},
                     modifier =
                         Modifier.align(Alignment.TopEnd)
                             .padding(HuntCardUIConstants.Padding8)
@@ -95,7 +99,7 @@ fun HuntCard(hunt: Hunt, modifier: Modifier = Modifier) {
                       Icon(
                           imageVector = Icons.Filled.Favorite,
                           contentDescription = HuntCardScreenStrings.LikeButton,
-                          tint = HuntCardUIConstants.LikeRed,
+                          tint = if (isLiked) HuntCardUIConstants.LikeRed else HuntCardScreenDefaults.LightGray,
                           modifier = Modifier.size(HuntCardUIConstants.IconSize28))
                     }
 
