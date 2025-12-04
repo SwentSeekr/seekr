@@ -1,0 +1,319 @@
+package com.swentseekr.seekr.ui.hunt.review
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import coil.compose.AsyncImage
+import com.swentseekr.seekr.R
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BaseReviewScreen(
+    title: String,
+    huntTitle: String,
+    authorName: String,
+    rating: Double = 0.0,
+    reviewText: String,
+    photos: List<String> = emptyList<String>(),
+    isReviewTextError: Boolean = false,
+    isDoneEnabled: Boolean = false,
+    reviewTextErrorMessage: String? = "",
+    onRatingChanged: (Int) -> Unit,
+    onReviewTextChanged: (String) -> Unit,
+    onAddPhotos: () -> Unit,
+    onRemovePhoto: (Int) -> Unit,
+    onGoBack: () -> Unit,
+    onCancel: () -> Unit,
+    onDone: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+  Scaffold(
+      topBar = {
+        TopAppBar(
+            title = {
+              Text(
+                  text = title,
+                  style = MaterialTheme.typography.headlineSmall,
+                  fontWeight = FontWeight.Bold)
+            },
+            navigationIcon = {
+              IconButton(
+                  modifier = modifier.testTag(AddReviewScreenTestTags.GO_BACK_BUTTON),
+                  onClick = onGoBack) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = AddReviewScreenStrings.BackContentDescription)
+                  }
+            },
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface))
+      },
+      modifier = modifier.fillMaxWidth()) { innerPadding ->
+        Column(
+            modifier =
+                modifier
+                    .fillMaxWidth()
+                    .background(
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = UICons.ChangeAlpha))
+                    .padding(innerPadding)
+                    .padding(horizontal = UICons.ColumnPadding)
+                    .verticalScroll(rememberScrollState())
+                    .testTag(AddReviewScreenTestTags.INFO_COLUMN),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(UICons.ColumnVArrangement)) {
+              Spacer(modifier = modifier.height(UICons.SpacerHeightSmall))
+
+              Card(
+                  modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),
+                  shape = RoundedCornerShape(UICons.CardCornerRadius),
+                  colors =
+                      CardDefaults.cardColors(
+                          containerColor =
+                              MaterialTheme.colorScheme.primaryContainer.copy(
+                                  alpha = UICons.ChangeAlpha)),
+                  elevation =
+                      CardDefaults.cardElevation(defaultElevation = UICons.CardNoElevation)) {
+                    Column(
+                        modifier = Modifier.padding(UICons.ColumnPadding).fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(UICons.ColumnLittleVArr)) {
+                          Text(
+                              text = huntTitle,
+                              style = MaterialTheme.typography.headlineSmall,
+                              fontWeight = FontWeight.Bold)
+                          Text(
+                              text = "${AddReviewScreenStrings.By} $authorName",
+                              style = MaterialTheme.typography.bodyLarge,
+                              color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                  }
+
+              Card(
+                  modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),
+                  shape = RoundedCornerShape(UICons.CardCornerRadius),
+                  colors =
+                      CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary),
+                  elevation =
+                      CardDefaults.cardElevation(defaultElevation = UICons.CardLittleElevation)) {
+                    Column(
+                        modifier = Modifier.padding(UICons.ColumnPadding).fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(UICons.ColumnMediumVArr)) {
+                          Text(
+                              AddReviewScreenStrings.RateThisHunt,
+                              style = MaterialTheme.typography.titleMedium,
+                              fontWeight = FontWeight.SemiBold)
+
+                          StarRatingBar(
+                              rating = rating.toInt(),
+                              maxStars = AddReviewScreenDefaults.MaxStars,
+                              onRatingChanged = onRatingChanged)
+
+                          AnimatedVisibility(
+                              visible = rating >= 1.0,
+                              enter = fadeIn() + scaleIn(),
+                              exit = fadeOut() + scaleOut()) {
+                                Text(
+                                    AddReviewScreenStrings.ratingSummary(
+                                        rating.toInt(), AddReviewScreenDefaults.MaxStars),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.primary)
+                              }
+                        }
+                  }
+
+              OutlinedTextField(
+                  value = reviewText,
+                  onValueChange = onReviewTextChanged,
+                  modifier =
+                      modifier
+                          .fillMaxWidth()
+                          .height(UICons.CommentFieldHeight)
+                          .testTag(AddReviewScreenTestTags.COMMENT_TEXT_FIELD),
+                  label = { Text(AddReviewScreenStrings.CommentLabel) },
+                  placeholder = { Text(AddReviewScreenStrings.CommentPlaceholder) },
+                  isError = isReviewTextError,
+                  supportingText = {
+                    AnimatedVisibility(
+                        visible = isReviewTextError && reviewTextErrorMessage != null,
+                        enter = fadeIn(),
+                        exit = fadeOut()) {
+                          Text(
+                              reviewTextErrorMessage ?: "", color = MaterialTheme.colorScheme.error)
+                        }
+                  },
+                  textStyle =
+                      LocalTextStyle.current.copy(
+                          lineHeight = AddReviewScreenDefaults.CommentLineHeight),
+                  singleLine = false,
+                  maxLines = AddReviewScreenDefaults.CommentMaxLines,
+                  shape = RoundedCornerShape(UICons.CommentFieldCornerRadius),
+                  colors =
+                      OutlinedTextFieldDefaults.colors(
+                          unfocusedBorderColor =
+                              MaterialTheme.colorScheme.outline.copy(
+                                  alpha = UICons.ChangeAlphaMedium),
+                          focusedBorderColor = MaterialTheme.colorScheme.primary,
+                          unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                          focusedContainerColor = MaterialTheme.colorScheme.surface))
+
+              FilledTonalButton(
+                  onClick = onAddPhotos,
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .height(UICons.ButtonTonalHeight)
+                          .testTag(AddReviewScreenTestTags.AddPhotoButtonTag),
+                  shape = RoundedCornerShape(UICons.ButtonTonalCornerRadius)) {
+                    Icon(
+                        imageVector = Icons.Default.AddCircle,
+                        contentDescription = AddReviewScreenStrings.AddPhotoContentDescription,
+                        modifier = Modifier.size(UICons.IconSize))
+                    Spacer(modifier = Modifier.padding(start = UICons.SpacerHeightSmall))
+                    Text(
+                        AddReviewScreenStrings.AddPicturesButtonLabel,
+                        style = MaterialTheme.typography.titleSmall)
+                  }
+
+              AnimatedVisibility(
+                  visible = photos.isNotEmpty(),
+                  enter = fadeIn() + scaleIn(),
+                  exit = fadeOut() + scaleOut()) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(UICons.CardMedCornerRadius),
+                        colors =
+                            CardDefaults.cardColors(
+                                containerColor =
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(
+                                        alpha = UICons.ChangeAlphaMedium))) {
+                          Column(modifier = Modifier.padding(UICons.ColumnMediumPadding)) {
+                            Text(
+                                "Photos (${photos.size})",
+                                style = MaterialTheme.typography.titleSmall,
+                                modifier = Modifier.padding(bottom = UICons.TextPadding))
+                            LazyRow(
+                                horizontalArrangement =
+                                    Arrangement.spacedBy(UICons.RowHArrangement),
+                                modifier = Modifier.testTag("PhotosLazyRow")) {
+                                  items(photos.size) { index ->
+                                    Box {
+                                      AsyncImage(
+                                          model = photos[index],
+                                          contentDescription =
+                                              "${AddReviewScreenStrings.SelectedImageContentDescriptionPrefix}$index",
+                                          modifier =
+                                              Modifier.size(UICons.ImageSize)
+                                                  .clip(RoundedCornerShape(UICons.ImageCorners))
+                                                  .shadow(
+                                                      UICons.ImageShadow,
+                                                      RoundedCornerShape(UICons.ImageCorners)),
+                                          placeholder = painterResource(R.drawable.empty_image),
+                                          error = painterResource(R.drawable.empty_image))
+                                      Surface(
+                                          modifier =
+                                              Modifier.align(Alignment.TopEnd)
+                                                  .padding(UICons.SurfacePadding)
+                                                  .size(UICons.SurfaceSize)
+                                                  .clickable { onRemovePhoto(index) }
+                                                  .testTag("RemovePhoto$index"),
+                                          shape = RoundedCornerShape(UICons.SurfaceCorners),
+                                          color = MaterialTheme.colorScheme.errorContainer) {
+                                            Icon(
+                                                imageVector = Icons.Default.Close,
+                                                contentDescription =
+                                                    AddReviewScreenStrings
+                                                        .RemovePhotoContentDescription,
+                                                tint = MaterialTheme.colorScheme.onErrorContainer,
+                                                modifier = Modifier.padding(UICons.SurfacePadding))
+                                          }
+                                    }
+                                  }
+                                }
+                          }
+                        }
+                  }
+
+              Spacer(modifier = Modifier.height(UICons.SpacerHeightSmall))
+
+              Row(
+                  modifier = modifier.fillMaxWidth().testTag(AddReviewScreenTestTags.BUTTONS_ROW),
+                  horizontalArrangement = Arrangement.spacedBy(UICons.RowHArrangement)) {
+                    OutlinedButton(
+                        onClick = onCancel,
+                        modifier =
+                            modifier
+                                .weight(UICons.ButtonWeight)
+                                .height(UICons.ButtonTonalHeight)
+                                .testTag(AddReviewScreenTestTags.CANCEL_BUTTON),
+                        shape = RoundedCornerShape(UICons.ButtonTonalCornerRadius)) {
+                          Text(AddReviewScreenStrings.CancelButtonLabel)
+                        }
+                    Button(
+                        onClick = onDone,
+                        enabled = isDoneEnabled,
+                        modifier =
+                            modifier
+                                .weight(UICons.ButtonWeight)
+                                .height(UICons.ButtonTonalHeight)
+                                .testTag(AddReviewScreenTestTags.DONE_BUTTON),
+                        shape = RoundedCornerShape(UICons.ButtonTonalCornerRadius),
+                        elevation =
+                            ButtonDefaults.buttonElevation(
+                                defaultElevation = UICons.ButtonElevation)) {
+                          Text(AddReviewScreenStrings.DoneButtonLabel)
+                        }
+                  }
+
+              Spacer(modifier = Modifier.height(UICons.SpacerHeightMedium))
+            }
+      }
+}
