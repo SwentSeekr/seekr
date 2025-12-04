@@ -12,6 +12,7 @@ import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryProvider
 import com.swentseekr.seekr.model.profile.ProfileRepository
 import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
 import com.swentseekr.seekr.offline.cache.ProfileCache
+import com.swentseekr.seekr.ui.profile.ProfileScreenConstants.EMPTY_REVIEW_RATE
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -223,7 +224,8 @@ class ProfileViewModel(
       _reviewsState.value = allReviews
       _totalReviews.value = allReviews.size
 
-      val newReviewRate = if (allReviews.isEmpty()) 0.0 else allReviews.map { it.rating }.average()
+      val newReviewRate =
+          if (allReviews.isEmpty()) EMPTY_REVIEW_RATE else allReviews.map { it.rating }.average()
 
       _uiState.value =
           _uiState.value.copy(

@@ -41,6 +41,11 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.profile.mockProfileData
 import com.swentseekr.seekr.ui.components.HuntCard
 import com.swentseekr.seekr.ui.components.MAX_RATING
+import com.swentseekr.seekr.ui.profile.ProfileScreenConstants.HUNTS_DONE_LABEL
+import com.swentseekr.seekr.ui.profile.ProfileScreenConstants.MULTIPLE_REVIEWS_LABEL
+import com.swentseekr.seekr.ui.profile.ProfileScreenConstants.ONE_DECIMAL_FORMAT
+import com.swentseekr.seekr.ui.profile.ProfileScreenConstants.SINGLE_REVIEW
+import com.swentseekr.seekr.ui.profile.ProfileScreenConstants.SINGLE_REVIEW_LABEL
 import kotlinx.serialization.Serializable
 
 // -------------------------
@@ -350,9 +355,11 @@ fun ModernProfileHeader(
           Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             ModernStatCard(
                 icon = painterResource(R.drawable.full_star),
-                value = "${String.format("%.1f",profile.author.reviewRate)}",
+                value = String.format(ONE_DECIMAL_FORMAT, profile.author.reviewRate),
                 label =
-                    if (reviewCount == 1) "- $reviewCount review " else "- $reviewCount reviews",
+                    if (reviewCount == SINGLE_REVIEW)
+                        String.format(SINGLE_REVIEW_LABEL, reviewCount)
+                    else String.format(MULTIPLE_REVIEWS_LABEL, reviewCount),
                 modifier =
                     Modifier.weight(ProfileUIConstantsDefaults.Weight).clickable {
                       onReviewsClick()
@@ -364,8 +371,8 @@ fun ModernProfileHeader(
 
             ModernStatCard(
                 icon = painterResource(R.drawable.full_sport),
-                value = "${String.format("%.1f", profile.author.sportRate)}",
-                label = "${profile.doneHunts.size} Hunts done",
+                value = String.format(ONE_DECIMAL_FORMAT, profile.author.sportRate),
+                label = String.format(HUNTS_DONE_LABEL, profile.doneHunts.size),
                 modifier = Modifier.weight(ProfileUIConstantsDefaults.Weight),
                 testTagValue = ProfileTestTags.PROFILE_SPORT_RATING,
                 testTagLabel = ProfileTestTags.PROFILE_HUNTS_DONE_COUNT)

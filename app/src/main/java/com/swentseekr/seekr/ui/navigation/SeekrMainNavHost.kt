@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
@@ -47,7 +48,7 @@ sealed class SeekrDestination(
     val label: String,
     val icon: androidx.compose.ui.graphics.vector.ImageVector
 ) {
-  object Overview : SeekrDestination("overview", "Overview", Icons.Filled.List)
+  object Overview : SeekrDestination("overview", "Overview", Icons.AutoMirrored.Filled.List)
 
   object Map : SeekrDestination("map", "Map", Icons.Filled.Place)
 
@@ -58,12 +59,12 @@ sealed class SeekrDestination(
 
     object Reviews :
         SeekrDestination(
-            route = "profile/{userId}/reviews",
+            route = "profile/{${ARG_USER_ID}}/reviews",
             label = "Profile Reviews",
-            icon = Icons.Filled.List) {
+            icon = Icons.AutoMirrored.Filled.List) {
       fun createRoute(userId: String) = "profile/$userId/reviews"
 
-      const val ARG_USER_ID_REVIEW = "userId"
+      const val ARG_USER_ID = Profile.ARG_USER_ID
     }
   }
 
@@ -172,6 +173,12 @@ fun SeekrMainNavHost(
     testMode: Boolean = false
 ) {
 
+  fun NavHostController.goToProfileReviews(userId: String?) {
+    if (!userId.isNullOrBlank()) {
+      navigate(SeekrDestination.Profile.Reviews.createRoute(userId))
+    }
+  }
+
   // Onboarding check
   val authViewModel: AuthViewModel = viewModel()
   val uiState by authViewModel.uiState.collectAsState()
@@ -240,11 +247,7 @@ fun SeekrMainNavHost(
                     },
                     onSettings = { navController.navigate(SeekrDestination.Settings.route) },
                     testMode = testMode,
-                    onReviewsClick = {
-                      user?.uid?.let { uid ->
-                        navController.navigate(SeekrDestination.Profile.Reviews.createRoute(uid))
-                      }
-                    })
+                    onReviewsClick = { navController.goToProfileReviews(user?.uid) })
               }
               // Public profile
               composable(
@@ -269,11 +272,7 @@ fun SeekrMainNavHost(
                         onSettings = {},
                         onGoBack = { navController.popBackStack() },
                         testMode = testMode,
-                        onReviewsClick = {
-                          userId?.let { id ->
-                            navController.navigate(SeekrDestination.Profile.Reviews.createRoute(id))
-                          }
-                        })
+                        onReviewsClick = { navController.goToProfileReviews(userId) })
                   }
 
               // Hunt card (details)
@@ -432,7 +431,7 @@ fun SeekrMainNavHost(
                       backStackEntry ->
                     val userId =
                         backStackEntry.arguments
-                            ?.getString(SeekrDestination.Profile.Reviews.ARG_USER_ID_REVIEW)
+                            ?.getString(SeekrDestination.Profile.Reviews.ARG_USER_ID)
                             .orEmpty()
 
                     ProfileReviewsScreen(
