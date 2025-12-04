@@ -2,6 +2,10 @@ package com.swentseekr.seekr.ui.map
 
 import android.net.Uri
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -244,5 +248,24 @@ class MapTest {
       assert(state.validatedCount == 0)
       assert(state.selectedHunt == null)
     }
+  }
+
+  @Test
+  fun fullscreenCheckpointImage_closesWhenCloseButtonClicked() {
+    composeRule.setContent {
+      var isOpen by remember { mutableStateOf(true) }
+
+      if (isOpen) {
+        FullscreenCheckpointImage(
+            imageUrl = "https://example.com/image.jpg",
+            contentDescription = "Checkpoint image",
+            onClose = { isOpen = false },
+        )
+      }
+    }
+
+    composeRule.onNodeWithTag(MapScreenTestTags.CLOSE_CHECKPOINT_IMAGE).assertIsDisplayed()
+    composeRule.onNodeWithTag(MapScreenTestTags.CLOSE_CHECKPOINT_IMAGE).performClick()
+    composeRule.onNodeWithTag(MapScreenTestTags.CLOSE_CHECKPOINT_IMAGE).assertDoesNotExist()
   }
 }

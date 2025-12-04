@@ -112,4 +112,5 @@ object MapScreenTestTags {
   const val STOP_POPUP = "stopPopup"
   const val CONFIRM = "confirm"
   const val NEXT_CHECKPOINT_IMAGE = "nextCheckpointImage"
+  const val CLOSE_CHECKPOINT_IMAGE = "closeCheckpointImage"
 }

@@ -171,7 +171,7 @@ private fun BoxScope.FocusedHuntBottomCard(
 }
 
 @Composable
-private fun FullscreenCheckpointImage(
+internal fun FullscreenCheckpointImage(
     imageUrl: String,
     contentDescription: String,
     onClose: () -> Unit
@@ -193,8 +193,7 @@ private fun FullscreenCheckpointImage(
                   .padding(16.dp)
                   .size(36.dp)
                   .background(color = Color.Black.copy(alpha = 0.6f), shape = CircleShape)
-          // .testTag(MapScreenTestTags.CLOSE_CHECKPOINT_IMAGE)
-          ) {
+                  .testTag(MapScreenTestTags.CLOSE_CHECKPOINT_IMAGE)) {
             Icon(
                 imageVector = Icons.Default.Close,
                 contentDescription = MapScreenStrings.Cancel,
