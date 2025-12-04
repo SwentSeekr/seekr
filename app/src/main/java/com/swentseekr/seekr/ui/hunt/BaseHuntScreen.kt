@@ -16,6 +16,8 @@ fun BaseHuntScreen(
     onDone: () -> Unit = {},
     testMode: Boolean = false,
     onSelectImage: (Uri?) -> Unit = {},
+    showDeleteAction: Boolean = false,
+    onDeleteClick: (() -> Unit)? = null,
 ) {
   val uiState by vm.uiState.collectAsState()
   val context = LocalContext.current
@@ -82,6 +84,8 @@ fun BaseHuntScreen(
         onRemoveExistingImage = vm::removeExistingOtherImage, // <-- images URL (Firestore)
         onSave = { showPreview = true },
         onGoBack = onGoBack,
+        showDeleteAction = showDeleteAction,
+        onDeleteClick = onDeleteClick,
     )
   }
 }
