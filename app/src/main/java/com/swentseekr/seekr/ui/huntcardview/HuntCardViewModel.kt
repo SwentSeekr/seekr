@@ -38,11 +38,13 @@ open class HuntCardViewModel(
     private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository,
     private val imageRepository: IReviewImageRepository = ReviewImageRepositoryProvider.repository
 ) : ViewModel() {
-
   private val _uiState = MutableStateFlow(HuntCardUiState())
   open val uiState: StateFlow<HuntCardUiState> = _uiState.asStateFlow()
+    // Expose the liked hunts cache as a StateFlow so composables can observe it
+
     private val _likedHuntsCache = MutableStateFlow<Set<String>>(emptySet())
 
+    val likedHuntsCache: StateFlow<Set<String>> = _likedHuntsCache.asStateFlow()
     fun isHuntLiked(huntId: String): Boolean {
         return _likedHuntsCache.value.contains(huntId)
     }
@@ -253,19 +255,28 @@ open class HuntCardViewModel(
    * likesList. Will be modify later
    */
   fun onLikeClick(huntID: String) {
-      viewModelScope.launch {
-          val currentUserId = _uiState.value.currentUserId ?: return@launch
-          val currentlyLiked = _uiState.value.isLiked
+      val currentUserId = _uiState.value.currentUserId ?: return
+      val currentlyLiked = _likedHuntsCache.value.contains(huntID)
 
-          try {
+      _likedHuntsCache.value = _likedHuntsCache.value.toMutableSet().apply {
+          if (currentlyLiked) remove(huntID) else add(huntID)
+      }
+
+      _uiState.value = _uiState.value.copy(
+          isLiked = !currentlyLiked
+      )
+      viewModelScope.launch {
+          /*try {
               if (currentlyLiked) {
                   profileRepository.removeLikedHunt(currentUserId, huntID)
-                  _likedHuntsCache.value = _likedHuntsCache.value - huntID
-
+                  _likedHuntsCache.value = _likedHuntsCache.value.toMutableSet().apply {
+                      remove(huntID)
+                  }
               } else {
                   profileRepository.addLikedHunt(currentUserId, huntID)
-                  _likedHuntsCache.value = _likedHuntsCache.value + huntID
-
+                  _likedHuntsCache.value = _likedHuntsCache.value.toMutableSet().apply {
+                      add(huntID)
+                  }
               }
               if (_uiState.value.hunt?.uid == huntID) {
                   _uiState.value = _uiState.value.copy(isLiked = !currentlyLiked)
@@ -273,6 +284,19 @@ open class HuntCardViewModel(
 
           } catch (e: Exception) {
               setErrorMsg("Failed to update liked hunt")
+          }*/
+          try {
+              if (currentlyLiked) profileRepository.removeLikedHunt(currentUserId, huntID)
+              else profileRepository.addLikedHunt(currentUserId, huntID)
+          } catch (e: Exception) {
+              // Revert on error
+              _likedHuntsCache.value = _likedHuntsCache.value.toMutableSet().apply {
+                  if (currentlyLiked) add(huntID) else remove(huntID)
+              }
+              _uiState.value = _uiState.value.copy(
+                  isLiked = currentlyLiked
+              )
+              setErrorMsg("Failed to update liked hunt: ${e.message}")
           }
 
       }

@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -94,6 +95,7 @@ fun OverviewScreen(
     val currentUserId by remember {
         mutableStateOf(huntCardViewModel.uiState.value.currentUserId)
     }
+    val likedHuntsCache by huntCardViewModel.likedHuntsCache.collectAsState()
 
   LaunchedEffect(Unit) { overviewViewModel.refreshUIState()
       huntCardViewModel.loadCurrentUserID()}
@@ -122,31 +124,30 @@ fun OverviewScreen(
           onStatusSelected = { overviewViewModel.onStatusFilterSelect(it) },
           onDifficultySelected = { overviewViewModel.onDifficultyFilterSelect(it) })
 
-      // HUNTS LIST
+        val likedHuntsCache by huntCardViewModel.likedHuntsCache.collectAsState()
+
+        // HUNTS LIST
       LazyColumn(
           modifier = modifier.testTag(OverviewScreenTestTags.HUNT_LIST).fillMaxWidth(),
           contentPadding = PaddingValues(bottom = OverviewScreenDefaults.VerticalPadding16),
           horizontalAlignment = Alignment.CenterHorizontally) {
-            items(hunts.size) { index ->
-              val hunt = hunts[index]
-                val isLiked = remember(hunt.hunt.uid, currentUserId) {
-                    derivedStateOf {
-                        huntCardViewModel.isHuntLiked(hunt.hunt.uid)
-                    }
-                }.value
+            items(hunts, key = { it.hunt.uid }) { hunt ->
+              //val hunt = hunts[index]
+                val isLiked =  likedHuntsCache.contains(hunt.hunt.uid)
 
-              HuntCard(
+
+                HuntCard(
                   hunt.hunt,
                   modifier =
                       modifier
                           .testTag(
-                              if (index == hunts.size - 1) OverviewScreenTestTags.LAST_HUNT_CARD
+                              if (hunts.lastIndex  == hunts.size - 1) OverviewScreenTestTags.LAST_HUNT_CARD
                               else OverviewScreenTestTags.HUNT_CARD)
                           .clickable { onHuntClick(hunt.hunt.uid) },
-                  isLiked = isLiked,
+                  isLiked = likedHuntsCache.contains(hunt.hunt.uid),
                   onLikeClick = { huntId ->
                       huntCardViewModel.onLikeClick(huntId)
-                      overviewViewModel.refreshUIState()
+                     // overviewViewModel.refreshUIState()
                   },)
 
               Spacer(modifier = Modifier.height(OverviewScreenDefaults.ListItemSpacing))
