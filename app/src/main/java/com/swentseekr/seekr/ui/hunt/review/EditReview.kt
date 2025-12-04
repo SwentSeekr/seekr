@@ -7,12 +7,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 
-
-
 /**
- *
- * This composable displays the UI for editing an existing hunt review.
- * It reuses the [ReviewScreenContent] composable to handle:
+ * This composable displays the UI for editing an existing hunt review. It reuses the
+ * [ReviewScreenContent] composable to handle:
  * - Display of the current review information.
  * - Rating adjustment.
  * - Comment editing.
@@ -26,7 +23,6 @@ import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
  * @param onGoBack Callback invoked when the user wants to navigate back.
  * @param onDone Callback invoked when the user saves the edited review.
  * @param onCancel Callback invoked when the user cancels editing the review.
- *
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

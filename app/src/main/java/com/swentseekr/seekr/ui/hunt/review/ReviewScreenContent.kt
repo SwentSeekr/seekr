@@ -13,11 +13,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 
-
 /**
- *
- * A composable that manages the content and state of a review screen.
- * It handles both adding and editing reviews for a given hunt, including:
+ * A composable that manages the content and state of a review screen. It handles both adding and
+ * editing reviews for a given hunt, including:
  * - Loading hunt and author data.
  * - Managing rating, text, and photo inputs.
  * - Handling submission, cancellation, and navigation callbacks.
@@ -29,7 +27,6 @@ import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
  * @param onCancel Callback invoked when the user cancels the review process.
  * @param reviewViewModel ViewModel managing review state (rating, text, photos).
  * @param huntCardViewModel ViewModel managing hunt and author profile data.
- *
  */
 @Composable
 fun ReviewScreenContent(

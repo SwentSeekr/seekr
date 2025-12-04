@@ -54,7 +54,6 @@ import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 
 /**
- *
  * This composable represents the main review UI for a hunt. It provides:
  * - Display of hunt title and author.
  * - Star rating input with animation.
@@ -70,7 +69,7 @@ import com.swentseekr.seekr.R
  * @param photos List of photo URLs to display in the review.
  * @param isReviewTextError True if the comment field has a validation error.
  * @param isDoneEnabled Enables the "Done" button when true.
- * @param reviewTextErrorMessage  error message to display below the comment field.
+ * @param reviewTextErrorMessage error message to display below the comment field.
  * @param onRatingChanged Callback invoked when the rating is changed.
  * @param onReviewTextChanged Callback invoked when the review text is changed.
  * @param onAddPhotos Callback invoked when the user taps the "Add Photos" button.
@@ -79,7 +78,6 @@ import com.swentseekr.seekr.R
  * @param onCancel Callback invoked when the "Cancel" button is pressed.
  * @param onDone Callback invoked when the "Done" button is pressed.
  * @param modifier Optional [Modifier] for customization.
- *
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
