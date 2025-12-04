@@ -133,7 +133,7 @@ object EditProfileTestTags {
  * Centralized UI constants extracted from ProfileScreen to remove hardcoded values while preserving
  * identical UI for tests.
  */
-object ProfileUIConstants {
+object ProfileUIConstantsDefaults {
 
   // ---- GENERAL PADDINGS ----
   val Padding4 = 4.dp
