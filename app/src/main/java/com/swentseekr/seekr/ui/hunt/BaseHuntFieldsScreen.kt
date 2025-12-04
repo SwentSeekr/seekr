@@ -38,21 +38,33 @@ import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.REMOVE_BUTTON_TAG_PREFIX
 
+/** Represents an additional image associated with a hunt, which can be either remote or local. */
 sealed class OtherImage {
   data class Remote(val url: String) : OtherImage()
 
   data class Local(val uri: Uri) : OtherImage()
 }
 
+/** UI constants used by the base hunt fields layout. */
 val UICons = BaseHuntFieldsUi
 
-/** Field style used to keep ValidatedOutlinedField arguments under the SonarCloud limit. */
+/**
+ * Encapsulates styling for validated text fields.
+ *
+ * This wrapper helps keep the argument list of [ValidatedOutlinedField] under the SonarCloud
+ * parameter limit while centralizing visual configuration.
+ */
 data class FieldStyle(
     val modifier: Modifier,
     val shape: Shape,
     val colors: TextFieldColors,
 )
 
+/**
+ * Provides a default [FieldStyle] instance based on the current theme.
+ *
+ * @param modifier Modifier applied to the underlying text field.
+ */
 @Composable
 fun defaultFieldStyle(
     modifier: Modifier = Modifier.fillMaxWidth(),
@@ -68,7 +80,12 @@ fun defaultFieldStyle(
       modifier = modifier, shape = RoundedCornerShape(UICons.FieldCornerRadius), colors = colors)
 }
 
-/** Callbacks for the main hunt fields (title, description, time, distance, etc.). */
+/**
+ * Callbacks for the main hunt fields (title, description, time, distance, etc.).
+ *
+ * Grouping these callbacks keeps the [BaseHuntFieldsScreen] signature concise and easier to
+ * maintain.
+ */
 data class HuntFieldCallbacks(
     val onTitleChange: (String) -> Unit,
     val onDescriptionChange: (String) -> Unit,
@@ -80,7 +97,7 @@ data class HuntFieldCallbacks(
     val onSave: () -> Unit,
 )
 
-/** Callbacks for image-related actions. */
+/** Callbacks for image-related actions in the hunt form. */
 data class ImageCallbacks(
     val onSelectImage: (Uri?) -> Unit,
     val onSelectOtherImages: (List<Uri>) -> Unit,
@@ -88,11 +105,28 @@ data class ImageCallbacks(
     val onRemoveExistingImage: (String) -> Unit,
 )
 
-/** Navigation related callbacks (kept extensible, currently only onGoBack). */
+/**
+ * Navigation-related callbacks for the hunt form.
+ *
+ * Additional navigation actions can be added here as the flow evolves.
+ */
 data class HuntNavigationCallbacks(
     val onGoBack: () -> Unit = {},
 )
 
+/**
+ * Text field with validation support and reusable styling.
+ *
+ * Displays an error message in the supporting text area when [errorMsg] is not null.
+ *
+ * @param value Current text value.
+ * @param onValueChange Callback invoked when the text changes.
+ * @param label Label displayed above the field.
+ * @param placeholder Placeholder text displayed inside the field when empty.
+ * @param errorMsg Optional error message shown below the field.
+ * @param testTag Test tag used to identify the field in UI tests.
+ * @param style Visual configuration for the field (shape, modifier, colors).
+ */
 @Composable
 fun ValidatedOutlinedField(
     value: String,
@@ -122,6 +156,23 @@ fun ValidatedOutlinedField(
       colors = style.colors)
 }
 
+/**
+ * Main layout for the hunt form fields.
+ *
+ * This composable renders:
+ * - Text inputs (title, description, time, distance).
+ * - Status and difficulty dropdowns.
+ * - Location selection button.
+ * - Image selection and management.
+ * - Save button.
+ *
+ * @param title Title displayed in the top bar.
+ * @param uiState Current UI state of the hunt form.
+ * @param fieldCallbacks Group of callbacks handling field changes and save action.
+ * @param imageCallbacks Group of callbacks handling image selection and removal.
+ * @param navigationCallbacks Callbacks related to navigation events.
+ * @param deleteAction Configuration for the optional delete action in the top bar.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BaseHuntFieldsScreen(
@@ -169,7 +220,7 @@ fun BaseHuntFieldsScreen(
                             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                             focusedContainerColor = MaterialTheme.colorScheme.surface)
 
-                    // Title
+                    // Title field.
                     ValidatedOutlinedField(
                         value = uiState.title,
                         onValueChange = fieldCallbacks.onTitleChange,
@@ -178,7 +229,7 @@ fun BaseHuntFieldsScreen(
                         errorMsg = uiState.invalidTitleMsg,
                         testTag = HuntScreenTestTags.INPUT_HUNT_TITLE)
 
-                    // Description
+                    // Description field.
                     ValidatedOutlinedField(
                         value = uiState.description,
                         onValueChange = fieldCallbacks.onDescriptionChange,
@@ -192,6 +243,7 @@ fun BaseHuntFieldsScreen(
                                 shape = fieldShape,
                                 colors = fieldColors))
 
+                    // Status and difficulty dropdowns.
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(UICons.RowHArrangement)) {
@@ -208,6 +260,7 @@ fun BaseHuntFieldsScreen(
                               colors = fieldColors)
                         }
 
+                    // Time and distance fields.
                     TimeAndDistanceRow(
                         uiState = uiState,
                         fieldShape = fieldShape,
@@ -215,14 +268,17 @@ fun BaseHuntFieldsScreen(
                         onTimeChange = fieldCallbacks.onTimeChange,
                         onDistanceChange = fieldCallbacks.onDistanceChange)
 
+                    // Location selection button.
                     SelectLocationsButton(
                         pointsCount = uiState.points.size,
                         onSelectLocations = fieldCallbacks.onSelectLocations)
 
+                    // Image selection and management section.
                     ImagesSection(uiState = uiState, imageCallbacks = imageCallbacks)
 
                     Spacer(modifier = Modifier.height(UICons.SpacerHeightSmall))
 
+                    // Save button at the bottom of the form.
                     SaveHuntButton(enabled = uiState.isValid, onSave = fieldCallbacks.onSave)
 
                     Spacer(modifier = Modifier.height(UICons.SpacerHeight))
@@ -231,7 +287,7 @@ fun BaseHuntFieldsScreen(
       }
 }
 
-/** Top app bar with back arrow and delete action toggle. */
+/** Top app bar for the hunt form, including navigation and optional delete action. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BaseHuntTopBar(
@@ -253,6 +309,7 @@ private fun BaseHuntTopBar(
       actions = {
         if (deleteAction.show && deleteAction.onClick != null) {
 
+          // Delete button toggled via the overflow icon.
           if (showDeleteButton) {
             Button(
                 onClick = deleteAction.onClick,
@@ -283,7 +340,11 @@ private fun BaseHuntTopBar(
               titleContentColor = MaterialTheme.colorScheme.onSurface))
 }
 
-/** Status dropdown with its own internal expanded state. */
+/**
+ * Status dropdown with its own internal expanded state.
+ *
+ * Defined as a [RowScope] extension to allow the use of [Modifier.weight].
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RowScope.StatusDropdown(
@@ -327,7 +388,11 @@ private fun RowScope.StatusDropdown(
       }
 }
 
-/** Difficulty dropdown with its own internal expanded state. */
+/**
+ * Difficulty dropdown with its own internal expanded state.
+ *
+ * Defined as a [RowScope] extension to allow the use of [Modifier.weight].
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RowScope.DifficultyDropdown(
@@ -373,6 +438,7 @@ private fun RowScope.DifficultyDropdown(
       }
 }
 
+/** Row containing time and distance fields. */
 @Composable
 private fun TimeAndDistanceRow(
     uiState: HuntUIState,
@@ -412,6 +478,9 @@ private fun TimeAndDistanceRow(
       }
 }
 
+/**
+ * Button used to trigger location selection, with label reflecting the number of points selected.
+ */
 @Composable
 private fun SelectLocationsButton(
     pointsCount: Int,
@@ -441,6 +510,7 @@ private fun SelectLocationsButton(
       }
 }
 
+/** Section responsible for main and secondary image selection, preview, and removal. */
 @Composable
 private fun ImagesSection(
     uiState: HuntUIState,
@@ -575,6 +645,7 @@ private fun ImagesSection(
       }
 }
 
+/** Primary save action for the hunt form. */
 @Composable
 private fun SaveHuntButton(
     enabled: Boolean,
