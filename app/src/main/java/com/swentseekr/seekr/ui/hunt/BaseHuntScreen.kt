@@ -34,7 +34,7 @@ fun BaseHuntScreen(
     LaunchedEffect(Unit) { vm.setTestMode(true) }
   }
 
-  // Toast when then hunt is saved
+  // Toast when the hunt is saved
   LaunchedEffect(uiState.saveSuccessful) {
     if (uiState.saveSuccessful) {
       Toast.makeText(context, BaseHuntScreenMessages.HUNT_SAVED, Toast.LENGTH_SHORT).show()
@@ -78,21 +78,26 @@ fun BaseHuntScreen(
     BaseHuntFieldsScreen(
         title = title,
         uiState = uiState,
-        onTitleChange = vm::setTitle,
-        onDescriptionChange = vm::setDescription,
-        onTimeChange = vm::setTime,
-        onDistanceChange = vm::setDistance,
-        onDifficultySelect = vm::setDifficulty,
-        onStatusSelect = vm::setStatus,
-        onSelectLocations = { vm.setIsSelectingPoints(true) },
-        onSelectImage = onSelectImage,
-        onSelectOtherImages = vm::updateOtherImagesUris,
-        onRemoveOtherImage = vm::removeOtherImage, // <-- images locales (URIs)
-        onRemoveExistingImage = vm::removeExistingOtherImage, // <-- images URL (Firestore)
-        onSave = { showPreview = true },
-        onGoBack = onGoBack,
-        showDeleteAction = deleteAction.show,
-        onDeleteClick = deleteAction.onClick,
+        fieldCallbacks =
+            HuntFieldCallbacks(
+                onTitleChange = vm::setTitle,
+                onDescriptionChange = vm::setDescription,
+                onTimeChange = vm::setTime,
+                onDistanceChange = vm::setDistance,
+                onDifficultySelect = vm::setDifficulty,
+                onStatusSelect = vm::setStatus,
+                onSelectLocations = { vm.setIsSelectingPoints(true) },
+                onSave = { showPreview = true },
+            ),
+        imageCallbacks =
+            ImageCallbacks(
+                onSelectImage = onSelectImage,
+                onSelectOtherImages = vm::updateOtherImagesUris,
+                onRemoveOtherImage = vm::removeOtherImage, // local URIs
+                onRemoveExistingImage = vm::removeExistingOtherImage, // Firestore URLs
+            ),
+        navigationCallbacks = HuntNavigationCallbacks(onGoBack = onGoBack),
+        deleteAction = deleteAction,
     )
   }
 }
