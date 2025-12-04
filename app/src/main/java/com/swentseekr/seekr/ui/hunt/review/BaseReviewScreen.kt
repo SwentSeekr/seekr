@@ -53,6 +53,34 @@ import androidx.compose.ui.text.font.FontWeight
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 
+/**
+ *
+ * This composable represents the main review UI for a hunt. It provides:
+ * - Display of hunt title and author.
+ * - Star rating input with animation.
+ * - Text field for review comments with validation support.
+ * - Optional photo attachments with add/remove functionality.
+ * - Action buttons for Cancel and Done.
+ *
+ * @param title The title displayed in the top app bar.
+ * @param huntTitle The title of the hunt being reviewed.
+ * @param authorName The name of the hunt author.
+ * @param rating Current rating value (0.0–MaxStars).
+ * @param reviewText Current text of the review comment.
+ * @param photos List of photo URLs to display in the review.
+ * @param isReviewTextError True if the comment field has a validation error.
+ * @param isDoneEnabled Enables the "Done" button when true.
+ * @param reviewTextErrorMessage  error message to display below the comment field.
+ * @param onRatingChanged Callback invoked when the rating is changed.
+ * @param onReviewTextChanged Callback invoked when the review text is changed.
+ * @param onAddPhotos Callback invoked when the user taps the "Add Photos" button.
+ * @param onRemovePhoto Callback invoked when the user removes a photo; provides the index.
+ * @param onGoBack Callback invoked when the top app bar back button is pressed.
+ * @param onCancel Callback invoked when the "Cancel" button is pressed.
+ * @param onDone Callback invoked when the "Done" button is pressed.
+ * @param modifier Optional [Modifier] for customization.
+ *
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BaseReviewScreen(

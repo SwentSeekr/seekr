@@ -18,7 +18,6 @@ val Blue = Color(0xFF2196F3)
 val Orange = Color(0xFFFFA64D)
 val GrayBackgound = Color(0xFFF2F2F2)
 
-val EasyGreen = Color(0xFFB0D4B1)
 val MediumYellow = Color(0xFFFFDFAD)
 val DifficultRed = Color(0xFFFFC1C1)
 
@@ -26,6 +25,7 @@ val Salmon = Color(0xFFE8847C)
 
 val GrayDislike = Color(0xFF666666)
 val RedLike = Color(0xFFF90606)
+val EasyGreen = Color(0xFFB0D4B1)
 
 val YellowStar = Color(0xFFE7CD0C)
 val GrayStar = Color(0xFF838382)

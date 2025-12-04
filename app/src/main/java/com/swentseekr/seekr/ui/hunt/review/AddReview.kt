@@ -24,6 +24,22 @@ import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 
 val UICons = AddReviewScreenDefaults
 
+/**
+ *
+ * This is the main composable for the "Add Review" screen where users can:
+ * - Rate a hunt using stars.
+ * - Add comments/review text.
+ * - Upload photos.
+ * - Submit, cancel, or go back.
+ *
+ * @param huntId The unique ID of the hunt being reviewed.
+ * @param reviewViewModel The ViewModel responsible for managing review-related UI state.
+ * @param huntCardViewModel The ViewModel responsible for fetching hunt and author details.
+ * @param onGoBack Callback triggered when the user presses the "Go Back" button.
+ * @param onDone Callback triggered when the user successfully submits the review.
+ * @param onCancel Callback triggered when the user cancels the review process.
+ *
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddReviewScreen(
@@ -44,6 +60,17 @@ fun AddReviewScreen(
       huntCardViewModel = huntCardViewModel)
 }
 
+/**
+ *
+ * A reusable composable for displaying a row of selectable stars.
+ * Supports interactive rating with animations.
+ *
+ * @param maxStars Maximum number of stars in the rating bar. Defaults to [AddReviewScreenDefaults.MaxStars].
+ * @param rating Current rating value (0 means no stars selected). Defaults to 0.
+ * @param onRatingChanged Callback invoked when the user taps a star.
+ *                        Provides the updated rating value.
+ *
+ */
 @Composable
 fun StarRatingBar(
     maxStars: Int = AddReviewScreenDefaults.MaxStars,
