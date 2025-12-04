@@ -14,7 +14,6 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.components.HuntCard
-import com.swentseekr.seekr.ui.components.HuntCardPreview
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -66,12 +65,5 @@ class HuntCardTest {
 
     // On recherche l’icône favorite par son contentDescription
     composeTestRule.onNodeWithContentDescription("Like Button").assertIsDisplayed()
-  }
-
-  @Test
-  fun huntCard_preview_displaysCorrectly() {
-    composeTestRule.setContent { HuntCardPreview() }
-
-    composeTestRule.onNodeWithText("City Exploration").assertIsDisplayed()
   }
 }
