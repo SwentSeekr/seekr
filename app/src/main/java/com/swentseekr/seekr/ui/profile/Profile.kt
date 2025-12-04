@@ -216,7 +216,8 @@ fun ProfileScreen(
               isMyProfile = isMyProfile,
               testPublic = testPublic,
               onSettings = onSettings,
-              onGoBack = onGoBack)
+              onGoBack = onGoBack,
+              onReviewsClick = onReviewsClick)
 
           // ---- TABS SECTION ----
           ModernCustomToolbar(selectedTab = selectedTab, onTabSelected = { selectedTab = it })
@@ -260,7 +261,8 @@ fun ModernProfileHeader(
     isMyProfile: Boolean,
     testPublic: Boolean,
     onSettings: () -> Unit,
-    onGoBack: () -> Unit
+    onGoBack: () -> Unit,
+    onReviewsClick: () -> Unit = {}
 ) {
   Box(
       modifier =
@@ -351,9 +353,9 @@ fun ModernProfileHeader(
                 value = "${String.format("%.1f",profile.author.reviewRate)}",
                 label =  if (reviewCount == 1) "- $reviewCount review "
                                   else "- $reviewCount reviews",
-                modifier = Modifier.weight(ProfileUIConstantsDefaults.Weight),
+                modifier = Modifier.weight(ProfileUIConstantsDefaults.Weight).clickable { onReviewsClick() },
                 testTagValue = ProfileTestTags.PROFILE_REVIEW_RATING,
-                testTagLabel = ProfileTestTags.PROFILE_REVIEWS_COUNT).clickable { onReviewsClick() }
+                testTagLabel = ProfileTestTags.PROFILE_REVIEWS_COUNT)
 
             Spacer(modifier = Modifier.width(ProfileUIConstantsDefaults.Padding12))
 
