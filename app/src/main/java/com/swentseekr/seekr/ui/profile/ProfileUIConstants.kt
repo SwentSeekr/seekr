@@ -2,6 +2,7 @@ package com.swentseekr.seekr.ui.profile
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 /**
  * Centralized constants, strings, and test tags used across both the Profile screen and Edit
