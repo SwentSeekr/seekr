@@ -1,8 +1,5 @@
 package com.swentseekr.seekr.ui.hunt.review
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -16,15 +13,10 @@ import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -42,6 +34,15 @@ fun AddReviewScreen(
     onDone: () -> Unit = {},
     onCancel: () -> Unit = {},
 ) {
+  ReviewScreenContent(
+      title = AddReviewScreenStrings.Title,
+      huntId = huntId,
+      onGoBack = onGoBack,
+      onDone = onDone,
+      onCancel = onCancel,
+      reviewViewModel = reviewViewModel,
+      huntCardViewModel = huntCardViewModel)
+  /*
   val uiState by reviewViewModel.uiState.collectAsState()
   val uiStateHuntCard by huntCardViewModel.uiState.collectAsState()
   LaunchedEffect(huntId) { reviewViewModel.loadHunt(huntId) }
@@ -84,6 +85,8 @@ fun AddReviewScreen(
         hunt?.let { reviewViewModel.submitCurrentUserReview(it, context) }
         onDone()
       })
+
+     */
 }
 
 @Composable

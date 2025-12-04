@@ -1,31 +1,29 @@
 package com.swentseekr.seekr.ui.hunt.review
 
-import androidx.compose.material3.ExperimentalMaterial3Api
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.platform.LocalContext
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditReviewScreen(
+fun ReviewScreenContent(
+    title: String,
     huntId: String,
-    reviewViewModel: ReviewHuntViewModel = viewModel(),
-    huntCardViewModel: HuntCardViewModel = viewModel(),
-    onGoBack: () -> Unit = {},
-    onDone: () -> Unit = {},
-    onCancel: () -> Unit = {},
+    onGoBack: () -> Unit,
+    onDone: () -> Unit,
+    onCancel: () -> Unit,
+    reviewViewModel: ReviewHuntViewModel,
+    huntCardViewModel: HuntCardViewModel
 ) {
-  ReviewScreenContent(
-      title = "Edit Review Hunt",
-      huntId = huntId,
-      onGoBack = onGoBack,
-      onDone = onDone,
-      onCancel = onCancel,
-      reviewViewModel = reviewViewModel,
-      huntCardViewModel = huntCardViewModel)
-  /*
+
   val uiState by reviewViewModel.uiState.collectAsState()
   val uiStateHuntCard by huntCardViewModel.uiState.collectAsState()
   LaunchedEffect(huntId) { reviewViewModel.loadHunt(huntId) }
@@ -47,7 +45,7 @@ fun EditReviewScreen(
   val context = LocalContext.current
 
   BaseReviewScreen(
-      title = "Edit Review Hunt",
+      title = title,
       huntTitle = uiState.hunt?.title ?: "",
       authorName = author,
       rating = uiState.rating,
@@ -68,6 +66,4 @@ fun EditReviewScreen(
         hunt?.let { reviewViewModel.submitCurrentUserReview(it, context) }
         onDone()
       })
-
-     */
 }
