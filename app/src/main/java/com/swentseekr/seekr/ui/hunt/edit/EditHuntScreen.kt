@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.swentseekr.seekr.ui.hunt.BaseHuntScreen
+import com.swentseekr.seekr.ui.hunt.DeleteAction
 import kotlinx.coroutines.launch
 
 @Composable
@@ -30,14 +31,15 @@ fun EditHuntScreen(
       onDone = onDone,
       testMode = testMode,
       onSelectImage = { uri -> editHuntViewModel.updateMainImageUri(uri) },
-      // NEW: enable delete menu for edit mode
-      showDeleteAction = true,
-      onDeleteClick = {
-        scope.launch {
-          editHuntViewModel.deleteCurrentHunt()
-          // After delete, go back (you can swap this for a dedicated onDeleted callback if needed)
-          onGoBack()
-        }
-      },
+      deleteAction =
+          DeleteAction(
+              show = true,
+              onClick = {
+                scope.launch {
+                  editHuntViewModel.deleteCurrentHunt()
+                  onGoBack()
+                }
+              },
+          ),
   )
 }
