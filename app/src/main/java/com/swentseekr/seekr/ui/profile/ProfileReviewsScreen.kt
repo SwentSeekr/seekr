@@ -12,10 +12,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -85,7 +87,9 @@ fun ProfileReviewsScreen(
               IconButton(
                   onClick = onGoBack,
                   modifier = Modifier.testTag(ProfileReviewsTestTags.BACK_BUTTON)) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back")
                   }
             })
       }) { padding ->
@@ -117,7 +121,10 @@ fun ProfileReviewsScreen(
                       modifier = Modifier.testTag(ProfileReviewsTestTags.RATING_TEXT))
                 }
 
-            Divider(modifier = Modifier.testTag(ProfileReviewsTestTags.DIVIDER))
+            HorizontalDivider(
+                modifier = Modifier.testTag(ProfileReviewsTestTags.DIVIDER),
+                thickness = DividerDefaults.Thickness,
+                color = DividerDefaults.color)
 
             // ProfileReviewsScreen
             LaunchedEffect(reviews) {

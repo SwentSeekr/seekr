@@ -103,6 +103,9 @@ class ProfileReviewsScreenTest {
     }
 
     composeTestRule.onNodeWithTag(ProfileReviewsTestTags.SCREEN).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(ProfileReviewsTestTags.LOADING).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(ProfileReviewsTestTags.RATING_SUMMARY).assertDoesNotExist()
+    composeTestRule.onNodeWithTag(ProfileReviewsTestTags.REVIEWS_LIST).assertDoesNotExist()
   }
 
   @Test
@@ -127,5 +130,26 @@ class ProfileReviewsScreenTest {
         .onNodeWithTag(ProfileReviewsTestTags.RATING_TEXT)
         .assertIsDisplayed()
         .assertTextContains("4.5/5.0 - 1 review")
+  }
+
+  @Test
+  fun testRatingTextMultipleReviews() {
+    val testProfile = sampleProfile.copy(author = sampleProfile.author.copy(reviewRate = 4.2))
+
+    composeTestRule.setContent {
+      val navController = rememberNavController()
+      ProfileReviewsScreen(
+          userId = testProfile.uid,
+          profileViewModel = ProfileViewModel(),
+          onGoBack = {},
+          navController = navController,
+          testProfile = testProfile,
+          testReviews = sampleReviews)
+    }
+
+    composeTestRule
+        .onNodeWithTag(ProfileReviewsTestTags.RATING_TEXT)
+        .assertIsDisplayed()
+        .assertTextContains("4.2/5.0 - 2 reviews")
   }
 }
