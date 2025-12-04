@@ -38,15 +38,42 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.ui.components.HuntCard
+import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Alpha02
+import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Border1
+import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Border2
+import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.FilterItemPadding
+import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Gray666
+import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.HorizontalPadding20
+import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.SearchBarCornerRadius
+import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.SearchBarElevation
+import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.SearchBarHeight
+import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.SmallFontSize
+import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding12
+import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding16
+import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding8
+import com.swentseekr.seekr.ui.overview.OverviewScreenStrings.FilterBy
 
+/**
+ * Main screen displaying the list of hunts with search, filters, and header.
+ *
+ * Includes:
+ * - Header section (title + subtitle)
+ * - Search bar
+ * - Status & difficulty filters
+ * - Scrollable list of HuntCard items
+ *
+ * @param modifier Optional modifier for layout adjustments.
+ * @param overviewViewModel ViewModel providing hunts and filtering logic.
+ * @param navHostController Navigation controller (used by previews).
+ * @param onActiveBar Callback invoked when the search bar expands or collapses.
+ * @param onHuntClick Callback fired when a hunt card is tapped.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OverviewScreen(
@@ -63,7 +90,7 @@ fun OverviewScreen(
 
   LaunchedEffect(Unit) { overviewViewModel.refreshUIState() }
 
-  Box(modifier = modifier.fillMaxSize().background(Color(0xFFF8F9FA))) {
+  Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.onPrimary)) {
     Column(
         modifier = Modifier.fillMaxWidth().testTag(OverviewScreenTestTags.OVERVIEW_SCREEN),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -90,7 +117,7 @@ fun OverviewScreen(
       // HUNTS LIST
       LazyColumn(
           modifier = modifier.testTag(OverviewScreenTestTags.HUNT_LIST).fillMaxWidth(),
-          contentPadding = PaddingValues(bottom = 16.dp),
+          contentPadding = PaddingValues(bottom = OverviewScreenDefaults.VerticalPadding16),
           horizontalAlignment = Alignment.CenterHorizontally) {
             items(hunts.size) { index ->
               val hunt = hunts[index]
@@ -111,26 +138,47 @@ fun OverviewScreen(
   }
 }
 
+/**
+ * Displays the header of the screen with the main section title ("Discover") and a subtitle
+ * encouraging users to explore new hunts.
+ *
+ * Uses theme colors for text and spacing from OverviewScreenDefaults.
+ */
 @Composable
 fun ModernHeader() {
   Column(
       modifier =
           Modifier.fillMaxWidth()
-              .background(Color.White)
-              .padding(horizontal = 20.dp, vertical = 16.dp)) {
+              .background(MaterialTheme.colorScheme.onPrimary)
+              .padding(horizontal = HorizontalPadding20, vertical = VerticalPadding16)) {
         Text(
             text = "Discover",
-            fontSize = 32.sp,
+            fontSize = OverviewScreenDefaults.DiscoverFontSize,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF1A1A1A))
+            color = MaterialTheme.colorScheme.onSurface)
         Text(
             text = "Find your next adventure",
-            fontSize = 16.sp,
-            color = Color(0xFF666666),
-            modifier = Modifier.padding(top = 4.dp))
+            fontSize = OverviewScreenDefaults.NextAdventureFontSize,
+            color = Gray666,
+            modifier = Modifier.padding(top = FilterItemPadding))
       }
 }
 
+/**
+ * Search bar allowing the user to filter hunts by text.
+ *
+ * Features:
+ * - Leading search icon when query is empty
+ * - Trailing clear icon when query is non-empty
+ * - Uses container and text colors from theme/defaults
+ *
+ * @param query The current search query text.
+ * @param onQueryChange Triggered on text updates.
+ * @param onSearch Triggered when submitting the search.
+ * @param onActiveChange Triggered when the bar becomes active/inactive.
+ * @param onClear Clears the current query.
+ * @param modifier Optional layout modifier.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModernSearchBar(
@@ -147,13 +195,15 @@ fun ModernSearchBar(
       onSearch = onSearch,
       active = true,
       onActiveChange = onActiveChange,
-      placeholder = { Text(OverviewScreenStrings.SearchPlaceholder, color = Color(0xFF999999)) },
+      placeholder = {
+        Text(OverviewScreenStrings.SearchPlaceholder, color = OverviewScreenDefaults.Gray999)
+      },
       leadingIcon = {
         if (query.isEmpty()) {
           Icon(
               imageVector = Icons.Default.Search,
               contentDescription = OverviewScreenStrings.SearchIconDescription,
-              tint = Color(0xFF666666))
+              tint = Gray666)
         } else null
       },
       trailingIcon = {
@@ -161,23 +211,38 @@ fun ModernSearchBar(
           Icon(
               imageVector = Icons.Default.Clear,
               contentDescription = OverviewScreenStrings.ClearIconDescription,
-              tint = Color(0xFF666666),
+              tint = Gray666,
               modifier = Modifier.clickable { onClear() })
         } else null
       },
       modifier =
           modifier
               .fillMaxWidth()
-              .padding(horizontal = 20.dp, vertical = 12.dp)
-              .height(70.dp)
+              .padding(horizontal = HorizontalPadding20, vertical = VerticalPadding12)
+              .height(SearchBarHeight)
               .testTag(OverviewScreenTestTags.SEARCH_BAR),
-      shape = RoundedCornerShape(16.dp),
+      shape = RoundedCornerShape(SearchBarCornerRadius),
       colors =
-          SearchBarDefaults.colors(containerColor = Color.White, dividerColor = Color.Transparent),
-      shadowElevation = 4.dp,
+          SearchBarDefaults.colors(
+              containerColor = MaterialTheme.colorScheme.onPrimary,
+              dividerColor = Color.Transparent),
+      shadowElevation = SearchBarElevation,
       content = {})
 }
 
+/**
+ * Displays filter chips for both HuntStatus and Difficulty.
+ *
+ * Includes section title ("Filter by") and two horizontal chip groups:
+ * - Status chips (FUN, DISCOVER, SPORT)
+ * - Difficulty chips (EASY, INTERMEDIATE, DIFFICULT)
+ *
+ * @param selectedStatus Currently selected hunt status.
+ * @param selectedDifficulty Currently selected difficulty.
+ * @param onStatusSelected Callback when a status filter is pressed.
+ * @param onDifficultySelected Callback when a difficulty filter is pressed.
+ * @param modifier Optional layout modifier.
+ */
 @Composable
 fun ModernFilterBar(
     selectedStatus: HuntStatus?,
@@ -187,24 +252,27 @@ fun ModernFilterBar(
     modifier: Modifier = Modifier,
 ) {
   Column(
-      modifier = Modifier.fillMaxWidth().background(Color.White).padding(vertical = 12.dp),
+      modifier =
+          Modifier.fillMaxWidth()
+              .background(MaterialTheme.colorScheme.onPrimary)
+              .padding(vertical = VerticalPadding12),
       horizontalAlignment = Alignment.Start,
   ) {
     // SECTION TITLE
     Text(
-        text = "Filter by",
-        fontSize = 14.sp,
+        text = FilterBy,
+        fontSize = SmallFontSize,
         fontWeight = FontWeight.SemiBold,
-        color = Color(0xFF666666),
-        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
+        color = Gray666,
+        modifier = Modifier.padding(horizontal = HorizontalPadding20, vertical = VerticalPadding8))
 
     val huntStatuses = remember { HuntStatus.values() }
     val difficulties = remember { Difficulty.values() }
 
     LazyRow(
         modifier = modifier.fillMaxWidth().testTag(OverviewScreenTestTags.FILTER_BAR),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(horizontal = 20.dp)) {
+        horizontalArrangement = Arrangement.spacedBy(VerticalPadding8),
+        contentPadding = PaddingValues(horizontal = HorizontalPadding20)) {
           // STATUS FILTERS
           items(huntStatuses.size) { index ->
             val status = huntStatuses[index]
@@ -232,10 +300,24 @@ fun ModernFilterBar(
           }
         }
 
-    Spacer(modifier = Modifier.height(8.dp))
+    Spacer(modifier = Modifier.height(VerticalPadding8))
   }
 }
 
+/**
+ * Single filter chip used for both status and difficulty filters.
+ *
+ * Behavior:
+ * - Highlights with custom colors when selected
+ * - Displays bold text when active
+ * - Uses rounded shape and border logic based on selection state
+ *
+ * @param text Chip label.
+ * @param isSelected Whether the chip is currently selected.
+ * @param color Base color used for borders and selected backgrounds.
+ * @param modifier Optional layout modifier.
+ * @param onClick Called when the chip is pressed.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ModernFilterChip(
@@ -251,45 +333,60 @@ fun ModernFilterChip(
       label = {
         Text(
             text = text,
-            fontSize = 13.sp,
+            fontSize = SmallFontSize,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium)
       },
       modifier = modifier,
       colors =
           FilterChipDefaults.filterChipColors(
-              containerColor = Color.White,
-              selectedContainerColor = color.copy(alpha = 0.2f),
-              labelColor = Color(0xFF666666),
+              containerColor = MaterialTheme.colorScheme.onPrimary,
+              selectedContainerColor = color.copy(alpha = Alpha02),
+              labelColor = Gray666,
               selectedLabelColor = color),
       border =
           FilterChipDefaults.filterChipBorder(
-              borderColor = if (isSelected) color else Color(0xFFE0E0E0),
+              borderColor = if (isSelected) color else MaterialTheme.colorScheme.onPrimary,
               selectedBorderColor = color,
-              borderWidth = if (isSelected) 2.dp else 1.dp,
+              borderWidth = if (isSelected) Border2 else Border1,
               enabled = true,
               selected = true),
-      shape = RoundedCornerShape(12.dp),
+      shape = RoundedCornerShape(OverviewScreenDefaults.FilterChipCornerRadius),
   )
 }
 
 // Helper function for status colors
+/**
+ * Returns the color associated with a HuntStatus.
+ *
+ * Colors are defined in OverviewScreenDefaults.
+ *
+ * @param status HuntStatus value.
+ */
 fun getStatusColor(status: HuntStatus): Color {
   return when (status) {
-    HuntStatus.FUN -> Color(0xFF9C27B0) // Purple
-    HuntStatus.DISCOVER -> Color(0xFF2196F3) // Blue
-    HuntStatus.SPORT -> Color(0xFFFF5722) // Orange-red
+    HuntStatus.FUN -> OverviewScreenDefaults.StatusFun // Purple
+    HuntStatus.DISCOVER -> OverviewScreenDefaults.StatusDiscover // Blue
+    HuntStatus.SPORT -> OverviewScreenDefaults.StatusSport // Orange-red
   }
 }
 
 // Helper function for difficulty colors
+/**
+ * Returns the color associated with a Difficulty level.
+ *
+ * Difficulty colors also come from OverviewScreenDefaults.
+ *
+ * @param difficulty The selected difficulty.
+ */
 fun getDifficultyColor(difficulty: Difficulty): Color {
   return when (difficulty) {
-    Difficulty.EASY -> Color(0xFF4CAF50) // Green
-    Difficulty.INTERMEDIATE -> Color(0xFFFFA726) // Orange
-    Difficulty.DIFFICULT -> Color(0xFFEF5350) // Red
+    Difficulty.EASY -> OverviewScreenDefaults.DifficultyEasy // Green
+    Difficulty.INTERMEDIATE -> OverviewScreenDefaults.DifficultyIntermediate // Orange
+    Difficulty.DIFFICULT -> OverviewScreenDefaults.DifficultyHard // Red
   }
 }
 
+/** Preview for the OverviewScreen in an isolated Compose environment. */
 @Preview
 @Composable
 fun OverviewScreenPreview() {
@@ -297,6 +394,15 @@ fun OverviewScreenPreview() {
 }
 
 // Keep the old FilterButton for compatibility if needed
+/**
+ * Legacy filter button kept for compatibility. Used only if older UI code relies on the previous
+ * filter layout.
+ *
+ * @param text Button label.
+ * @param isSelected Whether the button is selected.
+ * @param modifier Optional layout modifier.
+ * @param onClick Triggered when the button is pressed.
+ */
 @Composable
 fun FilterButton(
     text: String,

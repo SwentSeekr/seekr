@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
@@ -16,9 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -127,23 +124,28 @@ fun SeekrNavigationBar(
               onClick = { onTabSelected(dest) },
               icon = {
                 if (isSelected) {
-                  // Icon with shadow halo effect when selected
-                  Box(contentAlignment = Alignment.Center, modifier = Modifier.size(48.dp)) {
-                    // Shadow/halo background
-                    Box(
-                        modifier =
-                            Modifier.size(40.dp)
-                                .background(
-                                    color = iconColor.copy(alpha = 0.12f), shape = CircleShape))
-                    Icon(
-                        dest.icon,
-                        contentDescription = dest.label,
-                        tint = iconColor,
-                        modifier = Modifier.size(24.dp))
-                  }
+                  Box(
+                      contentAlignment = Alignment.Center,
+                      modifier = Modifier.size(BottomNavUIConstants.IconContainerSize)) {
+                        Box(
+                            modifier =
+                                Modifier.size(BottomNavUIConstants.IconHaloSize)
+                                    .background(
+                                        color =
+                                            iconColor.copy(alpha = BottomNavUIConstants.HaloAlpha),
+                                        shape = BottomNavUIConstants.HaloShape))
+                        Icon(
+                            dest.icon,
+                            contentDescription = dest.label,
+                            tint = iconColor,
+                            modifier = Modifier.size(BottomNavUIConstants.IconSizeSelected))
+                      }
                 } else {
-                  // Normal icon when not selected
-                  Icon(dest.icon, contentDescription = dest.label, tint = iconColor)
+                  Icon(
+                      dest.icon,
+                      contentDescription = dest.label,
+                      tint = iconColor,
+                      modifier = Modifier.size(BottomNavUIConstants.IconSizeUnselected))
                 }
               },
               label = { Text(dest.label, color = iconColor) },
@@ -154,8 +156,7 @@ fun SeekrNavigationBar(
                       unselectedIconColor = iconColor,
                       selectedTextColor = iconColor,
                       unselectedTextColor = iconColor,
-                      indicatorColor = Color.Transparent // Remove default indicator
-                      ))
+                      indicatorColor = BottomNavUIConstants.IndicatorColorTransparent))
         }
       }
 }
