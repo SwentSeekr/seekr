@@ -21,8 +21,11 @@ import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsScreen
+import com.swentseekr.seekr.ui.hunt.HuntFieldCallbacks
+import com.swentseekr.seekr.ui.hunt.HuntNavigationCallbacks
 import com.swentseekr.seekr.ui.hunt.HuntScreenTestTags
 import com.swentseekr.seekr.ui.hunt.HuntUIState
+import com.swentseekr.seekr.ui.hunt.ImageCallbacks
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -50,45 +53,63 @@ class AddHuntFieldsScreenTest {
     composeRule.setContent {
       MaterialTheme {
         state = remember { mutableStateOf(HuntUIState()) }
+
+        val fieldCallbacks =
+            HuntFieldCallbacks(
+                onTitleChange = { title ->
+                  state.value =
+                      state.value.copy(
+                          title = title,
+                          invalidTitleMsg = if (title.isBlank()) "Title cannot be empty" else null)
+                },
+                onDescriptionChange = { desc ->
+                  state.value =
+                      state.value.copy(
+                          description = desc,
+                          invalidDescriptionMsg =
+                              if (desc.isBlank()) "Description cannot be empty" else null)
+                },
+                onTimeChange = { time ->
+                  state.value =
+                      state.value.copy(
+                          time = time,
+                          invalidTimeMsg =
+                              if (time.toDoubleOrNull() == null) "Invalid time format" else null)
+                },
+                onDistanceChange = { distance ->
+                  state.value =
+                      state.value.copy(
+                          distance = distance,
+                          invalidDistanceMsg =
+                              if (distance.toDoubleOrNull() == null) "Invalid distance format"
+                              else null)
+                },
+                onDifficultySelect = { diff -> state.value = state.value.copy(difficulty = diff) },
+                onStatusSelect = { status -> state.value = state.value.copy(status = status) },
+                onSelectLocations = { onSelectLocationsCalled = true },
+                onSave = { onSaveCalled = true },
+            )
+
+        val imageCallbacks =
+            ImageCallbacks(
+                onSelectImage = { /* No-op for tests */},
+                onSelectOtherImages = { /* No-op for tests */},
+                onRemoveOtherImage = { /* No-op for tests */},
+                onRemoveExistingImage = { /* No-op for tests */},
+            )
+
+        val navCallbacks =
+            HuntNavigationCallbacks(
+                onGoBack = { onGoBackCalled = true },
+            )
+
         BaseHuntFieldsScreen(
+            title = add_hunt_text,
             uiState = state.value,
-            onTitleChange = { title ->
-              state.value =
-                  state.value.copy(
-                      title = title,
-                      invalidTitleMsg = if (title.isBlank()) "Title cannot be empty" else null)
-            },
-            onDescriptionChange = { desc ->
-              state.value =
-                  state.value.copy(
-                      description = desc,
-                      invalidDescriptionMsg =
-                          if (desc.isBlank()) "Description cannot be empty" else null)
-            },
-            onTimeChange = { time ->
-              state.value =
-                  state.value.copy(
-                      time = time,
-                      invalidTimeMsg =
-                          if (time.toDoubleOrNull() == null) "Invalid time format" else null)
-            },
-            onDistanceChange = { distance ->
-              state.value =
-                  state.value.copy(
-                      distance = distance,
-                      invalidDistanceMsg =
-                          if (distance.toDoubleOrNull() == null) "Invalid distance format"
-                          else null)
-            },
-            onDifficultySelect = { diff -> state.value = state.value.copy(difficulty = diff) },
-            onStatusSelect = { status -> state.value = state.value.copy(status = status) },
-            onSelectLocations = { onSelectLocationsCalled = true },
-            onSave = { onSaveCalled = true },
-            onGoBack = { onGoBackCalled = true },
-            onSelectImage = { /* No-op for tests */},
-            onSelectOtherImages = {},
-            onRemoveOtherImage = {},
-            onRemoveExistingImage = {})
+            fieldCallbacks = fieldCallbacks,
+            imageCallbacks = imageCallbacks,
+            navigationCallbacks = navCallbacks,
+        )
       }
     }
   }
@@ -239,21 +260,33 @@ class AddHuntFieldsScreenTest {
                   otherImagesUris = listOf(Uri.parse("file://localimage"))))
         }
 
+        val fieldCallbacks =
+            HuntFieldCallbacks(
+                onTitleChange = {},
+                onDescriptionChange = {},
+                onTimeChange = {},
+                onDistanceChange = {},
+                onDifficultySelect = {},
+                onStatusSelect = {},
+                onSelectLocations = {},
+                onSave = {},
+            )
+
+        val imageCallbacks =
+            ImageCallbacks(
+                onSelectImage = {},
+                onSelectOtherImages = {},
+                onRemoveOtherImage = { uri -> removedUri = uri },
+                onRemoveExistingImage = { url -> removedExisting = url },
+            )
+
         BaseHuntFieldsScreen(
+            title = add_hunt_text,
             uiState = state.value,
-            onTitleChange = {},
-            onDescriptionChange = {},
-            onTimeChange = {},
-            onDistanceChange = {},
-            onDifficultySelect = {},
-            onStatusSelect = {},
-            onSelectLocations = {},
-            onSave = {},
-            onGoBack = {},
-            onSelectImage = {},
-            onSelectOtherImages = {},
-            onRemoveOtherImage = { removedUri = it },
-            onRemoveExistingImage = { removedExisting = it })
+            fieldCallbacks = fieldCallbacks,
+            imageCallbacks = imageCallbacks,
+            navigationCallbacks = HuntNavigationCallbacks(onGoBack = {}),
+        )
       }
     }
 
