@@ -1,16 +1,33 @@
 package com.swentseekr.seekr.ui.map
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import coil.compose.AsyncImage
+import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
 import com.swentseekr.seekr.ui.theme.GrayDislike
@@ -96,6 +113,7 @@ private fun BoxScope.FocusedHuntBottomCard(
   val validated = uiState.validatedCount
   val distanceToNext = uiState.currentDistanceToNextMeters
   val currentCheckpointInfo = calculateCurrentCheckpointInfo(selectedHunt, validated)
+  var isCheckpointImageFullscreen by remember { mutableStateOf(false) }
 
   Box(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
     Card(
@@ -110,11 +128,17 @@ private fun BoxScope.FocusedHuntBottomCard(
               horizontalAlignment = Alignment.Start) {
                 ProgressSection(validated = validated, totalPoints = totalPoints)
 
-                currentCheckpointInfo?.let { (name, description) ->
+                currentCheckpointInfo?.let { (name, description, imageUrl) ->
                   NextCheckpointSection(
                       checkpointName = name,
                       checkpointDescription = description,
-                      distanceToNext = distanceToNext)
+                      distanceToNext = distanceToNext,
+                      imageUrl = imageUrl,
+                      onImageClick = {
+                        if (!imageUrl.isNullOrBlank()) {
+                          isCheckpointImageFullscreen = true
+                        }
+                      })
                 }
 
                 ErrorMessage(uiState.errorMsg)
@@ -130,6 +154,53 @@ private fun BoxScope.FocusedHuntBottomCard(
                     onFinishHunt = onFinishHunt)
               }
         }
+
+    if (isCheckpointImageFullscreen) {
+      val (_, description, imageUrl) = currentCheckpointInfo ?: Triple("", "", null)
+
+      if (!imageUrl.isNullOrBlank()) {
+        FullscreenCheckpointImage(
+            imageUrl = imageUrl,
+            contentDescription = description,
+            onClose = { isCheckpointImageFullscreen = false })
+      } else {
+        isCheckpointImageFullscreen = false
+      }
+    }
+  }
+}
+
+@Composable
+private fun FullscreenCheckpointImage(
+    imageUrl: String,
+    contentDescription: String,
+    onClose: () -> Unit
+) {
+  Dialog(onDismissRequest = onClose) {
+    Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.9f))) {
+      AsyncImage(
+          model = imageUrl,
+          contentDescription = contentDescription,
+          modifier = Modifier.align(Alignment.Center).fillMaxWidth().fillMaxHeight(0.9f),
+          contentScale = ContentScale.Fit,
+          error = painterResource(R.drawable.empty_image),
+      )
+
+      IconButton(
+          onClick = onClose,
+          modifier =
+              Modifier.align(Alignment.TopEnd)
+                  .padding(16.dp)
+                  .size(36.dp)
+                  .background(color = Color.Black.copy(alpha = 0.6f), shape = CircleShape)
+          // .testTag(MapScreenTestTags.CLOSE_CHECKPOINT_IMAGE)
+          ) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = MapScreenStrings.Cancel,
+                tint = Color.White)
+          }
+    }
   }
 }
 
@@ -143,16 +214,17 @@ private fun BoxScope.FocusedHuntBottomCard(
 private fun calculateCurrentCheckpointInfo(
     selectedHunt: Hunt,
     validated: Int
-): Pair<String, String>? {
+): Triple<String, String, String?>? {
   val ordered = buildList {
     add(selectedHunt.start)
     selectedHunt.middlePoints.forEach { add(it) }
     add(selectedHunt.end)
   }
+  val checkpoint = ordered.getOrNull(validated) ?: return null
+  val imageUrl =
+      checkpoint.imageIndex?.let { index -> selectedHunt.otherImagesUrls.getOrNull(index) }
 
-  return ordered.getOrNull(validated)?.let { checkpoint ->
-    checkpoint.name to checkpoint.description
-  }
+  return Triple(checkpoint.name, checkpoint.description, imageUrl)
 }
 
 /**
@@ -242,11 +314,30 @@ private fun SegmentedProgressBar(validated: Int, totalPoints: Int) {
 private fun NextCheckpointSection(
     checkpointName: String,
     checkpointDescription: String,
-    distanceToNext: Int?
+    distanceToNext: Int?,
+    imageUrl: String?,
+    onImageClick: () -> Unit = {}
 ) {
   Spacer(Modifier.height(MapScreenDefaults.PopupSpacing))
 
   val distanceSuffix = buildDistanceSuffix(distanceToNext)
+
+  if (!imageUrl.isNullOrBlank()) {
+    AsyncImage(
+        model = imageUrl,
+        contentDescription = checkpointName + MapScreenStrings.HuntImageDescriptionSuffix,
+        modifier =
+            Modifier.fillMaxWidth()
+                .height(MapScreenDefaults.PopupImageSize)
+                .clip(RoundedCornerShape(MapScreenDefaults.PopupImageCornerRadius))
+                .clickable(onClick = onImageClick)
+                .testTag(MapScreenTestTags.NEXT_CHECKPOINT_IMAGE),
+        contentScale = ContentScale.Crop,
+        error = painterResource(R.drawable.empty_image),
+    )
+
+    Spacer(Modifier.height(MapScreenDefaults.PopupSpacing))
+  }
 
   Text(
       text = "${MapScreenStrings.NextStopPrefix}$checkpointName$distanceSuffix",
