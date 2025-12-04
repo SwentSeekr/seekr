@@ -526,6 +526,11 @@ private fun ImagesSection(
           contract = ActivityResultContracts.GetMultipleContents(),
           onResult = { uris -> imageCallbacks.onSelectOtherImages(uris) })
 
+  // Build a single list of all images (remote + local)
+  val combinedImages: List<OtherImage> =
+      uiState.otherImagesUrls.map { OtherImage.Remote(it) } +
+          uiState.otherImagesUris.map { OtherImage.Local(it) }
+
   Card(
       modifier = Modifier.fillMaxWidth(),
       shape = RoundedCornerShape(UICons.CardCornerRadius),
@@ -536,111 +541,150 @@ private fun ImagesSection(
         Column(
             modifier = Modifier.padding(UICons.CardPadding),
             verticalArrangement = Arrangement.spacedBy(UICons.CardVArrangement)) {
-              Text(
-                  "Images",
-                  style = MaterialTheme.typography.titleMedium,
-                  color = MaterialTheme.colorScheme.onSurfaceVariant)
+              ImagesSectionHeader()
 
-              OutlinedButton(
-                  onClick = { imagePickerLauncher.launch("image/*") },
-                  modifier = Modifier.fillMaxWidth().height(UICons.ImageButtonHeight),
-                  shape = RoundedCornerShape(UICons.ImageButtonCornerRadius)) {
-                    Text(
-                        BaseHuntFieldsStrings.BUTTON_CHOOSE_IMAGE,
-                        style = MaterialTheme.typography.bodyLarge)
+              MainImagePickerButton(onClick = { imagePickerLauncher.launch("image/*") })
+
+              MainImagePreview(imageUrl = uiState.mainImageUrl)
+
+              AdditionalImagesPickerButton(
+                  onClick = { multipleImagesPickerLauncher.launch("image/*") })
+
+              AdditionalImagesList(
+                  images = combinedImages,
+                  imageCallbacks = imageCallbacks,
+              )
+            }
+      }
+}
+
+/** Title of the images section. */
+@Composable
+private fun ImagesSectionHeader() {
+  Text(
+      "Images",
+      style = MaterialTheme.typography.titleMedium,
+      color = MaterialTheme.colorScheme.onSurfaceVariant)
+}
+
+/** Button to pick the main image. */
+@Composable
+private fun MainImagePickerButton(
+    onClick: () -> Unit,
+) {
+  OutlinedButton(
+      onClick = onClick,
+      modifier = Modifier.fillMaxWidth().height(UICons.ImageButtonHeight),
+      shape = RoundedCornerShape(UICons.ImageButtonCornerRadius)) {
+        Text(BaseHuntFieldsStrings.BUTTON_CHOOSE_IMAGE, style = MaterialTheme.typography.bodyLarge)
+      }
+}
+
+/** Preview of the main image if one is available. */
+@Composable
+private fun MainImagePreview(
+    imageUrl: String?,
+) {
+  AnimatedVisibility(visible = !imageUrl.isNullOrBlank()) {
+    AsyncImage(
+        model = imageUrl,
+        contentDescription = BaseHuntFieldsStrings.CONTENT_DESC_SELECTED_IMAGE,
+        modifier =
+            Modifier.fillMaxWidth()
+                .height(UICons.ImageHeight)
+                .clip(RoundedCornerShape(UICons.ImageCornerRadius))
+                .shadow(4.dp, RoundedCornerShape(UICons.ImageCornerRadius)),
+        placeholder = painterResource(R.drawable.empty_image),
+        error = painterResource(R.drawable.empty_image))
+  }
+}
+
+/** Button to pick additional images. */
+@Composable
+private fun AdditionalImagesPickerButton(
+    onClick: () -> Unit,
+) {
+  OutlinedButton(
+      onClick = onClick,
+      modifier = Modifier.fillMaxWidth().height(UICons.ImageButtonHeight),
+      shape = RoundedCornerShape(UICons.ImageButtonCornerRadius)) {
+        Text(
+            BaseHuntFieldsStrings.BUTTON_CHOOSE_ADDITIONAL_IMAGES,
+            style = MaterialTheme.typography.bodyLarge)
+      }
+}
+
+/** List of additional images (remote + local) with delete actions. */
+@Composable
+private fun AdditionalImagesList(
+    images: List<OtherImage>,
+    imageCallbacks: ImageCallbacks,
+) {
+  if (images.isEmpty()) return
+
+  Column(verticalArrangement = Arrangement.spacedBy(UICons.CardVArrangement)) {
+    images.forEach { image ->
+      AdditionalImageItem(
+          image = image,
+          imageCallbacks = imageCallbacks,
+      )
+    }
+  }
+}
+
+/** Single additional image row with preview and remove button. */
+@Composable
+private fun AdditionalImageItem(
+    image: OtherImage,
+    imageCallbacks: ImageCallbacks,
+) {
+  val tagSuffix =
+      when (image) {
+        is OtherImage.Remote -> image.url
+        is OtherImage.Local -> image.uri.toString()
+      }
+
+  val model: Any =
+      when (image) {
+        is OtherImage.Remote -> image.url
+        is OtherImage.Local -> image.uri
+      }
+
+  Card(
+      modifier = Modifier.fillMaxWidth(),
+      shape = RoundedCornerShape(UICons.CardLittleCornerRadius)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(UICons.CardRowPadding),
+            horizontalArrangement = Arrangement.SpaceBetween) {
+              AsyncImage(
+                  model = model,
+                  contentDescription = BaseHuntFieldsStrings.CONTENT_DESC_SECONDARY_IMAGE,
+                  modifier =
+                      Modifier.testTag("otherImage_$tagSuffix")
+                          .weight(UICons.ImageWeight)
+                          .height(UICons.ImageLittleHeight)
+                          .clip(RoundedCornerShape(UICons.ImageLittleCornerRadius)),
+                  placeholder = painterResource(R.drawable.empty_image),
+                  error = painterResource(R.drawable.empty_image))
+
+              Spacer(modifier = Modifier.width(UICons.SpacerHeightMedium))
+
+              TextButton(
+                  modifier = Modifier.testTag("$REMOVE_BUTTON_TAG_PREFIX$tagSuffix"),
+                  onClick = {
+                    when (image) {
+                      is OtherImage.Remote -> imageCallbacks.onRemoveExistingImage(image.url)
+                      is OtherImage.Local -> imageCallbacks.onRemoveOtherImage(image.uri)
+                    }
+                  }) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_delete),
+                        contentDescription = BaseHuntFieldsStrings.DELETE_ICON_DESC,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(UICons.IconSize))
+                    Spacer(modifier = Modifier.width(UICons.SpacerHeightTiny))
+                    Text(BaseHuntFieldsStrings.REMOVE, color = MaterialTheme.colorScheme.error)
                   }
-
-              val imageToDisplay = uiState.mainImageUrl
-
-              AnimatedVisibility(visible = !imageToDisplay.isNullOrBlank()) {
-                AsyncImage(
-                    model = imageToDisplay,
-                    contentDescription = BaseHuntFieldsStrings.CONTENT_DESC_SELECTED_IMAGE,
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .height(UICons.ImageHeight)
-                            .clip(RoundedCornerShape(UICons.ImageCornerRadius))
-                            .shadow(4.dp, RoundedCornerShape(UICons.ImageCornerRadius)),
-                    placeholder = painterResource(R.drawable.empty_image),
-                    error = painterResource(R.drawable.empty_image))
-              }
-
-              OutlinedButton(
-                  onClick = { multipleImagesPickerLauncher.launch("image/*") },
-                  modifier = Modifier.fillMaxWidth().height(UICons.ImageButtonHeight),
-                  shape = RoundedCornerShape(UICons.ImageButtonCornerRadius)) {
-                    Text(
-                        BaseHuntFieldsStrings.BUTTON_CHOOSE_ADDITIONAL_IMAGES,
-                        style = MaterialTheme.typography.bodyLarge)
-                  }
-
-              val combinedImages: List<OtherImage> =
-                  uiState.otherImagesUrls.map { OtherImage.Remote(it) } +
-                      uiState.otherImagesUris.map { OtherImage.Local(it) }
-
-              if (combinedImages.isNotEmpty()) {
-                Column(verticalArrangement = Arrangement.spacedBy(UICons.CardVArrangement)) {
-                  combinedImages.forEach { image ->
-                    val tagSuffix =
-                        when (image) {
-                          is OtherImage.Remote -> image.url
-                          is OtherImage.Local -> image.uri.toString()
-                        }
-
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(UICons.CardLittleCornerRadius)) {
-                          Row(
-                              modifier = Modifier.fillMaxWidth().padding(UICons.CardRowPadding),
-                              horizontalArrangement = Arrangement.SpaceBetween) {
-                                val model =
-                                    when (image) {
-                                      is OtherImage.Remote -> image.url
-                                      is OtherImage.Local -> image.uri
-                                    }
-
-                                AsyncImage(
-                                    model = model,
-                                    contentDescription =
-                                        BaseHuntFieldsStrings.CONTENT_DESC_SECONDARY_IMAGE,
-                                    modifier =
-                                        Modifier.testTag("otherImage_$tagSuffix")
-                                            .weight(UICons.ImageWeight)
-                                            .height(UICons.ImageLittleHeight)
-                                            .clip(
-                                                RoundedCornerShape(UICons.ImageLittleCornerRadius)),
-                                    placeholder = painterResource(R.drawable.empty_image),
-                                    error = painterResource(R.drawable.empty_image))
-
-                                Spacer(modifier = Modifier.width(UICons.SpacerHeightMedium))
-
-                                TextButton(
-                                    modifier =
-                                        Modifier.testTag("$REMOVE_BUTTON_TAG_PREFIX$tagSuffix"),
-                                    onClick = {
-                                      when (image) {
-                                        is OtherImage.Remote ->
-                                            imageCallbacks.onRemoveExistingImage(image.url)
-                                        is OtherImage.Local ->
-                                            imageCallbacks.onRemoveOtherImage(image.uri)
-                                      }
-                                    }) {
-                                      Icon(
-                                          painter = painterResource(R.drawable.ic_delete),
-                                          contentDescription =
-                                              BaseHuntFieldsStrings.DELETE_ICON_DESC,
-                                          tint = MaterialTheme.colorScheme.error,
-                                          modifier = Modifier.size(UICons.IconSize))
-                                      Spacer(modifier = Modifier.width(UICons.SpacerHeightTiny))
-                                      Text(
-                                          BaseHuntFieldsStrings.REMOVE,
-                                          color = MaterialTheme.colorScheme.error)
-                                    }
-                              }
-                        }
-                  }
-                }
-              }
             }
       }
 }
