@@ -21,7 +21,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class EditReviewScreenTest {
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()
-
+  // Test
   @Test
   fun screen_displays_all_elements() {
     composeRule.setContent {
