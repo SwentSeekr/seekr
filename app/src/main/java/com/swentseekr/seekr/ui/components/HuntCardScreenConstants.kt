@@ -4,10 +4,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.swentseekr.seekr.ui.theme.GrayBackgound
-import com.swentseekr.seekr.ui.theme.Green
-import com.swentseekr.seekr.ui.theme.MediumYellow
-import com.swentseekr.seekr.ui.theme.White
 
 object HuntCardScreenDefaults {
   val CardElevation: Dp = 2.dp
@@ -54,7 +50,7 @@ object HuntCardScreenDefaults {
 
   val CardWeight = 1f
   val MediumFontSize = 24.sp
-    val SmallFontSize = 18.sp
+  val SmallFontSize = 18.sp
   val DescriptionFontSize = 15.sp
   val DescriptionLineHeight = 22.sp
 
@@ -62,16 +58,20 @@ object HuntCardScreenDefaults {
   val OtherLineHeight = 20.sp
   val MinFontSize = 13.sp
 
-
   val ImageIndicatorUnselectedColor: Color = Color.LightGray
   val ImageIndicatorSelectedColor: Color = Color.DarkGray
-  val BlueButton: Color =  Color(0xFF2196F3)
   val OrangeButton: Color = Color(0xFFFFA726)
-  val WhiteTint : Color = Color(0xFFCCCCCC)
-  val OrangeTint : Color = Color(0xFFEF5350)
-  val DarkGray : Color = Color(0xFF444444)
-  val RedLike : Color = Color(0xFFCCCCCC)
-  val GreyDefault : Color = Color(0xFFFF5252)
+
+  val ScreenBackground = Color(0xFFF8F9FA)
+  val LightGray = Color(0xFFCCCCCC)
+
+  val ParagraphGray = Color(0xFF444444)
+
+  val CardSoftGray = Color(0xFFF5F5F5)
+
+  // Couleurs spécifiques non présentes dans le thème
+  val ErrorRed = Color(0xFFEF5350)
+  val LikeRedStrong = Color(0xFFFF5252)
 }
 
 object HuntCardScreenStrings {
