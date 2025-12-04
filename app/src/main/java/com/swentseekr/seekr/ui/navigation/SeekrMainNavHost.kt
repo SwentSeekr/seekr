@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
@@ -37,6 +38,7 @@ import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import com.swentseekr.seekr.ui.map.MapScreen
 import com.swentseekr.seekr.ui.overview.OverviewScreen
 import com.swentseekr.seekr.ui.profile.EditProfileScreen
+import com.swentseekr.seekr.ui.profile.ProfileReviewsScreen
 import com.swentseekr.seekr.ui.profile.ProfileScreen
 import com.swentseekr.seekr.ui.settings.SettingsScreen
 
@@ -46,7 +48,7 @@ sealed class SeekrDestination(
     val label: String,
     val icon: androidx.compose.ui.graphics.vector.ImageVector
 ) {
-  object Overview : SeekrDestination("overview", "Overview", Icons.Filled.List)
+  object Overview : SeekrDestination("overview", "Overview", Icons.AutoMirrored.Filled.List)
 
   object Map : SeekrDestination("map", "Map", Icons.Filled.Place)
 
@@ -54,6 +56,16 @@ sealed class SeekrDestination(
     fun createRoute(userId: String) = "profile/$userId"
 
     const val ARG_USER_ID = "userId"
+
+    object Reviews :
+        SeekrDestination(
+            route = "profile/{${ARG_USER_ID}}/reviews",
+            label = "Profile Reviews",
+            icon = Icons.AutoMirrored.Filled.List) {
+      fun createRoute(userId: String) = "profile/$userId/reviews"
+
+      const val ARG_USER_ID = Profile.ARG_USER_ID
+    }
   }
 
   object HuntCard : SeekrDestination("hunt/{huntId}", "Hunt", Icons.Filled.List) {
@@ -161,6 +173,12 @@ fun SeekrMainNavHost(
     testMode: Boolean = false
 ) {
 
+  fun NavHostController.goToProfileReviews(userId: String?) {
+    if (!userId.isNullOrBlank()) {
+      navigate(SeekrDestination.Profile.Reviews.createRoute(userId))
+    }
+  }
+
   // Onboarding check
   val authViewModel: AuthViewModel = viewModel()
   val uiState by authViewModel.uiState.collectAsState()
@@ -228,7 +246,8 @@ fun SeekrMainNavHost(
                       }
                     },
                     onSettings = { navController.navigate(SeekrDestination.Settings.route) },
-                    testMode = testMode)
+                    testMode = testMode,
+                    onReviewsClick = { navController.goToProfileReviews(user?.uid) })
               }
               // Public profile
               composable(
@@ -252,7 +271,8 @@ fun SeekrMainNavHost(
                         },
                         onSettings = {},
                         onGoBack = { navController.popBackStack() },
-                        testMode = testMode)
+                        testMode = testMode,
+                        onReviewsClick = { navController.goToProfileReviews(userId) })
                   }
 
               // Hunt card (details)
@@ -376,22 +396,21 @@ fun SeekrMainNavHost(
               }
 
               // Review Images Screen
-              composable("reviewImages") { backStackEntry ->
+              composable(
+                  route = "reviewImages/{reviewId}",
+                  arguments = listOf(navArgument("reviewId") { type = NavType.StringType })) {
+                      backStackEntry ->
+                    val reviewId = backStackEntry.arguments?.getString("reviewId").orEmpty()
 
-                // accéder au même ViewModel que celui utilisé dans HuntCardScreen
-                val parentEntry =
-                    remember(backStackEntry) {
-                      navController.getBackStackEntry(SeekrDestination.HuntCard.route)
+                    val reviewHuntViewModel: ReviewHuntViewModel = viewModel()
+                    LaunchedEffect(reviewId) { reviewHuntViewModel.loadReview(reviewId) }
+                    val uiState by reviewHuntViewModel.uiState.collectAsState()
+
+                    Surface(modifier = Modifier.fillMaxSize().testTag("IMAGE_REVIEW_SCREEN")) {
+                      ReviewImagesScreen(
+                          photoUrls = uiState.photos, onGoBack = { navController.popBackStack() })
                     }
-                val reviewHuntViewModel: ReviewHuntViewModel = viewModel(parentEntry)
-
-                val uiState by reviewHuntViewModel.uiState.collectAsState()
-
-                Surface(modifier = Modifier.fillMaxSize().testTag("IMAGE_REVIEW_SCREEN")) {
-                  ReviewImagesScreen(
-                      photoUrls = uiState.photos, onGoBack = { navController.popBackStack() })
-                }
-              }
+                  }
 
               // Edit Profile (new)
               composable(SeekrDestination.EditProfile.route) {
@@ -405,6 +424,21 @@ fun SeekrMainNavHost(
                           testMode = testMode)
                     }
               }
+
+              composable(
+                  route = "profile/{userId}/reviews",
+                  arguments = listOf(navArgument("userId") { type = NavType.StringType })) {
+                      backStackEntry ->
+                    val userId =
+                        backStackEntry.arguments
+                            ?.getString(SeekrDestination.Profile.Reviews.ARG_USER_ID)
+                            .orEmpty()
+
+                    ProfileReviewsScreen(
+                        userId = userId,
+                        onGoBack = { navController.popBackStack() },
+                        navController = navController)
+                  }
             }
       }
 }

@@ -1,5 +1,6 @@
 package com.swentseekr.seekr
 
+import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntUIState
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,4 +14,13 @@ class FakeReviewHuntViewModel : ReviewHuntViewModel() {
   override fun loadHunt(huntId: String) {}
 
   override fun loadAuthorProfile(authorId: String) {}
+
+  fun setReviews(reviews: List<HuntReview>) {
+    val first = reviews.firstOrNull()
+    if (first != null) {
+      _uiState.value =
+          _uiState.value.copy(
+              huntId = first.huntId, reviewText = first.comment, photos = first.photos)
+    }
+  }
 }

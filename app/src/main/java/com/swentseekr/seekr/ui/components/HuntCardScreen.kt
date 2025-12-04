@@ -564,7 +564,8 @@ fun ModernReviewCard(
     reviewHuntViewModel: ReviewHuntViewModel,
     currentUserId: String?,
     navController: NavHostController,
-    onDeleteReview: (String) -> Unit
+    onDeleteReview: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
   val uiState by reviewHuntViewModel.uiState.collectAsState()
 
@@ -637,7 +638,7 @@ fun ModernReviewCard(
             Button(
                 onClick = {
                   reviewHuntViewModel.loadReviewImages(review.photos)
-                  navController.navigate("reviewImages")
+                  navController.navigate("reviewImages/${review.reviewId}")
                 },
                 modifier = Modifier.testTag("SEE_PICTURES_BUTTON"),
                 colors =

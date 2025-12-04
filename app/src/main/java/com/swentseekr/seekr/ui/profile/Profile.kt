@@ -41,6 +41,11 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.profile.mockProfileData
 import com.swentseekr.seekr.ui.components.HuntCard
 import com.swentseekr.seekr.ui.components.MAX_RATING
+import com.swentseekr.seekr.ui.profile.ProfileScreenConstants.HUNTS_DONE_LABEL
+import com.swentseekr.seekr.ui.profile.ProfileScreenConstants.MULTIPLE_REVIEWS_LABEL
+import com.swentseekr.seekr.ui.profile.ProfileScreenConstants.ONE_DECIMAL_FORMAT
+import com.swentseekr.seekr.ui.profile.ProfileScreenConstants.SINGLE_REVIEW
+import com.swentseekr.seekr.ui.profile.ProfileScreenConstants.SINGLE_REVIEW_LABEL
 import kotlinx.serialization.Serializable
 
 // -------------------------
@@ -125,6 +130,7 @@ fun ProfileScreen(
     testMode: Boolean = false,
     testPublic: Boolean = false,
     testProfile: Profile? = null,
+    onReviewsClick: () -> Unit = {}
 ) {
   val context = LocalContext.current
   val uiState by viewModel.uiState.collectAsState()
@@ -187,7 +193,7 @@ fun ProfileScreen(
 
   val reviewCount by viewModel.totalReviews.collectAsState()
   LaunchedEffect(profile.myHunts) { viewModel.loadTotalReviewsForProfile(profile) }
-
+  LaunchedEffect(profile) { profile.let { viewModel.loadAllReviewsForProfile(it) } }
   Scaffold(
       floatingActionButton = {
         if (isMyProfile) {
@@ -215,7 +221,8 @@ fun ProfileScreen(
               isMyProfile = isMyProfile,
               testPublic = testPublic,
               onSettings = onSettings,
-              onGoBack = onGoBack)
+              onGoBack = onGoBack,
+              onReviewsClick = onReviewsClick)
 
           // ---- TABS SECTION ----
           ModernCustomToolbar(selectedTab = selectedTab, onTabSelected = { selectedTab = it })
@@ -259,7 +266,8 @@ fun ModernProfileHeader(
     isMyProfile: Boolean,
     testPublic: Boolean,
     onSettings: () -> Unit,
-    onGoBack: () -> Unit
+    onGoBack: () -> Unit,
+    onReviewsClick: () -> Unit = {}
 ) {
   Box(
       modifier =
@@ -346,9 +354,13 @@ fun ModernProfileHeader(
           // STATS CARDS
           Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             ModernStatCard(
+                onReviewsClick = onReviewsClick,
                 icon = painterResource(R.drawable.full_star),
-                value = "${profile.author.reviewRate}",
-                label = "$reviewCount reviews",
+                value = String.format(ONE_DECIMAL_FORMAT, profile.author.reviewRate),
+                label =
+                    if (reviewCount == SINGLE_REVIEW)
+                        String.format(SINGLE_REVIEW_LABEL, reviewCount)
+                    else String.format(MULTIPLE_REVIEWS_LABEL, reviewCount),
                 modifier = Modifier.weight(ProfileUIConstantsDefaults.Weight),
                 testTagValue = ProfileTestTags.PROFILE_REVIEW_RATING,
                 testTagLabel = ProfileTestTags.PROFILE_REVIEWS_COUNT)
@@ -357,8 +369,8 @@ fun ModernProfileHeader(
 
             ModernStatCard(
                 icon = painterResource(R.drawable.full_sport),
-                value = "${profile.author.sportRate}",
-                label = "${profile.doneHunts.size} Hunts done",
+                value = String.format(ONE_DECIMAL_FORMAT, profile.author.sportRate),
+                label = String.format(HUNTS_DONE_LABEL, profile.doneHunts.size),
                 modifier = Modifier.weight(ProfileUIConstantsDefaults.Weight),
                 testTagValue = ProfileTestTags.PROFILE_SPORT_RATING,
                 testTagLabel = ProfileTestTags.PROFILE_HUNTS_DONE_COUNT)
@@ -372,12 +384,14 @@ fun ModernStatCard(
     icon: Painter,
     value: String,
     label: String,
+    onReviewsClick: () -> Unit = {},
     modifier: Modifier = Modifier,
     testTagValue: String,
     testTagLabel: String
 ) {
   Card(
-      modifier = modifier,
+      onClick = onReviewsClick,
+      modifier = modifier.semantics(mergeDescendants = true) {},
       colors =
           CardDefaults.cardColors(
               containerColor =
