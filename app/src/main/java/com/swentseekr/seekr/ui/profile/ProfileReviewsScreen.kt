@@ -35,9 +35,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.ui.components.MAX_RATING
+import com.swentseekr.seekr.ui.components.ModernReviewCard
 import com.swentseekr.seekr.ui.components.Rating
 import com.swentseekr.seekr.ui.components.RatingType
-import com.swentseekr.seekr.ui.components.ReviewCard
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
 
 object ProfileReviewsTestTags {
@@ -147,7 +147,7 @@ fun ProfileReviewsScreen(
                           modifier =
                               Modifier.testTag(
                                   ProfileReviewsTestTags.reviewCardTag(review.reviewId))) {
-                            ReviewCard(
+                            ModernReviewCard(
                                 review = review,
                                 reviewHuntViewModel = reviewHuntViewModel,
                                 currentUserId = profileViewModel.currentUid,
