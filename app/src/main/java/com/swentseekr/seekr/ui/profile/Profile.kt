@@ -354,16 +354,14 @@ fun ModernProfileHeader(
           // STATS CARDS
           Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             ModernStatCard(
+                onReviewsClick = onReviewsClick,
                 icon = painterResource(R.drawable.full_star),
                 value = String.format(ONE_DECIMAL_FORMAT, profile.author.reviewRate),
                 label =
                     if (reviewCount == SINGLE_REVIEW)
                         String.format(SINGLE_REVIEW_LABEL, reviewCount)
                     else String.format(MULTIPLE_REVIEWS_LABEL, reviewCount),
-                modifier =
-                    Modifier.weight(ProfileUIConstantsDefaults.Weight).clickable {
-                      onReviewsClick()
-                    },
+                modifier = Modifier.weight(ProfileUIConstantsDefaults.Weight),
                 testTagValue = ProfileTestTags.PROFILE_REVIEW_RATING,
                 testTagLabel = ProfileTestTags.PROFILE_REVIEWS_COUNT)
 
@@ -386,12 +384,14 @@ fun ModernStatCard(
     icon: Painter,
     value: String,
     label: String,
+    onReviewsClick: () -> Unit = {},
     modifier: Modifier = Modifier,
     testTagValue: String,
     testTagLabel: String
 ) {
   Card(
-      modifier = modifier,
+      onClick = onReviewsClick,
+      modifier = modifier.semantics(mergeDescendants = true) {},
       colors =
           CardDefaults.cardColors(
               containerColor =
