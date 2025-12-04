@@ -18,6 +18,13 @@ object ProfileScreenConstants {
   val ICON_BUTTON_SIZE_DP = 40.dp
   const val ICON_BUTTON_WHITE_ALPHA = 0.9f
   const val ICON_BUTTON_GOBACK = "Go Back"
+  const val SINGLE_REVIEW = 1
+
+  const val ONE_DECIMAL_FORMAT = "%.1f"
+  const val SINGLE_REVIEW_LABEL = "- %d review"
+  const val MULTIPLE_REVIEWS_LABEL = "- %d reviews"
+  const val HUNTS_DONE_LABEL = "%d Hunts done"
+  const val EMPTY_REVIEW_RATE = 0.0
 }
 
 /** Centralized constants for UI dimensions. */

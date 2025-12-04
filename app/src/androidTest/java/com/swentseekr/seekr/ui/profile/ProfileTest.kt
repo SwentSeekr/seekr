@@ -80,9 +80,15 @@ class ProfileScreenTest {
     setProfileScreen(sampleProfile())
 
     composeTestRule.onNodeWithTag(ProfileTestTags.PROFILE_PICTURE).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(ProfileTestTags.PROFILE_REVIEW_RATING).assertIsDisplayed()
+    composeTestRule.waitForIdle()
+
+    composeTestRule
+        .onNodeWithTag(ProfileTestTags.PROFILE_REVIEW_RATING, useUnmergedTree = true)
+        .assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileTestTags.PROFILE_PSEUDONYM).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(ProfileTestTags.PROFILE_SPORT_RATING).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(ProfileTestTags.PROFILE_SPORT_RATING, useUnmergedTree = true)
+        .assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileTestTags.PROFILE_BIO).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileTestTags.ADD_HUNT).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileTestTags.SETTINGS).assertIsDisplayed()
@@ -248,13 +254,13 @@ class ProfileScreenTest {
 
     // Vérifie la note de review : "3.0/5.0"
     composeTestRule
-        .onNodeWithTag(ProfileTestTags.PROFILE_REVIEW_RATING)
+        .onNodeWithTag(ProfileTestTags.PROFILE_REVIEW_RATING, useUnmergedTree = true)
         .assertIsDisplayed()
         .assertTextEquals("${computedProfile.author.reviewRate}/${MAX_RATING}")
 
     // Vérifie la note sport : "3.5/5.0"
     composeTestRule
-        .onNodeWithTag(ProfileTestTags.PROFILE_SPORT_RATING)
+        .onNodeWithTag(ProfileTestTags.PROFILE_SPORT_RATING, useUnmergedTree = true)
         .assertIsDisplayed()
         .assertTextEquals("${computedProfile.author.sportRate}/${MAX_RATING}")
   }
@@ -277,12 +283,14 @@ class ProfileScreenTest {
         profile = profile,
     )
 
-    composeTestRule.onNodeWithTag(ProfileTestTags.PROFILE_REVIEWS_COUNT).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag(ProfileTestTags.PROFILE_REVIEWS_COUNT, useUnmergedTree = true)
+        .assertIsDisplayed()
     // Assert correct reviews count isn't tested on purpose here since the review doesn't exist in
     // firebase yet
 
     composeTestRule
-        .onNodeWithTag(ProfileTestTags.PROFILE_HUNTS_DONE_COUNT)
+        .onNodeWithTag(ProfileTestTags.PROFILE_HUNTS_DONE_COUNT, useUnmergedTree = true)
         .assertIsDisplayed()
         .assert(hasText("${doneHunts.size} Hunts done"))
   }

@@ -573,4 +573,79 @@ class ReviewHuntViewModelTest {
       assertEquals(ReviewHuntViewModelTestConstantsStrings.FailCancle, state.errorMsg)
     }
   }
+
+  @Test
+  fun loadReview_withValidReviewId_loadsPhotos() = runTest {
+    val review =
+        HuntReview(
+            reviewId = "review123",
+            authorId = ReviewHuntViewModelTestConstantsStrings.AuthorId,
+            huntId = testHunt.uid,
+            rating = 4.5,
+            comment = "Great hunt!",
+            photos = listOf("photo1.jpg", "photo2.jpg", "photo3.jpg"))
+
+    fakeReviewRepository.addReviewHunt(review)
+
+    viewModel.loadReview("review123")
+    advanceUntilIdle()
+
+    val state = viewModel.uiState.value
+    assertEquals(3, state.photos.size)
+    assertTrue(state.photos.contains("photo1.jpg"))
+    assertTrue(state.photos.contains("photo2.jpg"))
+    assertTrue(state.photos.contains("photo3.jpg"))
+  }
+
+  @Test
+  fun loadReview_withInvalidReviewId_doesNotCrash() = runTest {
+    viewModel.loadReview("non-existent-review-id")
+    advanceUntilIdle()
+    val state = viewModel.uiState.value
+    assertTrue(state.photos.isEmpty())
+    assertNull(state.errorMsg)
+  }
+
+  @Test
+  fun loadReview_whenRepositoryThrowsException_doesNotCrash() = runTest {
+    val failingReviewRepository =
+        object : HuntReviewRepositoryLocal() {
+          override suspend fun getReviewHunt(reviewId: String): HuntReview {
+            throw RuntimeException("Database connection failed")
+          }
+        }
+
+    val vm =
+        ReviewHuntViewModel(
+            fakeHuntsRepository,
+            failingReviewRepository,
+            fakeProfileRepository,
+            fakeImageReviewRepository,
+            dispatcher = testDispatcher)
+
+    vm.loadReview("any-review-id")
+    advanceUntilIdle()
+    val state = vm.uiState.value
+    assertTrue(state.photos.isEmpty())
+  }
+
+  @Test
+  fun loadReview_withEmptyPhotos_updatesStateWithEmptyList() = runTest {
+    val review =
+        HuntReview(
+            reviewId = "review-no-photos",
+            authorId = ReviewHuntViewModelTestConstantsStrings.AuthorId,
+            huntId = testHunt.uid,
+            rating = 3.0,
+            comment = "Decent hunt",
+            photos = emptyList())
+
+    fakeReviewRepository.addReviewHunt(review)
+
+    viewModel.loadReview("review-no-photos")
+    advanceUntilIdle()
+
+    val state = viewModel.uiState.value
+    assertTrue(state.photos.isEmpty())
+  }
 }
