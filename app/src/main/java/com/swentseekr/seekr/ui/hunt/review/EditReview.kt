@@ -11,7 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
@@ -20,13 +19,11 @@ import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 @Composable
 fun EditReviewScreen(
     huntId: String,
-    modifier: Modifier = Modifier,
     reviewViewModel: ReviewHuntViewModel = viewModel(),
     huntCardViewModel: HuntCardViewModel = viewModel(),
     onGoBack: () -> Unit = {},
     onDone: () -> Unit = {},
     onCancel: () -> Unit = {},
-    onSelectImage: (Uri?) -> Unit = {},
 ) {
   val uiState by reviewViewModel.uiState.collectAsState()
   val uiStateHuntCard by huntCardViewModel.uiState.collectAsState()
@@ -36,7 +33,6 @@ fun EditReviewScreen(
   LaunchedEffect(authorId) { huntCardViewModel.loadAuthorProfile(authorId) }
   val authorProfile = uiStateHuntCard.authorProfile
   val hunt = uiState.hunt
-  val maxStar = AddReviewScreenDefaults.MaxStars
   var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
   val imagePickerLauncher =
       rememberLauncherForActivityResult(
