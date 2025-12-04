@@ -211,7 +211,6 @@ class AddHuntViewModelAndroidTest {
     assertEquals(0, pointsSecondAttach[0].imageIndex)
   }
 
-
   private fun setValidState(points: List<Location>) {
     viewModel.setTitle("T")
     viewModel.setDescription("D")
