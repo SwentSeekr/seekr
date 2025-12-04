@@ -3,6 +3,9 @@ package com.swentseekr.seekr.ui.hunt
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -20,6 +23,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -35,6 +40,8 @@ sealed class OtherImage {
     data class Local(val uri: Uri) : OtherImage()
 }
 
+val UICons = BaseHuntFieldsUi
+
 @Composable
 fun ValidatedOutlinedField(
     value: String = BaseHuntFieldsStrings.TITLE_DEFAULT,
@@ -44,19 +51,23 @@ fun ValidatedOutlinedField(
     errorMsg: String?,
     testTag: String
 ) {
-    ValidatedOutlinedField(
-        value = value,
-        onValueChange = onValueChange,
-        label = label,
-        placeholder = placeholder,
-        errorMsg = errorMsg,
-        testTag = testTag,
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(BaseHuntFieldsUi.FieldCornerRadius),
-        colors =
-            OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                focusedBorderColor = MaterialTheme.colorScheme.primary))
+  ValidatedOutlinedField(
+      value = value,
+      onValueChange = onValueChange,
+      label = label,
+      placeholder = placeholder,
+      errorMsg = errorMsg,
+      testTag = testTag,
+      modifier = Modifier.fillMaxWidth(),
+      shape = RoundedCornerShape(UICons.FieldCornerRadius),
+      colors =
+          OutlinedTextFieldDefaults.colors(
+              unfocusedBorderColor =
+                  MaterialTheme.colorScheme.outline.copy(alpha = UICons.ChangeAlpha),
+              focusedBorderColor = MaterialTheme.colorScheme.primary,
+              unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+              focusedContainerColor = MaterialTheme.colorScheme.surface))
+
 }
 
 @Composable
@@ -71,18 +82,23 @@ private fun ValidatedOutlinedField(
     shape: Shape,
     colors: TextFieldColors
 ) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text(label) },
-        placeholder = { Text(placeholder) },
-        isError = errorMsg != null,
-        supportingText = {
-            errorMsg?.let { Text(it, modifier = Modifier.testTag(HuntScreenTestTags.ERROR_MESSAGE)) }
-        },
-        modifier = modifier.testTag(testTag),
-        shape = shape,
-        colors = colors)
+  OutlinedTextField(
+      value = value,
+      onValueChange = onValueChange,
+      label = { Text(label) },
+      placeholder = { Text(placeholder) },
+      isError = errorMsg != null,
+      supportingText = {
+        AnimatedVisibility(visible = errorMsg != null, enter = fadeIn(), exit = fadeOut()) {
+          Text(
+              errorMsg ?: "",
+              modifier = Modifier.testTag(HuntScreenTestTags.ERROR_MESSAGE),
+              color = MaterialTheme.colorScheme.error)
+        }
+      },
+      modifier = modifier.testTag(testTag),
+      shape = shape,
+      colors = colors)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -112,380 +128,396 @@ fun BaseHuntFieldsScreen(
 
     val scrollState = rememberScrollState()
 
-    // Image selector launcher (main image)
-    val imagePickerLauncher =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.GetContent(), onResult = { uri -> onSelectImage(uri) })
+  val imagePickerLauncher =
+      rememberLauncherForActivityResult(
+          contract = ActivityResultContracts.GetContent(), onResult = { uri -> onSelectImage(uri) })
 
-    // Launcher for multiple images selection (other images)
-    val multipleImagesPickerLauncher =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.GetMultipleContents(),
-            onResult = { uris -> onSelectOtherImages(uris) })
+  val multipleImagesPickerLauncher =
+      rememberLauncherForActivityResult(
+          contract = ActivityResultContracts.GetMultipleContents(),
+          onResult = { uris -> onSelectOtherImages(uris) })
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(title) },
-                navigationIcon = {
-                    IconButton(onClick = onGoBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                            contentDescription = BaseHuntFieldsStrings.BACK_CONTENT_DESC)
-                    }
-                },
-                actions = {
-                    if (showDeleteAction && onDeleteClick != null) {
-                        IconButton(onClick = { showDeleteButton = !showDeleteButton }) {
-                            Icon(
-                                imageVector = Icons.Filled.MoreVert,
-                                contentDescription = "More actions")
-                        }
-                    }
-                },
-            )
-        },
-        modifier = Modifier.testTag(HuntScreenTestTags.ADD_HUNT_SCREEN)) { paddingValues ->
-
-        Box(
+  Scaffold(
+      topBar = {
+        TopAppBar(
+            title = { Text(title, style = MaterialTheme.typography.headlineSmall) },
+            navigationIcon = {
+              IconButton(onClick = onGoBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                    contentDescription = BaseHuntFieldsStrings.BACK_CONTENT_DESC)
+              }
+            },
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface))
+      },
+      actions = {
+          if (showDeleteAction && onDeleteClick != null) {
+              IconButton(onClick = { showDeleteButton = !showDeleteButton }) {
+                  Icon(
+                      imageVector = Icons.Filled.MoreVert,
+                      contentDescription = "More actions")
+              }
+          }
+      },
+      modifier = Modifier.testTag(HuntScreenTestTags.ADD_HUNT_SCREEN)) { paddingValues ->
+        Column(
             modifier =
                 Modifier.fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(BaseHuntFieldsUi.ScreenPadding)
-                    .padding(paddingValues)) {
+                    .background(
+                        Brush.verticalGradient(
+                            colors =
+                                listOf(
+                                    MaterialTheme.colorScheme.background,
+                                    MaterialTheme.colorScheme.surface.copy(
+                                        alpha = UICons.ChangeAlpha))))
+                    .padding(horizontal = UICons.ColumnHPadding)
+                    .padding(paddingValues)
+                    .verticalScroll(scrollState)
+                    .testTag(HuntScreenTestTags.COLLUMN_HUNT_FIELDS),
+            verticalArrangement = Arrangement.spacedBy(UICons.ColumnVArrangement)) {
+              Spacer(modifier = Modifier.height(UICons.SpacerHeightSmall))
 
-            // MAIN SCROLLABLE CONTENT
-            Column(
-                modifier =
-                    Modifier.fillMaxSize()
-                        .verticalScroll(scrollState)
-                        .testTag(HuntScreenTestTags.COLLUMN_HUNT_FIELDS),
-            ) {
-                val fieldShape = RoundedCornerShape(BaseHuntFieldsUi.FieldCornerRadius)
-                val fieldColors =
-                    OutlinedTextFieldDefaults.colors(
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                        focusedBorderColor = MaterialTheme.colorScheme.primary
-                    )
+              val fieldShape = RoundedCornerShape(UICons.FieldCornerRadius)
+              val fieldColors =
+                  OutlinedTextFieldDefaults.colors(
+                      unfocusedBorderColor =
+                          MaterialTheme.colorScheme.outline.copy(alpha = UICons.ChangeAlpha),
+                      focusedBorderColor = MaterialTheme.colorScheme.primary,
+                      unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                      focusedContainerColor = MaterialTheme.colorScheme.surface)
 
-                // === Form ===
-                ValidatedOutlinedField(
-                    value = uiState.title,
-                    onValueChange = onTitleChange,
-                    label = BaseHuntFieldsStrings.LABEL_TITLE,
-                    placeholder = BaseHuntFieldsStrings.PLACEHOLDER_TITLE,
-                    errorMsg = uiState.invalidTitleMsg,
-                    testTag = HuntScreenTestTags.INPUT_HUNT_TITLE
-                )
+              ValidatedOutlinedField(
+                  value = uiState.title,
+                  onValueChange = onTitleChange,
+                  label = BaseHuntFieldsStrings.LABEL_TITLE,
+                  placeholder = BaseHuntFieldsStrings.PLACEHOLDER_TITLE,
+                  errorMsg = uiState.invalidTitleMsg,
+                  testTag = HuntScreenTestTags.INPUT_HUNT_TITLE)
 
-                ValidatedOutlinedField(
-                    value = uiState.description,
-                    onValueChange = onDescriptionChange,
-                    label = BaseHuntFieldsStrings.LABEL_DESCRIPTION,
-                    placeholder = BaseHuntFieldsStrings.PLACEHOLDER_DESCRIPTION,
-                    errorMsg = uiState.invalidDescriptionMsg,
-                    testTag = HuntScreenTestTags.INPUT_HUNT_DESCRIPTION,
-                    modifier = Modifier.fillMaxWidth().height(BaseHuntFieldsUi.DescriptionHeight),
-                    shape = fieldShape,
-                    colors = fieldColors
-                )
+              ValidatedOutlinedField(
+                  value = uiState.description,
+                  onValueChange = onDescriptionChange,
+                  label = BaseHuntFieldsStrings.LABEL_DESCRIPTION,
+                  placeholder = BaseHuntFieldsStrings.PLACEHOLDER_DESCRIPTION,
+                  errorMsg = uiState.invalidDescriptionMsg,
+                  testTag = HuntScreenTestTags.INPUT_HUNT_DESCRIPTION,
+                  modifier = Modifier.fillMaxWidth().height(UICons.DescriptionHeight),
+                  shape = fieldShape,
+                  colors = fieldColors)
 
-                // === STATUS ===
-                ExposedDropdownMenuBox(
-                    expanded = showStatusDropdown, onExpandedChange = { showStatusDropdown = it }) {
-                    OutlinedTextField(
-                        value = uiState.status?.name ?: "",
-                        onValueChange = {},
-                        label = { Text(BaseHuntFieldsStrings.LABEL_STATUS) },
-                        readOnly = true,
-                        trailingIcon = {
-                            Icon(
-                                imageVector =
-                                    if (showStatusDropdown) Icons.Outlined.KeyboardArrowUp
-                                    else Icons.Outlined.KeyboardArrowDown,
-                                contentDescription = BaseHuntFieldsStrings.EXPAND_STATUS_DESC
-                            )
-                        },
-                        modifier =
-                            Modifier.menuAnchor()
-                                .fillMaxWidth()
-                                .testTag(HuntScreenTestTags.DROPDOWN_STATUS),
-                        shape = fieldShape,
-                        colors = fieldColors
-                    )
-                    ExposedDropdownMenu(
+              Row(
+                  modifier = Modifier.fillMaxWidth(),
+                  horizontalArrangement = Arrangement.spacedBy(UICons.RowHArrangement)) {
+                    ExposedDropdownMenuBox(
                         expanded = showStatusDropdown,
-                        onDismissRequest = { showStatusDropdown = false }) {
-                        HuntStatus.values().forEach { status ->
-                            DropdownMenuItem(
-                                text = { Text(status.name) },
-                                onClick = {
-                                    onStatusSelect(status)
-                                    showStatusDropdown = false
-                                })
+                        onExpandedChange = { showStatusDropdown = it },
+                        modifier = Modifier.weight(UICons.WeightTextField)) {
+                          OutlinedTextField(
+                              value = uiState.status?.name ?: "",
+                              onValueChange = {},
+                              label = { Text(BaseHuntFieldsStrings.LABEL_STATUS) },
+                              readOnly = true,
+                              trailingIcon = {
+                                Icon(
+                                    imageVector =
+                                        if (showStatusDropdown) Icons.Outlined.KeyboardArrowUp
+                                        else Icons.Outlined.KeyboardArrowDown,
+                                    contentDescription = BaseHuntFieldsStrings.EXPAND_STATUS_DESC)
+                              },
+                              modifier =
+                                  Modifier.menuAnchor()
+                                      .fillMaxWidth()
+                                      .testTag(HuntScreenTestTags.DROPDOWN_STATUS),
+                              shape = fieldShape,
+                              colors = fieldColors)
+                          ExposedDropdownMenu(
+                              expanded = showStatusDropdown,
+                              onDismissRequest = { showStatusDropdown = false }) {
+                                HuntStatus.values().forEach { status ->
+                                  DropdownMenuItem(
+                                      text = { Text(status.name) },
+                                      onClick = {
+                                        onStatusSelect(status)
+                                        showStatusDropdown = false
+                                      })
+                                }
+                              }
                         }
-                    }
-                }
 
-                // === DIFFICULTY ===
-                ExposedDropdownMenuBox(
-                    expanded = showDifficultyDropdown,
-                    onExpandedChange = { showDifficultyDropdown = it }) {
-                    OutlinedTextField(
-                        value = uiState.difficulty?.name ?: "",
-                        onValueChange = {},
-                        label = { Text(BaseHuntFieldsStrings.LABEL_DIFFICULTY) },
-                        readOnly = true,
-                        trailingIcon = {
-                            Icon(
-                                imageVector =
-                                    if (showDifficultyDropdown) Icons.Outlined.KeyboardArrowUp
-                                    else Icons.Outlined.KeyboardArrowDown,
-                                contentDescription = BaseHuntFieldsStrings.EXPAND_DIFFICULTY_DESC
-                            )
-                        },
-                        modifier =
-                            Modifier.menuAnchor()
-                                .fillMaxWidth()
-                                .testTag(HuntScreenTestTags.DROPDOWN_DIFFICULTY),
-                        shape = fieldShape,
-                        colors = fieldColors
-                    )
-                    ExposedDropdownMenu(
+                    ExposedDropdownMenuBox(
                         expanded = showDifficultyDropdown,
-                        onDismissRequest = { showDifficultyDropdown = false }) {
-                        Difficulty.values().forEach { diff ->
-                            DropdownMenuItem(
-                                text = { Text(diff.name) },
-                                onClick = {
-                                    onDifficultySelect(diff)
-                                    showDifficultyDropdown = false
-                                })
+                        onExpandedChange = { showDifficultyDropdown = it },
+                        modifier = Modifier.weight(UICons.WeightTextField)) {
+                          OutlinedTextField(
+                              value = uiState.difficulty?.name ?: "",
+                              onValueChange = {},
+                              label = { Text(BaseHuntFieldsStrings.LABEL_DIFFICULTY) },
+                              readOnly = true,
+                              trailingIcon = {
+                                Icon(
+                                    imageVector =
+                                        if (showDifficultyDropdown) Icons.Outlined.KeyboardArrowUp
+                                        else Icons.Outlined.KeyboardArrowDown,
+                                    contentDescription =
+                                        BaseHuntFieldsStrings.EXPAND_DIFFICULTY_DESC)
+                              },
+                              modifier =
+                                  Modifier.menuAnchor()
+                                      .fillMaxWidth()
+                                      .testTag(HuntScreenTestTags.DROPDOWN_DIFFICULTY),
+                              shape = fieldShape,
+                              colors = fieldColors)
+                          ExposedDropdownMenu(
+                              expanded = showDifficultyDropdown,
+                              onDismissRequest = { showDifficultyDropdown = false }) {
+                                Difficulty.values().forEach { diff ->
+                                  DropdownMenuItem(
+                                      text = { Text(diff.name) },
+                                      onClick = {
+                                        onDifficultySelect(diff)
+                                        showDifficultyDropdown = false
+                                      })
+                                }
+                              }
                         }
-                    }
-                }
+                  }
 
-                ValidatedOutlinedField(
-                    value = uiState.time,
-                    onValueChange = onTimeChange,
-                    label = BaseHuntFieldsStrings.LABEL_TIME,
-                    placeholder = BaseHuntFieldsStrings.PLACEHOLDER_TIME,
-                    errorMsg = uiState.invalidTimeMsg,
-                    testTag = HuntScreenTestTags.INPUT_HUNT_TIME
-                )
+              Row(
+                  modifier = Modifier.fillMaxWidth(),
+                  horizontalArrangement = Arrangement.spacedBy(UICons.RowHArrangement)) {
+                    ValidatedOutlinedField(
+                        value = uiState.time,
+                        onValueChange = onTimeChange,
+                        label = BaseHuntFieldsStrings.LABEL_TIME,
+                        placeholder = BaseHuntFieldsStrings.PLACEHOLDER_TIME,
+                        errorMsg = uiState.invalidTimeMsg,
+                        testTag = HuntScreenTestTags.INPUT_HUNT_TIME,
+                        modifier = Modifier.weight(UICons.WeightTextField),
+                        shape = fieldShape,
+                        colors = fieldColors)
 
-                ValidatedOutlinedField(
-                    value = uiState.distance,
-                    onValueChange = onDistanceChange,
-                    label = BaseHuntFieldsStrings.LABEL_DISTANCE,
-                    placeholder = BaseHuntFieldsStrings.PLACEHOLDER_DISTANCE,
-                    errorMsg = uiState.invalidDistanceMsg,
-                    testTag = HuntScreenTestTags.INPUT_HUNT_DISTANCE
-                )
+                    ValidatedOutlinedField(
+                        value = uiState.distance,
+                        onValueChange = onDistanceChange,
+                        label = BaseHuntFieldsStrings.LABEL_DISTANCE,
+                        placeholder = BaseHuntFieldsStrings.PLACEHOLDER_DISTANCE,
+                        errorMsg = uiState.invalidDistanceMsg,
+                        testTag = HuntScreenTestTags.INPUT_HUNT_DISTANCE,
+                        modifier = Modifier.weight(UICons.WeightTextField),
+                        shape = fieldShape,
+                        colors = fieldColors)
+                  }
 
-                Button(
-                    onClick = onSelectLocations,
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .testTag(HuntScreenTestTags.BUTTON_SELECT_LOCATION),
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = MaterialTheme.colorScheme.onSecondary
-                        )
-                ) {
+              ElevatedButton(
+                  onClick = onSelectLocations,
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .height(UICons.ButtonHeight)
+                          .testTag(HuntScreenTestTags.BUTTON_SELECT_LOCATION),
+                  shape = RoundedCornerShape(UICons.ButtonCornerRadius),
+                  colors =
+                      ButtonDefaults.elevatedButtonColors(
+                          containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                          contentColor = MaterialTheme.colorScheme.onSecondaryContainer)) {
                     val pointCount = uiState.points.size
                     val label =
                         if (pointCount > 0) {
-                            "${BaseHuntFieldsStrings.BUTTON_SELECT_LOCATIONS} ($pointCount ${
-                                if (pointCount == 1)
-                                    BaseHuntFieldsStrings.UNIT_POINT
-                                else BaseHuntFieldsStrings.UNIT_POINTS
-                            })"
+                          "${BaseHuntFieldsStrings.BUTTON_SELECT_LOCATIONS} ($pointCount ${if (pointCount == 1) BaseHuntFieldsStrings.UNIT_POINT else BaseHuntFieldsStrings.UNIT_POINTS})"
                         } else {
-                            BaseHuntFieldsStrings.BUTTON_SELECT_LOCATIONS
+                          BaseHuntFieldsStrings.BUTTON_SELECT_LOCATIONS
                         }
-                    Text(label)
-                }
+                    Text(label, style = MaterialTheme.typography.titleMedium)
+                  }
 
-                // IMAGE PICKER + PREVIEW
-                Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightSmall))
+              Card(
+                  modifier = Modifier.fillMaxWidth(),
+                  shape = RoundedCornerShape(UICons.CardCornerRadius),
+                  colors =
+                      CardDefaults.cardColors(
+                          containerColor =
+                              MaterialTheme.colorScheme.surfaceVariant.copy(
+                                  alpha = UICons.ChangeAlpha))) {
+                    Column(
+                        modifier = Modifier.padding(UICons.CardPadding),
+                        verticalArrangement = Arrangement.spacedBy(UICons.CardVArrangement)) {
+                          Text(
+                              "Images",
+                              style = MaterialTheme.typography.titleMedium,
+                              color = MaterialTheme.colorScheme.onSurfaceVariant)
 
-                Button(
-                    onClick = { imagePickerLauncher.launch("image/*") },
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = MaterialTheme.colorScheme.onSecondary
-                        ),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(BaseHuntFieldsStrings.BUTTON_CHOOSE_IMAGE)
-                }
+                          OutlinedButton(
+                              onClick = { imagePickerLauncher.launch("image/*") },
+                              modifier = Modifier.fillMaxWidth().height(UICons.ImageButtonHeight),
+                              shape = RoundedCornerShape(UICons.ImageButtonCornerRadius)) {
+                                Text(
+                                    BaseHuntFieldsStrings.BUTTON_CHOOSE_IMAGE,
+                                    style = MaterialTheme.typography.bodyLarge)
+                              }
 
-                val imageToDisplay = uiState.mainImageUrl
+                          val imageToDisplay = uiState.mainImageUrl
 
-                if (!imageToDisplay.isNullOrBlank()) {
-                    Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightMedium))
-                    AsyncImage(
-                        model = imageToDisplay,
-                        contentDescription = BaseHuntFieldsStrings.CONTENT_DESC_SELECTED_IMAGE,
-                        modifier =
-                            Modifier.fillMaxWidth()
-                                .height(BaseHuntFieldsUi.ImageHeight)
-                                .clip(RoundedCornerShape(BaseHuntFieldsUi.FieldCornerRadius)),
-                        placeholder = painterResource(R.drawable.empty_image),
-                        error = painterResource(R.drawable.empty_image)
-                    )
-                }
+                          AnimatedVisibility(visible = !imageToDisplay.isNullOrBlank()) {
+                            AsyncImage(
+                                model = imageToDisplay,
+                                contentDescription =
+                                    BaseHuntFieldsStrings.CONTENT_DESC_SELECTED_IMAGE,
+                                modifier =
+                                    Modifier.fillMaxWidth()
+                                        .height(UICons.ImageHeight)
+                                        .clip(RoundedCornerShape(UICons.ImageCornerRadius))
+                                        .shadow(4.dp, RoundedCornerShape(UICons.ImageCornerRadius)),
+                                placeholder = painterResource(R.drawable.empty_image),
+                                error = painterResource(R.drawable.empty_image))
+                          }
 
-                // OTHER IMAGES SECTION – EDIT + ADD MODE
-                Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightSmall))
+                          OutlinedButton(
+                              onClick = { multipleImagesPickerLauncher.launch("image/*") },
+                              modifier = Modifier.fillMaxWidth().height(UICons.ImageButtonHeight),
+                              shape = RoundedCornerShape(UICons.ImageButtonCornerRadius)) {
+                                Text(
+                                    BaseHuntFieldsStrings.BUTTON_CHOOSE_ADDITIONAL_IMAGES,
+                                    style = MaterialTheme.typography.bodyLarge)
+                              }
 
-                Button(
-                    onClick = { multipleImagesPickerLauncher.launch("image/*") },
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = MaterialTheme.colorScheme.onSecondary
-                        ),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(BaseHuntFieldsStrings.BUTTON_CHOOSE_ADDITIONAL_IMAGES)
-                }
+                          val combinedImages: List<OtherImage> =
+                              uiState.otherImagesUrls.map { OtherImage.Remote(it) } +
+                                  uiState.otherImagesUris.map { OtherImage.Local(it) }
 
-                val combinedImages: List<OtherImage> =
-                    uiState.otherImagesUrls.map { OtherImage.Remote(it) } +
-                            uiState.otherImagesUris.map { OtherImage.Local(it) }
-
-                if (combinedImages.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightMedium))
-
-                    Column {
-                        combinedImages.forEach { image ->
-                            val tagSuffix =
-                                when (image) {
-                                    is OtherImage.Remote -> image.url
-                                    is OtherImage.Local -> image.uri.toString()
-                                }
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                val model =
-                                    when (image) {
-                                        is OtherImage.Remote -> image.url
-                                        is OtherImage.Local -> image.uri
-                                    }
-
-                                AsyncImage(
-                                    model = model,
-                                    contentDescription =
-                                        BaseHuntFieldsStrings.CONTENT_DESC_SECONDARY_IMAGE,
-                                    modifier =
-                                        Modifier.testTag("otherImage_$tagSuffix")
-                                            .weight(BaseHuntFieldsUi.ImageWeight)
-                                            .height(
-                                                BaseHuntFieldsUi.ImageHeight /
-                                                        BaseHuntFieldsUi.ImageHeightDivisor
-                                            )
-                                            .clip(
-                                                RoundedCornerShape(BaseHuntFieldsUi.FieldCornerRadius)
-                                            ),
-                                    placeholder = painterResource(R.drawable.empty_image),
-                                    error = painterResource(R.drawable.empty_image)
-                                )
-
-                                Spacer(modifier = Modifier.width(BaseHuntFieldsUi.SpacerHeightSmall))
-
-                                TextButton(
-                                    modifier =
-                                        Modifier.testTag("$REMOVE_BUTTON_TAG_PREFIX$tagSuffix"),
-                                    onClick = {
+                          if (combinedImages.isNotEmpty()) {
+                            Column(
+                                verticalArrangement =
+                                    Arrangement.spacedBy(UICons.CardVArrangement)) {
+                                  combinedImages.forEach { image ->
+                                    val tagSuffix =
                                         when (image) {
-                                            is OtherImage.Remote -> onRemoveExistingImage(image.url)
-                                            is OtherImage.Local -> onRemoveOtherImage(image.uri)
+                                          is OtherImage.Remote -> image.url
+                                          is OtherImage.Local -> image.uri.toString()
                                         }
-                                    },
-                                    colors =
-                                        ButtonDefaults.textButtonColors(
-                                            contentColor = MaterialTheme.colorScheme.error
-                                        )
-                                ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.ic_delete),
-                                        contentDescription =
-                                            BaseHuntFieldsStrings.DELETE_ICON_DESC,
-                                        tint = MaterialTheme.colorScheme.error,
-                                        modifier =
-                                            Modifier.size(BaseHuntFieldsUi.IconSizeSmall)
-                                    )
-                                    Spacer(
-                                        modifier =
-                                            Modifier.width(BaseHuntFieldsUi.SpacerSuperSmall)
-                                    )
-                                    Text(BaseHuntFieldsStrings.REMOVE)
+
+                                    Card(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = RoundedCornerShape(UICons.CardLittleCornerRadius),
+                                    ) {
+                                      Row(
+                                          modifier =
+                                              Modifier.fillMaxWidth()
+                                                  .padding(UICons.CardRowPadding),
+                                          horizontalArrangement = Arrangement.SpaceBetween) {
+                                            val model =
+                                                when (image) {
+                                                  is OtherImage.Remote -> image.url
+                                                  is OtherImage.Local -> image.uri
+                                                }
+
+                                            AsyncImage(
+                                                model = model,
+                                                contentDescription =
+                                                    BaseHuntFieldsStrings
+                                                        .CONTENT_DESC_SECONDARY_IMAGE,
+                                                modifier =
+                                                    Modifier.testTag("otherImage_$tagSuffix")
+                                                        .weight(UICons.ImageWeight)
+                                                        .height(UICons.ImageLittleHeight)
+                                                        .clip(
+                                                            RoundedCornerShape(
+                                                                UICons.ImageLittleCornerRadius)),
+                                                placeholder =
+                                                    painterResource(R.drawable.empty_image),
+                                                error = painterResource(R.drawable.empty_image))
+
+                                            Spacer(
+                                                modifier =
+                                                    Modifier.width(UICons.SpacerHeightMedium))
+
+                                            TextButton(
+                                                modifier =
+                                                    Modifier.testTag(
+                                                        "$REMOVE_BUTTON_TAG_PREFIX$tagSuffix"),
+                                                onClick = {
+                                                  when (image) {
+                                                    is OtherImage.Remote ->
+                                                        onRemoveExistingImage(image.url)
+                                                    is OtherImage.Local ->
+                                                        onRemoveOtherImage(image.uri)
+                                                  }
+                                                }) {
+                                                  Icon(
+                                                      painter =
+                                                          painterResource(R.drawable.ic_delete),
+                                                      contentDescription =
+                                                          BaseHuntFieldsStrings.DELETE_ICON_DESC,
+                                                      tint = MaterialTheme.colorScheme.error,
+                                                      modifier = Modifier.size(UICons.IconSize))
+                                                  Spacer(
+                                                      modifier =
+                                                          Modifier.width(UICons.SpacerHeightTiny))
+                                                  Text(
+                                                      BaseHuntFieldsStrings.REMOVE,
+                                                      color = MaterialTheme.colorScheme.error)
+                                                }
+                                          }
+                                    }
+                                  }
                                 }
-                            }
-
-                            Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeightSmall))
+                          }
                         }
-                    }
+                  }
 
-                    Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeight))
-                }
+              Spacer(modifier = Modifier.height(UICons.SpacerHeightSmall))
 
-                Spacer(modifier = Modifier.height(BaseHuntFieldsUi.SpacerHeight))
-
-                Button(
-                    onClick = onSave,
-                    modifier =
-                        Modifier.fillMaxWidth()
-                            .height(BaseHuntFieldsUi.SaveButtonHeight)
-                            .clip(
-                                RoundedCornerShape(BaseHuntFieldsUi.SaveButtonCornerRadius)
-                            )
-                            .testTag(HuntScreenTestTags.HUNT_SAVE),
-                    enabled = uiState.isValid,
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        )
-                ) {
+              Button(
+                  onClick = onSave,
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .height(UICons.ButtonSaveHeight)
+                          .shadow(
+                              UICons.ButtonShadow,
+                              RoundedCornerShape(UICons.ButtonSaveCornerRadius))
+                          .testTag(HuntScreenTestTags.HUNT_SAVE),
+                  enabled = uiState.isValid,
+                  shape = RoundedCornerShape(UICons.ButtonSaveCornerRadius),
+                  colors =
+                      ButtonDefaults.buttonColors(
+                          containerColor = MaterialTheme.colorScheme.primary,
+                          contentColor = MaterialTheme.colorScheme.onPrimary,
+                          disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                          disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
                     Text(
                         BaseHuntFieldsStrings.BUTTON_SAVE_HUNT,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-            }
+                        style = MaterialTheme.typography.titleMedium)
+                  }
 
-            // FLOATING DELETE BUTTON OVERLAY (only on Edit)
-            if (showDeleteAction && onDeleteClick != null && showDeleteButton) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.TopEnd,
-                ) {
-                    Button(
-                        onClick = onDeleteClick,
-                        modifier = Modifier.padding(top = 1.dp, end = 8.dp),
-                        colors =
-                            ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error,
-                                contentColor = MaterialTheme.colorScheme.onError
-                            ),
-                        shape = RoundedCornerShape(999.dp) // pill shape, modern
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_delete),
-                            contentDescription = "Delete hunt",
-                            modifier = Modifier.size(BaseHuntFieldsUi.IconSizeSmall),
-                            tint = MaterialTheme.colorScheme.onError,
-                        )
-                        Spacer(modifier = Modifier.width(BaseHuntFieldsUi.SpacerSuperSmall))
-                        Text("Delete hunt")
-                    }
-                }
+              Spacer(modifier = Modifier.height(UICons.SpacerHeight))
             }
-        }}}
+      // FLOATING DELETE BUTTON OVERLAY (only on Edit)
+      if (showDeleteAction && onDeleteClick != null && showDeleteButton) {
+          Box(
+              modifier = Modifier.fillMaxSize(),
+              contentAlignment = Alignment.TopEnd,
+          ) {
+              Button(
+                  onClick = onDeleteClick,
+                  modifier = Modifier.padding(top = 1.dp, end = 8.dp),
+                  colors =
+                      ButtonDefaults.buttonColors(
+                          containerColor = MaterialTheme.colorScheme.error,
+                          contentColor = MaterialTheme.colorScheme.onError
+                      ),
+                  shape = RoundedCornerShape(999.dp) // pill shape, modern
+              ) {
+                  Icon(
+                      painter = painterResource(R.drawable.ic_delete),
+                      contentDescription = "Delete hunt",
+                      modifier = Modifier.size(BaseHuntFieldsUi.IconSizeSmall),
+                      tint = MaterialTheme.colorScheme.onError,
+                  )
+                  Spacer(modifier = Modifier.width(BaseHuntFieldsUi.SpacerSuperSmall))
+                  Text("Delete hunt")
+              }
+          }
+      }
+      }
+}
