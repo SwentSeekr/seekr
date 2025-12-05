@@ -24,14 +24,58 @@ import com.swentseekr.seekr.ui.profile.ModernProfileHeader
 import com.swentseekr.seekr.ui.profile.Profile
 import com.swentseekr.seekr.ui.profile.ProfileTab
 
+/**
+ * Tabs available in the offline profile view.
+ *
+ * These values mirror the online [ProfileTab] entries and represent the three logical sections of
+ * the profile:
+ * - [MY_HUNTS] – hunts created by the user.
+ * - [DONE_HUNTS] – hunts that the user has completed.
+ * - [LIKED_HUNTS] – hunts that the user has liked.
+ *
+ * The offline UI maps these values to [ProfileTab] so that existing composables (e.g.
+ * [ModernCustomToolbar], [ModernEmptyHuntsState]) can be reused without introducing separate
+ * offline-only variants.
+ */
 enum class OfflineProfileTab {
   MY_HUNTS,
   DONE_HUNTS,
   LIKED_HUNTS
 }
 
+/**
+ * Offline profile screen based on locally cached profile data.
+ *
+ * This composable:
+ * - Displays a profile-style layout even when the device is offline.
+ * - Reuses the same building blocks as the online profile:
+ *     - [ModernProfileHeader] for the profile header.
+ *     - [ModernCustomToolbar] for tab selection.
+ *     - [ModernEmptyHuntsState] and [HuntCard] for the hunts section.
+ * - Relies on [OfflineViewModel] to:
+ *     - Hold the current [Profile] snapshot.
+ *     - Track the selected [OfflineProfileTab].
+ *     - Expose the filtered list of [Hunt]s to display.
+ *
+ * Behavior:
+ * - If [profile] is `null`, a simple centered offline message is shown and no profile content is
+ *   rendered. This state typically indicates that the app has no cached profile yet.
+ * - If [profile] is non-null, the screen shows:
+ *     - A header with basic profile information.
+ *     - Tabs for "My Hunts", "Done Hunts", and "Liked Hunts".
+ *     - A list of hunts for the currently selected tab or a dedicated empty state when no hunts are
+ *       available.
+ *
+ * The screen is intended for use from [com.swentseekr.seekr.ui.navigation.SeekrOfflineNavHost] as
+ * part of the offline navigation graph.
+ *
+ * @param profile Cached [Profile] to display in offline mode. If `null`, the screen renders a
+ *   generic "no offline profile" message.
+ * @param modifier Optional [Modifier] applied to the root [Surface].
+ */
 @Composable
 fun OfflineCachedProfileScreen(profile: Profile?, modifier: Modifier = Modifier) {
+  // Offline-specific view model driven by the cached profile snapshot.
   val offlineViewModel = remember(profile) { OfflineViewModel(profile) }
   val currentProfile = offlineViewModel.profile
 
@@ -39,6 +83,7 @@ fun OfflineCachedProfileScreen(profile: Profile?, modifier: Modifier = Modifier)
       modifier = modifier.fillMaxSize(),
       color = MaterialTheme.colorScheme.onPrimary, // from theme (White)
   ) {
+    // If there is no cached profile, show a centered offline message and bail out early.
     if (currentProfile == null) {
       Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(
@@ -62,7 +107,7 @@ fun OfflineCachedProfileScreen(profile: Profile?, modifier: Modifier = Modifier)
 
     Column(modifier = Modifier.fillMaxSize()) {
 
-      // 1. HEADER – reuse ModernProfileHeader
+      // 1. HEADER – reuse ModernProfileHeader to keep visual parity with online profile.
       ModernProfileHeader(
           profile = currentProfile,
           reviewCount = 0,
@@ -72,7 +117,7 @@ fun OfflineCachedProfileScreen(profile: Profile?, modifier: Modifier = Modifier)
           onGoBack = {},
           onReviewsClick = {})
 
-      // 2. TABS – reuse ModernCustomToolbar
+      // 2. TABS – reuse ModernCustomToolbar, mapping back to OfflineProfileTab internally.
       ModernCustomToolbar(
           selectedTab = selectedProfileTab,
           onTabSelected = { newTab ->
@@ -85,7 +130,7 @@ fun OfflineCachedProfileScreen(profile: Profile?, modifier: Modifier = Modifier)
             offlineViewModel.selectTab(mappedOfflineTab)
           })
 
-      // 3. HUNTS LIST / EMPTY STATE – reuse ModernEmptyHuntsState + HuntCard
+      // 3. HUNTS LIST / EMPTY STATE – reuse ModernEmptyHuntsState + HuntCard for consistency.
       LazyColumn(
           modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             if (huntsToDisplay.isEmpty()) {
@@ -106,6 +151,12 @@ fun OfflineCachedProfileScreen(profile: Profile?, modifier: Modifier = Modifier)
   }
 }
 
+/**
+ * Design-time preview of [OfflineCachedProfileScreen] using [mockProfileData].
+ *
+ * This preview showcases the offline profile layout with a sample profile, allowing UI inspection
+ * and iteration without requiring a running app or real cached data.
+ */
 @Preview
 @Composable
 fun OfflineCachedProfileScreenPreview() {
