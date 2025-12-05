@@ -7,6 +7,24 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.ui.theme.EasyGreen
 import com.swentseekr.seekr.ui.theme.Green
 
+/**
+ * Centralized constants used across the offline UI layer.
+ *
+ * This object groups all string literals, spacing values, text sizes, and reusable styling
+ * primitives that are specific to offline-related screens, such as:
+ * - [OfflineRequiredScreen]
+ * - [OfflineOverviewScreen] / [OfflineOverviewHuntsScreen]
+ * - [OfflineMapScreen]
+ * - Offline profile components (e.g. [OfflineCachedProfileScreen])
+ *
+ * Goals:
+ * - Keep offline UI consistent (spacing, shapes, colors, copy).
+ * - Avoid duplication of magic numbers and repeated hard-coded strings.
+ * - Provide a single place to adjust offline branding / messaging.
+ *
+ * The values defined here are intentionally UI-focused and are not meant to be used as generic
+ * domain constants.
+ */
 object OfflineConstants {
 
   // --- Generic offline / required screen strings ---
