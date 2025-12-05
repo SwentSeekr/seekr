@@ -130,51 +130,52 @@ fun ProfileScreen(
     testMode: Boolean = false,
     testPublic: Boolean = false,
     testProfile: Profile? = null,
-    onReviewsClick: () -> Unit = {}
+    onReviewsClick: () -> Unit = {},
 ) {
   val context = LocalContext.current
   val uiState by viewModel.uiState.collectAsState()
+
+  LaunchedEffect(userId) { if (!testMode) viewModel.loadProfile(userId, context) }
 
   val profile =
       if (testMode) {
         testProfile ?: mockProfileData()
       } else {
-        LaunchedEffect(userId) { viewModel.loadProfile(userId, context) }
-
-        // LOADING UI
-        AnimatedVisibility(visible = uiState.isLoading, enter = fadeIn(), exit = fadeOut()) {
-          Box(
-              modifier =
-                  Modifier.fillMaxSize()
-                      .background(ProfileUIConstantsDefaults.LightGrayBackground)
-                      .testTag(ProfileTestTags.PROFILE_LOADING),
-              contentAlignment = Alignment.Center) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center) {
-                      CircularProgressIndicator(
-                          color = ProfileUIConstantsDefaults.LoadingIndicatorGreen)
-                      Text(
-                          text = ProfileConstants.LOADING_PROFILE,
-                          color = ProfileUIConstantsDefaults.LoadingGray,
-                          fontSize = ProfileConstants.TEXT_SIZE_LOADING,
-                          modifier = Modifier.padding(top = ProfileConstants.SIZE_MEDIUM_DP))
-                    }
-              }
-        }
-
-        if (uiState.errorMsg != null) {
-          Box(
-              modifier =
-                  Modifier.fillMaxSize().background(ProfileUIConstantsDefaults.LightGrayBackground),
-              contentAlignment = Alignment.Center) {
-                Text("Error: ${uiState.errorMsg}", color = ProfileUIConstantsDefaults.ErrorRed)
-              }
-          return
-        }
-
         uiState.profile
       }
+
+  // LOADING UI
+  AnimatedVisibility(visible = uiState.isLoading, enter = fadeIn(), exit = fadeOut()) {
+    Box(
+        modifier =
+            Modifier.fillMaxSize()
+                .background(ProfileUIConstantsDefaults.LightGrayBackground)
+                .testTag(ProfileTestTags.PROFILE_LOADING),
+        contentAlignment = Alignment.Center) {
+          Column(
+              horizontalAlignment = Alignment.CenterHorizontally,
+              verticalArrangement = Arrangement.Center) {
+                CircularProgressIndicator(color = ProfileUIConstantsDefaults.LoadingIndicatorGreen)
+                Text(
+                    text = ProfileConstants.LOADING_PROFILE,
+                    color = ProfileUIConstantsDefaults.LoadingGray,
+                    fontSize = ProfileConstants.TEXT_SIZE_LOADING,
+                    modifier = Modifier.padding(top = ProfileConstants.SIZE_MEDIUM_DP))
+              }
+        }
+  }
+
+  if (uiState.errorMsg != null) {
+    Box(
+        modifier =
+            Modifier.fillMaxSize().background(ProfileUIConstantsDefaults.LightGrayBackground),
+        contentAlignment = Alignment.Center) {
+          Text("Error: ${uiState.errorMsg}", color = ProfileUIConstantsDefaults.ErrorRed)
+        }
+    return
+  }
+
+  uiState.profile
 
   if (profile == null) {
     AnimatedVisibility(visible = !uiState.isLoading, enter = fadeIn(), exit = fadeOut()) {
@@ -228,6 +229,7 @@ fun ProfileScreen(
           ModernCustomToolbar(selectedTab = selectedTab, onTabSelected = { selectedTab = it })
 
           // ---- HUNTS LIST ----
+
           val huntsToDisplay =
               when (selectedTab) {
                 ProfileTab.MY_HUNTS -> profile.myHunts
@@ -241,7 +243,7 @@ fun ProfileScreen(
                 if (huntsToDisplay.isEmpty()) {
                   item { ModernEmptyHuntsState(selectedTab) }
                 } else {
-                  items(huntsToDisplay.size) { index ->
+                  items(huntsToDisplay.size, key = { huntsToDisplay[it].uid }) { index ->
                     val hunt = huntsToDisplay[index]
 
                     val base = Modifier.testTag(ProfileTestTags.getTestTagForHuntCard(hunt, index))
@@ -251,7 +253,13 @@ fun ProfileScreen(
                             base.clickable { onMyHuntClick(hunt.uid) }
                         else base
 
-                    HuntCard(hunt = hunt, modifier = clickable)
+                    HuntCard(
+                        hunt = hunt,
+                        isLiked = profile.likedHunts.any { it.uid == hunt.uid },
+                        onLikeClick = { _ -> viewModel.toggleLikedHunt(hunt, context) },
+                        modifier =
+                            clickable.testTag(
+                                "${ProfileTestTags.getTestTagForHuntCard(hunt, index)}_LIKE_BUTTON"))
                   }
                 }
               }

@@ -38,9 +38,16 @@ open class HuntCardViewModel(
     private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository,
     private val imageRepository: IReviewImageRepository = ReviewImageRepositoryProvider.repository
 ) : ViewModel() {
-
   private val _uiState = MutableStateFlow(HuntCardUiState())
   open val uiState: StateFlow<HuntCardUiState> = _uiState.asStateFlow()
+
+  val _likedHuntsCache = MutableStateFlow<Set<String>>(emptySet())
+
+  open val likedHuntsCache: StateFlow<Set<String>> = _likedHuntsCache.asStateFlow()
+
+  fun isHuntLiked(huntId: String): Boolean {
+    return _likedHuntsCache.value.contains(huntId)
+  }
 
   /** Clears any existing error message in the UI state. */
   fun clearErrorMsg() {
@@ -74,12 +81,24 @@ open class HuntCardViewModel(
         val userID =
             FirebaseAuth.getInstance().currentUser?.uid ?: HuntCardViewModelConstants.UnknownUser
         _uiState.value = _uiState.value.copy(currentUserId = userID)
+        loadLikedHuntsCache(userID)
       } catch (e: Exception) {
         Log.e(
             HuntCardViewModelConstants.HuntCardTag,
             HuntCardViewModelConstants.ErrorLoadingCurrentUser,
             e)
         setErrorMsg(HuntCardViewModelConstants.ErrorLodingCurrentUserSetMsg)
+      }
+    }
+  }
+
+  private fun loadLikedHuntsCache(userId: String) {
+    viewModelScope.launch {
+      try {
+        val likedHunts = profileRepository.getLikedHunts(userId)
+        _likedHuntsCache.value = likedHunts.map { it.uid }.toSet()
+      } catch (e: Exception) {
+        Log.e("HuntCardViewModel", "Error loading liked hunts cache", e)
       }
     }
   }
@@ -111,21 +130,25 @@ open class HuntCardViewModel(
         val hunt = huntRepository.getHunt(huntID)
         val reviews = reviewRepository.getHuntReviews(huntID)
         val userId = _uiState.value.currentUserId
-        // val currentUserLikes =
-        //    if (userId != null) {
-        //      profileRepository.getLikedHunts(userId)
-        //   } else emptyList<String>()
-        // val isLiked = currentUserLikes.contains(huntID)// this will be use later when we add
-        // likes in profile repository
+        val currentUserLikes =
+            if (userId != null) {
+              profileRepository.getLikedHunts(userId)
+            } else emptyList()
+
+        val isLiked = currentUserLikes.any { it.uid == huntID }
+
+        _uiState.value = _uiState.value.copy(hunt = hunt, isLiked = isLiked, reviewList = reviews)
+
         val currentUserAchieved =
             if (userId != null) {
               profileRepository.getDoneHunts(userId)
-            } else emptyList<Hunt>()
+            } else emptyList()
+
         val isAchieved = currentUserAchieved.any { it.uid == huntID }
-        // isLiked will be chnged later when we will have an addLike in the profile repository
+
         _uiState.value =
             _uiState.value.copy(
-                hunt = hunt, isLiked = false, isAchieved = isAchieved, reviewList = reviews)
+                hunt = hunt, isLiked = isLiked, isAchieved = isAchieved, reviewList = reviews)
       } catch (e: Exception) {
         Log.e(
             HuntCardViewModelConstants.HuntCardTag,
@@ -225,30 +248,44 @@ open class HuntCardViewModel(
    * likesList. Will be modify later
    */
   open fun onLikeClick(huntID: String) {
-    val currentHuntUiState = _uiState.value
-    // val currentUserId = _uiState.value.currentUserId //will be used later when we add likes in
-    // profile repository
-    val currentlyLiked = _uiState.value.isLiked
-    // This will be added to the likesList in the profile
-    // or remove if already liked
-    /*
-    if(currentlyLiked){
-      profileRepository.removeLikedHunt(currentUserId ?: "", huntID)
-    }
-    else {
-      profileRepository.addLikedHunt(currentUserId ?: "", huntID)
-    }
+    val currentUserId = _uiState.value.currentUserId ?: return
+    val currentlyLiked = _likedHuntsCache.value.contains(huntID)
 
-     */
+    _likedHuntsCache.value =
+        _likedHuntsCache.value.toMutableSet().apply {
+          if (currentlyLiked) remove(huntID) else add(huntID)
+        }
 
-    val updatedHuntUiState = currentHuntUiState.copy(isLiked = !currentlyLiked)
-    _uiState.value = updatedHuntUiState
+    _uiState.value = _uiState.value.copy(isLiked = !currentlyLiked)
+    viewModelScope.launch {
+      try {
+        if (currentlyLiked) profileRepository.removeLikedHunt(currentUserId, huntID)
+        else profileRepository.addLikedHunt(currentUserId, huntID)
+      } catch (e: Exception) {
+        // Revert on error
+        _likedHuntsCache.value =
+            _likedHuntsCache.value.toMutableSet().apply {
+              if (currentlyLiked) add(huntID) else remove(huntID)
+            }
+        _uiState.value = _uiState.value.copy(isLiked = currentlyLiked)
+        setErrorMsg("Failed to update liked hunt: ${e.message}")
+      }
+    }
   }
 
   fun initialize(userId: String, hunt: Hunt) {
-    // This is legal
-    _uiState.value = HuntCardUiState(hunt = hunt, currentUserId = userId)
+    viewModelScope.launch {
+      try {
+        val likedHunts = profileRepository.getLikedHunts(userId)
+        val isLiked = likedHunts.any { it.uid == hunt.uid }
+
+        _uiState.value = HuntCardUiState(hunt = hunt, currentUserId = userId, isLiked = isLiked)
+      } catch (e: Exception) {
+        _uiState.value = HuntCardUiState(hunt = hunt, currentUserId = userId, isLiked = false)
+      }
+    }
   }
+
   /**
    * Filters the hunts to show only those that have been achieved by the user and adds it to the
    * profile AchievedList. Will be modify later

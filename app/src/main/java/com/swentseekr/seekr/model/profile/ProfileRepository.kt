@@ -27,4 +27,8 @@ interface ProfileRepository {
   suspend fun completeOnboarding(userId: String, pseudonym: String, bio: String)
 
   suspend fun deleteCurrentProfilePicture(userId: String, url: String)
+
+  suspend fun addLikedHunt(userId: String, huntId: String)
+
+  suspend fun removeLikedHunt(userId: String, huntId: String)
 }

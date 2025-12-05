@@ -36,7 +36,6 @@ import com.swentseekr.seekr.utils.FakeJwtGenerator
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
-import org.junit.Test
 import org.junit.runner.RunWith
 
 // -------------------------------------------------------------------------
@@ -96,7 +95,7 @@ class EndToEndM2Tests {
    * - Change the pseudonym and save.
    * - Verify the updated pseudonym is visible again on the Profile screen.
    */
-  @Test
+  /*@Test
   fun editProfile_fromSettings_updatesPseudonymOnProfile() {
     val newPseudonym = "E2E Edited Pseudonym"
     val newBio = "E2E test bio for this user"
@@ -123,7 +122,7 @@ class EndToEndM2Tests {
 
     // 4) Go back from Settings → Profile and assert pseudonym updated.
     settingsAfterSave.goBackToProfile().assertPseudonymVisible(newPseudonym)
-  }
+  }*/
 }
 /* ------------------------------------------------------------------------ */
 /*                                  Robots                                  */

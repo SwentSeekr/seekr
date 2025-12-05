@@ -35,7 +35,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -105,8 +104,12 @@ fun HuntCardScreen(
 ) {
   val uiState by huntCardViewModel.uiState.collectAsState()
 
-  // Load data
-  LaunchedEffect(huntId) { huntCardViewModel.loadHunt(huntId) }
+  LaunchedEffect(Unit) { huntCardViewModel.loadCurrentUserID() }
+  LaunchedEffect(huntId, uiState.currentUserId) {
+    if (uiState.currentUserId != null) {
+      huntCardViewModel.loadHunt(huntId)
+    }
+  }
   val hunt = uiState.hunt
   val authorId = hunt?.authorId ?: ""
 
@@ -116,7 +119,6 @@ fun HuntCardScreen(
   LaunchedEffect(huntId) { huntCardViewModel.loadOtherReview(huntId) }
   val reviews = uiState.reviewList
 
-  LaunchedEffect(Unit) { huntCardViewModel.loadCurrentUserID() }
   val currentUserId = uiState.currentUserId
 
   val isAuthor = currentUserId == authorId
@@ -674,23 +676,19 @@ fun LikeButton(
     huntId: String,
     modifier: Modifier = Modifier
 ) {
-  val uiState by huntCardViewModel.uiState.collectAsState()
-  val isLiked = uiState.isLiked
 
-  Surface(
-      modifier = modifier,
-      shape = CircleShape,
-      color = MaterialTheme.colorScheme.onPrimary.copy(alpha = HuntCardScreenDefaults.Alpha)) {
-        IconButton(
-            onClick = { huntCardViewModel.onLikeClick(huntId) },
-            modifier = Modifier.testTag(HuntCardScreenTestTags.LIKE_BUTTON)) {
-              Icon(
-                  imageVector = Icons.Default.Favorite,
-                  contentDescription = HuntCardScreenStrings.LikeButton,
-                  tint =
-                      if (isLiked) HuntCardScreenDefaults.LikeRedStrong
-                      else HuntCardScreenDefaults.LightGray,
-                  modifier = Modifier.size(HuntCardScreenDefaults.IconSize24))
-            }
+  val likedHuntsCache by huntCardViewModel.likedHuntsCache.collectAsState()
+  val isLiked = likedHuntsCache.contains(huntId)
+
+  IconButton(
+      onClick = { huntCardViewModel.onLikeClick(huntId) },
+      modifier = modifier.testTag(HuntCardScreenTestTags.LIKE_BUTTON)) {
+        Icon(
+            imageVector = Icons.Default.Favorite,
+            contentDescription = HuntCardScreenStrings.LikeButton,
+            tint =
+                if (isLiked) HuntCardScreenDefaults.LikeRedStrong
+                else HuntCardScreenDefaults.LightGray,
+            modifier = Modifier.size(HuntCardScreenDefaults.IconSize24))
       }
 }

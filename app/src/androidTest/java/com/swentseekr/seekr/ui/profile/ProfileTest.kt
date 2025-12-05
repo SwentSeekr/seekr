@@ -294,4 +294,35 @@ class ProfileScreenTest {
         .assertIsDisplayed()
         .assert(hasText("${doneHunts.size} Hunts done"))
   }
+
+  @Test
+  fun profileScreen_likedHuntsTab_displaysLikedHunts() {
+    val likedHunts = List(3) { createHunt("liked$it", "Liked Hunt $it") }
+    val profile = sampleProfile(likedHunts = likedHunts)
+    setProfileScreen(profile)
+
+    composeTestRule.onNodeWithTag(ProfileTestTags.TAB_LIKED_HUNTS).performClick()
+
+    waitForHuntAndAssertVisible(
+        visibleTag = tagFor(likedHunts.first()), notVisibleTags = emptyList())
+
+    likedHunts.forEachIndexed { index, hunt ->
+      val tag = tagFor(hunt, index)
+      composeTestRule
+          .onNodeWithTag(ProfileTestTags.PROFILE_HUNTS_LIST)
+          .performScrollToNode(hasTestTag(tag))
+      composeTestRule.onNodeWithTag(tag).assertIsDisplayed()
+    }
+  }
+
+  @Test
+  fun profileScreen_likedHuntsTab_showsEmptyMessage_whenNoLikedHunts() {
+    val profile = sampleProfile(likedHunts = emptyList())
+    setProfileScreen(profile)
+
+    composeTestRule.onNodeWithTag(ProfileTestTags.TAB_LIKED_HUNTS).performClick()
+
+    composeTestRule.onNodeWithTag(ProfileTestTags.PROFILE_HUNTS_LIST).assertIsDisplayed()
+    composeTestRule.onNodeWithTag(ProfileTestTags.EMPTY_HUNTS_MESSAGE).assertIsDisplayed()
+  }
 }

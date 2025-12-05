@@ -272,16 +272,25 @@ class HuntCardViewModelTest {
     assertTrue(
         state.errorMsg?.contains(HuntCardViewModelConstants.ErrorDeletingReviewSetMsg) == true)
   }
+
   /** Test that check the change of the hunt state from dislike to like and from like to dislike */
   @Test
   fun onLikeClick_isLiked() = runTest {
+    val userId = "test_user"
+
+    fakeProRepository.addProfile(Profile(uid = userId))
+    viewModel.initialize(userId, testHunt)
+    advanceUntilIdle()
+
     assertFalse(viewModel.uiState.value.isLiked)
 
     viewModel.onLikeClick(TEST_HUNT_ID)
-    assertEquals(true, viewModel.uiState.value.isLiked)
+    advanceUntilIdle()
+    assertTrue(viewModel.uiState.value.isLiked)
 
     viewModel.onLikeClick(TEST_HUNT_ID)
-    assertEquals(false, viewModel.uiState.value.isLiked)
+    advanceUntilIdle()
+    assertFalse(viewModel.uiState.value.isLiked)
   }
 
   /** Test that onDoneClick with null hunt sets error message */
@@ -300,18 +309,16 @@ class HuntCardViewModelTest {
   @Test
   fun onDoneClick_marks_hunt_as_achieved() = runTest {
     val userId = HuntCardViewModelTestConstantsString.TestUser
-
     fakeProRepository.addProfile(Profile(uid = userId))
-
     viewModel.initialize(userId, testHunt)
-
+    advanceUntilIdle()
     viewModel.onDoneClick()
-    advanceUntilIdle() // wait for coroutine
-
+    advanceUntilIdle()
     assertTrue(viewModel.uiState.value.isAchieved)
     val doneHunts = fakeProRepository.getDoneHunts(userId)
     assertTrue(doneHunts.contains(testHunt))
   }
+
   /** Test that check that the hunt is deleted */
   @Test
   fun onDeleteClick_deletesHunt() = runTest {
@@ -324,7 +331,7 @@ class HuntCardViewModelTest {
       fail(HuntCardViewModelTestConstantsString.IllegalExeption_Message)
     } catch (e: IllegalArgumentException) {
       assertEquals(
-          "${ HuntCardViewModelTestConstantsString.MessageErrorStart } ${testHunt.uid} ${HuntCardViewModelTestConstantsString.MessageErrorEnd}",
+          "${HuntCardViewModelTestConstantsString.MessageErrorStart} ${testHunt.uid} ${HuntCardViewModelTestConstantsString.MessageErrorEnd}",
           e.message)
     }
   }
@@ -415,5 +422,40 @@ class HuntCardViewModelTest {
     } catch (e: IllegalArgumentException) {
       assertEquals(HuntCardViewModelTestConstantsString.ErrorMessageNotFound, e.message)
     }
+  }
+
+  /** Test that onLikeClick with null currentUserId returns early */
+  @Test
+  fun onLikeClick_withNullUserId_returnsEarly() = runTest {
+    viewModel.onLikeClick(TEST_HUNT_ID)
+    advanceUntilIdle()
+
+    val state = viewModel.uiState.value
+    assertNull(state.currentUserId)
+    assertFalse(state.isLiked)
+  }
+
+  /** Test that onLikeClick toggles like state multiple times */
+  @Test
+  fun onLikeClick_multipleTimes_togglesCorrectly() = runTest {
+    val userId = "test_user"
+
+    fakeProRepository.addProfile(Profile(uid = userId))
+    viewModel.initialize(userId, testHunt)
+    advanceUntilIdle()
+
+    assertFalse(viewModel.uiState.value.isLiked)
+
+    viewModel.onLikeClick(TEST_HUNT_ID)
+    advanceUntilIdle()
+    assertTrue(viewModel.uiState.value.isLiked)
+
+    viewModel.onLikeClick(TEST_HUNT_ID)
+    advanceUntilIdle()
+    assertFalse(viewModel.uiState.value.isLiked)
+
+    viewModel.onLikeClick(TEST_HUNT_ID)
+    advanceUntilIdle()
+    assertTrue(viewModel.uiState.value.isLiked)
   }
 }
