@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.google.android.gms.maps.model.LatLng
@@ -29,7 +30,7 @@ fun BaseAddPointsMapScreen(
   var showNameDialog by remember { mutableStateOf(false) }
   var tempLatLng by remember { mutableStateOf<LatLng?>(null) }
 
-  var pendingLocation by remember { mutableStateOf<Location?>(null) }
+  var pendingLocation by rememberSaveable { mutableStateOf<Location?>(null) }
 
   val imagePickerLauncher =
       rememberLauncherForActivityResult(

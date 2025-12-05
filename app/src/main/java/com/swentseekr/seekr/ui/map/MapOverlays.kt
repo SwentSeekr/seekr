@@ -20,16 +20,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
+import com.swentseekr.seekr.ui.theme.Black
 import com.swentseekr.seekr.ui.theme.GrayDislike
 import com.swentseekr.seekr.ui.theme.Green
 import com.swentseekr.seekr.ui.theme.White
@@ -155,17 +154,14 @@ private fun BoxScope.FocusedHuntBottomCard(
               }
         }
 
-    if (isCheckpointImageFullscreen) {
-      val (_, description, imageUrl) = currentCheckpointInfo ?: Triple("", "", null)
+    val imageUrl = currentCheckpointInfo?.third
+    val description = currentCheckpointInfo?.second.orEmpty()
 
-      if (!imageUrl.isNullOrBlank()) {
-        FullscreenCheckpointImage(
-            imageUrl = imageUrl,
-            contentDescription = description,
-            onClose = { isCheckpointImageFullscreen = false })
-      } else {
-        isCheckpointImageFullscreen = false
-      }
+    if (isCheckpointImageFullscreen && !imageUrl.isNullOrBlank()) {
+      FullscreenCheckpointImage(
+          imageUrl = imageUrl,
+          contentDescription = description,
+          onClose = { isCheckpointImageFullscreen = false })
     }
   }
 }
@@ -177,29 +173,37 @@ internal fun FullscreenCheckpointImage(
     onClose: () -> Unit
 ) {
   Dialog(onDismissRequest = onClose) {
-    Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.9f))) {
-      AsyncImage(
-          model = imageUrl,
-          contentDescription = contentDescription,
-          modifier = Modifier.align(Alignment.Center).fillMaxWidth().fillMaxHeight(0.9f),
-          contentScale = ContentScale.Fit,
-          error = painterResource(R.drawable.empty_image),
-      )
+    Box(
+        modifier =
+            Modifier.fillMaxSize()
+                .background(Black.copy(alpha = MapScreenDefaults.BackgroundOpacity))) {
+          AsyncImage(
+              model = imageUrl,
+              contentDescription = contentDescription,
+              modifier =
+                  Modifier.align(Alignment.Center)
+                      .fillMaxWidth()
+                      .fillMaxHeight(MapScreenDefaults.BackgroundOpacity),
+              contentScale = ContentScale.Fit,
+              error = painterResource(R.drawable.empty_image),
+          )
 
-      IconButton(
-          onClick = onClose,
-          modifier =
-              Modifier.align(Alignment.TopEnd)
-                  .padding(16.dp)
-                  .size(36.dp)
-                  .background(color = Color.Black.copy(alpha = 0.6f), shape = CircleShape)
-                  .testTag(MapScreenTestTags.CLOSE_CHECKPOINT_IMAGE)) {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = MapScreenStrings.Cancel,
-                tint = Color.White)
-          }
-    }
+          IconButton(
+              onClick = onClose,
+              modifier =
+                  Modifier.align(Alignment.TopEnd)
+                      .padding(MapScreenDefaults.IconPadding)
+                      .size(MapScreenDefaults.IconSize)
+                      .background(
+                          color = Black.copy(alpha = MapScreenDefaults.IconBackground),
+                          shape = CircleShape)
+                      .testTag(MapScreenTestTags.CLOSE_CHECKPOINT_IMAGE)) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = MapScreenStrings.Cancel,
+                    tint = White)
+              }
+        }
   }
 }
 
