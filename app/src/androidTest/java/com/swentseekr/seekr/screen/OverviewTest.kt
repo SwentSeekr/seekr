@@ -26,7 +26,6 @@ import com.swentseekr.seekr.ui.profile.Profile
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -43,8 +42,6 @@ class OverviewScreenTest {
   private lateinit var fakeReviewRepository: HuntReviewRepositoryLocal
   private lateinit var fakeProfileRepository: ProfileRepositoryLocal
   private lateinit var fakeImageRepository: ReviewImageRepositoryLocal
-  private val testDispatcher = StandardTestDispatcher()
-
   private val testHunt =
       createOverviewTestHunt(
           uid = "test_hunt_1",
