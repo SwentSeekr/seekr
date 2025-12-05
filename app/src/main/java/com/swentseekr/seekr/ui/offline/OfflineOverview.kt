@@ -16,19 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 
-/**
- * Overview screen displayed when the user is offline.
- *
- * Shows an informational card explaining offline capabilities and a primary action to access
- * downloaded hunts.
- *
- * @param profile The current user profile, if available. Currently not rendered but may be used in
- *   future enhancements (e.g., personalized messaging).
- * @param modifier Modifier used to adjust layout or apply additional styling from the parent
- *   composable.
- * @param onShowDownloadedHunts Callback invoked when the user taps the action button to navigate to
- *   the list of offline-available hunts.
- */
+/** Overview screen displayed when the user is offline. */
 @Composable
 fun OfflineOverviewScreen(
     modifier: Modifier = Modifier,
@@ -55,7 +43,9 @@ fun OfflineOverviewScreen(
                       Icon(
                           imageVector = Icons.Default.Warning,
                           contentDescription = OfflineConstants.OVERVIEW_ICON,
-                          modifier = Modifier.size(OfflineConstants.OFFLINE_ICON_SIZE))
+                          modifier = Modifier.size(OfflineConstants.OFFLINE_ICON_SIZE),
+                          tint = MaterialTheme.colorScheme.onBackground // black
+                          )
                       Spacer(modifier = Modifier.height(OfflineConstants.ICON_SPACING))
                       Text(
                           text = OfflineConstants.OFFLINE_OVERVIEW_MESSAGE,
@@ -72,7 +62,9 @@ fun OfflineOverviewScreen(
               shape = OfflineConstants.BUTTON_SHAPE,
               colors =
                   ButtonDefaults.buttonColors(
-                      containerColor = OfflineConstants.BUTTON_CONTAINER_COLOR),
+                      containerColor = OfflineConstants.BUTTON_CONTAINER_COLOR,
+                      contentColor = MaterialTheme.colorScheme.onPrimary // white text
+                      ),
               modifier = Modifier.fillMaxWidth(OfflineConstants.BUTTON_WIDTH_RATIO)) {
                 Text(text = OfflineConstants.SHOW_DOWNLOADED_HUNTS_BUTTON)
               }
