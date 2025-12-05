@@ -19,6 +19,35 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 
+/**
+ * Full-screen offline requirement screen.
+ *
+ * This screen is displayed when:
+ * - The user has no network connectivity, **and**
+ * - The app has no sufficient cached data to offer a meaningful offline experience.
+ *
+ * Responsibilities:
+ * - Clearly communicate that online connectivity is required to proceed.
+ * - Provide a single, prominent action for the user to open system network settings.
+ *
+ * Visual structure:
+ * - A centered column containing:
+ *     - A warning icon.
+ *     - A title indicating that the user is offline.
+ *     - A short explanatory message.
+ *     - A button that opens device settings (via [onOpenSettings]).
+ *
+ * Layout and colors are delegated to [OfflineConstants] and theme values to ensure a consistent
+ * look across all offline-related screens.
+ *
+ * Typical usage:
+ * - Invoked from [com.swentseekr.seekr.ui.navigation.SeekrRootApp] when the device is offline and
+ *   no cached profile is available.
+ *
+ * @param modifier Optional [Modifier] to customize the root [Surface].
+ * @param onOpenSettings Callback invoked when the user taps the "Open settings" button. The caller
+ *   usually launches an intent to the system's network / wireless settings.
+ */
 @Composable
 fun OfflineRequiredScreen(modifier: Modifier = Modifier, onOpenSettings: () -> Unit) {
   Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -54,6 +83,13 @@ fun OfflineRequiredScreen(modifier: Modifier = Modifier, onOpenSettings: () -> U
   }
 }
 
+/**
+ * Design-time preview of [OfflineRequiredScreen].
+ *
+ * This preview showcases the offline-required UI state with a no-op settings action. It is useful
+ * for iterating on layout, typography and spacing without running the app or simulating an actual
+ * offline scenario.
+ */
 @Preview
 @Composable
 fun OfflineRequiredScreenPreview() {
