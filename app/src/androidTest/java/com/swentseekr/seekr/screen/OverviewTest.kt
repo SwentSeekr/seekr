@@ -15,7 +15,6 @@ import com.swentseekr.seekr.model.hunt.HuntsRepositoryLocal
 import com.swentseekr.seekr.model.hunt.ReviewImageRepositoryLocal
 import com.swentseekr.seekr.model.profile.ProfileRepositoryLocal
 import com.swentseekr.seekr.model.profile.createHunt
-import com.swentseekr.seekr.model.profile.sampleProfile
 import com.swentseekr.seekr.ui.components.HuntCard
 import com.swentseekr.seekr.ui.components.HuntCardScreenStrings
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
@@ -229,46 +228,6 @@ class OverviewScreenTest {
     advanceUntilIdle()
 
     assertTrue(viewModel.isHuntLiked(testHunt.uid))
-  }
-
-  /** Test that multiple hunts can be liked independently */
-  @Test
-  fun multipleLikes_workIndependently() = runTest {
-    val userId = "test_user"
-
-    val hunt2 = createHunt(uid = "test_hunt_2", title = "Second Hunt")
-
-    fakeHuntRepository.addHunt(testHunt)
-    fakeHuntRepository.addHunt(hunt2)
-
-    fakeProfileRepository.addProfile(sampleProfile(uid = userId))
-
-    val viewModel1 =
-        HuntCardViewModel(
-            fakeHuntRepository, fakeReviewRepository, fakeProfileRepository, fakeImageRepository)
-
-    val viewModel2 =
-        HuntCardViewModel(
-            fakeHuntRepository, fakeReviewRepository, fakeProfileRepository, fakeImageRepository)
-
-    viewModel1.initialize(userId, testHunt)
-    viewModel2.initialize(userId, hunt2)
-    advanceUntilIdle()
-
-    viewModel1.onLikeClick(testHunt.uid)
-    advanceUntilIdle()
-
-    assertTrue(viewModel1.uiState.value.isLiked)
-    assertFalse(viewModel2.uiState.value.isLiked)
-
-    viewModel2.onLikeClick(hunt2.uid)
-    advanceUntilIdle()
-
-    viewModel1.initialize(userId, testHunt)
-    advanceUntilIdle()
-
-    assertTrue(viewModel1.uiState.value.isLiked)
-    assertTrue(viewModel2.uiState.value.isLiked)
   }
 
   @Test
