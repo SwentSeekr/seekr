@@ -1,6 +1,10 @@
 package com.swentseekr.seekr.ui.offline
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
@@ -19,7 +23,6 @@ import com.swentseekr.seekr.ui.profile.ModernEmptyHuntsState
 import com.swentseekr.seekr.ui.profile.ModernProfileHeader
 import com.swentseekr.seekr.ui.profile.Profile
 import com.swentseekr.seekr.ui.profile.ProfileTab
-import com.swentseekr.seekr.ui.theme.GrayDislike
 
 enum class OfflineProfileTab {
   MY_HUNTS,
@@ -34,13 +37,13 @@ fun OfflineCachedProfileScreen(profile: Profile?, modifier: Modifier = Modifier)
 
   Surface(
       modifier = modifier.fillMaxSize(),
-      color = MaterialTheme.colorScheme.onPrimary,
+      color = MaterialTheme.colorScheme.onPrimary, // from theme (White)
   ) {
     if (currentProfile == null) {
       Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(
-            text = OfflineProfileConstants.OFFLINE_NO_PROFILE,
-            color = GrayDislike,
+            text = OfflineConstants.OFFLINE_NO_PROFILE,
+            color = MaterialTheme.colorScheme.onSecondary, // GrayDislike via theme
             style = MaterialTheme.typography.bodyMedium)
       }
       return@Surface
@@ -59,14 +62,7 @@ fun OfflineCachedProfileScreen(profile: Profile?, modifier: Modifier = Modifier)
 
     Column(modifier = Modifier.fillMaxSize()) {
 
-      // ---------------------------------
       // 1. HEADER – reuse ModernProfileHeader
-      // ---------------------------------
-      // We pass:
-      // - reviewCount = 0 for now (offline doesn’t seem to have a review count field)
-      //   → layout is identical; label will show "- 0 reviews".
-      // - isMyProfile = false, testPublic = true so top-right “close/settings” logic
-      //   doesn’t depend on auth state. You can tweak this if you want a specific icon.
       ModernProfileHeader(
           profile = currentProfile,
           reviewCount = 0,
@@ -76,9 +72,7 @@ fun OfflineCachedProfileScreen(profile: Profile?, modifier: Modifier = Modifier)
           onGoBack = {},
           onReviewsClick = {})
 
-      // ---------------------------------
       // 2. TABS – reuse ModernCustomToolbar
-      // ---------------------------------
       ModernCustomToolbar(
           selectedTab = selectedProfileTab,
           onTabSelected = { newTab ->
@@ -91,9 +85,7 @@ fun OfflineCachedProfileScreen(profile: Profile?, modifier: Modifier = Modifier)
             offlineViewModel.selectTab(mappedOfflineTab)
           })
 
-      // ---------------------------------
       // 3. HUNTS LIST / EMPTY STATE – reuse ModernEmptyHuntsState + HuntCard
-      // ---------------------------------
       LazyColumn(
           modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             if (huntsToDisplay.isEmpty()) {
@@ -105,8 +97,8 @@ fun OfflineCachedProfileScreen(profile: Profile?, modifier: Modifier = Modifier)
                     modifier =
                         Modifier.fillMaxWidth()
                             .padding(
-                                vertical = OfflineProfileConstants.SCREEN_VERTICAL_PADDING,
-                                horizontal = OfflineProfileConstants.SCREEN_HORIZONTAL_PADDING))
+                                vertical = OfflineConstants.PROFILE_SCREEN_VERTICAL_PADDING,
+                                horizontal = OfflineConstants.PROFILE_SCREEN_HORIZONTAL_PADDING))
               }
             }
           }
