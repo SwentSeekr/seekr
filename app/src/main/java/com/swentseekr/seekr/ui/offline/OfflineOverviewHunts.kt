@@ -24,12 +24,39 @@ import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding16
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
 
+/**
+ * Offline variant of the overview hunts screen.
+ *
+ * This composable mirrors the online overview experience but operates purely on a provided list of
+ * [Hunt]s that are available offline. It reuses the same UI building blocks as the online screen:
+ * - [ModernHeader] for the top title/header section.
+ * - [ModernSearchBar] for client-side search.
+ * - [ModernFilterBar] for filtering by [HuntStatus] and [Difficulty].
+ * - [HuntCard] for rendering each hunt in the list.
+ *
+ * Behavior:
+ * - The provided [hunts] are passed into [OfflineOverviewViewModel], which:
+ *     - Maintains the search query and filter state.
+ *     - Exposes a derived list of hunts via its UI state.
+ * - Searching and filtering are performed locally in memory, without network calls.
+ * - Tapping a hunt triggers [onHuntClick] with the hunt's unique ID.
+ *
+ * The root container uses the `onPrimary` color from the theme, keeping visual parity with the rest
+ * of the offline UI.
+ *
+ * @param hunts List of hunts available offline. This is the source data for the offline overview;
+ *   no remote fetching is performed.
+ * @param modifier Optional [Modifier] applied to the outermost container.
+ * @param onHuntClick Callback invoked when a hunt card is tapped. The parameter is the unique hunt
+ *   ID, which the caller can use to navigate to an offline hunt-details screen.
+ */
 @Composable
 fun OfflineOverviewHuntsScreen(
     hunts: List<Hunt>,
     modifier: Modifier = Modifier,
     onHuntClick: (String) -> Unit = {},
 ) {
+  // ViewModel responsible for holding query, filters, and derived UI state.
   val offlineViewModel = remember(hunts) { OfflineOverviewViewModel(hunts) }
   val uiState by offlineViewModel.uiState.collectAsState()
   val query = offlineViewModel.searchQuery
@@ -40,10 +67,10 @@ fun OfflineOverviewHuntsScreen(
         modifier = Modifier.fillMaxWidth().testTag(OverviewScreenTestTags.OVERVIEW_SCREEN),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-      // HEADER
+      // HEADER – same as online overview.
       ModernHeader()
 
-      // SEARCH BAR
+      // SEARCH BAR – local, offline search.
       ModernSearchBar(
           query = query,
           onQueryChange = { offlineViewModel.onSearchChange(it) },
@@ -52,7 +79,7 @@ fun OfflineOverviewHuntsScreen(
           onClear = { offlineViewModel.onClearSearch() },
           modifier = modifier)
 
-      // FILTER BAR
+      // FILTER BAR – offline filters for status and difficulty.
       ModernFilterBar(
           selectedStatus = uiState.selectedStatus,
           selectedDifficulty = uiState.selectedDifficulty,
@@ -63,7 +90,7 @@ fun OfflineOverviewHuntsScreen(
             offlineViewModel.onDifficultyFilterSelect(difficulty)
           })
 
-      // HUNTS LIST
+      // HUNTS LIST – filtered, searched offline list of HuntCard items.
       LazyColumn(
           modifier = modifier.testTag(OverviewScreenTestTags.HUNT_LIST).fillMaxWidth(),
           horizontalAlignment = Alignment.CenterHorizontally,
@@ -89,7 +116,13 @@ fun OfflineOverviewHuntsScreen(
   }
 }
 
-// Optional very simple preview with empty list
+/**
+ * Design-time preview of [OfflineOverviewHuntsScreen].
+ *
+ * This simple preview renders the screen with an empty list of hunts. It is mainly useful for
+ * verifying layout, theming, and overall structure in the IDE without requiring a running
+ * application or real offline data.
+ */
 @Preview
 @Composable
 fun OfflineOverviewHuntsScreenPreview() {
