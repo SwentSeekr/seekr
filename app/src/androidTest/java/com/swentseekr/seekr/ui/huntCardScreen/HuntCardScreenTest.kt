@@ -294,4 +294,81 @@ class HuntCardScreenTest {
     // The "No Reviews" text should be visible
     composeTestRule.onNodeWithText(HuntCardScreenStrings.NoReviews).assertExists()
   }
+
+  @Test
+  fun likeButton_reflectsLikedHuntsCacheInitially() {
+    val fakeVm = FakeHuntCardViewModel(createFakeHunt())
+    fakeVm.setLiked(true)
+
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = HuntCardScreenConstantStrings.TestHunt,
+          huntCardViewModel = fakeVm,
+          navController = rememberNavController())
+    }
+
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.LIKE_BUTTON).assertExists()
+  }
+
+  @Test
+  fun likeButton_togglesStateAndUi_onClick() {
+    val fakeVm = FakeHuntCardViewModel(createFakeHunt())
+
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = HuntCardScreenConstantStrings.TestHunt,
+          huntCardViewModel = fakeVm,
+          navController = rememberNavController())
+    }
+
+    val likeButton = composeTestRule.onNodeWithTag(HuntCardScreenTestTags.LIKE_BUTTON)
+
+    assertTrue(!fakeVm.uiState.value.isLiked)
+
+    likeButton.performClick()
+    composeTestRule.waitForIdle()
+    assertTrue(fakeVm.uiState.value.isLiked)
+
+    likeButton.performClick()
+    composeTestRule.waitForIdle()
+    assertTrue(!fakeVm.uiState.value.isLiked)
+  }
+
+  @Test
+  fun likeButton_updatesUiBasedOnLikedHuntsCache() {
+    val fakeVm = FakeHuntCardViewModel(createFakeHunt())
+    fakeVm.setLikedHunts(setOf(HuntCardScreenConstantStrings.TestHunt))
+
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = HuntCardScreenConstantStrings.TestHunt,
+          huntCardViewModel = fakeVm,
+          navController = rememberNavController())
+    }
+
+    val likeButton = composeTestRule.onNodeWithTag(HuntCardScreenTestTags.LIKE_BUTTON)
+
+    assertTrue(fakeVm.uiState.value.isLiked)
+
+    likeButton.performClick()
+    composeTestRule.waitForIdle()
+    assertTrue(!fakeVm.uiState.value.isLiked)
+  }
+
+  @Test
+  fun launcedEffects_loadCurrentUserAndHunt() {
+    val fakeVm = FakeHuntCardViewModel(createFakeHunt())
+
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = HuntCardScreenConstantStrings.TestHunt,
+          huntCardViewModel = fakeVm,
+          navController = rememberNavController())
+    }
+
+    composeTestRule.waitForIdle()
+
+    assertTrue(fakeVm.uiState.value.currentUserId != null)
+    assertTrue(fakeVm.uiState.value.hunt?.uid == HuntCardScreenConstantStrings.TestHunt)
+  }
 }

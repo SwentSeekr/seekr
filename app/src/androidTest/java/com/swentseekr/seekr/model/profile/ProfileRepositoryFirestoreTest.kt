@@ -516,4 +516,78 @@ class ProfileRepositoryFirestoreTest {
     assertNotNull(profile)
     println("deleteCurrentProfilePicture with non-existent file passed")
   }
+
+  @Test
+  fun addLikedHunt_doesNotDuplicate() = runTest {
+    val uid = auth.currentUser!!.uid
+    db.collection("hunts")
+        .document(hunt.uid)
+        .set(
+            mapOf(
+                "uid" to hunt.uid,
+                "title" to hunt.title,
+                "description" to hunt.description,
+                "authorId" to hunt.authorId,
+                "status" to hunt.status.name,
+                "difficulty" to hunt.difficulty.name,
+                "time" to hunt.time,
+                "distance" to hunt.distance,
+                "reviewRate" to hunt.reviewRate,
+                "mainImageUrl" to hunt.mainImageUrl,
+                "start" to
+                    mapOf(
+                        "latitude" to hunt.start.latitude,
+                        "longitude" to hunt.start.longitude,
+                        "name" to hunt.start.name),
+                "end" to
+                    mapOf(
+                        "latitude" to hunt.end.latitude,
+                        "longitude" to hunt.end.longitude,
+                        "name" to hunt.end.name),
+                "middlePoints" to
+                    hunt.middlePoints.map { mp ->
+                      mapOf(
+                          "latitude" to mp.latitude, "longitude" to mp.longitude, "name" to mp.name)
+                    }))
+        .await()
+
+    val huntMap = huntToMap(hunt)
+    db.collection("profiles").document(uid).set(mapOf("likedHunts" to listOf(huntMap))).await()
+
+    repository.addLikedHunt(uid, hunt.uid)
+
+    val snapshot = db.collection("profiles").document(uid).get().await()
+    @Suppress("UNCHECKED_CAST")
+    val likedHunts = snapshot.get("likedHunts") as? List<Map<String, Any?>> ?: emptyList()
+
+    assertEquals(1, likedHunts.size)
+    assertEquals(hunt.uid, likedHunts[0]["uid"])
+  }
+
+  @Test
+  fun removeLikedHunt_removesHuntSuccessfully() = runTest {
+    val uid = auth.currentUser!!.uid
+    val huntMap = huntToMap(hunt)
+    db.collection("profiles").document(uid).set(mapOf("likedHunts" to listOf(huntMap))).await()
+    repository.removeLikedHunt(uid, hunt.uid)
+    val snapshot = db.collection("profiles").document(uid).get().await()
+    @Suppress("UNCHECKED_CAST")
+    val likedHunts = snapshot.get("likedHunts") as? List<Map<String, Any?>> ?: emptyList()
+
+    assertTrue(likedHunts.isEmpty())
+  }
+
+  @Test
+  fun removeLikedHunt_doesNothingIfNotLiked() = runTest {
+    val uid = auth.currentUser!!.uid
+    db.collection("profiles")
+        .document(uid)
+        .set(mapOf("likedHunts" to emptyList<Map<String, Any?>>()))
+        .await()
+    repository.removeLikedHunt(uid, hunt.uid)
+    val snapshot = db.collection("profiles").document(uid).get().await()
+    @Suppress("UNCHECKED_CAST")
+    val likedHunts = snapshot.get("likedHunts") as? List<Map<String, Any?>> ?: emptyList()
+    assertTrue(likedHunts.isEmpty())
+  }
 }

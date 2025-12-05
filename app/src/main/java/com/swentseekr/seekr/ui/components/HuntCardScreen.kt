@@ -35,7 +35,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -105,14 +104,12 @@ fun HuntCardScreen(
 ) {
   val uiState by huntCardViewModel.uiState.collectAsState()
 
-    LaunchedEffect(Unit) {
-        huntCardViewModel.loadCurrentUserID()
+  LaunchedEffect(Unit) { huntCardViewModel.loadCurrentUserID() }
+  LaunchedEffect(huntId, uiState.currentUserId) {
+    if (uiState.currentUserId != null) {
+      huntCardViewModel.loadHunt(huntId)
     }
-    LaunchedEffect(huntId, uiState.currentUserId) {
-        if (uiState.currentUserId != null) {
-            huntCardViewModel.loadHunt(huntId)
-        }
-    }
+  }
   val hunt = uiState.hunt
   val authorId = hunt?.authorId ?: ""
 
@@ -679,37 +676,37 @@ fun LikeButton(
     huntId: String,
     modifier: Modifier = Modifier
 ) {
-  //val uiState by huntCardViewModel.uiState.collectAsState()
-  //val isLiked = uiState.isLiked
-    val likedHuntsCache by huntCardViewModel.likedHuntsCache.collectAsState()
-    val isLiked = likedHuntsCache.contains(huntId)
+  // val uiState by huntCardViewModel.uiState.collectAsState()
+  // val isLiked = uiState.isLiked
+  val likedHuntsCache by huntCardViewModel.likedHuntsCache.collectAsState()
+  val isLiked = likedHuntsCache.contains(huntId)
 
   /*Surface(
-      modifier = modifier,
-      shape = CircleShape,
-      color = MaterialTheme.colorScheme.onPrimary.copy(alpha = HuntCardScreenDefaults.Alpha)) {
-        IconButton(
-            onClick = { huntCardViewModel.onLikeClick(huntId) },
-            modifier = Modifier.testTag(HuntCardScreenTestTags.LIKE_BUTTON)) {
-              Icon(
-                  imageVector = Icons.Default.Favorite,
-                  contentDescription = HuntCardScreenStrings.LikeButton,
-                  tint =
-                      if (isLiked) HuntCardScreenDefaults.LikeRedStrong
-                      else HuntCardScreenDefaults.LightGray,
-                  modifier = Modifier.size(HuntCardScreenDefaults.IconSize24))
-            }
-      }*/
-
+  modifier = modifier,
+  shape = CircleShape,
+  color = MaterialTheme.colorScheme.onPrimary.copy(alpha = HuntCardScreenDefaults.Alpha)) {
     IconButton(
         onClick = { huntCardViewModel.onLikeClick(huntId) },
-        modifier = modifier.testTag(HuntCardScreenTestTags.LIKE_BUTTON)
-    ) {
+        modifier = Modifier.testTag(HuntCardScreenTestTags.LIKE_BUTTON)) {
+          Icon(
+              imageVector = Icons.Default.Favorite,
+              contentDescription = HuntCardScreenStrings.LikeButton,
+              tint =
+                  if (isLiked) HuntCardScreenDefaults.LikeRedStrong
+                  else HuntCardScreenDefaults.LightGray,
+              modifier = Modifier.size(HuntCardScreenDefaults.IconSize24))
+        }
+  }*/
+
+  IconButton(
+      onClick = { huntCardViewModel.onLikeClick(huntId) },
+      modifier = modifier.testTag(HuntCardScreenTestTags.LIKE_BUTTON)) {
         Icon(
             imageVector = Icons.Default.Favorite,
             contentDescription = HuntCardScreenStrings.LikeButton,
-            tint = if (isLiked) HuntCardScreenDefaults.LikeRedStrong else HuntCardScreenDefaults.LightGray,
-            modifier = Modifier.size(HuntCardScreenDefaults.IconSize24)
-        )
-    }
+            tint =
+                if (isLiked) HuntCardScreenDefaults.LikeRedStrong
+                else HuntCardScreenDefaults.LightGray,
+            modifier = Modifier.size(HuntCardScreenDefaults.IconSize24))
+      }
 }

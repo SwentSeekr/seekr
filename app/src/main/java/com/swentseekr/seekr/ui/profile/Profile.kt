@@ -41,7 +41,6 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.profile.mockProfileData
 import com.swentseekr.seekr.ui.components.HuntCard
 import com.swentseekr.seekr.ui.components.MAX_RATING
-import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import com.swentseekr.seekr.ui.profile.ProfileScreenConstants.HUNTS_DONE_LABEL
 import com.swentseekr.seekr.ui.profile.ProfileScreenConstants.MULTIPLE_REVIEWS_LABEL
 import com.swentseekr.seekr.ui.profile.ProfileScreenConstants.ONE_DECIMAL_FORMAT
@@ -136,51 +135,47 @@ fun ProfileScreen(
   val context = LocalContext.current
   val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(userId) {
-        if (!testMode) viewModel.loadProfile(userId, context)
-    }
+  LaunchedEffect(userId) { if (!testMode) viewModel.loadProfile(userId, context) }
 
-    val profile = if (testMode) {
+  val profile =
+      if (testMode) {
         testProfile ?: mockProfileData()
-    } else {
+      } else {
         uiState.profile
-    }
+      }
 
-
-    // LOADING UI
-        AnimatedVisibility(visible = uiState.isLoading, enter = fadeIn(), exit = fadeOut()) {
-          Box(
-              modifier =
-                  Modifier.fillMaxSize()
-                      .background(ProfileUIConstantsDefaults.LightGrayBackground)
-                      .testTag(ProfileTestTags.PROFILE_LOADING),
-              contentAlignment = Alignment.Center) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center) {
-                      CircularProgressIndicator(
-                          color = ProfileUIConstantsDefaults.LoadingIndicatorGreen)
-                      Text(
-                          text = ProfileConstants.LOADING_PROFILE,
-                          color = ProfileUIConstantsDefaults.LoadingGray,
-                          fontSize = ProfileConstants.TEXT_SIZE_LOADING,
-                          modifier = Modifier.padding(top = ProfileConstants.SIZE_MEDIUM_DP))
-                    }
+  // LOADING UI
+  AnimatedVisibility(visible = uiState.isLoading, enter = fadeIn(), exit = fadeOut()) {
+    Box(
+        modifier =
+            Modifier.fillMaxSize()
+                .background(ProfileUIConstantsDefaults.LightGrayBackground)
+                .testTag(ProfileTestTags.PROFILE_LOADING),
+        contentAlignment = Alignment.Center) {
+          Column(
+              horizontalAlignment = Alignment.CenterHorizontally,
+              verticalArrangement = Arrangement.Center) {
+                CircularProgressIndicator(color = ProfileUIConstantsDefaults.LoadingIndicatorGreen)
+                Text(
+                    text = ProfileConstants.LOADING_PROFILE,
+                    color = ProfileUIConstantsDefaults.LoadingGray,
+                    fontSize = ProfileConstants.TEXT_SIZE_LOADING,
+                    modifier = Modifier.padding(top = ProfileConstants.SIZE_MEDIUM_DP))
               }
         }
+  }
 
-        if (uiState.errorMsg != null) {
-          Box(
-              modifier =
-                  Modifier.fillMaxSize().background(ProfileUIConstantsDefaults.LightGrayBackground),
-              contentAlignment = Alignment.Center) {
-                Text("Error: ${uiState.errorMsg}", color = ProfileUIConstantsDefaults.ErrorRed)
-              }
-          return
+  if (uiState.errorMsg != null) {
+    Box(
+        modifier =
+            Modifier.fillMaxSize().background(ProfileUIConstantsDefaults.LightGrayBackground),
+        contentAlignment = Alignment.Center) {
+          Text("Error: ${uiState.errorMsg}", color = ProfileUIConstantsDefaults.ErrorRed)
         }
+    return
+  }
 
-        uiState.profile
-
+  uiState.profile
 
   if (profile == null) {
     AnimatedVisibility(visible = !uiState.isLoading, enter = fadeIn(), exit = fadeOut()) {
@@ -235,12 +230,12 @@ fun ProfileScreen(
 
           // ---- HUNTS LIST ----
 
-            val huntsToDisplay =
-                when (selectedTab) {
-                    ProfileTab.MY_HUNTS -> profile.myHunts
-                    ProfileTab.DONE_HUNTS -> profile.doneHunts
-                    ProfileTab.LIKED_HUNTS -> profile.likedHunts
-                }
+          val huntsToDisplay =
+              when (selectedTab) {
+                ProfileTab.MY_HUNTS -> profile.myHunts
+                ProfileTab.DONE_HUNTS -> profile.doneHunts
+                ProfileTab.LIKED_HUNTS -> profile.likedHunts
+              }
 
           LazyColumn(
               modifier = Modifier.fillMaxSize().testTag(ProfileTestTags.PROFILE_HUNTS_LIST),
@@ -248,7 +243,7 @@ fun ProfileScreen(
                 if (huntsToDisplay.isEmpty()) {
                   item { ModernEmptyHuntsState(selectedTab) }
                 } else {
-                    items(huntsToDisplay.size, key = { huntsToDisplay[it].uid }) { index ->
+                  items(huntsToDisplay.size, key = { huntsToDisplay[it].uid }) { index ->
                     val hunt = huntsToDisplay[index]
 
                     val base = Modifier.testTag(ProfileTestTags.getTestTagForHuntCard(hunt, index))
@@ -258,14 +253,13 @@ fun ProfileScreen(
                             base.clickable { onMyHuntClick(hunt.uid) }
                         else base
 
-                        HuntCard(
-                            hunt = hunt,
-                            isLiked = profile.likedHunts.any { it.uid == hunt.uid },
-                            onLikeClick = { huntId ->
-                                viewModel.toggleLikedHunt(hunt, context)
-                                },
-                            modifier = clickable
-                        )
+                    HuntCard(
+                        hunt = hunt,
+                        isLiked = profile.likedHunts.any { it.uid == hunt.uid },
+                        onLikeClick = { huntId -> viewModel.toggleLikedHunt(hunt, context) },
+                        modifier =
+                            clickable.testTag(
+                                "${ProfileTestTags.getTestTagForHuntCard(hunt, index)}_LIKE_BUTTON"))
                   }
                 }
               }

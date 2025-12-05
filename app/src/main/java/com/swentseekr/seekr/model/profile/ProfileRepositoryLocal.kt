@@ -180,6 +180,7 @@ class ProfileRepositoryLocal : ProfileRepository {
   override suspend fun completeOnboarding(userId: String, pseudonym: String, bio: String) {
     return
   }
+
   override suspend fun addLikedHunt(userId: String, huntId: String) {
     return
   }
@@ -187,5 +188,4 @@ class ProfileRepositoryLocal : ProfileRepository {
   override suspend fun removeLikedHunt(userId: String, huntId: String) {
     return
   }
-
 }

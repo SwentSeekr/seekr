@@ -4,7 +4,6 @@ import android.net.Uri
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.swentseekr.seekr.model.author.Author
@@ -396,16 +395,14 @@ class ProfileRepositoryFirestore(
             .documents
             .mapNotNull { documentToHunt(it) }
             .toMutableList()
-      @Suppress("UNCHECKED_CAST")
-      val likedHuntsData =
-          document[ProfileRepositoryConstants.PROFILE_FIELD_LIKED_HUNTS]
-                  as? List<Map<String, Any?>> ?: emptyList()
+    @Suppress("UNCHECKED_CAST")
+    val likedHuntsData =
+        document[ProfileRepositoryConstants.PROFILE_FIELD_LIKED_HUNTS] as? List<Map<String, Any?>>
+            ?: emptyList()
 
-      val likedHunts =
-          likedHuntsData.mapNotNull { mapToHunt(it) }.toMutableList()
+    val likedHunts = likedHuntsData.mapNotNull { mapToHunt(it) }.toMutableList()
 
-
-      return Profile(
+    return Profile(
         uid = uid,
         author = author,
         myHunts = myHunts,
@@ -430,71 +427,60 @@ class ProfileRepositoryFirestore(
     profilesCollection.document(userId).update(updates).await()
   }
 
-    override suspend fun addLikedHunt(userId: String, huntId: String) {
-        try {
-            val hunt = huntsRepository.getHunt(huntId) ?: return
-            val userDocRef = profilesCollection.document(userId)
-            val snapshot = userDocRef.get().await()
+  override suspend fun addLikedHunt(userId: String, huntId: String) {
+    try {
+      val hunt = huntsRepository.getHunt(huntId) ?: return
+      val userDocRef = profilesCollection.document(userId)
+      val snapshot = userDocRef.get().await()
 
-            @Suppress("UNCHECKED_CAST")
-            val currentList =
-                snapshot[ProfileRepositoryConstants.PROFILE_FIELD_LIKED_HUNTS]
-                        as? List<Map<String, Any?>> ?: emptyList()
+      @Suppress("UNCHECKED_CAST")
+      val currentList =
+          snapshot[ProfileRepositoryConstants.PROFILE_FIELD_LIKED_HUNTS] as? List<Map<String, Any?>>
+              ?: emptyList()
 
-            val alreadyLiked =
-                currentList.any { it[ProfileRepositoryConstants.HUNT_FIELD_UID] == hunt.uid }
+      val alreadyLiked =
+          currentList.any { it[ProfileRepositoryConstants.HUNT_FIELD_UID] == hunt.uid }
 
-            if (alreadyLiked) {
-                Log.i(
-                    ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
-                    "Hunt '${hunt.title}' is already liked by user $userId"
-                )
-                return
-            }
+      if (alreadyLiked) {
+        Log.i(
+            ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
+            "Hunt '${hunt.title}' is already liked by user $userId")
+        return
+      }
 
-            val updatedList = currentList + huntToMap(hunt)
+      val updatedList = currentList + huntToMap(hunt)
 
-            userDocRef
-                .update(ProfileRepositoryConstants.PROFILE_FIELD_LIKED_HUNTS, updatedList)
-                .await()
-
-        } catch (e: Exception) {
-            Log.e(
-                ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
-                "Failed to add liked hunt for user $userId",
-                e
-            )
-            throw e
-        }
+      userDocRef.update(ProfileRepositoryConstants.PROFILE_FIELD_LIKED_HUNTS, updatedList).await()
+    } catch (e: Exception) {
+      Log.e(
+          ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
+          "Failed to add liked hunt for user $userId",
+          e)
+      throw e
     }
+  }
 
-    override suspend fun removeLikedHunt(userId: String, huntId: String) {
-        try {
-            val snapshot = profilesCollection.document(userId).get().await()
+  override suspend fun removeLikedHunt(userId: String, huntId: String) {
+    try {
+      val snapshot = profilesCollection.document(userId).get().await()
 
-            @Suppress("UNCHECKED_CAST")
-            val likedHunts =
-                snapshot[ProfileRepositoryConstants.PROFILE_FIELD_LIKED_HUNTS]
-                        as? List<Map<String, Any?>> ?: return
+      @Suppress("UNCHECKED_CAST")
+      val likedHunts =
+          snapshot[ProfileRepositoryConstants.PROFILE_FIELD_LIKED_HUNTS] as? List<Map<String, Any?>>
+              ?: return
 
-            val updated =
-                likedHunts.filterNot {
-                    it[ProfileRepositoryConstants.HUNT_FIELD_UID] == huntId
-                }
+      val updated = likedHunts.filterNot { it[ProfileRepositoryConstants.HUNT_FIELD_UID] == huntId }
 
-            profilesCollection.document(userId)
-                .update(ProfileRepositoryConstants.PROFILE_FIELD_LIKED_HUNTS, updated)
-                .await()
-
-        } catch (e: Exception) {
-            Log.e(
-                ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
-                "Failed to remove liked hunt for user $userId",
-                e
-            )
-            throw e
-        }
+      profilesCollection
+          .document(userId)
+          .update(ProfileRepositoryConstants.PROFILE_FIELD_LIKED_HUNTS, updated)
+          .await()
+    } catch (e: Exception) {
+      Log.e(
+          ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
+          "Failed to remove liked hunt for user $userId",
+          e)
+      throw e
     }
-
-
+  }
 }

@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
@@ -31,7 +31,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -92,13 +91,13 @@ fun OverviewScreen(
   val uiState by overviewViewModel.uiState.collectAsState()
   val query = overviewViewModel.searchQuery
   val hunts = uiState.hunts
-    val currentUserId by remember {
-        mutableStateOf(huntCardViewModel.uiState.value.currentUserId)
-    }
-    val likedHuntsCache by huntCardViewModel.likedHuntsCache.collectAsState()
+  val currentUserId by remember { mutableStateOf(huntCardViewModel.uiState.value.currentUserId) }
+  val likedHuntsCache by huntCardViewModel.likedHuntsCache.collectAsState()
 
-  LaunchedEffect(Unit) { overviewViewModel.refreshUIState()
-      huntCardViewModel.loadCurrentUserID()}
+  LaunchedEffect(Unit) {
+    overviewViewModel.refreshUIState()
+    huntCardViewModel.loadCurrentUserID()
+  }
 
   Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.onPrimary)) {
     Column(
@@ -124,31 +123,32 @@ fun OverviewScreen(
           onStatusSelected = { overviewViewModel.onStatusFilterSelect(it) },
           onDifficultySelected = { overviewViewModel.onDifficultyFilterSelect(it) })
 
-        val likedHuntsCache by huntCardViewModel.likedHuntsCache.collectAsState()
+      val likedHuntsCache by huntCardViewModel.likedHuntsCache.collectAsState()
 
-        // HUNTS LIST
+      // HUNTS LIST
       LazyColumn(
           modifier = modifier.testTag(OverviewScreenTestTags.HUNT_LIST).fillMaxWidth(),
           contentPadding = PaddingValues(bottom = OverviewScreenDefaults.VerticalPadding16),
           horizontalAlignment = Alignment.CenterHorizontally) {
             items(hunts, key = { it.hunt.uid }) { hunt ->
-              //val hunt = hunts[index]
-                val isLiked =  likedHuntsCache.contains(hunt.hunt.uid)
+              // val hunt = hunts[index]
+              val isLiked = likedHuntsCache.contains(hunt.hunt.uid)
 
-
-                HuntCard(
+              HuntCard(
                   hunt.hunt,
                   modifier =
                       modifier
                           .testTag(
-                              if (hunts.lastIndex  == hunts.size - 1) OverviewScreenTestTags.LAST_HUNT_CARD
+                              if (hunts.lastIndex == hunts.size - 1)
+                                  OverviewScreenTestTags.LAST_HUNT_CARD
                               else OverviewScreenTestTags.HUNT_CARD)
                           .clickable { onHuntClick(hunt.hunt.uid) },
                   isLiked = likedHuntsCache.contains(hunt.hunt.uid),
                   onLikeClick = { huntId ->
-                      huntCardViewModel.onLikeClick(huntId)
-                     // overviewViewModel.refreshUIState()
-                  },)
+                    huntCardViewModel.onLikeClick(huntId)
+                    // overviewViewModel.refreshUIState()
+                  },
+              )
 
               Spacer(modifier = Modifier.height(OverviewScreenDefaults.ListItemSpacing))
             }

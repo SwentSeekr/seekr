@@ -234,37 +234,36 @@ class ProfileViewModel(
                       author = _uiState.value.profile!!.author.copy(reviewRate = newReviewRate)))
     }
   }
-    fun toggleLikedHunt(hunt: Hunt, context: Context? = null) {
-        viewModelScope.launch {
-            val currentProfile = _uiState.value.profile ?: return@launch
-            val userId = currentProfile.uid
 
-            val isCurrentlyLiked = currentProfile.likedHunts.any { it.uid == hunt.uid }
+  fun toggleLikedHunt(hunt: Hunt, context: Context? = null) {
+    viewModelScope.launch {
+      val currentProfile = _uiState.value.profile ?: return@launch
+      val userId = currentProfile.uid
 
-            val updatedLikedHunts =
-                if (isCurrentlyLiked) {
-                    currentProfile.likedHunts.filter { it.uid != hunt.uid }
-                } else {
-                    currentProfile.likedHunts + hunt
-                }
+      val isCurrentlyLiked = currentProfile.likedHunts.any { it.uid == hunt.uid }
 
-            val updatedProfile =
-                currentProfile.copy(likedHunts = updatedLikedHunts.toMutableList())
+      val updatedLikedHunts =
+          if (isCurrentlyLiked) {
+            currentProfile.likedHunts.filter { it.uid != hunt.uid }
+          } else {
+            currentProfile.likedHunts + hunt
+          }
 
-            _uiState.value = _uiState.value.copy(profile = updatedProfile)
+      val updatedProfile = currentProfile.copy(likedHunts = updatedLikedHunts.toMutableList())
 
-            try {
-                if (isCurrentlyLiked) {
-                    repository.removeLikedHunt(userId, hunt.uid)
-                } else {
-                    repository.addLikedHunt(userId, hunt.uid)
-                }
+      _uiState.value = _uiState.value.copy(profile = updatedProfile)
 
-                context?.let { ProfileCache.saveProfile(it, updatedProfile) }
-            } catch (e: Exception) {
-                Log.e("PROFILE", "Failed to toggle liked hunt", e)
-            }
+      try {
+        if (isCurrentlyLiked) {
+          repository.removeLikedHunt(userId, hunt.uid)
+        } else {
+          repository.addLikedHunt(userId, hunt.uid)
         }
-    }
 
+        context?.let { ProfileCache.saveProfile(it, updatedProfile) }
+      } catch (e: Exception) {
+        Log.e("PROFILE", "Failed to toggle liked hunt", e)
+      }
+    }
+  }
 }
