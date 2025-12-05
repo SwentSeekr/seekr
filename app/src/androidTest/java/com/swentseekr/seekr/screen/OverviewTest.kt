@@ -15,6 +15,7 @@ import com.swentseekr.seekr.model.hunt.HuntsRepositoryLocal
 import com.swentseekr.seekr.model.hunt.ReviewImageRepositoryLocal
 import com.swentseekr.seekr.model.profile.ProfileRepositoryLocal
 import com.swentseekr.seekr.model.profile.createHunt
+import com.swentseekr.seekr.model.profile.createOverviewTestHunt
 import com.swentseekr.seekr.ui.components.HuntCard
 import com.swentseekr.seekr.ui.components.HuntCardScreenStrings
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
@@ -44,7 +45,13 @@ class OverviewScreenTest {
   private lateinit var fakeImageRepository: ReviewImageRepositoryLocal
   private val testDispatcher = StandardTestDispatcher()
 
-  private val testHunt = createHunt(uid = "test_hunt_1", title = "Test Hunt")
+  private val testHunt =
+      createOverviewTestHunt(
+          uid = "test_hunt_1",
+          title = "Test Hunt",
+          description = "A test hunt for like functionality",
+          time = 60.0,
+          distance = 5.0)
 
   @Before
   fun setUp() = runTest {

@@ -130,3 +130,26 @@ fun createReview(
       comment = comment,
       photos = photos)
 }
+
+fun createOverviewTestHunt(
+    uid: String,
+    title: String,
+    description: String,
+    time: Double,
+    distance: Double
+): Hunt {
+  return Hunt(
+      uid = uid,
+      start = Location(46.5197, 6.6323, "Start Point"),
+      end = Location(46.5207, 6.6333, "End Point"),
+      middlePoints = emptyList(),
+      status = HuntStatus.FUN,
+      title = title,
+      description = description,
+      time = time,
+      distance = distance,
+      difficulty = Difficulty.EASY,
+      authorId = "author_123",
+      mainImageUrl = "",
+      reviewRate = 4.5)
+}
