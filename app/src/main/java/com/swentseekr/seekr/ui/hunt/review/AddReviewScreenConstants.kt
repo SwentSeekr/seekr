@@ -115,6 +115,7 @@ object AddReviewScreenTestTags {
   const val CANCEL_BUTTON = "HuntCardReview_CancelButton"
   const val DONE_BUTTON = "HuntCardReview_DoneButton"
   const val ERROR_MESSAGE = "HuntCardReview_ErrorMessage"
+  const val AddPhotoButtonTag = "AddPhotoButton"
 
   fun starTag(index: Int) = "Star_$index"
 }

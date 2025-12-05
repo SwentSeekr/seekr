@@ -13,6 +13,7 @@ object MapScreenDefaults {
   val PopupImageCornerRadius: Dp = 8.dp
   const val ChipBackgroundAlpha: Float = 0.25f
   const val ChipContentDarkenFactor: Float = 0.7f
+  const val BackgroundOpacity: Float = 0.9f
 
   val ChipHorizontalPadding: Dp = 8.dp
   val ChipVerticalPadding: Dp = 4.dp
@@ -38,6 +39,9 @@ object MapScreenDefaults {
   val ProgressTickSpacing: Dp = 4.dp
   val ProgressSegmentCornerRadius: Dp = 4.dp
   val CustomMarkerBorderWidth: Float = 5f
+  val IconPadding: Dp = 16.dp
+  val IconSize: Dp = 36.dp
+  val IconBackground: Float = 0.6f
 }
 
 object MapConfig {
@@ -111,4 +115,6 @@ object MapScreenTestTags {
   const val FINISH = "finish"
   const val STOP_POPUP = "stopPopup"
   const val CONFIRM = "confirm"
+  const val NEXT_CHECKPOINT_IMAGE = "nextCheckpointImage"
+  const val CLOSE_CHECKPOINT_IMAGE = "closeCheckpointImage"
 }

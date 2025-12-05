@@ -60,6 +60,31 @@ abstract class BaseHuntViewModel(
 
   protected var otherImagesUris: List<Uri> = emptyList()
 
+  private val checkpointImages: MutableList<Pair<Location, Uri>> = mutableListOf()
+
+  fun registerCheckpointImage(location: Location, uri: Uri?) {
+    if (uri == null) return
+    checkpointImages.add(location to uri)
+  }
+
+  fun attachCheckpointImages(points: List<Location>): List<Location> {
+    if (checkpointImages.isEmpty()) return points
+    val startIndex = otherImagesUris.size
+    otherImagesUris = otherImagesUris + checkpointImages.map { it.second }
+
+    val indexByLocation = mutableMapOf<Location, Int>()
+    checkpointImages.forEachIndexed { offset, (loc, _) ->
+      indexByLocation[loc] = startIndex + offset
+    }
+
+    checkpointImages.clear()
+    _uiState.value = _uiState.value.copy(otherImagesUris = otherImagesUris)
+    return points.map { p ->
+      val index = indexByLocation[p]
+      if (index != null) p.copy(imageIndex = index) else p
+    }
+  }
+
   fun clearErrorMsg() {
     _uiState.value = _uiState.value.copy(errorMsg = null)
   }

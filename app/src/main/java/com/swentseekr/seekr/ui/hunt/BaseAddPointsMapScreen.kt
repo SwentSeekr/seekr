@@ -1,10 +1,14 @@
 package com.swentseekr.seekr.ui.hunt
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.google.android.gms.maps.model.LatLng
@@ -18,12 +22,26 @@ fun BaseAddPointsMapScreen(
     initPoints: List<Location> = emptyList(),
     onCancel: () -> Unit,
     testMode: Boolean = false,
+    onCheckpointImagePicked: (Location, Uri?) -> Unit = { _, _ -> }
 ) {
   var points by remember { mutableStateOf(initPoints) }
   val cameraPositionState = rememberCameraPositionState()
 
   var showNameDialog by remember { mutableStateOf(false) }
   var tempLatLng by remember { mutableStateOf<LatLng?>(null) }
+
+  var pendingLocation by rememberSaveable { mutableStateOf<Location?>(null) }
+
+  val imagePickerLauncher =
+      rememberLauncherForActivityResult(
+          contract = ActivityResultContracts.GetContent(),
+          onResult = { uri: Uri? ->
+            val location = pendingLocation
+            if (location != null) {
+              onCheckpointImagePicked(location, uri)
+            }
+            pendingLocation = null
+          })
 
   if (testMode) {
     LaunchedEffect(Unit) { points = listOf(Location(0.0, 0.0, "P1"), Location(1.0, 1.0, "P2")) }
@@ -83,7 +101,12 @@ fun BaseAddPointsMapScreen(
       show = showNameDialog && tempLatLng != null,
       onDismiss = { showNameDialog = false },
       onConfirm = { name, description ->
-        tempLatLng?.let { points = points + Location(it.latitude, it.longitude, name, description) }
+        tempLatLng?.let { latLng ->
+          val newLocation = Location(latLng.latitude, latLng.longitude, name, description)
+          points = points + newLocation
+          pendingLocation = newLocation
+          imagePickerLauncher.launch("image/*")
+        }
         showNameDialog = false
       })
 }

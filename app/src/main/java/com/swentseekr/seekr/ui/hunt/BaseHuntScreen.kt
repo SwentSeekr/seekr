@@ -92,12 +92,13 @@ fun BaseHuntScreen(
     BaseAddPointsMapScreen(
         initPoints = uiState.points,
         onDone = { locations: List<Location> ->
-          val ok = vm.setPoints(locations)
+          val locationsWithImages = vm.attachCheckpointImages(locations)
+          val ok = vm.setPoints(locationsWithImages)
           if (ok) vm.setIsSelectingPoints(false)
         },
         onCancel = { vm.setIsSelectingPoints(false) },
         testMode = testMode,
-    )
+        onCheckpointImagePicked = vm::registerCheckpointImage)
   } else {
     // Main hunt fields screen with callbacks wired to the ViewModel.
     BaseHuntFieldsScreen(
