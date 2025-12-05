@@ -14,6 +14,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
@@ -290,16 +291,14 @@ class AddHuntFieldsScreenTest {
       }
     }
 
-    // --- Vérifie l'affichage des deux images ---
     composeRule.onNodeWithTag("otherImage_https://image1").assertExists()
     composeRule.onNodeWithTag("otherImage_file://localimage").assertExists()
 
-    // --- Supprime l’image via URL ---
     composeRule.onNodeWithTag("removeButton_https://image1").performClick()
     assertEquals("https://image1", removedExisting)
 
-    // --- Supprime l’image URI ---
-    composeRule.onNodeWithTag("removeButton_file://localimage").performClick()
+    composeRule.onNodeWithTag("removeButton_file://localimage").performScrollTo().performClick()
+
     assertEquals(Uri.parse("file://localimage"), removedUri)
   }
 }
