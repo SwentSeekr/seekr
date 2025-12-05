@@ -19,7 +19,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 
-/** Map placeholder screen displayed when the user is offline. */
+/**
+ * Offline placeholder for the map tab.
+ *
+ * This screen is displayed when:
+ * - The user navigates to the map tab, and
+ * - The app is in offline mode (no network connectivity).
+ *
+ * Responsibilities:
+ * - Provide a clear, lightweight indication that the map is unavailable offline.
+ * - Use a visually distinct card with an icon and explanatory message, without attempting to load
+ *   any map data or network resources.
+ *
+ * Visual structure:
+ * - Fullscreen [Surface] using the theme background color.
+ * - Centered card with:
+ *     - Warning icon.
+ *     - Localized offline message text.
+ *
+ * The exact dimensions, shapes, and colors are delegated to [OfflineConstants] so they can be
+ * reused across offline UI components.
+ *
+ * This composable is typically used from the offline navigation graph:
+ * [com.swentseekr.seekr.ui.navigation.SeekrOfflineNavHost].
+ *
+ * @param modifier Optional [Modifier] for customizing the root [Surface] container.
+ */
 @Composable
 fun OfflineMapScreen(modifier: Modifier = Modifier) {
   Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -53,7 +78,15 @@ fun OfflineMapScreen(modifier: Modifier = Modifier) {
   }
 }
 
-/** Design-time preview of [OfflineMapScreen]. */
+/**
+ * Design-time preview of [OfflineMapScreen].
+ *
+ * This preview demonstrates the offline map placeholder in isolation, using the current theme
+ * defaults. It is useful for verifying:
+ * - Card sizing and alignment.
+ * - Icon and text styling.
+ * - Overall visual hierarchy in offline scenarios.
+ */
 @Preview
 @Composable
 fun OfflineMapScreenPreview() {
