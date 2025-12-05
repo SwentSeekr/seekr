@@ -229,12 +229,12 @@ class OverviewScreenTest {
     viewModel.initialize(userId, testHunt)
     advanceUntilIdle()
 
-    assertFalse(viewModel.isHuntLiked(testHunt.uid))
+    assertFalse(viewModel.uiState.value.isLiked)
 
     viewModel.onLikeClick(testHunt.uid)
     advanceUntilIdle()
 
-    assertTrue(viewModel.isHuntLiked(testHunt.uid))
+    assertTrue(viewModel.uiState.value.isLiked)
   }
 
   @Test
