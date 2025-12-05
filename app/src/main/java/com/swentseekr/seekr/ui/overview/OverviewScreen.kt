@@ -131,9 +131,6 @@ fun OverviewScreen(
           contentPadding = PaddingValues(bottom = OverviewScreenDefaults.VerticalPadding16),
           horizontalAlignment = Alignment.CenterHorizontally) {
             items(hunts, key = { it.hunt.uid }) { hunt ->
-              // val hunt = hunts[index]
-              val isLiked = likedHuntsCache.contains(hunt.hunt.uid)
-
               HuntCard(
                   hunt.hunt,
                   modifier =
@@ -144,10 +141,7 @@ fun OverviewScreen(
                               else OverviewScreenTestTags.HUNT_CARD)
                           .clickable { onHuntClick(hunt.hunt.uid) },
                   isLiked = likedHuntsCache.contains(hunt.hunt.uid),
-                  onLikeClick = { huntId ->
-                    huntCardViewModel.onLikeClick(huntId)
-                    // overviewViewModel.refreshUIState()
-                  },
+                  onLikeClick = { huntId -> huntCardViewModel.onLikeClick(huntId) },
               )
 
               Spacer(modifier = Modifier.height(OverviewScreenDefaults.ListItemSpacing))

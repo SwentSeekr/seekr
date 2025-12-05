@@ -1,5 +1,7 @@
 package com.swentseekr.seekr.screen
 
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
@@ -8,14 +10,12 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.swentseekr.seekr.model.hunt.Difficulty
-import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryLocal
-import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryLocal
 import com.swentseekr.seekr.model.hunt.ReviewImageRepositoryLocal
-import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.model.profile.ProfileRepositoryLocal
+import com.swentseekr.seekr.model.profile.createHunt
+import com.swentseekr.seekr.model.profile.sampleProfile
 import com.swentseekr.seekr.ui.components.HuntCard
 import com.swentseekr.seekr.ui.components.HuntCardScreenStrings
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
@@ -23,6 +23,7 @@ import com.swentseekr.seekr.ui.overview.FilterButton
 import com.swentseekr.seekr.ui.overview.ModernFilterBar
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
 import com.swentseekr.seekr.ui.profile.Profile
+import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -44,21 +45,7 @@ class OverviewScreenTest {
   private lateinit var fakeImageRepository: ReviewImageRepositoryLocal
   private val testDispatcher = StandardTestDispatcher()
 
-  private val testHunt =
-      Hunt(
-          uid = "test_hunt_1",
-          start = Location(46.5197, 6.6323, "Start Point"),
-          end = Location(46.5207, 6.6333, "End Point"),
-          middlePoints = emptyList(),
-          status = HuntStatus.FUN,
-          title = "Test Hunt",
-          description = "A test hunt for like functionality",
-          time = 60.0,
-          distance = 5.0,
-          difficulty = Difficulty.EASY,
-          authorId = "author_123",
-          mainImageUrl = "",
-          reviewRate = 4.5)
+  private val testHunt = createHunt(uid = "test_hunt_1", title = "Test Hunt")
 
   @Before
   fun setUp() = runTest {
@@ -248,14 +235,18 @@ class OverviewScreenTest {
   @Test
   fun multipleLikes_workIndependently() = runTest {
     val userId = "test_user"
-    val hunt2 = testHunt.copy(uid = "test_hunt_2", title = "Second Hunt")
 
+    val hunt2 = createHunt(uid = "test_hunt_2", title = "Second Hunt")
+
+    fakeHuntRepository.addHunt(testHunt)
     fakeHuntRepository.addHunt(hunt2)
-    fakeProfileRepository.addProfile(Profile(uid = userId))
+
+    fakeProfileRepository.addProfile(sampleProfile(uid = userId))
 
     val viewModel1 =
         HuntCardViewModel(
             fakeHuntRepository, fakeReviewRepository, fakeProfileRepository, fakeImageRepository)
+
     val viewModel2 =
         HuntCardViewModel(
             fakeHuntRepository, fakeReviewRepository, fakeProfileRepository, fakeImageRepository)
@@ -273,7 +264,40 @@ class OverviewScreenTest {
     viewModel2.onLikeClick(hunt2.uid)
     advanceUntilIdle()
 
+    viewModel1.initialize(userId, testHunt)
+    advanceUntilIdle()
+
     assertTrue(viewModel1.uiState.value.isLiked)
     assertTrue(viewModel2.uiState.value.isLiked)
+  }
+
+  @Test
+  fun lazyColumn_onLikeClick_dynamicList_isCovered() = runTest {
+    val userId = "test_user"
+    val hunts =
+        listOf(
+            createHunt(uid = "hunt_1", title = "Hunt One"),
+            createHunt(uid = "hunt_2", title = "Hunt Two"),
+            createHunt(uid = "hunt_3", title = "Hunt Three"))
+
+    val clickedHunts = mutableSetOf<String>()
+
+    composeTestRule.setContent {
+      LazyColumn {
+        items(hunts, key = { it.uid }) { hunt ->
+          HuntCard(
+              hunt = hunt, isLiked = false, onLikeClick = { huntId -> clickedHunts.add(huntId) })
+        }
+      }
+    }
+
+    composeTestRule.onAllNodes(hasTestTag(HuntCardScreenStrings.LikeButton))[1].performClick()
+
+    assertTrue(clickedHunts.contains("hunt_2"))
+
+    composeTestRule.onAllNodes(hasTestTag(HuntCardScreenStrings.LikeButton))[0].performClick()
+    assertTrue(clickedHunts.contains("hunt_1"))
+
+    assertEquals(setOf("hunt_1", "hunt_2"), clickedHunts)
   }
 }

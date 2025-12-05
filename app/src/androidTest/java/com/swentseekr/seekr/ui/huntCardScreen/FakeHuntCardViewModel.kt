@@ -24,7 +24,6 @@ class FakeHuntCardViewModel(hunt: Hunt) : HuntCardViewModel() { // Inherit from 
                         photos = emptyList())
                   }))
   override val uiState: StateFlow<HuntCardUiState> = _uiState
-  override val _likedHuntsCache = MutableStateFlow<Set<String>>(emptySet())
   override val likedHuntsCache: StateFlow<Set<String>> = _likedHuntsCache
 
   fun setLikedHunts(hunts: Set<String>) {

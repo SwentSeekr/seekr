@@ -256,7 +256,7 @@ fun ProfileScreen(
                     HuntCard(
                         hunt = hunt,
                         isLiked = profile.likedHunts.any { it.uid == hunt.uid },
-                        onLikeClick = { huntId -> viewModel.toggleLikedHunt(hunt, context) },
+                        onLikeClick = { _ -> viewModel.toggleLikedHunt(hunt, context) },
                         modifier =
                             clickable.testTag(
                                 "${ProfileTestTags.getTestTagForHuntCard(hunt, index)}_LIKE_BUTTON"))

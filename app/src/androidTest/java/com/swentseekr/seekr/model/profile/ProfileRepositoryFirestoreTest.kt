@@ -9,6 +9,12 @@ import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.model.profile.Constants.LIKED_HUNTS
+import com.swentseekr.seekr.model.profile.Constants.ONE
+import com.swentseekr.seekr.model.profile.Constants.PROFILES
+import com.swentseekr.seekr.model.profile.Constants.UID
+import com.swentseekr.seekr.model.profile.Constants.UNCHECKED_CAST
+import com.swentseekr.seekr.model.profile.Constants.ZERO
 import com.swentseekr.seekr.model.profile.ProfileRepositoryFirestore.Companion.huntToMap
 import com.swentseekr.seekr.model.profile.ProfileRepositoryFirestore.Companion.mapToHunt
 import com.swentseekr.seekr.ui.profile.Profile
@@ -552,27 +558,27 @@ class ProfileRepositoryFirestoreTest {
         .await()
 
     val huntMap = huntToMap(hunt)
-    db.collection("profiles").document(uid).set(mapOf("likedHunts" to listOf(huntMap))).await()
+    db.collection(PROFILES).document(uid).set(mapOf(LIKED_HUNTS to listOf(huntMap))).await()
 
     repository.addLikedHunt(uid, hunt.uid)
 
-    val snapshot = db.collection("profiles").document(uid).get().await()
-    @Suppress("UNCHECKED_CAST")
-    val likedHunts = snapshot.get("likedHunts") as? List<Map<String, Any?>> ?: emptyList()
+    val snapshot = db.collection(PROFILES).document(uid).get().await()
+    @Suppress(UNCHECKED_CAST)
+    val likedHunts = snapshot.get(LIKED_HUNTS) as? List<Map<String, Any?>> ?: emptyList()
 
-    assertEquals(1, likedHunts.size)
-    assertEquals(hunt.uid, likedHunts[0]["uid"])
+    assertEquals(ONE, likedHunts.size)
+    assertEquals(hunt.uid, likedHunts[ZERO][UID])
   }
 
   @Test
   fun removeLikedHunt_removesHuntSuccessfully() = runTest {
     val uid = auth.currentUser!!.uid
     val huntMap = huntToMap(hunt)
-    db.collection("profiles").document(uid).set(mapOf("likedHunts" to listOf(huntMap))).await()
+    db.collection(PROFILES).document(uid).set(mapOf(LIKED_HUNTS to listOf(huntMap))).await()
     repository.removeLikedHunt(uid, hunt.uid)
-    val snapshot = db.collection("profiles").document(uid).get().await()
-    @Suppress("UNCHECKED_CAST")
-    val likedHunts = snapshot.get("likedHunts") as? List<Map<String, Any?>> ?: emptyList()
+    val snapshot = db.collection(PROFILES).document(uid).get().await()
+    @Suppress(UNCHECKED_CAST)
+    val likedHunts = snapshot.get(LIKED_HUNTS) as? List<Map<String, Any?>> ?: emptyList()
 
     assertTrue(likedHunts.isEmpty())
   }
@@ -582,12 +588,44 @@ class ProfileRepositoryFirestoreTest {
     val uid = auth.currentUser!!.uid
     db.collection("profiles")
         .document(uid)
-        .set(mapOf("likedHunts" to emptyList<Map<String, Any?>>()))
+        .set(mapOf(LIKED_HUNTS to emptyList<Map<String, Any?>>()))
         .await()
     repository.removeLikedHunt(uid, hunt.uid)
     val snapshot = db.collection("profiles").document(uid).get().await()
-    @Suppress("UNCHECKED_CAST")
-    val likedHunts = snapshot.get("likedHunts") as? List<Map<String, Any?>> ?: emptyList()
+    @Suppress(UNCHECKED_CAST)
+    val likedHunts = snapshot.get(LIKED_HUNTS) as? List<Map<String, Any?>> ?: emptyList()
     assertTrue(likedHunts.isEmpty())
+  }
+
+  @Test
+  fun addLikedHunt_firestoreFailure_hitsCatchBlock() = runTest {
+    val uid = auth.currentUser!!.uid
+
+    val brokenDb = FirebaseFirestore.getInstance().apply { terminate() }
+
+    val brokenRepo = ProfileRepositoryFirestore(brokenDb, auth, storage = storage)
+
+    try {
+      brokenRepo.addLikedHunt(uid, hunt.uid)
+      fail("Expected Firestore failure")
+    } catch (e: Exception) {
+      assertTrue(e.message != null)
+    }
+  }
+
+  @Test
+  fun removeLikedHunt_firestoreFailure_hitsCatchBlock() = runTest {
+    val uid = auth.currentUser!!.uid
+
+    val brokenDb = FirebaseFirestore.getInstance().apply { terminate() }
+
+    val brokenRepo = ProfileRepositoryFirestore(brokenDb, auth, storage = storage)
+
+    try {
+      brokenRepo.removeLikedHunt(uid, hunt.uid)
+      fail("Expected Firestore failure")
+    } catch (e: Exception) {
+      assertTrue(e.message != null)
+    }
   }
 }

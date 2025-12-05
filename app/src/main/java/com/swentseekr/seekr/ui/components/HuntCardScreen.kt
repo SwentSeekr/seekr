@@ -676,27 +676,9 @@ fun LikeButton(
     huntId: String,
     modifier: Modifier = Modifier
 ) {
-  // val uiState by huntCardViewModel.uiState.collectAsState()
-  // val isLiked = uiState.isLiked
+
   val likedHuntsCache by huntCardViewModel.likedHuntsCache.collectAsState()
   val isLiked = likedHuntsCache.contains(huntId)
-
-  /*Surface(
-  modifier = modifier,
-  shape = CircleShape,
-  color = MaterialTheme.colorScheme.onPrimary.copy(alpha = HuntCardScreenDefaults.Alpha)) {
-    IconButton(
-        onClick = { huntCardViewModel.onLikeClick(huntId) },
-        modifier = Modifier.testTag(HuntCardScreenTestTags.LIKE_BUTTON)) {
-          Icon(
-              imageVector = Icons.Default.Favorite,
-              contentDescription = HuntCardScreenStrings.LikeButton,
-              tint =
-                  if (isLiked) HuntCardScreenDefaults.LikeRedStrong
-                  else HuntCardScreenDefaults.LightGray,
-              modifier = Modifier.size(HuntCardScreenDefaults.IconSize24))
-        }
-  }*/
 
   IconButton(
       onClick = { huntCardViewModel.onLikeClick(huntId) },

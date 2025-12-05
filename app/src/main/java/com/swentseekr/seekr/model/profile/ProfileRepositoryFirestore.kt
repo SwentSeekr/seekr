@@ -429,7 +429,7 @@ class ProfileRepositoryFirestore(
 
   override suspend fun addLikedHunt(userId: String, huntId: String) {
     try {
-      val hunt = huntsRepository.getHunt(huntId) ?: return
+      val hunt = huntsRepository.getHunt(huntId)
       val userDocRef = profilesCollection.document(userId)
       val snapshot = userDocRef.get().await()
 

@@ -356,7 +356,7 @@ class HuntCardScreenTest {
   }
 
   @Test
-  fun launcedEffects_loadCurrentUserAndHunt() {
+  fun launchedEffects_loadCurrentUserAndHunt() {
     val fakeVm = FakeHuntCardViewModel(createFakeHunt())
 
     composeTestRule.setContent {

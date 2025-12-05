@@ -40,9 +40,8 @@ open class HuntCardViewModel(
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(HuntCardUiState())
   open val uiState: StateFlow<HuntCardUiState> = _uiState.asStateFlow()
-  // Expose the liked hunts cache as a StateFlow so composables can observe it
 
-  open val _likedHuntsCache = MutableStateFlow<Set<String>>(emptySet())
+  val _likedHuntsCache = MutableStateFlow<Set<String>>(emptySet())
 
   open val likedHuntsCache: StateFlow<Set<String>> = _likedHuntsCache.asStateFlow()
 
