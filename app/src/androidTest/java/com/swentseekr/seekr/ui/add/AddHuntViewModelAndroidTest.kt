@@ -160,6 +160,57 @@ class AddHuntViewModelAndroidTest {
     assertFalse(s3.otherImagesUris.contains(uri1))
   }
 
+  @Test
+  fun checkpointImages_areAttachedAndStateUpdated() {
+    val existing = Uri.parse("file://existing.png")
+    viewModel.updateOtherImagesUris(listOf(existing))
+
+    val a = Location(0.0, 0.0, "A")
+    val b = Location(1.0, 1.0, "B")
+    val c = Location(2.0, 2.0, "C")
+
+    val uriA = Uri.parse("file://checkpoint_a.png")
+    val uriC = Uri.parse("file://checkpoint_c.png")
+
+    viewModel.registerCheckpointImage(a, uriA)
+    viewModel.registerCheckpointImage(c, uriC)
+
+    val pointsWithImages = viewModel.attachCheckpointImages(listOf(a, b, c))
+
+    val state = viewModel.uiState.value
+    assertEquals(listOf(existing, uriA, uriC), state.otherImagesUris)
+
+    assertEquals(1, pointsWithImages[0].imageIndex)
+    assertNull(pointsWithImages[1].imageIndex)
+    assertEquals(2, pointsWithImages[2].imageIndex)
+  }
+
+  @Test
+  fun checkpointImages_ignoreNullUri_andBufferIsClearedAfterAttach() {
+    val a = Location(0.0, 0.0, "A")
+    val uriA = Uri.parse("file://checkpoint_a.png")
+
+    viewModel.registerCheckpointImage(a, null)
+    var pointsWithImages = viewModel.attachCheckpointImages(listOf(a))
+
+    var state = viewModel.uiState.value
+    assertTrue(state.otherImagesUris.isEmpty())
+    assertNull(pointsWithImages[0].imageIndex)
+
+    viewModel.registerCheckpointImage(a, uriA)
+    pointsWithImages = viewModel.attachCheckpointImages(listOf(a))
+
+    state = viewModel.uiState.value
+    assertEquals(listOf(uriA), state.otherImagesUris)
+    assertEquals(0, pointsWithImages[0].imageIndex)
+
+    val pointsSecondAttach = viewModel.attachCheckpointImages(listOf(pointsWithImages[0]))
+
+    state = viewModel.uiState.value
+    assertEquals(listOf(uriA), state.otherImagesUris)
+    assertEquals(0, pointsSecondAttach[0].imageIndex)
+  }
+
   private fun setValidState(points: List<Location>) {
     viewModel.setTitle("T")
     viewModel.setDescription("D")

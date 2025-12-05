@@ -2,6 +2,11 @@ package com.swentseekr.seekr.ui.map
 
 import android.net.Uri
 import androidx.activity.ComponentActivity
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -11,6 +16,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.rule.GrantPermissionRule
 import com.swentseekr.seekr.model.hunt.*
 import com.swentseekr.seekr.model.map.Location
+import junit.framework.TestCase.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -244,5 +250,46 @@ class MapTest {
       assert(state.validatedCount == 0)
       assert(state.selectedHunt == null)
     }
+  }
+
+  @Test
+  fun fullscreenCheckpointImage_closesWhenCloseButtonClicked() {
+    composeRule.setContent {
+      var isOpen by remember { mutableStateOf(true) }
+
+      if (isOpen) {
+        FullscreenCheckpointImage(
+            imageUrl = "https://example.com/image.jpg",
+            contentDescription = "Checkpoint image",
+            onClose = { isOpen = false },
+        )
+      }
+    }
+
+    composeRule.onNodeWithTag(MapScreenTestTags.CLOSE_CHECKPOINT_IMAGE).assertIsDisplayed()
+    composeRule.onNodeWithTag(MapScreenTestTags.CLOSE_CHECKPOINT_IMAGE).performClick()
+    composeRule.onNodeWithTag(MapScreenTestTags.CLOSE_CHECKPOINT_IMAGE).assertDoesNotExist()
+  }
+
+  @Test
+  fun nextCheckpointSection_showsImage_and_isClickable_whenImageUrlPresent() {
+    var imageClicked = false
+
+    composeRule.setContent {
+      MaterialTheme {
+        NextCheckpointSection(
+            checkpointName = "Checkpoint 1",
+            checkpointDescription = "Some description",
+            distanceToNext = 42,
+            imageUrl = "https://example.com/image.png",
+            onImageClick = { imageClicked = true })
+      }
+    }
+
+    composeRule
+        .onNodeWithTag(MapScreenTestTags.NEXT_CHECKPOINT_IMAGE)
+        .assertIsDisplayed()
+        .performClick()
+    assertTrue(imageClicked)
   }
 }
