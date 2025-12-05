@@ -278,19 +278,18 @@ class MapTest {
     composeRule.setContent {
       MaterialTheme {
         NextCheckpointSection(
-          checkpointName = "Checkpoint 1",
-          checkpointDescription = "Some description",
-          distanceToNext = 42,
-          imageUrl = "https://example.com/image.png",
-          onImageClick = { imageClicked = true }
-        )
+            checkpointName = "Checkpoint 1",
+            checkpointDescription = "Some description",
+            distanceToNext = 42,
+            imageUrl = "https://example.com/image.png",
+            onImageClick = { imageClicked = true })
       }
     }
 
     composeRule
-      .onNodeWithTag(MapScreenTestTags.NEXT_CHECKPOINT_IMAGE)
-      .assertIsDisplayed()
-      .performClick()
+        .onNodeWithTag(MapScreenTestTags.NEXT_CHECKPOINT_IMAGE)
+        .assertIsDisplayed()
+        .performClick()
     assertTrue(imageClicked)
   }
 }

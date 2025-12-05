@@ -310,7 +310,7 @@ private fun SegmentedProgressBar(validated: Int, totalPoints: Int) {
  * @param distanceToNext distance to next checkpoint in meters.
  */
 @Composable
-public fun NextCheckpointSection(
+fun NextCheckpointSection(
     checkpointName: String,
     checkpointDescription: String,
     distanceToNext: Int?,
