@@ -40,10 +40,10 @@ fun OfflineOverviewHuntsScreen(
         modifier = Modifier.fillMaxWidth().testTag(OverviewScreenTestTags.OVERVIEW_SCREEN),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-      // ---- HEADER (same as online overview) ----
+      // HEADER
       ModernHeader()
 
-      // ---- SEARCH BAR (reuse ModernSearchBar) ----
+      // SEARCH BAR
       ModernSearchBar(
           query = query,
           onQueryChange = { offlineViewModel.onSearchChange(it) },
@@ -52,7 +52,7 @@ fun OfflineOverviewHuntsScreen(
           onClear = { offlineViewModel.onClearSearch() },
           modifier = modifier)
 
-      // ---- FILTER BAR (reuse ModernFilterBar) ----
+      // FILTER BAR
       ModernFilterBar(
           selectedStatus = uiState.selectedStatus,
           selectedDifficulty = uiState.selectedDifficulty,
@@ -63,7 +63,7 @@ fun OfflineOverviewHuntsScreen(
             offlineViewModel.onDifficultyFilterSelect(difficulty)
           })
 
-      // ---- HUNTS LIST ----
+      // HUNTS LIST
       LazyColumn(
           modifier = modifier.testTag(OverviewScreenTestTags.HUNT_LIST).fillMaxWidth(),
           horizontalAlignment = Alignment.CenterHorizontally,
