@@ -85,16 +85,13 @@ class SeekrRootAppTest {
     // 1. Ensure we have a signed-in user, regardless of initial state.
     ensureSignedIn()
 
-    // 2. Start online so the connectivity observer boots in a known state.
-    NetworkTestUtils.goOnline()
-
-    // 3. Render the app so InternetConnectivityObserver.start() is running.
+    // 2. Render the app so InternetConnectivityObserver.start() is running.
     composeTestRule.setContent { SeekrRootApp() }
 
-    // 4. Now simulate going offline while the observer is active.
+    // 3. Now simulate going offline while the observer is active.
     NetworkTestUtils.goOffline()
 
-    // 5. Wait until the offline-required UI shows up.
+    // 4. Wait until the offline-required UI shows up.
     composeTestRule.waitUntil(timeoutMillis = 10_000) {
       composeTestRule
           .onAllNodesWithText(OfflineConstants.OFFLINE_TITLE)
@@ -102,7 +99,7 @@ class SeekrRootAppTest {
           .isNotEmpty()
     }
 
-    // 6. Assert the "You're offline" screen is visible.
+    // 5. Assert the "You're offline" screen is visible.
     composeTestRule.onNodeWithText(OfflineConstants.OFFLINE_TITLE).assertIsDisplayed()
   }
 }
