@@ -235,6 +235,7 @@ dependencies {
     // ----------       Robolectric     ------------
     testImplementation(libs.robolectric)
     testImplementation("org.robolectric:robolectric:4.12.1")
+    testImplementation(kotlin("test"))
 }
 
 tasks.withType<Test> {

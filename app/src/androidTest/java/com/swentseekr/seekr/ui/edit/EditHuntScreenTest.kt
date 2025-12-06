@@ -6,10 +6,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
@@ -193,6 +195,43 @@ class EditHuntScreenTest {
 
     assertTrue(doneCalled)
     assertNull(vm.uiState.value.errorMsg)
+  }
+
+  @Test
+  fun delete_via_menu_deletes_hunt_and_calls_onGoBack() = runBlocking {
+    // 1) Create a hunt to be edited/deleted
+    createHunt(title = "To Delete", description = "Will be removed")
+    val allBefore = repository.getAllHunts()
+    assertTrue(allBefore.isNotEmpty())
+    val id = allBefore.first().uid
+
+    val vm = EditHuntViewModel(repository)
+    var backCalled = false
+
+    // 2) Set content with EditHuntScreen (which wires in showDeleteAction + onDeleteClick)
+    setContent(
+        huntId = id,
+        vm = vm,
+        onGoBack = { backCalled = true },
+    )
+
+    // 3) Wait until the hunt is loaded into the view model
+    composeRule.waitUntil(timeoutMillis = 5_000) { vm.uiState.value.title.isNotEmpty() }
+
+    // 4) Initially, the delete button should not be visible
+    composeRule.onNodeWithText("Delete").assertDoesNotExist()
+
+    // 5) Click the 3-dots "More actions" icon to toggle the delete button
+    composeRule.onNodeWithContentDescription("More actions").performClick()
+
+    // 6) Now the delete button should be visible in the top bar
+    composeRule.onNodeWithText("Delete").assertIsDisplayed()
+
+    // 7) Click "Delete" to trigger deleteCurrentHunt() + onGoBack()
+    composeRule.onNodeWithText("Delete").performClick()
+
+    // 8) Wait until onGoBack has been called, which happens after deleteCurrentHunt()
+    composeRule.waitUntil(timeoutMillis = 5_000) { backCalled }
   }
 
   // Helpers
