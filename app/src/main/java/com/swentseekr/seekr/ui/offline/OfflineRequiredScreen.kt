@@ -17,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 
 /**
  * Full-screen offline requirement screen.
@@ -81,17 +80,4 @@ fun OfflineRequiredScreen(modifier: Modifier = Modifier, onOpenSettings: () -> U
               }
         }
   }
-}
-
-/**
- * Design-time preview of [OfflineRequiredScreen].
- *
- * This preview showcases the offline-required UI state with a no-op settings action. It is useful
- * for iterating on layout, typography and spacing without running the app or simulating an actual
- * offline scenario.
- */
-@Preview
-@Composable
-fun OfflineRequiredScreenPreview() {
-  OfflineRequiredScreen(onOpenSettings = {})
 }
