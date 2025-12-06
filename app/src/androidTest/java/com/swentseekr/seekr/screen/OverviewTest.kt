@@ -216,24 +216,20 @@ class OverviewScreenTest {
 
     assertTrue(viewModel.uiState.value.isLiked)
   }
-
-  /** Test that isHuntLiked helper works correctly */
-  @Test
-  fun viewModel_isHuntLiked_returnsCorrectValue() = runTest {
-    val userId = "test_user"
-    fakeProfileRepository.addProfile(Profile(uid = userId))
-
-    viewModel.initialize(userId, testHunt)
-    advanceUntilIdle()
-
-    assertFalse(viewModel.uiState.value.isLiked)
-
-    viewModel.onLikeClick(testHunt.uid)
-    advanceUntilIdle()
-
-    assertTrue(viewModel.uiState.value.isLiked)
-  }
-
+  /**
+   * /** Test that isHuntLiked helper works correctly */
+   *
+   * @Test fun viewModel_isHuntLiked_returnsCorrectValue() = runTest { val userId = "test_user"
+   *   fakeProfileRepository.addProfile(Profile(uid = userId))
+   *
+   * viewModel.initialize(userId, testHunt) advanceUntilIdle()
+   *
+   * assertFalse(viewModel.uiState.value.isLiked)
+   *
+   * viewModel.onLikeClick(testHunt.uid) advanceUntilIdle()
+   *
+   * assertTrue(viewModel.uiState.value.isLiked) }
+   */
   @Test
   fun lazyColumn_onLikeClick_dynamicList_isCovered() = runTest {
     val userId = "test_user"

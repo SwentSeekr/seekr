@@ -10,8 +10,18 @@ object SeekrNavigationDefaults {
   val BottomBarIconColor: Color = Black
   val ScaffoldContainerColor: Color = White
   const val IgnoredTestTag = "IGNORED"
+
+  // --- Offline / shared extra routes ---
+  // Route + arg name for the review images screen (used online & offline)
+  const val REVIEW_IMAGES_ROUTE = "reviewImages/{reviewId}"
+  const val REVIEW_IMAGES_REVIEW_ID_ARG = "reviewId"
 }
 
+/**
+ * Centralized navigation-related test tags.
+ *
+ * Used in instrumented and UI tests to find elements using `composeTestRule.onNodeWithTag(...)`.
+ */
 object NavigationTestTags {
   const val BOTTOM_NAVIGATION_MENU = "BOTTOM_NAVIGATION_MENU"
   const val OVERVIEW_TAB = "OVERVIEW_TAB"
@@ -25,4 +35,7 @@ object NavigationTestTags {
   const val REVIEW_HUNT_SCREEN = "REVIEW_HUNT_SCREEN"
   const val SETTINGS_SCREEN = "SETTINGS_SCREEN"
   const val EDIT_PROFILE_SCREEN = "EDIT_PROFILE_SCREEN"
+
+  // --- review images screen test tag (used by offline nav) ---
+  const val IMAGE_REVIEW_SCREEN = "IMAGE_REVIEW_SCREEN"
 }
