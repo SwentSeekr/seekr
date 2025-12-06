@@ -40,8 +40,19 @@ import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.REMOVE_BUTTON_TAG_PREF
 
 /** Represents an additional image associated with a hunt, which can be either remote or local. */
 sealed class OtherImage {
+
+  /**
+   * Remote image stored in the backend.
+   *
+   * @property url Downloadable URL of the image stored in the backend (e.g. Firebase Storage).
+   */
   data class Remote(val url: String) : OtherImage()
 
+  /**
+   * Local image selected on the device.
+   *
+   * @property uri Content [Uri] pointing to the selected local image.
+   */
   data class Local(val uri: Uri) : OtherImage()
 }
 
@@ -53,6 +64,10 @@ val UICons = BaseHuntFieldsUi
  *
  * This wrapper helps keep the argument list of [ValidatedOutlinedField] under the SonarCloud
  * parameter limit while centralizing visual configuration.
+ *
+ * @property modifier [Modifier] applied to the underlying text field.
+ * @property shape Shape used for the text field.
+ * @property colors Color configuration for the text field.
  */
 data class FieldStyle(
     val modifier: Modifier,
@@ -63,7 +78,8 @@ data class FieldStyle(
 /**
  * Provides a default [FieldStyle] instance based on the current theme.
  *
- * @param modifier Modifier applied to the underlying text field.
+ * @param modifier [Modifier] applied to the underlying text field.
+ * @return A [FieldStyle] that can be reused across validated text fields.
  */
 @Composable
 fun defaultFieldStyle(
@@ -85,6 +101,15 @@ fun defaultFieldStyle(
  *
  * Grouping these callbacks keeps the [BaseHuntFieldsScreen] signature concise and easier to
  * maintain.
+ *
+ * @property onTitleChange Invoked when the title text changes.
+ * @property onDescriptionChange Invoked when the description text changes.
+ * @property onTimeChange Invoked when the time text changes.
+ * @property onDistanceChange Invoked when the distance text changes.
+ * @property onDifficultySelect Invoked when a difficulty value is selected.
+ * @property onStatusSelect Invoked when a status value is selected.
+ * @property onSelectLocations Invoked when the user wants to open the location picker.
+ * @property onSave Invoked when the user presses the primary save button.
  */
 data class HuntFieldCallbacks(
     val onTitleChange: (String) -> Unit,
@@ -97,7 +122,14 @@ data class HuntFieldCallbacks(
     val onSave: () -> Unit,
 )
 
-/** Callbacks for image-related actions in the hunt form. */
+/**
+ * Callbacks for image-related actions in the hunt form.
+ *
+ * @property onSelectImage Invoked when a main image is selected (or cleared with `null`).
+ * @property onSelectOtherImages Invoked when one or more additional images are selected.
+ * @property onRemoveOtherImage Invoked when a local additional image should be removed.
+ * @property onRemoveExistingImage Invoked when a remote additional image URL should be removed.
+ */
 data class ImageCallbacks(
     val onSelectImage: (Uri?) -> Unit,
     val onSelectOtherImages: (List<Uri>) -> Unit,
@@ -109,6 +141,8 @@ data class ImageCallbacks(
  * Navigation-related callbacks for the hunt form.
  *
  * Additional navigation actions can be added here as the flow evolves.
+ *
+ * @property onGoBack Invoked when the back action in the top bar is pressed.
  */
 data class HuntNavigationCallbacks(
     val onGoBack: () -> Unit = {},
@@ -123,7 +157,8 @@ data class HuntNavigationCallbacks(
  * @param onValueChange Callback invoked when the text changes.
  * @param label Label displayed above the field.
  * @param placeholder Placeholder text displayed inside the field when empty.
- * @param errorMsg Optional error message shown below the field.
+ * @param errorMsg Optional error message shown below the field; when non-null, the field is marked
+ *   as invalid.
  * @param testTag Test tag used to identify the field in UI tests.
  * @param style Visual configuration for the field (shape, modifier, colors).
  */
@@ -170,8 +205,9 @@ fun ValidatedOutlinedField(
  * @param uiState Current UI state of the hunt form.
  * @param fieldCallbacks Group of callbacks handling field changes and save action.
  * @param imageCallbacks Group of callbacks handling image selection and removal.
- * @param navigationCallbacks Callbacks related to navigation events.
- * @param deleteAction Configuration for the optional delete action in the top bar.
+ * @param navigationCallbacks Callbacks related to navigation events (e.g. back navigation).
+ * @param deleteAction Configuration for the optional delete action in the top bar. The delete
+ *   button is shown only when [DeleteAction.show] is `true` and [DeleteAction.onClick] is non-null.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -287,7 +323,17 @@ fun BaseHuntFieldsScreen(
       }
 }
 
-/** Top app bar for the hunt form, including navigation and optional delete action. */
+/**
+ * Top app bar for the hunt form, including navigation and optional delete action.
+ *
+ * The delete button is displayed only when [deleteAction.show] is `true` and [deleteAction.onClick]
+ * is non-null. When the "Delete" button is tapped, the callback is invoked directly with no
+ * built-in confirmation.
+ *
+ * @param title Title text displayed in the top bar.
+ * @param onGoBack Callback invoked when the back button is pressed.
+ * @param deleteAction Configuration for the optional delete action.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BaseHuntTopBar(
@@ -344,6 +390,11 @@ private fun BaseHuntTopBar(
  * Status dropdown with its own internal expanded state.
  *
  * Defined as a [RowScope] extension to allow the use of [Modifier.weight].
+ *
+ * @param status Currently selected status, or `null` if none.
+ * @param onStatusSelect Invoked when the user selects a new [HuntStatus].
+ * @param shape Shape used for the text field.
+ * @param colors Color configuration for the text field.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -392,6 +443,11 @@ private fun RowScope.StatusDropdown(
  * Difficulty dropdown with its own internal expanded state.
  *
  * Defined as a [RowScope] extension to allow the use of [Modifier.weight].
+ *
+ * @param difficulty Currently selected difficulty, or `null` if none.
+ * @param onDifficultySelect Invoked when the user selects a new [Difficulty].
+ * @param shape Shape used for the text field.
+ * @param colors Color configuration for the text field.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -438,7 +494,15 @@ private fun RowScope.DifficultyDropdown(
       }
 }
 
-/** Row containing time and distance fields. */
+/**
+ * Row containing time and distance fields.
+ *
+ * @param uiState Current [HuntUIState], used for values and error messages.
+ * @param fieldShape Shape applied to both fields.
+ * @param fieldColors Color configuration applied to both fields.
+ * @param onTimeChange Invoked when the time text changes.
+ * @param onDistanceChange Invoked when the distance text changes.
+ */
 @Composable
 private fun TimeAndDistanceRow(
     uiState: HuntUIState,
@@ -480,6 +544,9 @@ private fun TimeAndDistanceRow(
 
 /**
  * Button used to trigger location selection, with label reflecting the number of points selected.
+ *
+ * @param pointsCount Number of currently selected points.
+ * @param onSelectLocations Invoked when the button is pressed.
  */
 @Composable
 private fun SelectLocationsButton(
@@ -510,7 +577,12 @@ private fun SelectLocationsButton(
       }
 }
 
-/** Section responsible for main and secondary image selection, preview, and removal. */
+/**
+ * Section responsible for main and secondary image selection, preview, and removal.
+ *
+ * @param uiState Current [HuntUIState], used to determine current images.
+ * @param imageCallbacks Callbacks invoked when images are selected or removed.
+ */
 @Composable
 private fun ImagesSection(
     uiState: HuntUIState,
@@ -567,7 +639,11 @@ private fun ImagesSectionHeader() {
       color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
 
-/** Button to pick the main image. */
+/**
+ * Button to pick the main image.
+ *
+ * @param onClick Callback invoked when the user taps the button to choose a main image.
+ */
 @Composable
 private fun MainImagePickerButton(
     onClick: () -> Unit,
@@ -580,7 +656,11 @@ private fun MainImagePickerButton(
       }
 }
 
-/** Preview of the main image if one is available. */
+/**
+ * Preview of the main image if one is available.
+ *
+ * @param imageUrl URL of the main image to preview, or `null` / blank to hide the preview.
+ */
 @Composable
 private fun MainImagePreview(
     imageUrl: String?,
@@ -599,7 +679,11 @@ private fun MainImagePreview(
   }
 }
 
-/** Button to pick additional images. */
+/**
+ * Button to pick additional (secondary) images.
+ *
+ * @param onClick Callback invoked when the user taps the button to choose additional images.
+ */
 @Composable
 private fun AdditionalImagesPickerButton(
     onClick: () -> Unit,
@@ -614,7 +698,12 @@ private fun AdditionalImagesPickerButton(
       }
 }
 
-/** List of additional images (remote + local) with delete actions. */
+/**
+ * List of additional images (remote + local) with delete actions.
+ *
+ * @param images List of [OtherImage] instances to display.
+ * @param imageCallbacks Callbacks used when an image is removed.
+ */
 @Composable
 private fun AdditionalImagesList(
     images: List<OtherImage>,
@@ -632,7 +721,12 @@ private fun AdditionalImagesList(
   }
 }
 
-/** Single additional image row with preview and remove button. */
+/**
+ * Single additional image row with preview and remove button.
+ *
+ * @param image Image to display, either [OtherImage.Remote] or [OtherImage.Local].
+ * @param imageCallbacks Callbacks used when the user presses the remove button.
+ */
 @Composable
 private fun AdditionalImageItem(
     image: OtherImage,
@@ -689,7 +783,12 @@ private fun AdditionalImageItem(
       }
 }
 
-/** Primary save action for the hunt form. */
+/**
+ * Primary save action for the hunt form.
+ *
+ * @param enabled Whether the button is enabled.
+ * @param onSave Invoked when the user presses the button.
+ */
 @Composable
 private fun SaveHuntButton(
     enabled: Boolean,
