@@ -38,66 +38,6 @@ class SeekrOfflineNavHostTest {
     FirebaseTestEnvironment.setup()
   }
 
-  //    @Test
-  //    fun startDestination_showsOverviewScreen() {
-  //        composeTestRule.setContent {
-  //            SeekrOfflineNavHost(
-  //                cachedProfile = null,
-  //                offlineHunts = emptyList()
-  //            )
-  //        }
-  //
-  //        composeTestRule
-  //            .onNodeWithTag(OverviewScreenTestTags.OVERVIEW_SCREEN)
-  //            .assertIsDisplayed()
-  //    }
-  //
-  //    @Test
-  //    fun canNavigateToMapAndProfileScreens() {
-  //        lateinit var navController: NavHostController
-  //
-  //        composeTestRule.setContent {
-  //            navController = rememberNavController()
-  //            SeekrOfflineNavHost(
-  //                cachedProfile = null,
-  //                offlineHunts = emptyList(),
-  //                navController = navController
-  //            )
-  //        }
-  //
-  //        // Navigate to MAP
-  //        composeTestRule.runOnIdle {
-  //            navController.navigate(SeekrDestination.Map.route)
-  //        }
-  //
-  //        composeTestRule.waitUntil(timeoutMillis = 5_000) {
-  //            composeTestRule
-  //                .onAllNodesWithTag(NavigationTestTags.MAP_SCREEN)
-  //                .fetchSemanticsNodes()
-  //                .isNotEmpty()
-  //        }
-  //
-  //        composeTestRule
-  //            .onNodeWithTag(NavigationTestTags.MAP_SCREEN)
-  //            .assertIsDisplayed()
-  //
-  //        // Navigate to PROFILE
-  //        composeTestRule.runOnIdle {
-  //            navController.navigate(SeekrDestination.Profile.route)
-  //        }
-  //
-  //        composeTestRule.waitUntil(timeoutMillis = 5_000) {
-  //            composeTestRule
-  //                .onAllNodesWithTag(NavigationTestTags.PROFILE_TAB)
-  //                .fetchSemanticsNodes()
-  //                .isNotEmpty()
-  //        }
-  //
-  //        composeTestRule
-  //            .onNodeWithTag(NavigationTestTags.PROFILE_TAB)
-  //            .assertIsDisplayed()
-  //    }
-
   @Test
   fun navigateToHuntCard_displaysHuntCardScreen() {
     lateinit var navController: NavHostController
