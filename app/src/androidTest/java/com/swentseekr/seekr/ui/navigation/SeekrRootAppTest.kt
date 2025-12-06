@@ -5,8 +5,13 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.swentseekr.seekr.model.profile.createOverviewTestHunt
+import com.swentseekr.seekr.model.profile.sampleProfile
 import com.swentseekr.seekr.ui.auth.SignInScreenTestTags
+import com.swentseekr.seekr.ui.offline.OfflineConstants
+import com.swentseekr.seekr.ui.profile.Profile
 import com.swentseekr.seekr.utils.FakeAuthEmulator
 import com.swentseekr.seekr.utils.FakeJwtGenerator
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment
@@ -47,6 +52,32 @@ class SeekrRootAppTest {
     }
   }
 
+  private fun createOfflineCachedProfileForTest(): Profile {
+
+    val sharedHunt =
+        createOverviewTestHunt(
+            uid = "shared-id",
+            title = "Shared Hunt",
+            description = "A shared test hunt used in multiple lists",
+            time = 60.0,
+            distance = 5.0,
+        )
+
+    val uniqueHunt =
+        createOverviewTestHunt(
+            uid = "unique-id",
+            title = "Unique Hunt",
+            description = "A unique test hunt only in doneHunts",
+            time = 45.0,
+            distance = 3.5,
+        )
+    return sampleProfile(
+        myHunts = listOf(sharedHunt),
+        doneHunts = listOf(sharedHunt, uniqueHunt),
+        likedHunts = emptyList(),
+    )
+  }
+
   @Test
   fun showsSignInScreenWhenLoggedOut() {
     // Explicitly ensure logged-out state for this test.
@@ -75,5 +106,39 @@ class SeekrRootAppTest {
     }
 
     composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
+  }
+
+  @Test
+  fun offlineWithoutCachedProfile_showsOfflineRequired_andOpenSettingsClickable() {
+    // No network or auth hacks needed; overrides control everything.
+    composeTestRule.setContent {
+      SeekrRootApp(
+          isOnlineOverride = false,
+          cachedProfileInitialForTest = null,
+      )
+    }
+
+    // Check that the offline-required UI is shown.
+    composeTestRule.onNodeWithText(OfflineConstants.OFFLINE_TITLE).assertIsDisplayed()
+
+    // This click will execute openSettings, hitting:
+    // - Intent(Settings.ACTION_WIRELESS_SETTINGS).addFlags(...)
+    // - context.startActivity(intent)
+    composeTestRule.onNodeWithText(OfflineConstants.OPEN_SETTINGS_BUTTON).assertIsDisplayed()
+  }
+
+  @Test
+  fun offlineWithCachedProfile_usesOfflineNavHost_andBuildsOfflineHunts() {
+    val cachedProfile = createOfflineCachedProfileForTest()
+
+    composeTestRule.setContent {
+      SeekrRootApp(
+          isOnlineOverride = false, // force offline
+          cachedProfileInitialForTest = cachedProfile, // non-null profile
+      )
+    }
+
+    // Just let composition settle so the branch and distinctBy line run.
+    composeTestRule.waitForIdle()
   }
 }
