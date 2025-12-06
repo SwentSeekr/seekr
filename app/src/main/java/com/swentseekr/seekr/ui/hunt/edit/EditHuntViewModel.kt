@@ -18,15 +18,17 @@ import com.swentseekr.seekr.ui.hunt.HuntUIState
  * - Handles image updates (main and other images) and removal.
  * - Provides an operation to permanently delete the current hunt.
  */
-class EditHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.repository) :
-    BaseHuntViewModel(repository) {
+class EditHuntViewModel(
+    repository: HuntsRepository = HuntRepositoryProvider.repository,
+) : BaseHuntViewModel(repository) {
 
   /** Identifier of the hunt currently being edited. `null` until [load] succeeds. */
   private var huntId: String? = null
 
   /**
-   * Optional URI of the new main image selected by the user. If `null`, the existing main image is
-   * kept.
+   * Optional URI of the new main image selected by the user.
+   *
+   * If `null`, the existing main image is kept.
    */
   var mainImageUri: Uri? = null
 
@@ -35,6 +37,10 @@ class EditHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.rep
    *
    * When the user removes an already stored image from the UI, its URL is added here so the
    * repository can delete it from Firebase Storage.
+   *
+   * This list is:
+   * - Cleared whenever [load] is called.
+   * - Snapshotted via [toList] when persisting, to avoid exposing internal mutability.
    */
   private val pendingDeletionUrls = mutableListOf<String>()
 
@@ -44,12 +50,16 @@ class EditHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.rep
    * On success:
    * - Populates [_uiState] with the existing hunt data.
    * - Sets [huntId] so subsequent edit/delete operations know which hunt to target.
+   * - Clears any pending deletion state ([pendingDeletionUrls]).
    *
    * On failure:
    * - Resets [huntId] to `null`.
    * - Exposes an error message via [setErrorMsg].
    */
   suspend fun load(id: String) {
+    // Reset deletion state when loading a new hunt.
+    pendingDeletionUrls.clear()
+
     try {
       val hunt = repository.getHunt(id)
 
@@ -97,7 +107,8 @@ class EditHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.rep
         difficulty = state.difficulty!!,
         authorId = authorId,
         mainImageUrl = state.mainImageUrl,
-        otherImagesUrls = state.otherImagesUrls, // Actual URLs will be updated after image uploads.
+        // Actual URLs will be updated after image uploads.
+        otherImagesUrls = state.otherImagesUrls,
         reviewRate = state.reviewRate,
     )
   }
@@ -124,17 +135,25 @@ class EditHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.rep
    * - Applies main image updates via [mainImageUri] if provided.
    * - Uploads any newly added "other images".
    * - Deletes images referenced in [pendingDeletionUrls].
+   *
+   * After calling the repository, [pendingDeletionUrls] is cleared.
    */
   override suspend fun persist(hunt: Hunt) {
     val id = requireNotNull(huntId)
+
+    // Take an immutable snapshot of the URLs to remove.
+    val removedOtherImages = pendingDeletionUrls.toList()
 
     repository.editHunt(
         huntID = id,
         newValue = hunt,
         mainImageUri = mainImageUri,
         addedOtherImages = otherImagesUris,
-        removedOtherImages = pendingDeletionUrls,
+        removedOtherImages = removedOtherImages,
     )
+
+    // Clear the internal mutable state once the operation has been requested.
+    pendingDeletionUrls.clear()
   }
 
   /**
