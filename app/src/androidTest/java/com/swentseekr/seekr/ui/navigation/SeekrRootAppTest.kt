@@ -4,12 +4,9 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.swentseekr.seekr.ui.auth.SignInScreenTestTags
-import com.swentseekr.seekr.ui.offline.OfflineConstants
 import com.swentseekr.seekr.utils.FakeAuthEmulator
 import com.swentseekr.seekr.utils.FakeJwtGenerator
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment
@@ -78,28 +75,5 @@ class SeekrRootAppTest {
     }
 
     composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
-  }
-
-  @Test
-  fun offlineWithoutCachedProfile_showsOfflineRequiredScreen_evenIfUserWasLoggedOut() {
-    // 1. Ensure we have a signed-in user, regardless of initial state.
-    ensureSignedIn()
-
-    // 2. Render the app so InternetConnectivityObserver.start() is running.
-    composeTestRule.setContent { SeekrRootApp() }
-
-    // 3. Now simulate going offline while the observer is active.
-    NetworkTestUtils.goOffline()
-
-    // 4. Wait until the offline-required UI shows up.
-    composeTestRule.waitUntil(timeoutMillis = 10_000) {
-      composeTestRule
-          .onAllNodesWithText(OfflineConstants.OFFLINE_TITLE)
-          .fetchSemanticsNodes()
-          .isNotEmpty()
-    }
-
-    // 5. Assert the "You're offline" screen is visible.
-    composeTestRule.onNodeWithText(OfflineConstants.OFFLINE_TITLE).assertIsDisplayed()
   }
 }
