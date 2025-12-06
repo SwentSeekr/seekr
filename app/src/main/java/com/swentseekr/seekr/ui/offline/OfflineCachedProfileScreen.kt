@@ -14,9 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.swentseekr.seekr.model.hunt.Hunt
-import com.swentseekr.seekr.model.profile.mockProfileData
 import com.swentseekr.seekr.ui.components.HuntCard
 import com.swentseekr.seekr.ui.profile.ModernCustomToolbar
 import com.swentseekr.seekr.ui.profile.ModernEmptyHuntsState
@@ -149,16 +147,4 @@ fun OfflineCachedProfileScreen(profile: Profile?, modifier: Modifier = Modifier)
           }
     }
   }
-}
-
-/**
- * Design-time preview of [OfflineCachedProfileScreen] using [mockProfileData].
- *
- * This preview showcases the offline profile layout with a sample profile, allowing UI inspection
- * and iteration without requiring a running app or real cached data.
- */
-@Preview
-@Composable
-fun OfflineCachedProfileScreenPreview() {
-  OfflineCachedProfileScreen(profile = mockProfileData())
 }
