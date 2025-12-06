@@ -17,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 
 /**
  * Offline placeholder for the map tab.
@@ -76,19 +75,4 @@ fun OfflineMapScreen(modifier: Modifier = Modifier) {
           }
     }
   }
-}
-
-/**
- * Design-time preview of [OfflineMapScreen].
- *
- * This preview demonstrates the offline map placeholder in isolation, using the current theme
- * defaults. It is useful for verifying:
- * - Card sizing and alignment.
- * - Icon and text styling.
- * - Overall visual hierarchy in offline scenarios.
- */
-@Preview
-@Composable
-fun OfflineMapScreenPreview() {
-  OfflineMapScreen()
 }
