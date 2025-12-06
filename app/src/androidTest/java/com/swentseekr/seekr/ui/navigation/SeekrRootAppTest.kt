@@ -28,23 +28,34 @@ class SeekrRootAppTest {
   @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
   @Before
-  fun setup() = runBlocking {
+  fun setup() {
+    // Make sure Firebase is wired up (emulators if available).
     FirebaseTestEnvironment.setup()
-    // Always start signed out for a clean state.
-    FakeAuthEmulator.signOut()
-    // Make sure network is on by default (for online tests).
+    // Start from "online" as a default; failures are safely ignored.
     NetworkTestUtils.goOnline()
   }
 
   @After
   fun teardown() = runBlocking {
-    // Restore network for whatever runs after these tests.
+    // Restore network + clear auth state at the end of each test run.
     NetworkTestUtils.goOnline()
     FakeAuthEmulator.signOut()
   }
 
+  /** Helper: sign in only if not already authenticated. */
+  private fun ensureSignedIn() = runBlocking {
+    if (!FakeAuthEmulator.isAuthenticated()) {
+      val fakeToken = FakeJwtGenerator.createFakeGoogleIdToken()
+      FakeAuthEmulator.signInWithFakeGoogleToken(fakeToken)
+    }
+  }
+
   @Test
   fun showsSignInScreenWhenLoggedOut() {
+    // Explicitly ensure logged-out state for this test.
+    runBlocking { FakeAuthEmulator.signOut() }
+    NetworkTestUtils.goOnline()
+
     composeTestRule.setContent { SeekrRootApp() }
 
     composeTestRule.onNodeWithTag(SignInScreenTestTags.LOGIN_BUTTON).assertIsDisplayed()
@@ -52,33 +63,38 @@ class SeekrRootAppTest {
 
   @Test
   fun loggedInUser_opensAppAndGoesDirectlyToMain() {
-    runBlocking {
-      val fakeToken = FakeJwtGenerator.createFakeGoogleIdToken()
-
-      FakeAuthEmulator.signInWithFakeGoogleToken(fakeToken)
-
-      composeTestRule.setContent { SeekrRootApp() }
-
-      // Wait until the bottom navigation appears (main app shell).
-      composeTestRule.waitUntil(timeoutMillis = 10_000) {
-        composeTestRule
-            .onAllNodesWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU)
-            .fetchSemanticsNodes()
-            .isNotEmpty()
-      }
-
-      composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
-    }
-  }
-
-  @Test
-  fun offlineWithoutCachedProfile_showsOfflineRequiredScreen() {
-    // We explicitly simulate offline *before* rendering the composable.
-    NetworkTestUtils.goOffline()
+    // Ensure we have an authenticated user (no-op if already signed in).
+    ensureSignedIn()
+    NetworkTestUtils.goOnline()
 
     composeTestRule.setContent { SeekrRootApp() }
 
-    // Wait until the offline-required UI shows up.
+    // Wait until the bottom navigation appears (main app shell).
+    composeTestRule.waitUntil(timeoutMillis = 10_000) {
+      composeTestRule
+          .onAllNodesWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU)
+          .fetchSemanticsNodes()
+          .isNotEmpty()
+    }
+
+    composeTestRule.onNodeWithTag(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
+  }
+
+  @Test
+  fun offlineWithoutCachedProfile_showsOfflineRequiredScreen_evenIfUserWasLoggedOut() {
+    // 1. Ensure we have a signed-in user, regardless of initial state.
+    ensureSignedIn()
+
+    // 2. Start online so the connectivity observer boots in a known state.
+    NetworkTestUtils.goOnline()
+
+    // 3. Render the app so InternetConnectivityObserver.start() is running.
+    composeTestRule.setContent { SeekrRootApp() }
+
+    // 4. Now simulate going offline while the observer is active.
+    NetworkTestUtils.goOffline()
+
+    // 5. Wait until the offline-required UI shows up.
     composeTestRule.waitUntil(timeoutMillis = 10_000) {
       composeTestRule
           .onAllNodesWithText(OfflineConstants.OFFLINE_TITLE)
@@ -86,7 +102,7 @@ class SeekrRootAppTest {
           .isNotEmpty()
     }
 
-    // Assert the "You're offline" screen is visible.
+    // 6. Assert the "You're offline" screen is visible.
     composeTestRule.onNodeWithText(OfflineConstants.OFFLINE_TITLE).assertIsDisplayed()
   }
 }
