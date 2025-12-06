@@ -11,8 +11,15 @@ import com.swentseekr.seekr.ui.hunt.preview.PreviewHuntViewModel
 /**
  * Configuration for displaying a delete action in the hunt UI.
  *
- * @param show Whether the delete option should be visible.
- * @param onClick Callback invoked when the delete action is confirmed.
+ * @property show Whether the delete option should be visible in the UI.
+ * @property onClick Optional callback invoked when the delete action is triggered.
+ *
+ * The [BaseHuntScreen] and its sub-composables:
+ * - Only render a delete button when [show] is `true` **and** [onClick] is not `null`.
+ * - Invoke [onClick] directly when the delete button is pressed.
+ *
+ * No confirmation dialog is enforced by this configuration; callers are responsible for wrapping
+ * [onClick] in any confirmation flow (e.g. dialog) if needed.
  */
 data class DeleteAction(
     val show: Boolean = false,
@@ -29,13 +36,18 @@ data class DeleteAction(
  * - Map-based point selection.
  * - The main hunt fields screen.
  *
+ * The optional [deleteAction] controls whether a delete button is shown in the top bar; if
+ * [deleteAction.show] is `true` and [deleteAction.onClick] is non-null, the callback will be
+ * invoked directly when the user taps "Delete". Any additional confirmation must be implemented by
+ * the caller.
+ *
  * @param title Title displayed in the top app bar.
  * @param vm ViewModel providing the state and actions for the hunt being edited.
  * @param onGoBack Callback invoked when the user navigates back.
  * @param onDone Callback invoked when the hunt has been successfully saved.
- * @param testMode When true, configures the screen for instrumentation testing.
+ * @param testMode When `true`, configures the screen for instrumentation testing.
  * @param onSelectImage Callback invoked when a main image is selected.
- * @param deleteAction Configuration for the delete action displayed in the UI.
+ * @param deleteAction Configuration for the optional delete action displayed in the UI.
  */
 @Composable
 fun BaseHuntScreen(
@@ -77,7 +89,8 @@ fun BaseHuntScreen(
 
   // Preview screen shown before submitting the hunt.
   if (showPreview) {
-    val previewVm = remember { PreviewHuntViewModel(vm.uiState) }
+    // Tie the preview ViewModel lifecycle to the underlying hunt ViewModel.
+    val previewVm = remember(vm) { PreviewHuntViewModel(vm.uiState) }
 
     PreviewHuntScreen(
         viewModel = previewVm,
