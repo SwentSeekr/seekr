@@ -207,4 +207,44 @@ class ProfileViewModelTest {
 
     assertNull(viewModel.uiState.value.profile)
   }
+
+  @Test
+  fun toggleLikedHunt_addsHuntToLikedHunts() = runTest {
+    viewModel.loadProfile("user1")
+    advanceUntilIdle()
+
+    val hunt =
+        createHuntWithRateAndDifficulty(
+            uid = "hunt1", title = "Test Hunt", reviewRate = 4.0, difficulty = Difficulty.EASY)
+
+    viewModel.toggleLikedHunt(hunt)
+    advanceUntilIdle()
+
+    val likedHunts = viewModel.uiState.value.profile!!.likedHunts
+
+    assertEquals(1, likedHunts.size)
+    assertEquals("hunt1", likedHunts.first().uid)
+  }
+
+  @Test
+  fun toggleLikedHunt_removesHuntFromLikedHunts() = runTest {
+    val hunt =
+        createHuntWithRateAndDifficulty(
+            uid = "hunt1", title = "Test Hunt", reviewRate = 4.0, difficulty = Difficulty.EASY)
+
+    val profileWithLike = profileAlice.copy(likedHunts = mutableListOf(hunt))
+
+    repository.updateProfile(profileWithLike)
+
+    viewModel.loadProfile("user1")
+    advanceUntilIdle()
+
+    assertEquals(1, viewModel.uiState.value.profile!!.likedHunts.size)
+
+    viewModel.toggleLikedHunt(hunt)
+    advanceUntilIdle()
+
+    val likedHunts = viewModel.uiState.value.profile!!.likedHunts
+    assertTrue(likedHunts.isEmpty())
+  }
 }

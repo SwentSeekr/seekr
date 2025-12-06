@@ -18,4 +18,10 @@ object Constants {
   const val IMAGE_URL = "http://image.url"
   const val DIFFICULTY_EASY = "EASY"
   const val HUNT_STATUS_FUN = "FUN"
+  const val UNCHECKED_CAST = "UNCHECKED_CAST"
+  const val LIKED_HUNTS = "likedHunts"
+  const val PROFILES = "profiles"
+  const val UID = "uid"
+  const val ZERO = 0
+  const val ONE = 1
 }

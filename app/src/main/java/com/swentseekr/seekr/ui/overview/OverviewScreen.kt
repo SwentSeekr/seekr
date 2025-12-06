@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
@@ -44,6 +45,7 @@ import androidx.navigation.compose.rememberNavController
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.ui.components.HuntCard
+import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Alpha02
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Border1
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Border2
@@ -79,6 +81,7 @@ import com.swentseekr.seekr.ui.overview.OverviewScreenStrings.FilterBy
 fun OverviewScreen(
     modifier: Modifier = Modifier,
     overviewViewModel: OverviewViewModel = viewModel(),
+    huntCardViewModel: HuntCardViewModel = viewModel(),
     navHostController: NavHostController = rememberNavController(),
     onActiveBar: (Boolean) -> Unit = {},
     onHuntClick: (String) -> Unit = {},
@@ -88,7 +91,10 @@ fun OverviewScreen(
   val query = overviewViewModel.searchQuery
   val hunts = uiState.hunts
 
-  LaunchedEffect(Unit) { overviewViewModel.refreshUIState() }
+  LaunchedEffect(Unit) {
+    overviewViewModel.refreshUIState()
+    huntCardViewModel.loadCurrentUserID()
+  }
 
   Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.onPrimary)) {
     Column(
@@ -114,22 +120,26 @@ fun OverviewScreen(
           onStatusSelected = { overviewViewModel.onStatusFilterSelect(it) },
           onDifficultySelected = { overviewViewModel.onDifficultyFilterSelect(it) })
 
+      val likedHuntsCache by huntCardViewModel.likedHuntsCache.collectAsState()
+
       // HUNTS LIST
       LazyColumn(
           modifier = modifier.testTag(OverviewScreenTestTags.HUNT_LIST).fillMaxWidth(),
           contentPadding = PaddingValues(bottom = OverviewScreenDefaults.VerticalPadding16),
           horizontalAlignment = Alignment.CenterHorizontally) {
-            items(hunts.size) { index ->
-              val hunt = hunts[index]
-
+            items(hunts, key = { it.hunt.uid }) { hunt ->
               HuntCard(
                   hunt.hunt,
                   modifier =
                       modifier
                           .testTag(
-                              if (index == hunts.size - 1) OverviewScreenTestTags.LAST_HUNT_CARD
+                              if (hunts.lastIndex == hunts.size - 1)
+                                  OverviewScreenTestTags.LAST_HUNT_CARD
                               else OverviewScreenTestTags.HUNT_CARD)
-                          .clickable { onHuntClick(hunt.hunt.uid) })
+                          .clickable { onHuntClick(hunt.hunt.uid) },
+                  isLiked = likedHuntsCache.contains(hunt.hunt.uid),
+                  onLikeClick = { huntId -> huntCardViewModel.onLikeClick(huntId) },
+              )
 
               Spacer(modifier = Modifier.height(OverviewScreenDefaults.ListItemSpacing))
             }

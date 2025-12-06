@@ -9,6 +9,12 @@ import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.model.profile.Constants.LIKED_HUNTS
+import com.swentseekr.seekr.model.profile.Constants.ONE
+import com.swentseekr.seekr.model.profile.Constants.PROFILES
+import com.swentseekr.seekr.model.profile.Constants.UID
+import com.swentseekr.seekr.model.profile.Constants.UNCHECKED_CAST
+import com.swentseekr.seekr.model.profile.Constants.ZERO
 import com.swentseekr.seekr.model.profile.ProfileRepositoryFirestore.Companion.huntToMap
 import com.swentseekr.seekr.model.profile.ProfileRepositoryFirestore.Companion.mapToHunt
 import com.swentseekr.seekr.ui.profile.Profile
@@ -515,5 +521,111 @@ class ProfileRepositoryFirestoreTest {
     val profile = repository.getProfile(uid)
     assertNotNull(profile)
     println("deleteCurrentProfilePicture with non-existent file passed")
+  }
+
+  @Test
+  fun addLikedHunt_doesNotDuplicate() = runTest {
+    val uid = auth.currentUser!!.uid
+    db.collection("hunts")
+        .document(hunt.uid)
+        .set(
+            mapOf(
+                "uid" to hunt.uid,
+                "title" to hunt.title,
+                "description" to hunt.description,
+                "authorId" to hunt.authorId,
+                "status" to hunt.status.name,
+                "difficulty" to hunt.difficulty.name,
+                "time" to hunt.time,
+                "distance" to hunt.distance,
+                "reviewRate" to hunt.reviewRate,
+                "mainImageUrl" to hunt.mainImageUrl,
+                "start" to
+                    mapOf(
+                        "latitude" to hunt.start.latitude,
+                        "longitude" to hunt.start.longitude,
+                        "name" to hunt.start.name),
+                "end" to
+                    mapOf(
+                        "latitude" to hunt.end.latitude,
+                        "longitude" to hunt.end.longitude,
+                        "name" to hunt.end.name),
+                "middlePoints" to
+                    hunt.middlePoints.map { mp ->
+                      mapOf(
+                          "latitude" to mp.latitude, "longitude" to mp.longitude, "name" to mp.name)
+                    }))
+        .await()
+
+    val huntMap = huntToMap(hunt)
+    db.collection(PROFILES).document(uid).set(mapOf(LIKED_HUNTS to listOf(huntMap))).await()
+
+    repository.addLikedHunt(uid, hunt.uid)
+
+    val snapshot = db.collection(PROFILES).document(uid).get().await()
+    @Suppress(UNCHECKED_CAST)
+    val likedHunts = snapshot.get(LIKED_HUNTS) as? List<Map<String, Any?>> ?: emptyList()
+
+    assertEquals(ONE, likedHunts.size)
+    assertEquals(hunt.uid, likedHunts[ZERO][UID])
+  }
+
+  @Test
+  fun removeLikedHunt_removesHuntSuccessfully() = runTest {
+    val uid = auth.currentUser!!.uid
+    val huntMap = huntToMap(hunt)
+    db.collection(PROFILES).document(uid).set(mapOf(LIKED_HUNTS to listOf(huntMap))).await()
+    repository.removeLikedHunt(uid, hunt.uid)
+    val snapshot = db.collection(PROFILES).document(uid).get().await()
+    @Suppress(UNCHECKED_CAST)
+    val likedHunts = snapshot.get(LIKED_HUNTS) as? List<Map<String, Any?>> ?: emptyList()
+
+    assertTrue(likedHunts.isEmpty())
+  }
+
+  @Test
+  fun removeLikedHunt_doesNothingIfNotLiked() = runTest {
+    val uid = auth.currentUser!!.uid
+    db.collection("profiles")
+        .document(uid)
+        .set(mapOf(LIKED_HUNTS to emptyList<Map<String, Any?>>()))
+        .await()
+    repository.removeLikedHunt(uid, hunt.uid)
+    val snapshot = db.collection("profiles").document(uid).get().await()
+    @Suppress(UNCHECKED_CAST)
+    val likedHunts = snapshot.get(LIKED_HUNTS) as? List<Map<String, Any?>> ?: emptyList()
+    assertTrue(likedHunts.isEmpty())
+  }
+
+  @Test
+  fun addLikedHunt_firestoreFailure_hitsCatchBlock() = runTest {
+    val uid = auth.currentUser!!.uid
+
+    val brokenDb = FirebaseFirestore.getInstance().apply { terminate() }
+
+    val brokenRepo = ProfileRepositoryFirestore(brokenDb, auth, storage = storage)
+
+    try {
+      brokenRepo.addLikedHunt(uid, hunt.uid)
+      fail("Expected Firestore failure")
+    } catch (e: Exception) {
+      assertTrue(e.message != null)
+    }
+  }
+
+  @Test
+  fun removeLikedHunt_firestoreFailure_hitsCatchBlock() = runTest {
+    val uid = auth.currentUser!!.uid
+
+    val brokenDb = FirebaseFirestore.getInstance().apply { terminate() }
+
+    val brokenRepo = ProfileRepositoryFirestore(brokenDb, auth, storage = storage)
+
+    try {
+      brokenRepo.removeLikedHunt(uid, hunt.uid)
+      fail("Expected Firestore failure")
+    } catch (e: Exception) {
+      assertTrue(e.message != null)
+    }
   }
 }

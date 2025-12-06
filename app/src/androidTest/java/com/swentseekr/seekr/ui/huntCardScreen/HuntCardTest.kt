@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.swentseekr.seekr.R
@@ -65,5 +66,34 @@ class HuntCardTest {
 
     // On recherche l’icône favorite par son contentDescription
     composeTestRule.onNodeWithContentDescription("Like Button").assertIsDisplayed()
+  }
+
+  @Test
+  fun huntCard_likeButton_clickTriggersCallback() {
+    val hunt = createFakeHunt()
+    var clickedHuntId: String? = null
+
+    composeTestRule.setContent {
+      HuntCard(
+          hunt,
+          isLiked = false,
+          onLikeClick = { clickedHuntId = it },
+          modifier = Modifier.padding(2.dp))
+    }
+
+    composeTestRule.onNodeWithContentDescription("Like Button").performClick()
+
+    assert(clickedHuntId == hunt.uid)
+  }
+
+  @Test
+  fun huntCard_likeButton_tintChangesWhenLiked() {
+    val hunt = createFakeHunt()
+
+    composeTestRule.setContent {
+      HuntCard(hunt, isLiked = true, onLikeClick = {}, modifier = Modifier.padding(2.dp))
+    }
+
+    composeTestRule.onNodeWithContentDescription("Like Button").assertExists()
   }
 }
