@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 
 /**
  * Overview screen displayed when the user is offline.
@@ -100,20 +99,4 @@ fun OfflineOverviewScreen(
           Spacer(modifier = Modifier.height(OfflineConstants.OVERVIEW_BUTTON_BOTTOM_SPACER_HEIGHT))
         }
   }
-}
-
-/**
- * Design-time preview of [OfflineOverviewScreen].
- *
- * This preview showcases the offline overview layout, including:
- * - The offline information card.
- * - The "Show downloaded hunts" action button.
- *
- * It is intended for visual inspection and UI iteration in the IDE without requiring a running app
- * or a real offline state.
- */
-@Preview
-@Composable
-fun OfflineOverviewScreenPreview() {
-  OfflineOverviewScreen(onShowDownloadedHunts = {})
 }
