@@ -197,19 +197,19 @@ private fun rememberLocationPermissionState(testMode: Boolean): LocationPermissi
 }
 
 /**
- * Side-effect composable that moves the camera to the user's last known location
- * **only when no hunt is currently selected or active**.
+ * Side-effect composable that moves the camera to the user's last known location **only when no
+ * hunt is currently selected or active**.
  *
  * This effect:
  * - Runs whenever location permission, map load state, or hunt-selection state changes.
  * - Aborts immediately if:
- *   - The map is not yet loaded.
- *   - Location permission is not granted.
- *   - A hunt is selected or a hunt has already started (in these cases the camera
- *     should remain focused on the hunt instead of the user).
+ *     - The map is not yet loaded.
+ *     - Location permission is not granted.
+ *     - A hunt is selected or a hunt has already started (in these cases the camera should remain
+ *       focused on the hunt instead of the user).
  * - When allowed, queries the last known location from [FusedLocationProviderClient].
- * - Animates the [CameraPositionState] to center on the user's location using the
- *   default user-location zoom level.
+ * - Animates the [CameraPositionState] to center on the user's location using the default
+ *   user-location zoom level.
  *
  * @param hasLocationPermission whether the app currently has location permission.
  * @param mapLoaded whether the map has finished initializing.
@@ -229,34 +229,28 @@ private fun MoveCameraToUserLocationEffect(
     cameraPositionState: CameraPositionState,
     scope: CoroutineScope
 ) {
-    LaunchedEffect(
-        hasLocationPermission,
-        mapLoaded,
-        uiState.selectedHunt,
-        uiState.isHuntStarted) {
-        if (!mapLoaded || !hasLocationPermission) return@LaunchedEffect
-        if (!isLocationPermissionGranted(context)) return@LaunchedEffect
+  LaunchedEffect(hasLocationPermission, mapLoaded, uiState.selectedHunt, uiState.isHuntStarted) {
+    if (!mapLoaded || !hasLocationPermission) return@LaunchedEffect
+    if (!isLocationPermissionGranted(context)) return@LaunchedEffect
 
-        val hasActiveHunt = uiState.selectedHunt != null || uiState.isHuntStarted
-        if (hasActiveHunt) return@LaunchedEffect
+    val hasActiveHunt = uiState.selectedHunt != null || uiState.isHuntStarted
+    if (hasActiveHunt) return@LaunchedEffect
 
-        try {
-            fused.lastLocation.addOnSuccessListener { location ->
-                location?.let {
-                    val here = LatLng(it.latitude, it.longitude)
-                    scope.launch {
-                        cameraPositionState.animate(
-                            CameraUpdateFactory.newLatLngZoom(
-                                here, MapScreenDefaults.UserLocationZoom))
-                    }
-                }
-            }
-        } catch (_: SecurityException) {
-            return@LaunchedEffect
+    try {
+      fused.lastLocation.addOnSuccessListener { location ->
+        location?.let {
+          val here = LatLng(it.latitude, it.longitude)
+          scope.launch {
+            cameraPositionState.animate(
+                CameraUpdateFactory.newLatLngZoom(here, MapScreenDefaults.UserLocationZoom))
+          }
         }
+      }
+    } catch (_: SecurityException) {
+      return@LaunchedEffect
     }
+  }
 }
-
 
 /**
  * Displays a permission request popup when location permission is not granted.

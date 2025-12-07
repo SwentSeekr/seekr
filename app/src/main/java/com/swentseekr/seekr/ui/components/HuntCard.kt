@@ -146,8 +146,7 @@ fun HuntCard(
                 Spacer(modifier = Modifier.width(HuntCardUIConstants.Padding8))
 
                 ModernStatChip(
-                    icon = StatIcon.PainterIcon(
-                        painter = painterResource(R.drawable.clock)),
+                    icon = StatIcon.PainterIcon(painter = painterResource(R.drawable.clock)),
                     value = "${hunt.time}",
                     unit = HuntCardScreenStrings.TimeUnit,
                     modifier = Modifier.weight(1f))
@@ -198,23 +197,22 @@ fun ModernDifficultyBadge(difficulty: Difficulty, modifier: Modifier = Modifier)
  * Represents an icon that can be rendered inside a stat chip.
  *
  * `StatIcon` abstracts over two possible icon sources:
- *
  * - [Vector] — a standard Compose [ImageVector] such as Material Icons.
- * - [PainterIcon] — a drawable-based icon using a [Painter], typically from
- *   `painterResource()` (e.g., custom SVGs imported as VectorDrawables).
+ * - [PainterIcon] — a drawable-based icon using a [Painter], typically from `painterResource()`
+ *   (e.g., custom SVGs imported as VectorDrawables).
  *
- * This sealed class allows `ModernStatChip` to support both built-in Material
- * icons and custom SVG-based icons without changing its public API.
+ * This sealed class allows `ModernStatChip` to support both built-in Material icons and custom
+ * SVG-based icons without changing its public API.
  */
 sealed class StatIcon {
-    data class Vector(val icon: ImageVector) : StatIcon()
-    data class PainterIcon(val painter: Painter) : StatIcon()
+  data class Vector(val icon: ImageVector) : StatIcon()
+
+  data class PainterIcon(val painter: Painter) : StatIcon()
 }
 
 /**
- * Displays a small rounded chip showing a numeric value with a unit,
- * preceded by an icon. Common use cases include distance, duration,
- * or other numerical stats in a Hunt card.
+ * Displays a small rounded chip showing a numeric value with a unit, preceded by an icon. Common
+ * use cases include distance, duration, or other numerical stats in a Hunt card.
  *
  * This version accepts a [StatIcon], allowing callers to provide either:
  * - a Material Design [ImageVector] (via [StatIcon.Vector]), or
@@ -243,20 +241,20 @@ fun ModernStatChip(icon: StatIcon, value: String, unit: String, modifier: Modifi
                     vertical = HuntCardUIConstants.Padding10),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center) {
-            when (icon) {
-                is StatIcon.Vector -> Icon(
-                    imageVector = icon.icon,
-                    contentDescription = null,
-                    tint = HuntCardUIConstants.StatIconGray,
-                    modifier = Modifier.size(HuntCardUIConstants.StatIconSize)
-                )
-                is StatIcon.PainterIcon -> Icon(
-                    painter = icon.painter,
-                    contentDescription = null,
-                    tint = HuntCardUIConstants.StatIconGray,
-                    modifier = Modifier.size(HuntCardUIConstants.StatIconSize)
-                )
-            }
+              when (icon) {
+                is StatIcon.Vector ->
+                    Icon(
+                        imageVector = icon.icon,
+                        contentDescription = null,
+                        tint = HuntCardUIConstants.StatIconGray,
+                        modifier = Modifier.size(HuntCardUIConstants.StatIconSize))
+                is StatIcon.PainterIcon ->
+                    Icon(
+                        painter = icon.painter,
+                        contentDescription = null,
+                        tint = HuntCardUIConstants.StatIconGray,
+                        modifier = Modifier.size(HuntCardUIConstants.StatIconSize))
+              }
 
               Spacer(modifier = Modifier.width(HuntCardUIConstants.Padding6))
 

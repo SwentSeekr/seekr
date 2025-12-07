@@ -285,9 +285,8 @@ private fun HuntImagePage(
             modifier = Modifier.fillMaxSize(),
             placeholder = painterResource(R.drawable.empty_image),
             error = painterResource(R.drawable.empty_image),
-            contentScale =
-                ContentScale.Crop,
-            )
+            contentScale = ContentScale.Crop,
+        )
         Box(
             modifier =
                 Modifier.fillMaxSize()

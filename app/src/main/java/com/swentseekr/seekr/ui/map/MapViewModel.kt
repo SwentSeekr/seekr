@@ -113,26 +113,26 @@ class MapViewModel(
     viewModelScope.launch { computeRouteForSelectedHunt(travelMode = MapConfig.TravelModeWalking) }
   }
 
-    /**
-     * Selects a hunt by its id, like clicking its marker on the map.
-     *
-     * @param huntId the id of the hunt to select.
-     */
-    fun selectHuntById(huntId: String) {
-        val state = _uiState.value
-        val hunt = state.hunts.find { it.uid == huntId } ?: return
+  /**
+   * Selects a hunt by its id, like clicking its marker on the map.
+   *
+   * @param huntId the id of the hunt to select.
+   */
+  fun selectHuntById(huntId: String) {
+    val state = _uiState.value
+    val hunt = state.hunts.find { it.uid == huntId } ?: return
 
-        _uiState.value =
-            state.copy(
-                selectedHunt = hunt,
-                isFocused = false,
-                route = emptyList(),
-                isHuntStarted = false,
-                validatedCount = MapConfig.DefaultValidatedCount,
-                currentDistanceToNextMeters = null,
-                errorMsg = null,
-            )
-    }
+    _uiState.value =
+        state.copy(
+            selectedHunt = hunt,
+            isFocused = false,
+            route = emptyList(),
+            isHuntStarted = false,
+            validatedCount = MapConfig.DefaultValidatedCount,
+            currentDistanceToNextMeters = null,
+            errorMsg = null,
+        )
+  }
 
   /** Exits focused mode and resets hunt-related state. */
   fun onBackToAllHunts() {

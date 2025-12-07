@@ -184,8 +184,8 @@ fun SeekrMainNavHost(
   val authViewModel: AuthViewModel = viewModel()
   val uiState by authViewModel.uiState.collectAsState()
 
-    // Shared MapViewModel for the whole nav graph
-    val mapViewModel: MapViewModel = viewModel()
+  // Shared MapViewModel for the whole nav graph
+  val mapViewModel: MapViewModel = viewModel()
 
   if (uiState.needsOnboarding && user != null) {
     OnboardingFlow(userId = user.uid, onboardingHandler = authViewModel)
@@ -307,15 +307,16 @@ fun SeekrMainNavHost(
                         },
                         beginHunt = {
 
-                            // 1. Select hunt in MapViewModel
-                            mapViewModel.selectHuntById(huntId)
-                            mapViewModel.onViewHuntClick()
+                          // 1. Select hunt in MapViewModel
+                          mapViewModel.selectHuntById(huntId)
+                          mapViewModel.onViewHuntClick()
 
-                            // 2. navigate to Map
-                            navController.navigate(SeekrDestination.Map.route) {
-                                launchSingleTop = true
-                                popUpTo(SeekrDestination.Overview.route)
-                            }},
+                          // 2. navigate to Map
+                          navController.navigate(SeekrDestination.Map.route) {
+                            launchSingleTop = true
+                            popUpTo(SeekrDestination.Overview.route)
+                          }
+                        },
                         addReview = {
                           navController.navigate(SeekrDestination.AddReview.createRoute(huntId)) {
                             launchSingleTop = true

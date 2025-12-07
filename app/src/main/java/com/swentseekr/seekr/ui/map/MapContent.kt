@@ -32,20 +32,20 @@ import kotlin.math.roundToInt
  *
  * This composable:
  * - Displays a GoogleMap instance using the Maps Compose library.
- * - Configures map properties and UI settings, including location features that depend
- *   on whether the user has granted location permission.
+ * - Configures map properties and UI settings, including location features that depend on whether
+ *   the user has granted location permission.
  * - Places hunt markers according to the current [uiState], supporting:
  *     - Overview mode (all hunts visible)
  *     - Focused mode (single hunt highlighted with its route)
  * - Notifies callers when the map has finished loading via [onMapLoaded].
- * - Triggers camera animations elsewhere in response to changes in [uiState] or
- *   [selectedHunt] (this composable does not directly animate the camera).
+ * - Triggers camera animations elsewhere in response to changes in [uiState] or [selectedHunt]
+ *   (this composable does not directly animate the camera).
  * - Forwards marker click events through [onMarkerClick].
  *
- * @param uiState the current state of the map screen, containing hunts, selection,
- *   focus state, and optional active route.
- * @param hasLocationPermission whether the app currently has permission to access
- *   fine or coarse location; controls the My Location layer and button.
+ * @param uiState the current state of the map screen, containing hunts, selection, focus state, and
+ *   optional active route.
+ * @param hasLocationPermission whether the app currently has permission to access fine or coarse
+ *   location; controls the My Location layer and button.
  * @param cameraPositionState controller for reading or animating the map camera.
  * @param mapLoaded flag indicating whether the map instance has completed loading.
  * @param onMapLoaded callback invoked exactly once when the map signals readiness.
