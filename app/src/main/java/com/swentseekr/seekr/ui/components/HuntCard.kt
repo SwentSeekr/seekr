@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
@@ -137,16 +138,16 @@ fun HuntCard(
               horizontalArrangement = Arrangement.SpaceEvenly,
               verticalAlignment = Alignment.CenterVertically) {
                 ModernStatChip(
-                    icon = Icons.Filled.LocationOn,
+                    icon = StatIcon.Vector(Icons.Filled.LocationOn),
                     value = "${hunt.distance}",
                     unit = HuntCardScreenStrings.DistanceUnit,
                     modifier = Modifier.weight(1f))
 
                 Spacer(modifier = Modifier.width(HuntCardUIConstants.Padding8))
 
-                // We need to change the icon later
                 ModernStatChip(
-                    icon = Icons.Filled.Favorite,
+                    icon = StatIcon.PainterIcon(
+                        painter = painterResource(R.drawable.clock)),
                     value = "${hunt.time}",
                     unit = HuntCardScreenStrings.TimeUnit,
                     modifier = Modifier.weight(1f))
@@ -194,22 +195,43 @@ fun ModernDifficultyBadge(difficulty: Difficulty, modifier: Modifier = Modifier)
 }
 
 /**
- * Displays a small rounded chip showing a numeric value with a unit, preceded by an icon (e.g.
- * distance or duration).
+ * Represents an icon that can be rendered inside a stat chip.
  *
- * The chip uses:
- * - a light background,
- * - a gray icon,
- * - semi-bold text,
- * - internal paddings and radius from `HuntCardUIConstants`.
+ * `StatIcon` abstracts over two possible icon sources:
  *
- * @param icon The icon displayed before the text (ImageVector such as Material Icons)
- * @param value The main numeric value to show (e.g. "5.0")
- * @param unit The unit to display after the value (e.g. "km", "h")
- * @param modifier Optional modifier, usually used with `.weight()` to align chips in a row
+ * - [Vector] — a standard Compose [ImageVector] such as Material Icons.
+ * - [PainterIcon] — a drawable-based icon using a [Painter], typically from
+ *   `painterResource()` (e.g., custom SVGs imported as VectorDrawables).
+ *
+ * This sealed class allows `ModernStatChip` to support both built-in Material
+ * icons and custom SVG-based icons without changing its public API.
+ */
+sealed class StatIcon {
+    data class Vector(val icon: ImageVector) : StatIcon()
+    data class PainterIcon(val painter: Painter) : StatIcon()
+}
+
+/**
+ * Displays a small rounded chip showing a numeric value with a unit,
+ * preceded by an icon. Common use cases include distance, duration,
+ * or other numerical stats in a Hunt card.
+ *
+ * This version accepts a [StatIcon], allowing callers to provide either:
+ * - a Material Design [ImageVector] (via [StatIcon.Vector]), or
+ * - a custom SVG/drawable icon using a [Painter] (via [StatIcon.PainterIcon]).
+ *
+ * The chip includes:
+ * - a light pill-shaped background,
+ * - an icon tinted with a standardized gray color,
+ * - a value+unit text section.
+ *
+ * @param icon The icon to display in the chip, either vector-based or painter-based.
+ * @param value The numeric or textual value to show (e.g., "5.0").
+ * @param unit The unit displayed after the value (e.g., "km", "h").
+ * @param modifier Optional modifier for size, layout, or styling.
  */
 @Composable
-fun ModernStatChip(icon: ImageVector, value: String, unit: String, modifier: Modifier = Modifier) {
+fun ModernStatChip(icon: StatIcon, value: String, unit: String, modifier: Modifier = Modifier) {
   Surface(
       modifier = modifier,
       shape = RoundedCornerShape(HuntCardUIConstants.StatChipCorner),
@@ -221,11 +243,20 @@ fun ModernStatChip(icon: ImageVector, value: String, unit: String, modifier: Mod
                     vertical = HuntCardUIConstants.Padding10),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center) {
-              Icon(
-                  imageVector = icon,
-                  contentDescription = null,
-                  modifier = Modifier.size(HuntCardUIConstants.StatIconSize),
-                  tint = HuntCardUIConstants.StatIconGray)
+            when (icon) {
+                is StatIcon.Vector -> Icon(
+                    imageVector = icon.icon,
+                    contentDescription = null,
+                    tint = HuntCardUIConstants.StatIconGray,
+                    modifier = Modifier.size(HuntCardUIConstants.StatIconSize)
+                )
+                is StatIcon.PainterIcon -> Icon(
+                    painter = icon.painter,
+                    contentDescription = null,
+                    tint = HuntCardUIConstants.StatIconGray,
+                    modifier = Modifier.size(HuntCardUIConstants.StatIconSize)
+                )
+            }
 
               Spacer(modifier = Modifier.width(HuntCardUIConstants.Padding6))
 
