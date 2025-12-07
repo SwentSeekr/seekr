@@ -15,9 +15,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,8 +44,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.ui.components.HuntCard
@@ -62,27 +64,26 @@ import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding8
 import com.swentseekr.seekr.ui.overview.OverviewScreenStrings.FilterBy
 
 /**
- * Main screen displaying the list of hunts with search, filters, and header.
+ * Overview screen displaying the main hunt discovery experience.
  *
- * Includes:
- * - Header section (title + subtitle)
- * - Search bar
- * - Status & difficulty filters
- * - Scrollable list of HuntCard items
+ * This screen includes:
+ * - A header section with title and subtitle
+ * - A search bar with expand/collapse behavior
+ * - Status and difficulty filter controls
+ * - A scrollable list of hunts with pull-to-refresh support
  *
- * @param modifier Optional modifier for layout adjustments.
- * @param overviewViewModel ViewModel providing hunts and filtering logic.
- * @param navHostController Navigation controller (used by previews).
- * @param onActiveBar Callback invoked when the search bar expands or collapses.
- * @param onHuntClick Callback fired when a hunt card is tapped.
+ * @param modifier Modifier used to adjust layout or styling.
+ * @param overviewViewModel Provides hunt data, search state, and filtering logic.
+ * @param huntCardViewModel Provides like/unlike state for individual hunt cards.
+ * @param onActiveBar Called when the search bar expands or collapses.
+ * @param onHuntClick Invoked when a hunt card is tapped, returning the hunt ID.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun OverviewScreen(
     modifier: Modifier = Modifier,
     overviewViewModel: OverviewViewModel = viewModel(),
     huntCardViewModel: HuntCardViewModel = viewModel(),
-    navHostController: NavHostController = rememberNavController(),
     onActiveBar: (Boolean) -> Unit = {},
     onHuntClick: (String) -> Unit = {},
 ) {
@@ -95,6 +96,10 @@ fun OverviewScreen(
     overviewViewModel.refreshUIState()
     huntCardViewModel.loadCurrentUserID()
   }
+
+  val pullRefreshState =
+      rememberPullRefreshState(
+          refreshing = uiState.isRefreshing, onRefresh = { overviewViewModel.refreshUIState() })
 
   Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.onPrimary)) {
     Column(
@@ -122,27 +127,41 @@ fun OverviewScreen(
 
       val likedHuntsCache by huntCardViewModel.likedHuntsCache.collectAsState()
 
-      // HUNTS LIST
-      LazyColumn(
-          modifier = modifier.testTag(OverviewScreenTestTags.HUNT_LIST).fillMaxWidth(),
-          contentPadding = PaddingValues(bottom = OverviewScreenDefaults.VerticalPadding16),
-          horizontalAlignment = Alignment.CenterHorizontally) {
-            items(hunts, key = { it.hunt.uid }) { hunt ->
-              HuntCard(
-                  hunt.hunt,
-                  modifier =
-                      modifier
-                          .testTag(
-                              if (hunts.lastIndex == hunts.size - 1)
-                                  OverviewScreenTestTags.LAST_HUNT_CARD
-                              else OverviewScreenTestTags.HUNT_CARD)
-                          .clickable { onHuntClick(hunt.hunt.uid) },
-                  isLiked = likedHuntsCache.contains(hunt.hunt.uid),
-                  onLikeClick = { huntId -> huntCardViewModel.onLikeClick(huntId) },
-              )
+      // HUNTS LIST with pull-to-refresh ONLY on the list
+      Box(
+          modifier =
+              Modifier.fillMaxWidth()
+                  .weight(OverviewScreenDefaults.RefreshIndicatorWeight)
+                  .pullRefresh(pullRefreshState)) {
+            LazyColumn(
+                modifier = modifier.testTag(OverviewScreenTestTags.HUNT_LIST).fillMaxSize(),
+                contentPadding = PaddingValues(bottom = OverviewScreenDefaults.VerticalPadding16),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                  items(hunts, key = { it.hunt.uid }) { hunt ->
+                    HuntCard(
+                        hunt.hunt,
+                        modifier =
+                            modifier
+                                .testTag(
+                                    if (hunts.lastIndex == hunts.size - 1)
+                                        OverviewScreenTestTags.LAST_HUNT_CARD
+                                    else OverviewScreenTestTags.HUNT_CARD)
+                                .clickable { onHuntClick(hunt.hunt.uid) },
+                        isLiked = likedHuntsCache.contains(hunt.hunt.uid),
+                        onLikeClick = { huntId -> huntCardViewModel.onLikeClick(huntId) },
+                    )
 
-              Spacer(modifier = Modifier.height(OverviewScreenDefaults.ListItemSpacing))
-            }
+                    Spacer(modifier = Modifier.height(OverviewScreenDefaults.ListItemSpacing))
+                  }
+                }
+
+            // Indicator now tied just to the list area
+            PullRefreshIndicator(
+                refreshing = uiState.isRefreshing,
+                state = pullRefreshState,
+                modifier =
+                    Modifier.align(Alignment.TopCenter)
+                        .testTag(OverviewScreenTestTags.REFRESH_INDICATOR))
           }
     }
   }

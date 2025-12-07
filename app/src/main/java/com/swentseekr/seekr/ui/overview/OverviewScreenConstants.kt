@@ -33,7 +33,6 @@ object OverviewScreenDefaults {
   val Gray999 = Color(0xFF999999)
 
   val FilterChipCornerRadius = 12.dp
-  val FilterChipLabelSize = 13.dp
   val DifficultyFilterOffset = 3
 
   // Status colors
@@ -46,6 +45,9 @@ object OverviewScreenDefaults {
   val DifficultyEasy = Color(0xFF4CAF50)
   val DifficultyIntermediate = Color(0xFFFFA726)
   val DifficultyHard = Color(0xFFEF5350)
+
+  // Refresh indicator
+  val RefreshIndicatorWeight = 1f
 }
 
 object OverviewScreenStrings {
@@ -63,4 +65,6 @@ object OverviewScreenTestTags {
   const val FILTER_BAR = "FilterBar"
   const val FILTER_BUTTON = "FilterButton"
   const val OVERVIEW_SCREEN = "OverviewScreen"
+
+  const val REFRESH_INDICATOR = "RefreshIndicator"
 }

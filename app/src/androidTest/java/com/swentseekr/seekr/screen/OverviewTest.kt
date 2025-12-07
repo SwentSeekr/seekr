@@ -23,7 +23,9 @@ import com.swentseekr.seekr.ui.components.HuntCardScreenStrings
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import com.swentseekr.seekr.ui.overview.FilterButton
 import com.swentseekr.seekr.ui.overview.ModernFilterBar
+import com.swentseekr.seekr.ui.overview.OverviewScreen
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
+import com.swentseekr.seekr.ui.overview.OverviewViewModel
 import com.swentseekr.seekr.ui.profile.Profile
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
@@ -237,5 +239,69 @@ class OverviewScreenTest {
 
     assertTrue(clickedHunts.contains("hunt_1"))
     assertEquals(setOf("hunt_1", "hunt_2"), clickedHunts)
+  }
+
+  // ---------------- OverviewScreen + pull-to-refresh ----------------
+
+  @Test
+  fun overviewScreen_displaysHeaderSearchFiltersAndList() {
+    // Given an OverviewViewModel backed by the fake repository
+    val overviewViewModel = OverviewViewModel(fakeHuntRepository)
+
+    // When: we render the full OverviewScreen
+    composeTestRule.setContent {
+      OverviewScreen(
+          overviewViewModel = overviewViewModel, huntCardViewModel = viewModel, onHuntClick = {})
+    }
+
+    // Then: root container is visible
+    composeTestRule.onNodeWithTag(OverviewScreenTestTags.OVERVIEW_SCREEN).assertIsDisplayed()
+
+    // And: search bar, filter bar and hunt list are present
+    composeTestRule.onNodeWithTag(OverviewScreenTestTags.SEARCH_BAR).assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag(OverviewScreenTestTags.FILTER_BAR).assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag(OverviewScreenTestTags.HUNT_LIST).assertIsDisplayed()
+  }
+
+  @Test
+  fun overviewScreen_showsHuntCardsFromRepository_inLazyList() {
+    val overviewViewModel = OverviewViewModel(fakeHuntRepository)
+
+    composeTestRule.setContent {
+      OverviewScreen(
+          overviewViewModel = overviewViewModel, huntCardViewModel = viewModel, onHuntClick = {})
+    }
+
+    composeTestRule.waitForIdle()
+
+    // Ensure the LazyColumn list is there
+    composeTestRule.onNodeWithTag(OverviewScreenTestTags.HUNT_LIST).assertIsDisplayed()
+
+    // Scroll until we find a hunt card (LAST_HUNT_CARD when there's a single item)
+    composeTestRule
+        .onNodeWithTag(OverviewScreenTestTags.HUNT_LIST)
+        .performScrollToNode(hasTestTag(OverviewScreenTestTags.LAST_HUNT_CARD))
+
+    composeTestRule.onNodeWithTag(OverviewScreenTestTags.LAST_HUNT_CARD).assertIsDisplayed()
+  }
+
+  @Test
+  fun overviewScreen_containsPullToRefreshIndicatorInsideListContainer() {
+    val overviewViewModel = OverviewViewModel(fakeHuntRepository)
+
+    composeTestRule.setContent {
+      OverviewScreen(
+          overviewViewModel = overviewViewModel, huntCardViewModel = viewModel, onHuntClick = {})
+    }
+
+    composeTestRule.waitForIdle()
+
+    // Verify hunt list exists
+    composeTestRule.onNodeWithTag(OverviewScreenTestTags.HUNT_LIST).assertIsDisplayed()
+
+    // Verify PullRefreshIndicator exists inside the list container
+    composeTestRule.onNodeWithTag(OverviewScreenTestTags.REFRESH_INDICATOR).assertExists()
   }
 }
