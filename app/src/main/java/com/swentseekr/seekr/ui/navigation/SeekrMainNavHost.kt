@@ -36,6 +36,7 @@ import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
 import com.swentseekr.seekr.ui.hunt.review.ReviewImagesScreen
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import com.swentseekr.seekr.ui.map.MapScreen
+import com.swentseekr.seekr.ui.map.MapViewModel
 import com.swentseekr.seekr.ui.overview.OverviewScreen
 import com.swentseekr.seekr.ui.profile.EditProfileScreen
 import com.swentseekr.seekr.ui.profile.ProfileReviewsScreen
@@ -183,6 +184,9 @@ fun SeekrMainNavHost(
   val authViewModel: AuthViewModel = viewModel()
   val uiState by authViewModel.uiState.collectAsState()
 
+    // Shared MapViewModel for the whole nav graph
+    val mapViewModel: MapViewModel = viewModel()
+
   if (uiState.needsOnboarding && user != null) {
     OnboardingFlow(userId = user.uid, onboardingHandler = authViewModel)
   }
@@ -231,7 +235,7 @@ fun SeekrMainNavHost(
               // Map
               composable(SeekrDestination.Map.route) {
                 Surface(modifier = Modifier.fillMaxSize().testTag(NavigationTestTags.MAP_SCREEN)) {
-                  MapScreen()
+                  MapScreen(viewModel = mapViewModel)
                 }
               }
 
@@ -301,7 +305,17 @@ fun SeekrMainNavHost(
                                 launchSingleTop = true
                               }
                         },
-                        beginHunt = { /* wire if needed */},
+                        beginHunt = {
+
+                            // 1. Select hunt in MapViewModel
+                            mapViewModel.selectHuntById(huntId)
+                            mapViewModel.onViewHuntClick()
+
+                            // 2. navigate to Map
+                            navController.navigate(SeekrDestination.Map.route) {
+                                launchSingleTop = true
+                                popUpTo(SeekrDestination.Overview.route)
+                            }},
                         addReview = {
                           navController.navigate(SeekrDestination.AddReview.createRoute(huntId)) {
                             launchSingleTop = true

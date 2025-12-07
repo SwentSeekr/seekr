@@ -28,21 +28,34 @@ import com.swentseekr.seekr.ui.theme.Blue
 import kotlin.math.roundToInt
 
 /**
- * Main map rendering composable responsible for:
- * - Displaying a GoogleMap instance.
- * - Placing markers depending on whether the map is in overview mode or focused mode.
- * - Animating the camera when a hunt is selected or focused.
+ * Main map composable responsible for rendering and updating the Google Map UI.
  *
- * @param uiState the current state of the map screen, including hunts, focus, and route.
- * @param cameraPositionState the state object controlling the map's camera.
- * @param mapLoaded whether the GoogleMap instance has fully initialized.
- * @param onMapLoaded callback invoked once the map is ready.
- * @param selectedHunt the hunt currently selected by the user.
+ * This composable:
+ * - Displays a GoogleMap instance using the Maps Compose library.
+ * - Configures map properties and UI settings, including location features that depend
+ *   on whether the user has granted location permission.
+ * - Places hunt markers according to the current [uiState], supporting:
+ *     - Overview mode (all hunts visible)
+ *     - Focused mode (single hunt highlighted with its route)
+ * - Notifies callers when the map has finished loading via [onMapLoaded].
+ * - Triggers camera animations elsewhere in response to changes in [uiState] or
+ *   [selectedHunt] (this composable does not directly animate the camera).
+ * - Forwards marker click events through [onMarkerClick].
+ *
+ * @param uiState the current state of the map screen, containing hunts, selection,
+ *   focus state, and optional active route.
+ * @param hasLocationPermission whether the app currently has permission to access
+ *   fine or coarse location; controls the My Location layer and button.
+ * @param cameraPositionState controller for reading or animating the map camera.
+ * @param mapLoaded flag indicating whether the map instance has completed loading.
+ * @param onMapLoaded callback invoked exactly once when the map signals readiness.
+ * @param selectedHunt the hunt currently selected by the user, or null if none.
  * @param onMarkerClick callback invoked when a hunt marker is tapped.
  */
 @Composable
 fun MapContent(
     uiState: MapUIState,
+    hasLocationPermission: Boolean,
     cameraPositionState: CameraPositionState,
     mapLoaded: Boolean,
     onMapLoaded: () -> Unit,
@@ -51,14 +64,14 @@ fun MapContent(
 ) {
   val mapUiSettings =
       MapUiSettings(
-          myLocationButtonEnabled = true,
+          myLocationButtonEnabled = hasLocationPermission,
           scrollGesturesEnabled = true,
           zoomGesturesEnabled = true,
           zoomControlsEnabled = false,
           tiltGesturesEnabled = true,
           rotationGesturesEnabled = true)
 
-  val mapProperties = MapProperties(isMyLocationEnabled = true)
+  val mapProperties = MapProperties(isMyLocationEnabled = hasLocationPermission)
 
   GoogleMap(
       modifier =
