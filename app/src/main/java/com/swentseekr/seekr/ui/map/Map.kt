@@ -64,6 +64,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
       hasLocationPermission = permissionState.hasPermission,
       mapLoaded = mapLoaded,
       context = context,
+      uiState = uiState,
       fused = fused,
       cameraPositionState = cameraPositionState,
       scope = scope)
@@ -87,6 +88,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
   Box(modifier = Modifier.fillMaxSize().testTag(MapScreenTestTags.MAP_SCREEN)) {
     MapContent(
         uiState = uiState,
+        hasLocationPermission = permissionState.hasPermission,
         cameraPositionState = cameraPositionState,
         mapLoaded = mapLoaded,
         onMapLoaded = { mapLoaded = true },
@@ -195,33 +197,44 @@ private fun rememberLocationPermissionState(testMode: Boolean): LocationPermissi
 }
 
 /**
- * Side-effect composable that moves the camera to the user's last known location.
+ * Side-effect composable that moves the camera to the user's last known location **only when no
+ * hunt is currently selected or active**.
  *
  * This effect:
- * - Runs when [hasLocationPermission] or [mapLoaded] changes.
- * - Checks that location permission is granted.
- * - Queries the last known location from [FusedLocationProviderClient].
- * - Animates the [CameraPositionState] to center on the user with a default zoom.
+ * - Runs whenever location permission, map load state, or hunt-selection state changes.
+ * - Aborts immediately if:
+ *     - The map is not yet loaded.
+ *     - Location permission is not granted.
+ *     - A hunt is selected or a hunt has already started (in these cases the camera should remain
+ *       focused on the hunt instead of the user).
+ * - When allowed, queries the last known location from [FusedLocationProviderClient].
+ * - Animates the [CameraPositionState] to center on the user's location using the default
+ *   user-location zoom level.
  *
- * @param hasLocationPermission [Boolean] whether location permission is currently granted.
- * @param mapLoaded [Boolean] flag indicating whether the map has finished loading.
- * @param context [Context] used to check permission state.
- * @param fused [FusedLocationProviderClient] used to access the last known location.
- * @param cameraPositionState [CameraPositionState] representing the current map camera.
- * @param scope [CoroutineScope] used to launch the camera animation.
+ * @param hasLocationPermission whether the app currently has location permission.
+ * @param mapLoaded whether the map has finished initializing.
+ * @param uiState the current [MapUIState], used to detect selected or active hunts.
+ * @param context the context required to verify permission state.
+ * @param fused client providing access to the user's last known location.
+ * @param cameraPositionState the map camera to animate.
+ * @param scope coroutine scope used to perform the animation.
  */
 @Composable
 private fun MoveCameraToUserLocationEffect(
     hasLocationPermission: Boolean,
     mapLoaded: Boolean,
+    uiState: MapUIState,
     context: Context,
     fused: FusedLocationProviderClient,
     cameraPositionState: CameraPositionState,
     scope: CoroutineScope
 ) {
-  LaunchedEffect(hasLocationPermission, mapLoaded) {
+  LaunchedEffect(hasLocationPermission, mapLoaded, uiState.selectedHunt, uiState.isHuntStarted) {
     if (!mapLoaded || !hasLocationPermission) return@LaunchedEffect
     if (!isLocationPermissionGranted(context)) return@LaunchedEffect
+
+    val hasActiveHunt = uiState.selectedHunt != null || uiState.isHuntStarted
+    if (hasActiveHunt) return@LaunchedEffect
 
     try {
       fused.lastLocation.addOnSuccessListener { location ->

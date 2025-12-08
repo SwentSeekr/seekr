@@ -16,11 +16,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 /**
- * Data class representing the UI state for the Overview screen.
+ * UI state for the Overview screen.
  *
- * @param hunts A list of hunts to be displayed.
- * @param searchWord The current search word entered by the user.
- * @param errorMsg An optional error message to be displayed to the user.
+ * @param hunts The list of hunts currently displayed.
+ * @param searchWord The active search query entered by the user.
+ * @param errorMsg Optional error message to surface to the user.
+ * @param selectedStatus The currently applied status filter, if any.
+ * @param selectedDifficulty The currently applied difficulty filter, if any.
+ * @param signedOut Whether the user has been signed out.
+ * @param isRefreshing Indicates whether the hunt list is being refreshed.
  */
 data class OverviewUIState(
     val hunts: List<HuntUiState> = emptyList(),
@@ -28,7 +32,8 @@ data class OverviewUIState(
     val errorMsg: String? = null,
     val selectedStatus: HuntStatus? = null,
     val selectedDifficulty: Difficulty? = null,
-    val signedOut: Boolean = false
+    val signedOut: Boolean = false,
+    val isRefreshing: Boolean = false
 )
 /**
  * Data class representing the UI state for a single Hunt item in the Overview screen.
@@ -70,12 +75,14 @@ class OverviewViewModel(
   /** Fetches all hunts from the repository and updates the UI state. */
   private fun loadHunts() {
     viewModelScope.launch {
+      _uiState.value = _uiState.value.copy(isRefreshing = true, errorMsg = null)
+
       try {
         val hunts = repository.getAllHunts()
         huntItems = hunts.map { HuntUiState(it) }.toMutableList()
-        _uiState.value = _uiState.value.copy(hunts = huntItems)
+        _uiState.value = _uiState.value.copy(hunts = huntItems, isRefreshing = false)
       } catch (e: Exception) {
-        _uiState.value = _uiState.value.copy(errorMsg = e.message)
+        _uiState.value = _uiState.value.copy(errorMsg = e.message, isRefreshing = false)
       }
     }
   }

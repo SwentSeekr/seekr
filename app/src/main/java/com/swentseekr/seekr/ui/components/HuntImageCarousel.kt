@@ -128,8 +128,7 @@ private fun HuntImageFullScreenDialog(
                   .testTag(HuntCardScreenTestTags.IMAGE_FULLSCREEN),
           placeholder = painterResource(R.drawable.empty_image),
           error = painterResource(R.drawable.empty_image),
-          // We avoid cropping in full-screen view to show as much of the image as possible.
-          contentScale = ContentScale.Fit,
+          contentScale = ContentScale.Crop,
       )
     }
   }
@@ -286,9 +285,8 @@ private fun HuntImagePage(
             modifier = Modifier.fillMaxSize(),
             placeholder = painterResource(R.drawable.empty_image),
             error = painterResource(R.drawable.empty_image),
-            contentScale =
-                ContentScale.FillBounds // revien CROP maintenant que gradient est intégré !
-            )
+            contentScale = ContentScale.Crop,
+        )
         Box(
             modifier =
                 Modifier.fillMaxSize()

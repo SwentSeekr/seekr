@@ -490,4 +490,71 @@ class MapViewModelTest {
     assertNotNull(errorMsg)
     assertTrue(errorMsg!!.contains(MapScreenStrings.ErrorIncompleteHunt))
   }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun selectHuntByIdSelectsHuntAndResetsFlags() =
+      runTest(mainDispatcherRule.dispatcher) {
+        val hunts =
+            listOf(
+                sample(uid = Constants.HUNT_UID_1),
+                sample(uid = Constants.HUNT_UID_2),
+            )
+        val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
+
+        // Let fetchHunts complete so uiState.hunts is populated
+        advanceUntilIdle()
+
+        // Put the ViewModel in a "dirty" state first
+        val initialState =
+            vm.uiState.value.copy(
+                selectedHunt = hunts[0],
+                isFocused = true,
+                isHuntStarted = true,
+                validatedCount = 3,
+                currentDistanceToNextMeters = 42,
+                route = listOf(LatLng(1.0, 1.0)),
+                errorMsg = "Some error",
+            )
+
+        // Use reflection to set the internal state (similar to other tests)
+        val field: Field = MapViewModel::class.java.getDeclaredField("_uiState")
+        field.isAccessible = true
+        @Suppress("UNCHECKED_CAST") val mutable = field.get(vm) as MutableStateFlow<MapUIState>
+        mutable.value = initialState
+
+        // Act: select second hunt by id
+        vm.selectHuntById(Constants.HUNT_UID_2)
+
+        val state = vm.uiState.value
+        assertEquals(Constants.HUNT_UID_2, state.selectedHunt?.uid)
+        assertFalse(state.isFocused)
+        assertFalse(state.isHuntStarted)
+        assertTrue(state.route.isEmpty())
+        assertEquals(MapConfig.DefaultValidatedCount, state.validatedCount)
+        assertNull(state.currentDistanceToNextMeters)
+        assertNull(state.errorMsg)
+      }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun selectHuntByIdWithUnknownIdDoesNotChangeState() =
+      runTest(mainDispatcherRule.dispatcher) {
+        val hunts =
+            listOf(
+                sample(uid = Constants.HUNT_UID_1),
+                sample(uid = Constants.HUNT_UID_2),
+            )
+        val vm = MapViewModel(repository = FakeRepoSuccess(hunts))
+
+        // Ensure hunts are loaded into state
+        advanceUntilIdle()
+
+        val before = vm.uiState.value
+        vm.selectHuntById("non-existent-id")
+        val after = vm.uiState.value
+
+        // Data class equality is fine here
+        assertEquals(before, after)
+      }
 }
