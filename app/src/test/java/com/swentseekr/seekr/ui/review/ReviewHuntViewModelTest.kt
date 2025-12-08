@@ -13,6 +13,7 @@ import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.model.notifications.NotificationHelper
 import com.swentseekr.seekr.model.profile.ProfileRepositoryLocal
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
+import com.swentseekr.seekr.ui.profile.Profile
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -647,5 +648,69 @@ class ReviewHuntViewModelTest {
 
     val state = viewModel.uiState.value
     assertTrue(state.photos.isEmpty())
+  }
+
+  @Test
+  fun loadAuthorProfile_populatesAuthorProfilesMap() = runTest {
+    val userId = ReviewHuntViewModelTestConstantsStrings.UserId
+
+    // Fake profile to return
+    val expectedProfile = mockk<Profile>(relaxed = true)
+
+    // Profile repository that always returns our fake profile
+    val profileRepo =
+        object : ProfileRepositoryLocal() {
+          override suspend fun getProfile(userId: String): Profile {
+            return expectedProfile
+          }
+        }
+
+    val vm =
+        ReviewHuntViewModel(
+            fakeHuntsRepository,
+            fakeReviewRepository,
+            profileRepo,
+            fakeImageReviewRepository,
+            dispatcher = testDispatcher)
+
+    vm.loadAuthorProfile(userId)
+    advanceUntilIdle()
+
+    val state = vm.uiState.value
+
+    // The map should contain an entry for this userId with the profile we returned
+    assertTrue(state.authorProfiles.containsKey(userId))
+    assertSame(expectedProfile, state.authorProfiles[userId])
+  }
+
+  @Test
+  fun loadAuthorProfile_whenRepositoryThrows_doesNotAddEntry() = runTest {
+    val userId = ReviewHuntViewModelTestConstantsStrings.UserId
+
+    // Profile repository that always throws
+    val failingProfileRepo =
+        object : ProfileRepositoryLocal() {
+          override suspend fun getProfile(userId: String): Profile {
+            throw RuntimeException("Failed to load profile")
+          }
+        }
+
+    val vm =
+        ReviewHuntViewModel(
+            fakeHuntsRepository,
+            fakeReviewRepository,
+            failingProfileRepo,
+            fakeImageReviewRepository,
+            dispatcher = testDispatcher)
+
+    vm.loadAuthorProfile(userId)
+    advanceUntilIdle()
+
+    val state = vm.uiState.value
+
+    // No entry should have been added
+    assertTrue(state.authorProfiles.isEmpty())
+    // loadAuthorProfile only logs, it doesn't touch errorMsg
+    assertNull(state.errorMsg)
   }
 }
