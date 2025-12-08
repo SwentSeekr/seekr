@@ -51,4 +51,12 @@ class FakeHuntCardViewModel(hunt: Hunt) : HuntCardViewModel() { // Inherit from 
   fun setLiked(liked: Boolean) {
     _uiState.value = _uiState.value.copy(isLiked = liked)
   }
+
+  fun setCurrentUserIdForTest(id: String) {
+    _uiState.value = _uiState.value.copy(currentUserId = id)
+  }
+
+  fun setReviewsForTest(reviews: List<HuntReview>) {
+    _uiState.value = _uiState.value.copy(reviewList = reviews)
+  }
 }
