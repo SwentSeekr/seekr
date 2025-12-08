@@ -5,6 +5,23 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * Provides default UI values, localized strings, and test tags used across the Hunt Card screen.
+ *
+ * This file contains three main objects:
+ * - **HuntCardScreenDefaults**: Centralizes all styling constants such as dimensions, colors,
+ *   elevations, font sizes, scaling values, and layout configurations used by the Hunt Card UI.
+ *   These defaults help maintain visual consistency and simplify UI updates.
+ * - **HuntCardScreenStrings**: Contains user-facing text constants and accessibility descriptions
+ *   related to the Hunt Card screen. Keeping strings here supports reusability and improves
+ *   maintainability, especially for localization and accessibility.
+ * - **HuntCardScreenTestTags**: Defines semantic tags used for UI testing with Compose Test APIs.
+ *   These tags ensure stable and descriptive identifiers for automated tests targeting visual
+ *   components such as buttons, text fields, maps, image carousels, and review elements.
+ *
+ * Together, these objects form a cohesive configuration layer that standardizes appearance,
+ * behavior, accessibility, and testability for the Hunt Card screen components.
+ */
 object HuntCardScreenDefaults {
   val CardElevation: Dp = 2.dp
   val CornerRadius: Dp = 12.dp
