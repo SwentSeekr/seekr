@@ -708,6 +708,8 @@ class ReviewHuntViewModelTest {
 
     val state = vm.uiState.value
 
+    // The map should not contain an entry for this userId
+    assertFalse(state.authorProfiles.containsKey(userId))
     // No entry should have been added
     assertTrue(state.authorProfiles.isEmpty())
     // loadAuthorProfile only logs, it doesn't touch errorMsg
