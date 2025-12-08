@@ -143,7 +143,7 @@ fun OverviewScreen(
                         modifier =
                             modifier
                                 .testTag(
-                                    if (hunts.lastIndex == hunts.size - 1)
+                                    if (hunts.lastIndex == hunts.size - OverviewScreenDefaults.ONE)
                                         OverviewScreenTestTags.LAST_HUNT_CARD
                                     else OverviewScreenTestTags.HUNT_CARD)
                                 .clickable { onHuntClick(hunt.hunt.uid) },

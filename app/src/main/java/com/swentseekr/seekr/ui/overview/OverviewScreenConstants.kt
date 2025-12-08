@@ -48,6 +48,9 @@ object OverviewScreenDefaults {
 
   // Refresh indicator
   val RefreshIndicatorWeight = 1f
+
+  // BASIC NUMBER
+  const val ONE = 1
 }
 
 object OverviewScreenStrings {
