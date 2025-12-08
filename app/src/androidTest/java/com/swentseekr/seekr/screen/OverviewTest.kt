@@ -284,6 +284,8 @@ class OverviewScreenTest {
         .onNodeWithTag(OverviewScreenTestTags.HUNT_LIST)
         .performScrollToNode(hasTestTag(OverviewScreenTestTags.LAST_HUNT_CARD))
 
+    composeTestRule.waitForIdle()
+
     composeTestRule.onNodeWithTag(OverviewScreenTestTags.LAST_HUNT_CARD).assertIsDisplayed()
   }
 
