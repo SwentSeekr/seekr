@@ -122,6 +122,10 @@ fun HuntCardScreen(
   val currentUserId = uiState.currentUserId
 
   val isAuthor = currentUserId == authorId
+
+  val hasUserReview = currentUserId != null && reviews.any { it.authorId == currentUserId }
+  val canUserAddReview = !isAuthor && !hasUserReview
+
   val actionButton = if (isAuthor) editHunt else addReview
   val actionIcon = if (isAuthor) Icons.Filled.Edit else Icons.Filled.Star
   val authorName = authorProfile?.author?.pseudonym ?: HuntCardScreenStrings.UnknownAuthor
@@ -182,9 +186,11 @@ fun HuntCardScreen(
           item { ModernDescriptionSection(description = hunt.description) }
           item { ModernMapSection(hunt = hunt) }
 
-          item {
-            ModernActionButtons(
-                isCurrentId = isAuthor, buttonIcon = actionIcon, onActionClick = actionButton)
+          if (isAuthor || canUserAddReview) {
+            item {
+              ModernActionButtons(
+                  isCurrentId = isAuthor, buttonIcon = actionIcon, onActionClick = actionButton)
+            }
           }
 
           // Reviews header
@@ -567,15 +573,13 @@ fun ModernReviewCard(
     currentUserId: String?,
     navController: NavHostController,
     onDeleteReview: (String) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
   val uiState by reviewHuntViewModel.uiState.collectAsState()
 
-  LaunchedEffect(review.huntId) { reviewHuntViewModel.loadHunt(review.huntId) }
   val authorId = review.authorId
 
   LaunchedEffect(authorId) { reviewHuntViewModel.loadAuthorProfile(authorId) }
-  val authorProfile = uiState.authorProfile
+  val authorProfile = uiState.authorProfiles[authorId]
 
   val isCurrentId = currentUserId == authorId
 
