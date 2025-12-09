@@ -12,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
@@ -114,17 +113,4 @@ fun OfflineOverviewHuntsScreen(
           }
     }
   }
-}
-
-/**
- * Design-time preview of [OfflineOverviewHuntsScreen].
- *
- * This simple preview renders the screen with an empty list of hunts. It is mainly useful for
- * verifying layout, theming, and overall structure in the IDE without requiring a running
- * application or real offline data.
- */
-@Preview
-@Composable
-fun OfflineOverviewHuntsScreenPreview() {
-  OfflineOverviewHuntsScreen(hunts = emptyList())
 }

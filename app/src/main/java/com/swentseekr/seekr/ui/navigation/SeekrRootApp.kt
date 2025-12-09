@@ -45,7 +45,9 @@ import com.swentseekr.seekr.ui.profile.Profile
 @Composable
 fun SeekrRootApp(
     context: Context = LocalContext.current,
-    authViewModel: AuthViewModel = viewModel()
+    authViewModel: AuthViewModel = viewModel(),
+    isOnlineOverride: Boolean? = null,
+    cachedProfileInitialForTest: Profile? = null,
 ) {
   // Credential manager used by the authentication flow (e.g., Sign in with Google, etc.).
   val credentialManager = remember { CredentialManager.create(context) }
@@ -55,17 +57,27 @@ fun SeekrRootApp(
 
   // Observe internet connectivity state for online/offline routing.
   val internetConnectivityObserver = remember { InternetConnectivityObserver(context) }
-  val isOnline by internetConnectivityObserver.connectionState.collectAsState()
-
+  // If override is provided, use a fixed state; otherwise collect the real flow.
+  val isOnline: Boolean by
+      if (isOnlineOverride != null) {
+        remember(isOnlineOverride) { androidx.compose.runtime.mutableStateOf(isOnlineOverride) }
+      } else {
+        internetConnectivityObserver.connectionState.collectAsState()
+      }
   /**
    * Start and stop the connectivity observer with the lifecycle of this composable.
    *
    * When the composable enters the composition, we start listening for connectivity changes. When
    * it leaves, we stop to avoid leaks and unnecessary work.
    */
-  DisposableEffect(internetConnectivityObserver) {
-    internetConnectivityObserver.start()
-    onDispose { internetConnectivityObserver.stop() }
+  DisposableEffect(internetConnectivityObserver, isOnlineOverride) {
+    if (isOnlineOverride == null) {
+      internetConnectivityObserver.start()
+      onDispose { internetConnectivityObserver.stop() }
+    } else {
+      // Test override: don't start the real observer.
+      onDispose {}
+    }
   }
 
   /**
@@ -80,7 +92,14 @@ fun SeekrRootApp(
 
   // Observe cached profile for offline mode. When available, this enables
   // an offline-first experience (e.g., showing profile and hunts without network).
-  val cachedProfile by ProfileCache.observeProfile(context).collectAsState(initial = null)
+  val cachedProfile: Profile? by
+      if (cachedProfileInitialForTest != null) {
+        remember(cachedProfileInitialForTest) {
+          androidx.compose.runtime.mutableStateOf(cachedProfileInitialForTest)
+        }
+      } else {
+        ProfileCache.observeProfile(context).collectAsState(initial = null)
+      }
 
   /**
    * Build a list of "stored hunts" for offline overview.

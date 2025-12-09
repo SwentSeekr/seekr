@@ -58,6 +58,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
+import com.swentseekr.seekr.ui.huntcardview.HuntCardUiState
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import com.swentseekr.seekr.ui.profile.ProfilePicture
 
@@ -104,24 +105,21 @@ fun HuntCardScreen(
 ) {
   val uiState by huntCardViewModel.uiState.collectAsState()
 
-  LaunchedEffect(Unit) { huntCardViewModel.loadCurrentUserID() }
-  LaunchedEffect(huntId, uiState.currentUserId) {
-    if (uiState.currentUserId != null) {
-      huntCardViewModel.loadHunt(huntId)
-    }
-  }
+  LoadHuntCardScreenData(huntId = huntId, uiState = uiState, huntCardViewModel = huntCardViewModel)
+
   val hunt = uiState.hunt
   val authorId = hunt?.authorId ?: ""
 
-  LaunchedEffect(authorId) { huntCardViewModel.loadAuthorProfile(authorId) }
   val authorProfile = uiState.authorProfile
-
-  LaunchedEffect(huntId) { huntCardViewModel.loadOtherReview(huntId) }
   val reviews = uiState.reviewList
 
   val currentUserId = uiState.currentUserId
 
   val isAuthor = currentUserId == authorId
+
+  val hasUserReview = currentUserId != null && reviews.any { it.authorId == currentUserId }
+  val canUserAddReview = !isAuthor && !hasUserReview
+
   val actionButton = if (isAuthor) editHunt else addReview
   val actionIcon = if (isAuthor) Icons.Filled.Edit else Icons.Filled.Star
   val authorName = authorProfile?.author?.pseudonym ?: HuntCardScreenStrings.UnknownAuthor
@@ -182,9 +180,11 @@ fun HuntCardScreen(
           item { ModernDescriptionSection(description = hunt.description) }
           item { ModernMapSection(hunt = hunt) }
 
-          item {
-            ModernActionButtons(
-                isCurrentId = isAuthor, buttonIcon = actionIcon, onActionClick = actionButton)
+          if (isAuthor || canUserAddReview) {
+            item {
+              ModernActionButtons(
+                  isCurrentId = isAuthor, buttonIcon = actionIcon, onActionClick = actionButton)
+            }
           }
 
           // Reviews header
@@ -222,6 +222,41 @@ fun HuntCardScreen(
           item { Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding40 * 2)) }
         }
       }
+}
+
+/**
+ * Handles all asynchronous data-loading logic required by the HuntCard screen.
+ *
+ * This helper centralizes the `LaunchedEffect` calls that load:
+ * - the current user ID,
+ * - the selected hunt's details,
+ * - the hunt author's profile,
+ * - all other reviews for the hunt.
+ *
+ * It ensures that data is only fetched when needed and reacts to state changes such as the current
+ * user ID or when the hunt becomes available in `uiState`.
+ *
+ * @param huntId The ID of the hunt whose data should be loaded.
+ * @param uiState The current state of the HuntCard screen, used to react to user and hunt changes.
+ * @param huntCardViewModel The ViewModel responsible for fetching hunt, profile, and review data.
+ */
+@Composable
+private fun LoadHuntCardScreenData(
+    huntId: String,
+    uiState: HuntCardUiState,
+    huntCardViewModel: HuntCardViewModel
+) {
+  LaunchedEffect(Unit) { huntCardViewModel.loadCurrentUserID() }
+
+  LaunchedEffect(huntId, uiState.currentUserId) {
+    uiState.currentUserId?.let { huntCardViewModel.loadHunt(huntId) }
+  }
+
+  LaunchedEffect(uiState.hunt?.authorId) {
+    uiState.hunt?.authorId?.let { huntCardViewModel.loadAuthorProfile(it) }
+  }
+
+  LaunchedEffect(huntId) { huntCardViewModel.loadOtherReview(huntId) }
 }
 
 /**
@@ -567,15 +602,13 @@ fun ModernReviewCard(
     currentUserId: String?,
     navController: NavHostController,
     onDeleteReview: (String) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
   val uiState by reviewHuntViewModel.uiState.collectAsState()
 
-  LaunchedEffect(review.huntId) { reviewHuntViewModel.loadHunt(review.huntId) }
   val authorId = review.authorId
 
   LaunchedEffect(authorId) { reviewHuntViewModel.loadAuthorProfile(authorId) }
-  val authorProfile = uiState.authorProfile
+  val authorProfile = uiState.authorProfiles[authorId]
 
   val isCurrentId = currentUserId == authorId
 

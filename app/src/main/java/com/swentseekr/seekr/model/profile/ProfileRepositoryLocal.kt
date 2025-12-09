@@ -10,7 +10,7 @@ import com.swentseekr.seekr.ui.profile.Profile
  * A local in-memory repository for managing [Profile] objects. This class is used primarily for
  * testing or local data storage without a backend.
  */
-class ProfileRepositoryLocal : ProfileRepository {
+open class ProfileRepositoryLocal : ProfileRepository {
   private val profiles = mutableListOf<Profile>()
 
   fun size() = profiles.size

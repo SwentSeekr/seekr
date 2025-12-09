@@ -226,7 +226,8 @@ dependencies {
     debugImplementation(libs.compose.test.manifest)
     // For createAndroidComposeRule in tests
     androidTestUtil("androidx.test:orchestrator:1.4.2")
-
+    // Material 2 (needed for pullRefresh APIs)
+    implementation(libs.compose.material)
 
     // --------- Kaspresso test framework ----------
     globalTestImplementation(libs.kaspresso)
@@ -235,6 +236,7 @@ dependencies {
     // ----------       Robolectric     ------------
     testImplementation(libs.robolectric)
     testImplementation("org.robolectric:robolectric:4.12.1")
+    testImplementation(kotlin("test"))
 }
 
 tasks.withType<Test> {

@@ -16,6 +16,9 @@ object HuntCardScreenConstantStrings {
   const val SingleImageUrl = "https://example.com/example1.jpg"
   const val FullscreenImageUrl = "https://example.com/example.jpg"
   const val NoReviews = "No reviews yet."
+
+  const val AuthorIdOther = "user456"
+  const val CurrentUserId = "currentUser"
 }
 
 object HuntCardScreenConstantNumbers {

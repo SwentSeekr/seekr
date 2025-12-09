@@ -10,7 +10,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryLocal
+import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryLocal
 import com.swentseekr.seekr.model.hunt.ReviewImageRepositoryLocal
 import com.swentseekr.seekr.model.profile.ProfileRepositoryLocal
@@ -21,12 +23,13 @@ import com.swentseekr.seekr.ui.components.HuntCardScreenStrings
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import com.swentseekr.seekr.ui.overview.FilterButton
 import com.swentseekr.seekr.ui.overview.ModernFilterBar
+import com.swentseekr.seekr.ui.overview.OverviewScreen
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
+import com.swentseekr.seekr.ui.overview.OverviewViewModel
 import com.swentseekr.seekr.ui.profile.Profile
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -37,11 +40,13 @@ import org.junit.runner.RunWith
 class OverviewScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
+
   private lateinit var viewModel: HuntCardViewModel
   private lateinit var fakeHuntRepository: HuntsRepositoryLocal
   private lateinit var fakeReviewRepository: HuntReviewRepositoryLocal
   private lateinit var fakeProfileRepository: ProfileRepositoryLocal
   private lateinit var fakeImageRepository: ReviewImageRepositoryLocal
+
   private val testHunt =
       createOverviewTestHunt(
           uid = "test_hunt_1",
@@ -63,43 +68,9 @@ class OverviewScreenTest {
         HuntCardViewModel(
             fakeHuntRepository, fakeReviewRepository, fakeProfileRepository, fakeImageRepository)
   }
-  /*
-  @Test
-  fun overviewScreen_displaysSearchBarAndHuntCards() {
-    composeTestRule.setContent { OverviewScreen() }
 
-    // Vérifie que la SearchBar est affichée
-    composeTestRule.onNodeWithTag(OverviewScreenTestTags.SEARCH_BAR).assertIsDisplayed()
+  // ---------------- Filter bar tests ----------------
 
-    // Vérifie que les HuntCard sont affichées
-    composeTestRule
-        .onAllNodes(hasTestTag(OverviewScreenTestTags.HUNT_CARD))
-        .assertCountEquals(5) // il y en a 6 au total (la dernière a un tag différent)
-  }
-
-  @Test
-  fun searchBar_click_changesActiveState() {
-    var activeState = false
-    composeTestRule.setContent { OverviewScreen(onActiveBar = { activeState = it }) }
-
-    val searchBarNode = composeTestRule.onNodeWithTag(OverviewScreenTestTags.SEARCH_BAR)
-    searchBarNode.performClick()
-
-    assert(activeState) // Devrait être true après le clic
-  }
-
-  @Test
-  fun huntCardScroll_works() {
-    composeTestRule.setContent { OverviewScreen() }
-
-    // Scroll jusqu'à la dernière HuntCard
-    composeTestRule
-        .onNodeWithTag(OverviewScreenTestTags.HUNT_LIST)
-        .performScrollToNode(hasTestTag(OverviewScreenTestTags.LAST_HUNT_CARD))
-        .assertIsDisplayed()
-  }*/
-
-  // test de la FilterBar
   @Test
   fun filterBar_displaysAllFilterButtons() {
     composeTestRule.setContent {
@@ -110,12 +81,12 @@ class OverviewScreenTest {
           onDifficultySelected = {})
     }
 
-    val statuses = com.swentseekr.seekr.model.hunt.HuntStatus.values()
-    val difficulties = com.swentseekr.seekr.model.hunt.Difficulty.values()
+    val statuses = HuntStatus.values()
+    val difficulties = Difficulty.values()
     val allLabels = statuses.map { it.name } + difficulties.map { it.name }
 
-    // Vérifie chaque bouton individuellement, en scrollant si nécessaire
-    allLabels.forEachIndexed { index, label ->
+    allLabels.forEachIndexed { index, _ ->
+      // Scroll to the button inside the filter bar
       composeTestRule
           .onNodeWithTag(OverviewScreenTestTags.FILTER_BAR)
           .performScrollToNode(hasTestTag("FilterButton_$index"))
@@ -124,11 +95,10 @@ class OverviewScreenTest {
     }
   }
 
-  // test d’interaction avec un FilterButton
   @Test
   fun filterButton_click_triggersCallback() {
     var clicked = false
-    val index = 4 // Choisit un index pour le bouton à tester
+    val index = 4
 
     composeTestRule.setContent {
       FilterButton(
@@ -142,9 +112,11 @@ class OverviewScreenTest {
 
     composeTestRule.onNodeWithTag(OverviewScreenTestTags.FILTER_BUTTON + "_" + index).performClick()
 
-    assert(clicked) // Le clic doit avoir déclenché le callback
+    assertTrue(clicked)
   }
-  /** Test that the like button is displayed on HuntCard */
+
+  // ---------------- HuntCard tests (stateless) ----------------
+
   @Test
   fun huntCard_displaysLikeButton() {
     composeTestRule.setContent { HuntCard(hunt = testHunt, isLiked = false, onLikeClick = {}) }
@@ -155,7 +127,6 @@ class OverviewScreenTest {
         .assertIsDisplayed()
   }
 
-  /** Test that clicking like button triggers callback */
   @Test
   fun huntCard_likeButton_triggersCallback() {
     var clickedHuntId: String? = null
@@ -169,7 +140,6 @@ class OverviewScreenTest {
     assertTrue(clickedHuntId == testHunt.uid)
   }
 
-  /** Test that liked hunts show red heart icon */
   @Test
   fun huntCard_likedHunt_showsRedHeart() {
     composeTestRule.setContent { HuntCard(hunt = testHunt, isLiked = true, onLikeClick = {}) }
@@ -178,9 +148,9 @@ class OverviewScreenTest {
         .onNodeWithTag(HuntCardScreenStrings.LikeButton)
         .assertExists()
         .assertIsDisplayed()
+    // If you expose separate tags for red/gray variants, you can assert them here.
   }
 
-  /** Test that unliked hunts show gray heart icon */
   @Test
   fun huntCard_unlikedHunt_showsGrayHeart() {
     composeTestRule.setContent { HuntCard(hunt = testHunt, isLiked = false, onLikeClick = {}) }
@@ -189,15 +159,19 @@ class OverviewScreenTest {
         .onNodeWithTag(HuntCardScreenStrings.LikeButton)
         .assertExists()
         .assertIsDisplayed()
+    // Same note as above about specific color/icon tags.
   }
 
-  /** Test that like button toggles state in ViewModel */
+  // ---------------- HuntCard + ViewModel integration ----------------
+
   @Test
-  fun huntCard_withViewModel_togglesLikeState() = runTest {
+  fun huntCard_withViewModel_togglesLikeState() {
     val userId = "test_user"
     fakeProfileRepository.addProfile(Profile(uid = userId))
-    viewModel.initialize(userId, testHunt)
-    advanceUntilIdle()
+
+    // Initialize ViewModel on the main (Compose) thread
+    composeTestRule.runOnIdle { viewModel.initialize(userId, testHunt) }
+    composeTestRule.waitForIdle()
 
     assertFalse(viewModel.uiState.value.isLiked)
 
@@ -212,26 +186,33 @@ class OverviewScreenTest {
     composeTestRule.onNodeWithTag(HuntCardScreenStrings.LikeButton).performClick()
 
     composeTestRule.waitForIdle()
-    advanceUntilIdle()
 
     assertTrue(viewModel.uiState.value.isLiked)
   }
-  /**
-   * /** Test that isHuntLiked helper works correctly */
-   *
-   * @Test fun viewModel_isHuntLiked_returnsCorrectValue() = runTest { val userId = "test_user"
-   *   fakeProfileRepository.addProfile(Profile(uid = userId))
-   *
-   * viewModel.initialize(userId, testHunt) advanceUntilIdle()
-   *
-   * assertFalse(viewModel.uiState.value.isLiked)
-   *
-   * viewModel.onLikeClick(testHunt.uid) advanceUntilIdle()
-   *
-   * assertTrue(viewModel.uiState.value.isLiked) }
-   */
+
   @Test
-  fun lazyColumn_onLikeClick_dynamicList_isCovered() = runTest {
+  fun viewModel_isHuntLiked_returnsCorrectValue() {
+    val userId = "test_user"
+    fakeProfileRepository.addProfile(Profile(uid = userId))
+
+    // initialize() launches a coroutine on viewModelScope (Main)
+    composeTestRule.runOnIdle { viewModel.initialize(userId, testHunt) }
+    composeTestRule.waitForIdle()
+
+    assertFalse(viewModel.uiState.value.isLiked)
+
+    // onLikeClick updates uiState synchronously + does repo work in a coroutine
+    composeTestRule.runOnIdle { viewModel.onLikeClick(testHunt.uid) }
+    composeTestRule.waitForIdle()
+
+    assertTrue(viewModel.uiState.value.isLiked)
+    assertTrue(viewModel.isHuntLiked(testHunt.uid))
+  }
+
+  // ---------------- LazyColumn + HuntCard list ----------------
+
+  @Test
+  fun lazyColumn_onLikeClick_dynamicList_isCovered() {
     val userId = "test_user"
     val hunts =
         listOf(
@@ -255,8 +236,74 @@ class OverviewScreenTest {
     assertTrue(clickedHunts.contains("hunt_2"))
 
     composeTestRule.onAllNodes(hasTestTag(HuntCardScreenStrings.LikeButton))[0].performClick()
-    assertTrue(clickedHunts.contains("hunt_1"))
 
+    assertTrue(clickedHunts.contains("hunt_1"))
     assertEquals(setOf("hunt_1", "hunt_2"), clickedHunts)
+  }
+
+  // ---------------- OverviewScreen + pull-to-refresh ----------------
+
+  @Test
+  fun overviewScreen_displaysHeaderSearchFiltersAndList() {
+    // Given an OverviewViewModel backed by the fake repository
+    val overviewViewModel = OverviewViewModel(fakeHuntRepository)
+
+    // When: we render the full OverviewScreen
+    composeTestRule.setContent {
+      OverviewScreen(
+          overviewViewModel = overviewViewModel, huntCardViewModel = viewModel, onHuntClick = {})
+    }
+
+    // Then: root container is visible
+    composeTestRule.onNodeWithTag(OverviewScreenTestTags.OVERVIEW_SCREEN).assertIsDisplayed()
+
+    // And: search bar, filter bar and hunt list are present
+    composeTestRule.onNodeWithTag(OverviewScreenTestTags.SEARCH_BAR).assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag(OverviewScreenTestTags.FILTER_BAR).assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag(OverviewScreenTestTags.HUNT_LIST).assertIsDisplayed()
+  }
+
+  @Test
+  fun overviewScreen_showsHuntCardsFromRepository_inLazyList() {
+    val overviewViewModel = OverviewViewModel(fakeHuntRepository)
+
+    composeTestRule.setContent {
+      OverviewScreen(
+          overviewViewModel = overviewViewModel, huntCardViewModel = viewModel, onHuntClick = {})
+    }
+
+    composeTestRule.waitForIdle()
+
+    // Ensure the LazyColumn list is there
+    composeTestRule.onNodeWithTag(OverviewScreenTestTags.HUNT_LIST).assertIsDisplayed()
+
+    // Scroll until we find a hunt card (LAST_HUNT_CARD when there's a single item)
+    composeTestRule
+        .onNodeWithTag(OverviewScreenTestTags.HUNT_LIST)
+        .performScrollToNode(hasTestTag(OverviewScreenTestTags.LAST_HUNT_CARD))
+
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag(OverviewScreenTestTags.LAST_HUNT_CARD).assertIsDisplayed()
+  }
+
+  @Test
+  fun overviewScreen_containsPullToRefreshIndicatorInsideListContainer() {
+    val overviewViewModel = OverviewViewModel(fakeHuntRepository)
+
+    composeTestRule.setContent {
+      OverviewScreen(
+          overviewViewModel = overviewViewModel, huntCardViewModel = viewModel, onHuntClick = {})
+    }
+
+    composeTestRule.waitForIdle()
+
+    // Verify hunt list exists
+    composeTestRule.onNodeWithTag(OverviewScreenTestTags.HUNT_LIST).assertIsDisplayed()
+
+    // Verify PullRefreshIndicator exists inside the list container
+    composeTestRule.onNodeWithTag(OverviewScreenTestTags.REFRESH_INDICATOR).assertExists()
   }
 }

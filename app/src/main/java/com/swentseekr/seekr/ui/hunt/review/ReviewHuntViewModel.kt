@@ -28,6 +28,22 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/**
+ * UI state for reviewing a hunt.
+ *
+ * @property hunt Currently loaded [Hunt] being reviewed, or `null` if none is loaded.
+ * @property huntId Identifier of the hunt being reviewed.
+ * @property userId Identifier of the user creating or editing the review.
+ * @property reviewText Text content of the review.
+ * @property rating Star rating associated with the review.
+ * @property isSubmitted `true` if the review submit action has been triggered.
+ * @property photos List of photo URLs attached to the review.
+ * @property errorMsg Optional error message to display to the user.
+ * @property saveSuccessful `true` if the review was successfully saved.
+ * @property invalidReviewText Optional validation message for the review text.
+ * @property invalidRating Optional validation message for the rating value.
+ * @property authorProfiles Map from author user ID to their [Profile], or `null` while loading.
+ */
 data class ReviewHuntUIState(
     val hunt: Hunt? = null,
     val huntId: String = AddReviewScreenStrings.Empty,
@@ -40,12 +56,27 @@ data class ReviewHuntUIState(
     val saveSuccessful: Boolean = false,
     val invalidReviewText: String? = null,
     val invalidRating: String? = null,
-    val authorProfile: Profile? = null
+    val authorProfiles: Map<String, Profile?> = emptyMap()
 ) {
+  /**
+   * Indicates whether the current review data is valid.
+   *
+   * @return `true` if the review text is not blank, `false` otherwise.
+   */
   val isValid: Boolean
     get() = reviewText.isNotBlank()
 }
 
+/**
+ * ViewModel responsible for loading hunts, managing review data, and interacting with repositories
+ * for reviews, profiles, and review images.
+ *
+ * @property repositoryHunt Repository used to load [Hunt] data.
+ * @property repositoryReview Repository used to create, read, and delete [HuntReview] data.
+ * @property profileRepository Repository used to load author profile information.
+ * @property imageRepository Repository used to upload and delete review images.
+ * @property dispatcher Coroutine dispatcher used for image-related operations.
+ */
 open class ReviewHuntViewModel(
     private val repositoryHunt: HuntsRepository = HuntRepositoryProvider.repository,
     private val repositoryReview: HuntReviewRepository = HuntReviewRepositoryProvider.repository,
@@ -55,21 +86,45 @@ open class ReviewHuntViewModel(
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(ReviewHuntUIState())
+
+  /** Public immutable [StateFlow] exposing the current [ReviewHuntUIState]. */
   open val uiState: StateFlow<ReviewHuntUIState> = _uiState.asStateFlow()
-  /** Clears any existing error message in the UI state. */
+
+  /**
+   * Clears any existing error message in the UI state.
+   *
+   * @return Unit
+   */
   fun clearErrorMsg() {
     _uiState.value = _uiState.value.copy(errorMsg = null)
   }
-  /** Sets an error message in the UI state. */
+
+  /**
+   * Sets an error message in the UI state.
+   *
+   * @param error Error message to display to the user.
+   * @return Unit
+   */
   fun setErrorMsg(error: String) {
     _uiState.value = _uiState.value.copy(errorMsg = error)
   }
 
+  /**
+   * Sets the list of photos in the UI state. Intended for use in tests.
+   *
+   * @param list List of photo URLs to set.
+   * @return Unit
+   */
   fun setPhotosForTest(list: List<String>) {
     _uiState.value = _uiState.value.copy(photos = list)
   }
 
-  /** Loads a hunt by its ID and updates the UI state. */
+  /**
+   * Loads a hunt by its ID and updates the UI state.
+   *
+   * @param huntId Unique identifier of the [Hunt] to load.
+   * @return Unit
+   */
   open fun loadHunt(huntId: String) {
     viewModelScope.launch {
       try {
@@ -85,12 +140,19 @@ open class ReviewHuntViewModel(
     }
   }
 
-  /** Loads the profile of the Maker of the hunt */
+  /**
+   * Loads the profile of the author of a hunt or review and stores it in [ReviewHuntUIState].
+   *
+   * @param userId Unique identifier of the user whose [Profile] should be loaded.
+   * @return Unit
+   */
   open fun loadAuthorProfile(userId: String) {
     viewModelScope.launch {
       try {
         val profile = profileRepository.getProfile(userId)
-        _uiState.value = _uiState.value.copy(authorProfile = profile)
+        _uiState.update { state ->
+          state.copy(authorProfiles = state.authorProfiles + (userId to profile))
+        }
       } catch (e: Exception) {
         Log.e(
             AddReviewScreenStrings.HuntCardViewModel,
@@ -100,7 +162,19 @@ open class ReviewHuntViewModel(
     }
   }
 
-  /** Submits the review to the repository. */
+  /**
+   * Submits the review to the repository and updates the UI state.
+   *
+   * This method constructs a [HuntReview] from the current UI state, adds it to [repositoryReview],
+   * optionally sends a notification, and updates flags such as [ReviewHuntUIState.saveSuccessful]
+   * and [ReviewHuntUIState.isSubmitted].
+   *
+   * @param id Identifier of the user submitting the review.
+   * @param hunt [Hunt] being reviewed.
+   * @param context Optional [Context] used to display a notification. If `null`, no notification is
+   *   sent.
+   * @return Unit
+   */
   private fun reviewHuntToRepository(id: String, hunt: Hunt, context: Context?) {
     viewModelScope.launch {
       try {
@@ -128,7 +202,16 @@ open class ReviewHuntViewModel(
       }
     }
   }
-  /** Deletes a review if the user is the author. */
+
+  /**
+   * Deletes a review (and its associated photos) if the given user is the author.
+   *
+   * @param reviewID Identifier of the review to delete.
+   * @param userID Identifier of the user requesting deletion (the review author).
+   * @param currentUserId Optional current user ID. If `null`, the ID is fetched from Firebase. This
+   *   is mainly useful for testing.
+   * @return Unit
+   */
   fun deleteReview(
       reviewID: String,
       userID: String,
@@ -161,7 +244,12 @@ open class ReviewHuntViewModel(
     }
   }
 
-  /** Sets the review text and validates it. */
+  /**
+   * Sets the review text and updates validation state accordingly.
+   *
+   * @param text New review text entered by the user.
+   * @return Unit
+   */
   fun setReviewText(text: String) {
     _uiState.value =
         _uiState.value.copy(
@@ -169,7 +257,12 @@ open class ReviewHuntViewModel(
             invalidReviewText = if (text.isBlank()) AddReviewScreenStrings.ReviewNotEmpty else null)
   }
 
-  /** Sets the rating for the review and validates it. */
+  /**
+   * Sets the rating for the review and updates validation errors if necessary.
+   *
+   * @param rating New rating value, expected to be in the range (0.0, 5.0].
+   * @return Unit
+   */
   fun setRating(rating: Double) {
     _uiState.value =
         _uiState.value.copy(
@@ -179,8 +272,15 @@ open class ReviewHuntViewModel(
   }
 
   /**
-   * Handles the submit button click event. Validates the input and submits the review to the
+   * Handles the submit button click event.
+   *
+   * Validates the current UI state and, if valid, triggers the submission of the review to the
    * repository.
+   *
+   * @param userId Identifier of the user submitting the review.
+   * @param hunt [Hunt] being reviewed.
+   * @param context Optional [Context] used for notifications.
+   * @return Unit
    */
   fun submitReviewHunt(userId: String, hunt: Hunt, context: Context?) {
     val state = _uiState.value
@@ -192,7 +292,14 @@ open class ReviewHuntViewModel(
     reviewHuntToRepository(userId, hunt, context)
   }
 
-  /** Adds a photo to the current list of photos in the UI state. */
+  /**
+   * Adds a photo to the review by uploading it and updating the UI state's photo list.
+   *
+   * @param myPhoto Local URI string of the photo to upload.
+   * @param userId Optional user ID to associate with the uploaded photo. If `null`, the ID is taken
+   *   from the currently authenticated Firebase user.
+   * @return Unit
+   */
   fun addPhoto(myPhoto: String, userId: String? = null) {
     val uid = userId ?: FirebaseAuth.getInstance().currentUser?.uid ?: return
     val uri = myPhoto.toUri()
@@ -210,7 +317,12 @@ open class ReviewHuntViewModel(
     }
   }
 
-  /** Removes a photo from the current list of photos in the UI state. */
+  /**
+   * Removes a photo from the review by deleting it remotely and updating the UI state's photo list.
+   *
+   * @param myPhoto URL of the photo to remove.
+   * @return Unit
+   */
   fun removePhoto(myPhoto: String) {
     viewModelScope.launch(dispatcher) {
       try {
@@ -225,15 +337,35 @@ open class ReviewHuntViewModel(
     }
   }
 
-  /** Updates the rating in the UI state. */
+  /**
+   * Updates the rating in the UI state.
+   *
+   * This does not perform validation. Use [setRating] if you also want validation.
+   *
+   * @param newRating New rating value to set.
+   * @return Unit
+   */
   fun updateRating(newRating: Double) {
     _uiState.value = _uiState.value.copy(rating = newRating)
   }
 
+  /**
+   * Loads the given list of review image URLs into the UI state's photo list.
+   *
+   * @param photoUrls List of existing review photo URLs.
+   * @return Unit
+   */
   fun loadReviewImages(photoUrls: List<String>) {
     _uiState.value = _uiState.value.copy(photos = photoUrls)
   }
-  /** Clears the review form if the review was submitted successfully. */
+
+  /**
+   * Clears the review form if the review was submitted successfully.
+   *
+   * If the save was not successful, sets an error message instead.
+   *
+   * @return Unit
+   */
   fun clearForm() {
     if (_uiState.value.saveSuccessful) {
       clearFormCancel()
@@ -242,7 +374,13 @@ open class ReviewHuntViewModel(
     }
   }
 
-  /** Clears the review form and deletes any selected photos without submitting the review. */
+  /**
+   * Clears the review form and deletes any selected photos without submitting the review.
+   *
+   * This is typically called when the user cancels review creation.
+   *
+   * @return Unit
+   */
   fun clearFormNoSubmission() {
     for (photo in _uiState.value.photos) {
       viewModelScope.launch(dispatcher) {
@@ -258,7 +396,13 @@ open class ReviewHuntViewModel(
     clearFormCancel()
   }
 
-  /** Clears the review form when click on cancel */
+  /**
+   * Resets the review form to its initial state.
+   *
+   * This is used by both [clearForm] and [clearFormNoSubmission].
+   *
+   * @return Unit
+   */
   fun clearFormCancel() {
     _uiState.value =
         _uiState.value.copy(
@@ -272,12 +416,27 @@ open class ReviewHuntViewModel(
             errorMsg = null)
   }
 
-  /** Submits the current user's review for the given hunt. */
+  /**
+   * Submits the current user's review for the given hunt.
+   *
+   * The current user ID is obtained from [FirebaseAuth]. If no user is logged in, a default ID is
+   * used as fallback.
+   *
+   * @param hunt [Hunt] being reviewed.
+   * @param context Optional [Context] used for notifications.
+   * @return Unit
+   */
   fun submitCurrentUserReview(hunt: Hunt, context: Context?) {
     val userId = FirebaseAuth.getInstance().currentUser?.uid ?: AddReviewScreenStrings.User0
     submitReviewHunt(userId, hunt, context)
   }
 
+  /**
+   * Loads a review by its ID and updates the UI state's list of photo URLs.
+   *
+   * @param reviewId Identifier of the review to load.
+   * @return A [kotlinx.coroutines.Job] representing the launched coroutine.
+   */
   fun loadReview(reviewId: String) =
       viewModelScope.launch {
         try {

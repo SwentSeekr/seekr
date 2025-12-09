@@ -371,4 +371,36 @@ class HuntCardScreenTest {
     assertTrue(fakeVm.uiState.value.currentUserId != null)
     assertTrue(fakeVm.uiState.value.hunt?.uid == HuntCardScreenConstantStrings.TestHunt)
   }
+
+  @Test
+  fun addReviewButton_isNotShown_whenCurrentUserAlreadyReviewed() {
+    // Given: a hunt where the current user is NOT the author
+    val hunt = createFakeHunt().copy(authorId = HuntCardScreenConstantStrings.AuthorIdOther)
+
+    // Fake VM where current user (set by loadCurrentUserID) has already reviewed the hunt
+    val fakeVm =
+        FakeHuntCardViewModel(hunt).apply {
+          // FakeHuntCardViewModel.loadCurrentUserID() sets currentUserId = "fakeUser123"
+          // so we create a review with that same authorId
+          setReviewsForTest(
+              listOf(
+                  com.swentseekr.seekr.model.hunt.HuntReview(
+                      reviewId = "review-1",
+                      authorId = "fakeUser123",
+                      huntId = hunt.uid,
+                      rating = 4.0,
+                      comment = "Already reviewed",
+                      photos = emptyList())))
+        }
+
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = hunt.uid, huntCardViewModel = fakeVm, navController = rememberNavController())
+    }
+
+    composeTestRule.waitForIdle()
+
+    // Then: the "Add review" button should NOT be in the tree at all
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.REVIEW_BUTTON).assertDoesNotExist()
+  }
 }
