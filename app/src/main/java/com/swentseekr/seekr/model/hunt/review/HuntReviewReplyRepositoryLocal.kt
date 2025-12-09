@@ -24,16 +24,12 @@ class HuntReviewReplyRepositoryLocal : HuntReviewReplyRepository {
   }
 
   override suspend fun updateReply(replyId: String, newReply: HuntReviewReply) {
-    if (!replies.containsKey(replyId)) {
-      throw IllegalArgumentException("Reply with id $replyId does not exist")
-    }
+    require(replies.containsKey(replyId)) { "Reply with id $replyId does not exist" }
     replies[replyId] = newReply.copy(replyId = replyId)
   }
 
   override suspend fun deleteReply(replyId: String) {
-    if (!replies.containsKey(replyId)) {
-      throw IllegalArgumentException("Reply with id $replyId does not exist")
-    }
+    require(replies.containsKey(replyId)) { "Reply with id $replyId does not exist" }
     replies.remove(replyId)
   }
 
