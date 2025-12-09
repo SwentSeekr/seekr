@@ -621,36 +621,34 @@ fun ModernReviewCard(
 
   val isCurrentId = currentUserId == authorId
 
-    val repliesViewModel: ReviewRepliesViewModel =
-        viewModel(
-            key = "replies_${review.reviewId}",
-            factory = ReviewRepliesViewModelFactory(
-                reviewId = review.reviewId,
-                repository = HuntReviewReplyRepositoryProvider.repository, // or DI
-            ),
-        )
+  val repliesViewModel: ReviewRepliesViewModel =
+      viewModel(
+          key = "replies_${review.reviewId}",
+          factory =
+              ReviewRepliesViewModelFactory(
+                  reviewId = review.reviewId,
+                  repository = HuntReviewReplyRepositoryProvider.repository, // or DI
+              ),
+      )
 
-    LaunchedEffect(review.reviewId) {
-        repliesViewModel.start()
-    }
+  LaunchedEffect(review.reviewId) { repliesViewModel.start() }
 
-    val repliesState by repliesViewModel.uiState.collectAsState()
+  val repliesState by repliesViewModel.uiState.collectAsState()
 
-    // Local flag: “card clicked = show replies block”
-    var showReplies by remember { mutableStateOf(false) }
+  // Local flag: “card clicked = show replies block”
+  var showReplies by remember { mutableStateOf(false) }
 
-    Card(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = HuntCardScreenDefaults.Padding20,
-                    vertical = HuntCardScreenDefaults.Padding8)
-                .testTag(HuntCardScreenTestTags.REVIEW_CARD)
-                .clickable {
-                    showReplies = !showReplies
-                    repliesViewModel.onToggleReplies(parentReplyId = null)
-                },
+  Card(
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(
+                  horizontal = HuntCardScreenDefaults.Padding20,
+                  vertical = HuntCardScreenDefaults.Padding8)
+              .testTag(HuntCardScreenTestTags.REVIEW_CARD)
+              .clickable {
+                showReplies = !showReplies
+                repliesViewModel.onToggleReplies(parentReplyId = null)
+              },
       colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary),
       elevation =
           CardDefaults.cardElevation(defaultElevation = HuntCardScreenDefaults.CardElevation),
@@ -718,46 +716,39 @@ fun ModernReviewCard(
                       fontSize = HuntCardScreenDefaults.MinFontSize)
                 }
           }
-            if (showReplies) {
-                Spacer(modifier = Modifier.height(8.dp))
-                ReviewRepliesSection(
-                    state = repliesState,
-                    onToggleRootReplies = {
-                        repliesViewModel.onToggleReplies(parentReplyId = null)
-                    },
-                    onRootReplyTextChanged = { newText ->
-                        repliesViewModel.onReplyTextChanged(
-                            ReplyTarget.RootReview(reviewId = review.reviewId),
-                            newText,
-                        )
-                    },
-                    onSendRootReply = {
-                        repliesViewModel.sendReply(
-                            ReplyTarget.RootReview(reviewId = review.reviewId),
-                        )
-                    },
-                    onReplyAction = { target ->
-                        // Open/close inline composer under a specific reply
-                        repliesViewModel.onToggleComposer(target)
-                    },
-                    onToggleReplyThread = { parentReplyId ->
-                        repliesViewModel.onToggleReplies(parentReplyId)
-                    },
-                    onReplyTextChanged = { target, text ->
-                        repliesViewModel.onReplyTextChanged(target, text)
-                    },
-                    onSendReply = { target ->
-                        repliesViewModel.sendReply(target)
-                    },
-                    onDeleteReply = { replyId ->
-                        repliesViewModel.deleteReply(replyId)
-                    },
-                )
-            }
+          if (showReplies) {
+            Spacer(modifier = Modifier.height(8.dp))
+            ReviewRepliesSection(
+                state = repliesState,
+                onToggleRootReplies = { repliesViewModel.onToggleReplies(parentReplyId = null) },
+                onRootReplyTextChanged = { newText ->
+                  repliesViewModel.onReplyTextChanged(
+                      ReplyTarget.RootReview(reviewId = review.reviewId),
+                      newText,
+                  )
+                },
+                onSendRootReply = {
+                  repliesViewModel.sendReply(
+                      ReplyTarget.RootReview(reviewId = review.reviewId),
+                  )
+                },
+                onReplyAction = { target ->
+                  // Open/close inline composer under a specific reply
+                  repliesViewModel.onToggleComposer(target)
+                },
+                onToggleReplyThread = { parentReplyId ->
+                  repliesViewModel.onToggleReplies(parentReplyId)
+                },
+                onReplyTextChanged = { target, text ->
+                  repliesViewModel.onReplyTextChanged(target, text)
+                },
+                onSendReply = { target -> repliesViewModel.sendReply(target) },
+                onDeleteReply = { replyId -> repliesViewModel.deleteReply(replyId) },
+            )
+          }
         }
-    }
+      }
 }
-
 
 /**
  * Displays a circular like/unlike button inside a translucent background.
