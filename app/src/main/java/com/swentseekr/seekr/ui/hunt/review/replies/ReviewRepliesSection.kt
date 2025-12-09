@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
+import com.swentseekr.seekr.ui.theme.Green
 
 /**
  * Renders the entire replies block below a review card:
@@ -129,27 +131,32 @@ private fun ReviewRepliesHeader(
     onToggleRootReplies: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-  if (totalReplyCount > 0) {
-    Surface(
-        modifier = modifier.clickable { onToggleRootReplies() }.fillMaxWidth(),
-        color = Color.Transparent) {
-          Row(
-              modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp),
-              verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Filled.KeyboardArrowDown,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                    modifier = Modifier.size(20.dp))
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = "$totalReplyCount ${if (totalReplyCount == 1) "reply" else "replies"}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontWeight = FontWeight.Medium)
-              }
-        }
-  }
+  Surface(
+      modifier = modifier.clickable { onToggleRootReplies() }.fillMaxWidth(),
+      color = Color.Transparent) {
+        Row(
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+              Icon(
+                  imageVector =
+                      if (totalReplyCount > 0) Icons.Filled.KeyboardArrowDown
+                      else Icons.Filled.Send,
+                  contentDescription = null,
+                  tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                  modifier = Modifier.size(20.dp))
+              Spacer(modifier = Modifier.width(6.dp))
+              Text(
+                  text =
+                      if (totalReplyCount > 0) {
+                        "$totalReplyCount ${if (totalReplyCount == 1) "reply" else "replies"}"
+                      } else {
+                        "No replies yet – be the first"
+                      },
+                  style = MaterialTheme.typography.bodyMedium,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  fontWeight = if (totalReplyCount > 0) FontWeight.Medium else FontWeight.Normal)
+            }
+      }
 }
 
 /**
@@ -189,6 +196,7 @@ private fun RepliesList(
     }
   }
 }
+
 /** Single reply item row, Reddit-style. */
 @Composable
 private fun ReplyItem(
@@ -205,153 +213,169 @@ private fun ReplyItem(
   val reply = node.reply
   var composerExpanded by remember { mutableStateOf(false) }
 
-  Column(modifier = modifier.fillMaxWidth().padding(start = depthIndent)) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
-      // Thread line
-      if (node.depth > 0) {
-        Box(
-            modifier =
-                Modifier.width(2.dp)
-                    .height(48.dp)
-                    .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)))
-        Spacer(modifier = Modifier.width(12.dp))
-      }
+  Column(
+      modifier = modifier.fillMaxWidth().padding(start = depthIndent),
+      verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+          // Thread line
+          if (node.depth > 0) {
+            Box(
+                modifier =
+                    Modifier.width(2.dp)
+                        .fillMaxHeight()
+                        .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)))
+            Spacer(modifier = Modifier.width(8.dp))
+          }
 
-      // Reply content card
-      Surface(
-          modifier = Modifier.weight(1f),
-          shape = RoundedCornerShape(12.dp),
-          color = MaterialTheme.colorScheme.onPrimary,
-          tonalElevation = 0.dp) {
-            Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
-              // Header: author + timestamp + delete
-              Row(
-                  modifier = Modifier.fillMaxWidth(),
-                  verticalAlignment = Alignment.CenterVertically) {
-                    // Avatar circle
-                    Box(
-                        modifier =
-                            Modifier.size(24.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    if (node.isMine) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.tertiary),
-                        contentAlignment = Alignment.Center) {
-                          Text(
-                              text = if (node.isMine) "Y" else reply.authorId.take(1).uppercase(),
-                              style = MaterialTheme.typography.labelSmall,
-                              fontWeight = FontWeight.Bold,
-                              color = Color.White,
-                              fontSize = 11.sp)
-                        }
+          // Reply content bubble
+          Surface(
+              modifier = Modifier.weight(1f),
+              shape = RoundedCornerShape(12.dp),
+              color = MaterialTheme.colorScheme.surface,
+              tonalElevation = 0.dp) {
+                Column(
+                    modifier =
+                        Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
+                      // Header: avatar + author + timestamp + delete
+                      Row(
+                          modifier = Modifier.fillMaxWidth(),
+                          verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier =
+                                    Modifier.size(24.dp)
+                                        .clip(CircleShape)
+                                        .background(
+                                            if (node.isMine) MaterialTheme.colorScheme.primary
+                                            else MaterialTheme.colorScheme.tertiary),
+                                contentAlignment = Alignment.Center) {
+                                  Text(
+                                      text =
+                                          if (node.isMine) "Y"
+                                          else reply.authorId.take(1).uppercase(),
+                                      style = MaterialTheme.typography.labelSmall,
+                                      fontWeight = FontWeight.Bold,
+                                      color = Color.White,
+                                      fontSize = 11.sp)
+                                }
 
-                    Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
 
-                    Text(
-                        text = if (node.isMine) "You" else reply.authorId.take(8),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface)
+                            Text(
+                                text = if (node.isMine) "You" else reply.authorId.take(8),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface)
 
-                    Text(
-                        text = " • just now",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+                            Text(
+                                text = " • just now",
+                                style = MaterialTheme.typography.labelSmall,
+                                color =
+                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
 
-                    Spacer(modifier = Modifier.weight(1f))
+                            Spacer(modifier = Modifier.weight(1f))
 
-                    if (node.isMine && !reply.isDeleted) {
-                      IconButton(onClick = onDeleteReply, modifier = Modifier.size(32.dp)) {
-                        Icon(
-                            imageVector = Icons.Filled.Delete,
-                            contentDescription = "Delete",
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(18.dp))
+                            if (node.isMine && !reply.isDeleted) {
+                              IconButton(onClick = onDeleteReply, modifier = Modifier.size(28.dp)) {
+                                Icon(
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = "Delete",
+                                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.85f),
+                                    modifier = Modifier.size(18.dp))
+                              }
+                            }
+                          }
+
+                      Spacer(modifier = Modifier.height(4.dp))
+
+                      // Comment text
+                      Text(
+                          text = if (reply.isDeleted) "[deleted]" else reply.comment,
+                          style = MaterialTheme.typography.bodyMedium,
+                          color =
+                              if (reply.isDeleted) {
+                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                              } else {
+                                MaterialTheme.colorScheme.onSurface
+                              },
+                          lineHeight = 20.sp)
+
+                      Spacer(modifier = Modifier.height(4.dp))
+
+                      // Actions
+                      Row(
+                          modifier = Modifier.fillMaxWidth(),
+                          verticalAlignment = Alignment.CenterVertically,
+                          horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            TextButton(
+                                onClick = {
+                                  composerExpanded = !composerExpanded
+                                  onReplyAction(
+                                      ReplyTarget.Reply(
+                                          reviewId = reply.reviewId, parentReplyId = reply.replyId))
+                                },
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                modifier = Modifier.height(28.dp),
+                                colors =
+                                    ButtonDefaults.textButtonColors(
+                                        contentColor = com.swentseekr.seekr.ui.theme.Green)) {
+                                  Icon(
+                                      imageVector = Icons.Filled.Send,
+                                      contentDescription = "Reply",
+                                      modifier = Modifier.size(16.dp),
+                                      tint = com.swentseekr.seekr.ui.theme.Green)
+                                  Spacer(modifier = Modifier.width(4.dp))
+                                  Text(
+                                      text = "Reply",
+                                      style = MaterialTheme.typography.labelMedium,
+                                      color = com.swentseekr.seekr.ui.theme.Green)
+                                }
+
+                            if (node.totalChildrenCount > 0) {
+                              TextButton(
+                                  onClick = onToggleReplyThread,
+                                  contentPadding =
+                                      PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                  modifier = Modifier.height(28.dp),
+                                  colors =
+                                      ButtonDefaults.textButtonColors(
+                                          contentColor =
+                                              MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                                  alpha = 0.9f))) {
+                                    Icon(
+                                        imageVector =
+                                            if (node.isExpanded) Icons.Filled.KeyboardArrowUp
+                                            else Icons.Filled.KeyboardArrowDown,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text =
+                                            if (node.isExpanded) "Hide"
+                                            else
+                                                "${node.totalChildrenCount} ${if (node.totalChildrenCount == 1) "reply" else "replies"}",
+                                        style = MaterialTheme.typography.labelMedium)
+                                  }
+                            }
+                          }
+
+                      // Inline composer
+                      if (node.isComposerOpen && !reply.isDeleted) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        ModernReplyComposer(
+                            text = replyText.orEmpty(),
+                            isSending = false,
+                            placeholder = "Write a reply...",
+                            onTextChanged = onReplyTextChanged,
+                            onSend = onSendReply,
+                            isExpanded = composerExpanded,
+                            onExpandChange = { composerExpanded = it },
+                            compact = true)
                       }
                     }
-                  }
-
-              Spacer(modifier = Modifier.height(8.dp))
-
-              // Comment text
-              Text(
-                  text = if (reply.isDeleted) "[deleted]" else reply.comment,
-                  style = MaterialTheme.typography.bodyMedium,
-                  color =
-                      if (reply.isDeleted) {
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                      } else {
-                        MaterialTheme.colorScheme.onSurface
-                      },
-                  lineHeight = 20.sp)
-
-              Spacer(modifier = Modifier.height(8.dp))
-
-              // Action buttons
-              Row(
-                  modifier = Modifier.fillMaxWidth(),
-                  verticalAlignment = Alignment.CenterVertically,
-                  horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    // Reply button
-                    TextButton(
-                        onClick = {
-                          composerExpanded = !composerExpanded
-                          onReplyAction(
-                              ReplyTarget.Reply(
-                                  reviewId = reply.reviewId, parentReplyId = reply.replyId))
-                        },
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                        modifier = Modifier.height(32.dp)) {
-                          Icon(
-                              imageVector = Icons.Filled.Send,
-                              contentDescription = "Reply",
-                              modifier = Modifier.size(16.dp))
-                          Spacer(modifier = Modifier.width(4.dp))
-                          Text(text = "Reply", style = MaterialTheme.typography.labelMedium)
-                        }
-
-                    // Toggle thread button
-                    if (node.totalChildrenCount > 0) {
-                      TextButton(
-                          onClick = onToggleReplyThread,
-                          contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                          modifier = Modifier.height(32.dp)) {
-                            Icon(
-                                imageVector =
-                                    if (node.isExpanded) Icons.Filled.KeyboardArrowUp
-                                    else Icons.Filled.KeyboardArrowDown,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text =
-                                    if (node.isExpanded) "Hide"
-                                    else
-                                        "${node.totalChildrenCount} ${if (node.totalChildrenCount == 1) "reply" else "replies"}",
-                                style = MaterialTheme.typography.labelMedium)
-                          }
-                    }
-                  }
-
-              // Inline composer
-              if (node.isComposerOpen && !reply.isDeleted) {
-                Spacer(modifier = Modifier.height(8.dp))
-                ModernReplyComposer(
-                    text = replyText.orEmpty(),
-                    isSending = false,
-                    placeholder = "Write a reply...",
-                    onTextChanged = onReplyTextChanged,
-                    onSend = onSendReply,
-                    isExpanded = composerExpanded,
-                    onExpandChange = { composerExpanded = it },
-                    compact = true)
               }
-            }
-          }
-    }
-  }
+        }
+      }
 }
-
 /** Modern, compact reply composer with send button. */
 @Composable
 private fun ModernReplyComposer(
@@ -370,11 +394,11 @@ private fun ModernReplyComposer(
     TextButton(
         onClick = { onExpandChange(true) },
         modifier = modifier.fillMaxWidth().padding(horizontal = if (compact) 0.dp else 4.dp),
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
         shape = RoundedCornerShape(24.dp),
         colors =
             ButtonDefaults.textButtonColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))) {
+                containerColor = Green.copy(alpha = 0.10f), contentColor = Green)) {
           Row(
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.Start,
@@ -383,12 +407,9 @@ private fun ModernReplyComposer(
                     imageVector = Icons.Filled.Send,
                     contentDescription = "Reply",
                     modifier = Modifier.size(18.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    tint = Green)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Reply",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = "Reply", style = MaterialTheme.typography.bodyMedium, color = Green)
               }
         }
   } else {
@@ -415,7 +436,7 @@ private fun ModernReplyComposer(
                       unfocusedContainerColor = MaterialTheme.colorScheme.surface))
 
           if (isSending) {
-            CircularProgressIndicator(modifier = Modifier.size(32.dp), strokeWidth = 2.dp)
+            CircularProgressIndicator(modifier = Modifier.size(28.dp), strokeWidth = 2.dp)
           } else {
             IconButton(
                 onClick = {
@@ -429,7 +450,7 @@ private fun ModernReplyComposer(
                   Surface(
                       shape = CircleShape,
                       color =
-                          if (text.isNotBlank()) MaterialTheme.colorScheme.primary
+                          if (text.isNotBlank()) Green
                           else MaterialTheme.colorScheme.surfaceVariant,
                       modifier = Modifier.size(36.dp)) {
                         Box(
