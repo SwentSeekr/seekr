@@ -42,6 +42,9 @@ import com.swentseekr.seekr.ui.profile.EditProfileScreen
 import com.swentseekr.seekr.ui.profile.ProfileReviewsScreen
 import com.swentseekr.seekr.ui.profile.ProfileScreen
 import com.swentseekr.seekr.ui.settings.SettingsScreen
+import android.app.Activity
+import androidx.compose.ui.platform.LocalContext
+
 
 // Destinations as sealed class
 sealed class SeekrDestination(
@@ -173,8 +176,26 @@ fun SeekrMainNavHost(
     reviewViewModelFactory: (() -> ReviewHuntViewModel)? = null,
     testMode: Boolean = false
 ) {
+    val context = LocalContext.current
+    val activity = context as? Activity
 
-  fun NavHostController.goToProfileReviews(userId: String?) {
+// Read huntId if app was launched/tapped via notification
+    val deepLinkHuntId = remember {
+        activity?.intent?.getStringExtra("huntId")
+    }
+
+// Navigate exactly once when a notification tap occurs
+    LaunchedEffect(deepLinkHuntId) {
+        if (deepLinkHuntId != null) {
+            navController.navigate(SeekrDestination.HuntCard.createRoute(deepLinkHuntId)) {
+                launchSingleTop = true
+            }
+            activity?.intent?.removeExtra("huntId") // prevent re-trigger
+        }
+    }
+
+
+    fun NavHostController.goToProfileReviews(userId: String?) {
     if (!userId.isNullOrBlank()) {
       navigate(SeekrDestination.Profile.Reviews.createRoute(userId))
     }
