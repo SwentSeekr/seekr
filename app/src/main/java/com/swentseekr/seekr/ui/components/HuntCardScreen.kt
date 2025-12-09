@@ -1,9 +1,11 @@
 package com.swentseekr.seekr.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -19,10 +21,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -36,6 +42,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -48,6 +55,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -627,13 +635,14 @@ fun ModernReviewCard(
           factory =
               ReviewRepliesViewModelFactory(
                   reviewId = review.reviewId,
-                  repository = HuntReviewReplyRepositoryProvider.repository, // or DI
+                  repository = HuntReviewReplyRepositoryProvider.repository,
               ),
       )
 
   LaunchedEffect(review.reviewId) { repliesViewModel.start() }
 
   val repliesState by repliesViewModel.uiState.collectAsState()
+  val totalReplies = repliesState.totalReplyCount
 
   // Local flag: “card clicked = show replies block”
   var showReplies by remember { mutableStateOf(false) }
@@ -654,11 +663,33 @@ fun ModernReviewCard(
           CardDefaults.cardElevation(defaultElevation = HuntCardScreenDefaults.CardElevation),
       shape = RoundedCornerShape(HuntCardScreenDefaults.CornerRadius)) {
         Column(modifier = Modifier.padding(HuntCardScreenDefaults.Padding16)) {
+          // Header row: avatar, name, rating, delete
           Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            ProfilePicture(
-                profilePictureRes = authorProfile?.author?.profilePicture ?: 0,
-                modifier =
-                    Modifier.size(HuntCardScreenDefaults.ProfilePictureSize).clip(CircleShape))
+            val profilePictureRes = authorProfile?.author?.profilePicture ?: 0
+
+            if (profilePictureRes != 0) {
+              ProfilePicture(
+                  profilePictureRes = profilePictureRes,
+                  modifier =
+                      Modifier.size(HuntCardScreenDefaults.ProfilePictureSize).clip(CircleShape))
+            } else {
+              // Default avatar like in reply thread
+              Box(
+                  modifier =
+                      Modifier.size(HuntCardScreenDefaults.ProfilePictureSize)
+                          .clip(CircleShape)
+                          .background(
+                              if (isCurrentId) MaterialTheme.colorScheme.primary
+                              else MaterialTheme.colorScheme.tertiary),
+                  contentAlignment = Alignment.Center) {
+                    val initial = authorId.take(1).uppercase()
+                    Text(
+                        text = if (isCurrentId) "Y" else initial,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White)
+                  }
+            }
 
             Spacer(modifier = Modifier.width(HuntCardScreenDefaults.Padding12))
 
@@ -668,7 +699,7 @@ fun ModernReviewCard(
 
               Text(
                   text = authorName,
-                  fontWeight = FontWeight.Bold,
+                  fontWeight = FontWeight.SemiBold,
                   fontSize = HuntCardScreenDefaults.DescriptionFontSize,
                   color = MaterialTheme.colorScheme.onSurface)
 
@@ -691,12 +722,14 @@ fun ModernReviewCard(
 
           Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding12))
 
+          // Main comment text – same feel as reply bubble text
           Text(
               text = review.comment,
               fontSize = HuntCardScreenDefaults.DescriptionFontSize,
               lineHeight = HuntCardScreenDefaults.OtherLineHeight,
-              color = HuntCardScreenDefaults.ParagraphGray)
+              color = MaterialTheme.colorScheme.onSurface)
 
+          // Optional photos button
           if (review.photos.isNotEmpty()) {
             Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding12))
 
@@ -716,6 +749,71 @@ fun ModernReviewCard(
                       fontSize = HuntCardScreenDefaults.MinFontSize)
                 }
           }
+
+          Spacer(modifier = Modifier.height(8.dp))
+
+          // Footer: Reply + See X replies / Hide
+          Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically) {
+                // "Reply" chip – visually aligned with ModernReplyComposer collapsed state
+                TextButton(
+                    onClick = {
+                      showReplies = true
+                      repliesViewModel.onToggleReplies(parentReplyId = null)
+                    },
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    colors =
+                        ButtonDefaults.textButtonColors(
+                            containerColor =
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))) {
+                      Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Filled.Send,
+                            contentDescription = "Reply",
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Reply",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                      }
+                    }
+
+                if (totalReplies > 0) {
+                  TextButton(
+                      onClick = {
+                        showReplies = !showReplies
+                        repliesViewModel.onToggleReplies(parentReplyId = null)
+                      },
+                      contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                      shape = RoundedCornerShape(24.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                          Icon(
+                              imageVector =
+                                  if (showReplies) Icons.Filled.KeyboardArrowUp
+                                  else Icons.Filled.KeyboardArrowDown,
+                              contentDescription = null,
+                              modifier = Modifier.size(18.dp),
+                              tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
+                          Spacer(modifier = Modifier.width(4.dp))
+                          Text(
+                              text =
+                                  if (showReplies) "Hide replies"
+                                  else {
+                                    "$totalReplies " + if (totalReplies == 1) "reply" else "replies"
+                                  },
+                              style = MaterialTheme.typography.labelMedium,
+                              color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                      }
+                }
+              }
+
+          // Threaded replies below the card body
           if (showReplies) {
             Spacer(modifier = Modifier.height(8.dp))
             ReviewRepliesSection(
@@ -732,10 +830,7 @@ fun ModernReviewCard(
                       ReplyTarget.RootReview(reviewId = review.reviewId),
                   )
                 },
-                onReplyAction = { target ->
-                  // Open/close inline composer under a specific reply
-                  repliesViewModel.onToggleComposer(target)
-                },
+                onReplyAction = { target -> repliesViewModel.onToggleComposer(target) },
                 onToggleReplyThread = { parentReplyId ->
                   repliesViewModel.onToggleReplies(parentReplyId)
                 },
