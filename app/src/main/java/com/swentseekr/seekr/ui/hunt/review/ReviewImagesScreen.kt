@@ -3,8 +3,11 @@ package com.swentseekr.seekr.ui.hunt.review
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,6 +18,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -28,12 +32,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
@@ -54,7 +62,6 @@ fun ReviewImagesScreen(
     onGoBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-
   val scroll = rememberScrollState()
   val pagerState = rememberPagerState(pageCount = { photoUrls.size })
   var showFullScreen by remember { mutableStateOf(false) }
@@ -85,66 +92,58 @@ fun ReviewImagesScreen(
                     .padding(ReviewImagesScreenConstants.PaddingColumn)
                     .padding(innerPadding)
                     .verticalScroll(scroll)
-                    .testTag(ReviewImagesScreenConstantsStrings.ReviewImagesColumnTestTag),
-        ) {
-          Text(
-              "${ReviewImagesScreenConstantsStrings.StartTopText} ${photoUrls.size} ${ReviewImagesScreenConstantsStrings.EndTopText}",
-              fontSize = AddReviewScreenDefaults.TitleFontSize,
-              fontWeight = FontWeight.Bold,
-              style = MaterialTheme.typography.titleLarge,
-              modifier =
-                  Modifier.padding(bottom = ReviewImagesScreenConstants.TextBottomPadding)
-                      .testTag(ReviewImagesScreenConstantsStrings.ReviewImageInfoTexteTestTag))
+                    .testTag(ReviewImagesScreenConstantsStrings.ReviewImagesColumnTestTag)) {
+              val index = pagerState.currentPage + ReviewImagesScreenConstants.One
 
-          val index = pagerState.currentPage + ReviewImagesScreenConstants.One
-          HorizontalPager(
-              state = pagerState,
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .height(ReviewImagesScreenConstants.PagerHeight)
-                      .testTag(ReviewImagesScreenConstantsStrings.ReviewImagePagerTestTag)) { page
-                ->
-                Box(
-                    modifier =
-                        Modifier.fillMaxSize()
-                            .clip(RoundedCornerShape(ReviewImagesScreenConstants.RoundShape))
-                            .testTag(
-                                "${ReviewImagesScreenConstantsStrings.ReviewImageBoxTestTag}$page")
-                            .clickable {
-                              fullscreenIndex = page
-                              showFullScreen = true
-                            }) {
-                      AsyncImage(
-                          model = photoUrls[page],
-                          contentDescription = null,
-                          modifier =
-                              Modifier.fillMaxWidth()
-                                  .height(ReviewImagesScreenConstants.ImageSize)
-                                  .padding(vertical = ReviewImagesScreenConstants.PaddingImage)
-                                  .clip(
-                                      RoundedCornerShape(
-                                          ReviewImagesScreenConstants.ImageCornerRadius))
-                                  .testTag(
-                                      "${ReviewImagesScreenConstantsStrings.ReviewImageAsycTestTag}$page"),
-                          contentScale = ContentScale.Fit,
-                          placeholder = painterResource(R.drawable.logo_seekr),
-                          error = painterResource(R.drawable.logo_seekr),
-                      )
-                    }
-              }
+              HorizontalPager(
+                  state = pagerState,
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .height(ReviewImagesScreenConstants.PagerHeight)
+                          .testTag(ReviewImagesScreenConstantsStrings.ReviewImagePagerTestTag)) {
+                      page ->
+                    Box(
+                        modifier =
+                            Modifier.fillMaxSize()
+                                .clip(RoundedCornerShape(ReviewImagesScreenConstants.RoundShape))
+                                .clickable {
+                                  fullscreenIndex = page
+                                  showFullScreen = true
+                                }
+                                .testTag(
+                                    "${ReviewImagesScreenConstantsStrings.ReviewImageBoxTestTag}$page")) {
+                          AsyncImage(
+                              model = photoUrls[page],
+                              contentDescription = null,
+                              modifier =
+                                  Modifier.fillMaxWidth()
+                                      .height(ReviewImagesScreenConstants.ImageSize)
+                                      .padding(vertical = ReviewImagesScreenConstants.PaddingImage)
+                                      .clip(
+                                          RoundedCornerShape(
+                                              ReviewImagesScreenConstants.ImageCornerRadius))
+                                      .testTag(
+                                          "${ReviewImagesScreenConstantsStrings.ReviewImageAsycTestTag}$page"),
+                              contentScale = ContentScale.Fit,
+                              placeholder = painterResource(R.drawable.logo_seekr),
+                              error = painterResource(R.drawable.logo_seekr),
+                          )
+                        }
+                  }
 
-          Text(
-              "${ReviewImagesScreenConstantsStrings.ImageTitle}$index/${photoUrls.size}",
-              fontSize = AddReviewScreenDefaults.TitleFontSize,
-              fontWeight = FontWeight.Bold,
-              style = MaterialTheme.typography.titleLarge,
-              modifier =
-                  Modifier.padding(
-                          top = ReviewImagesScreenConstants.TextTopPadding,
-                          bottom = ReviewImagesScreenConstants.TextBottomPadding)
-                      .testTag(ReviewImagesScreenConstantsStrings.ReviewImageTextBottomTestTag))
-        }
+              Spacer(modifier = Modifier.height(12.dp))
+
+              Text(
+                  text = "$index/${photoUrls.size}",
+                  fontSize = AddReviewScreenDefaults.TitleFontSize,
+                  fontWeight = FontWeight.SemiBold,
+                  style = MaterialTheme.typography.titleMedium,
+                  modifier =
+                      Modifier.align(Alignment.CenterHorizontally)
+                          .testTag(ReviewImagesScreenConstantsStrings.ReviewImageTextBottomTestTag))
+            }
       }
+
   if (showFullScreen) {
     FullScreenImageViewer(
         images = photoUrls, startIndex = fullscreenIndex, onClose = { showFullScreen = false })
@@ -170,8 +169,7 @@ fun FullScreenImageViewer(
         Box(
             modifier =
                 Modifier.fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-                    .clickable { onClose() }
+                    .background(Color.Black)
                     .testTag(
                         ReviewImagesScreenConstantsStrings.ReviewImageFullScreenDialogTestTag)) {
               val pagerState =
@@ -189,7 +187,38 @@ fun FullScreenImageViewer(
                         contentDescription =
                             "${ReviewImagesScreenConstantsStrings.ReviewImageFullScreenImageDescription} ${page + ReviewImagesScreenConstants.One}",
                         modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Fit,
                     )
+                  }
+
+              // Top overlay with close + index
+              val currentIndex = pagerState.currentPage + 1
+
+              Box(
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .align(Alignment.TopStart)
+                          .background(
+                              Brush.verticalGradient(
+                                  colors =
+                                      listOf(Color.Black.copy(alpha = 0.6f), Color.Transparent)))
+                          .padding(horizontal = 8.dp, vertical = 8.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()) {
+                          IconButton(onClick = onClose) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Close",
+                                tint = Color.White)
+                          }
+
+                          Text(
+                              text = "$currentIndex/${images.size}",
+                              style = MaterialTheme.typography.bodyMedium,
+                              color = Color.White)
+                        }
                   }
             }
       }
