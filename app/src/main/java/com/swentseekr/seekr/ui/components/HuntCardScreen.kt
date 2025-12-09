@@ -21,12 +21,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Star
@@ -623,7 +620,6 @@ fun ModernReviewCard(
   val uiState by reviewHuntViewModel.uiState.collectAsState()
 
   val authorId = review.authorId
-
   LaunchedEffect(authorId) { reviewHuntViewModel.loadAuthorProfile(authorId) }
   val authorProfile = uiState.authorProfiles[authorId]
 
@@ -644,7 +640,6 @@ fun ModernReviewCard(
   val repliesState by repliesViewModel.uiState.collectAsState()
   val totalReplies = repliesState.totalReplyCount
 
-  // Local flag: “card clicked = show replies block”
   var showReplies by remember { mutableStateOf(false) }
 
   Card(
@@ -653,17 +648,12 @@ fun ModernReviewCard(
               .padding(
                   horizontal = HuntCardScreenDefaults.Padding20,
                   vertical = HuntCardScreenDefaults.Padding8)
-              .testTag(HuntCardScreenTestTags.REVIEW_CARD)
-              .clickable {
-                showReplies = !showReplies
-                repliesViewModel.onToggleReplies(parentReplyId = null)
-              },
-      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary),
-      elevation =
-          CardDefaults.cardElevation(defaultElevation = HuntCardScreenDefaults.CardElevation),
-      shape = RoundedCornerShape(HuntCardScreenDefaults.CornerRadius)) {
+              .testTag(HuntCardScreenTestTags.REVIEW_CARD),
+      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+      elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+      shape = RoundedCornerShape(16.dp)) {
         Column(modifier = Modifier.padding(HuntCardScreenDefaults.Padding16)) {
-          // Header row: avatar, name, rating, delete
+          // --- Header: avatar + name + rating + optional delete ---
           Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             val profilePictureRes = authorProfile?.author?.profilePicture ?: 0
 
@@ -673,7 +663,6 @@ fun ModernReviewCard(
                   modifier =
                       Modifier.size(HuntCardScreenDefaults.ProfilePictureSize).clip(CircleShape))
             } else {
-              // Default avatar like in reply thread
               Box(
                   modifier =
                       Modifier.size(HuntCardScreenDefaults.ProfilePictureSize)
@@ -715,23 +704,26 @@ fun ModernReviewCard(
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = HuntCardScreenStrings.ReviewDeleteButton,
-                        tint = HuntCardScreenDefaults.ErrorRed)
+                        // softer delete color
+                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.85f))
                   }
             }
           }
 
-          Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding12))
+          Spacer(modifier = Modifier.height(8.dp))
 
-          // Main comment text – same feel as reply bubble text
-          Text(
-              text = review.comment,
-              fontSize = HuntCardScreenDefaults.DescriptionFontSize,
-              lineHeight = HuntCardScreenDefaults.OtherLineHeight,
-              color = MaterialTheme.colorScheme.onSurface)
+          // --- Comment text ---
+          if (review.comment.isNotBlank()) {
+            Text(
+                text = review.comment,
+                fontSize = HuntCardScreenDefaults.DescriptionFontSize,
+                lineHeight = HuntCardScreenDefaults.OtherLineHeight,
+                color = MaterialTheme.colorScheme.onSurface)
+          }
 
-          // Optional photos button
+          // --- Optional photos button ---
           if (review.photos.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding12))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Button(
                 onClick = {
@@ -750,14 +742,14 @@ fun ModernReviewCard(
                 }
           }
 
-          Spacer(modifier = Modifier.height(8.dp))
+          Spacer(modifier = Modifier.height(6.dp))
 
-          // Footer: Reply + See X replies / Hide
+          // --- Footer: Reply + View replies ---
           Row(
               modifier = Modifier.fillMaxWidth(),
               horizontalArrangement = Arrangement.SpaceBetween,
               verticalAlignment = Alignment.CenterVertically) {
-                // "Reply" chip – visually aligned with ModernReplyComposer collapsed state
+                // Reply chip - GREEN, more tappable
                 TextButton(
                     onClick = {
                       showReplies = true
@@ -768,18 +760,19 @@ fun ModernReviewCard(
                     colors =
                         ButtonDefaults.textButtonColors(
                             containerColor =
-                                MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))) {
+                                com.swentseekr.seekr.ui.theme.Green.copy(alpha = 0.12f),
+                            contentColor = com.swentseekr.seekr.ui.theme.Green)) {
                       Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Filled.Send,
                             contentDescription = "Reply",
                             modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            tint = com.swentseekr.seekr.ui.theme.Green)
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = "Reply",
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            color = com.swentseekr.seekr.ui.theme.Green)
                       }
                     }
 
@@ -789,33 +782,26 @@ fun ModernReviewCard(
                         showReplies = !showReplies
                         repliesViewModel.onToggleReplies(parentReplyId = null)
                       },
-                      contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                      shape = RoundedCornerShape(24.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                          Icon(
-                              imageVector =
-                                  if (showReplies) Icons.Filled.KeyboardArrowUp
-                                  else Icons.Filled.KeyboardArrowDown,
-                              contentDescription = null,
-                              modifier = Modifier.size(18.dp),
-                              tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
-                          Spacer(modifier = Modifier.width(4.dp))
-                          Text(
-                              text =
-                                  if (showReplies) "Hide replies"
-                                  else {
-                                    "$totalReplies " + if (totalReplies == 1) "reply" else "replies"
-                                  },
-                              style = MaterialTheme.typography.labelMedium,
-                              color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
+                      contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                      shape = RoundedCornerShape(24.dp),
+                      colors =
+                          ButtonDefaults.textButtonColors(
+                              contentColor =
+                                  MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.9f))) {
+                        Text(
+                            text =
+                                if (showReplies) "Hide replies"
+                                else
+                                    "View $totalReplies " +
+                                        if (totalReplies == 1) "reply" else "replies",
+                            style = MaterialTheme.typography.labelMedium)
                       }
                 }
               }
 
-          // Threaded replies below the card body
+          // --- Replies block below the card body ---
           if (showReplies) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             ReviewRepliesSection(
                 state = repliesState,
                 onToggleRootReplies = { repliesViewModel.onToggleReplies(parentReplyId = null) },
