@@ -14,16 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/**
- * ViewModel managing replies for a *single* review card.
- *
- * Responsibilities:
- * - Load and listen to replies for the given review.
- * - Maintain a tree → flattened list of [ReplyNodeUiState].
- * - Track expansion state for "See replies" at the root and at each reply.
- * - Track inline reply text per target (root or specific reply).
- * - Send new replies and delete replies authored by the current user.
- */
+/** ViewModel managing replies for a *single* review card. */
 class ReviewRepliesViewModel(
     private val reviewId: String,
     private val replyRepository: HuntReviewReplyRepository =
@@ -49,10 +40,6 @@ class ReviewRepliesViewModel(
   /** Prevents starting multiple collectors for the same ViewModel. */
   private var hasStarted: Boolean = false
 
-  /**
-   * Starts loading replies and listening for updates for this review. Should typically be called
-   * once from the composable using this ViewModel.
-   */
   fun start() {
     if (hasStarted) return
     hasStarted = true
@@ -68,32 +55,6 @@ class ReviewRepliesViewModel(
     }
   }
 
-  /** Explicitly refreshes the replies snapshot (e.g. pull-to-refresh). */
-  fun refresh() {
-    viewModelScope.launch(dispatcher) {
-      _uiState.update { it.copy(isLoading = true) }
-      try {
-        val raw = replyRepository.getRepliesForReview(reviewId)
-        allReplies = raw
-        rebuildFromRawReplies(raw)
-        _uiState.update { it.copy(isLoading = false, errorMessage = null) }
-      } catch (e: Exception) {
-        _uiState.update {
-          it.copy(
-              isLoading = false,
-              errorMessage = e.message ?: "Failed to refresh replies",
-          )
-        }
-      }
-    }
-  }
-
-  /**
-   * Updates the text of the inline composer bound to [target].
-   *
-   * For [ReplyTarget.RootReview] this drives the composer at the bottom of the review card. For
-   * [ReplyTarget.Reply] this drives the composer shown under a specific reply.
-   */
   fun onReplyTextChanged(target: ReplyTarget, newText: String) {
     _uiState.update { state ->
       when (target) {
@@ -107,11 +68,6 @@ class ReviewRepliesViewModel(
     }
   }
 
-  /**
-   * Toggles the expanded/collapsed state of children under the given reply.
-   *
-   * If [parentReplyId] is null, this toggles the root review's "See replies" section.
-   */
   fun onToggleReplies(parentReplyId: String?) {
     if (parentReplyId == null) {
       _uiState.update { it.copy(isRootExpanded = !it.isRootExpanded) }
@@ -123,12 +79,6 @@ class ReviewRepliesViewModel(
     rebuildFromRawReplies(allReplies)
   }
 
-  /**
-   * Toggles whether the inline reply composer is visible for the given [target]. Typically called
-   * when the user taps "Reply" on the review or a reply.
-   *
-   * Root review: we assume the root composer is always visible, so this is a no-op.
-   */
   fun onToggleComposer(target: ReplyTarget) {
     when (target) {
       is ReplyTarget.RootReview -> {
@@ -144,16 +94,10 @@ class ReviewRepliesViewModel(
     }
   }
 
-  /**
-   * Validates and sends the reply text currently associated with [target].
-   * - Builds a [HuntReviewReply] with appropriate parentReplyId.
-   * - Uses the current user as [HuntReviewReply.authorId].
-   * - Clears the inline composer text on success.
-   */
   fun sendReply(target: ReplyTarget) {
     val currentUserId = currentUserIdOrNull()
     if (currentUserId == null) {
-      _uiState.update { it.copy(errorMessage = "You must be signed in to reply.") }
+      _uiState.update { it.copy(errorMessage = ReviewRepliesStrings.ErrorSignInToReply) }
       return
     }
 
@@ -165,7 +109,7 @@ class ReviewRepliesViewModel(
         }
 
     if (text.isBlank()) {
-      _uiState.update { it.copy(errorMessage = "Reply cannot be empty.") }
+      _uiState.update { it.copy(errorMessage = ReviewRepliesStrings.ErrorEmptyReply) }
       return
     }
 
@@ -211,7 +155,7 @@ class ReviewRepliesViewModel(
       } catch (e: Exception) {
         _uiState.update {
           it.copy(
-              errorMessage = e.message ?: "Failed to send reply.",
+              errorMessage = e.message ?: ReviewRepliesStrings.ErrorSendReply,
           )
         }
       } finally {
@@ -220,29 +164,21 @@ class ReviewRepliesViewModel(
     }
   }
 
-  /**
-   * Deletes the reply with the given [replyId] if the current user is its author.
-   *
-   * This:
-   * - Checks ownership.
-   * - Calls [HuntReviewReplyRepository.deleteReply].
-   * - Leaves descendants intact; they remain as replies to a now-missing parent.
-   */
   fun deleteReply(replyId: String) {
     val currentUserId = currentUserIdOrNull()
     if (currentUserId == null) {
-      _uiState.update { it.copy(errorMessage = "You must be signed in to delete a reply.") }
+      _uiState.update { it.copy(errorMessage = ReviewRepliesStrings.ErrorSignInToDelete) }
       return
     }
 
     val reply = allReplies.find { it.replyId == replyId }
     if (reply == null) {
-      _uiState.update { it.copy(errorMessage = "Reply not found.") }
+      _uiState.update { it.copy(errorMessage = ReviewRepliesStrings.ErrorReplyNotFound) }
       return
     }
 
     if (reply.authorId != currentUserId) {
-      _uiState.update { it.copy(errorMessage = "You can only delete your own replies.") }
+      _uiState.update { it.copy(errorMessage = ReviewRepliesStrings.ErrorDeleteNotOwner) }
       return
     }
 
@@ -250,27 +186,20 @@ class ReviewRepliesViewModel(
       try {
         replyRepository.deleteReply(replyId)
       } catch (e: Exception) {
-        _uiState.update { it.copy(errorMessage = e.message ?: "Failed to delete reply.") }
+        _uiState.update {
+          it.copy(
+              errorMessage = e.message ?: ReviewRepliesStrings.ErrorDeleteReply,
+          )
+        }
       }
     }
   }
 
-  /** Clears the current error message (if any) from [ReviewRepliesUiState.errorMessage]. */
   fun clearError() {
     _uiState.update { it.copy(errorMessage = null) }
   }
 
-  /**
-   * Rebuilds the internal tree + flattened list of [ReplyNodeUiState] from a raw list of
-   * [HuntReviewReply] coming from the repository.
-   *
-   * This method:
-   * - Computes parent → children relationships.
-   * - Applies expansion state to decide which nodes are visible.
-   * - Computes depth and children counts.
-   */
   internal fun rebuildFromRawReplies(rawReplies: List<HuntReviewReply>) {
-    // Build parent -> children map
     val currentState = _uiState.value
     val rootExpanded = currentState.isRootExpanded
     val childrenByParent: Map<String?, List<HuntReviewReply>> =
@@ -278,7 +207,6 @@ class ReviewRepliesViewModel(
             .groupBy { it.parentReplyId }
             .mapValues { (_, list) -> list.sortedBy { it.createdAt } }
 
-    // Precompute total descendant counts per replyId
     val memoChildrenCount = mutableMapOf<String, Int>()
 
     fun countDescendants(replyId: String): Int {
@@ -300,13 +228,11 @@ class ReviewRepliesViewModel(
     fun traverse(parentId: String?, depth: Int) {
       val children = childrenByParent[parentId].orEmpty()
       for (child in children) {
-        val id = child.replyId
-
-        // If root is collapsed, we don't show any of its children.
         if (parentId == null && !rootExpanded) {
           continue
         }
 
+        val id = child.replyId
         val isExpanded = expandedReplyIds.contains(id)
         val isComposerOpen = composerOpenReplyIds.contains(id)
         val totalChildrenCount = memoChildrenCount[id] ?: 0
@@ -333,11 +259,6 @@ class ReviewRepliesViewModel(
     val totalReplyCount = rawReplies.size
     _uiState.update { it.copy(replies = flattened, totalReplyCount = totalReplyCount) }
   }
-  /**
-   * Returns the ID of the currently authenticated user, or null if not logged in. Used for "isMine"
-   * and ownership checks.
-   */
-  internal fun currentUserIdOrNull(): String? {
-    return auth.currentUser?.uid
-  }
+
+  internal fun currentUserIdOrNull(): String? = auth.currentUser?.uid
 }
