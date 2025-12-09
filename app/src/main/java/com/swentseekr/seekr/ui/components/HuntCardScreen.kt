@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -25,7 +24,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -39,7 +37,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -648,6 +645,12 @@ fun ModernReviewCard(
               .padding(
                   horizontal = HuntCardScreenDefaults.Padding20,
                   vertical = HuntCardScreenDefaults.Padding8)
+              .clickable {
+                if (!showReplies) {
+                  showReplies = true
+                  repliesViewModel.onToggleReplies(parentReplyId = null)
+                }
+              }
               .testTag(HuntCardScreenTestTags.REVIEW_CARD),
       colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
       elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
@@ -744,59 +747,40 @@ fun ModernReviewCard(
 
           Spacer(modifier = Modifier.height(6.dp))
 
-          // --- Footer: Reply + View replies ---
+          // --- Footer: right-aligned "No replies / View replies / Hide replies" label ---
           Row(
               modifier = Modifier.fillMaxWidth(),
-              horizontalArrangement = Arrangement.SpaceBetween,
+              horizontalArrangement = Arrangement.End,
               verticalAlignment = Alignment.CenterVertically) {
-                // Reply chip - GREEN, more tappable
-                TextButton(
-                    onClick = {
-                      showReplies = true
-                      repliesViewModel.onToggleReplies(parentReplyId = null)
-                    },
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                    shape = RoundedCornerShape(24.dp),
-                    colors =
-                        ButtonDefaults.textButtonColors(
-                            containerColor =
-                                com.swentseekr.seekr.ui.theme.Green.copy(alpha = 0.12f),
-                            contentColor = com.swentseekr.seekr.ui.theme.Green)) {
-                      Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Filled.Send,
-                            contentDescription = "Reply",
-                            modifier = Modifier.size(16.dp),
-                            tint = com.swentseekr.seekr.ui.theme.Green)
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "Reply",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = com.swentseekr.seekr.ui.theme.Green)
+                val hasReplies = totalReplies > 0
+                val label =
+                    if (hasReplies) {
+                      if (showReplies) {
+                        "Hide replies"
+                      } else {
+                        "View $totalReplies ${if (totalReplies == 1) "reply" else "replies"}"
                       }
+                    } else {
+                      "No replies yet"
                     }
 
-                if (totalReplies > 0) {
-                  TextButton(
-                      onClick = {
-                        showReplies = !showReplies
-                        repliesViewModel.onToggleReplies(parentReplyId = null)
-                      },
-                      contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                      shape = RoundedCornerShape(24.dp),
-                      colors =
-                          ButtonDefaults.textButtonColors(
-                              contentColor =
-                                  MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.9f))) {
-                        Text(
-                            text =
-                                if (showReplies) "Hide replies"
-                                else
-                                    "View $totalReplies " +
-                                        if (totalReplies == 1) "reply" else "replies",
-                            style = MaterialTheme.typography.labelMedium)
-                      }
-                }
+                val labelModifier =
+                    when {
+                      // Only "Hide replies" collapses
+                      hasReplies && showReplies ->
+                          Modifier.clickable {
+                            showReplies = false
+                            repliesViewModel.onToggleReplies(parentReplyId = null)
+                          }
+                      else -> Modifier
+                    }
+
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                    modifier = labelModifier,
+                )
               }
 
           // --- Replies block below the card body ---
