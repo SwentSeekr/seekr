@@ -4,36 +4,35 @@ import com.swentseekr.seekr.model.hunt.review.HuntReviewReply
 
 /**
  * Identifies the logical target of a reply in a thread.
- *
  * - [RootReview] means "reply to the review itself".
  * - [Reply] means "reply to a specific existing reply".
  */
 sealed class ReplyTarget {
 
-    /**
-     * Target representing the root review card.
-     *
-     * @property reviewId ID of the review being replied to.
-     */
-    data class RootReview(
-        val reviewId: String,
-    ) : ReplyTarget()
+  /**
+   * Target representing the root review card.
+   *
+   * @property reviewId ID of the review being replied to.
+   */
+  data class RootReview(
+      val reviewId: String,
+  ) : ReplyTarget()
 
-    /**
-     * Target representing a reply to another reply.
-     *
-     * @property reviewId ID of the review the whole thread belongs to.
-     * @property parentReplyId ID of the reply this new reply will be attached to.
-     */
-    data class Reply(
-        val reviewId: String,
-        val parentReplyId: String,
-    ) : ReplyTarget()
+  /**
+   * Target representing a reply to another reply.
+   *
+   * @property reviewId ID of the review the whole thread belongs to.
+   * @property parentReplyId ID of the reply this new reply will be attached to.
+   */
+  data class Reply(
+      val reviewId: String,
+      val parentReplyId: String,
+  ) : ReplyTarget()
 }
 
 /**
- * UI-ready representation of a reply node inside a threaded discussion.
- * This is what the card/replies section will render.
+ * UI-ready representation of a reply node inside a threaded discussion. This is what the
+ * card/replies section will render.
  */
 data class ReplyNodeUiState(
     /** Underlying domain model for this reply. */
@@ -50,10 +49,7 @@ data class ReplyNodeUiState(
     val totalChildrenCount: Int,
 )
 
-/**
- * UI state for the replies section of a single review card.
- * This is scoped to one review.
- */
+/** UI state for the replies section of a single review card. This is scoped to one review. */
 data class ReviewRepliesUiState(
     /** ID of the review whose thread is being represented. */
     val reviewId: String,
@@ -66,8 +62,8 @@ data class ReviewRepliesUiState(
     /** Current text in the inline composer for the root review. */
     val rootReplyText: String = "",
     /**
-     * Map from parent reply ID to current composer text for that reply.
-     * This drives the inline reply fields under each reply.
+     * Map from parent reply ID to current composer text for that reply. This drives the inline
+     * reply fields under each reply.
      */
     val childReplyTexts: Map<String, String> = emptyMap(),
     /** Optional error message to briefly show near the replies section. */
