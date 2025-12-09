@@ -221,7 +221,7 @@ private fun ReplyItem(
       Surface(
           modifier = Modifier.weight(1f),
           shape = RoundedCornerShape(12.dp),
-          color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+          color = MaterialTheme.colorScheme.onPrimary,
           tonalElevation = 0.dp) {
             Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
               // Header: author + timestamp + delete
