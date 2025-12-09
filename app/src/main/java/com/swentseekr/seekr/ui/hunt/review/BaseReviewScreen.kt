@@ -167,7 +167,10 @@ fun BaseReviewScreen(
                   modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),
                   shape = RoundedCornerShape(UICons.CardCornerRadius),
                   colors =
-                      CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary),
+                      CardDefaults.cardColors(
+                          containerColor =
+                              MaterialTheme.colorScheme.surfaceVariant.copy(
+                                  alpha = UICons.ChangeAlphaMedium)),
                   elevation =
                       CardDefaults.cardElevation(defaultElevation = UICons.CardLittleElevation)) {
                     Column(
@@ -225,12 +228,11 @@ fun BaseReviewScreen(
                   shape = RoundedCornerShape(UICons.CommentFieldCornerRadius),
                   colors =
                       OutlinedTextFieldDefaults.colors(
-                          unfocusedBorderColor =
-                              MaterialTheme.colorScheme.outline.copy(
-                                  alpha = UICons.ChangeAlphaMedium),
                           focusedBorderColor = MaterialTheme.colorScheme.primary,
-                          unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                          focusedContainerColor = MaterialTheme.colorScheme.surface))
+                          unfocusedBorderColor =
+                              MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                          focusedContainerColor = MaterialTheme.colorScheme.surface,
+                          unfocusedContainerColor = MaterialTheme.colorScheme.surface))
 
               FilledTonalButton(
                   onClick = onAddPhotos,
