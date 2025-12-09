@@ -2,42 +2,13 @@ package com.swentseekr.seekr.ui.hunt.review.replies
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Send
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,14 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
-import com.swentseekr.seekr.ui.theme.Green
 
-/**
- * Renders the entire replies block below a review card:
- * - A "See replies" / "Hide replies" line when there are replies.
- * - Inline composer to reply directly to the review.
- * - Visible replies list with nested indentation.
- */
+/** Reddit-style replies section with improved visual hierarchy and polish */
 @Composable
 fun ReviewRepliesSection(
     state: ReviewRepliesUiState,
@@ -69,102 +34,82 @@ fun ReviewRepliesSection(
 ) {
   var rootComposerExpanded by remember { mutableStateOf(false) }
 
-  Column(modifier = modifier.fillMaxWidth().padding(top = 12.dp)) {
-    // Header with reply count (only show when collapsed)
+  Column(modifier = modifier.fillMaxWidth()) {
+
+    // Elegant header with reply count
     if (!state.isRootExpanded) {
-      ReviewRepliesHeader(
-          totalReplyCount = state.totalReplyCount,
-          isExpanded = state.isRootExpanded,
-          onToggleRootReplies = onToggleRootReplies,
-      )
+      Surface(
+          modifier = Modifier.fillMaxWidth().clickable { onToggleRootReplies() },
+          color = Color.Transparent) {
+            Row(
+                modifier = Modifier.padding(vertical = 12.dp, horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                  Icon(
+                      imageVector = Icons.Default.Send,
+                      contentDescription = null,
+                      tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                      modifier = Modifier.size(20.dp))
+                  Spacer(modifier = Modifier.width(10.dp))
+                  Text(
+                      text =
+                          when {
+                            state.totalReplyCount > 0 ->
+                                "${state.totalReplyCount} ${if (state.totalReplyCount == 1) "reply" else "replies"}"
+                            else -> "Be the first to reply"
+                          },
+                      style = MaterialTheme.typography.bodyMedium,
+                      fontWeight = FontWeight.Medium,
+                      color = MaterialTheme.colorScheme.primary)
+                }
+          }
     }
 
-    // Show composer and replies when expanded
+    // Expanded state with composer and replies
     if (state.isRootExpanded) {
-      Spacer(modifier = Modifier.height(8.dp))
-
-      // Root reply composer
-      ModernReplyComposer(
-          text = state.rootReplyText,
-          isSending = state.isSendingReply,
-          placeholder = "Add a reply...",
-          onTextChanged = onRootReplyTextChanged,
-          onSend = onSendRootReply,
-          isExpanded = rootComposerExpanded,
-          onExpandChange = { rootComposerExpanded = it })
-
-      // Error message
-      state.errorMessage?.let { msg ->
+      Column(modifier = Modifier.fillMaxWidth()) {
         Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = msg,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.error,
-            modifier = Modifier.padding(horizontal = 8.dp))
-      }
 
-      // Replies list
-      if (state.replies.isNotEmpty()) {
-        Spacer(modifier = Modifier.height(12.dp))
-        RepliesList(
-            items = state.replies,
-            state = state,
-            onReplyAction = onReplyAction,
-            onToggleReplyThread = onToggleReplyThread,
-            onReplyTextChanged = onReplyTextChanged,
-            onSendReply = onSendReply,
-            onDeleteReply = onDeleteReply,
-        )
+        // Root composer
+        RedditStyleComposer(
+            text = state.rootReplyText,
+            isSending = state.isSendingReply,
+            placeholder = "What are your thoughts?",
+            onTextChanged = onRootReplyTextChanged,
+            onSend = onSendRootReply,
+            isExpanded = rootComposerExpanded,
+            onExpandChange = { rootComposerExpanded = it })
+
+        // Error message
+        state.errorMessage?.let { msg ->
+          Spacer(modifier = Modifier.height(8.dp))
+          Text(
+              text = msg,
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.error,
+              modifier = Modifier.padding(horizontal = 12.dp))
+        }
+
+        // Replies thread
+        if (state.replies.isNotEmpty()) {
+          Spacer(modifier = Modifier.height(16.dp))
+          RedditThreadList(
+              items = state.replies,
+              state = state,
+              onReplyAction = onReplyAction,
+              onToggleReplyThread = onToggleReplyThread,
+              onReplyTextChanged = onReplyTextChanged,
+              onSendReply = onSendReply,
+              onDeleteReply = onDeleteReply,
+          )
+        }
       }
     }
   }
 }
-/**
- * Header row shown just under the review, combining:
- * - "See X replies" / "Hide replies" text if there are replies.
- * - A subtle "No replies yet" label when there are none.
- */
-@Composable
-private fun ReviewRepliesHeader(
-    totalReplyCount: Int,
-    isExpanded: Boolean,
-    onToggleRootReplies: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-  Surface(
-      modifier = modifier.clickable { onToggleRootReplies() }.fillMaxWidth(),
-      color = Color.Transparent) {
-        Row(
-            modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically) {
-              Icon(
-                  imageVector =
-                      if (totalReplyCount > 0) Icons.Filled.KeyboardArrowDown
-                      else Icons.Filled.Send,
-                  contentDescription = null,
-                  tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                  modifier = Modifier.size(20.dp))
-              Spacer(modifier = Modifier.width(6.dp))
-              Text(
-                  text =
-                      if (totalReplyCount > 0) {
-                        "$totalReplyCount ${if (totalReplyCount == 1) "reply" else "replies"}"
-                      } else {
-                        "No replies yet – be the first"
-                      },
-                  style = MaterialTheme.typography.bodyMedium,
-                  color = MaterialTheme.colorScheme.onSurfaceVariant,
-                  fontWeight = if (totalReplyCount > 0) FontWeight.Medium else FontWeight.Normal)
-            }
-      }
-}
 
-/**
- * Shows all currently visible replies as a vertical list. The indentation, nested "See replies" and
- * inline composers are handled at the item level.
- */
+/** Reddit-style thread list with clean vertical lines */
 @Composable
-private fun RepliesList(
+private fun RedditThreadList(
     items: List<ReplyNodeUiState>,
     state: ReviewRepliesUiState,
     onReplyAction: (ReplyTarget.Reply) -> Unit,
@@ -174,11 +119,12 @@ private fun RepliesList(
     onDeleteReply: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-  Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-    items.forEach { node ->
-      ReplyItem(
+  Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(0.dp)) {
+    items.forEachIndexed { index, node ->
+      RedditReplyItem(
           node = node,
           replyText = state.childReplyTexts[node.reply.replyId],
+          isLastInThread = index == items.lastIndex,
           onReplyAction = onReplyAction,
           onToggleReplyThread = { onToggleReplyThread(node.reply.replyId) },
           onReplyTextChanged = { newText ->
@@ -197,11 +143,12 @@ private fun RepliesList(
   }
 }
 
-/** Single reply item row, Reddit-style. */
+/** Individual Reddit-style reply with elegant thread lines */
 @Composable
-private fun ReplyItem(
+private fun RedditReplyItem(
     node: ReplyNodeUiState,
     replyText: String?,
+    isLastInThread: Boolean,
     onReplyAction: (ReplyTarget.Reply) -> Unit,
     onToggleReplyThread: () -> Unit,
     onReplyTextChanged: (String) -> Unit,
@@ -209,176 +156,173 @@ private fun ReplyItem(
     onDeleteReply: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-  val depthIndent = (node.depth.coerceAtLeast(0)) * 16.dp
   val reply = node.reply
   var composerExpanded by remember { mutableStateOf(false) }
+  val depthIndent = node.depth * 20.dp
 
-  Column(
+  Row(
       modifier = modifier.fillMaxWidth().padding(start = depthIndent),
-      verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
-          // Thread line
-          if (node.depth > 0) {
-            Box(
-                modifier =
-                    Modifier.width(2.dp)
-                        .fillMaxHeight()
-                        .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)))
-            Spacer(modifier = Modifier.width(8.dp))
-          }
+      horizontalArrangement = Arrangement.Start) {
+        // Thread line indicator
+        if (node.depth > 0) {
+          Box(
+              modifier =
+                  Modifier.width(2.dp)
+                      .height(IntrinsicSize.Min)
+                      .background(
+                          MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+                          shape = RoundedCornerShape(1.dp)))
+          Spacer(modifier = Modifier.width(12.dp))
+        }
 
-          // Reply content bubble
-          Surface(
-              modifier = Modifier.weight(1f),
-              shape = RoundedCornerShape(12.dp),
-              color = MaterialTheme.colorScheme.surface,
-              tonalElevation = 0.dp) {
-                Column(
-                    modifier =
-                        Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
-                      // Header: avatar + author + timestamp + delete
-                      Row(
-                          modifier = Modifier.fillMaxWidth(),
-                          verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier =
-                                    Modifier.size(24.dp)
-                                        .clip(CircleShape)
-                                        .background(
-                                            if (node.isMine) MaterialTheme.colorScheme.primary
-                                            else MaterialTheme.colorScheme.tertiary),
-                                contentAlignment = Alignment.Center) {
-                                  Text(
-                                      text =
-                                          if (node.isMine) "Y"
-                                          else reply.authorId.take(1).uppercase(),
-                                      style = MaterialTheme.typography.labelSmall,
-                                      fontWeight = FontWeight.Bold,
-                                      color = Color.White,
-                                      fontSize = 11.sp)
-                                }
-
-                            Spacer(modifier = Modifier.width(8.dp))
-
+        Column(modifier = Modifier.weight(1f).padding(bottom = 12.dp)) {
+          // Reply content
+          Column(
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .background(
+                          MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(8.dp))
+                      .padding(12.dp)) {
+                // Header: avatar + author + timestamp + actions
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically) {
+                      // Avatar
+                      Box(
+                          modifier =
+                              Modifier.size(28.dp)
+                                  .clip(CircleShape)
+                                  .background(
+                                      if (node.isMine) MaterialTheme.colorScheme.primary
+                                      else MaterialTheme.colorScheme.surfaceVariant),
+                          contentAlignment = Alignment.Center) {
                             Text(
-                                text = if (node.isMine) "You" else reply.authorId.take(8),
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurface)
-
-                            Text(
-                                text = " • just now",
+                                text = if (node.isMine) "Y" else reply.authorId.take(1).uppercase(),
                                 style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
                                 color =
-                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
-
-                            Spacer(modifier = Modifier.weight(1f))
-
-                            if (node.isMine && !reply.isDeleted) {
-                              IconButton(onClick = onDeleteReply, modifier = Modifier.size(28.dp)) {
-                                Icon(
-                                    imageVector = Icons.Filled.Delete,
-                                    contentDescription = "Delete",
-                                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.85f),
-                                    modifier = Modifier.size(18.dp))
-                              }
-                            }
+                                    if (node.isMine) Color.White
+                                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 12.sp)
                           }
 
-                      Spacer(modifier = Modifier.height(4.dp))
+                      Spacer(modifier = Modifier.width(10.dp))
 
-                      // Comment text
+                      // Author name
                       Text(
-                          text = if (reply.isDeleted) "[deleted]" else reply.comment,
+                          text = if (node.isMine) "You" else "u/${reply.authorId.take(10)}",
                           style = MaterialTheme.typography.bodyMedium,
-                          color =
-                              if (reply.isDeleted) {
-                                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                              } else {
-                                MaterialTheme.colorScheme.onSurface
-                              },
-                          lineHeight = 20.sp)
+                          fontWeight = FontWeight.SemiBold,
+                          color = MaterialTheme.colorScheme.onSurface)
 
-                      Spacer(modifier = Modifier.height(4.dp))
+                      Text(
+                          text = " · just now",
+                          style = MaterialTheme.typography.bodySmall,
+                          color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
 
-                      // Actions
-                      Row(
-                          modifier = Modifier.fillMaxWidth(),
-                          verticalAlignment = Alignment.CenterVertically,
-                          horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            TextButton(
-                                onClick = {
-                                  composerExpanded = !composerExpanded
-                                  onReplyAction(
-                                      ReplyTarget.Reply(
-                                          reviewId = reply.reviewId, parentReplyId = reply.replyId))
-                                },
-                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
-                                modifier = Modifier.height(28.dp),
-                                colors =
-                                    ButtonDefaults.textButtonColors(
-                                        contentColor = com.swentseekr.seekr.ui.theme.Green)) {
-                                  Icon(
-                                      imageVector = Icons.Filled.Send,
-                                      contentDescription = "Reply",
-                                      modifier = Modifier.size(16.dp),
-                                      tint = com.swentseekr.seekr.ui.theme.Green)
-                                  Spacer(modifier = Modifier.width(4.dp))
-                                  Text(
-                                      text = "Reply",
-                                      style = MaterialTheme.typography.labelMedium,
-                                      color = com.swentseekr.seekr.ui.theme.Green)
-                                }
+                      Spacer(modifier = Modifier.weight(1f))
 
-                            if (node.totalChildrenCount > 0) {
-                              TextButton(
-                                  onClick = onToggleReplyThread,
-                                  contentPadding =
-                                      PaddingValues(horizontal = 8.dp, vertical = 2.dp),
-                                  modifier = Modifier.height(28.dp),
-                                  colors =
-                                      ButtonDefaults.textButtonColors(
-                                          contentColor =
-                                              MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                                  alpha = 0.9f))) {
-                                    Icon(
-                                        imageVector =
-                                            if (node.isExpanded) Icons.Filled.KeyboardArrowUp
-                                            else Icons.Filled.KeyboardArrowDown,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(16.dp))
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text =
-                                            if (node.isExpanded) "Hide"
-                                            else
-                                                "${node.totalChildrenCount} ${if (node.totalChildrenCount == 1) "reply" else "replies"}",
-                                        style = MaterialTheme.typography.labelMedium)
-                                  }
-                            }
-                          }
-
-                      // Inline composer
-                      if (node.isComposerOpen && !reply.isDeleted) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        ModernReplyComposer(
-                            text = replyText.orEmpty(),
-                            isSending = false,
-                            placeholder = "Write a reply...",
-                            onTextChanged = onReplyTextChanged,
-                            onSend = onSendReply,
-                            isExpanded = composerExpanded,
-                            onExpandChange = { composerExpanded = it },
-                            compact = true)
+                      // Delete button for own replies
+                      if (node.isMine && !reply.isDeleted) {
+                        IconButton(onClick = onDeleteReply, modifier = Modifier.size(32.dp)) {
+                          Icon(
+                              imageVector = Icons.Default.Delete,
+                              contentDescription = "Delete",
+                              tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
+                              modifier = Modifier.size(18.dp))
+                        }
                       }
                     }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Comment text
+                Text(
+                    text = if (reply.isDeleted) "[deleted]" else reply.comment,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color =
+                        if (reply.isDeleted)
+                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        else MaterialTheme.colorScheme.onSurface,
+                    lineHeight = 22.sp)
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Action buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically) {
+                      // Reply button
+                      TextButton(
+                          onClick = {
+                            composerExpanded = !composerExpanded
+                            onReplyAction(
+                                ReplyTarget.Reply(
+                                    reviewId = reply.reviewId, parentReplyId = reply.replyId))
+                          },
+                          contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                          colors =
+                              ButtonDefaults.textButtonColors(
+                                  contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                            Icon(
+                                imageVector = Icons.Default.Send,
+                                contentDescription = "Reply",
+                                modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Reply",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Medium)
+                          }
+
+                      // Show/hide replies button
+                      if (node.totalChildrenCount > 0) {
+                        TextButton(
+                            onClick = onToggleReplyThread,
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                            colors =
+                                ButtonDefaults.textButtonColors(
+                                    contentColor = MaterialTheme.colorScheme.primary)) {
+                              Icon(
+                                  imageVector =
+                                      if (node.isExpanded) Icons.Default.KeyboardArrowUp
+                                      else Icons.Default.KeyboardArrowDown,
+                                  contentDescription = null,
+                                  modifier = Modifier.size(16.dp))
+                              Spacer(modifier = Modifier.width(6.dp))
+                              Text(
+                                  text =
+                                      if (node.isExpanded) "Hide"
+                                      else
+                                          "${node.totalChildrenCount} ${if (node.totalChildrenCount == 1) "reply" else "replies"}",
+                                  style = MaterialTheme.typography.labelLarge,
+                                  fontWeight = FontWeight.Medium)
+                            }
+                      }
+                    }
+
+                // Inline composer
+                if (node.isComposerOpen && !reply.isDeleted) {
+                  Spacer(modifier = Modifier.height(8.dp))
+                  RedditStyleComposer(
+                      text = replyText.orEmpty(),
+                      isSending = false,
+                      placeholder = "Write a reply...",
+                      onTextChanged = onReplyTextChanged,
+                      onSend = onSendReply,
+                      isExpanded = composerExpanded,
+                      onExpandChange = { composerExpanded = it },
+                      compact = true)
+                }
               }
         }
       }
 }
-/** Modern, compact reply composer with send button. */
+
+/** Reddit-style composer with clean design */
 @Composable
-private fun ModernReplyComposer(
+private fun RedditStyleComposer(
     text: String,
     isSending: Boolean,
     placeholder: String,
@@ -389,84 +333,106 @@ private fun ModernReplyComposer(
     compact: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
-  if (!isExpanded && onExpandChange != null) {
-    // Collapsed state - just show Reply button
-    TextButton(
+  // Collapsed state - show button
+  if (!compact && !isExpanded && onExpandChange != null) {
+    OutlinedButton(
         onClick = { onExpandChange(true) },
-        modifier = modifier.fillMaxWidth().padding(horizontal = if (compact) 0.dp else 4.dp),
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-        shape = RoundedCornerShape(24.dp),
+        modifier = modifier.fillMaxWidth().padding(horizontal = 4.dp).height(44.dp),
         colors =
-            ButtonDefaults.textButtonColors(
-                containerColor = Green.copy(alpha = 0.10f), contentColor = Green)) {
+            ButtonDefaults.outlinedButtonColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
+        border =
+            ButtonDefaults.outlinedButtonBorder.copy(
+                width = 1.dp,
+                brush =
+                    androidx.compose.ui.graphics.SolidColor(
+                        MaterialTheme.colorScheme.outlineVariant)),
+        shape = RoundedCornerShape(24.dp)) {
           Row(
-              verticalAlignment = Alignment.CenterVertically,
+              modifier = Modifier.fillMaxWidth(),
               horizontalArrangement = Arrangement.Start,
-              modifier = Modifier.fillMaxWidth()) {
-                Icon(
-                    imageVector = Icons.Filled.Send,
-                    contentDescription = "Reply",
-                    modifier = Modifier.size(18.dp),
-                    tint = Green)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Reply", style = MaterialTheme.typography.bodyMedium, color = Green)
+              verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = placeholder,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
               }
         }
   } else {
-    // Expanded state - show text field and send button
-    Row(
+    // Expanded state - show input field
+    Surface(
         modifier = modifier.fillMaxWidth().padding(horizontal = if (compact) 0.dp else 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-          OutlinedTextField(
-              value = text,
-              onValueChange = onTextChanged,
-              modifier = Modifier.weight(1f).heightIn(min = 44.dp),
-              placeholder = {
-                Text(text = placeholder, style = MaterialTheme.typography.bodyMedium)
-              },
-              singleLine = true,
-              shape = RoundedCornerShape(24.dp),
-              textStyle = MaterialTheme.typography.bodyMedium,
-              colors =
-                  OutlinedTextFieldDefaults.colors(
-                      focusedBorderColor = MaterialTheme.colorScheme.primary,
-                      unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                      focusedContainerColor = MaterialTheme.colorScheme.surface,
-                      unfocusedContainerColor = MaterialTheme.colorScheme.surface))
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+        border =
+            ButtonDefaults.outlinedButtonBorder.copy(
+                width = 1.dp,
+                brush =
+                    androidx.compose.ui.graphics.SolidColor(
+                        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)))) {
+          Row(
+              modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = onTextChanged,
+                    modifier = Modifier.weight(1f),
+                    placeholder = {
+                      Text(
+                          text = placeholder,
+                          style = MaterialTheme.typography.bodyMedium,
+                          color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                    },
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodyMedium,
+                    colors =
+                        OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color.Transparent,
+                            unfocusedBorderColor = Color.Transparent,
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent))
 
-          if (isSending) {
-            CircularProgressIndicator(modifier = Modifier.size(28.dp), strokeWidth = 2.dp)
-          } else {
-            IconButton(
-                onClick = {
-                  if (text.isNotBlank()) {
-                    onSend()
-                    onExpandChange?.invoke(false)
-                  }
-                },
-                enabled = text.isNotBlank(),
-                modifier = Modifier.size(40.dp)) {
-                  Surface(
-                      shape = CircleShape,
-                      color =
-                          if (text.isNotBlank()) Green
-                          else MaterialTheme.colorScheme.surfaceVariant,
-                      modifier = Modifier.size(36.dp)) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.fillMaxSize()) {
-                              Icon(
-                                  imageVector = Icons.Filled.Send,
-                                  contentDescription = "Send",
-                                  tint =
-                                      if (text.isNotBlank()) MaterialTheme.colorScheme.onPrimary
-                                      else MaterialTheme.colorScheme.onSurfaceVariant,
-                                  modifier = Modifier.size(18.dp))
+                if (isSending) {
+                  CircularProgressIndicator(
+                      modifier = Modifier.size(32.dp),
+                      strokeWidth = 2.dp,
+                      color = MaterialTheme.colorScheme.primary)
+                } else {
+                  val isActive = text.isNotBlank()
+                  IconButton(
+                      onClick = {
+                        if (isActive) {
+                          onSend()
+                          onExpandChange?.invoke(false)
+                        }
+                      },
+                      enabled = isActive,
+                      modifier = Modifier.size(40.dp)) {
+                        Surface(
+                            shape = CircleShape,
+                            color =
+                                if (isActive) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.surfaceVariant,
+                            modifier = Modifier.size(36.dp)) {
+                              Box(
+                                  contentAlignment = Alignment.Center,
+                                  modifier = Modifier.fillMaxSize()) {
+                                    Icon(
+                                        imageVector = Icons.Default.Send,
+                                        contentDescription = "Send",
+                                        tint =
+                                            if (isActive) MaterialTheme.colorScheme.onPrimary
+                                            else
+                                                MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                                    alpha = 0.5f),
+                                        modifier = Modifier.size(18.dp))
+                                  }
                             }
                       }
                 }
-          }
+              }
         }
   }
 }
