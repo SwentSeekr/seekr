@@ -17,7 +17,7 @@ interface HuntReviewReplyRepository {
   /** Overwrites an existing reply with new data (for edits). */
   suspend fun updateReply(replyId: String, newReply: HuntReviewReply)
 
-  /** Deletes a reply (hard delete). You can layer soft-delete in ViewModel/model if needed. */
+  /** Deletes a reply (hard delete). */
   suspend fun deleteReply(replyId: String)
 
   /**
