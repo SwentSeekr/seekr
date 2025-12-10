@@ -90,11 +90,11 @@ open class HuntCardViewModel(
     _uiState.value = _uiState.value.copy(errorMsg = error)
   }
 
-    /**
-     * Loads the profile of the author of a hunt and updates [authorProfile].
-     *
-     * @param userID The ID of the author whose profile is being fetched.
-     */
+  /**
+   * Loads the profile of the author of a hunt and updates [authorProfile].
+   *
+   * @param userID The ID of the author whose profile is being fetched.
+   */
   open fun loadAuthorProfile(userID: String) {
     viewModelScope.launch {
       try {
@@ -310,12 +310,12 @@ open class HuntCardViewModel(
     }
   }
 
-    /**
-     * Updates a hunt with new data.
-     *
-     * @param huntID The ID of the hunt to update.
-     * @param newValue The updated Hunt object containing new values.
-     */
+  /**
+   * Updates a hunt with new data.
+   *
+   * @param huntID The ID of the hunt to update.
+   * @param newValue The updated Hunt object containing new values.
+   */
   fun editHunt(huntID: String, newValue: Hunt) {
     viewModelScope.launch {
       try {
@@ -329,15 +329,15 @@ open class HuntCardViewModel(
       }
     }
   }
-    /**
-     * Toggles the like state of a hunt.
-     *
-     * Updates:
-     * - Local cache (`likedHuntsCache`)
-     * - Firebase profile repository
-     *
-     * @param huntID The ID of the hunt to like or unlike.
-     */
+  /**
+   * Toggles the like state of a hunt.
+   *
+   * Updates:
+   * - Local cache (`likedHuntsCache`)
+   * - Firebase profile repository
+   *
+   * @param huntID The ID of the hunt to like or unlike.
+   */
   open fun onLikeClick(huntID: String) {
     val currentUserId = _uiState.value.currentUserId ?: return
     val currentlyLiked = _likedHuntsCache.value.contains(huntID)
@@ -364,14 +364,14 @@ open class HuntCardViewModel(
     }
   }
 
-    /**
-     * Initializes the UI state for the Hunt Card screen.
-     *
-     * Used when loading a hunt inside an existing user session.
-     *
-     * @param userId The ID of the current user.
-     * @param hunt The Hunt to display.
-     */
+  /**
+   * Initializes the UI state for the Hunt Card screen.
+   *
+   * Used when loading a hunt inside an existing user session.
+   *
+   * @param userId The ID of the current user.
+   * @param hunt The Hunt to display.
+   */
   fun initialize(userId: String, hunt: Hunt) {
     viewModelScope.launch {
       try {
@@ -385,13 +385,13 @@ open class HuntCardViewModel(
     }
   }
 
-    /**
-     * Marks the current hunt as "achieved" (completed) for the current user.
-     *
-     * Updates:
-     * - The Firebase profile repository
-     * - UI state
-     */
+  /**
+   * Marks the current hunt as "achieved" (completed) for the current user.
+   *
+   * Updates:
+   * - The Firebase profile repository
+   * - UI state
+   */
   fun onDoneClick() {
     val currentHuntUiState = _uiState.value
     val currentUserId = _uiState.value.currentUserId
