@@ -41,19 +41,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 
 /**
- * Displays a screen allowing the user to review a list of images with a paging UI
- * * and optional full-screen viewing.
- *
- * @param photoUrls the list of image URLs to display in this screen pager.
- * @param onGoBack callback when the user cancels or navigates back.
- * @param modifier a modifier
+ * Displays a screen allowing the user to review a list of images with a paging UI and optional
+ * full-screen viewing.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -131,10 +126,10 @@ fun ReviewImagesScreen(
                         }
                   }
 
-              Spacer(modifier = Modifier.height(12.dp))
+              Spacer(modifier = Modifier.height(ReviewImagesScreenConstants.SpacerHeight))
 
               Text(
-                  text = "$index/${photoUrls.size}",
+                  text = "${index}/${photoUrls.size}",
                   fontSize = AddReviewScreenDefaults.TitleFontSize,
                   fontWeight = FontWeight.SemiBold,
                   style = MaterialTheme.typography.titleMedium,
@@ -150,13 +145,7 @@ fun ReviewImagesScreen(
   }
 }
 
-/**
- * Displays a full-screen dialog that allows the user to swipe through a collection of images.
- *
- * @param images the list of image URLs to display in the full-screen pager.
- * @param startIndex the index of the image that should be shown first when the full-screen opens.
- * @param onClose callback invoked when the user dismisses the dialog (by tipping on the screen)
- */
+/** Displays a full-screen dialog that allows the user to swipe through a collection of images. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FullScreenImageViewer(
@@ -165,7 +154,10 @@ fun FullScreenImageViewer(
     onClose: () -> Unit,
 ) {
   Dialog(
-      onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+      onDismissRequest = onClose,
+      properties =
+          DialogProperties(
+              usePlatformDefaultWidth = ReviewImagesScreenConstants.UsePlatformDefaultWidth)) {
         Box(
             modifier =
                 Modifier.fillMaxSize()
@@ -192,7 +184,7 @@ fun FullScreenImageViewer(
                   }
 
               // Top overlay with close + index
-              val currentIndex = pagerState.currentPage + 1
+              val currentIndex = pagerState.currentPage + ReviewImagesScreenConstants.One
 
               Box(
                   modifier =
@@ -201,8 +193,15 @@ fun FullScreenImageViewer(
                           .background(
                               Brush.verticalGradient(
                                   colors =
-                                      listOf(Color.Black.copy(alpha = 0.6f), Color.Transparent)))
-                          .padding(horizontal = 8.dp, vertical = 8.dp)) {
+                                      listOf(
+                                          Color.Black.copy(
+                                              alpha =
+                                                  ReviewImagesScreenConstants
+                                                      .FullScreenOverlayStartAlpha),
+                                          Color.Transparent)))
+                          .padding(
+                              horizontal = ReviewImagesScreenConstants.FullScreenPadding,
+                              vertical = ReviewImagesScreenConstants.FullScreenPadding)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -210,12 +209,13 @@ fun FullScreenImageViewer(
                           IconButton(onClick = onClose) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Close",
+                                contentDescription =
+                                    ReviewImagesScreenConstantsStrings.CloseContentDescription,
                                 tint = Color.White)
                           }
 
                           Text(
-                              text = "$currentIndex/${images.size}",
+                              text = "${currentIndex}/${images.size}",
                               style = MaterialTheme.typography.bodyMedium,
                               color = Color.White)
                         }
