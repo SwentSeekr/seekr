@@ -135,6 +135,7 @@ data class ImageCallbacks(
     val onSelectOtherImages: (List<Uri>) -> Unit,
     val onRemoveOtherImage: (Uri) -> Unit,
     val onRemoveExistingImage: (String) -> Unit,
+    val onRemoveMainImage: () -> Unit
 )
 
 /**
@@ -617,7 +618,9 @@ private fun ImagesSection(
 
               MainImagePickerButton(onClick = { imagePickerLauncher.launch("image/*") })
 
-              MainImagePreview(imageUrl = uiState.mainImageUrl)
+              MainImagePreview(
+                  imageUrl = uiState.mainImageUrl,
+                  onDelete = { imageCallbacks.onRemoveMainImage() })
 
               AdditionalImagesPickerButton(
                   onClick = { multipleImagesPickerLauncher.launch("image/*") })
@@ -664,18 +667,33 @@ private fun MainImagePickerButton(
 @Composable
 private fun MainImagePreview(
     imageUrl: String?,
+    onDelete: () -> Unit,
 ) {
   AnimatedVisibility(visible = !imageUrl.isNullOrBlank()) {
-    AsyncImage(
-        model = imageUrl,
-        contentDescription = BaseHuntFieldsStrings.CONTENT_DESC_SELECTED_IMAGE,
-        modifier =
-            Modifier.fillMaxWidth()
-                .height(UICons.ImageHeight)
-                .clip(RoundedCornerShape(UICons.ImageCornerRadius))
-                .shadow(4.dp, RoundedCornerShape(UICons.ImageCornerRadius)),
-        placeholder = painterResource(R.drawable.empty_image),
-        error = painterResource(R.drawable.empty_image))
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+      AsyncImage(
+          model = imageUrl,
+          contentDescription = BaseHuntFieldsStrings.CONTENT_DESC_SELECTED_IMAGE,
+          modifier =
+              Modifier.weight(1f)
+                  .height(UICons.ImageHeight)
+                  .clip(RoundedCornerShape(UICons.ImageCornerRadius))
+                  .shadow(4.dp, RoundedCornerShape(UICons.ImageCornerRadius)),
+          placeholder = painterResource(R.drawable.empty_image),
+          error = painterResource(R.drawable.empty_image))
+
+      Spacer(modifier = Modifier.width(12.dp))
+
+      TextButton(onClick = onDelete, modifier = Modifier.testTag("delete_main_image")) {
+        Icon(
+            painter = painterResource(R.drawable.ic_delete),
+            contentDescription = "Delete main image",
+            tint = MaterialTheme.colorScheme.error,
+            modifier = Modifier.size(UICons.IconSize))
+        Spacer(modifier = Modifier.width(4.dp))
+        Text("Remove", color = MaterialTheme.colorScheme.error)
+      }
+    }
   }
 }
 
