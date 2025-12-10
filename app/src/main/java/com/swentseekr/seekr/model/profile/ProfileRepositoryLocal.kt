@@ -53,6 +53,10 @@ open class ProfileRepositoryLocal : ProfileRepository {
         String.format(ProfileRepositoryStrings.PROFILE_NOT_FOUND, userId))
   }
 
+  override suspend fun getAllPseudonyms(): List<String> {
+    return emptyList()
+  }
+
   /**
    * Updates an existing profile.
    *

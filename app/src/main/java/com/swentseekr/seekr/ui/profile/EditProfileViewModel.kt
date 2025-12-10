@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.swentseekr.seekr.model.profile.ProfileRepository
 import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
+import com.swentseekr.seekr.model.profile.ProfileUtils
+import com.swentseekr.seekr.ui.auth.OnboardingFlowStrings
 import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.MAX_BIO_LENGTH
 import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.MAX_PSEUDONYM_LENGTH
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,6 +42,8 @@ data class EditProfileUIState(
     val success: Boolean = false,
     val profilePictureUri: Uri? = null, // picked from gallery/camera
     val profilePictureUrl: String = EditProfileStrings.EMPTY_STRING, // from Firestore
+    val pseudonymError: String? = null,
+    val isCheckingPseudonym: Boolean = false,
     val isLoading: Boolean = false
 )
 
@@ -108,6 +112,47 @@ class EditProfileViewModel(
     val newState = _uiState.value.copy(pseudonym = pseudonym)
     updateChangesFlags(newState)
   }
+
+  /** Verification of Pseudonym **/
+
+  fun validatePseudonym(pseudonym: String) {
+    _uiState.value = _uiState.value.copy(
+      pseudonymError = when {
+        ProfileUtils().isValidPseudonym(pseudonym) -> null
+        else -> OnboardingFlowStrings.ERROR_PSEUDONYM_INVALID
+      }
+    )
+
+    if (_uiState.value.pseudonymError == null && pseudonym.isNotBlank()) {
+      checkPseudonymAvailability(pseudonym)
+    }
+    updatePseudonym(pseudonym)
+  }
+
+  private fun checkPseudonymAvailability(pseudonym: String) {
+    viewModelScope.launch {
+      _uiState.value = _uiState.value.copy(isCheckingPseudonym = true)
+
+      try {
+        val isAvailable = pseudonym == lastSavedFullProfile?.author?.pseudonym || pseudonym !in repository.getAllPseudonyms()
+
+        _uiState.value = _uiState.value.copy(
+          pseudonymError = if (!isAvailable) {
+            OnboardingFlowStrings.ERROR_PSEUDONYM_TAKEN
+          } else {
+            null
+          },
+          isCheckingPseudonym = false
+        )
+      } catch (e: Exception) {
+        _uiState.value = _uiState.value.copy(
+          pseudonymError = null,
+          isCheckingPseudonym = false
+        )
+      }
+    }
+  }
+
 
   /** Update bio and recompute flags */
   fun updateBio(bio: String) {

@@ -34,6 +34,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.swentseekr.seekr.ui.auth.OnboardingFlowDimensions
+import com.swentseekr.seekr.ui.auth.OnboardingFlowStrings
 import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.MAX_BIO_LENGTH
 import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.MAX_PSEUDONYM_LENGTH
 import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.PROFILE_PIC_DEFAULT
@@ -184,7 +186,9 @@ fun EditProfileScreen(
 
   EditProfileContent(
       uiState = uiState,
-      onPseudonymChange = editProfileViewModel::updatePseudonym,
+      onPseudonymChange = editProfileViewModel::validatePseudonym,
+      pseudonymError = uiState.pseudonymError,
+      isCheckingPseudonym = uiState.isCheckingPseudonym,
       onBioChange = editProfileViewModel::updateBio,
       onCancel = {
         editProfileViewModel.cancelChanges()
@@ -215,15 +219,17 @@ fun createImageUri(context: Context): Uri? {
 fun EditProfileContent(
     uiState: EditProfileUIState,
     onPseudonymChange: (String) -> Unit,
+    pseudonymError: String?,
+    isCheckingPseudonym: Boolean,
     onBioChange: (String) -> Unit,
     onCancel: () -> Unit,
     onSave: () -> Unit,
     onProfilePictureChange: () -> Unit,
     profilePictureUri: Uri? = null
 ) {
-  var pseudonymError by remember { mutableStateOf<String?>(null) }
   var bioError by remember { mutableStateOf<String?>(null) }
   var localError by remember { mutableStateOf<String?>(null) }
+  var pseudonym = uiState.pseudonym
 
   val isLoading = uiState.isLoading
 
@@ -286,21 +292,51 @@ fun EditProfileContent(
                   modifier = Modifier.padding(UI_C.PADDING_GIGANTIC),
                   verticalArrangement = Arrangement.spacedBy(UI_C.VERTICAL_ARR_MEDIUM)) {
                     OutlinedTextField(
-                        value = uiState.pseudonym,
-                        onValueChange = { newValue ->
-                          if (!isLoading) {
-                            onPseudonymChange(newValue)
-                            pseudonymError =
-                                when {
-                                  newValue.isBlank() -> ERROR_PSEUDONYM_EMPTY
-                                  newValue.length > MAX_PSEUDONYM_LENGTH -> ERROR_PSEUDONYM_MAX
-                                  else -> null
-                                }
-                          }
+                        value = pseudonym,
+                        onValueChange = {
+                          pseudonym = it
+                          onPseudonymChange(it)
                         },
                         label = { Text(FIELD_LABEL_PSEUDONYM) },
                         enabled = !isLoading,
                         isError = pseudonymError != null,
+                        supportingText = {
+                          when {
+                            isCheckingPseudonym -> {
+                              Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(OnboardingFlowDimensions.SPACING_SMALL)
+                              ) {
+                                CircularProgressIndicator(
+                                  modifier = Modifier.size(OnboardingFlowDimensions.SIZE_MEDIUM),
+                                  strokeWidth = OnboardingFlowDimensions.STROKE_WIDTH
+                                )
+                                Text(
+                                  OnboardingFlowStrings.CHECKING_AVAILABILITY,
+                                  style = MaterialTheme.typography.bodySmall
+                                )
+                              }
+                            }
+                            pseudonymError != null -> {
+                              Text(
+                                pseudonymError,
+                                color = MaterialTheme.colorScheme.error
+                              )
+                            }
+                          }
+                        },
+                        trailingIcon = {
+                          AnimatedVisibility(
+                            visible = isCheckingPseudonym,
+                            enter = fadeIn(),
+                            exit = fadeOut()
+                          ) {
+                            CircularProgressIndicator(
+                              modifier = Modifier.size(OnboardingFlowDimensions.SIZE_LARGE),
+                              strokeWidth = OnboardingFlowDimensions.STROKE_WIDTH
+                            )
+                          }
+                        },
                         modifier =
                             Modifier.fillMaxWidth().testTag(EditProfileTestTags.PSEUDONYM_FIELD),
                         shape = RoundedCornerShape(UI_C.ROUND_CORNER_MID),
@@ -310,16 +346,6 @@ fun EditProfileContent(
                                     MaterialTheme.colorScheme.outline.copy(alpha = UI_C.ALPHA_MID),
                                 focusedBorderColor = MaterialTheme.colorScheme.primary))
 
-                    AnimatedVisibility(
-                        visible = pseudonymError != null,
-                        enter = fadeIn() + scaleIn(),
-                        exit = fadeOut() + scaleOut()) {
-                          Text(
-                              text = pseudonymError ?: "",
-                              color = MaterialTheme.colorScheme.error,
-                              style = MaterialTheme.typography.bodySmall,
-                              modifier = Modifier.padding(start = UI_C.PADDING_SMALL))
-                        }
 
                     OutlinedTextField(
                         value = uiState.bio,

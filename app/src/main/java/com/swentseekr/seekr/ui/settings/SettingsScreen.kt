@@ -50,6 +50,7 @@ fun SettingsScreen(
     onSignedOut: () -> Unit = {},
     onGoBack: () -> Unit = {},
     onEditProfile: () -> Unit = {},
+    onViewTerms : () -> Unit = {},
     credentialManager: CredentialManager = CredentialManager.create(LocalContext.current)
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -91,6 +92,7 @@ fun SettingsScreen(
             onNotificationsChange = { viewModel.onNotificationsToggleRequested(it, context) },
             onPicturesChange = { viewModel.onPicturesToggleRequested(it, context) },
             onLocalisationChange = { viewModel.onLocalisationToggleRequested(it, context) },
+            onViewTerms = onViewTerms
         )
       }
 }
@@ -173,6 +175,7 @@ fun SettingsContent(
     onNotificationsChange: (Boolean) -> Unit = {},
     onPicturesChange: (Boolean) -> Unit = {},
     onLocalisationChange: (Boolean) -> Unit = {},
+    onViewTerms: () -> Unit = {}
 ) {
   Column(
       modifier =
@@ -274,6 +277,7 @@ fun SettingsContent(
           item {
             SettingsArrowItem(
                 title = SettingsScreenStrings.APP_CONDITION_LABEL,
+                onClick = onViewTerms,
                 modifier = Modifier.testTag(SettingsScreenTestTags.APP_CONDITION_BUTTON))
           }
         }

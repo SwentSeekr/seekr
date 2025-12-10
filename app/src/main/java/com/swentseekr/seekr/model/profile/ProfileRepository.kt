@@ -10,6 +10,8 @@ interface ProfileRepository {
 
   suspend fun getProfile(userId: String): Profile?
 
+  suspend fun getAllPseudonyms(): List<String>
+
   suspend fun updateProfile(profile: Profile)
 
   suspend fun getMyHunts(userId: String): List<Hunt>

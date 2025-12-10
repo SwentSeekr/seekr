@@ -166,6 +166,26 @@ class ProfileRepositoryFirestore(
     return defaultProfile
   }
 
+
+  override suspend fun getAllPseudonyms(): List<String> {
+    return try {
+      val snapshot = profilesCollection.get().await()
+
+      snapshot.documents.mapNotNull { doc ->
+        val author = doc.get("author") as? Map<*, *> ?: return@mapNotNull null
+        val pseudonym = author["pseudonym"] as? String
+        pseudonym?.takeIf { it.isNotBlank() }
+      }
+    } catch (e: Exception) {
+      Log.e(
+        ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
+        "Failed to fetch pseudonyms",
+        e
+      )
+      emptyList()
+    }
+  }
+
   private suspend fun createDefaultProfile(userId: String): Profile {
     val defaultProfile =
         Profile(
