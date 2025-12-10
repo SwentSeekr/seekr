@@ -52,7 +52,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.google.android.gms.maps.model.CameraPosition
@@ -158,7 +157,9 @@ fun HuntCardScreen(
             onClick = beginHunt,
             modifier =
                 Modifier.testTag(HuntCardScreenTestTags.BEGIN_BUTTON)
-                    .size(HuntCardScreenDefaults.IconSize32 * 2),
+                    .size(
+                        HuntCardScreenDefaults.IconSize32 *
+                            HuntCardScreenDefaults.BeginButtonSizeMultiplier),
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
             shape = CircleShape) {
@@ -177,61 +178,69 @@ fun HuntCardScreen(
           return@Scaffold
         }
 
-        LazyColumn(modifier = Modifier.padding(innerPadding).testTag("HUNT_CARD_LIST")) {
-          item {
-            ModernHeroImageSection(
-                hunt = hunt,
-                authorName = authorName,
-                huntId = huntId,
-                huntCardViewModel = huntCardViewModel,
-                goProfile = goProfile)
-          }
+        LazyColumn(
+            modifier =
+                Modifier.padding(innerPadding).testTag(HuntCardScreenTestTags.HUNT_CARD_LIST)) {
+              item {
+                ModernHeroImageSection(
+                    hunt = hunt,
+                    authorName = authorName,
+                    huntId = huntId,
+                    huntCardViewModel = huntCardViewModel,
+                    goProfile = goProfile)
+              }
 
-          item { ModernStatsSection(hunt = hunt) }
-          item { ModernDescriptionSection(description = hunt.description) }
-          item { ModernMapSection(hunt = hunt) }
+              item { ModernStatsSection(hunt = hunt) }
+              item { ModernDescriptionSection(description = hunt.description) }
+              item { ModernMapSection(hunt = hunt) }
 
-          if (isAuthor || canUserAddReview) {
-            item {
-              ModernActionButtons(
-                  isCurrentId = isAuthor, buttonIcon = actionIcon, onActionClick = actionButton)
+              if (isAuthor || canUserAddReview) {
+                item {
+                  ModernActionButtons(
+                      isCurrentId = isAuthor, buttonIcon = actionIcon, onActionClick = actionButton)
+                }
+              }
+
+              // Reviews header
+              item {
+                Text(
+                    HuntCardScreenStrings.Reviews,
+                    fontSize = HuntCardScreenDefaults.SmallFontSize,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier =
+                        Modifier.fillMaxWidth()
+                            .padding(horizontal = HuntCardScreenDefaults.Padding20)
+                            .padding(
+                                top = HuntCardScreenDefaults.Padding40,
+                                bottom = HuntCardScreenDefaults.Padding16))
+              }
+
+              // Reviews list
+              if (reviews.isNullOrEmpty()) {
+                item { ModernEmptyReviewsState() }
+              } else {
+                items(reviews) { review ->
+                  ModernReviewCard(
+                      review = review,
+                      reviewHuntViewModel = reviewViewModel,
+                      currentUserId = currentUserId,
+                      navController = navController,
+                      onDeleteReview = { reviewId ->
+                        huntCardViewModel.deleteReview(
+                            review.huntId, reviewId, review.authorId, currentUserId)
+                      })
+                }
+              }
+
+              item {
+                Spacer(
+                    modifier =
+                        Modifier.height(
+                            HuntCardScreenDefaults.Padding40 *
+                                HuntCardScreenDefaults.EndListSpacerMultiplier))
+              }
             }
-          }
-
-          // Reviews header
-          item {
-            Text(
-                HuntCardScreenStrings.Reviews,
-                fontSize = HuntCardScreenDefaults.SmallFontSize,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier =
-                    Modifier.fillMaxWidth()
-                        .padding(horizontal = HuntCardScreenDefaults.Padding20)
-                        .padding(
-                            top = HuntCardScreenDefaults.Padding40,
-                            bottom = HuntCardScreenDefaults.Padding16))
-          }
-
-          // Reviews list
-          if (reviews.isNullOrEmpty()) {
-            item { ModernEmptyReviewsState() }
-          } else {
-            items(reviews) { review ->
-              ModernReviewCard(
-                  review = review,
-                  reviewHuntViewModel = reviewViewModel,
-                  currentUserId = currentUserId,
-                  navController = navController,
-                  onDeleteReview = { reviewId ->
-                    huntCardViewModel.deleteReview(
-                        review.huntId, reviewId, review.authorId, currentUserId)
-                  })
-            }
-          }
-
-          item { Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding40 * 2)) }
-        }
       }
 }
 
@@ -585,7 +594,7 @@ fun ModernEmptyReviewsState() {
 
           Text(
               text = HuntCardScreenStrings.NoReviews,
-              modifier = Modifier.testTag("NO_REVIEWS_TEXT"))
+              modifier = Modifier.testTag(HuntCardScreenTestTags.NO_REVIEWS_TEXT))
         }
       }
 }
@@ -624,7 +633,7 @@ fun ModernReviewCard(
 
   val repliesViewModel: ReviewRepliesViewModel =
       viewModel(
-          key = "replies_${review.reviewId}",
+          key = "${HuntCardScreenStrings.RepliesViewModelKeyPrefix}${review.reviewId}",
           factory =
               ReviewRepliesViewModelFactory(
                   reviewId = review.reviewId,
@@ -653,14 +662,17 @@ fun ModernReviewCard(
               }
               .testTag(HuntCardScreenTestTags.REVIEW_CARD),
       colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-      elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-      shape = RoundedCornerShape(16.dp)) {
+      elevation =
+          CardDefaults.cardElevation(defaultElevation = HuntCardScreenDefaults.ZeroElevation),
+      shape = RoundedCornerShape(HuntCardScreenDefaults.ReviewCardCornerRadius)) {
         Column(modifier = Modifier.padding(HuntCardScreenDefaults.Padding16)) {
           // --- Header: avatar + name + rating + optional delete ---
           Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            val profilePictureRes = authorProfile?.author?.profilePicture ?: 0
+            val profilePictureRes =
+                authorProfile?.author?.profilePicture
+                    ?: HuntCardScreenDefaults.NoProfilePictureResId
 
-            if (profilePictureRes != 0) {
+            if (profilePictureRes != HuntCardScreenDefaults.NoProfilePictureResId) {
               ProfilePicture(
                   profilePictureRes = profilePictureRes,
                   modifier =
@@ -674,9 +686,12 @@ fun ModernReviewCard(
                               if (isCurrentId) MaterialTheme.colorScheme.primary
                               else MaterialTheme.colorScheme.tertiary),
                   contentAlignment = Alignment.Center) {
-                    val initial = authorId.take(1).uppercase()
+                    val initial =
+                        authorId.take(HuntCardScreenDefaults.InitialLetterCount).uppercase()
                     Text(
-                        text = if (isCurrentId) "Y" else initial,
+                        text =
+                            if (isCurrentId) HuntCardScreenStrings.CurrentUserInitialLabel
+                            else initial,
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color.White)
@@ -707,13 +722,14 @@ fun ModernReviewCard(
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = HuntCardScreenStrings.ReviewDeleteButton,
-                        // softer delete color
-                        tint = MaterialTheme.colorScheme.error.copy(alpha = 0.85f))
+                        tint =
+                            MaterialTheme.colorScheme.error.copy(
+                                alpha = HuntCardScreenDefaults.DeleteIconAlpha))
                   }
             }
           }
 
-          Spacer(modifier = Modifier.height(8.dp))
+          Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding8))
 
           // --- Comment text ---
           if (review.comment.isNotBlank()) {
@@ -726,47 +742,53 @@ fun ModernReviewCard(
 
           // --- Optional photos button ---
           if (review.photos.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding8))
 
             Button(
                 onClick = {
                   reviewHuntViewModel.loadReviewImages(review.photos)
-                  navController.navigate("reviewImages/${review.reviewId}")
+                  navController.navigate(
+                      "${HuntCardScreenStrings.ReviewImagesRoutePrefix}${review.reviewId}")
                 },
-                modifier = Modifier.testTag("SEE_PICTURES_BUTTON"),
+                modifier = Modifier.testTag(HuntCardScreenTestTags.SEE_PICTURES_BUTTON),
                 colors =
                     ButtonDefaults.buttonColors(
                         containerColor = HuntCardScreenDefaults.CardSoftGray,
                         contentColor = MaterialTheme.colorScheme.onSurface),
                 shape = RoundedCornerShape(HuntCardScreenDefaults.Padding8)) {
                   Text(
-                      "See Pictures (${review.photos.size})",
+                      "${HuntCardScreenStrings.SeePictures} (${review.photos.size})",
                       fontSize = HuntCardScreenDefaults.MinFontSize)
                 }
           }
 
-          Spacer(modifier = Modifier.height(6.dp))
+          Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Spacing6))
 
           // --- Footer: right-aligned "No replies / View replies / Hide replies" label ---
           Row(
               modifier = Modifier.fillMaxWidth(),
               horizontalArrangement = Arrangement.End,
               verticalAlignment = Alignment.CenterVertically) {
-                val hasReplies = totalReplies > 0
+                val hasReplies = totalReplies > HuntCardScreenDefaults.NoRepliesCount
                 val label =
                     if (hasReplies) {
                       if (showReplies) {
-                        "Hide replies"
+                        HuntCardScreenStrings.HideReplies
                       } else {
-                        "View $totalReplies ${if (totalReplies == 1) "reply" else "replies"}"
+                        val replyWord =
+                            if (totalReplies == HuntCardScreenDefaults.SingleReplyCount) {
+                              HuntCardScreenStrings.ReplySingular
+                            } else {
+                              HuntCardScreenStrings.ReplyPlural
+                            }
+                        "${HuntCardScreenStrings.ViewRepliesPrefix} $totalReplies $replyWord"
                       }
                     } else {
-                      "No replies yet"
+                      HuntCardScreenStrings.NoRepliesYet
                     }
 
                 val labelModifier =
                     when {
-                      // Only "Hide replies" collapses
                       hasReplies && showReplies ->
                           Modifier.clickable {
                             showReplies = false
@@ -778,14 +800,16 @@ fun ModernReviewCard(
                 Text(
                     text = label,
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                    color =
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                            alpha = HuntCardScreenDefaults.RepliesLabelAlpha),
                     modifier = labelModifier,
                 )
               }
 
           // --- Replies block below the card body ---
           if (showReplies) {
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Spacing6))
             ReviewRepliesSection(
                 state = repliesState,
                 onToggleRootReplies = { repliesViewModel.onToggleReplies(parentReplyId = null) },
