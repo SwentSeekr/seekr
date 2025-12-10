@@ -97,6 +97,7 @@ class AddHuntFieldsScreenTest {
                 onSelectOtherImages = { /* No-op for tests */},
                 onRemoveOtherImage = { /* No-op for tests */},
                 onRemoveExistingImage = { /* No-op for tests */},
+                onRemoveMainImage = {/* No-op for tests */}
             )
 
         val navCallbacks =
@@ -279,6 +280,7 @@ class AddHuntFieldsScreenTest {
                 onSelectOtherImages = {},
                 onRemoveOtherImage = { uri -> removedUri = uri },
                 onRemoveExistingImage = { url -> removedExisting = url },
+                onRemoveMainImage = {}
             )
 
         BaseHuntFieldsScreen(
