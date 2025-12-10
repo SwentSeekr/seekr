@@ -58,7 +58,7 @@ class OverviewScreenTest {
 
   private val profileAlice =
       sampleProfileWithPseudonym(
-          uid = "0",
+          uid = "author_123",
           pseudonym = "Alice",
       )
 
@@ -70,6 +70,7 @@ class OverviewScreenTest {
     fakeImageRepository = ReviewImageRepositoryLocal()
 
     fakeHuntRepository.addHunt(testHunt)
+    fakeProfileRepository.addProfile(profileAlice)
 
     viewModel =
         HuntCardViewModel(
@@ -280,7 +281,7 @@ class OverviewScreenTest {
 
   @Test
   fun overviewScreen_showsHuntCardsFromRepository_inLazyList() {
-    val overviewViewModel = OverviewViewModel(fakeHuntRepository)
+    val overviewViewModel = OverviewViewModel(fakeHuntRepository, fakeProfileRepository)
 
     composeTestRule.setContent {
       OverviewScreen(
