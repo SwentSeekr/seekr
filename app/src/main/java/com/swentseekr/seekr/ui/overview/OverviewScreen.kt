@@ -97,6 +97,8 @@ fun OverviewScreen(
     huntCardViewModel.loadCurrentUserID()
   }
 
+  val uiStateHuntCard by huntCardViewModel.uiState.collectAsState()
+
   val pullRefreshState =
       rememberPullRefreshState(
           refreshing = uiState.isRefreshing, onRefresh = { overviewViewModel.refreshUIState() })
@@ -106,28 +108,12 @@ fun OverviewScreen(
         modifier = Modifier.fillMaxWidth().testTag(OverviewScreenTestTags.OVERVIEW_SCREEN),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+
       // MODERN HEADER WITH TITLE
       ModernHeader()
 
-      // MODERN SEARCH BAR
-      ModernSearchBar(
-          query = query,
-          onQueryChange = { overviewViewModel.onSearchChange(it) },
-          onSearch = { overviewViewModel.onSearchChange(it) },
-          onActiveChange = onActiveBar,
-          onClear = { overviewViewModel.onClearSearch() },
-          modifier = modifier)
-
-      // MODERN FILTER BAR
-      ModernFilterBar(
-          selectedStatus = uiState.selectedStatus,
-          selectedDifficulty = uiState.selectedDifficulty,
-          onStatusSelected = { overviewViewModel.onStatusFilterSelect(it) },
-          onDifficultySelected = { overviewViewModel.onDifficultyFilterSelect(it) })
-
       val likedHuntsCache by huntCardViewModel.likedHuntsCache.collectAsState()
 
-      // HUNTS LIST with pull-to-refresh ONLY on the list
       Box(
           modifier =
               Modifier.fillMaxWidth()
@@ -137,9 +123,42 @@ fun OverviewScreen(
                 modifier = modifier.testTag(OverviewScreenTestTags.HUNT_LIST).fillMaxSize(),
                 contentPadding = PaddingValues(bottom = OverviewScreenDefaults.VerticalPadding16),
                 horizontalAlignment = Alignment.CenterHorizontally) {
+                  item {
+                    // MODERN SEARCH BAR
+                    ModernSearchBar(
+                        query = query,
+                        onQueryChange = { overviewViewModel.onSearchChange(it) },
+                        onSearch = { overviewViewModel.onSearchChange(it) },
+                        onActiveChange = onActiveBar,
+                        onClear = { overviewViewModel.onClearSearch() },
+                        modifier = modifier)
+                  }
+                  item {
+                    // MODERN FILTER BAR
+                    ModernFilterBar(
+                        selectedStatus = uiState.selectedStatus,
+                        selectedDifficulty = uiState.selectedDifficulty,
+                        onStatusSelected = { overviewViewModel.onStatusFilterSelect(it) },
+                        onDifficultySelected = { overviewViewModel.onDifficultyFilterSelect(it) })
+                  }
+
+                  // HUNTS LIST with pull-to-refresh ONLY on the list
                   items(hunts, key = { it.hunt.uid }) { hunt ->
+                    val authorId = hunt.hunt.authorId
+
+                    LaunchedEffect(authorId) {
+                      if (authorId.isNotBlank()) {
+                        huntCardViewModel.loadMultipleAuthorProfiles(authorId)
+                      }
+                    }
+
+                    // Retrieve correct profile for THIS hunt
+                    val authorProfile = uiStateHuntCard.authorProfiles[authorId]
+                    val author = authorProfile?.author?.pseudonym ?: "Unknown Author"
+
                     HuntCard(
                         hunt.hunt,
+                        authorName = author,
                         modifier =
                             modifier
                                 .testTag(
@@ -383,9 +402,8 @@ fun ModernFilterChip(
   )
 }
 
-// Helper function for status colors
 /**
- * Returns the color associated with a HuntStatus.
+ * Helper function for status colors Returns the color associated with a HuntStatus.
  *
  * Colors are defined in OverviewScreenDefaults.
  *
@@ -399,9 +417,8 @@ fun getStatusColor(status: HuntStatus): Color {
   }
 }
 
-// Helper function for difficulty colors
 /**
- * Returns the color associated with a Difficulty level.
+ * Helper function for difficulty colors Returns the color associated with a Difficulty level.
  *
  * Difficulty colors also come from OverviewScreenDefaults.
  *
@@ -422,7 +439,6 @@ fun OverviewScreenPreview() {
   OverviewScreen()
 }
 
-// Keep the old FilterButton for compatibility if needed
 /**
  * Legacy filter button kept for compatibility. Used only if older UI code relies on the previous
  * filter layout.

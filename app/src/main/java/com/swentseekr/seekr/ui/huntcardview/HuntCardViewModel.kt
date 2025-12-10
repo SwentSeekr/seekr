@@ -29,7 +29,8 @@ data class HuntCardUiState(
     val isAchieved: Boolean = false,
     val errorMsg: String? = null,
     val currentUserId: String? = null,
-    val authorProfile: Profile? = null
+    val authorProfile: Profile? = null,
+    val authorProfiles: Map<String, Profile?> = emptyMap()
 )
 
 open class HuntCardViewModel(
@@ -70,6 +71,27 @@ open class HuntCardViewModel(
             "${HuntCardViewModelConstants.ErrorLoadingProfil} $userID",
             e)
         setErrorMsg(HuntCardViewModelConstants.ErrorLoadingProfileSetMsg)
+      }
+    }
+  }
+
+  /**
+   * Loads the profile of a specific author and adds it to the authorProfiles map in the UI state.
+   *
+   * @param userId The ID of the author whose profile should be loaded.
+   */
+  fun loadMultipleAuthorProfiles(userId: String) {
+    viewModelScope.launch {
+      try {
+        val profile = profileRepository.getProfile(userId)
+
+        _uiState.value =
+            _uiState.value.copy(
+                authorProfiles =
+                    _uiState.value.authorProfiles.toMutableMap().apply { put(userId, profile) })
+      } catch (e: Exception) {
+        Log.e("HuntCardViewModel", "Error loading author $userId", e)
+        setErrorMsg("Error loading author profile")
       }
     }
   }
@@ -159,7 +181,11 @@ open class HuntCardViewModel(
     }
   }
 
-  /** Loads the Author of a Hunt by its ID. */
+  /**
+   * Loads the Author of a Hunt by its ID.
+   *
+   * @param huntID the id of the hunt
+   */
   fun loadHuntAuthor(huntID: String) {
     viewModelScope.launch {
       try {
@@ -175,7 +201,11 @@ open class HuntCardViewModel(
       }
     }
   }
-  /** Deletes a Hunt by its ID. */
+  /**
+   * Deletes a Hunt by its ID.
+   *
+   * @param huntID the id of the hunt to delete
+   */
   fun deleteHunt(huntID: String) {
     viewModelScope.launch {
       try {
@@ -190,7 +220,15 @@ open class HuntCardViewModel(
     }
   }
 
-  /** Deletes a review if the user is the author. */
+  /**
+   * Deletes a review if the user is the author.
+   *
+   * @param huntID The ID of the hunt the review belongs to.
+   * @param reviewID The ID of the review to delete.
+   * @param userID The ID of the user attempting the deletion.
+   * @param currentUserId Optional: The ID of the currently logged-in user; defaults to
+   *   Firebase.currentUser.
+   */
   fun deleteReview(
       huntID: String,
       reviewID: String,

@@ -10,6 +10,9 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.hunt.HuntsRepository
+import com.swentseekr.seekr.model.profile.ProfileRepository
+import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
+import com.swentseekr.seekr.ui.profile.Profile
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -55,13 +58,15 @@ data class HuntUiState(
  * [HuntsRepository].
  *
  * @property huntRepository The repository used to fetch and manage Hunt items.
+ *     @property profileRepository The reopository used to fetch and manage Profiles.
  */
 class OverviewViewModel(
-    private val repository: HuntsRepository = HuntRepositoryProvider.repository
+    private val repository: HuntsRepository = HuntRepositoryProvider.repository,
+    private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(OverviewUIState())
   val uiState: StateFlow<OverviewUIState> = _uiState.asStateFlow()
-
+  private val authorProfiles = mutableMapOf<String, Profile?>()
   private var huntItems: MutableList<HuntUiState> = mutableListOf()
 
   init {
@@ -80,6 +85,7 @@ class OverviewViewModel(
       try {
         val hunts = repository.getAllHunts()
         huntItems = hunts.map { HuntUiState(it) }.toMutableList()
+        loadAuthorProfiles()
         _uiState.value = _uiState.value.copy(hunts = huntItems, isRefreshing = false)
       } catch (e: Exception) {
         _uiState.value = _uiState.value.copy(errorMsg = e.message, isRefreshing = false)
@@ -87,7 +93,22 @@ class OverviewViewModel(
     }
   }
 
-  /** Toggles the 'like' botton of a hunt item identified by [huntID]. */
+  /** Loads and caches the profiles of all authors associated with the current list of hunts */
+  private suspend fun loadAuthorProfiles() {
+    viewModelScope.launch {
+      val authorIds = huntItems.map { it.hunt.authorId }.distinct()
+      authorIds.forEach { authorId ->
+        if (!authorProfiles.containsKey(authorId)) {
+          authorProfiles[authorId] = profileRepository.getProfile(authorId)
+        }
+      }
+    }
+  }
+  /**
+   * Toggles the 'like' botton of a hunt item identified by [huntID].
+   *
+   * @param huntID The ID of the hunt to like/unlike.
+   */
   fun onLikeClick(huntID: String) {
     val index = huntItems.indexOfFirst { it.hunt.uid == huntID }
     if (index != -1) {
@@ -101,7 +122,11 @@ class OverviewViewModel(
   var searchQuery by mutableStateOf("")
     private set
 
-  /** Updates the search word and filters the hunts based on the new search term [newSearch]. */
+  /**
+   * Updates the search word and filters the hunts based on the new search term [newSearch].
+   *
+   * @param newSearch the new string input for searching
+   */
   fun onSearchChange(newSearch: String) {
     searchQuery = newSearch
     if (newSearch != "") {
@@ -116,14 +141,22 @@ class OverviewViewModel(
     applyFilters()
   }
 
-  /** Updates the selected status filter and applies the filter to the hunt list. */
+  /**
+   * Updates the selected status filter and applies the filter to the hunt list.
+   *
+   * @param status the status selected [ FUN,DISCOVER,SPORT]
+   */
   fun onStatusFilterSelect(status: HuntStatus?) {
     val newStatus = if (_uiState.value.selectedStatus == status) null else status
     _uiState.value = _uiState.value.copy(selectedStatus = newStatus)
     applyFilters()
   }
 
-  /** Updates the selected difficulty filter and applies the filter to the hunt list. */
+  /**
+   * Updates the selected difficulty filter and applies the filter to the hunt list.
+   *
+   * @param difficulty the difficulty selected [ EASY, INTERMEDIATE,DIFFICULT]
+   */
   fun onDifficultyFilterSelect(difficulty: Difficulty?) {
     val newDifficulty = if (_uiState.value.selectedDifficulty == difficulty) null else difficulty
     _uiState.value = _uiState.value.copy(selectedDifficulty = newDifficulty)
@@ -146,7 +179,12 @@ class OverviewViewModel(
           val hunt = huntUiState.hunt
           val searchMatches =
               if (searchQuery.isNotEmpty()) {
-                hunt.title.contains(searchQuery, ignoreCase = true)
+                val titleMatches = hunt.title.contains(searchQuery, ignoreCase = true)
+                val authorProfile = authorProfiles[hunt.authorId]
+                val authorMatches =
+                    authorProfile?.author?.pseudonym?.contains(searchQuery, ignoreCase = true)
+                        ?: false
+                titleMatches || authorMatches
               } else {
                 true
               }
