@@ -187,13 +187,13 @@ open class ReviewHuntViewModel(
                 comment = _uiState.value.reviewText,
                 photos = _uiState.value.photos)
         repositoryReview.addReviewHunt(createdReview)
-        if (context != null) {
+        /*if (context != null) {
           NotificationHelper.sendNotification(
               context,
               AddReviewScreenStrings.NEW_REVIEW_TITLE,
               AddReviewScreenStrings.NEW_REVIEW_MESSAGE,
               hunt.uid  )
-        }
+        }*/
         _uiState.value =
             _uiState.value.copy(saveSuccessful = true, errorMsg = null, isSubmitted = true)
       } catch (e: Exception) {
