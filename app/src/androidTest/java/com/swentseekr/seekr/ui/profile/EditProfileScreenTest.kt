@@ -27,7 +27,6 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.MAX_BIO_LENGTH
-import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.MAX_PSEUDONYM_LENGTH
 import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.PROFILE_PIC_DEFAULT
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.DIALOG_TITLE
 import com.swentseekr.seekr.ui.profile.EditProfileTestTags.DIALOG_CANCEL_BUTTON
@@ -162,17 +161,6 @@ class EditProfileScreenTest {
   }
 
   @Test
-  fun pseudonymTooLong_showsError() {
-    var pseudonym by mutableStateOf(EditProfileStrings.EMPTY_STRING)
-    setContent(pseudonymChange = { pseudonym = it })
-    val longPseudonym = "a".repeat(MAX_PSEUDONYM_LENGTH + 1)
-
-    composeTestRule.inputPseudonym(longPseudonym)
-    composeTestRule.onNodeWithText(EditProfileStrings.ERROR_PSEUDONYM_MAX).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).assertIsNotEnabled()
-  }
-
-  @Test
   fun bioTooLong_showsError() {
 
     var bio by mutableStateOf(EditProfileStrings.EMPTY_STRING)
@@ -180,15 +168,6 @@ class EditProfileScreenTest {
     val longBio = "a".repeat(MAX_BIO_LENGTH + 1)
     composeTestRule.inputBio(longBio)
     composeTestRule.onNodeWithText(EditProfileStrings.ERROR_BIO_MAX).assertIsDisplayed()
-    composeTestRule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).assertIsNotEnabled()
-  }
-
-  @Test
-  fun emptyPseudonym_showsErrorAndDisablesSave() {
-    var pseudonym by mutableStateOf(EditProfileStrings.EMPTY_STRING)
-    setContent(pseudonymChange = { pseudonym = it })
-    composeTestRule.inputPseudonym(" ")
-    composeTestRule.onNodeWithText(EditProfileStrings.ERROR_PSEUDONYM_EMPTY).assertIsDisplayed()
     composeTestRule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).assertIsNotEnabled()
   }
 

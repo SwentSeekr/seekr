@@ -99,7 +99,10 @@ fun TermsAndConditionsScreen(onGoBack: () -> Unit = {}) {
                   title = TermsScreenStrings.SECTION_6_TITLE,
                   content = TermsScreenStrings.SECTION_6_CONTENT)
 
-              Spacer(modifier = Modifier.height(TermsScreenConstants.BOTTOM_SPACER))
+              Spacer(
+                  modifier =
+                      Modifier.height(TermsScreenConstants.BOTTOM_SPACER)
+                          .testTag(TermsScreenTestTags.LAST_SPACER))
             }
       }
 }

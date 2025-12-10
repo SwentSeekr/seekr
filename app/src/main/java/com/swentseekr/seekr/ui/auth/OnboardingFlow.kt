@@ -192,7 +192,7 @@ fun ProfileSetupDialog(
       confirmButton = {
         Button(
             onClick = { onFinished(pseudonym, bio) },
-            enabled = pseudonym.isNotBlank() && pseudonymError == null && !isCheckingPseudonym,
+            enabled = pseudonym.isNotBlank() && pseudonymError == null,
             modifier = Modifier.testTag(OnboardingFlowTestTags.FINISH_BUTTON)) {
               Text(OnboardingFlowStrings.FINISH_BUTTON)
             }

@@ -49,4 +49,5 @@ object TermsScreenTestTags {
   const val SCREEN = "TERMS_SCREEN"
   const val BACK_BUTTON = "TERMS_BACK_BUTTON"
   const val CONTENT_COLUMN = "TERMS_CONTENT_COLUMN"
+  const val LAST_SPACER = "TERMS_LAST_SPACER"
 }

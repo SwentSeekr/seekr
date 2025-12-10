@@ -23,6 +23,7 @@ import com.swentseekr.seekr.ui.components.HuntCardScreenTestTags
 import com.swentseekr.seekr.ui.huntCardScreen.FakeHuntCardViewModel
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
 import com.swentseekr.seekr.ui.profile.ProfileTestTags
+import com.swentseekr.seekr.ui.settings.SettingsScreenTestTags
 import com.swentseekr.seekr.utils.FakeRepoSuccess
 import org.junit.Before
 import org.junit.Rule
@@ -792,5 +793,18 @@ class SeekrNavigationTest {
 
       node(ProfileTestTags.PROFILE_SCREEN).assertIsDisplayed()
     }
+  }
+
+  @Test
+  fun goProfile_opensSettings_opensTerms() {
+    // Profile → Settings
+    goToProfileTab()
+
+    node(ProfileTestTags.SETTINGS).performClick()
+    node(NavigationTestTags.SETTINGS_SCREEN).assertIsDisplayed()
+    node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
+
+    node(SettingsScreenTestTags.APP_CONDITION_BUTTON).performClick()
+    node(NavigationTestTags.TERMS_CONDITIONS_SCREEN).assertIsDisplayed()
   }
 }
