@@ -37,8 +37,6 @@ object BaseHuntFieldsStrings {
   // Image labels
   const val LABEL_MAIN_IMAGE = "Main image"
   const val LABEL_ADDITIONAL_IMAGES = "Additional images"
-  const val CONTENT_DESC_SELECTED_IMAGE = "Selected Hunt Image"
-  const val CONTENT_DESC_SECONDARY_IMAGE = "Secondary Image"
   const val DELETE_ICON_DESC = "Delete Image"
 
   const val LABEL_IMAGES = "Images"
@@ -94,7 +92,6 @@ object BaseHuntFieldsUi {
 
   // Spacers
   val SpacerHeight: Dp = 16.dp
-  val SpacerHeightMedium: Dp = 12.dp
   val SpacerHeightSmall: Dp = 8.dp
   val SpacerHeightTiny: Dp = 4.dp
 
