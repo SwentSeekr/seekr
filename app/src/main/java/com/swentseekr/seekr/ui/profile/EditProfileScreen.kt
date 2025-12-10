@@ -217,8 +217,8 @@ fun createImageUri(context: Context): Uri? {
 fun EditProfileContent(
     uiState: EditProfileUIState,
     onPseudonymChange: (String) -> Unit,
-    pseudonymError: String?,
-    isCheckingPseudonym: Boolean,
+    pseudonymError: String? = null,
+    isCheckingPseudonym: Boolean = false,
     onBioChange: (String) -> Unit,
     onCancel: () -> Unit,
     onSave: () -> Unit,

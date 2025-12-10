@@ -106,7 +106,7 @@ fun TermsDialog(onAccepted: () -> Unit, onTermsClicked: () -> Unit = {}) {
       title = { Text(OnboardingFlowStrings.TERMS_TITLE) },
       text = {
         Column {
-          Text(annotatedText)
+          Text(annotatedText, modifier = Modifier.testTag(OnboardingFlowTestTags.TERMS))
           Spacer(modifier = Modifier.height(OnboardingFlowDimensions.SPACING_MEDIUM))
           Row(verticalAlignment = Alignment.CenterVertically) {
             Checkbox(
@@ -204,7 +204,7 @@ fun ProfileSetupDialog(
 fun FullScreenTermsDialog(onContinue: () -> Unit, onCancel: () -> Unit = {}) {
   AlertDialog(
       onDismissRequest = {},
-      modifier = Modifier.fillMaxSize(),
+      modifier = Modifier.fillMaxSize().testTag(OnboardingFlowTestTags.TERMS_CONDITION_DIALOG),
       title = { Text(TermsScreenStrings.TITLE) },
       text = {
         // Content scrollable
@@ -254,5 +254,6 @@ fun FullScreenTermsDialog(onContinue: () -> Unit, onCancel: () -> Unit = {}) {
             modifier = Modifier.testTag(OnboardingFlowTestTags.I_DONT_AGREE_BUTTON)) {
               Text(OnboardingFlowStrings.TERMS_DONT_AGREE_BUTTON)
             }
-      })
+      },
+  )
 }

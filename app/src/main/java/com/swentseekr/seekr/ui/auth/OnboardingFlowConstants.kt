@@ -11,7 +11,10 @@ object OnboardingFlowTestTags {
   const val CONTINUE_BUTTON = "continue_button"
   const val I_AGREE_BUTTON = "i_agree_button"
   const val I_DONT_AGREE_BUTTON = "i_dont_agree_button"
+  const val PSEUDO_ERROR_TEXT = "pseudo_error_text"
   const val FINISH_BUTTON = "finish_button"
+
+  const val TERMS_CONDITION_DIALOG = "terms_condition_dialog"
 
   const val CHECKBOX_AGREE = "checkbox_agree"
 }
