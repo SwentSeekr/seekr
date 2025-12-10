@@ -214,7 +214,7 @@ fun HuntCardScreen(
               }
 
               // Reviews list
-              if (reviews.isNullOrEmpty()) {
+              if (reviews.isEmpty()) {
                 item { ModernEmptyReviewsState() }
               } else {
                 items(reviews) { review ->
