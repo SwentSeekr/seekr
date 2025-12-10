@@ -193,6 +193,165 @@ class ReviewRepliesViewModelTest {
 
         assertEquals(listOf("r1"), fakeRepository.deletedReplyIds)
       }
+
+  // ---------- NEW TESTS FOR TOGGLE LOGIC ----------
+
+  @Test
+  fun onToggleReplies_null_togglesRootExpansionAndRebuilds() =
+      runTest(mainDispatcherRule.testDispatcher) {
+        val vm = createViewModel(currentUserId = "user-1")
+
+        val reply =
+            HuntReviewReply(
+                replyId = "r1",
+                reviewId = reviewId,
+                parentReplyId = null,
+                authorId = "user-1",
+                comment = "Root reply",
+                createdAt = 1L,
+                updatedAt = null,
+                isDeleted = false,
+            )
+
+        vm.start()
+        fakeRepository.emit(listOf(reply))
+        advanceUntilIdle()
+
+        // Initially collapsed -> no replies in flattened list
+        val initialState = vm.uiState.value
+        assertFalse(initialState.isRootExpanded)
+        assertTrue(initialState.replies.isEmpty())
+
+        // Toggle with null: expand root
+        vm.onToggleReplies(parentReplyId = null)
+
+        val expandedState = vm.uiState.value
+        assertTrue(expandedState.isRootExpanded)
+        assertEquals(1, expandedState.replies.size)
+        assertEquals("r1", expandedState.replies.first().reply.replyId)
+
+        // Toggle again: collapse root, flattened list empty again
+        vm.onToggleReplies(parentReplyId = null)
+
+        val collapsedState = vm.uiState.value
+        assertFalse(collapsedState.isRootExpanded)
+        assertTrue(collapsedState.replies.isEmpty())
+      }
+
+  @Test
+  fun onToggleReplies_nonNull_togglesChildExpansion() =
+      runTest(mainDispatcherRule.testDispatcher) {
+        val vm = createViewModel(currentUserId = "user-1")
+
+        val parent =
+            HuntReviewReply(
+                replyId = "r1",
+                reviewId = reviewId,
+                parentReplyId = null,
+                authorId = "user-1",
+                comment = "Parent",
+                createdAt = 1L,
+                updatedAt = null,
+                isDeleted = false,
+            )
+        val child =
+            HuntReviewReply(
+                replyId = "r2",
+                reviewId = reviewId,
+                parentReplyId = "r1",
+                authorId = "user-1",
+                comment = "Child",
+                createdAt = 2L,
+                updatedAt = null,
+                isDeleted = false,
+            )
+
+        vm.start()
+        fakeRepository.emit(listOf(parent, child))
+        advanceUntilIdle()
+
+        // First expand root so that the parent appears
+        vm.onToggleReplies(parentReplyId = null)
+        var state = vm.uiState.value
+        assertTrue(state.isRootExpanded)
+        assertEquals(1, state.replies.size)
+        assertEquals("r1", state.replies[0].reply.replyId)
+
+        // Now toggle "r1" expansion -> child should appear
+        vm.onToggleReplies(parentReplyId = "r1")
+        state = vm.uiState.value
+        assertEquals(2, state.replies.size)
+        assertEquals("r1", state.replies[0].reply.replyId)
+        assertEquals("r2", state.replies[1].reply.replyId)
+
+        // Toggle again -> child should disappear
+        vm.onToggleReplies(parentReplyId = "r1")
+        state = vm.uiState.value
+        assertEquals(1, state.replies.size)
+        assertEquals("r1", state.replies[0].reply.replyId)
+      }
+
+  @Test
+  fun onToggleComposer_handlesRootNoop_andTogglesChildComposer() =
+      runTest(mainDispatcherRule.testDispatcher) {
+        val vm = createViewModel(currentUserId = "user-1")
+
+        // 1) Root composer branch is a no-op
+        vm.onReplyTextChanged(
+            ReplyTarget.RootReview(reviewId = reviewId),
+            "Some text",
+        )
+        val beforeRootToggle = vm.uiState.value
+
+        vm.onToggleComposer(ReplyTarget.RootReview(reviewId = reviewId))
+
+        val afterRootToggle = vm.uiState.value
+        // Entire state should be unchanged
+        assertEquals(beforeRootToggle, afterRootToggle)
+
+        // 2) Reply composer toggles isComposerOpen in flattened nodes
+        val reply =
+            HuntReviewReply(
+                replyId = "r1",
+                reviewId = reviewId,
+                parentReplyId = null,
+                authorId = "user-1",
+                comment = "Parent",
+                createdAt = 1L,
+                updatedAt = null,
+                isDeleted = false,
+            )
+
+        vm.start()
+        fakeRepository.emit(listOf(reply))
+        advanceUntilIdle()
+
+        // Show the reply in flattened state
+        vm.onToggleReplies(parentReplyId = null)
+        var state = vm.uiState.value
+        assertEquals(1, state.replies.size)
+        assertFalse(state.replies[0].isComposerOpen)
+
+        // Open inline composer for that reply
+        vm.onToggleComposer(
+            ReplyTarget.Reply(
+                reviewId = reviewId,
+                parentReplyId = "r1",
+            ))
+        state = vm.uiState.value
+        assertEquals(1, state.replies.size)
+        assertTrue(state.replies[0].isComposerOpen)
+
+        // Close inline composer again
+        vm.onToggleComposer(
+            ReplyTarget.Reply(
+                reviewId = reviewId,
+                parentReplyId = "r1",
+            ))
+        state = vm.uiState.value
+        assertEquals(1, state.replies.size)
+        assertFalse(state.replies[0].isComposerOpen)
+      }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
