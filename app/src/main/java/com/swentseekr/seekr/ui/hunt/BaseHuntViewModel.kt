@@ -204,7 +204,7 @@ abstract class BaseHuntViewModel(
     _uiState.value = _uiState.value.copy(otherImagesUris = otherImagesUris)
   }
 
-  fun removeMainImage() {
+  open fun removeMainImage() {
     updateMainImageUri(null)
   }
 

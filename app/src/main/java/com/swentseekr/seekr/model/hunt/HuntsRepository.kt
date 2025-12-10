@@ -61,7 +61,8 @@ interface HuntsRepository {
       newValue: Hunt,
       mainImageUri: Uri? = null,
       addedOtherImages: List<Uri> = emptyList(),
-      removedOtherImages: List<String> = emptyList()
+      removedOtherImages: List<String> = emptyList(),
+      removedMainImageUrl: String? = ""
   )
 
   /**
