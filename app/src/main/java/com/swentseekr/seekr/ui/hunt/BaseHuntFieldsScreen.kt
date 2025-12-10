@@ -6,6 +6,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.RowScope
@@ -22,6 +24,7 @@ import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -29,6 +32,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -37,6 +42,7 @@ import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.REMOVE_BUTTON_TAG_PREFIX
+import com.swentseekr.seekr.ui.profile.createImageUri
 
 /** Represents an additional image associated with a hunt, which can be either remote or local. */
 sealed class OtherImage {
@@ -584,144 +590,227 @@ private fun SelectLocationsButton(
  * @param uiState Current [HuntUIState], used to determine current images.
  * @param imageCallbacks Callbacks invoked when images are selected or removed.
  */
+/**
+ * Section améliorée pour la sélection d'images principales et additionnelles avec une UI moderne et
+ * professionnelle.
+ */
 @Composable
 private fun ImagesSection(
     uiState: HuntUIState,
     imageCallbacks: ImageCallbacks,
 ) {
+  val context = LocalContext.current
+
+  // --- GALLERY LAUNCHERS ---
   val imagePickerLauncher =
-      rememberLauncherForActivityResult(
-          contract = ActivityResultContracts.GetContent(),
-          onResult = { uri -> imageCallbacks.onSelectImage(uri) })
+      rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        imageCallbacks.onSelectImage(uri)
+      }
 
   val multipleImagesPickerLauncher =
-      rememberLauncherForActivityResult(
-          contract = ActivityResultContracts.GetMultipleContents(),
-          onResult = { uris -> imageCallbacks.onSelectOtherImages(uris) })
+      rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
+        imageCallbacks.onSelectOtherImages(uris)
+      }
 
-  // Build a single list of all images (remote + local)
+  // --- CAMERA LAUNCHERS ---
+  var mainCameraUri by remember { mutableStateOf<Uri?>(null) }
+  val mainCameraLauncher =
+      rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success && mainCameraUri != null) {
+          imageCallbacks.onSelectImage(mainCameraUri!!)
+        }
+      }
+
+  var otherCameraUri by remember { mutableStateOf<Uri?>(null) }
+  val otherCameraLauncher =
+      rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success && otherCameraUri != null) {
+          imageCallbacks.onSelectOtherImages(listOf(otherCameraUri!!))
+        }
+      }
+
+  // Unified list of all additional images
   val combinedImages: List<OtherImage> =
       uiState.otherImagesUrls.map { OtherImage.Remote(it) } +
           uiState.otherImagesUris.map { OtherImage.Local(it) }
 
+  // --- UI START ---
   Card(
-      modifier = Modifier.fillMaxWidth(),
-      shape = RoundedCornerShape(UICons.CardCornerRadius),
-      colors =
-          CardDefaults.cardColors(
-              containerColor =
-                  MaterialTheme.colorScheme.surfaceVariant.copy(alpha = UICons.ChangeAlpha))) {
+      modifier = Modifier.fillMaxWidth().shadow(2.dp, RoundedCornerShape(UICons.FieldCornerRadius)),
+      shape = RoundedCornerShape(UICons.FieldCornerRadius),
+      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         Column(
-            modifier = Modifier.padding(UICons.CardPadding),
-            verticalArrangement = Arrangement.spacedBy(UICons.CardVArrangement)) {
-              ImagesSectionHeader()
+            modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+              // --- HEADER ---
+              Text(
+                  "Images",
+                  style = MaterialTheme.typography.titleMedium,
+                  color = MaterialTheme.colorScheme.onSurface)
 
-              MainImagePickerButton(onClick = { imagePickerLauncher.launch("image/*") })
+              // --- MAIN IMAGE SECTION ---
+              Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                      Text(
+                          "Main image",
+                          style = MaterialTheme.typography.labelLarge,
+                          color = MaterialTheme.colorScheme.onSurfaceVariant)
 
-              MainImagePreview(
-                  imageUrl = uiState.mainImageUrl,
-                  onDelete = { imageCallbacks.onRemoveMainImage() })
+                      if (!uiState.mainImageUrl.isNullOrBlank()) {
+                        Text(
+                            "1 image",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary)
+                      }
+                    }
 
-              AdditionalImagesPickerButton(
-                  onClick = { multipleImagesPickerLauncher.launch("image/*") })
+                // Preview ou boutons de sélection
+                if (uiState.mainImageUrl.isNullOrBlank()) {
+                  Row(
+                      modifier = Modifier.fillMaxWidth(),
+                      horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        ImageActionButton(
+                            label = "Gallery",
+                            icon = R.drawable.gallerie_image,
+                            onClick = { imagePickerLauncher.launch("image/*") },
+                            modifier = Modifier.weight(1f))
 
-              AdditionalImagesList(
-                  images = combinedImages,
-                  imageCallbacks = imageCallbacks,
-              )
+                        ImageActionButton(
+                            label = "Camera",
+                            icon = R.drawable.camera_icon,
+                            onClick = {
+                              val uri = createImageUri(context)
+                              if (uri != null) {
+                                mainCameraUri = uri
+                                mainCameraLauncher.launch(uri)
+                              }
+                            },
+                            modifier = Modifier.weight(1f))
+                      }
+                } else {
+                  MainImagePreview(
+                      imageUrl = uiState.mainImageUrl,
+                      onDelete = { imageCallbacks.onRemoveMainImage() })
+                }
+              }
+
+              Divider(
+                  color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                  thickness = 1.dp)
+
+              // --- ADDITIONAL IMAGES SECTION ---
+              Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                      Text(
+                          "Additional images",
+                          style = MaterialTheme.typography.labelLarge,
+                          color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+                      if (combinedImages.isNotEmpty()) {
+                        Text(
+                            "${combinedImages.size} ${if (combinedImages.size == 1) "image" else "images"}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary)
+                      }
+                    }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                      ImageActionButton(
+                          label = "Gallery",
+                          icon = R.drawable.gallerie_image,
+                          onClick = { multipleImagesPickerLauncher.launch("image/*") },
+                          modifier = Modifier.weight(1f))
+
+                      ImageActionButton(
+                          label = "Camera",
+                          icon = R.drawable.camera_icon,
+                          onClick = {
+                            val uri = createImageUri(context)
+                            if (uri != null) {
+                              otherCameraUri = uri
+                              otherCameraLauncher.launch(uri)
+                            }
+                          },
+                          modifier = Modifier.weight(1f))
+                    }
+
+                AdditionalImagesList(images = combinedImages, imageCallbacks = imageCallbacks)
+              }
             }
       }
 }
 
-/** Title of the images section. */
 @Composable
-private fun ImagesSectionHeader() {
-  Text(
-      "Images",
-      style = MaterialTheme.typography.titleMedium,
-      color = MaterialTheme.colorScheme.onSurfaceVariant)
-}
-
-/**
- * Button to pick the main image.
- *
- * @param onClick Callback invoked when the user taps the button to choose a main image.
- */
-@Composable
-private fun MainImagePickerButton(
+private fun ImageActionButton(
+    label: String,
+    icon: Int,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
   OutlinedButton(
       onClick = onClick,
-      modifier = Modifier.fillMaxWidth().height(UICons.ImageButtonHeight),
-      shape = RoundedCornerShape(UICons.ImageButtonCornerRadius)) {
-        Text(BaseHuntFieldsStrings.BUTTON_CHOOSE_IMAGE, style = MaterialTheme.typography.bodyLarge)
+      modifier = modifier.height(48.dp),
+      shape = RoundedCornerShape(12.dp),
+      colors =
+          ButtonDefaults.outlinedButtonColors(
+              containerColor = MaterialTheme.colorScheme.surface,
+              contentColor = MaterialTheme.colorScheme.onSurface),
+      border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
+        Image(
+            painter = painterResource(icon),
+            contentDescription = label,
+            modifier = Modifier.size(20.dp),
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(label, style = MaterialTheme.typography.labelLarge)
       }
 }
 
-/**
- * Preview of the main image if one is available.
- *
- * @param imageUrl URL of the main image to preview, or `null` / blank to hide the preview.
- */
 @Composable
 private fun MainImagePreview(
     imageUrl: String?,
     onDelete: () -> Unit,
 ) {
-  AnimatedVisibility(visible = !imageUrl.isNullOrBlank()) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-      AsyncImage(
-          model = imageUrl,
-          contentDescription = BaseHuntFieldsStrings.CONTENT_DESC_SELECTED_IMAGE,
-          modifier =
-              Modifier.weight(1f)
-                  .height(UICons.ImageHeight)
-                  .clip(RoundedCornerShape(UICons.ImageCornerRadius))
-                  .shadow(4.dp, RoundedCornerShape(UICons.ImageCornerRadius)),
-          placeholder = painterResource(R.drawable.empty_image),
-          error = painterResource(R.drawable.empty_image))
+  Card(
+      modifier = Modifier.fillMaxWidth(),
+      shape = RoundedCornerShape(12.dp),
+      colors =
+          CardDefaults.cardColors(
+              containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))) {
+        Column(modifier = Modifier.padding(12.dp)) {
+          AsyncImage(
+              model = imageUrl,
+              contentDescription = BaseHuntFieldsStrings.CONTENT_DESC_SELECTED_IMAGE,
+              modifier = Modifier.fillMaxWidth().height(200.dp).clip(RoundedCornerShape(8.dp)),
+              contentScale = ContentScale.Crop,
+              placeholder = painterResource(R.drawable.empty_image),
+              error = painterResource(R.drawable.empty_image))
 
-      Spacer(modifier = Modifier.width(12.dp))
+          Spacer(modifier = Modifier.height(8.dp))
 
-      TextButton(onClick = onDelete, modifier = Modifier.testTag("delete_main_image")) {
-        Icon(
-            painter = painterResource(R.drawable.ic_delete),
-            contentDescription = "Delete main image",
-            tint = MaterialTheme.colorScheme.error,
-            modifier = Modifier.size(UICons.IconSize))
-        Spacer(modifier = Modifier.width(4.dp))
-        Text("Remove", color = MaterialTheme.colorScheme.error)
-      }
-    }
-  }
-}
-
-/**
- * Button to pick additional (secondary) images.
- *
- * @param onClick Callback invoked when the user taps the button to choose additional images.
- */
-@Composable
-private fun AdditionalImagesPickerButton(
-    onClick: () -> Unit,
-) {
-  OutlinedButton(
-      onClick = onClick,
-      modifier = Modifier.fillMaxWidth().height(UICons.ImageButtonHeight),
-      shape = RoundedCornerShape(UICons.ImageButtonCornerRadius)) {
-        Text(
-            BaseHuntFieldsStrings.BUTTON_CHOOSE_ADDITIONAL_IMAGES,
-            style = MaterialTheme.typography.bodyLarge)
+          TextButton(
+              onClick = onDelete,
+              modifier = Modifier.fillMaxWidth().testTag("delete_main_image"),
+              colors =
+                  ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_delete),
+                    contentDescription = "Delete main image",
+                    modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(6.dp))
+                Text("Remove image", style = MaterialTheme.typography.labelLarge)
+              }
+        }
       }
 }
 
-/**
- * List of additional images (remote + local) with delete actions.
- *
- * @param images List of [OtherImage] instances to display.
- * @param imageCallbacks Callbacks used when an image is removed.
- */
 @Composable
 private fun AdditionalImagesList(
     images: List<OtherImage>,
@@ -729,7 +818,7 @@ private fun AdditionalImagesList(
 ) {
   if (images.isEmpty()) return
 
-  Column(verticalArrangement = Arrangement.spacedBy(UICons.CardVArrangement)) {
+  Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
     images.forEach { image ->
       AdditionalImageItem(
           image = image,
@@ -739,12 +828,6 @@ private fun AdditionalImagesList(
   }
 }
 
-/**
- * Single additional image row with preview and remove button.
- *
- * @param image Image to display, either [OtherImage.Remote] or [OtherImage.Local].
- * @param imageCallbacks Callbacks used when the user presses the remove button.
- */
 @Composable
 private fun AdditionalImageItem(
     image: OtherImage,
@@ -764,22 +847,26 @@ private fun AdditionalImageItem(
 
   Card(
       modifier = Modifier.fillMaxWidth(),
-      shape = RoundedCornerShape(UICons.CardLittleCornerRadius)) {
+      shape = RoundedCornerShape(12.dp),
+      colors =
+          CardDefaults.cardColors(
+              containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(UICons.CardRowPadding),
-            horizontalArrangement = Arrangement.SpaceBetween) {
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
               AsyncImage(
                   model = model,
                   contentDescription = BaseHuntFieldsStrings.CONTENT_DESC_SECONDARY_IMAGE,
                   modifier =
                       Modifier.testTag("otherImage_$tagSuffix")
-                          .weight(UICons.ImageWeight)
-                          .height(UICons.ImageLittleHeight)
-                          .clip(RoundedCornerShape(UICons.ImageLittleCornerRadius)),
+                          .size(80.dp)
+                          .clip(RoundedCornerShape(8.dp)),
+                  contentScale = ContentScale.Crop,
                   placeholder = painterResource(R.drawable.empty_image),
                   error = painterResource(R.drawable.empty_image))
 
-              Spacer(modifier = Modifier.width(UICons.SpacerHeightMedium))
+              Spacer(modifier = Modifier.width(12.dp))
 
               TextButton(
                   modifier = Modifier.testTag("$REMOVE_BUTTON_TAG_PREFIX$tagSuffix"),
@@ -788,14 +875,16 @@ private fun AdditionalImageItem(
                       is OtherImage.Remote -> imageCallbacks.onRemoveExistingImage(image.url)
                       is OtherImage.Local -> imageCallbacks.onRemoveOtherImage(image.uri)
                     }
-                  }) {
+                  },
+                  colors =
+                      ButtonDefaults.textButtonColors(
+                          contentColor = MaterialTheme.colorScheme.error)) {
                     Icon(
                         painter = painterResource(R.drawable.ic_delete),
                         contentDescription = BaseHuntFieldsStrings.DELETE_ICON_DESC,
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(UICons.IconSize))
-                    Spacer(modifier = Modifier.width(UICons.SpacerHeightTiny))
-                    Text(BaseHuntFieldsStrings.REMOVE, color = MaterialTheme.colorScheme.error)
+                        modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Remove", style = MaterialTheme.typography.labelLarge)
                   }
             }
       }
