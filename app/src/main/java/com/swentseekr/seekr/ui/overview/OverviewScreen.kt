@@ -60,6 +60,7 @@ import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.SearchBarHeight
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.SmallFontSize
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding12
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding16
+import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding2
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding8
 import com.swentseekr.seekr.ui.overview.OverviewScreenStrings.FilterBy
 
@@ -238,6 +239,7 @@ fun ModernSearchBar(
     onClear: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+
   SearchBar(
       query = query,
       onQueryChange = onQueryChange,
@@ -245,7 +247,10 @@ fun ModernSearchBar(
       active = true,
       onActiveChange = onActiveChange,
       placeholder = {
-        Text(OverviewScreenStrings.SearchPlaceholder, color = OverviewScreenDefaults.Gray999)
+        Text(
+            OverviewScreenStrings.SearchPlaceholder,
+            color = OverviewScreenDefaults.Gray999,
+            style = MaterialTheme.typography.bodyMedium)
       },
       leadingIcon = {
         if (query.isEmpty()) {
@@ -267,14 +272,13 @@ fun ModernSearchBar(
       modifier =
           modifier
               .fillMaxWidth()
-              .padding(horizontal = HorizontalPadding20, vertical = VerticalPadding12)
+              .padding(horizontal = HorizontalPadding20, vertical = VerticalPadding2)
               .height(SearchBarHeight)
               .testTag(OverviewScreenTestTags.SEARCH_BAR),
       shape = RoundedCornerShape(SearchBarCornerRadius),
       colors =
           SearchBarDefaults.colors(
-              containerColor = MaterialTheme.colorScheme.onPrimary,
-              dividerColor = Color.Transparent),
+              containerColor = Color.Transparent, dividerColor = Color.Transparent),
       shadowElevation = SearchBarElevation,
       content = {})
 }

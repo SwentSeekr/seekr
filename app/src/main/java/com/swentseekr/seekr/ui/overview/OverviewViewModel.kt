@@ -86,7 +86,8 @@ class OverviewViewModel(
         val hunts = repository.getAllHunts()
         huntItems = hunts.map { HuntUiState(it) }.toMutableList()
         loadAuthorProfiles()
-        _uiState.value = _uiState.value.copy(hunts = huntItems, isRefreshing = false)
+        applyFilters()
+        _uiState.value = _uiState.value.copy(isRefreshing = false)
       } catch (e: Exception) {
         _uiState.value = _uiState.value.copy(errorMsg = e.message, isRefreshing = false)
       }

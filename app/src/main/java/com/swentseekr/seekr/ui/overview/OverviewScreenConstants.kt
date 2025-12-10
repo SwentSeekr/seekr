@@ -13,13 +13,14 @@ object OverviewScreenDefaults {
 
   // Spacing & Layout
   val HorizontalPadding20: Dp = 20.dp
+  val VerticalPadding2: Dp = 2.dp
   val VerticalPadding12: Dp = 12.dp
   val VerticalPadding16: Dp = 16.dp
   val VerticalPadding8: Dp = 8.dp
   val ListItemSpacing: Dp = 8.dp
 
   // Search bar
-  val SearchBarHeight: Dp = 70.dp
+  val SearchBarHeight: Dp = 68.dp
   val SearchBarCornerRadius: Dp = 16.dp
   val SearchBarElevation: Dp = 4.dp
 
