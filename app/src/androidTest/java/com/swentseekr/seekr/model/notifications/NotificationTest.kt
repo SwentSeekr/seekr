@@ -268,12 +268,9 @@ class NotificationTest {
   @Test
   fun intentExtras_handleSpecialCharactersInHuntId() {
     val specialHuntId = "hunt_with-special_chars.123"
-
     val intent =
         Intent(context, MainActivity::class.java).apply { putExtra("huntId", specialHuntId) }
-
     val extractedHuntId = intent.getStringExtra("huntId")
-
     assertEquals(specialHuntId, extractedHuntId)
   }
 }
