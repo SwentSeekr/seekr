@@ -58,6 +58,10 @@ object OverviewScreenStrings {
   const val SearchIconDescription = "Search Icon"
   const val ClearIconDescription = "Clear Icon"
   const val FilterBy = "Filter by"
+
+  const val UnKnownAuthor = "Unknown Author"
+  const val Title = "Discover"
+  const val SubTitle = "Find your next adventure"
 }
 
 object OverviewScreenTestTags {

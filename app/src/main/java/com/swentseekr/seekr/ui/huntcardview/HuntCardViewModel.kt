@@ -125,8 +125,11 @@ open class HuntCardViewModel(
                 authorProfiles =
                     _uiState.value.authorProfiles.toMutableMap().apply { put(userId, profile) })
       } catch (e: Exception) {
-        Log.e("HuntCardViewModel", "Error loading author $userId", e)
-        setErrorMsg("Error loading author profile")
+        Log.e(
+            HuntCardViewModelConstants.HuntCardTag,
+            "${HuntCardViewModelConstants.ErrorAuthor} $userId",
+            e)
+        setErrorMsg(HuntCardViewModelConstants.ErrorAuthorSetMsg)
       }
     }
   }
@@ -159,7 +162,7 @@ open class HuntCardViewModel(
         val likedHunts = profileRepository.getLikedHunts(userId)
         _likedHuntsCache.value = likedHunts.map { it.uid }.toSet()
       } catch (e: Exception) {
-        Log.e("HuntCardViewModel", "Error loading liked hunts cache", e)
+        Log.e(HuntCardViewModelConstants.HuntCardTag, HuntCardViewModelConstants.ErrorCacheLike, e)
       }
     }
   }
@@ -359,7 +362,7 @@ open class HuntCardViewModel(
               if (currentlyLiked) add(huntID) else remove(huntID)
             }
         _uiState.value = _uiState.value.copy(isLiked = currentlyLiked)
-        setErrorMsg("Failed to update liked hunt: ${e.message}")
+        setErrorMsg("${HuntCardViewModelConstants.ErrorOnLike} ${e.message}")
       }
     }
   }

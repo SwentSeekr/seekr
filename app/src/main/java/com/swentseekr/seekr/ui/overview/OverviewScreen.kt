@@ -154,7 +154,8 @@ fun OverviewScreen(
 
                     // Retrieve correct profile for THIS hunt
                     val authorProfile = uiStateHuntCard.authorProfiles[authorId]
-                    val author = authorProfile?.author?.pseudonym ?: "Unknown Author"
+                    val author =
+                        authorProfile?.author?.pseudonym ?: OverviewScreenStrings.UnKnownAuthor
 
                     HuntCard(
                         hunt.hunt,
@@ -200,12 +201,12 @@ fun ModernHeader() {
               .background(MaterialTheme.colorScheme.onPrimary)
               .padding(horizontal = HorizontalPadding20, vertical = VerticalPadding16)) {
         Text(
-            text = "Discover",
+            text = OverviewScreenStrings.Title,
             fontSize = OverviewScreenDefaults.DiscoverFontSize,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface)
         Text(
-            text = "Find your next adventure",
+            text = OverviewScreenStrings.SubTitle,
             fontSize = OverviewScreenDefaults.NextAdventureFontSize,
             color = Gray666,
             modifier = Modifier.padding(top = FilterItemPadding))
