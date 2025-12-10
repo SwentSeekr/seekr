@@ -36,12 +36,25 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
+import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.BACK_CONTENT_DESC
+import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.BUTTON_CAMERA
+import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.BUTTON_DELETE
+import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.BUTTON_GALLERY
+import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.BUTTON_REMOVE
+import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.BUTTON_REMOVE_IMAGE
+import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.CONTENT_DESC_ADDITIONAL_IMAGE
+import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.CONTENT_DESC_MAIN_IMAGE
+import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.DELETE_ICON_DESC
+import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.LABEL_ADDITIONAL_IMAGES
+import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.LABEL_IMAGES
+import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.LABEL_MAIN_IMAGE
 import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.REMOVE_BUTTON_TAG_PREFIX
+import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.UNIT_IMAGE
+import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.UNIT_IMAGES
 import com.swentseekr.seekr.ui.profile.createImageUri
 
 /** Represents an additional image associated with a hunt, which can be either remote or local. */
@@ -356,29 +369,27 @@ private fun BaseHuntTopBar(
         IconButton(onClick = onGoBack) {
           Icon(
               imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-              contentDescription = BaseHuntFieldsStrings.BACK_CONTENT_DESC)
+              contentDescription = BACK_CONTENT_DESC)
         }
       },
       actions = {
         if (deleteAction.show && deleteAction.onClick != null) {
 
-          // Delete button toggled via the overflow icon.
           if (showDeleteButton) {
             Button(
                 onClick = deleteAction.onClick,
-                modifier = Modifier.padding(end = 8.dp),
+                modifier = Modifier.padding(end = UICons.SpacerHeightSmall),
                 colors =
                     ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.error,
                         contentColor = MaterialTheme.colorScheme.onError),
-                shape = RoundedCornerShape(999.dp)) {
+                shape = RoundedCornerShape(UICons.ButtonCornerRadius)) {
                   Icon(
                       painter = painterResource(R.drawable.ic_delete),
-                      contentDescription = "Delete hunt",
-                      modifier = Modifier.size(UICons.IconSize),
-                      tint = MaterialTheme.colorScheme.onError)
+                      contentDescription = DELETE_ICON_DESC,
+                      modifier = Modifier.size(UICons.IconSize))
                   Spacer(modifier = Modifier.width(UICons.SpacerHeightSmall))
-                  Text("Delete")
+                  Text(BUTTON_DELETE)
                 }
           }
 
@@ -601,18 +612,18 @@ private fun ImagesSection(
 ) {
   val context = LocalContext.current
 
-  // --- GALLERY LAUNCHERS ---
+  // GALLERY
   val imagePickerLauncher =
       rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         imageCallbacks.onSelectImage(uri)
       }
 
-  val multipleImagesPickerLauncher =
+  val multipleImagesLauncher =
       rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
         imageCallbacks.onSelectOtherImages(uris)
       }
 
-  // --- CAMERA LAUNCHERS ---
+  // CAMERA
   var mainCameraUri by remember { mutableStateOf<Uri?>(null) }
   val mainCameraLauncher =
       rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
@@ -629,56 +640,56 @@ private fun ImagesSection(
         }
       }
 
-  // Unified list of all additional images
-  val combinedImages: List<OtherImage> =
+  val combinedImages =
       uiState.otherImagesUrls.map { OtherImage.Remote(it) } +
           uiState.otherImagesUris.map { OtherImage.Local(it) }
 
-  // --- UI START ---
   Card(
-      modifier = Modifier.fillMaxWidth().shadow(2.dp, RoundedCornerShape(UICons.FieldCornerRadius)),
-      shape = RoundedCornerShape(UICons.FieldCornerRadius),
+      modifier =
+          Modifier.fillMaxWidth()
+              .shadow(UICons.SpacerHeightTiny, RoundedCornerShape(UICons.CardCornerRadius)),
+      shape = RoundedCornerShape(UICons.CardCornerRadius),
       colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         Column(
-            modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-              // --- HEADER ---
+            modifier = Modifier.padding(UICons.CardPadding),
+            verticalArrangement = Arrangement.spacedBy(UICons.CardVArrangement)) {
+
+              // HEADER
               Text(
-                  "Images",
+                  LABEL_IMAGES,
                   style = MaterialTheme.typography.titleMedium,
                   color = MaterialTheme.colorScheme.onSurface)
 
-              // --- MAIN IMAGE SECTION ---
-              Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+              // MAIN IMAGE
+              Column(verticalArrangement = Arrangement.spacedBy(UICons.SpacerHeightSmall)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                    horizontalArrangement = Arrangement.SpaceBetween) {
                       Text(
-                          "Main image",
+                          LABEL_MAIN_IMAGE,
                           style = MaterialTheme.typography.labelLarge,
                           color = MaterialTheme.colorScheme.onSurfaceVariant)
 
                       if (!uiState.mainImageUrl.isNullOrBlank()) {
                         Text(
-                            "1 image",
+                            "1 $UNIT_IMAGE",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary)
                       }
                     }
 
-                // Preview ou boutons de sélection
                 if (uiState.mainImageUrl.isNullOrBlank()) {
                   Row(
                       modifier = Modifier.fillMaxWidth(),
-                      horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                      horizontalArrangement = Arrangement.spacedBy(UICons.RowHArrangement)) {
                         ImageActionButton(
-                            label = "Gallery",
+                            label = BUTTON_GALLERY,
                             icon = R.drawable.gallerie_image,
                             onClick = { imagePickerLauncher.launch("image/*") },
-                            modifier = Modifier.weight(1f))
+                            modifier = Modifier.weight(UICons.WeightTextField))
 
                         ImageActionButton(
-                            label = "Camera",
+                            label = BUTTON_CAMERA,
                             icon = R.drawable.camera_icon,
                             onClick = {
                               val uri = createImageUri(context)
@@ -687,7 +698,7 @@ private fun ImagesSection(
                                 mainCameraLauncher.launch(uri)
                               }
                             },
-                            modifier = Modifier.weight(1f))
+                            modifier = Modifier.weight(UICons.WeightTextField))
                       }
                 } else {
                   MainImagePreview(
@@ -696,24 +707,26 @@ private fun ImagesSection(
                 }
               }
 
-              Divider(
-                  color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                  thickness = 1.dp)
+              // DIVIDER
+              HorizontalDivider(
+                  thickness = UICons.DividerThickness,
+                  color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = UICons.ChangeAlpha))
 
-              // --- ADDITIONAL IMAGES SECTION ---
-              Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+              // ADDITIONAL IMAGES
+              Column(verticalArrangement = Arrangement.spacedBy(UICons.SpacerHeightSmall)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                    horizontalArrangement = Arrangement.SpaceBetween) {
                       Text(
-                          "Additional images",
+                          LABEL_ADDITIONAL_IMAGES,
                           style = MaterialTheme.typography.labelLarge,
                           color = MaterialTheme.colorScheme.onSurfaceVariant)
 
                       if (combinedImages.isNotEmpty()) {
                         Text(
-                            "${combinedImages.size} ${if (combinedImages.size == 1) "image" else "images"}",
+                            "${combinedImages.size} ${
+                                if (combinedImages.size == 1) UNIT_IMAGE else UNIT_IMAGES
+                            }",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary)
                       }
@@ -721,15 +734,15 @@ private fun ImagesSection(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    horizontalArrangement = Arrangement.spacedBy(UICons.RowHArrangement)) {
                       ImageActionButton(
-                          label = "Gallery",
+                          label = BUTTON_GALLERY,
                           icon = R.drawable.gallerie_image,
-                          onClick = { multipleImagesPickerLauncher.launch("image/*") },
-                          modifier = Modifier.weight(1f))
+                          onClick = { multipleImagesLauncher.launch("image/*") },
+                          modifier = Modifier.weight(UICons.WeightTextField))
 
                       ImageActionButton(
-                          label = "Camera",
+                          label = BUTTON_CAMERA,
                           icon = R.drawable.camera_icon,
                           onClick = {
                             val uri = createImageUri(context)
@@ -738,7 +751,7 @@ private fun ImagesSection(
                               otherCameraLauncher.launch(uri)
                             }
                           },
-                          modifier = Modifier.weight(1f))
+                          modifier = Modifier.weight(UICons.WeightTextField))
                     }
 
                 AdditionalImagesList(images = combinedImages, imageCallbacks = imageCallbacks)
@@ -756,19 +769,22 @@ private fun ImageActionButton(
 ) {
   OutlinedButton(
       onClick = onClick,
-      modifier = modifier.height(48.dp),
-      shape = RoundedCornerShape(12.dp),
+      modifier = modifier.height(UICons.ImageButtonHeight),
+      shape = RoundedCornerShape(UICons.ImageButtonCornerRadius),
       colors =
           ButtonDefaults.outlinedButtonColors(
               containerColor = MaterialTheme.colorScheme.surface,
               contentColor = MaterialTheme.colorScheme.onSurface),
-      border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))) {
+      border =
+          BorderStroke(
+              UICons.SpacerHeightTiny,
+              MaterialTheme.colorScheme.outline.copy(alpha = UICons.Alpha03))) {
         Image(
             painter = painterResource(icon),
             contentDescription = label,
-            modifier = Modifier.size(20.dp),
+            modifier = Modifier.size(UICons.IconSize),
         )
-        Spacer(Modifier.width(8.dp))
+        Spacer(Modifier.width(UICons.SpacerHeightSmall))
         Text(label, style = MaterialTheme.typography.labelLarge)
       }
 }
@@ -780,20 +796,24 @@ private fun MainImagePreview(
 ) {
   Card(
       modifier = Modifier.fillMaxWidth(),
-      shape = RoundedCornerShape(12.dp),
+      shape = RoundedCornerShape(UICons.ImageCornerRadius),
       colors =
           CardDefaults.cardColors(
-              containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))) {
-        Column(modifier = Modifier.padding(12.dp)) {
+              containerColor =
+                  MaterialTheme.colorScheme.surfaceVariant.copy(alpha = UICons.Alpha03))) {
+        Column(modifier = Modifier.padding(UICons.CardRowPadding)) {
           AsyncImage(
               model = imageUrl,
-              contentDescription = BaseHuntFieldsStrings.CONTENT_DESC_SELECTED_IMAGE,
-              modifier = Modifier.fillMaxWidth().height(200.dp).clip(RoundedCornerShape(8.dp)),
+              contentDescription = CONTENT_DESC_MAIN_IMAGE,
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .height(UICons.ImageHeight)
+                      .clip(RoundedCornerShape(UICons.ImageCornerRadius)),
               contentScale = ContentScale.Crop,
               placeholder = painterResource(R.drawable.empty_image),
               error = painterResource(R.drawable.empty_image))
 
-          Spacer(modifier = Modifier.height(8.dp))
+          Spacer(modifier = Modifier.height(UICons.SpacerHeightSmall))
 
           TextButton(
               onClick = onDelete,
@@ -802,10 +822,10 @@ private fun MainImagePreview(
                   ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) {
                 Icon(
                     painter = painterResource(R.drawable.ic_delete),
-                    contentDescription = "Delete main image",
-                    modifier = Modifier.size(18.dp))
-                Spacer(modifier = Modifier.width(6.dp))
-                Text("Remove image", style = MaterialTheme.typography.labelLarge)
+                    contentDescription = DELETE_ICON_DESC,
+                    modifier = Modifier.size(UICons.IconSize))
+                Spacer(modifier = Modifier.width(UICons.SpacerHeightSmall))
+                Text(BUTTON_REMOVE_IMAGE, style = MaterialTheme.typography.labelLarge)
               }
         }
       }
@@ -818,7 +838,7 @@ private fun AdditionalImagesList(
 ) {
   if (images.isEmpty()) return
 
-  Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+  Column(verticalArrangement = Arrangement.spacedBy(UICons.SpacerHeightSmall)) {
     images.forEach { image ->
       AdditionalImageItem(
           image = image,
@@ -847,26 +867,27 @@ private fun AdditionalImageItem(
 
   Card(
       modifier = Modifier.fillMaxWidth(),
-      shape = RoundedCornerShape(12.dp),
+      shape = RoundedCornerShape(UICons.ImageThumbCornerRadius),
       colors =
           CardDefaults.cardColors(
-              containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))) {
+              containerColor =
+                  MaterialTheme.colorScheme.surfaceVariant.copy(alpha = UICons.Alpha03))) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            modifier = Modifier.fillMaxWidth().padding(UICons.CardRowPadding),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
               AsyncImage(
                   model = model,
-                  contentDescription = BaseHuntFieldsStrings.CONTENT_DESC_SECONDARY_IMAGE,
+                  contentDescription = CONTENT_DESC_ADDITIONAL_IMAGE,
                   modifier =
                       Modifier.testTag("otherImage_$tagSuffix")
-                          .size(80.dp)
-                          .clip(RoundedCornerShape(8.dp)),
+                          .size(UICons.ImageThumbSize)
+                          .clip(RoundedCornerShape(UICons.ImageThumbCornerRadius)),
                   contentScale = ContentScale.Crop,
                   placeholder = painterResource(R.drawable.empty_image),
                   error = painterResource(R.drawable.empty_image))
 
-              Spacer(modifier = Modifier.width(12.dp))
+              Spacer(modifier = Modifier.width(UICons.SpacerHeight))
 
               TextButton(
                   modifier = Modifier.testTag("$REMOVE_BUTTON_TAG_PREFIX$tagSuffix"),
@@ -881,10 +902,10 @@ private fun AdditionalImageItem(
                           contentColor = MaterialTheme.colorScheme.error)) {
                     Icon(
                         painter = painterResource(R.drawable.ic_delete),
-                        contentDescription = BaseHuntFieldsStrings.DELETE_ICON_DESC,
-                        modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text("Remove", style = MaterialTheme.typography.labelLarge)
+                        contentDescription = DELETE_ICON_DESC,
+                        modifier = Modifier.size(UICons.IconSize))
+                    Spacer(modifier = Modifier.width(UICons.SpacerHeightSmall))
+                    Text(BUTTON_REMOVE, style = MaterialTheme.typography.labelLarge)
                   }
             }
       }
