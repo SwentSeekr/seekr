@@ -113,15 +113,15 @@ class EditProfileViewModel(
     updateChangesFlags(newState)
   }
 
-  /** Verification of Pseudonym **/
-
+  /** Verification of Pseudonym * */
   fun validatePseudonym(pseudonym: String) {
-    _uiState.value = _uiState.value.copy(
-      pseudonymError = when {
-        ProfileUtils().isValidPseudonym(pseudonym) -> null
-        else -> OnboardingFlowStrings.ERROR_PSEUDONYM_INVALID
-      }
-    )
+    _uiState.value =
+        _uiState.value.copy(
+            pseudonymError =
+                when {
+                  ProfileUtils().isValidPseudonym(pseudonym) -> null
+                  else -> OnboardingFlowStrings.ERROR_PSEUDONYM_INVALID
+                })
 
     if (_uiState.value.pseudonymError == null && pseudonym.isNotBlank()) {
       checkPseudonymAvailability(pseudonym)
@@ -134,25 +134,24 @@ class EditProfileViewModel(
       _uiState.value = _uiState.value.copy(isCheckingPseudonym = true)
 
       try {
-        val isAvailable = pseudonym == lastSavedFullProfile?.author?.pseudonym || pseudonym !in repository.getAllPseudonyms()
+        val isAvailable =
+            pseudonym == lastSavedFullProfile?.author?.pseudonym ||
+                pseudonym !in repository.getAllPseudonyms()
 
-        _uiState.value = _uiState.value.copy(
-          pseudonymError = if (!isAvailable) {
-            OnboardingFlowStrings.ERROR_PSEUDONYM_TAKEN
-          } else {
-            null
-          },
-          isCheckingPseudonym = false
-        )
+        _uiState.value =
+            _uiState.value.copy(
+                pseudonymError =
+                    if (!isAvailable) {
+                      OnboardingFlowStrings.ERROR_PSEUDONYM_TAKEN
+                    } else {
+                      null
+                    },
+                isCheckingPseudonym = false)
       } catch (e: Exception) {
-        _uiState.value = _uiState.value.copy(
-          pseudonymError = null,
-          isCheckingPseudonym = false
-        )
+        _uiState.value = _uiState.value.copy(pseudonymError = null, isCheckingPseudonym = false)
       }
     }
   }
-
 
   /** Update bio and recompute flags */
   fun updateBio(bio: String) {

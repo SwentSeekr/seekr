@@ -37,7 +37,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.swentseekr.seekr.ui.auth.OnboardingFlowDimensions
 import com.swentseekr.seekr.ui.auth.OnboardingFlowStrings
 import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.MAX_BIO_LENGTH
-import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.MAX_PSEUDONYM_LENGTH
 import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.PROFILE_PIC_DEFAULT
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.BUTTON_CAMERA
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.BUTTON_CANCEL
@@ -49,7 +48,6 @@ import com.swentseekr.seekr.ui.profile.EditProfileStrings.DIALOG_MESSAGE
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.DIALOG_TITLE
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.ERROR_BIO_MAX
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.ERROR_PSEUDONYM_EMPTY
-import com.swentseekr.seekr.ui.profile.EditProfileStrings.ERROR_PSEUDONYM_MAX
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.FIELD_LABEL_BIO
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.FIELD_LABEL_PSEUDONYM
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.SUCCESS_UPDATE
@@ -304,38 +302,31 @@ fun EditProfileContent(
                           when {
                             isCheckingPseudonym -> {
                               Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(OnboardingFlowDimensions.SPACING_SMALL)
-                              ) {
-                                CircularProgressIndicator(
-                                  modifier = Modifier.size(OnboardingFlowDimensions.SIZE_MEDIUM),
-                                  strokeWidth = OnboardingFlowDimensions.STROKE_WIDTH
-                                )
-                                Text(
-                                  OnboardingFlowStrings.CHECKING_AVAILABILITY,
-                                  style = MaterialTheme.typography.bodySmall
-                                )
-                              }
+                                  verticalAlignment = Alignment.CenterVertically,
+                                  horizontalArrangement =
+                                      Arrangement.spacedBy(
+                                          OnboardingFlowDimensions.SPACING_SMALL)) {
+                                    CircularProgressIndicator(
+                                        modifier =
+                                            Modifier.size(OnboardingFlowDimensions.SIZE_MEDIUM),
+                                        strokeWidth = OnboardingFlowDimensions.STROKE_WIDTH)
+                                    Text(
+                                        OnboardingFlowStrings.CHECKING_AVAILABILITY,
+                                        style = MaterialTheme.typography.bodySmall)
+                                  }
                             }
                             pseudonymError != null -> {
-                              Text(
-                                pseudonymError,
-                                color = MaterialTheme.colorScheme.error
-                              )
+                              Text(pseudonymError, color = MaterialTheme.colorScheme.error)
                             }
                           }
                         },
                         trailingIcon = {
                           AnimatedVisibility(
-                            visible = isCheckingPseudonym,
-                            enter = fadeIn(),
-                            exit = fadeOut()
-                          ) {
-                            CircularProgressIndicator(
-                              modifier = Modifier.size(OnboardingFlowDimensions.SIZE_LARGE),
-                              strokeWidth = OnboardingFlowDimensions.STROKE_WIDTH
-                            )
-                          }
+                              visible = isCheckingPseudonym, enter = fadeIn(), exit = fadeOut()) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(OnboardingFlowDimensions.SIZE_LARGE),
+                                    strokeWidth = OnboardingFlowDimensions.STROKE_WIDTH)
+                              }
                         },
                         modifier =
                             Modifier.fillMaxWidth().testTag(EditProfileTestTags.PSEUDONYM_FIELD),
@@ -345,7 +336,6 @@ fun EditProfileContent(
                                 unfocusedBorderColor =
                                     MaterialTheme.colorScheme.outline.copy(alpha = UI_C.ALPHA_MID),
                                 focusedBorderColor = MaterialTheme.colorScheme.primary))
-
 
                     OutlinedTextField(
                         value = uiState.bio,

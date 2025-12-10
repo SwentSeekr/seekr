@@ -37,7 +37,8 @@ object OnboardingFlowStrings {
   const val PSEUDONYM_LABEL = "Pseudonym"
   const val BIO_LABEL = "Bio"
   const val FINISH_BUTTON = "Finish"
-  const val ERROR_PSEUDONYM_INVALID = "Pseudonym is invalid. It must be between 3 and 30 characters."
+  const val ERROR_PSEUDONYM_INVALID =
+      "Pseudonym is invalid. It must be between 3 and 30 characters."
   const val ERROR_PSEUDONYM_TAKEN = "This pseudonym is already taken. Please choose another one."
   const val CHECKING_AVAILABILITY = "Checking availability..."
 }

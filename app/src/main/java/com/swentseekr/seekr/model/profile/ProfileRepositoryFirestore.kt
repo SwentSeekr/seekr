@@ -166,7 +166,6 @@ class ProfileRepositoryFirestore(
     return defaultProfile
   }
 
-
   override suspend fun getAllPseudonyms(): List<String> {
     return try {
       val snapshot = profilesCollection.get().await()
@@ -178,10 +177,9 @@ class ProfileRepositoryFirestore(
       }
     } catch (e: Exception) {
       Log.e(
-        ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
-        "Failed to fetch pseudonyms",
-        e
-      )
+          ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
+          "Failed to fetch pseudonyms",
+          e)
       emptyList()
     }
   }

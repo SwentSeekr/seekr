@@ -12,14 +12,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class OnboardingState(
-  val step: Int = 1,
-  val showingFullTerms: Boolean = false,
-  val pseudonymError: String? = null,
-  val isCheckingPseudonym: Boolean = false
+    val step: Int = 1,
+    val showingFullTerms: Boolean = false,
+    val pseudonymError: String? = null,
+    val isCheckingPseudonym: Boolean = false
 )
 
-class OnboardingViewModel (
-  private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository
+class OnboardingViewModel(
+    private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository
 ) : ViewModel(), OnboardingHandler {
 
   private val _state = MutableStateFlow(OnboardingState())
@@ -37,14 +37,14 @@ class OnboardingViewModel (
     _state.update { it.copy(step = 4) }
   }
 
-
   fun validatePseudonym(pseudonym: String) {
-    _state.value = _state.value.copy(
-      pseudonymError = when {
-        ProfileUtils().isValidPseudonym(pseudonym) -> null
-        else -> OnboardingFlowStrings.ERROR_PSEUDONYM_INVALID
-      }
-    )
+    _state.value =
+        _state.value.copy(
+            pseudonymError =
+                when {
+                  ProfileUtils().isValidPseudonym(pseudonym) -> null
+                  else -> OnboardingFlowStrings.ERROR_PSEUDONYM_INVALID
+                })
 
     if (_state.value.pseudonymError == null && pseudonym.isNotBlank()) {
       checkPseudonymAvailability(pseudonym)
@@ -58,19 +58,17 @@ class OnboardingViewModel (
       try {
         val isAvailable = pseudonym !in profileRepository.getAllPseudonyms()
 
-        _state.value = _state.value.copy(
-          pseudonymError = if (!isAvailable) {
-            OnboardingFlowStrings.ERROR_PSEUDONYM_TAKEN
-          } else {
-            null
-          },
-          isCheckingPseudonym = false
-        )
+        _state.value =
+            _state.value.copy(
+                pseudonymError =
+                    if (!isAvailable) {
+                      OnboardingFlowStrings.ERROR_PSEUDONYM_TAKEN
+                    } else {
+                      null
+                    },
+                isCheckingPseudonym = false)
       } catch (e: Exception) {
-        _state.value = _state.value.copy(
-          pseudonymError = null,
-          isCheckingPseudonym = false
-        )
+        _state.value = _state.value.copy(pseudonymError = null, isCheckingPseudonym = false)
       }
     }
   }

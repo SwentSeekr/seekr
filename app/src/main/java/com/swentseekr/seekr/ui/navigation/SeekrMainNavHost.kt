@@ -91,7 +91,9 @@ sealed class SeekrDestination(
   object AddHunt : SeekrDestination("add_hunt", "Add Hunt", Icons.Filled.List)
 
   object Settings : SeekrDestination("settings", "Settings", Icons.Filled.List)
-  object TermsConditions : SeekrDestination("terms_conditions", "Terms & Conditions", Icons.Filled.List)
+
+  object TermsConditions :
+      SeekrDestination("terms_conditions", "Terms & Conditions", Icons.Filled.List)
 
   object EditProfile : SeekrDestination("edit_profile", "Edit Profile", Icons.Filled.List)
 
@@ -419,18 +421,13 @@ fun SeekrMainNavHost(
 
               // Terms and Conditions
               composable(SeekrDestination.TermsConditions.route) {
-                  Surface(
-                      modifier =
-                          Modifier
-                              .fillMaxSize()
-                              .testTag(NavigationTestTags.TERMS_CONDITIONS_SCREEN)
-                  ) {
-                      TermsAndConditionsScreen(
-                          onGoBack = { navController.popBackStack() }
-                      )
-                  }
+                Surface(
+                    modifier =
+                        Modifier.fillMaxSize()
+                            .testTag(NavigationTestTags.TERMS_CONDITIONS_SCREEN)) {
+                      TermsAndConditionsScreen(onGoBack = { navController.popBackStack() })
+                    }
               }
-
 
               // Review Images Screen
               composable(
