@@ -77,6 +77,12 @@ fun ProfileReviewsScreen(
     if (testProfile == null && profile != null) profileViewModel.loadAllReviewsForProfile(profile)
   }
 
+    LaunchedEffect(reviews) {
+        reviews.forEach { review ->
+            reviewHuntViewModel.loadHunt(review.huntId)
+            reviewHuntViewModel.loadAuthorProfile(review.authorId)
+        }
+    }
   Scaffold(
       modifier = Modifier.testTag(ProfileReviewsTestTags.SCREEN),
       topBar = {
@@ -126,14 +132,6 @@ fun ProfileReviewsScreen(
                 thickness = DividerDefaults.Thickness,
                 color = DividerDefaults.color)
 
-            // ProfileReviewsScreen
-            LaunchedEffect(reviews) {
-              reviews.forEach { review ->
-                reviewHuntViewModel.loadHunt(review.huntId)
-                reviewHuntViewModel.loadAuthorProfile(review.authorId)
-              }
-            }
-
             // Scrollable list of reviews
             LazyColumn(
                 modifier = Modifier.fillMaxSize().testTag(ProfileReviewsTestTags.REVIEWS_LIST),
@@ -150,13 +148,15 @@ fun ProfileReviewsScreen(
                     }
                   } else {
                     items(reviews) { review ->
-                      Box(
+                        val authorProfile = reviewHuntViewModel.uiState.collectAsState().value.authorProfiles[review.authorId]
+
+                        Box(
                           modifier =
                               Modifier.testTag(
                                   ProfileReviewsTestTags.reviewCardTag(review.reviewId))) {
                             ModernReviewCard(
                                 review = review,
-                                reviewHuntViewModel = reviewHuntViewModel,
+                                authorProfile = authorProfile,
                                 currentUserId = profileViewModel.currentUid,
                                 navController = navController,
                                 onDeleteReview = { reviewId ->

@@ -60,6 +60,7 @@ import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
 import com.swentseekr.seekr.ui.huntcardview.HuntCardUiState
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
+import com.swentseekr.seekr.ui.profile.Profile
 import com.swentseekr.seekr.ui.profile.ProfilePicture
 
 /**
@@ -113,9 +114,13 @@ fun HuntCardScreen(
   val authorProfile = uiState.authorProfile
   val reviews = uiState.reviewList
 
-  val currentUserId = uiState.currentUserId
+    val currentUserId = uiState.currentUserId
+    LoadHuntCardScreenData(huntId, uiState, huntCardViewModel)
 
-  val isAuthor = currentUserId == authorId
+    LaunchedEffect(reviews) {
+        reviews.forEach { review -> reviewViewModel.loadAuthorProfile(review.authorId) }
+    }
+    val isAuthor = currentUserId == authorId
 
   val hasUserReview = currentUserId != null && reviews.any { it.authorId == currentUserId }
   val canUserAddReview = !isAuthor && !hasUserReview
@@ -207,9 +212,10 @@ fun HuntCardScreen(
             item { ModernEmptyReviewsState() }
           } else {
             items(reviews) { review ->
-              ModernReviewCard(
+                val reviewAuthorProfile = reviewViewModel.uiState.collectAsState().value.authorProfiles[review.authorId]
+                ModernReviewCard(
                   review = review,
-                  reviewHuntViewModel = reviewViewModel,
+                  authorProfile = reviewAuthorProfile,
                   currentUserId = currentUserId,
                   navController = navController,
                   onDeleteReview = { reviewId ->
@@ -598,17 +604,18 @@ fun ModernEmptyReviewsState() {
 @Composable
 fun ModernReviewCard(
     review: HuntReview,
-    reviewHuntViewModel: ReviewHuntViewModel,
+    authorProfile: Profile?,
+    //reviewHuntViewModel: ReviewHuntViewModel,
     currentUserId: String?,
     navController: NavHostController,
     onDeleteReview: (String) -> Unit,
 ) {
-  val uiState by reviewHuntViewModel.uiState.collectAsState()
+  //val uiState by reviewHuntViewModel.uiState.collectAsState()
 
   val authorId = review.authorId
 
-  LaunchedEffect(authorId) { reviewHuntViewModel.loadAuthorProfile(authorId) }
-  val authorProfile = uiState.authorProfiles[authorId]
+ // LaunchedEffect(authorId) { reviewHuntViewModel.loadAuthorProfile(authorId) }
+  //val authorProfile = uiState.authorProfiles[authorId]
 
   val isCurrentId = currentUserId == authorId
 
@@ -672,7 +679,7 @@ fun ModernReviewCard(
 
             Button(
                 onClick = {
-                  reviewHuntViewModel.loadReviewImages(review.photos)
+                  //reviewHuntViewModel.loadReviewImages(review.photos)
                   navController.navigate("reviewImages/${review.reviewId}")
                 },
                 modifier = Modifier.testTag("SEE_PICTURES_BUTTON"),
