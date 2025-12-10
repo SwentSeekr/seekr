@@ -171,7 +171,7 @@ fun ReviewRepliesCollapsedHeader(
                 ),
             verticalAlignment = Alignment.CenterVertically) {
               Icon(
-                  imageVector = Icons.Default.Send,
+                  imageVector = Icons.Filled.Send,
                   contentDescription = null,
                   tint =
                       MaterialTheme.colorScheme.primary.copy(
@@ -480,7 +480,7 @@ fun ReplyButton(onClick: () -> Unit) {
           ButtonDefaults.textButtonColors(
               contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
         Icon(
-            imageVector = Icons.Default.Send,
+            imageVector = Icons.Filled.Send,
             contentDescription = ReviewRepliesStrings.ReplyContentDescription,
             modifier = Modifier.size(ReviewRepliesDimensions.ReplyButtonIconSize))
         Spacer(modifier = Modifier.width(ReviewRepliesDimensions.ReplyButtonIconSpacing))
@@ -733,7 +733,7 @@ fun ComposerSendButton(
             modifier = Modifier.size(ReviewRepliesDimensions.SendButtonInnerSize)) {
               Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                 Icon(
-                    imageVector = Icons.Default.Send,
+                    imageVector = Icons.Filled.Send,
                     contentDescription = ReviewRepliesStrings.SendContentDescription,
                     tint =
                         if (isActive) MaterialTheme.colorScheme.onPrimary
