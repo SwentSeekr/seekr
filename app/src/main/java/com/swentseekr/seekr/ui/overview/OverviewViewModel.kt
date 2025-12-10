@@ -95,13 +95,11 @@ class OverviewViewModel(
 
   /** Loads and caches the profiles of all authors associated with the current list of hunts */
   private suspend fun loadAuthorProfiles() {
-    viewModelScope.launch {
       val authorIds = huntItems.map { it.hunt.authorId }.distinct()
       authorIds.forEach { authorId ->
         if (!authorProfiles.containsKey(authorId)) {
           authorProfiles[authorId] = profileRepository.getProfile(authorId)
         }
-      }
     }
   }
   /**

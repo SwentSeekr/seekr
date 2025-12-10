@@ -22,6 +22,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * UI state for the Hunt Card screen.
+ *
+ * @param hunt The currently loaded hunt (if any).
+ * @param reviewList List of reviews for the hunt.
+ * @param isLiked Whether the current user has liked this hunt.
+ * @param isAchieved Whether the current user has completed this hunt.
+ * @param errorMsg Optional error message to show in the UI.
+ * @param currentUserId The ID of the logged-in user.
+ * @param authorProfile The profile of the hunt's author (single hunt view).
+ * @param authorProfiles Map of multiple author profiles (for overview screen).
+ */
 data class HuntCardUiState(
     val hunt: Hunt? = null,
     val reviewList: List<HuntReview> = emptyList(),
@@ -33,6 +45,21 @@ data class HuntCardUiState(
     val authorProfiles: Map<String, Profile?> = emptyMap()
 )
 
+/**
+ * ViewModel responsible for managing the state and business logic of the Hunt Card screen.
+ *
+ * Handles:
+ * - Loading hunts and their reviews
+ * - Loading author profiles
+ * - Tracking likes and achievements
+ * - Deleting hunts and reviews
+ * - User interaction state (likes, achievements)
+ *
+ * @property huntRepository Repository to load, edit, and delete hunts.
+ * @property reviewRepository Repository to load and manage hunt reviews.
+ * @property profileRepository Repository to load and manage user profiles.
+ * @property imageRepository Repository to manage review images.
+ */
 open class HuntCardViewModel(
     private val huntRepository: HuntsRepository = HuntRepositoryProvider.repository,
     private val reviewRepository: HuntReviewRepository = HuntReviewRepositoryProvider.repository,
@@ -54,12 +81,20 @@ open class HuntCardViewModel(
   fun clearErrorMsg() {
     _uiState.value = _uiState.value.copy(errorMsg = null)
   }
-  /** Sets an error message in the UI state. */
+  /**
+   * Sets an error message in the UI state.
+   *
+   * @param error The message to display.
+   */
   fun setErrorMsg(error: String) {
     _uiState.value = _uiState.value.copy(errorMsg = error)
   }
 
-  /** Loads the profile of the Maker of the hunt */
+    /**
+     * Loads the profile of the author of a hunt and updates [authorProfile].
+     *
+     * @param userID The ID of the author whose profile is being fetched.
+     */
   open fun loadAuthorProfile(userID: String) {
     viewModelScope.launch {
       try {
@@ -96,7 +131,11 @@ open class HuntCardViewModel(
     }
   }
 
-  /** Loads current user ID in the UI state. */
+  /**
+   * Loads current user ID in the UI state.
+   *
+   * Also loads the user's liked hunts into cache.
+   */
   open fun loadCurrentUserID() {
     viewModelScope.launch {
       try {
@@ -125,7 +164,11 @@ open class HuntCardViewModel(
     }
   }
 
-  /** Loads reviews for a specific hunt.* */
+  /**
+   * Loads all reviews belonging to a hunt and updates the UI state.
+   *
+   * @param huntID The ID of the hunt whose reviews are being fetched.
+   */
   open fun loadOtherReview(huntID: String) {
     viewModelScope.launch {
       try {
@@ -184,7 +227,7 @@ open class HuntCardViewModel(
   /**
    * Loads the Author of a Hunt by its ID.
    *
-   * @param huntID the id of the hunt
+   * @param huntID The ID of the hunt whose author is requested.
    */
   fun loadHuntAuthor(huntID: String) {
     viewModelScope.launch {
@@ -204,7 +247,7 @@ open class HuntCardViewModel(
   /**
    * Deletes a Hunt by its ID.
    *
-   * @param huntID the id of the hunt to delete
+   * @param huntID the id of the hunt to delete.
    */
   fun deleteHunt(huntID: String) {
     viewModelScope.launch {
@@ -267,7 +310,12 @@ open class HuntCardViewModel(
     }
   }
 
-  /** Edits a Hunt by its ID. */
+    /**
+     * Updates a hunt with new data.
+     *
+     * @param huntID The ID of the hunt to update.
+     * @param newValue The updated Hunt object containing new values.
+     */
   fun editHunt(huntID: String, newValue: Hunt) {
     viewModelScope.launch {
       try {
@@ -281,10 +329,15 @@ open class HuntCardViewModel(
       }
     }
   }
-  /**
-   * Toggles the 'like' botton of a hunt item identified by [huntID] and adds it to the profile
-   * likesList. Will be modify later
-   */
+    /**
+     * Toggles the like state of a hunt.
+     *
+     * Updates:
+     * - Local cache (`likedHuntsCache`)
+     * - Firebase profile repository
+     *
+     * @param huntID The ID of the hunt to like or unlike.
+     */
   open fun onLikeClick(huntID: String) {
     val currentUserId = _uiState.value.currentUserId ?: return
     val currentlyLiked = _likedHuntsCache.value.contains(huntID)
@@ -311,6 +364,14 @@ open class HuntCardViewModel(
     }
   }
 
+    /**
+     * Initializes the UI state for the Hunt Card screen.
+     *
+     * Used when loading a hunt inside an existing user session.
+     *
+     * @param userId The ID of the current user.
+     * @param hunt The Hunt to display.
+     */
   fun initialize(userId: String, hunt: Hunt) {
     viewModelScope.launch {
       try {
@@ -324,10 +385,13 @@ open class HuntCardViewModel(
     }
   }
 
-  /**
-   * Filters the hunts to show only those that have been achieved by the user and adds it to the
-   * profile AchievedList. Will be modify later
-   */
+    /**
+     * Marks the current hunt as "achieved" (completed) for the current user.
+     *
+     * Updates:
+     * - The Firebase profile repository
+     * - UI state
+     */
   fun onDoneClick() {
     val currentHuntUiState = _uiState.value
     val currentUserId = _uiState.value.currentUserId
