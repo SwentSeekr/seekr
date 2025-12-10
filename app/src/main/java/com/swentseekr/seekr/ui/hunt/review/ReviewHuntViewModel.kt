@@ -192,7 +192,7 @@ open class ReviewHuntViewModel(
               context,
               AddReviewScreenStrings.NEW_REVIEW_TITLE,
               AddReviewScreenStrings.NEW_REVIEW_MESSAGE,
-              hunt.uid  )
+              hunt.uid)
         }
         _uiState.value =
             _uiState.value.copy(saveSuccessful = true, errorMsg = null, isSubmitted = true)

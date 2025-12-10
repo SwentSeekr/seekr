@@ -460,7 +460,7 @@ class ReviewHuntViewModelTest {
     val context = mockk<Context>(relaxed = true)
 
     mockkObject(NotificationHelper)
-    every { NotificationHelper.sendNotification(any(), any(), any()) } just Runs
+    every { NotificationHelper.sendNotification(any(), any(), any(), any()) } just Runs
 
     viewModel.setReviewText("Amazing hunt!")
     viewModel.setRating(5.0)
@@ -470,7 +470,8 @@ class ReviewHuntViewModelTest {
     testScheduler.advanceUntilIdle()
 
     verify {
-      NotificationHelper.sendNotification(context, "New review added", "You added a new review!")
+      NotificationHelper.sendNotification(
+          context, "New review added", "You added a new review!", "hunt123")
     }
 
     val reviews = fakeReviewRepository.getHuntReviews(testHunt.uid)
@@ -485,7 +486,7 @@ class ReviewHuntViewModelTest {
     val context = mockk<Context>(relaxed = true)
 
     mockkObject(NotificationHelper)
-    every { NotificationHelper.sendNotification(any(), any(), any()) } throws
+    every { NotificationHelper.sendNotification(any(), any(), any(), any()) } throws
         RuntimeException("Notification failed")
 
     viewModel.setReviewText("Great hunt!")

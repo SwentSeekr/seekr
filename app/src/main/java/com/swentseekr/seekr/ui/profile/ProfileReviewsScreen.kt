@@ -77,12 +77,12 @@ fun ProfileReviewsScreen(
     if (testProfile == null && profile != null) profileViewModel.loadAllReviewsForProfile(profile)
   }
 
-    LaunchedEffect(reviews) {
-        reviews.forEach { review ->
-            reviewHuntViewModel.loadHunt(review.huntId)
-            reviewHuntViewModel.loadAuthorProfile(review.authorId)
-        }
+  LaunchedEffect(reviews) {
+    reviews.forEach { review ->
+      reviewHuntViewModel.loadHunt(review.huntId)
+      reviewHuntViewModel.loadAuthorProfile(review.authorId)
     }
+  }
   Scaffold(
       modifier = Modifier.testTag(ProfileReviewsTestTags.SCREEN),
       topBar = {
@@ -148,9 +148,13 @@ fun ProfileReviewsScreen(
                     }
                   } else {
                     items(reviews) { review ->
-                        val authorProfile = reviewHuntViewModel.uiState.collectAsState().value.authorProfiles[review.authorId]
+                      val authorProfile =
+                          reviewHuntViewModel.uiState
+                              .collectAsState()
+                              .value
+                              .authorProfiles[review.authorId]
 
-                        Box(
+                      Box(
                           modifier =
                               Modifier.testTag(
                                   ProfileReviewsTestTags.reviewCardTag(review.reviewId))) {

@@ -38,7 +38,7 @@ class MyFirebaseMessagingServiceTest {
     every { Log.e(any(), any(), any()) } returns 0
 
     mockkObject(NotificationHelper)
-    every { NotificationHelper.sendNotification(any(), any(), any()) } just Runs
+    every { NotificationHelper.sendNotification(any(), any(), any(), any()) } just Runs
   }
 
   @After
@@ -56,7 +56,7 @@ class MyFirebaseMessagingServiceTest {
 
     service.onMessageReceived(remoteMessage)
 
-    verify { NotificationHelper.sendNotification(service, "Hello", "World") }
+    verify { NotificationHelper.sendNotification(service, "Hello", "World", null) }
   }
 
   @Test
@@ -66,7 +66,7 @@ class MyFirebaseMessagingServiceTest {
 
     service.onMessageReceived(remoteMessage)
 
-    verify { NotificationHelper.sendNotification(service, "New Notification", "") }
+    verify { NotificationHelper.sendNotification(service, "New Notification", "", null) }
   }
 
   @Test

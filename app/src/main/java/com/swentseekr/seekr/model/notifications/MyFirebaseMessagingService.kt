@@ -12,8 +12,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     val title =
         remoteMessage.notification?.title ?: NotificationConstants.DEFAULT_NOTIFICATION_TITLE
     val body = remoteMessage.notification?.body ?: NotificationConstants.DEFAULT_NOTIFICATION_BODY
-      val huntId = remoteMessage.data["huntId"]
-      NotificationHelper.sendNotification(this, title, body, huntId)
+    val huntId = remoteMessage.data["huntId"]
+    NotificationHelper.sendNotification(this, title, body, huntId)
   }
 
   override fun onNewToken(token: String) {
