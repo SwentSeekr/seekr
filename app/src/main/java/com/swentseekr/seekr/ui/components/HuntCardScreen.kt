@@ -43,8 +43,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,7 +62,6 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.model.hunt.review.HuntReviewReplyRepositoryProvider
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
-import com.swentseekr.seekr.ui.hunt.review.replies.ReplyTarget
 import com.swentseekr.seekr.ui.hunt.review.replies.ReviewRepliesSection
 import com.swentseekr.seekr.ui.hunt.review.replies.ReviewRepliesViewModel
 import com.swentseekr.seekr.ui.hunt.review.replies.ReviewRepliesViewModelFactory
@@ -631,6 +628,7 @@ fun ModernReviewCard(
 
   val isCurrentId = currentUserId == authorId
 
+  // Replies ViewModel for this specific review
   val repliesViewModel: ReviewRepliesViewModel =
       viewModel(
           key = "${HuntCardScreenStrings.RepliesViewModelKeyPrefix}${review.reviewId}",
@@ -641,13 +639,6 @@ fun ModernReviewCard(
               ),
       )
 
-  LaunchedEffect(review.reviewId) { repliesViewModel.start() }
-
-  val repliesState by repliesViewModel.uiState.collectAsState()
-  val totalReplies = repliesState.totalReplyCount
-
-  var showReplies by remember { mutableStateOf(false) }
-
   Card(
       modifier =
           Modifier.fillMaxWidth()
@@ -655,10 +646,7 @@ fun ModernReviewCard(
                   horizontal = HuntCardScreenDefaults.Padding20,
                   vertical = HuntCardScreenDefaults.Padding8)
               .clickable {
-                if (!showReplies) {
-                  showReplies = true
-                  repliesViewModel.onToggleReplies(parentReplyId = null)
-                }
+                // You can leave this clickable for some future behavior or remove it if not needed
               }
               .testTag(HuntCardScreenTestTags.REVIEW_CARD),
       colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -666,6 +654,7 @@ fun ModernReviewCard(
           CardDefaults.cardElevation(defaultElevation = HuntCardScreenDefaults.ZeroElevation),
       shape = RoundedCornerShape(HuntCardScreenDefaults.ReviewCardCornerRadius)) {
         Column(modifier = Modifier.padding(HuntCardScreenDefaults.Padding16)) {
+
           // --- Header: avatar + name + rating + optional delete ---
           Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             val profilePictureRes =
@@ -764,77 +753,10 @@ fun ModernReviewCard(
 
           Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Spacing6))
 
-          // --- Footer: right-aligned "No replies / View replies / Hide replies" label ---
-          Row(
-              modifier = Modifier.fillMaxWidth(),
-              horizontalArrangement = Arrangement.End,
-              verticalAlignment = Alignment.CenterVertically) {
-                val hasReplies = totalReplies > HuntCardScreenDefaults.NoRepliesCount
-                val label =
-                    if (hasReplies) {
-                      if (showReplies) {
-                        HuntCardScreenStrings.HideReplies
-                      } else {
-                        val replyWord =
-                            if (totalReplies == HuntCardScreenDefaults.SingleReplyCount) {
-                              HuntCardScreenStrings.ReplySingular
-                            } else {
-                              HuntCardScreenStrings.ReplyPlural
-                            }
-                        "${HuntCardScreenStrings.ViewRepliesPrefix} $totalReplies $replyWord"
-                      }
-                    } else {
-                      HuntCardScreenStrings.NoRepliesYet
-                    }
-
-                val labelModifier =
-                    when {
-                      hasReplies && showReplies ->
-                          Modifier.clickable {
-                            showReplies = false
-                            repliesViewModel.onToggleReplies(parentReplyId = null)
-                          }
-                      else -> Modifier
-                    }
-
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelMedium,
-                    color =
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                            alpha = HuntCardScreenDefaults.RepliesLabelAlpha),
-                    modifier = labelModifier,
-                )
-              }
-
-          // --- Replies block below the card body ---
-          if (showReplies) {
-            Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Spacing6))
-            ReviewRepliesSection(
-                state = repliesState,
-                onToggleRootReplies = { repliesViewModel.onToggleReplies(parentReplyId = null) },
-                onRootReplyTextChanged = { newText ->
-                  repliesViewModel.onReplyTextChanged(
-                      ReplyTarget.RootReview(reviewId = review.reviewId),
-                      newText,
-                  )
-                },
-                onSendRootReply = {
-                  repliesViewModel.sendReply(
-                      ReplyTarget.RootReview(reviewId = review.reviewId),
-                  )
-                },
-                onReplyAction = { target -> repliesViewModel.onToggleComposer(target) },
-                onToggleReplyThread = { parentReplyId ->
-                  repliesViewModel.onToggleReplies(parentReplyId)
-                },
-                onReplyTextChanged = { target, text ->
-                  repliesViewModel.onReplyTextChanged(target, text)
-                },
-                onSendReply = { target -> repliesViewModel.sendReply(target) },
-                onDeleteReply = { replyId -> repliesViewModel.deleteReply(replyId) },
-            )
-          }
+          ReviewRepliesSection(
+              viewModel = repliesViewModel,
+              modifier = Modifier.padding(top = HuntCardScreenDefaults.Spacing6),
+          )
         }
       }
 }
