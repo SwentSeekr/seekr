@@ -2,6 +2,8 @@ package com.swentseekr.seekr.ui
 
 import com.swentseekr.seekr.model.hunt.*
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.model.profile.ProfileRepositoryLocal
+import com.swentseekr.seekr.model.profile.sampleProfileWithPseudonym
 import com.swentseekr.seekr.ui.overview.OverviewViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -16,6 +18,7 @@ class OverviewViewModelTest {
 
   private lateinit var viewModel: OverviewViewModel
   private lateinit var fakeRepository: HuntsRepositoryLocal
+  private lateinit var fakeProfileRepo: ProfileRepositoryLocal
   private val testDispatcher = StandardTestDispatcher()
 
   private val hunt1 =
@@ -33,6 +36,11 @@ class OverviewViewModelTest {
           authorId = "0",
           mainImageUrl = "",
           reviewRate = 4.0)
+  private val profileAlice =
+      sampleProfileWithPseudonym(
+          uid = "0",
+          pseudonym = "Alice",
+      )
 
   private val hunt2 =
       hunt1.copy(
@@ -46,10 +54,12 @@ class OverviewViewModelTest {
   fun setUp() = runTest {
     Dispatchers.setMain(testDispatcher)
     fakeRepository = HuntsRepositoryLocal()
+    fakeProfileRepo = ProfileRepositoryLocal()
     fakeRepository.addHunt(hunt1)
+    fakeProfileRepo.addProfile(profileAlice)
     fakeRepository.addHunt(hunt2)
 
-    viewModel = OverviewViewModel(fakeRepository)
+    viewModel = OverviewViewModel(fakeRepository, fakeProfileRepo)
 
     // Let initial loadHunts() complete
     advanceUntilIdle()
@@ -94,7 +104,7 @@ class OverviewViewModelTest {
   /** Test that changing the search term filters the hunts correctly based on the search input. */
   @Test
   fun onSearchChange_filters_by_search() = runTest {
-    viewModel = OverviewViewModel(fakeRepository)
+    viewModel = OverviewViewModel(fakeRepository, fakeProfileRepo)
     advanceUntilIdle()
 
     viewModel.onSearchChange("fun")

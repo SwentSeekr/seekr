@@ -29,4 +29,9 @@ object HuntCardViewModelConstants {
   const val ErrorOnDonClick = "Error marking hunt done"
   const val ErrorOnDoneClickSetMsg = "Failed to mark hunt as done:"
   const val ErrorDeletingPhotoSetMsg = "Failed to delete photo"
+
+  const val ErrorAuthor = "Error loading author"
+  const val ErrorAuthorSetMsg = "Error loading author profile"
+  const val ErrorCacheLike = "Error loading liked hunts cache"
+  const val ErrorOnLike = "Failed to update liked hunt:"
 }
