@@ -90,6 +90,7 @@ open class HuntCardViewModel(
     _uiState.value = _uiState.value.copy(errorMsg = error)
   }
 
+  private suspend fun fetchProfile(userId: String): Profile? = profileRepository.getProfile(userId)
   /**
    * Loads the profile of the author of a hunt and updates [authorProfile].
    *
@@ -98,7 +99,7 @@ open class HuntCardViewModel(
   open fun loadAuthorProfile(userID: String) {
     viewModelScope.launch {
       try {
-        val profile = profileRepository.getProfile(userID)
+        val profile = fetchProfile(userID)
         _uiState.value = _uiState.value.copy(authorProfile = profile)
       } catch (e: Exception) {
         Log.e(
@@ -118,7 +119,7 @@ open class HuntCardViewModel(
   fun loadMultipleAuthorProfiles(userId: String) {
     viewModelScope.launch {
       try {
-        val profile = profileRepository.getProfile(userId)
+        val profile = fetchProfile(userId)
 
         _uiState.value =
             _uiState.value.copy(
@@ -227,26 +228,6 @@ open class HuntCardViewModel(
     }
   }
 
-  /**
-   * Loads the Author of a Hunt by its ID.
-   *
-   * @param huntID The ID of the hunt whose author is requested.
-   */
-  fun loadHuntAuthor(huntID: String) {
-    viewModelScope.launch {
-      try {
-        val hunt = huntRepository.getHunt(huntID)
-        val authorId = hunt.authorId
-        // repositoryAuthor.getPseudo(authorId)
-      } catch (e: Exception) {
-        Log.e(
-            HuntCardViewModelConstants.HuntCardTag,
-            "${HuntCardViewModelConstants.ErrorLoadingHuntAuthor} $huntID",
-            e)
-        setErrorMsg(HuntCardViewModelConstants.ErrorLOadingHuntAuthorSetMsg)
-      }
-    }
-  }
   /**
    * Deletes a Hunt by its ID.
    *
