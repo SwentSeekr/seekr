@@ -19,13 +19,13 @@ class ReviewRepliesViewModel(
     private val reviewId: String,
     private val replyRepository: HuntReviewReplyRepository =
         HuntReviewReplyRepositoryProvider.repository,
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main,
+    private val currentUserIdProvider: () -> String? = {
+      FirebaseAuth.getInstance().currentUser?.uid
+    },
 ) : ViewModel() {
 
   private val _uiState = MutableStateFlow(ReviewRepliesUiState(reviewId = reviewId))
-
-  /** Public state consumed by the UI layer. */
   val uiState: StateFlow<ReviewRepliesUiState> = _uiState.asStateFlow()
 
   /** Latest raw replies snapshot coming from the repository. */
@@ -260,5 +260,5 @@ class ReviewRepliesViewModel(
     _uiState.update { it.copy(replies = flattened, totalReplyCount = totalReplyCount) }
   }
 
-  internal fun currentUserIdOrNull(): String? = auth.currentUser?.uid
+  internal fun currentUserIdOrNull(): String? = currentUserIdProvider()
 }
