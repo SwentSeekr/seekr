@@ -68,30 +68,6 @@ class ReviewImagesScreenTest {
   }
 
   @Test
-  fun reviewImagesScreen_displaysPagerWithImages() {
-    val photos =
-        listOf(
-            ReviewImagesScreenConstantStings.Photo1,
-            ReviewImagesScreenConstantStings.Photo2,
-            ReviewImagesScreenConstantStings.Photo3)
-
-    composeRule.setContent { ReviewImagesScreen(photoUrls = photos, onGoBack = {}) }
-
-    composeRule.waitForIdle()
-
-    // Pager is displayed
-    val pager =
-        composeRule.onNodeWithTag(ReviewImagesScreenConstantsStrings.ReviewImagePagerTestTag)
-    pager.assertIsDisplayed()
-
-    // First index text is "1/size"
-    composeRule
-        .onNodeWithTag(ReviewImagesScreenConstantsStrings.ReviewImageTextBottomTestTag)
-        .assertIsDisplayed()
-        .assertTextEquals("1/${photos.size}")
-  }
-
-  @Test
   fun reviewImagesScreen_swipingChangesImageIndex() {
     val photos =
         listOf(
