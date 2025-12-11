@@ -1,5 +1,37 @@
 package com.swentseekr.seekr.ui.hunt
 
+/**
+ * Provides centralized constants and UI configuration values used across Hunt-creation and
+ * Hunt-editing screens within the Seekr application.
+ *
+ * This file contains three main objects:
+ *
+ * ### `BaseHuntFieldsStrings`
+ * Holds all user-facing strings, content descriptions, placeholders, labels, button texts, and
+ * units used throughout Hunt-related UI components. Centralizing these values ensures:
+ * - Consistent wording across screens.
+ * - Easier localization in the future.
+ * - Cleaner composable files by removing inline string values.
+ *
+ * ### `BaseHuntFieldsUi`
+ * Defines UI layout constants, such as paddings, corner radii, image sizes, button dimensions, and
+ * alpha values used for styling. These standards ensure:
+ * - Consistent spacing and visual hierarchy.
+ * - Ease of adjusting UI design from a single source.
+ *
+ * ### `HuntScreenTestTags`
+ * Provides test tag constants used by UI tests (e.g., Compose UI testing). Tags are placed on
+ * interactive elements so automated tests can reliably target and validate them. Centralizing tags
+ * prevents typos and makes UI tests more maintainable.
+ *
+ * Together, these objects support clean code practices by separating concerns:
+ * - UI visuals in `BaseHuntFieldsUi`
+ * - Text content in `BaseHuntFieldsStrings`
+ * - Test identifiers in `HuntScreenTestTags`
+ *
+ * Any new Hunt-related screen or composable should reference these constants rather than defining
+ * new ones inline.
+ */
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 

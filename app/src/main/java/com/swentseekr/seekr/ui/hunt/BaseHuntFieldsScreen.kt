@@ -596,14 +596,19 @@ private fun SelectLocationsButton(
 }
 
 /**
- * Section responsible for main and secondary image selection, preview, and removal.
+ * Renders the complete image management section of the hunt form.
  *
- * @param uiState Current [HuntUIState], used to determine current images.
- * @param imageCallbacks Callbacks invoked when images are selected or removed.
- */
-/**
- * Section améliorée pour la sélection d'images principales et additionnelles avec une UI moderne et
- * professionnelle.
+ * This includes:
+ * - Selecting a main image via gallery or camera.
+ * - Selecting additional images (multiple) via gallery or camera.
+ * - Displaying previews of existing or newly added images.
+ * - Removing main or additional images.
+ *
+ * This composable manages internal activity launchers for the camera and gallery, while delegating
+ * data updates to [imageCallbacks].
+ *
+ * @param uiState Current UI state containing all image-related information.
+ * @param imageCallbacks Callbacks triggered when adding or removing images.
  */
 @Composable
 private fun ImagesSection(
@@ -760,6 +765,16 @@ private fun ImagesSection(
       }
 }
 
+/**
+ * A reusable button for triggering image-related actions (gallery or camera).
+ *
+ * Displays an icon and label, styled as an outlined button matching the application's theme.
+ *
+ * @param label Text displayed inside the button.
+ * @param icon Resource ID of the icon to display.
+ * @param onClick Action invoked when the button is clicked.
+ * @param modifier Modifier applied to the button container.
+ */
 @Composable
 private fun ImageActionButton(
     label: String,
@@ -789,6 +804,16 @@ private fun ImageActionButton(
       }
 }
 
+/**
+ * Displays a preview of the main hunt image along with an action to remove it.
+ *
+ * Includes:
+ * - A full-width image preview.
+ * - A "Remove image" button styled with error colors.
+ *
+ * @param imageUrl URL of the main image to preview.
+ * @param onDelete Callback invoked when the user chooses to remove the main image.
+ */
 @Composable
 private fun MainImagePreview(
     imageUrl: String?,
@@ -831,6 +856,14 @@ private fun MainImagePreview(
       }
 }
 
+/**
+ * Displays a vertical list of additional images, if any exist.
+ *
+ * Delegates the rendering of each item to [AdditionalImageItem].
+ *
+ * @param images List of additional images, either remote or local.
+ * @param imageCallbacks Callbacks invoked when removing an image.
+ */
 @Composable
 private fun AdditionalImagesList(
     images: List<OtherImage>,
@@ -848,6 +881,18 @@ private fun AdditionalImagesList(
   }
 }
 
+/**
+ * Displays a single additional image entry with a thumbnail and a remove button.
+ *
+ * Supports:
+ * - Remote images loaded by URL.
+ * - Local images loaded by [Uri].
+ *
+ * Each item includes a test tag based on its content to support reliable UI testing.
+ *
+ * @param image Image to preview, either remote or local.
+ * @param imageCallbacks Callbacks used to remove the selected image.
+ */
 @Composable
 private fun AdditionalImageItem(
     image: OtherImage,

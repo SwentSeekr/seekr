@@ -129,6 +129,17 @@ class EditHuntViewModel(
     _uiState.value = _uiState.value.copy(otherImagesUrls = newList)
   }
 
+  /**
+   * Removes the currently selected main image from the hunt.
+   *
+   * This function performs two actions:
+   * 1. If a remote image exists (i.e., `mainImageUrl` is not blank), its URL is stored in
+   *    [pendingMainImageDeletionUrl] so that it can be deleted from the backend later.
+   * 2. Updates the UI state by clearing the main image preview with [updateMainImageUri].
+   *
+   * This ensures that the UI reflects the removal immediately while still allowing the repository
+   * or ViewModel to handle the actual remote deletion when appropriate.
+   */
   override fun removeMainImage() {
     val currentUrl = uiState.value.mainImageUrl
     if (currentUrl.isNotBlank()) {
