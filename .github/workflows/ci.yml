@@ -124,34 +124,12 @@ jobs:
           java-version: "21"
 
       # Start Firebase
-      #- name: Start Firebase emulators
-      #  run: |
-      #    if [ -e "firebase.json" ] && jq -e '.emulators' firebase.json >/dev/null; then
-      #      echo "Starting Firebase emulators for instrumentation tests..."
-      #      firebase emulators:start --only auth,firestore,storage --project demo-project &
-      #      echo "Firebase emulators started"
-      #    else
-      #      echo "Firebase emulators not configured, skipping emulator startup..."
-      #    fi
-
       - name: Start Firebase emulators
         run: |
           if [ -e "firebase.json" ] && jq -e '.emulators' firebase.json >/dev/null; then
             echo "Starting Firebase emulators for instrumentation tests..."
-
-            firebase emulators:start --only auth,firestore,storage --project demo-project > emulator.log 2>&1 &
-
-            echo "Waiting for Firebase Firestore emulator..."
-            until nc -z localhost 8080; do
-              sleep 1
-            done
-
-            echo "Waiting for Firebase Storage emulator..."
-            until nc -z localhost 9199; do
-              sleep 1
-            done
-
-            echo "Firebase emulators ready!"
+            firebase emulators:start --only auth,firestore,storage --project demo-project &
+            echo "Firebase emulators started"
           else
             echo "Firebase emulators not configured, skipping emulator startup..."
           fi
