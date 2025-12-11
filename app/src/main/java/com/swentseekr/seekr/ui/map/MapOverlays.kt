@@ -15,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,7 +31,6 @@ import com.swentseekr.seekr.ui.theme.Black
 import com.swentseekr.seekr.ui.theme.GrayDislike
 import com.swentseekr.seekr.ui.theme.Green
 import com.swentseekr.seekr.ui.theme.White
-import kotlinx.coroutines.launch
 
 /**
  * Displays all overlay controls when a hunt is in "focused" mode.
@@ -431,8 +429,6 @@ private fun HuntActionsRow(
     onValidateCurrentLocation: () -> Unit,
     onFinishHunt: ((suspend (Hunt) -> Unit)?) -> Unit,
 ) {
-  val scope = rememberCoroutineScope()
-
   Row(
       modifier = Modifier.fillMaxWidth(),
       horizontalArrangement = Arrangement.SpaceEvenly,
@@ -448,16 +444,13 @@ private fun HuntActionsRow(
             modifier = Modifier.testTag(MapScreenTestTags.FINISH),
             onClick = {
               onFinishHunt { finished ->
-                scope.launch {
-                  try {
-                    val userId =
-                        com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
-                    if (userId != null) {
-                      ProfileRepositoryProvider.repository.addDoneHunt(userId, finished)
-                    }
-                  } catch (e: Exception) {
-                    android.util.Log.e(MapScreenTestTags.MAP_SCREEN, MapScreenStrings.Fail, e)
+                try {
+                  val userId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+                  if (userId != null) {
+                    ProfileRepositoryProvider.repository.addDoneHunt(userId, finished)
                   }
+                } catch (e: Exception) {
+                  android.util.Log.e(MapScreenTestTags.MAP_SCREEN, MapScreenStrings.Fail, e)
                 }
               }
             },
