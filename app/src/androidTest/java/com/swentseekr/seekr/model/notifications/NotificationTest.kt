@@ -102,17 +102,13 @@ class NotificationTest {
   @Test
   fun settingsViewModel_updatesNotificationPreference() = runBlocking {
     val uid = auth.currentUser?.uid ?: return@runBlocking
-
     db.collection(SETTINGS_COLLECTION)
         .document(uid)
         .set(mapOf(FIELD_NOTIFICATIONS to false))
         .await()
-
     db.collection(SETTINGS_COLLECTION).document(uid).update(FIELD_NOTIFICATIONS, true).await()
-
     val doc = db.collection(SETTINGS_COLLECTION).document(uid).get().await()
     val notificationsEnabled = doc.getBoolean(FIELD_NOTIFICATIONS)
-
     assertEquals(NotificationTestConstants.NOTIFICATION_MESSAGE, true, notificationsEnabled)
   }
 
