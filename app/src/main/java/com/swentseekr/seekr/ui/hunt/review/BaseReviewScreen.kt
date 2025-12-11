@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -250,7 +251,7 @@ fun BaseReviewScreen(
                           imageVector = Icons.Default.AddCircle,
                           contentDescription = AddReviewScreenStrings.AddPhotoContentDescription,
                           modifier = Modifier.size(UICons.IconSize))
-                      Spacer(modifier = Modifier.padding(start = UICons.SpacerHeightSmall))
+                      Spacer(modifier = Modifier.width(UICons.SpacerHeightSmall))
                       Text(
                           AddReviewScreenStrings.AddPicturesButtonLabel,
                           style = MaterialTheme.typography.titleSmall)
