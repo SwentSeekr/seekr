@@ -602,7 +602,8 @@ fun ModernEmptyReviewsState() {
  * - rating stars,
  * - review comment,
  * - optional "See Pictures" button,
- * - delete button if the review belongs to the current user.
+ * - delete button if the review belongs to the current user,
+ * - replies section below the review.
  *
  * Automatically loads the review author's profile via the ReviewHuntViewModel.
  *
@@ -626,7 +627,11 @@ fun ModernReviewCard(
   LaunchedEffect(authorId) { reviewHuntViewModel.loadAuthorProfile(authorId) }
   val authorProfile = uiState.authorProfiles[authorId]
 
-  val isCurrentId = currentUserId == authorId
+  val isCurrentUser = currentUserId == authorId
+
+  val profilePictureRes =
+      authorProfile?.author?.profilePicture ?: HuntCardScreenDefaults.NoProfilePictureResId
+  val authorName = authorProfile?.author?.pseudonym ?: HuntCardScreenStrings.UnknownAuthor
 
   // Replies ViewModel for this specific review
   val repliesViewModel: ReviewRepliesViewModel =
@@ -646,7 +651,7 @@ fun ModernReviewCard(
                   horizontal = HuntCardScreenDefaults.Padding20,
                   vertical = HuntCardScreenDefaults.Padding8)
               .clickable {
-                // You can leave this clickable for some future behavior or remove it if not needed
+                // Reserved for potential future behavior
               }
               .testTag(HuntCardScreenTestTags.REVIEW_CARD),
       colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -654,102 +659,27 @@ fun ModernReviewCard(
           CardDefaults.cardElevation(defaultElevation = HuntCardScreenDefaults.ZeroElevation),
       shape = RoundedCornerShape(HuntCardScreenDefaults.ReviewCardCornerRadius)) {
         Column(modifier = Modifier.padding(HuntCardScreenDefaults.Padding16)) {
-
-          // --- Header: avatar + name + rating + optional delete ---
-          Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            val profilePictureRes =
-                authorProfile?.author?.profilePicture
-                    ?: HuntCardScreenDefaults.NoProfilePictureResId
-
-            if (profilePictureRes != HuntCardScreenDefaults.NoProfilePictureResId) {
-              ProfilePicture(
-                  profilePictureRes = profilePictureRes,
-                  modifier =
-                      Modifier.size(HuntCardScreenDefaults.ProfilePictureSize).clip(CircleShape))
-            } else {
-              Box(
-                  modifier =
-                      Modifier.size(HuntCardScreenDefaults.ProfilePictureSize)
-                          .clip(CircleShape)
-                          .background(
-                              if (isCurrentId) MaterialTheme.colorScheme.primary
-                              else MaterialTheme.colorScheme.tertiary),
-                  contentAlignment = Alignment.Center) {
-                    val initial =
-                        authorId.take(HuntCardScreenDefaults.InitialLetterCount).uppercase()
-                    Text(
-                        text =
-                            if (isCurrentId) HuntCardScreenStrings.CurrentUserInitialLabel
-                            else initial,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White)
-                  }
-            }
-
-            Spacer(modifier = Modifier.width(HuntCardScreenDefaults.Padding12))
-
-            Column(modifier = Modifier.weight(HuntCardScreenDefaults.CardWeight)) {
-              val authorName =
-                  authorProfile?.author?.pseudonym ?: HuntCardScreenStrings.UnknownAuthor
-
-              Text(
-                  text = authorName,
-                  fontWeight = FontWeight.SemiBold,
-                  fontSize = HuntCardScreenDefaults.DescriptionFontSize,
-                  color = MaterialTheme.colorScheme.onSurface)
-
-              Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding4))
-
-              Rating(review.rating, RatingType.STAR)
-            }
-
-            if (isCurrentId) {
-              IconButton(
-                  onClick = { onDeleteReview(review.reviewId) },
-                  modifier = Modifier.testTag(HuntCardScreenTestTags.DELETE_REVIEW_BUTTON)) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = HuntCardScreenStrings.ReviewDeleteButton,
-                        tint =
-                            MaterialTheme.colorScheme.error.copy(
-                                alpha = HuntCardScreenDefaults.DeleteIconAlpha))
-                  }
-            }
-          }
+          ReviewCardHeader(
+              review = review,
+              authorId = authorId,
+              authorName = authorName,
+              isCurrentUser = isCurrentUser,
+              profilePictureRes = profilePictureRes,
+              onDeleteReview = { onDeleteReview(review.reviewId) },
+          )
 
           Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding8))
 
-          // --- Comment text ---
-          if (review.comment.isNotBlank()) {
-            Text(
-                text = review.comment,
-                fontSize = HuntCardScreenDefaults.DescriptionFontSize,
-                lineHeight = HuntCardScreenDefaults.OtherLineHeight,
-                color = MaterialTheme.colorScheme.onSurface)
-          }
+          ReviewCardComment(review = review)
 
-          // --- Optional photos button ---
-          if (review.photos.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding8))
-
-            Button(
-                onClick = {
-                  reviewHuntViewModel.loadReviewImages(review.photos)
-                  navController.navigate(
-                      "${HuntCardScreenStrings.ReviewImagesRoutePrefix}${review.reviewId}")
-                },
-                modifier = Modifier.testTag(HuntCardScreenTestTags.SEE_PICTURES_BUTTON),
-                colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = HuntCardScreenDefaults.CardSoftGray,
-                        contentColor = MaterialTheme.colorScheme.onSurface),
-                shape = RoundedCornerShape(HuntCardScreenDefaults.Padding8)) {
-                  Text(
-                      "${HuntCardScreenStrings.SeePictures} (${review.photos.size})",
-                      fontSize = HuntCardScreenDefaults.MinFontSize)
-                }
-          }
+          ReviewCardPhotosSection(
+              review = review,
+              onSeePhotosClick = {
+                reviewHuntViewModel.loadReviewImages(review.photos)
+                navController.navigate(
+                    "${HuntCardScreenStrings.ReviewImagesRoutePrefix}${review.reviewId}")
+              },
+          )
 
           Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Spacing6))
 
@@ -759,6 +689,103 @@ fun ModernReviewCard(
           )
         }
       }
+}
+
+@Composable
+private fun ReviewCardHeader(
+    review: HuntReview,
+    authorId: String,
+    authorName: String,
+    isCurrentUser: Boolean,
+    profilePictureRes: Int,
+    onDeleteReview: () -> Unit,
+) {
+  Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+    if (profilePictureRes != HuntCardScreenDefaults.NoProfilePictureResId) {
+      ProfilePicture(
+          profilePictureRes = profilePictureRes,
+          modifier = Modifier.size(HuntCardScreenDefaults.ProfilePictureSize).clip(CircleShape))
+    } else {
+      Box(
+          modifier =
+              Modifier.size(HuntCardScreenDefaults.ProfilePictureSize)
+                  .clip(CircleShape)
+                  .background(
+                      if (isCurrentUser) MaterialTheme.colorScheme.primary
+                      else MaterialTheme.colorScheme.tertiary),
+          contentAlignment = Alignment.Center) {
+            val initial = authorId.take(HuntCardScreenDefaults.InitialLetterCount).uppercase()
+
+            Text(
+                text =
+                    if (isCurrentUser) HuntCardScreenStrings.CurrentUserInitialLabel else initial,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color.White)
+          }
+    }
+
+    Spacer(modifier = Modifier.width(HuntCardScreenDefaults.Padding12))
+
+    Column(modifier = Modifier.weight(HuntCardScreenDefaults.CardWeight)) {
+      Text(
+          text = authorName,
+          fontWeight = FontWeight.SemiBold,
+          fontSize = HuntCardScreenDefaults.DescriptionFontSize,
+          color = MaterialTheme.colorScheme.onSurface)
+
+      Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding4))
+
+      Rating(review.rating, RatingType.STAR)
+    }
+
+    if (isCurrentUser) {
+      IconButton(
+          onClick = onDeleteReview,
+          modifier = Modifier.testTag(HuntCardScreenTestTags.DELETE_REVIEW_BUTTON)) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = HuntCardScreenStrings.ReviewDeleteButton,
+                tint =
+                    MaterialTheme.colorScheme.error.copy(
+                        alpha = HuntCardScreenDefaults.DeleteIconAlpha))
+          }
+    }
+  }
+}
+
+@Composable
+private fun ReviewCardComment(review: HuntReview) {
+  if (review.comment.isNotBlank()) {
+    Text(
+        text = review.comment,
+        fontSize = HuntCardScreenDefaults.DescriptionFontSize,
+        lineHeight = HuntCardScreenDefaults.OtherLineHeight,
+        color = MaterialTheme.colorScheme.onSurface)
+  }
+}
+
+@Composable
+private fun ReviewCardPhotosSection(
+    review: HuntReview,
+    onSeePhotosClick: () -> Unit,
+) {
+  if (review.photos.isNotEmpty()) {
+    Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding8))
+
+    Button(
+        onClick = onSeePhotosClick,
+        modifier = Modifier.testTag(HuntCardScreenTestTags.SEE_PICTURES_BUTTON),
+        colors =
+            ButtonDefaults.buttonColors(
+                containerColor = HuntCardScreenDefaults.CardSoftGray,
+                contentColor = MaterialTheme.colorScheme.onSurface),
+        shape = RoundedCornerShape(HuntCardScreenDefaults.Padding8)) {
+          Text(
+              "${HuntCardScreenStrings.SeePictures} (${review.photos.size})",
+              fontSize = HuntCardScreenDefaults.MinFontSize)
+        }
+  }
 }
 
 /**
