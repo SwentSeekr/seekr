@@ -13,6 +13,23 @@ import com.swentseekr.seekr.FakeReviewHuntViewModel
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
 import com.swentseekr.seekr.model.profile.createHunt
 import com.swentseekr.seekr.ui.huntCardScreen.FakeHuntCardViewModel
+import com.swentseekr.seekr.ui.navigation.NotificationNavigationConstants.BACK_TO_OVERVIEW_HUNT
+import com.swentseekr.seekr.ui.navigation.NotificationNavigationConstants.EXTRA_HUNT_ID
+import com.swentseekr.seekr.ui.navigation.NotificationNavigationConstants.HUNT_123
+import com.swentseekr.seekr.ui.navigation.NotificationNavigationConstants.HUNT_REMOVAL_SENTENCE
+import com.swentseekr.seekr.ui.navigation.NotificationNavigationConstants.KILLED_APP_HUNT
+import com.swentseekr.seekr.ui.navigation.NotificationNavigationConstants.NOTIFICATION_HUNT_456
+import com.swentseekr.seekr.ui.navigation.NotificationNavigationConstants.REMOVE_AFTER_NAV_HUNT
+import com.swentseekr.seekr.ui.navigation.NotificationNavigationConstants.SINGLE_TOP_HUNT
+import com.swentseekr.seekr.ui.navigation.NotificationNavigationConstants.SPECIAL_CHARS_HUNT
+import com.swentseekr.seekr.ui.navigation.NotificationNavigationConstants.TEST_ROUTE_HUNT
+import com.swentseekr.seekr.ui.navigation.NotificationNavigationConstants.TITLE_BACK_TEST_HUNT
+import com.swentseekr.seekr.ui.navigation.NotificationNavigationConstants.TITLE_DEEPLINK_HUNT
+import com.swentseekr.seekr.ui.navigation.NotificationNavigationConstants.TITLE_KILLED_APP_HUNT
+import com.swentseekr.seekr.ui.navigation.NotificationNavigationConstants.TITLE_NOTIFICATION_HUNT
+import com.swentseekr.seekr.ui.navigation.NotificationNavigationConstants.TITLE_REMOVE_TEST_HUNT
+import com.swentseekr.seekr.ui.navigation.NotificationNavigationConstants.TITLE_SINGLE_TOP_HUNT
+import com.swentseekr.seekr.ui.navigation.NotificationNavigationConstants.TITLE_SPECIAL_CHARS_HUNT
 import com.swentseekr.seekr.utils.FakeRepoSuccess
 import org.junit.Before
 import org.junit.Rule
@@ -32,10 +49,8 @@ class NotificationNavigationTest {
           android.Manifest.permission.POST_NOTIFICATIONS)
 
   companion object {
-    const val SHORT = 3_000L
     const val MED = 5_000L
     const val LONG = 10_000L
-    const val XLONG = 40_000L
   }
 
   private fun node(tag: String) = compose.onNodeWithTag(tag, useUnmergedTree = true)
@@ -70,8 +85,8 @@ class NotificationNavigationTest {
 
   @Test
   fun deepLink_withHuntId_navigatesToHuntCardScreen() {
-    val testHuntId = "deeplink_hunt_123"
-    val hunt = createHunt(uid = testHuntId, title = "DeepLink Hunt")
+    val testHuntId = HUNT_123
+    val hunt = createHunt(uid = testHuntId, title = TITLE_DEEPLINK_HUNT)
 
     withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
       compose.runOnUiThread {
@@ -106,20 +121,20 @@ class NotificationNavigationTest {
 
   @Test
   fun deepLink_fromIntent_navigatesToCorrectHunt() {
-    val huntIdFromNotification = "notification_hunt_456"
-    val huntTitle = "Notification Hunt"
+    val huntIdFromNotification = NOTIFICATION_HUNT_456
+    val huntTitle = TITLE_NOTIFICATION_HUNT
     val hunt = createHunt(uid = huntIdFromNotification, title = huntTitle)
 
     withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
       val intent =
           Intent(compose.activity, compose.activity::class.java).apply {
-            putExtra("huntId", huntIdFromNotification)
+            putExtra(EXTRA_HUNT_ID, huntIdFromNotification)
           }
 
       compose.activity.setContent {
         val navController = rememberNavController()
 
-        val deepLinkHuntId = intent.getStringExtra("huntId")
+        val deepLinkHuntId = intent.getStringExtra(EXTRA_HUNT_ID)
 
         SeekrMainNavHost(
             navController = navController,
@@ -132,7 +147,7 @@ class NotificationNavigationTest {
             navController.navigate(SeekrDestination.HuntCard.createRoute(deepLinkHuntId)) {
               launchSingleTop = true
             }
-            intent.removeExtra("huntId")
+            intent.removeExtra(EXTRA_HUNT_ID)
           }
         }
       }
@@ -152,18 +167,18 @@ class NotificationNavigationTest {
 
   @Test
   fun deepLink_removesHuntIdFromIntent_afterNavigation() {
-    val huntId = "remove_after_nav"
-    val hunt = createHunt(uid = huntId, title = "Remove Test Hunt")
+    val huntId = REMOVE_AFTER_NAV_HUNT
+    val hunt = createHunt(uid = huntId, title = TITLE_REMOVE_TEST_HUNT)
 
     withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
       val intent =
           Intent(compose.activity, compose.activity::class.java).apply {
-            putExtra("huntId", huntId)
+            putExtra(EXTRA_HUNT_ID, huntId)
           }
 
       compose.activity.setContent {
         val navController = rememberNavController()
-        val deepLinkHuntId = intent.getStringExtra("huntId")
+        val deepLinkHuntId = intent.getStringExtra(EXTRA_HUNT_ID)
 
         SeekrMainNavHost(
             navController = navController,
@@ -176,7 +191,7 @@ class NotificationNavigationTest {
             navController.navigate(SeekrDestination.HuntCard.createRoute(deepLinkHuntId)) {
               launchSingleTop = true
             }
-            intent.removeExtra("huntId")
+            intent.removeExtra(EXTRA_HUNT_ID)
           }
         }
       }
@@ -189,16 +204,14 @@ class NotificationNavigationTest {
       }
 
       compose.waitForIdle()
-      assert(intent.getStringExtra("huntId") == null) {
-        "huntId should be removed from intent after navigation"
-      }
+      assert(intent.getStringExtra(EXTRA_HUNT_ID) == null) { HUNT_REMOVAL_SENTENCE }
     }
   }
 
   @Test
   fun deepLink_navigatesWithLaunchSingleTop() {
-    val huntId = "single_top_hunt"
-    val hunt = createHunt(uid = huntId, title = "Single Top Hunt")
+    val huntId = SINGLE_TOP_HUNT
+    val hunt = createHunt(uid = huntId, title = TITLE_SINGLE_TOP_HUNT)
 
     withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
       compose.runOnUiThread {
@@ -235,18 +248,18 @@ class NotificationNavigationTest {
 
   @Test
   fun deepLink_fromNotification_canNavigateBackToOverview() {
-    val huntId = "back_to_overview_hunt"
-    val hunt = createHunt(uid = huntId, title = "Back Test Hunt")
+    val huntId = BACK_TO_OVERVIEW_HUNT
+    val hunt = createHunt(uid = huntId, title = TITLE_BACK_TEST_HUNT)
 
     withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
       val intent =
           Intent(compose.activity, compose.activity::class.java).apply {
-            putExtra("huntId", huntId)
+            putExtra(EXTRA_HUNT_ID, huntId)
           }
 
       compose.activity.setContent {
         val navController = rememberNavController()
-        val deepLinkHuntId = intent.getStringExtra("huntId")
+        val deepLinkHuntId = intent.getStringExtra(EXTRA_HUNT_ID)
 
         SeekrMainNavHost(
             navController = navController,
@@ -259,7 +272,7 @@ class NotificationNavigationTest {
             navController.navigate(SeekrDestination.HuntCard.createRoute(deepLinkHuntId)) {
               launchSingleTop = true
             }
-            intent.removeExtra("huntId")
+            intent.removeExtra(EXTRA_HUNT_ID)
           }
         }
       }
@@ -285,8 +298,8 @@ class NotificationNavigationTest {
 
   @Test
   fun deepLink_withSpecialCharacters_handlesCorrectly() {
-    val huntId = "hunt-with_special.chars123"
-    val hunt = createHunt(uid = huntId, title = "Special Chars Hunt")
+    val huntId = SPECIAL_CHARS_HUNT
+    val hunt = createHunt(uid = huntId, title = TITLE_SPECIAL_CHARS_HUNT)
 
     withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
       compose.runOnUiThread {
@@ -320,19 +333,19 @@ class NotificationNavigationTest {
 
   @Test
   fun deepLink_afterAppKilled_navigatesCorrectly() {
-    val huntId = "killed_app_hunt"
-    val hunt = createHunt(uid = huntId, title = "Killed App Hunt")
+    val huntId = KILLED_APP_HUNT
+    val hunt = createHunt(uid = huntId, title = TITLE_KILLED_APP_HUNT)
 
     withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
       val restartIntent =
           Intent(compose.activity, compose.activity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            putExtra("huntId", huntId)
+            putExtra(EXTRA_HUNT_ID, huntId)
           }
 
       compose.activity.setContent {
         val navController = rememberNavController()
-        val deepLinkHuntId = restartIntent.getStringExtra("huntId")
+        val deepLinkHuntId = restartIntent.getStringExtra(EXTRA_HUNT_ID)
 
         SeekrMainNavHost(
             navController = navController,
@@ -345,7 +358,7 @@ class NotificationNavigationTest {
             navController.navigate(SeekrDestination.HuntCard.createRoute(deepLinkHuntId)) {
               launchSingleTop = true
             }
-            restartIntent.removeExtra("huntId")
+            restartIntent.removeExtra(EXTRA_HUNT_ID)
           }
         }
       }
@@ -363,7 +376,7 @@ class NotificationNavigationTest {
 
   @Test
   fun huntCardRoute_createdWithCorrectFormat() {
-    val huntId = "test_route_hunt"
+    val huntId = TEST_ROUTE_HUNT
     val expectedRoute = "hunt/$huntId"
     val actualRoute = SeekrDestination.HuntCard.createRoute(huntId)
     assert(actualRoute == expectedRoute) { "Expected route: $expectedRoute, but got: $actualRoute" }

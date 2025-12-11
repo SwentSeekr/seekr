@@ -28,6 +28,10 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
+const val NEW_REVIEW = "New review added"
+const val NEW_REVIEW_MESSAGE = "You added a new review!"
+const val HUNT = "hunt123"
+
 class ReviewHuntViewModelTest {
 
   private lateinit var fakeHuntsRepository: HuntsRepositoryLocal
@@ -469,10 +473,7 @@ class ReviewHuntViewModelTest {
 
     testScheduler.advanceUntilIdle()
 
-    verify {
-      NotificationHelper.sendNotification(
-          context, "New review added", "You added a new review!", "hunt123")
-    }
+    verify { NotificationHelper.sendNotification(context, NEW_REVIEW, NEW_REVIEW_MESSAGE, HUNT) }
 
     val reviews = fakeReviewRepository.getHuntReviews(testHunt.uid)
     assertEquals(1, reviews.size)

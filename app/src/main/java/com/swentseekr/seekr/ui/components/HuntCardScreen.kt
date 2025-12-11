@@ -606,17 +606,12 @@ fun ModernEmptyReviewsState() {
 fun ModernReviewCard(
     review: HuntReview,
     authorProfile: Profile?,
-    // reviewHuntViewModel: ReviewHuntViewModel,
     currentUserId: String?,
     navController: NavHostController,
     onDeleteReview: (String) -> Unit,
 ) {
-  // val uiState by reviewHuntViewModel.uiState.collectAsState()
 
   val authorId = review.authorId
-
-  // LaunchedEffect(authorId) { reviewHuntViewModel.loadAuthorProfile(authorId) }
-  // val authorProfile = uiState.authorProfiles[authorId]
 
   val isCurrentId = currentUserId == authorId
 
@@ -679,10 +674,7 @@ fun ModernReviewCard(
             Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding12))
 
             Button(
-                onClick = {
-                  // reviewHuntViewModel.loadReviewImages(review.photos)
-                  navController.navigate("reviewImages/${review.reviewId}")
-                },
+                onClick = { navController.navigate("reviewImages/${review.reviewId}") },
                 modifier = Modifier.testTag("SEE_PICTURES_BUTTON"),
                 colors =
                     ButtonDefaults.buttonColors(

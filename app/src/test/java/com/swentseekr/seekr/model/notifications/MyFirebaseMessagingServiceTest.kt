@@ -12,9 +12,13 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
+const val NEW_NOTIFICATION = "New Notification"
+const val HELLO = "Hello"
+const val WORLD = "World"
+const val EMPTY_STRING = ""
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class MyFirebaseMessagingServiceTest {
-
   private lateinit var service: MyFirebaseMessagingService
   private val mockFirebaseAuth = mockk<FirebaseAuth>(relaxed = true)
   private val mockFirebaseUser = mockk<FirebaseUser>()
@@ -50,13 +54,13 @@ class MyFirebaseMessagingServiceTest {
   fun onMessageReceived_sends_notification_with_title_and_body() {
     val remoteMessage = mockk<RemoteMessage>(relaxed = true)
     val notification = mockk<RemoteMessage.Notification>()
-    every { notification.title } returns "Hello"
-    every { notification.body } returns "World"
+    every { notification.title } returns HELLO
+    every { notification.body } returns WORLD
     every { remoteMessage.notification } returns notification
 
     service.onMessageReceived(remoteMessage)
 
-    verify { NotificationHelper.sendNotification(service, "Hello", "World", null) }
+    verify { NotificationHelper.sendNotification(service, HELLO, WORLD, null) }
   }
 
   @Test
@@ -66,7 +70,7 @@ class MyFirebaseMessagingServiceTest {
 
     service.onMessageReceived(remoteMessage)
 
-    verify { NotificationHelper.sendNotification(service, "New Notification", "", null) }
+    verify { NotificationHelper.sendNotification(service, NEW_NOTIFICATION, EMPTY_STRING, null) }
   }
 
   @Test

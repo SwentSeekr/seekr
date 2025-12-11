@@ -11,10 +11,19 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.swentseekr.seekr.MainActivity
+import com.swentseekr.seekr.model.notifications.NotificationTestConstants.EMPTY_STRING
+import com.swentseekr.seekr.model.notifications.NotificationTestConstants.EXTRA_HUNT_ID
 import com.swentseekr.seekr.model.notifications.NotificationTestConstants.FIELD_NOTIFICATIONS
+import com.swentseekr.seekr.model.notifications.NotificationTestConstants.HUNT_FCM
+import com.swentseekr.seekr.model.notifications.NotificationTestConstants.HUNT_PRESERVE
+import com.swentseekr.seekr.model.notifications.NotificationTestConstants.HUNT_REMOTE
+import com.swentseekr.seekr.model.notifications.NotificationTestConstants.HUNT_REMOVE
+import com.swentseekr.seekr.model.notifications.NotificationTestConstants.HUNT_SPECIAL_CHAR
+import com.swentseekr.seekr.model.notifications.NotificationTestConstants.NULL_VALUE
 import com.swentseekr.seekr.model.notifications.NotificationTestConstants.PROFILES_COLLECTION
 import com.swentseekr.seekr.model.notifications.NotificationTestConstants.SETTINGS_COLLECTION
 import com.swentseekr.seekr.model.notifications.NotificationTestConstants.TEST_FCM_TOKEN_PREFIX
+import com.swentseekr.seekr.model.notifications.NotificationTestConstants.TEST_HUNT_ID
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
@@ -114,26 +123,26 @@ class NotificationTest {
 
   @Test
   fun notificationHelper_createsIntentWithHuntId() {
-    val testHuntId = "test_hunt_123"
+    val testHuntId = TEST_HUNT_ID
 
     val intent =
         Intent(context, MainActivity::class.java).apply {
           flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-          putExtra("huntId", testHuntId)
+          putExtra(EXTRA_HUNT_ID, testHuntId)
         }
 
-    assertEquals(testHuntId, intent.getStringExtra("huntId"))
-    assertTrue(intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK != 0)
-    assertTrue(intent.flags and Intent.FLAG_ACTIVITY_CLEAR_TASK != 0)
+    assertEquals(testHuntId, intent.getStringExtra(EXTRA_HUNT_ID))
+    assertTrue(intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK != NULL_VALUE)
+    assertTrue(intent.flags and Intent.FLAG_ACTIVITY_CLEAR_TASK != NULL_VALUE)
   }
 
   @Test
   fun notificationHelper_sendsNotificationWithHuntId() = runBlocking {
     NotificationHelper.createNotificationChannel(context)
 
-    val testHuntId = "hunt_456"
-    val testTitle = "New Review"
-    val testMessage = "Someone reviewed your hunt!"
+    val testHuntId = NotificationTestConstants.TEST_HUNT_ID_456
+    val testTitle = NotificationTestConstants.NEW_REVIEW
+    val testMessage = NotificationTestConstants.REVIEW_MESSAGE
 
     NotificationHelper.sendNotification(context, testTitle, testMessage, testHuntId)
     assertTrue(true)
@@ -143,8 +152,8 @@ class NotificationTest {
   fun notificationHelper_sendsNotificationWithNullHuntId() = runBlocking {
     NotificationHelper.createNotificationChannel(context)
 
-    val testTitle = "General Notification"
-    val testMessage = "This is a general message"
+    val testTitle = NotificationTestConstants.GENERAL_NOTIFICATION
+    val testMessage = NotificationTestConstants.GENERAL_MESSAGE
 
     NotificationHelper.sendNotification(context, testTitle, testMessage, null)
 
@@ -153,17 +162,20 @@ class NotificationTest {
 
   @Test
   fun notificationHelper_createsPendingIntentWithCorrectFlags() {
-    val testHuntId = "hunt_789"
+    val testHuntId = NotificationTestConstants.TEST_HUNT_ID_789
 
     val intent =
         Intent(context, MainActivity::class.java).apply {
           flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-          putExtra("huntId", testHuntId)
+          putExtra(EXTRA_HUNT_ID, testHuntId)
         }
 
     val pendingIntent =
         PendingIntent.getActivity(
-            context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            context,
+            NULL_VALUE,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
     assertNotNull(pendingIntent)
   }
@@ -171,35 +183,36 @@ class NotificationTest {
   @Test
   fun firebaseMessaging_handlesRemoteMessageWithHuntId() {
 
-    val data = mapOf("huntId" to "hunt_remote_123")
+    val data = mapOf(EXTRA_HUNT_ID to HUNT_REMOTE)
 
-    assertNotNull(data["huntId"])
-    assertEquals("hunt_remote_123", data["huntId"])
+    assertNotNull(data[EXTRA_HUNT_ID])
+    assertEquals(HUNT_REMOTE, data[EXTRA_HUNT_ID])
   }
 
   @Test
   fun intent_preservesHuntIdAcrossRecreation() {
-    val originalHuntId = "hunt_preserve_test"
+    val originalHuntId = HUNT_PRESERVE
 
     val intent =
-        Intent(context, MainActivity::class.java).apply { putExtra("huntId", originalHuntId) }
+        Intent(context, MainActivity::class.java).apply { putExtra(EXTRA_HUNT_ID, originalHuntId) }
 
-    val extractedHuntId = intent.getStringExtra("huntId")
+    val extractedHuntId = intent.getStringExtra(EXTRA_HUNT_ID)
 
     assertEquals(originalHuntId, extractedHuntId)
   }
 
   @Test
   fun intent_canRemoveHuntIdExtra() {
-    val testHuntId = "hunt_remove_test"
+    val testHuntId = HUNT_REMOVE
 
-    val intent = Intent(context, MainActivity::class.java).apply { putExtra("huntId", testHuntId) }
+    val intent =
+        Intent(context, MainActivity::class.java).apply { putExtra(EXTRA_HUNT_ID, testHuntId) }
 
-    assertNotNull(intent.getStringExtra("huntId"))
+    assertNotNull(intent.getStringExtra(EXTRA_HUNT_ID))
 
-    intent.removeExtra("huntId")
+    intent.removeExtra(EXTRA_HUNT_ID)
 
-    assertNull(intent.getStringExtra("huntId"))
+    assertNull(intent.getStringExtra(EXTRA_HUNT_ID))
   }
 
   @Test
@@ -211,12 +224,15 @@ class NotificationTest {
   @Test
   fun remoteMessage_extractsHuntIdFromData() {
     val remoteMessageData =
-        mapOf("huntId" to "hunt_fcm_data_test", "title" to "Test Title", "body" to "Test Body")
+        mapOf(
+            EXTRA_HUNT_ID to HUNT_FCM,
+            NotificationTestConstants.TITLE to NotificationTestConstants.TEST_TITLE,
+            NotificationTestConstants.BODY to NotificationTestConstants.TEST_BODY)
 
-    val huntId = remoteMessageData["huntId"]
+    val huntId = remoteMessageData[EXTRA_HUNT_ID]
 
     assertNotNull(huntId)
-    assertEquals("hunt_fcm_data_test", huntId)
+    assertEquals(HUNT_FCM, huntId)
   }
 
   @Test
@@ -234,7 +250,10 @@ class NotificationTest {
 
     val pendingIntent =
         PendingIntent.getActivity(
-            context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            context,
+            NULL_VALUE,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
     assertNotNull(pendingIntent)
   }
@@ -242,7 +261,7 @@ class NotificationTest {
   @Test
   fun multipleNotifications_haveUniqueIds() {
     val time1 = System.currentTimeMillis()
-    Thread.sleep(2)
+    Thread.sleep(NotificationTestConstants.THREAD_SLEEP_TIME.toLong())
     val time2 = System.currentTimeMillis()
 
     val id1 = time1.toInt()
@@ -253,9 +272,10 @@ class NotificationTest {
 
   @Test
   fun intentExtras_handleEmptyHuntId() {
-    val intent = Intent(context, MainActivity::class.java).apply { putExtra("huntId", "") }
+    val intent =
+        Intent(context, MainActivity::class.java).apply { putExtra(EXTRA_HUNT_ID, EMPTY_STRING) }
 
-    val huntId = intent.getStringExtra("huntId")
+    val huntId = intent.getStringExtra(EXTRA_HUNT_ID)
 
     assertNotNull(huntId)
     assertTrue(huntId!!.isEmpty())
@@ -263,10 +283,10 @@ class NotificationTest {
 
   @Test
   fun intentExtras_handleSpecialCharactersInHuntId() {
-    val specialHuntId = "hunt_with-special_chars.123"
+    val specialHuntId = HUNT_SPECIAL_CHAR
     val intent =
-        Intent(context, MainActivity::class.java).apply { putExtra("huntId", specialHuntId) }
-    val extractedHuntId = intent.getStringExtra("huntId")
+        Intent(context, MainActivity::class.java).apply { putExtra(EXTRA_HUNT_ID, specialHuntId) }
+    val extractedHuntId = intent.getStringExtra(EXTRA_HUNT_ID)
     assertEquals(specialHuntId, extractedHuntId)
   }
 }

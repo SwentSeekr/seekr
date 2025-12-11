@@ -523,6 +523,133 @@ class SettingsScreenTest {
     // No assertion needed; if no crash, Jacoco records the executed paths.
   }
 
+  @Test
+  fun notificationPermissionLauncher_executes_when_permission_granted() {
+    val viewModel = SettingsViewModel()
+
+    composeRule.setContent {
+      MaterialTheme { SettingsScreen(viewModel = viewModel, onSignedOut = {}, onGoBack = {}) }
+    }
+
+    composeRule.waitForIdle()
+    composeRule.runOnIdle { viewModel.onNotificationPermissionResult(true) }
+
+    composeRule.waitForIdle()
+  }
+
+  /**
+   * Test to cover the else branch in HandlePermissions for pre-TIRAMISU devices. This covers the
+   * code: } else { viewModel.onNotificationPermissionResult(true)
+   * NotificationHelper.sendNotification(...) }
+   */
+  @Test
+  fun handlePermissions_notification_event_executes_notification_code_path() {
+    val viewModel = SettingsViewModel()
+
+    composeRule.setContent {
+      MaterialTheme { SettingsScreen(viewModel = viewModel, onSignedOut = {}, onGoBack = {}) }
+    }
+
+    composeRule.waitForIdle()
+
+    composeRule.runOnIdle {
+      val field = SettingsViewModel::class.java.getDeclaredField("_permissionEvents")
+      field.isAccessible = true
+      @Suppress("UNCHECKED_CAST")
+      val flow = field.get(viewModel) as MutableSharedFlow<PermissionEvent>
+
+      flow.tryEmit(PermissionEvent.RequestNotification)
+    }
+
+    composeRule.waitForIdle()
+    composeRule.runOnIdle { viewModel.onNotificationPermissionResult(true) }
+
+    composeRule.waitForIdle()
+  }
+
+  /** Test that exercises all permission event types and their notification paths. */
+  @Test
+  fun handlePermissions_all_events_execute_their_code_paths() {
+    val viewModel = SettingsViewModel()
+
+    composeRule.setContent {
+      MaterialTheme { SettingsScreen(viewModel = viewModel, onSignedOut = {}, onGoBack = {}) }
+    }
+
+    composeRule.waitForIdle()
+
+    composeRule.runOnIdle {
+      val field = SettingsViewModel::class.java.getDeclaredField("_permissionEvents")
+      field.isAccessible = true
+      @Suppress("UNCHECKED_CAST")
+      val flow = field.get(viewModel) as MutableSharedFlow<PermissionEvent>
+
+      flow.tryEmit(PermissionEvent.RequestNotification)
+    }
+
+    composeRule.waitForIdle()
+
+    composeRule.runOnIdle {
+      viewModel.onNotificationPermissionResult(true)
+      viewModel.onGalleryPermissionResult(true)
+      viewModel.onLocationPermissionResult(true)
+    }
+
+    composeRule.waitForIdle()
+  }
+
+  /**
+   * Test specifically targeting the notification permission granted scenario to ensure the
+   * NotificationHelper.sendNotification call is executed.
+   */
+  @Test
+  fun notification_permission_granted_executes_send_notification() {
+    val viewModel = SettingsViewModel()
+
+    composeRule.setContent {
+      MaterialTheme { SettingsScreen(viewModel = viewModel, onSignedOut = {}, onGoBack = {}) }
+    }
+
+    composeRule.waitForIdle()
+
+    composeRule.runOnIdle {
+      val field = SettingsViewModel::class.java.getDeclaredField("_permissionEvents")
+      field.isAccessible = true
+      @Suppress("UNCHECKED_CAST")
+      val flow = field.get(viewModel) as MutableSharedFlow<PermissionEvent>
+      flow.tryEmit(PermissionEvent.RequestNotification)
+    }
+
+    composeRule.waitForIdle()
+
+    composeRule.runOnIdle { viewModel.onNotificationPermissionResult(true) }
+
+    composeRule.waitForIdle()
+  }
+
+  /**
+   * Test that exercises the notification toggle which can also trigger the permission request flow.
+   */
+  @Test
+  fun toggling_notifications_on_executes_permission_and_notification_flow() {
+    val viewModel = SettingsViewModel()
+    val context = composeRule.activity
+
+    composeRule.setContent {
+      MaterialTheme { SettingsScreen(viewModel = viewModel, onSignedOut = {}, onGoBack = {}) }
+    }
+
+    composeRule.waitForIdle()
+
+    composeRule.runOnIdle { viewModel.onNotificationsToggleRequested(true, context) }
+
+    composeRule.waitForIdle()
+
+    composeRule.runOnIdle { viewModel.onNotificationPermissionResult(true) }
+
+    composeRule.waitForIdle()
+  }
+
   // ----------------------------------------------------------------------------------------------
   // Helper: reflection to manipulate real ViewModel state
   // ----------------------------------------------------------------------------------------------

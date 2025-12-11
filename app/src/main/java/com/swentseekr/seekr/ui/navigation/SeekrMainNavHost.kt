@@ -179,7 +179,9 @@ fun SeekrMainNavHost(
   val activity = context as? Activity
 
   // Read huntId if app was launched/tapped via notification
-  val deepLinkHuntId = remember { activity?.intent?.getStringExtra("huntId") }
+  val deepLinkHuntId = remember {
+    activity?.intent?.getStringExtra(SeekrNavigationDefaults.HUNT_ID)
+  }
 
   // Navigate exactly once when a notification tap occurs
   LaunchedEffect(deepLinkHuntId) {
@@ -187,7 +189,7 @@ fun SeekrMainNavHost(
       navController.navigate(SeekrDestination.HuntCard.createRoute(deepLinkHuntId)) {
         launchSingleTop = true
       }
-      activity?.intent?.removeExtra("huntId") // prevent re-trigger
+      activity?.intent?.removeExtra(SeekrNavigationDefaults.HUNT_ID) // prevent re-trigger
     }
   }
 
