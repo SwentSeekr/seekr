@@ -63,6 +63,17 @@ fun OnboardingFlow(
   }
 }
 
+/**
+ * Modal welcome dialog shown during the onboarding flow.
+ *
+ * This dialog includes:
+ * - A title with localized text and headline styling
+ * - A welcome message in body text
+ * - A "Continue" button that triggers progression in the onboarding flow
+ * - Non-dismissible behavior (user must tap Continue to proceed)
+ *
+ * @param onContinue Callback invoked when the user taps the "Continue" button.
+ */
 @Composable
 fun WelcomeDialog(onContinue: () -> Unit) {
   AlertDialog(
@@ -83,6 +94,19 @@ fun WelcomeDialog(onContinue: () -> Unit) {
       modifier = Modifier.testTag(OnboardingFlowTestTags.WELCOME_DIALOG))
 }
 
+/**
+ * Modal terms and conditions dialog shown during the onboarding flow.
+ *
+ * This dialog includes:
+ * - A title with localized text
+ * - A message with clickable link to view full terms
+ * - A checkbox for the user to agree to the terms
+ * - An "I Agree" button that is enabled only when the checkbox is checked
+ * - Non-dismissible behavior (user must agree to proceed)
+ *
+ * @param onAccepted Callback invoked when the user taps the "I Agree" button.
+ * @param onTermsClicked Callback invoked when the user clicks the terms link.
+ */
 @Composable
 fun TermsDialog(onAccepted: () -> Unit, onTermsClicked: () -> Unit = {}) {
   var checked by remember { mutableStateOf(false) }
@@ -128,6 +152,25 @@ fun TermsDialog(onAccepted: () -> Unit, onTermsClicked: () -> Unit = {}) {
       modifier = Modifier.testTag(OnboardingFlowTestTags.TERMS_DIALOG))
 }
 
+/**
+ * Modal dialog for setting up the user’s profile during onboarding.
+ *
+ * This dialog includes:
+ * - A pseudonym input field with real-time validation and availability checking
+ * - A bio input field (multi-line, up to 4 lines)
+ * - Loading indicators while pseudonym is being checked
+ * - Error messaging for invalid or taken pseudonyms
+ * - A “Finish” button that’s only enabled when pseudonym is valid and non-empty
+ * - Non-dismissible behavior (user must complete or cancel via system back)
+ *
+ * @param pseudonymError Error message to display under pseudonym field, or null if valid.
+ * @param isCheckingPseudonym Indicates whether pseudonym availability is being checked (shows
+ *   loading state).
+ * @param onPseudonymChange Callback invoked when pseudonym text changes, for validation or API
+ *   calls.
+ * @param onFinished Callback invoked when user taps “Finish”, providing pseudonym and bio as
+ *   parameters.
+ */
 @Composable
 fun ProfileSetupDialog(
     pseudonymError: String?,
@@ -200,6 +243,19 @@ fun ProfileSetupDialog(
       modifier = Modifier.testTag(OnboardingFlowTestTags.PROFILE_SETUP_DIALOG))
 }
 
+/**
+ * Full-screen dialog displaying the complete terms and conditions during onboarding.
+ *
+ * This dialog includes:
+ * - A scrollable column with multiple sections of terms content
+ * - A title with localized text
+ * - An "I Agree" button to accept the terms
+ * - An "I Don't Agree" button to cancel and go back
+ * - Non-dismissible behavior (user must choose an option)
+ *
+ * @param onContinue Callback invoked when the user taps the "I Agree" button.
+ * @param onCancel Callback invoked when the user taps the "I Don't Agree" button.
+ */
 @Composable
 fun FullScreenTermsDialog(onContinue: () -> Unit, onCancel: () -> Unit = {}) {
   AlertDialog(

@@ -14,8 +14,21 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 
+/**
+ * Full-screen view displaying the app’s Terms & Conditions.
+ *
+ * Features:
+ * - Top app bar with back button and title
+ * - Scrollable content with gradient background
+ * - Last updated timestamp in a card at top
+ * - Six collapsible or static sections (Section 1 to 6) with titles and content
+ * - Spacing and padding optimized for readability
+ * - Test tags for UI automation
+ *
+ * @param onGoBack Callback invoked when user taps the back button — typically navigates to previous
+ *   screen.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TermsAndConditionsScreen(onGoBack: () -> Unit = {}) {
@@ -51,7 +64,8 @@ fun TermsAndConditionsScreen(onGoBack: () -> Unit = {}) {
                             colors =
                                 listOf(
                                     MaterialTheme.colorScheme.background,
-                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))))
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(
+                                        alpha = TermsScreenConstants.ALPHA))))
                     .padding(paddingValues)
                     .padding(horizontal = TermsScreenConstants.SCREEN_PADDING)
                     .verticalScroll(scrollState)
@@ -65,8 +79,11 @@ fun TermsAndConditionsScreen(onGoBack: () -> Unit = {}) {
                   colors =
                       CardDefaults.cardColors(
                           containerColor =
-                              MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)),
-                  elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)) {
+                              MaterialTheme.colorScheme.primaryContainer.copy(
+                                  alpha = TermsScreenConstants.ALPHA)),
+                  elevation =
+                      CardDefaults.cardElevation(
+                          defaultElevation = TermsScreenConstants.ELEVATION)) {
                     Column(modifier = Modifier.padding(TermsScreenConstants.CARD_PADDING)) {
                       Text(
                           text = TermsScreenStrings.LAST_UPDATED,

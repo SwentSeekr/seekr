@@ -113,7 +113,13 @@ class EditProfileViewModel(
     updateChangesFlags(newState)
   }
 
-  /** Verification of Pseudonym * */
+  /**
+   * Validates the user’s chosen pseudonym locally and triggers availability check if valid.
+   *
+   * @param pseudonym The pseudonym entered by the user.
+   * - If invalid (format or empty), sets an error message.
+   * - If valid and non-empty, triggers async availability check via `checkPseudonymAvailability`.
+   */
   fun validatePseudonym(pseudonym: String) {
     _uiState.value =
         _uiState.value.copy(
@@ -129,6 +135,16 @@ class EditProfileViewModel(
     updatePseudonym(pseudonym)
   }
 
+  /**
+   * Asynchronously checks if the given pseudonym is available (not already taken).
+   *
+   * Updates state to show loading indicator, then:
+   * - Sets error if pseudonym is taken.
+   * - Clears error if available.
+   * - Handles network/error cases gracefully.
+   *
+   * @param pseudonym The pseudonym to check for availability.
+   */
   private fun checkPseudonymAvailability(pseudonym: String) {
     viewModelScope.launch {
       _uiState.value = _uiState.value.copy(isCheckingPseudonym = true)

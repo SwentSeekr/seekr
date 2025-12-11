@@ -171,7 +171,7 @@ class ProfileRepositoryFirestore(
       val snapshot = profilesCollection.get().await()
 
       snapshot.documents.mapNotNull { doc ->
-        val author = doc.get("author") as? Map<*, *> ?: return@mapNotNull null
+        val author = doc["author"] as? Map<*, *> ?: return@mapNotNull null
         val pseudonym = author["pseudonym"] as? String
         pseudonym?.takeIf { it.isNotBlank() }
       }

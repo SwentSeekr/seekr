@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
@@ -93,7 +94,7 @@ sealed class SeekrDestination(
   object Settings : SeekrDestination("settings", "Settings", Icons.Filled.List)
 
   object TermsConditions :
-      SeekrDestination("terms_conditions", "Terms & Conditions", Icons.Filled.List)
+      SeekrDestination("terms_conditions", "Terms & Conditions", Icons.Filled.Info)
 
   object EditProfile : SeekrDestination("edit_profile", "Edit Profile", Icons.Filled.List)
 

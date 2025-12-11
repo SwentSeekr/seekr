@@ -129,7 +129,7 @@ class TermsAndConditionsScreenTest {
   fun allSections_areDisplayed() {
     composeTestRule.setContent { TermsAndConditionsScreen() }
 
-    // Vérifie que tous les titres de sections sont affichés
+    // Verifies all section titles are displayed
     composeTestRule.onNodeWithText(TermsScreenStrings.SECTION_1_TITLE).assertIsDisplayed()
     composeTestRule.onNodeWithText(TermsScreenStrings.SECTION_2_TITLE).assertIsDisplayed()
     composeTestRule.onNodeWithText(TermsScreenStrings.SECTION_3_TITLE).assertIsDisplayed()
@@ -148,12 +148,12 @@ class TermsAndConditionsScreenTest {
   fun contentColumn_isScrollable() {
     composeTestRule.setContent { TermsAndConditionsScreen() }
 
-    // Vérifie que la colonne est scrollable en scrollant vers le bas
+    // Verifies the column can be scrolled to the last section
     composeTestRule
         .onNodeWithTag(TermsScreenTestTags.CONTENT_COLUMN)
         .performScrollToNode(hasText(TermsScreenStrings.SECTION_6_TITLE))
 
-    // Vérifie que la dernière section est maintenant visible
+    // verifies last section is displayed after scroll
     composeTestRule.onNodeWithText(TermsScreenStrings.SECTION_6_TITLE).assertIsDisplayed()
   }
 

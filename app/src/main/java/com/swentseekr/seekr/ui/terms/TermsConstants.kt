@@ -4,11 +4,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 object TermsScreenConstants {
+  val ALPHA = 0.3f
   val SCREEN_PADDING = 20.dp
   val SECTION_SPACING = 16.dp
   val CARD_CORNER_RADIUS = 20.dp
   val CARD_PADDING = 20.dp
   val CARD_ELEVATION = 2.dp
+  val ELEVATION = 0.dp
   val TEXT_SPACING = 12.dp
   val LINE_HEIGHT = 24.sp
   val TOP_SPACER = 8.dp

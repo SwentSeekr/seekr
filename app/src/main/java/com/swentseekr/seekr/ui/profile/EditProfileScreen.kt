@@ -34,8 +34,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.swentseekr.seekr.ui.auth.OnboardingFlowDimensions
-import com.swentseekr.seekr.ui.auth.OnboardingFlowStrings
 import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.MAX_BIO_LENGTH
 import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.PROFILE_PIC_DEFAULT
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.BUTTON_CAMERA
@@ -213,6 +211,30 @@ fun createImageUri(context: Context): Uri? {
   }
 }
 
+/**
+ * Composable UI for editing user profile details (pseudonym, bio, profile picture).
+ *
+ * Features:
+ * - Editable pseudonym field with real-time validation and availability checking
+ * - Multi-line bio editor with length limit validation
+ * - Profile picture preview with edit trigger (click to change)
+ * - Loading states during save or validation
+ * - Error/success feedback cards
+ * - Cancel & Save buttons with state-aware enabled/disabled behavior
+ *
+ * @param uiState Current state of the edit profile screen (includes pseudonym, bio, loading, error,
+ *   success flags).
+ * @param onPseudonymChange Called when pseudonym text changes — triggers validation.
+ * @param pseudonymError Optional error message for pseudonym (null if valid).
+ * @param isCheckingPseudonym Indicates if pseudonym availability is being checked (shows loading
+ *   indicator).
+ * @param onBioChange Called when bio text changes — validates length.
+ * @param onCancel Called when user taps “Cancel” — typically dismisses the screen.
+ * @param onSave Called when user taps “Save” — triggers profile update (after validation).
+ * @param onProfilePictureChange Called when user taps profile picture — opens image picker or
+ *   camera.
+ * @param profilePictureUri Optional URI of locally selected image (previewed before upload).
+ */
 @Composable
 fun EditProfileContent(
     uiState: EditProfileUIState,
@@ -303,15 +325,12 @@ fun EditProfileContent(
                             isCheckingPseudonym -> {
                               Row(
                                   verticalAlignment = Alignment.CenterVertically,
-                                  horizontalArrangement =
-                                      Arrangement.spacedBy(
-                                          OnboardingFlowDimensions.SPACING_SMALL)) {
+                                  horizontalArrangement = Arrangement.spacedBy(UI_C.SPACER_SMALL)) {
                                     CircularProgressIndicator(
-                                        modifier =
-                                            Modifier.size(OnboardingFlowDimensions.SIZE_MEDIUM),
-                                        strokeWidth = OnboardingFlowDimensions.STROKE_WIDTH)
+                                        modifier = Modifier.size(UI_C.SPACER_LARGE),
+                                        strokeWidth = UI_C.STROKE_WIDTH)
                                     Text(
-                                        OnboardingFlowStrings.CHECKING_AVAILABILITY,
+                                        EditProfileStrings.CHECKING_AVAILABILITY,
                                         style = MaterialTheme.typography.bodySmall)
                                   }
                             }
@@ -324,8 +343,8 @@ fun EditProfileContent(
                           AnimatedVisibility(
                               visible = isCheckingPseudonym, enter = fadeIn(), exit = fadeOut()) {
                                 CircularProgressIndicator(
-                                    modifier = Modifier.size(OnboardingFlowDimensions.SIZE_LARGE),
-                                    strokeWidth = OnboardingFlowDimensions.STROKE_WIDTH)
+                                    modifier = Modifier.size(UI_C.SIZE_LARGE),
+                                    strokeWidth = UI_C.STROKE_WIDTH)
                               }
                         },
                         modifier =
