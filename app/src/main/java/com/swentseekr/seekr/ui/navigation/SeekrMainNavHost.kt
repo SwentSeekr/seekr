@@ -250,7 +250,7 @@ fun SeekrMainNavHost(
                     userId = user?.uid,
                     onAddHunt = { navController.navigate(SeekrDestination.AddHunt.route) },
                     onMyHuntClick = { huntId ->
-                      navController.navigate(SeekrDestination.EditHunt.createRoute(huntId)) {
+                      navController.navigate(SeekrDestination.HuntCard.createRoute(huntId)) {
                         launchSingleTop = true
                       }
                     },
@@ -324,6 +324,11 @@ fun SeekrMainNavHost(
                         },
                         addReview = {
                           navController.navigate(SeekrDestination.AddReview.createRoute(huntId)) {
+                            launchSingleTop = true
+                          }
+                        },
+                        editHunt = {
+                          navController.navigate(SeekrDestination.EditHunt.createRoute(huntId)) {
                             launchSingleTop = true
                           }
                         },

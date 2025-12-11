@@ -26,6 +26,12 @@ class FakeHuntCardViewModel(hunt: Hunt) : HuntCardViewModel() { // Inherit from 
   override val uiState: StateFlow<HuntCardUiState> = _uiState
   override val likedHuntsCache: StateFlow<Set<String>> = _likedHuntsCache
 
+  fun setHuntAuthor(authorId: String) {
+    _uiState.value = _uiState.value.copy(
+      hunt = _uiState.value.hunt?.copy(authorId = authorId)
+    )
+  }
+
   fun setLikedHunts(hunts: Set<String>) {
     _likedHuntsCache.value = hunts
     _uiState.value = _uiState.value.copy(isLiked = hunts.contains(_uiState.value.hunt?.uid ?: ""))

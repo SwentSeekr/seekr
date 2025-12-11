@@ -123,6 +123,7 @@ object HuntCardScreenTestTags {
   const val MAP_CONTAINER = "MapContainer"
   const val BEGIN_BUTTON = "BeginButton"
   const val REVIEW_BUTTON = "ReviewButton"
+  const val EDIT_HUNT_BUTTON = "EditHuntButton"
   const val REVIEW_CARD = "ReviewCard"
   const val IMAGE_CAROUSEL_CONTAINER = "HuntCardImageCarouselContainer"
   const val IMAGE_PAGER = "HuntCardImagePager"
@@ -132,4 +133,5 @@ object HuntCardScreenTestTags {
   const val IMAGE_INDICATOR_DOT_PREFIX = "HuntCardImageIndicatorDot_"
   const val DELETE_REVIEW_BUTTON = "DeleteReviewButton"
   const val LIKE_BUTTON = "HuntCard_LikeButton"
+  const val LAST_SPACER = "HuntCard_LastSpacer"
 }

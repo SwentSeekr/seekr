@@ -54,7 +54,7 @@ open class ProfileRepositoryLocal : ProfileRepository {
   }
 
   override suspend fun getAllPseudonyms(): List<String> {
-    return emptyList()
+    return profiles.map { it.author.pseudonym }
   }
 
   /**
