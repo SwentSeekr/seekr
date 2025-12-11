@@ -55,6 +55,7 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
 
   var mapLoaded by remember { mutableStateOf(false) }
   var previousCameraPosition by remember { mutableStateOf<CameraPosition?>(null) }
+  var autoCenterOnUser by remember { mutableStateOf(true) }
   var showStopHuntDialog by remember { mutableStateOf(false) }
 
   val permissionState = rememberLocationPermissionState(testMode = testMode)
@@ -67,7 +68,8 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
       uiState = uiState,
       fused = fused,
       cameraPositionState = cameraPositionState,
-      scope = scope)
+      scope = scope,
+      autoCenterOnUser = autoCenterOnUser)
 
   ContinuousDistanceUpdateEffect(
       hasLocationPermission = permissionState.hasPermission,
@@ -93,7 +95,12 @@ fun MapScreen(viewModel: MapViewModel = viewModel(), testMode: Boolean = false) 
         mapLoaded = mapLoaded,
         onMapLoaded = { mapLoaded = true },
         selectedHunt = selectedHunt,
-        onMarkerClick = viewModel::onMarkerClick)
+        onMarkerClick = { hunt ->
+          previousCameraPosition = cameraPositionState.position
+          autoCenterOnUser = false
+          viewModel.onMarkerClick(hunt)
+        },
+    )
 
     LocationPermissionPopup(permissionState = permissionState)
 
@@ -227,11 +234,20 @@ private fun MoveCameraToUserLocationEffect(
     context: Context,
     fused: FusedLocationProviderClient,
     cameraPositionState: CameraPositionState,
-    scope: CoroutineScope
+    scope: CoroutineScope,
+    autoCenterOnUser: Boolean
 ) {
-  LaunchedEffect(hasLocationPermission, mapLoaded, uiState.selectedHunt, uiState.isHuntStarted) {
+  LaunchedEffect(
+      hasLocationPermission,
+      mapLoaded,
+      uiState.selectedHunt,
+      uiState.isHuntStarted,
+      autoCenterOnUser,
+  ) {
     if (!mapLoaded || !hasLocationPermission) return@LaunchedEffect
     if (!isLocationPermissionGranted(context)) return@LaunchedEffect
+
+    if (!autoCenterOnUser) return@LaunchedEffect
 
     val hasActiveHunt = uiState.selectedHunt != null || uiState.isHuntStarted
     if (hasActiveHunt) return@LaunchedEffect
