@@ -114,7 +114,7 @@ jobs:
           GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES }}
 
       - name: Install Firebase CLI
-        run: npm install -g firebase-tools
+        run: npm install -g firebase-tools@12.9.0
 
       # Start Firebase
       - name: Start Firebase emulators
