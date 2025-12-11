@@ -17,11 +17,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
@@ -42,6 +45,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,6 +66,8 @@ import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
 import com.swentseekr.seekr.ui.huntcardview.HuntCardUiState
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import com.swentseekr.seekr.ui.profile.ProfilePicture
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 /**
  * Main screen displaying all the details of a Hunt, including:
@@ -101,6 +108,7 @@ fun HuntCardScreen(
     beginHunt: () -> Unit = {},
     addReview: () -> Unit = {},
     editHunt: () -> Unit = {},
+    editReview: (String)-> Unit = {},
     navController: NavHostController
 ) {
   val uiState by huntCardViewModel.uiState.collectAsState()
@@ -215,7 +223,7 @@ fun HuntCardScreen(
                   onDeleteReview = { reviewId ->
                     huntCardViewModel.deleteReview(
                         review.huntId, reviewId, review.authorId, currentUserId)
-                  })
+                  },   onEdit = editReview)
             }
           }
 
@@ -602,6 +610,7 @@ fun ModernReviewCard(
     currentUserId: String?,
     navController: NavHostController,
     onDeleteReview: (String) -> Unit,
+    onEdit: (String) -> Unit ={}
 ) {
   val uiState by reviewHuntViewModel.uiState.collectAsState()
 
@@ -651,10 +660,19 @@ fun ModernReviewCard(
               IconButton(
                   onClick = { onDeleteReview(review.reviewId) },
                   modifier = Modifier.testTag(HuntCardScreenTestTags.DELETE_REVIEW_BUTTON)) {
+                  DotMenu(
+                      onEdit = {onEdit(review.reviewId)},
+                      onDelete = {
+                          onDeleteReview(review.reviewId)
+                      }
+                  )
+                    /*
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = HuntCardScreenStrings.ReviewDeleteButton,
                         tint = HuntCardScreenDefaults.ErrorRed)
+*/
+
                   }
             }
           }
@@ -688,6 +706,39 @@ fun ModernReviewCard(
           }
         }
       }
+}
+
+@Composable
+fun DotMenu(
+    onEdit: ()->Unit,
+    onDelete: ()-> Unit
+){
+    var expanded by remember { mutableStateOf(false) }
+    Box{
+        IconButton(onClick = { expanded = true }) {
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = "Menu"
+            )
+        }
+        DropdownMenu(
+            expanded,
+            onDismissRequest = {expanded= false}
+        ) {
+            DropdownMenuItem( text = {Text("Edit")}, onClick = {
+                expanded = false
+                onEdit()
+                })
+
+            DropdownMenuItem( text = {Text("Delete")},onClick = {
+                expanded = false
+                onDelete()
+            })
+
+
+        }
+    }
+
 }
 
 /**

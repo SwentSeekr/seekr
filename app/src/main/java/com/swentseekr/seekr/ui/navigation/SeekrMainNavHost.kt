@@ -32,6 +32,7 @@ import com.swentseekr.seekr.ui.components.HuntCardScreen
 import com.swentseekr.seekr.ui.hunt.add.AddHuntScreen
 import com.swentseekr.seekr.ui.hunt.edit.EditHuntScreen
 import com.swentseekr.seekr.ui.hunt.review.AddReviewScreen
+import com.swentseekr.seekr.ui.hunt.review.EditReviewScreen
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
 import com.swentseekr.seekr.ui.hunt.review.ReviewImagesScreen
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
@@ -86,6 +87,13 @@ sealed class SeekrDestination(
 
     const val ARG_HUNT_ID = "huntId"
   }
+
+    object EditReview : SeekrDestination("edit_review/{huntId}/{reviewId}", "Edit Review", Icons.Filled.List) {
+        fun createRoute(huntId:String ,reviewId: String) = "edit_review/$huntId/$reviewId"
+
+        const val ARG_HUNT_ID = "huntId"
+        const val ARG_REVIEW_ID = "reviewId"
+    }
 
   object AddHunt : SeekrDestination("add_hunt", "Add Hunt", Icons.Filled.List)
 
@@ -322,6 +330,12 @@ fun SeekrMainNavHost(
                             launchSingleTop = true
                           }
                         },
+                        editReview = {reviewId ->
+                            navController.navigate( SeekrDestination.EditReview.createRoute(huntId, reviewId)) {
+                                launchSingleTop = true
+                            }
+
+                        },
                         huntCardViewModel = huntCardVm,
                         reviewViewModel = reviewVm,
                         modifier = Modifier.testTag(NavigationTestTags.HUNTCARD_SCREEN),
@@ -395,6 +409,37 @@ fun SeekrMainNavHost(
                               onDone = { navController.popBackStack() })
                         }
                   }
+
+            //Edit Review
+            composable(
+                route = SeekrDestination.EditReview.route,
+                arguments =
+                    listOf(
+                        navArgument(SeekrDestination.EditReview.ARG_HUNT_ID) {
+                            type = NavType.StringType },
+                        navArgument(SeekrDestination.EditReview.ARG_REVIEW_ID) {
+                            type = NavType.StringType
+                        })) { backStackEntry ->
+                val huntId =
+                    backStackEntry.arguments
+                        ?.getString(SeekrDestination.EditReview.ARG_HUNT_ID)
+                        .orEmpty()
+                val reviewId = backStackEntry.arguments
+                    ?.getString(SeekrDestination.EditReview.ARG_REVIEW_ID)
+                    .orEmpty()
+
+                Surface(
+                    modifier =
+                        Modifier.fillMaxSize().testTag(NavigationTestTags.EDIT_REVIEW_HUNT_SCREEN)) {
+                    EditReviewScreen(
+                        huntId = huntId,
+                        reviewId= reviewId,
+                        onGoBack = { navController.popBackStack() },
+                        onCancel = { navController.popBackStack() },
+                        onDone = { navController.popBackStack() })
+                }
+            }
+
 
               // Settings
               composable(SeekrDestination.Settings.route) {

@@ -28,18 +28,21 @@ import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 @Composable
 fun EditReviewScreen(
     huntId: String,
-    reviewViewModel: ReviewHuntViewModel = viewModel(),
+    reviewId: String,
+    //reviewViewModel: ReviewHuntViewModel = viewModel(),
     huntCardViewModel: HuntCardViewModel = viewModel(),
     onGoBack: () -> Unit = {},
     onDone: () -> Unit = {},
     onCancel: () -> Unit = {},
 ) {
+    val vm: ReviewHuntViewModel = viewModel(key = "edit_$reviewId")
   ReviewScreenContent(
       title = "Edit Review Hunt",
       huntId = huntId,
+      reviewId= reviewId,
       onGoBack = onGoBack,
       onDone = onDone,
       onCancel = onCancel,
-      reviewViewModel = reviewViewModel,
+      reviewViewModel = vm,
       huntCardViewModel = huntCardViewModel)
 }

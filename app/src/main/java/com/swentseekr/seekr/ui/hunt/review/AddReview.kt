@@ -42,19 +42,21 @@ val UICons = AddReviewScreenDefaults
 @Composable
 fun AddReviewScreen(
     huntId: String,
-    reviewViewModel: ReviewHuntViewModel = viewModel(),
+    //reviewViewModel: ReviewHuntViewModel = viewModel(),
     huntCardViewModel: HuntCardViewModel = viewModel(),
     onGoBack: () -> Unit = {},
     onDone: () -> Unit = {},
     onCancel: () -> Unit = {},
 ) {
+    val vm: ReviewHuntViewModel = viewModel(key = "add_$huntId")
   ReviewScreenContent(
       title = AddReviewScreenStrings.Title,
       huntId = huntId,
+      reviewId = "",
       onGoBack = onGoBack,
       onDone = onDone,
       onCancel = onCancel,
-      reviewViewModel = reviewViewModel,
+      reviewViewModel = vm,
       huntCardViewModel = huntCardViewModel)
 }
 
