@@ -91,7 +91,7 @@ open class ReviewHuntViewModel(
   /** Public immutable [StateFlow] exposing the current [ReviewHuntUIState]. */
   open val uiState: StateFlow<ReviewHuntUIState> = _uiState.asStateFlow()
 
-    private var lastSavedReview: ReviewHuntUIState ?= null
+  private var lastSavedReview: ReviewHuntUIState? = null
 
   /**
    * Clears any existing error message in the UI state.
@@ -143,31 +143,29 @@ open class ReviewHuntViewModel(
     }
   }
 
-    fun loadReview(reviewId: String){
-        viewModelScope.launch {
-            try {
-                val review = repositoryReview.getReviewHunt(reviewId)
-                // _uiState.value = ReviewHuntUIState(hunt = hunt)
+  fun loadReview(reviewId: String) {
+    viewModelScope.launch {
+      try {
+        val review = repositoryReview.getReviewHunt(reviewId)
+        // _uiState.value = ReviewHuntUIState(hunt = hunt)
 
-                // Update only review-specific fields, preserve hunt data
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        reviewId = reviewId,
-                        userId = review.authorId,
-                        reviewText = review.comment,
-                        photos = review.photos,
-                        rating = review.rating
-
-                    )
-                }
-            } catch (e: Exception) {
-                Log.e(
-                    AddReviewScreenStrings.ReviewViewModel,
-                    "${AddReviewScreenStrings.ErrorLoadingHunt} $reviewId",
-                    e)
-            }
+        // Update only review-specific fields, preserve hunt data
+        _uiState.update { currentState ->
+          currentState.copy(
+              reviewId = reviewId,
+              userId = review.authorId,
+              reviewText = review.comment,
+              photos = review.photos,
+              rating = review.rating)
         }
+      } catch (e: Exception) {
+        Log.e(
+            AddReviewScreenStrings.ReviewViewModel,
+            "${AddReviewScreenStrings.ErrorLoadingHunt} $reviewId",
+            e)
+      }
     }
+  }
 
   /**
    * Loads the profile of the author of a hunt or review and stores it in [ReviewHuntUIState].
@@ -232,44 +230,37 @@ open class ReviewHuntViewModel(
     }
   }
 
-    /**
-     * Updates an existing review in the repository.
-     */
-    private fun updateReviewInRepository(reviewId: String, hunt: Hunt, context: Context?) {
-        viewModelScope.launch {
-            try {
-                val updatedReview = HuntReview(
-                    reviewId = reviewId, // Use existing review ID
-                    authorId = FirebaseAuth.getInstance().currentUser?.uid ?: AddReviewScreenStrings.User0,
-                    huntId = hunt.uid,
-                    rating = _uiState.value.rating,
-                    comment = _uiState.value.reviewText,
-                    photos = _uiState.value.photos
-                )
+  /** Updates an existing review in the repository. */
+  private fun updateReviewInRepository(reviewId: String, hunt: Hunt, context: Context?) {
+    viewModelScope.launch {
+      try {
+        val updatedReview =
+            HuntReview(
+                reviewId = reviewId, // Use existing review ID
+                authorId =
+                    FirebaseAuth.getInstance().currentUser?.uid ?: AddReviewScreenStrings.User0,
+                huntId = hunt.uid,
+                rating = _uiState.value.rating,
+                comment = _uiState.value.reviewText,
+                photos = _uiState.value.photos)
 
-                // Update the review instead of adding a new one
-                repositoryReview.updateReviewHunt(reviewId,updatedReview)
+        // Update the review instead of adding a new one
+        repositoryReview.updateReviewHunt(reviewId, updatedReview)
 
-                if (context != null) {
-                    NotificationHelper.sendNotification(
-                        context,
-                        "Review Updated",
-                        "Your review has been updated successfully"
-                    )
-                }
-
-                _uiState.value = _uiState.value.copy(
-                    saveSuccessful = true,
-                    errorMsg = null,
-                    isSubmitted = true
-                )
-            } catch (e: Exception) {
-                Log.e(AddReviewScreenStrings.ReviewViewModel, "Error updating review", e)
-                setErrorMsg("Failed to update review: ${e.message}")
-                _uiState.value = _uiState.value.copy(saveSuccessful = false)
-            }
+        if (context != null) {
+          NotificationHelper.sendNotification(
+              context, "Review Updated", "Your review has been updated successfully")
         }
+
+        _uiState.value =
+            _uiState.value.copy(saveSuccessful = true, errorMsg = null, isSubmitted = true)
+      } catch (e: Exception) {
+        Log.e(AddReviewScreenStrings.ReviewViewModel, "Error updating review", e)
+        setErrorMsg("Failed to update review: ${e.message}")
+        _uiState.value = _uiState.value.copy(saveSuccessful = false)
+      }
     }
+  }
   /**
    * Deletes a review (and its associated photos) if the given user is the author.
    *
@@ -355,14 +346,12 @@ open class ReviewHuntViewModel(
       setErrorMsg(AddReviewScreenStrings.ErrorSubmisson)
       return
     }
-      if (state.reviewId.isNotEmpty()) {
-          updateReviewInRepository(state.reviewId, hunt, context)
-      }
-      else{
-          _uiState.value = _uiState.value.copy(isSubmitted = true)
-          reviewHuntToRepository(userId, hunt, context)
-      }
-
+    if (state.reviewId.isNotEmpty()) {
+      updateReviewInRepository(state.reviewId, hunt, context)
+    } else {
+      _uiState.value = _uiState.value.copy(isSubmitted = true)
+      reviewHuntToRepository(userId, hunt, context)
+    }
   }
 
   /**

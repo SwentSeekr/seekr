@@ -62,11 +62,10 @@ fun ProfileReviewsScreen(
     userId: String,
     profileViewModel: ProfileViewModel = viewModel(),
     onGoBack: () -> Unit = {},
-    editReview: ()-> Unit = {},
+    editReview: () -> Unit = {},
     navController: NavHostController,
     testProfile: Profile? = null,
     testReviews: List<HuntReview>? = null
-
 ) {
   val uiState by profileViewModel.uiState.collectAsState()
   val profile = testProfile ?: uiState.profile
@@ -166,7 +165,8 @@ fun ProfileReviewsScreen(
                                       reviewId,
                                       review.authorId,
                                       currentUserId = profileViewModel.currentUid)
-                                }, onEdit = {editReview})
+                                },
+                                onEdit = { editReview })
                           }
                     }
                   }

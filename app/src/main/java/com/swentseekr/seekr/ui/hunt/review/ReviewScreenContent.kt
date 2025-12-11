@@ -8,7 +8,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 
 /**
@@ -41,12 +40,12 @@ fun ReviewScreenContent(
   val uiState by reviewViewModel.uiState.collectAsState()
   val uiStateHuntCard by huntCardViewModel.uiState.collectAsState()
   LaunchedEffect(huntId) { reviewViewModel.loadHunt(huntId) }
-    // Only load review if reviewId is not empty (edit mode)
-    LaunchedEffect(reviewId) {
-        if (reviewId.isNotEmpty()) {
-            reviewViewModel.loadReview(reviewId)
-        }
+  // Only load review if reviewId is not empty (edit mode)
+  LaunchedEffect(reviewId) {
+    if (reviewId.isNotEmpty()) {
+      reviewViewModel.loadReview(reviewId)
     }
+  }
 
   val hunt2 = uiState.hunt
   val authorId = hunt2?.authorId ?: ""

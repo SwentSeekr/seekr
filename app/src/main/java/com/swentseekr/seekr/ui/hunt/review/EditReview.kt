@@ -29,17 +29,17 @@ import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 fun EditReviewScreen(
     huntId: String,
     reviewId: String,
-    //reviewViewModel: ReviewHuntViewModel = viewModel(),
+    // reviewViewModel: ReviewHuntViewModel = viewModel(),
     huntCardViewModel: HuntCardViewModel = viewModel(),
     onGoBack: () -> Unit = {},
     onDone: () -> Unit = {},
     onCancel: () -> Unit = {},
 ) {
-    val vm: ReviewHuntViewModel = viewModel(key = "edit_$reviewId")
+  val vm: ReviewHuntViewModel = viewModel(key = "edit_$reviewId")
   ReviewScreenContent(
       title = "Edit Review Hunt",
       huntId = huntId,
-      reviewId= reviewId,
+      reviewId = reviewId,
       onGoBack = onGoBack,
       onDone = onDone,
       onCancel = onCancel,
