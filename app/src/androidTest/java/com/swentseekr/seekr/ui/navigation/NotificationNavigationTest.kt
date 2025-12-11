@@ -365,9 +365,7 @@ class NotificationNavigationTest {
   fun huntCardRoute_createdWithCorrectFormat() {
     val huntId = "test_route_hunt"
     val expectedRoute = "hunt/$huntId"
-
     val actualRoute = SeekrDestination.HuntCard.createRoute(huntId)
-
     assert(actualRoute == expectedRoute) { "Expected route: $expectedRoute, but got: $actualRoute" }
   }
 }
