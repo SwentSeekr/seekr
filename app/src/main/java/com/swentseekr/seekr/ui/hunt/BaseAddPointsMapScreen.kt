@@ -1,5 +1,7 @@
 package com.swentseekr.seekr.ui.hunt
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -10,10 +12,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.core.content.ContextCompat
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.ui.map.MapScreenDefaults
+import com.swentseekr.seekr.ui.map.PermissionRequestPopup
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,6 +34,43 @@ fun BaseAddPointsMapScreen(
 ) {
   var points by remember { mutableStateOf(initPoints) }
   val cameraPositionState = rememberCameraPositionState()
+  var shouldRecenterOnUser by remember { mutableStateOf(false) }
+
+  val context = LocalContext.current
+  val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
+  var hasLocationPermission by remember { mutableStateOf(false) }
+  val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+
+  var mapLoaded by remember { mutableStateOf(false) }
+
+  val permissionLauncher =
+      rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
+          granted ->
+        hasLocationPermission = granted
+        if (granted) shouldRecenterOnUser = true
+      }
+
+  LaunchedEffect(Unit) {
+    hasLocationPermission =
+        ContextCompat.checkSelfPermission(context, locationPermission) ==
+            PackageManager.PERMISSION_GRANTED
+
+    if (hasLocationPermission) shouldRecenterOnUser = true
+  }
+
+  LaunchedEffect(hasLocationPermission, mapLoaded) {
+    if (!hasLocationPermission || !mapLoaded) return@LaunchedEffect
+
+    try {
+      fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+        if (location != null) {
+          val target = LatLng(location.latitude, location.longitude)
+          cameraPositionState.move(
+              CameraUpdateFactory.newLatLngZoom(target, MapScreenDefaults.UserLocationZoom))
+        }
+      }
+    } catch (_: SecurityException) {}
+  }
 
   var showNameDialog by remember { mutableStateOf(false) }
   var tempLatLng by remember { mutableStateOf<LatLng?>(null) }
@@ -72,29 +117,35 @@ fun BaseAddPointsMapScreen(
           }
         }
       }) { padding ->
-        GoogleMap(
-            modifier =
-                Modifier.fillMaxSize()
-                    .padding(padding)
-                    .testTag(AddPointsMapScreenTestTags.MAP_VIEW),
-            cameraPositionState = cameraPositionState,
-            onMapClick = { latLng ->
-              tempLatLng = latLng
-              showNameDialog = true
-            }) {
-              points.forEach { point ->
-                Marker(
-                    state = MarkerState(position = LatLng(point.latitude, point.longitude)),
-                    title = point.name,
-                    snippet = point.description.ifBlank { null })
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
+          GoogleMap(
+              modifier = Modifier.fillMaxSize().testTag(AddPointsMapScreenTestTags.MAP_VIEW),
+              cameraPositionState = cameraPositionState,
+              onMapLoaded = { mapLoaded = true },
+              properties = MapProperties(isMyLocationEnabled = hasLocationPermission),
+              onMapClick = { latLng ->
+                tempLatLng = latLng
+                showNameDialog = true
+              }) {
+                points.forEach { point ->
+                  Marker(
+                      state = MarkerState(position = LatLng(point.latitude, point.longitude)),
+                      title = point.name,
+                      snippet = point.description.ifBlank { null })
+                }
+
+                if (points.size >= 2) {
+                  Polyline(
+                      points = points.map { LatLng(it.latitude, it.longitude) },
+                      color = MaterialTheme.colorScheme.primary)
+                }
               }
 
-              if (points.size >= 2) {
-                Polyline(
-                    points = points.map { LatLng(it.latitude, it.longitude) },
-                    color = MaterialTheme.colorScheme.primary)
-              }
-            }
+          if (!hasLocationPermission) {
+            PermissionRequestPopup(
+                onRequestPermission = { permissionLauncher.launch(locationPermission) })
+          }
+        }
       }
 
   PointNameDialog(
