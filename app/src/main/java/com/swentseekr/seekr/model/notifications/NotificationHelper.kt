@@ -48,7 +48,7 @@ object NotificationHelper {
    * @param huntId An optional identifier included in the launched activity’s intent extras. May be
    *   null.
    */
-  fun sendNotification(context: Context, title: String, message: String, huntId: String?) {
+  fun sendNotification(context: Context, title: String, message: String, huntId: String? = null) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
         context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
             PackageManager.PERMISSION_GRANTED) {

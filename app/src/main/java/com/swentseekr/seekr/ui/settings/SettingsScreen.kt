@@ -109,8 +109,7 @@ private fun HandlePermissions(viewModel: SettingsViewModel) {
           NotificationHelper.sendNotification(
               context,
               SettingsScreenStrings.NOTIFICATION_FIELD_2,
-              SettingsScreenStrings.NOTIFICATION_ACCEPT_MESSAGE,
-              null)
+              SettingsScreenStrings.NOTIFICATION_ACCEPT_MESSAGE)
         }
       }
 
@@ -149,8 +148,7 @@ private fun HandlePermissions(viewModel: SettingsViewModel) {
             NotificationHelper.sendNotification(
                 context,
                 SettingsScreenStrings.NOTIFICATION_FIELD_2,
-                SettingsScreenStrings.NOTIFICATION_ACCEPT_MESSAGE,
-                null)
+                SettingsScreenStrings.NOTIFICATION_ACCEPT_MESSAGE)
           }
         }
         PermissionEvent.RequestGallery -> {
