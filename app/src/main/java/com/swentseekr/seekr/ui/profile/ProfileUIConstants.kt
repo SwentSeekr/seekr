@@ -47,6 +47,8 @@ object EditProfileNumberConstants {
   val SPACER_LARGE = 16.dp
   val SPACER_SMALL = 8.dp
 
+  val SIZE_LARGE = 20.dp
+
   val PADDING_GIGANTIC = 20.dp
   val PADDING_BIG = 16.dp
   val PADDING_SMALL = 4.dp
@@ -75,6 +77,8 @@ object EditProfileNumberConstants {
   const val MAX_PSEUDONYM_LENGTH = 30
   const val MAX_BIO_LENGTH = 30
   const val MIN_PSEUDONYM_LENGTH = 3
+
+  val STROKE_WIDTH = 2.dp
 }
 
 object EditProfileStrings {
@@ -115,6 +119,8 @@ object EditProfileStrings {
   const val REPO_ERROR = "Repo error"
   const val NEW_TEST_NAME = "NewName"
   const val NEW_TEST_BIO = "New bio text"
+
+  const val CHECKING_AVAILABILITY = "Checking availability..."
 }
 
 /**

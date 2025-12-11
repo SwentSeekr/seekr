@@ -14,11 +14,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 
@@ -73,17 +71,22 @@ fun AddReviewScreen(
 @Composable
 fun StarRatingBar(
     maxStars: Int = AddReviewScreenDefaults.MaxStars,
-    rating: Int = 0,
+    rating: Int = AddReviewScreenDefaults.DefaultRating,
     onRatingChanged: (Int) -> Unit
 ) {
-  val starCount = if (maxStars > 0) maxStars else AddReviewScreenDefaults.MaxStars
+  val starCount =
+      if (maxStars > AddReviewScreenDefaults.MinStars) maxStars
+      else AddReviewScreenDefaults.MaxStars
+
   Row(
       modifier = Modifier.testTag(AddReviewScreenTestTags.RATING_BAR),
       horizontalArrangement = Arrangement.spacedBy(UICons.RowStarArrangement)) {
-        for (i in 1..starCount) {
+        for (i in AddReviewScreenDefaults.FirstStarIndex..starCount) {
           val scale by
               animateFloatAsState(
-                  targetValue = if (i <= rating) 1.1f else 1f,
+                  targetValue =
+                      if (i <= rating) AddReviewScreenDefaults.StarSelectedScale
+                      else AddReviewScreenDefaults.StarUnselectedScale,
                   animationSpec =
                       spring(
                           dampingRatio = Spring.DampingRatioMediumBouncy,
@@ -100,7 +103,7 @@ fun StarRatingBar(
                       .scale(scale)
                       .clickable {
                         if (i == rating) {
-                          onRatingChanged(i - 1)
+                          onRatingChanged(i - AddReviewScreenDefaults.RatingStep)
                         } else {
                           onRatingChanged(i)
                         }
@@ -108,10 +111,4 @@ fun StarRatingBar(
                       .testTag(AddReviewScreenTestTags.starTag(i)))
         }
       }
-}
-
-@Preview
-@Composable
-fun AddReviewScreenPreview() {
-  AddReviewScreen("hunt123")
 }
