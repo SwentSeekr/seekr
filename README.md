@@ -3,7 +3,6 @@
 The **Treasure Hunt App** is a mobile application built around the excitement of discovery.  
 It lets players explore their surroundings through location-based treasure hunts — combining culture, outdoor activity, and fun.
 
-
 ---
 
 ## 🎯 Concept
