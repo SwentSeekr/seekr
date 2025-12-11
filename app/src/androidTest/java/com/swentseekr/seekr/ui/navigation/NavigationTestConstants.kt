@@ -1,6 +1,6 @@
 package com.swentseekr.seekr.ui.navigation
 
-object NotificationNavigationConstants {
+object NavigationTestConstants {
   // --- Hunt IDs used in tests ---
   const val HUNT_123 = "hunt_123"
   const val NOTIFICATION_HUNT_456 = "notification_hunt_456"
@@ -23,4 +23,10 @@ object NotificationNavigationConstants {
   // --- Intent extra keys ---
   const val EXTRA_HUNT_ID = "huntId"
   const val HUNT_REMOVAL_SENTENCE = "huntId should be removed from intent after navigation"
+}
+
+object SeekrMainNavHostConstants {
+
+  const val NAVIGATION_MESSAGE = "HUNT_ID should be removed after navigation"
+  const val DEEP_LINK_ID = "deep-123"
 }

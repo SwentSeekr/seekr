@@ -24,6 +24,8 @@ import com.swentseekr.seekr.model.profile.createHunt
 import com.swentseekr.seekr.model.profile.sampleProfileWithPseudonym
 import com.swentseekr.seekr.ui.components.HuntCardScreenTestTags
 import com.swentseekr.seekr.ui.huntCardScreen.FakeHuntCardViewModel
+import com.swentseekr.seekr.ui.navigation.SeekrMainNavHostConstants.DEEP_LINK_ID
+import com.swentseekr.seekr.ui.navigation.SeekrMainNavHostConstants.NAVIGATION_MESSAGE
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
 import com.swentseekr.seekr.ui.profile.ProfileTestTags
 import com.swentseekr.seekr.ui.settings.SettingsScreenTestTags
@@ -858,7 +860,7 @@ class SeekrNavigationTest {
 
   @Test
   fun deepLink_navigates_to_huntCard_and_removes_intent_extra() {
-    val deepLinkId = "deep-123"
+    val deepLinkId = DEEP_LINK_ID
     compose.activityRule.scenario.onActivity { activity ->
       activity.intent.putExtra(SeekrNavigationDefaults.HUNT_ID, deepLinkId)
     }
@@ -874,7 +876,7 @@ class SeekrNavigationTest {
 
     compose.activityRule.scenario.onActivity { activity ->
       assert(activity.intent.getStringExtra(SeekrNavigationDefaults.HUNT_ID) == null) {
-        "HUNT_ID should be removed after navigation"
+        NAVIGATION_MESSAGE
       }
     }
   }

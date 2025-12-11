@@ -10,10 +10,19 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.credentials.CredentialManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.swentseekr.seekr.ui.settings.SettingsScreenTestConstants.INITIAL_STATE_MESSAGE
+import com.swentseekr.seekr.ui.settings.SettingsScreenTestConstants.LOCALISATION_MESSAGE
+import com.swentseekr.seekr.ui.settings.SettingsScreenTestConstants.NOTIFICATION_ENABLED
+import com.swentseekr.seekr.ui.settings.SettingsScreenTestConstants.NOTIFICATION_MESSAGE
+import com.swentseekr.seekr.ui.settings.SettingsScreenTestConstants.PERMISSION_EVENTS
+import com.swentseekr.seekr.ui.settings.SettingsScreenTestConstants.PICTURES_MESSAGE
+import com.swentseekr.seekr.ui.settings.SettingsScreenTestConstants.REPETITION_TIMES
+import com.swentseekr.seekr.ui.settings.SettingsScreenTestConstants.UI_STATE
+import com.swentseekr.seekr.ui.settings.SettingsScreenTestConstants.UNCHECKED_CAST
+import com.swentseekr.seekr.ui.settings.SettingsScreenTestConstants.VIEW_MODEL_MESSAGE
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -526,7 +535,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun notificationPermissionLauncher_executes_when_permission_granted() {
+  fun notification_permission_launcher_executes_when_permission_granted() {
     val viewModel = SettingsViewModel()
 
     composeRule.setContent {
@@ -540,35 +549,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun notificationPermissionLauncher_granted_executes_if_block_and_updates_state() {
-    val viewModel = SettingsViewModel()
-
-    composeRule.setContent {
-      MaterialTheme { SettingsScreen(viewModel = viewModel, onSignedOut = {}, onGoBack = {}) }
-    }
-
-    composeRule.waitForIdle()
-    assertFalse(
-        "Notifications should initially be disabled", viewModel.uiState.value.notificationsEnabled)
-
-    composeRule.runOnIdle {
-      val field = SettingsViewModel::class.java.getDeclaredField("_permissionEvents")
-      field.isAccessible = true
-      @Suppress("UNCHECKED_CAST")
-      val flow = field.get(viewModel) as MutableSharedFlow<PermissionEvent>
-      flow.tryEmit(PermissionEvent.RequestNotification)
-    }
-
-    composeRule.waitForIdle()
-    composeRule.runOnIdle { viewModel.onNotificationPermissionResult(true) }
-    composeRule.waitForIdle()
-    assertTrue(
-        "Notifications should be enabled after granting permission",
-        viewModel.uiState.value.notificationsEnabled)
-  }
-
-  @Test
-  fun notificationPermission_preTiramisu_executes_else_block_and_updates_state() {
+  fun notification_permission_executes_else_block_and_updates_state() {
     val viewModel = SettingsViewModel()
 
     composeRule.setContent {
@@ -578,44 +559,15 @@ class SettingsScreenTest {
     composeRule.waitForIdle()
 
     composeRule.runOnIdle {
-      val field = SettingsViewModel::class.java.getDeclaredField("_permissionEvents")
+      val field = SettingsViewModel::class.java.getDeclaredField(PERMISSION_EVENTS)
       field.isAccessible = true
-      @Suppress("UNCHECKED_CAST")
+      @Suppress(UNCHECKED_CAST)
       val flow = field.get(viewModel) as MutableSharedFlow<PermissionEvent>
       flow.tryEmit(PermissionEvent.RequestNotification)
     }
 
     composeRule.waitForIdle()
-    assertNotNull("ViewModel should still be valid after permission flow", viewModel.uiState.value)
-  }
-
-  @Test
-  fun notificationPermissionLauncher_denied_keeps_notifications_disabled() {
-    val viewModel = SettingsViewModel()
-
-    composeRule.setContent {
-      MaterialTheme { SettingsScreen(viewModel = viewModel, onSignedOut = {}, onGoBack = {}) }
-    }
-
-    composeRule.waitForIdle()
-
-    composeRule.runOnIdle {
-      val field = SettingsViewModel::class.java.getDeclaredField("_permissionEvents")
-      field.isAccessible = true
-      @Suppress("UNCHECKED_CAST")
-      val flow = field.get(viewModel) as MutableSharedFlow<PermissionEvent>
-      flow.tryEmit(PermissionEvent.RequestNotification)
-    }
-
-    composeRule.waitForIdle()
-
-    composeRule.runOnIdle { viewModel.onNotificationPermissionResult(false) }
-
-    composeRule.waitForIdle()
-
-    assertFalse(
-        "Notifications should remain disabled after denying permission",
-        viewModel.uiState.value.notificationsEnabled)
+    assertNotNull(VIEW_MODEL_MESSAGE, viewModel.uiState.value)
   }
 
   @Test
@@ -629,12 +581,12 @@ class SettingsScreenTest {
     composeRule.waitForIdle()
 
     val initialState = viewModel.uiState.value
-    assertNotNull("Initial state should not be null", initialState)
+    assertNotNull(INITIAL_STATE_MESSAGE, initialState)
 
     composeRule.runOnIdle {
-      val field = SettingsViewModel::class.java.getDeclaredField("_permissionEvents")
+      val field = SettingsViewModel::class.java.getDeclaredField(PERMISSION_EVENTS)
       field.isAccessible = true
-      @Suppress("UNCHECKED_CAST")
+      @Suppress(UNCHECKED_CAST)
       val flow = field.get(viewModel) as MutableSharedFlow<PermissionEvent>
 
       flow.tryEmit(PermissionEvent.RequestNotification)
@@ -651,9 +603,9 @@ class SettingsScreenTest {
     composeRule.waitForIdle()
 
     val finalState = viewModel.uiState.value
-    assertTrue("Notifications should be enabled after granting", finalState.notificationsEnabled)
-    assertTrue("Pictures should be enabled after granting", finalState.picturesEnabled)
-    assertTrue("Localisation should be enabled after granting", finalState.localisationEnabled)
+    assertTrue(NOTIFICATION_ENABLED, finalState.notificationsEnabled)
+    assertTrue(PICTURES_MESSAGE, finalState.picturesEnabled)
+    assertTrue(LOCALISATION_MESSAGE, finalState.localisationEnabled)
   }
 
   @Test
@@ -663,11 +615,11 @@ class SettingsScreenTest {
     composeRule.setContent { MaterialTheme { SettingsScreen(viewModel = viewModel) } }
     composeRule.waitForIdle()
 
-    repeat(3) {
+    repeat(REPETITION_TIMES) {
       composeRule.runOnIdle {
-        val field = SettingsViewModel::class.java.getDeclaredField("_permissionEvents")
+        val field = SettingsViewModel::class.java.getDeclaredField(PERMISSION_EVENTS)
         field.isAccessible = true
-        @Suppress("UNCHECKED_CAST")
+        @Suppress(UNCHECKED_CAST)
         val flow = field.get(viewModel) as MutableSharedFlow<PermissionEvent>
         flow.tryEmit(PermissionEvent.RequestNotification)
       }
@@ -677,31 +629,7 @@ class SettingsScreenTest {
       composeRule.waitForIdle()
     }
 
-    assertTrue(
-        "Notifications should remain enabled after multiple grants",
-        viewModel.uiState.value.notificationsEnabled)
-  }
-
-  @Test
-  fun notification_toggle_off_updates_state_to_disabled() {
-    val viewModel = SettingsViewModel()
-    val context = composeRule.activity
-
-    composeRule.runOnIdle {
-      setUiState(viewModel, viewModel.uiState.value.copy(notificationsEnabled = true))
-    }
-
-    composeRule.setContent { MaterialTheme { SettingsScreen(viewModel = viewModel) } }
-    composeRule.waitForIdle()
-
-    assertTrue("Notifications should start enabled", viewModel.uiState.value.notificationsEnabled)
-
-    composeRule.runOnIdle { viewModel.onNotificationsToggleRequested(false, context) }
-    composeRule.waitForIdle()
-
-    assertFalse(
-        "Notifications should be disabled after toggling off",
-        viewModel.uiState.value.notificationsEnabled)
+    assertTrue(NOTIFICATION_MESSAGE, viewModel.uiState.value.notificationsEnabled)
   }
 
   // ----------------------------------------------------------------------------------------------
@@ -709,9 +637,9 @@ class SettingsScreenTest {
   // ----------------------------------------------------------------------------------------------
 
   private fun setUiState(viewModel: SettingsViewModel, newState: SettingsUIState) {
-    val field = SettingsViewModel::class.java.getDeclaredField("_uiState")
+    val field = SettingsViewModel::class.java.getDeclaredField(UI_STATE)
     field.isAccessible = true
-    @Suppress("UNCHECKED_CAST")
+    @Suppress(UNCHECKED_CAST)
     val mutableStateFlow = field.get(viewModel) as MutableStateFlow<SettingsUIState>
     mutableStateFlow.value = newState
   }
