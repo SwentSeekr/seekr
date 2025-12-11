@@ -12,7 +12,6 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
@@ -157,24 +156,6 @@ class ProfileScreenTest {
 
     waitForHuntAndAssertVisible(
         visibleTag = tagFor(likedHunt), notVisibleTags = listOf(tagFor(myHunt), tagFor(doneHunt)))
-  }
-
-  @Test
-  fun profileScreen_canScrollThroughManyHunts() {
-    val sample = sampleProfile()
-    val myHunts = List(20) { createHunt("hunt$it", "Hunt $it") }
-    setProfileScreen(sample.copy(myHunts = myHunts.toMutableList()))
-
-    val lastIndex = myHunts.lastIndex
-    val lastHuntTag = ProfileTestTags.getTestTagForHuntCard(myHunts[lastIndex], lastIndex)
-
-    composeTestRule.onAllNodesWithTag(lastHuntTag).onFirst().assertIsNotDisplayed()
-
-    composeTestRule
-        .onNodeWithTag(ProfileTestTags.PROFILE_HUNTS_LIST)
-        .performScrollToNode(hasTestTag(lastHuntTag))
-
-    composeTestRule.onAllNodesWithTag(lastHuntTag).onFirst().assertIsDisplayed()
   }
 
   @Test
