@@ -36,7 +36,7 @@ class HuntReviewReplyTest {
 
     assertNotEquals(base, copy)
     assertEquals("Hi again", copy.comment)
-    assertEquals("r1", copy.replyId) // unchanged
+    assertEquals("r1", copy.replyId)
     assertEquals("rev1", copy.reviewId)
   }
 }

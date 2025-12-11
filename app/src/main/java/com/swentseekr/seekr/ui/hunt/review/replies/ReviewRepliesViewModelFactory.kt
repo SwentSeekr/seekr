@@ -28,6 +28,8 @@ class ReviewRepliesViewModelFactory(
       )
           as T
     }
-    throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
+
+    throw IllegalArgumentException(
+        ReviewRepliesStrings.ErrorUnknownViewModelClassPrefix + modelClass.name)
   }
 }

@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.sp
  */
 object ReviewRepliesStrings {
   const val HideReplies = "Hide replies"
+  const val ShowReplies = "Show replies"
   const val Reply = "Reply"
   const val Delete = "Delete"
   const val ErrorEmptyReply = "Reply cannot be empty."
@@ -35,6 +36,9 @@ object ReviewRepliesStrings {
   const val ReplyContentDescription = "Reply"
   const val DeleteContentDescription = "Delete"
   const val SendContentDescription = "Send"
+
+  // Factory / internal error strings
+  const val ErrorUnknownViewModelClassPrefix = "Unknown ViewModel class: "
 }
 
 /** Layout / typography constants for the replies UI. */
@@ -142,4 +146,10 @@ object ReviewRepliesTestTags {
   const val REPLY_SEE_REPLIES_PREFIX = "ReviewReplies_Reply_See_"
   const val REPLY_INLINE_COMPOSER_PREFIX = "ReviewReplies_ReplyComposer_"
   const val REPLY_DELETE_BUTTON_PREFIX = "ReviewReplies_ReplyDelete_"
+}
+
+/** Constants for ReviewRepliesUiModel. */
+object ReviewRepliesUiModelConstants {
+  const val totalReplyBaseCount = 0
+  const val rootReplyBaseText = ""
 }

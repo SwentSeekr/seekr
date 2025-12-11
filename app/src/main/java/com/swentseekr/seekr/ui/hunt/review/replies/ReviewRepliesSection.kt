@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -49,10 +50,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.times
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.swentseekr.seekr.model.hunt.review.HuntReviewReply
+import com.swentseekr.seekr.ui.hunt.review.replies.ReviewRepliesStrings.HideReplies
 import com.swentseekr.seekr.ui.hunt.review.replies.ReviewRepliesValues.AuthorIdMaxLength
 import com.swentseekr.seekr.ui.hunt.review.replies.ReviewRepliesValues.SingleReplyCount
+import com.swentseekr.seekr.ui.theme.Green
 
-/** Small container so composables don't have 10 parameters each. */
+// ---------- Shared shapes ----------
+
+private val replyCardShape = RoundedCornerShape(ReviewRepliesDimensions.ReplyCardCornerRadius)
+
+private val threadLineShape = RoundedCornerShape(ReviewRepliesDimensions.ThreadLineCornerRadius)
+
+private val collapsedComposerShape =
+    RoundedCornerShape(ReviewRepliesDimensions.CollapsedComposerCornerRadius)
+
+private val expandedComposerShape =
+    RoundedCornerShape(ReviewRepliesDimensions.ExpandedComposerCornerRadius)
+
+/** Aggregates callbacks used by the review replies UI to avoid long parameter lists. */
 data class ReviewRepliesCallbacks(
     val onToggleRootReplies: () -> Unit,
     val onRootReplyTextChanged: (String) -> Unit,
@@ -64,12 +79,14 @@ data class ReviewRepliesCallbacks(
     val onDeleteReply: (String) -> Unit,
 )
 
+/** Represents the state of a Reddit-style reply composer. */
 data class RedditComposerState(
     val text: String,
     val isExpanded: Boolean,
     val isSending: Boolean,
 )
 
+/** Configuration for a Reddit-style composer instance. */
 data class RedditComposerConfig(
     val placeholder: String,
     val compact: Boolean,
@@ -79,9 +96,10 @@ data class RedditComposerConfig(
 )
 
 /**
- * Entry-point composable that is connected to the ViewModel.
+ * Entry point composable for the review replies section, wired to the [ReviewRepliesViewModel].
  *
- * Call this from your review card with the appropriate ViewModel instance.
+ * This composable subscribes to the ViewModel state and builds the UI through
+ * [ReviewRepliesSectionContent].
  */
 @Composable
 fun ReviewRepliesSection(
@@ -122,7 +140,10 @@ fun ReviewRepliesSection(
   )
 }
 
-/** Pure UI, driven by state + callbacks (no ViewModel knowledge here). */
+/**
+ * Pure UI composable that renders the replies section based on [ReviewRepliesUiState] and
+ * [ReviewRepliesCallbacks], without direct knowledge of the ViewModel.
+ */
 @Composable
 fun ReviewRepliesSectionContent(
     state: ReviewRepliesUiState,
@@ -152,6 +173,11 @@ fun ReviewRepliesSectionContent(
   }
 }
 
+/**
+ * Header displayed when the root replies are collapsed.
+ *
+ * Provides a summary of the number of replies and a toggle to expand the thread.
+ */
 @Composable
 fun ReviewRepliesCollapsedHeader(
     state: ReviewRepliesUiState,
@@ -171,7 +197,7 @@ fun ReviewRepliesCollapsedHeader(
                 ),
             verticalAlignment = Alignment.CenterVertically) {
               Icon(
-                  imageVector = Icons.Filled.Send,
+                  imageVector = Icons.AutoMirrored.Filled.Send,
                   contentDescription = null,
                   tint =
                       MaterialTheme.colorScheme.primary.copy(
@@ -187,6 +213,10 @@ fun ReviewRepliesCollapsedHeader(
       }
 }
 
+/**
+ * Expanded content of the replies section, including the root composer, errors and the threaded
+ * list of replies.
+ */
 @Composable
 fun ReviewRepliesExpandedContent(
     state: ReviewRepliesUiState,
@@ -240,7 +270,11 @@ fun ReviewRepliesExpandedContent(
   }
 }
 
-/** Reddit-style thread list with clean vertical lines */
+/**
+ * Reddit-style threaded list of replies.
+ *
+ * Each [ReplyNodeUiState] is rendered as a separate threaded reply item.
+ */
 @Composable
 fun RedditThreadList(
     items: List<ReplyNodeUiState>,
@@ -262,7 +296,7 @@ fun RedditThreadList(
       }
 }
 
-/** Individual Reddit-style reply with elegant thread lines */
+/** Renders a single reply node, including thread line, card and actions. */
 @Composable
 fun RedditReplyItem(
     node: ReplyNodeUiState,
@@ -300,6 +334,7 @@ fun RedditReplyItem(
       }
 }
 
+/** Vertical thread line used to visually connect replies in a thread. */
 @Composable
 fun ReplyThreadLine() {
   Box(
@@ -309,10 +344,15 @@ fun ReplyThreadLine() {
               .background(
                   MaterialTheme.colorScheme.outlineVariant.copy(
                       alpha = ReviewRepliesAlphas.OutlineVariant),
-                  shape = RoundedCornerShape(ReviewRepliesDimensions.ThreadLineCornerRadius)))
+                  shape = threadLineShape,
+              ),
+  )
   Spacer(modifier = Modifier.width(ReviewRepliesDimensions.ThreadLineHorizontalSpacing))
 }
 
+/**
+ * Card that displays a single reply, including header, body, actions and optional inline composer.
+ */
 @Composable
 fun ReplyCard(
     node: ReplyNodeUiState,
@@ -328,7 +368,8 @@ fun ReplyCard(
           Modifier.fillMaxWidth()
               .background(
                   MaterialTheme.colorScheme.surface,
-                  shape = RoundedCornerShape(ReviewRepliesDimensions.ReplyCardCornerRadius))
+                  shape = replyCardShape,
+              )
               .padding(ReviewRepliesDimensions.ReplyCardPadding)) {
         ReplyHeader(node = node, callbacks = callbacks)
 
@@ -357,6 +398,9 @@ fun ReplyCard(
       }
 }
 
+/**
+ * Header section of a reply card, including avatar, author, timestamp and optional delete action.
+ */
 @Composable
 fun ReplyHeader(
     node: ReplyNodeUiState,
@@ -402,6 +446,10 @@ fun ReplyHeader(
   }
 }
 
+/**
+ * Avatar displayed for a reply. Uses "You" for the current user, otherwise initials from the author
+ * id.
+ */
 @Composable
 fun ReplyAvatar(node: ReplyNodeUiState) {
   val reply = node.reply
@@ -426,6 +474,7 @@ fun ReplyAvatar(node: ReplyNodeUiState) {
       }
 }
 
+/** Body text of a reply, including handling for deleted replies. */
 @Composable
 fun ReplyBody(reply: HuntReviewReply) {
   Text(
@@ -439,6 +488,7 @@ fun ReplyBody(reply: HuntReviewReply) {
       lineHeight = ReviewRepliesDimensions.ReplyTextLineHeight)
 }
 
+/** Action row displayed below a reply body, including reply and expand/collapse controls. */
 @Composable
 fun ReplyActions(
     node: ReplyNodeUiState,
@@ -468,6 +518,7 @@ fun ReplyActions(
       }
 }
 
+/** Button used to open the inline composer for replying to a specific message. */
 @Composable
 fun ReplyButton(onClick: () -> Unit) {
   TextButton(
@@ -480,7 +531,7 @@ fun ReplyButton(onClick: () -> Unit) {
           ButtonDefaults.textButtonColors(
               contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
         Icon(
-            imageVector = Icons.Filled.Send,
+            imageVector = Icons.AutoMirrored.Filled.Send,
             contentDescription = ReviewRepliesStrings.ReplyContentDescription,
             modifier = Modifier.size(ReviewRepliesDimensions.ReplyButtonIconSize))
         Spacer(modifier = Modifier.width(ReviewRepliesDimensions.ReplyButtonIconSpacing))
@@ -491,6 +542,7 @@ fun ReplyButton(onClick: () -> Unit) {
       }
 }
 
+/** Button that toggles the visibility of child replies for a given reply node. */
 @Composable
 fun RepliesToggleButton(
     node: ReplyNodeUiState,
@@ -511,7 +563,7 @@ fun RepliesToggleButton(
     Icon(
         imageVector =
             if (node.isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-        contentDescription = null,
+        contentDescription = if (node.isExpanded) HideReplies else ReviewRepliesStrings.ShowReplies,
         modifier = Modifier.size(ReviewRepliesDimensions.ReplyButtonIconSize))
     Spacer(modifier = Modifier.width(ReviewRepliesDimensions.ReplyButtonIconSpacing))
     Text(
@@ -521,6 +573,7 @@ fun RepliesToggleButton(
   }
 }
 
+/** Inline composer displayed under a specific reply to allow direct responses in the thread. */
 @Composable
 fun InlineReplyComposer(
     reply: HuntReviewReply,
@@ -561,7 +614,7 @@ fun InlineReplyComposer(
   )
 }
 
-/** Reddit-style composer with clean design */
+/** Generic Reddit-style composer used for both root and inline reply inputs. */
 @Composable
 fun RedditStyleComposer(
     state: RedditComposerState,
@@ -583,6 +636,7 @@ fun RedditStyleComposer(
   }
 }
 
+/** Collapsed representation of the root composer, prompting the user to start a reply. */
 @Composable
 fun CollapsedComposerButton(
     placeholder: String,
@@ -605,7 +659,7 @@ fun CollapsedComposerButton(
               width = ReviewRepliesDimensions.OutlineBorderWidth,
               color = MaterialTheme.colorScheme.outlineVariant,
           ),
-      shape = RoundedCornerShape(ReviewRepliesDimensions.CollapsedComposerCornerRadius)) {
+      shape = collapsedComposerShape) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Start,
@@ -620,6 +674,9 @@ fun CollapsedComposerButton(
       }
 }
 
+/**
+ * Expanded content of the composer, including the text field and send button/progress indicator.
+ */
 @Composable
 fun ExpandedComposerContent(
     state: RedditComposerState,
@@ -639,7 +696,7 @@ fun ExpandedComposerContent(
                       if (config.compact)
                           ReviewRepliesDimensions.ExpandedComposerCompactHorizontalPadding
                       else ReviewRepliesDimensions.ExpandedComposerHorizontalPadding),
-      shape = RoundedCornerShape(ReviewRepliesDimensions.ExpandedComposerCornerRadius),
+      shape = expandedComposerShape,
       color =
           MaterialTheme.colorScheme.surfaceVariant.copy(
               alpha = ReviewRepliesAlphas.ComposerSurfaceAlpha),
@@ -656,8 +713,6 @@ fun ExpandedComposerContent(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement =
                 Arrangement.spacedBy(ReviewRepliesDimensions.InlineComposerHorizontalSpacing)) {
-
-              // ⬅️ weight is applied HERE, inside the RowScope
               ComposerTextField(
                   state = state,
                   config = config,
@@ -678,6 +733,7 @@ fun ExpandedComposerContent(
       }
 }
 
+/** Text field used in the composer to enter a reply. */
 @Composable
 fun ComposerTextField(
     state: RedditComposerState,
@@ -688,6 +744,7 @@ fun ComposerTextField(
       value = state.text,
       onValueChange = config.onTextChanged,
       modifier = modifier,
+      enabled = !state.isSending,
       placeholder = {
         Text(
             text = config.placeholder,
@@ -707,6 +764,7 @@ fun ComposerTextField(
   )
 }
 
+/** Send button used in the composer, including disabled state handling. */
 @Composable
 fun ComposerSendButton(
     state: RedditComposerState,
@@ -733,10 +791,10 @@ fun ComposerSendButton(
             modifier = Modifier.size(ReviewRepliesDimensions.SendButtonInnerSize)) {
               Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                 Icon(
-                    imageVector = Icons.Filled.Send,
+                    imageVector = Icons.AutoMirrored.Filled.Send,
                     contentDescription = ReviewRepliesStrings.SendContentDescription,
                     tint =
-                        if (isActive) MaterialTheme.colorScheme.onPrimary
+                        if (isActive) Green
                         else
                             MaterialTheme.colorScheme.onSurfaceVariant.copy(
                                 alpha = ReviewRepliesAlphas.InactiveSendIcon),
@@ -746,8 +804,9 @@ fun ComposerSendButton(
       }
 }
 
-/* ---------- Pure helpers (no Compose) ---------- */
+/* ---------- Pure helper functions (no Compose) ---------- */
 
+/** Returns a localized label for the total number of replies at the root level. */
 private fun replyCountLabel(totalCount: Int): String {
   return if (totalCount > ReviewRepliesValues.RootDepth) {
     val unit =
@@ -760,6 +819,7 @@ private fun replyCountLabel(totalCount: Int): String {
   }
 }
 
+/** Returns a localized label for the number of child replies of a node. */
 private fun childRepliesLabel(isExpanded: Boolean, totalChildren: Int): String {
   if (isExpanded) return ReviewRepliesStrings.HideReplies
 
@@ -771,6 +831,7 @@ private fun childRepliesLabel(isExpanded: Boolean, totalChildren: Int): String {
   return "$totalChildren $unit"
 }
 
+/** Returns the display label for the reply author, including handling for the current user. */
 private fun authorLabel(node: ReplyNodeUiState): String {
   return if (node.isMine) {
     ReviewRepliesStrings.You

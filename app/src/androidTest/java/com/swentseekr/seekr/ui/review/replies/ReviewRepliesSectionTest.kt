@@ -31,12 +31,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * NOTE:
- * - This test file is intentionally focused on *line coverage* of the replies UI.
- * - For it to compile, make sure the referenced composables are not `private`. (e.g. make them
- *   `internal` or `public`).
- */
 @RunWith(AndroidJUnit4::class)
 class ReviewRepliesUiTest {
 

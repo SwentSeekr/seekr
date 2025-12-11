@@ -51,9 +51,8 @@ class HuntReviewReplyRepositoryFirestoreTest {
     val snapshot = mockk<DocumentSnapshot>()
 
     every { snapshot.id } returns "r1"
-    every { snapshot.getString("reviewId") } returns null // required but missing
-    every { snapshot.getString("authorId") } returns "userA" // doesn’t matter
-
+    every { snapshot.getString("reviewId") } returns null
+    every { snapshot.getString("authorId") } returns "userA"
     val result = repository.documentToReply(snapshot)
 
     assertNull(result)
@@ -64,7 +63,6 @@ class HuntReviewReplyRepositoryFirestoreTest {
     val snapshot = mockk<DocumentSnapshot>()
 
     every { snapshot.id } returns "r1"
-    // Force an exception when trying to read a field:
     every { snapshot.getString("reviewId") } throws RuntimeException("boom")
 
     val result = repository.documentToReply(snapshot)
