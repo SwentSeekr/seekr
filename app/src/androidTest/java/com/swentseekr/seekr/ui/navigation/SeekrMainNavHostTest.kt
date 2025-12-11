@@ -18,7 +18,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.swentseekr.seekr.FakeReviewHuntViewModel
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
+import com.swentseekr.seekr.model.profile.ProfileRepositoryLocal
+import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
 import com.swentseekr.seekr.model.profile.createHunt
+import com.swentseekr.seekr.model.profile.sampleProfileWithPseudonym
 import com.swentseekr.seekr.ui.components.HuntCardScreenTestTags
 import com.swentseekr.seekr.ui.huntCardScreen.FakeHuntCardViewModel
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
@@ -103,6 +106,22 @@ class SeekrNavigationTest {
       block()
     } finally {
       HuntRepositoryProvider.repository = prev
+    }
+  }
+
+  private inline fun <T> withFakeRepos(
+      huntRepo: FakeRepoSuccess,
+      profileRepo: ProfileRepositoryLocal,
+      crossinline block: () -> T
+  ): T {
+    val prevHunt = HuntRepositoryProvider.repository
+    val prevProfile = ProfileRepositoryProvider.repository
+    HuntRepositoryProvider.repository = huntRepo
+    return try {
+      block()
+    } finally {
+      HuntRepositoryProvider.repository = prevHunt
+      ProfileRepositoryProvider.repository = prevProfile
     }
   }
 
@@ -272,17 +291,21 @@ class SeekrNavigationTest {
   fun overview_click_navigates_to_huntcard_with_passed_id_using_fake_repo() {
     // Use createHunt() to seed repository
     val hunt = createHunt(uid = "fake-123", title = "Paris Discovery")
+    val fakeHuntRepo = FakeRepoSuccess(listOf(hunt))
+    val fakeProfileRepo = ProfileRepositoryLocal()
+    val authorProfile = sampleProfileWithPseudonym(uid = hunt.authorId, pseudonym = "Test Author")
+    fakeProfileRepo.addProfile(authorProfile)
 
-    withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
+    withFakeRepos(fakeHuntRepo, fakeProfileRepo) {
       // Compose the real NavHost (no Firebase involved).
       compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
 
-      // Wait for Overview to draw with list content.
-      waitUntilTrue(MED) {
+      // Wait until the LAST_HUNT_CARD is actually displayed.
+      compose.waitUntil(MED) {
         compose
-            .onNodeWithTag(OverviewScreenTestTags.HUNT_LIST, useUnmergedTree = true)
-            .assertExists()
-        true
+            .onAllNodesWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
       }
 
       // Click the last card.
@@ -465,8 +488,14 @@ class SeekrNavigationTest {
   fun huntcard_addReview_navigates_to_add_review_and_back_restores_huntcard() {
     // Seed repo with a single hunt that will appear in Overview and then in HuntCard.
     val hunt = createHunt(uid = "review-123", title = "Reviewable Hunt")
+    val authorId = NavHostPublicProfileTestConstants.EXAMPLE_AUTHOR_ID
+    val fakeHuntRepo = FakeRepoSuccess(listOf(hunt))
+    val fakeProfileRepo =
+        ProfileRepositoryLocal().apply {
+          addProfile(sampleProfileWithPseudonym(authorId, "Author Test"))
+        }
 
-    withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
+    withFakeRepos(fakeHuntRepo, fakeProfileRepo) {
       compose.runOnUiThread {
         compose.activity.setContent {
           SeekrMainNavHost(
@@ -476,12 +505,12 @@ class SeekrNavigationTest {
         }
       }
 
-      // Wait for overview list
-      waitUntilTrue(MED) {
+      // Wait for last hunt card to actually appear
+      compose.waitUntil(MED) {
         compose
-            .onNodeWithTag(OverviewScreenTestTags.HUNT_LIST, useUnmergedTree = true)
-            .assertExists()
-        true
+            .onAllNodesWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
       }
 
       // Open HuntCard
@@ -556,7 +585,13 @@ class SeekrNavigationTest {
                 title = NavHostPublicProfileTestConstants.EXAMPLE_HUNT_TITLE)
             .copy(authorId = authorId)
 
-    withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
+    val fakeHuntRepo = FakeRepoSuccess(listOf(hunt))
+    val fakeProfileRepo =
+        ProfileRepositoryLocal().apply {
+          addProfile(sampleProfileWithPseudonym(authorId, "Author Test"))
+        }
+
+    withFakeRepos(fakeHuntRepo, fakeProfileRepo) {
       // Re-compose with fake repo and ViewModels
       compose.runOnUiThread {
         compose.activity.setContent {
@@ -567,12 +602,12 @@ class SeekrNavigationTest {
         }
       }
 
-      // Wait for the overview list to appear
-      waitUntilTrue(MED) {
+      // Wait for last hunt card to actually appear
+      compose.waitUntil(MED) {
         compose
-            .onNodeWithTag(OverviewScreenTestTags.HUNT_LIST, useUnmergedTree = true)
-            .assertExists()
-        true
+            .onAllNodesWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
       }
 
       // Click on the hunt card to open HuntCardScreen
@@ -613,8 +648,14 @@ class SeekrNavigationTest {
   @Test
   fun huntcard_beginHunt_callback_can_be_invoked() {
     val hunt = createHunt(uid = "begin-hunt-123", title = "Beginnable Hunt")
+    val authorId = NavHostPublicProfileTestConstants.EXAMPLE_AUTHOR_ID
+    val fakeHuntRepo = FakeRepoSuccess(listOf(hunt))
+    val fakeProfileRepo =
+        ProfileRepositoryLocal().apply {
+          addProfile(sampleProfileWithPseudonym(authorId, "Author Test"))
+        }
 
-    withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
+    withFakeRepos(fakeHuntRepo, fakeProfileRepo) {
       compose.runOnUiThread {
         compose.activity.setContent {
           SeekrMainNavHost(
@@ -624,13 +665,13 @@ class SeekrNavigationTest {
         }
       }
 
-      waitUntilTrue(MED) {
+      // Wait for last hunt card to actually appear
+      compose.waitUntil(MED) {
         compose
-            .onNodeWithTag(OverviewScreenTestTags.HUNT_LIST, useUnmergedTree = true)
-            .assertExists()
-        true
+            .onAllNodesWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
       }
-
       compose
           .onAllNodesWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
           .onFirst()
@@ -751,6 +792,12 @@ class SeekrNavigationTest {
         createHunt(uid = "hunt-profile-nav", title = "Hunt for Profile Nav")
             .copy(authorId = authorId)
 
+    val fakeHuntRepo = FakeRepoSuccess(listOf(hunt))
+    val fakeProfileRepo =
+        ProfileRepositoryLocal().apply {
+          addProfile(sampleProfileWithPseudonym(authorId, "Author Test"))
+        }
+
     withFakeRepo(FakeRepoSuccess(listOf(hunt))) {
       compose.runOnUiThread {
         compose.activity.setContent {
@@ -761,11 +808,12 @@ class SeekrNavigationTest {
         }
       }
 
-      waitUntilTrue(MED) {
+      // Wait for last hunt card to actually appear
+      compose.waitUntil(MED) {
         compose
-            .onNodeWithTag(OverviewScreenTestTags.HUNT_LIST, useUnmergedTree = true)
-            .assertExists()
-        true
+            .onAllNodesWithTag(OverviewScreenTestTags.LAST_HUNT_CARD, useUnmergedTree = true)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
       }
 
       compose
