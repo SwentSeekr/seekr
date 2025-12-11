@@ -73,14 +73,19 @@ class HuntsRepositoryFirestore(
       newValue: Hunt,
       mainImageUri: Uri?,
       addedOtherImages: List<Uri>,
-      removedOtherImages: List<String>
+      removedOtherImages: List<String>,
+      removedMainImageUrl: String?
   ) {
 
     removedOtherImages.forEach { url -> imageRepo.deleteImageByUrl(url) }
 
-    var mainImageUrl = newValue.mainImageUrl
+    if (removedMainImageUrl != null) {
+      imageRepo.deleteImageByUrl(removedMainImageUrl)
+    }
+
+    var finalMainImageUrl = newValue.mainImageUrl
     if (mainImageUri != null) {
-      mainImageUrl = imageRepo.uploadMainImage(huntID, mainImageUri)
+      finalMainImageUrl = imageRepo.uploadMainImage(huntID, mainImageUri)
     }
 
     val newOtherImageUrls =
@@ -91,9 +96,10 @@ class HuntsRepositoryFirestore(
 
     val finalOtherImages = remainingOldImages + newOtherImageUrls
 
-    val updated = newValue.copy(mainImageUrl = mainImageUrl, otherImagesUrls = finalOtherImages)
+    val updatedHunt =
+        newValue.copy(mainImageUrl = finalMainImageUrl, otherImagesUrls = finalOtherImages)
 
-    db.collection(HUNTS_COLLECTION_PATH).document(huntID).set(updated).await()
+    db.collection(HUNTS_COLLECTION_PATH).document(huntID).set(updatedHunt).await()
   }
 
   override suspend fun deleteHunt(huntID: String) {

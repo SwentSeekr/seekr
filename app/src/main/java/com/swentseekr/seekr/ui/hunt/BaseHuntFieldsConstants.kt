@@ -1,10 +1,46 @@
 package com.swentseekr.seekr.ui.hunt
 
+/**
+ * Provides centralized constants and UI configuration values used across Hunt-creation and
+ * Hunt-editing screens within the Seekr application.
+ *
+ * This file contains three main objects:
+ *
+ * ### `BaseHuntFieldsStrings`
+ * Holds all user-facing strings, content descriptions, placeholders, labels, button texts, and
+ * units used throughout Hunt-related UI components. Centralizing these values ensures:
+ * - Consistent wording across screens.
+ * - Easier localization in the future.
+ * - Cleaner composable files by removing inline string values.
+ *
+ * ### `BaseHuntFieldsUi`
+ * Defines UI layout constants, such as paddings, corner radii, image sizes, button dimensions, and
+ * alpha values used for styling. These standards ensure:
+ * - Consistent spacing and visual hierarchy.
+ * - Ease of adjusting UI design from a single source.
+ *
+ * ### `HuntScreenTestTags`
+ * Provides test tag constants used by UI tests (e.g., Compose UI testing). Tags are placed on
+ * interactive elements so automated tests can reliably target and validate them. Centralizing tags
+ * prevents typos and makes UI tests more maintainable.
+ *
+ * Together, these objects support clean code practices by separating concerns:
+ * - UI visuals in `BaseHuntFieldsUi`
+ * - Text content in `BaseHuntFieldsStrings`
+ * - Test identifiers in `HuntScreenTestTags`
+ *
+ * Any new Hunt-related screen or composable should reference these constants rather than defining
+ * new ones inline.
+ */
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 object BaseHuntFieldsStrings {
+
+  // Top bar
   const val BACK_CONTENT_DESC = "Back"
+
+  // Fields
   const val LABEL_TITLE = "Title"
   const val PLACEHOLDER_TITLE = "Enter hunt name"
   const val LABEL_DESCRIPTION = "Description"
@@ -17,62 +53,88 @@ object BaseHuntFieldsStrings {
   const val PLACEHOLDER_TIME = "e.g., 1.5"
   const val LABEL_DISTANCE = "Distance (km)"
   const val PLACEHOLDER_DISTANCE = "e.g., 2.3"
+
+  // Screens
+  const val TITLE_DEFAULT = "Add your Hunt"
+
+  // Buttons
   const val BUTTON_SELECT_LOCATIONS = "Select Locations"
   const val BUTTON_SAVE_HUNT = "Save Hunt"
+  const val BUTTON_GALLERY = "Gallery"
+  const val BUTTON_CAMERA = "Camera"
+  const val BUTTON_REMOVE_IMAGE = "Remove image"
+  const val BUTTON_REMOVE = "Remove"
+  const val BUTTON_DELETE = "Delete"
+
+  // Image labels
+  const val LABEL_MAIN_IMAGE = "Main image"
+  const val LABEL_ADDITIONAL_IMAGES = "Additional images"
+  const val DELETE_ICON_DESC = "Delete Image"
+
+  const val LABEL_IMAGES = "Images"
+  const val UNIT_IMAGE = "image"
+  const val UNIT_IMAGES = "images"
+  const val CONTENT_DESC_MAIN_IMAGE = "Main image preview"
+  const val CONTENT_DESC_ADDITIONAL_IMAGE = "Additional image preview"
+
+  // Units
   const val UNIT_POINT = "point"
   const val UNIT_POINTS = "points"
 
-  const val TITLE_DEFAULT = "Add your Hunt"
-  const val BUTTON_CHOOSE_IMAGE = "Choose Main Image"
-  const val CONTENT_DESC_SELECTED_IMAGE = "Selected Hunt Image"
-  const val BUTTON_CHOOSE_ADDITIONAL_IMAGES = "Choose Additional Images"
-  const val CONTENT_DESC_SECONDARY_IMAGE = "Secondary Image"
-  const val REMOVE = "Remove"
-  const val DELETE_ICON_DESC = "Delete Image"
+  // Tags
   const val REMOVE_BUTTON_TAG_PREFIX = "removeButton_"
+
+  const val IMAGE_LAUNCH = "image/*"
+  const val DELETE_MAIN_IMAGE = "delete_main_image"
 }
 
 object BaseHuntFieldsUi {
-  val FieldCornerRadius: Dp = 16.dp
-  val ChangeAlpha: Float = 0.5f
-  val WeightTextField: Float = 1f
 
+  // Layout
   val ColumnHPadding: Dp = 20.dp
   val ColumnVArrangement: Dp = 16.dp
   val RowHArrangement: Dp = 12.dp
 
+  // Fields
+  val FieldCornerRadius: Dp = 16.dp
+  val ChangeAlpha: Float = 0.5f
+  val Alpha03: Float = 0.3f
+  val WeightTextField: Float = 1f
   val DescriptionHeight: Dp = 140.dp
 
+  // Images
   val ImageHeight: Dp = 200.dp
-  val ImageLittleHeight: Dp = 100.dp
-  val ImageWeight: Float = 1f
+  val ImageThumbSize: Dp = 80.dp
   val ImageCornerRadius: Dp = 16.dp
-  val ImageLittleCornerRadius: Dp = 8.dp
+  val ImageThumbCornerRadius: Dp = 8.dp
 
+  // Buttons
   val ButtonHeight: Dp = 64.dp
   val ButtonCornerRadius: Dp = 16.dp
-
-  val ButtonSaveHeight: Dp = 56.dp
-  val ButtonSaveCornerRadius: Dp = 16.dp
 
   val ImageButtonHeight: Dp = 48.dp
   val ImageButtonCornerRadius: Dp = 12.dp
 
+  val ButtonSaveHeight: Dp = 56.dp
+  val ButtonSaveCornerRadius: Dp = 16.dp
   val ButtonShadow: Dp = 8.dp
 
+  // Cards
   val CardCornerRadius: Dp = 20.dp
-  val CardLittleCornerRadius: Dp = 12.dp
   val CardPadding: Dp = 20.dp
-  val CardVArrangement: Dp = 12.dp
+  val CardVArrangement: Dp = 16.dp
+  val CardRowPadding: Dp = 12.dp
 
-  val CardRowPadding: Dp = 8.dp
-
+  // Spacers
   val SpacerHeight: Dp = 16.dp
-  val SpacerHeightMedium: Dp = 12.dp
   val SpacerHeightSmall: Dp = 8.dp
   val SpacerHeightTiny: Dp = 4.dp
 
+  // Icons
   val IconSize: Dp = 20.dp
+
+  // Divider
+  val DividerThickness: Dp = 1.dp
 }
 
 object HuntScreenTestTags {
