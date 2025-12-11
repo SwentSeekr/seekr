@@ -116,6 +116,13 @@ jobs:
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
 
+      # Use JDK 21 specifically for firebase-tools / emulators
+      - name: Setup JDK 21 (Firebase emulators)
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "21"
+
       # Start Firebase
       #- name: Start Firebase emulators
       #  run: |
@@ -149,6 +156,12 @@ jobs:
             echo "Firebase emulators not configured, skipping emulator startup..."
           fi
 
+      # Switch back to JDK 17 for Gradle / Android build
+      - name: Switch back to JDK 17 (Gradle / Android)
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
 
       # Run instrumentation tests + unit tests + Coverage + Sonar
       - name: Run instrumentation tests + unit tests + Coverage + Sonar
