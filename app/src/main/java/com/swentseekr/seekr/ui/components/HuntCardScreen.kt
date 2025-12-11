@@ -797,23 +797,27 @@ private fun ReviewCardPhotosSection(
 fun DotMenu(onEdit: () -> Unit, onDelete: () -> Unit) {
   var expanded by remember { mutableStateOf(false) }
   Box {
-    IconButton(onClick = { expanded = true }) {
-      Icon(imageVector = Icons.Default.MoreVert, contentDescription = "Menu")
-    }
+    IconButton(
+        onClick = { expanded = true },
+        modifier = Modifier.testTag(HuntCardScreenTestTags.DOTBUTOON)) {
+          Icon(imageVector = Icons.Default.MoreVert, contentDescription = "Menu")
+        }
     DropdownMenu(expanded, onDismissRequest = { expanded = false }) {
       DropdownMenuItem(
           text = { Text("Edit") },
           onClick = {
             expanded = false
             onEdit()
-          })
+          },
+          modifier = Modifier.testTag(HuntCardScreenTestTags.EDIT_BUTTON))
 
       DropdownMenuItem(
           text = { Text("Delete") },
           onClick = {
             expanded = false
             onDelete()
-          })
+          },
+          modifier = Modifier.testTag(HuntCardScreenTestTags.DELETE_BUTTON))
     }
   }
 }

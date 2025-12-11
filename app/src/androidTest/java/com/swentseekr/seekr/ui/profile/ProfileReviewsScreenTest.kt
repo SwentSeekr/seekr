@@ -33,6 +33,7 @@ class ProfileReviewsScreenTest {
           userId = sampleProfile.uid,
           profileViewModel = ProfileViewModel(),
           onGoBack = {},
+          editReview = {},
           navController = navController,
           testProfile = sampleProfile,
           testReviews = sampleReviews)
@@ -64,6 +65,7 @@ class ProfileReviewsScreenTest {
           userId = sampleProfile.uid,
           profileViewModel = ProfileViewModel(),
           onGoBack = { backClicked = true },
+          editReview = {},
           navController = navController,
           testProfile = sampleProfile,
           testReviews = sampleReviews)
@@ -81,6 +83,7 @@ class ProfileReviewsScreenTest {
           userId = sampleProfile.uid,
           profileViewModel = ProfileViewModel(),
           onGoBack = {},
+          editReview = {},
           navController = navController,
           testProfile = sampleProfile,
           testReviews = emptyList())
@@ -97,6 +100,7 @@ class ProfileReviewsScreenTest {
           userId = "someUserId",
           profileViewModel = ProfileViewModel(),
           onGoBack = {},
+          editReview = {},
           navController = navController,
           testProfile = null,
           testReviews = emptyList())
@@ -121,6 +125,7 @@ class ProfileReviewsScreenTest {
           userId = testProfile.uid,
           profileViewModel = ProfileViewModel(),
           onGoBack = {},
+          editReview = {},
           navController = navController,
           testProfile = testProfile,
           testReviews = singleReview)
@@ -142,6 +147,7 @@ class ProfileReviewsScreenTest {
           userId = testProfile.uid,
           profileViewModel = ProfileViewModel(),
           onGoBack = {},
+          editReview = {},
           navController = navController,
           testProfile = testProfile,
           testReviews = sampleReviews)
