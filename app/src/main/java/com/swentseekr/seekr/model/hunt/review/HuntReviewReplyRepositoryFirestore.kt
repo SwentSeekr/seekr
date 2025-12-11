@@ -72,9 +72,7 @@ class HuntReviewReplyRepositoryFirestore(
   override suspend fun updateReply(replyId: String, newReply: HuntReviewReply) {
     val docRef = repliesCollection.document(replyId)
     val snapshot = docRef.get().await()
-    if (!snapshot.exists()) {
-      throw IllegalArgumentException(HuntReviewReplyFirestoreConstants.replyNotFoundError(replyId))
-    }
+    require(snapshot.exists()) { HuntReviewReplyFirestoreConstants.replyNotFoundError(replyId) }
     docRef.set(newReply).await()
   }
 
@@ -87,9 +85,7 @@ class HuntReviewReplyRepositoryFirestore(
   override suspend fun deleteReply(replyId: String) {
     val docRef = repliesCollection.document(replyId)
     val snapshot = docRef.get().await()
-    if (!snapshot.exists()) {
-      throw IllegalArgumentException(HuntReviewReplyFirestoreConstants.replyNotFoundError(replyId))
-    }
+    require(snapshot.exists()) { HuntReviewReplyFirestoreConstants.replyNotFoundError(replyId) }
     docRef.delete().await()
   }
 
