@@ -2,7 +2,6 @@ package com.swentseekr.seekr.ui.navigation
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
@@ -13,20 +12,16 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.findNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.swentseekr.seekr.FakeReviewHuntViewModel
-import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
 import com.swentseekr.seekr.model.profile.ProfileRepositoryLocal
 import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
 import com.swentseekr.seekr.model.profile.createHunt
 import com.swentseekr.seekr.model.profile.sampleProfileWithPseudonym
-import com.swentseekr.seekr.ui.components.HuntCardScreen
 import com.swentseekr.seekr.ui.components.HuntCardScreenTestTags
 import com.swentseekr.seekr.ui.huntCardScreen.FakeHuntCardViewModel
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
@@ -198,28 +193,25 @@ class SeekrNavigationTest {
     // Wait until the MyHunt card appears
     waitUntilTrue(MED) {
       compose
-        .onAllNodesWithTag("HUNT_CARD_hunt123", useUnmergedTree = true)
-        .fetchSemanticsNodes()
-        .isNotEmpty()
+          .onAllNodesWithTag("HUNT_CARD_hunt123", useUnmergedTree = true)
+          .fetchSemanticsNodes()
+          .isNotEmpty()
     }
 
     // Click on the MyHunt card
-    compose
-      .onNodeWithTag("HUNT_CARD_hunt123", useUnmergedTree = true)
-      .assertExists()
-      .performClick()
+    compose.onNodeWithTag("HUNT_CARD_hunt123", useUnmergedTree = true).assertExists().performClick()
 
     // Wait for HuntCard screen to appear
     waitUntilTrue(MED) {
       compose
-        .onAllNodesWithTag(NavigationTestTags.HUNTCARD_SCREEN, useUnmergedTree = true)
-        .fetchSemanticsNodes()
-        .isNotEmpty()
+          .onAllNodesWithTag(NavigationTestTags.HUNTCARD_SCREEN, useUnmergedTree = true)
+          .fetchSemanticsNodes()
+          .isNotEmpty()
     }
 
     compose
-      .onNodeWithTag(NavigationTestTags.HUNTCARD_SCREEN, useUnmergedTree = true)
-      .assertIsDisplayed()
+        .onNodeWithTag(NavigationTestTags.HUNTCARD_SCREEN, useUnmergedTree = true)
+        .assertIsDisplayed()
   }
 
   @Test
@@ -228,10 +220,8 @@ class SeekrNavigationTest {
     val currentUserId = "fakeUser123"
 
     // FIRST create the hunt with the correct authorId
-    val hunt = createHunt(
-      uid = "hunt123",
-      title = "Test Hunt for Editing"
-    ).copy(authorId = currentUserId)
+    val hunt =
+        createHunt(uid = "hunt123", title = "Test Hunt for Editing").copy(authorId = currentUserId)
 
     // THEN pass it to the ViewModel so it's in the initial state
     val viewModel = FakeHuntCardViewModel(hunt)
@@ -242,17 +232,15 @@ class SeekrNavigationTest {
     }
 
     // Setup profile repo with the author's profile
-    val fakeProfileRepo = ProfileRepositoryLocal().apply {
-      addProfile(sampleProfileWithPseudonym(currentUserId, "Test Author"))
-    }
+    val fakeProfileRepo =
+        ProfileRepositoryLocal().apply {
+          addProfile(sampleProfileWithPseudonym(currentUserId, "Test Author"))
+        }
 
     withFakeRepos(FakeRepoSuccess(listOf(hunt)), fakeProfileRepo) {
       compose.runOnUiThread {
         compose.activity.setContent {
-          SeekrMainNavHost(
-            testMode = true,
-            huntCardViewModelFactory = { viewModel }
-          )
+          SeekrMainNavHost(testMode = true, huntCardViewModelFactory = { viewModel })
         }
       }
 
@@ -262,67 +250,64 @@ class SeekrNavigationTest {
       // Wait until the hunt card appears
       waitUntilTrue(MED) {
         compose
-          .onAllNodesWithTag("HUNT_CARD_hunt123", useUnmergedTree = true)
-          .fetchSemanticsNodes()
-          .isNotEmpty()
+            .onAllNodesWithTag("HUNT_CARD_hunt123", useUnmergedTree = true)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
       }
 
       // Click on the hunt card
       compose
-        .onNodeWithTag("HUNT_CARD_hunt123", useUnmergedTree = true)
-        .assertExists()
-        .performClick()
+          .onNodeWithTag("HUNT_CARD_hunt123", useUnmergedTree = true)
+          .assertExists()
+          .performClick()
 
       // Wait for HuntCard screen to appear
       waitUntilTrue(MED) {
         compose
-          .onAllNodesWithTag(NavigationTestTags.HUNTCARD_SCREEN, useUnmergedTree = true)
-          .fetchSemanticsNodes()
-          .isNotEmpty()
+            .onAllNodesWithTag(NavigationTestTags.HUNTCARD_SCREEN, useUnmergedTree = true)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
       }
 
       compose
-        .onNodeWithTag(NavigationTestTags.HUNTCARD_SCREEN, useUnmergedTree = true)
-        .assertIsDisplayed()
+          .onNodeWithTag(NavigationTestTags.HUNTCARD_SCREEN, useUnmergedTree = true)
+          .assertIsDisplayed()
 
       // Give extra time for the lazy column to fully compose
       compose.waitForIdle()
 
       compose
-        .onNodeWithTag("HUNT_CARD_LIST", useUnmergedTree = true)
-        .performScrollToNode(hasTestTag(HuntCardScreenTestTags.EDIT_HUNT_BUTTON))
+          .onNodeWithTag("HUNT_CARD_LIST", useUnmergedTree = true)
+          .performScrollToNode(hasTestTag(HuntCardScreenTestTags.EDIT_HUNT_BUTTON))
 
       compose.waitForIdle()
 
       // Scroll to the Edit button
       compose
-        .onNodeWithTag("HUNT_CARD_LIST", useUnmergedTree = true)
-        .performScrollToNode(hasTestTag(HuntCardScreenTestTags.EDIT_HUNT_BUTTON))
+          .onNodeWithTag("HUNT_CARD_LIST", useUnmergedTree = true)
+          .performScrollToNode(hasTestTag(HuntCardScreenTestTags.EDIT_HUNT_BUTTON))
 
       // Click the Edit Hunt button
       compose
-        .onNodeWithTag(HuntCardScreenTestTags.EDIT_HUNT_BUTTON, useUnmergedTree = true)
-        .assertExists()
-        .assertIsDisplayed()
-        .performClick()
+          .onNodeWithTag(HuntCardScreenTestTags.EDIT_HUNT_BUTTON, useUnmergedTree = true)
+          .assertExists()
+          .assertIsDisplayed()
+          .performClick()
 
       // Wait for EditHunt screen to appear
       compose.waitUntil(MED) {
         compose
-          .onAllNodesWithTag(NavigationTestTags.EDIT_HUNT_SCREEN, useUnmergedTree = true)
-          .fetchSemanticsNodes()
-          .isNotEmpty()
+            .onAllNodesWithTag(NavigationTestTags.EDIT_HUNT_SCREEN, useUnmergedTree = true)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
       }
 
       // Verify we're on the EditHunt screen
       compose
-        .onNodeWithTag(NavigationTestTags.EDIT_HUNT_SCREEN, useUnmergedTree = true)
-        .assertIsDisplayed()
+          .onNodeWithTag(NavigationTestTags.EDIT_HUNT_SCREEN, useUnmergedTree = true)
+          .assertIsDisplayed()
     }
   }
-
-
-
 
   @Test
   fun add_hunt_on_done_navigates_back_to_tabs_and_shows_bar() {
