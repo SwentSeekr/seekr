@@ -43,10 +43,12 @@ class HuntCardTest {
   @Test
   fun huntCard_displaysTitleAndAuthor() {
     val hunt = createFakeHunt()
-    composeTestRule.setContent { HuntCard(hunt, modifier = Modifier.Companion.padding(2.dp)) }
+    composeTestRule.setContent {
+      HuntCard(hunt, authorName = "Alice", modifier = Modifier.Companion.padding(2.dp))
+    }
 
     composeTestRule.onNodeWithText(hunt.title).assertIsDisplayed()
-    composeTestRule.onNodeWithText("by ${hunt.authorId}").assertIsDisplayed()
+    composeTestRule.onNodeWithText("by Alice").assertIsDisplayed()
   }
 
   @Test

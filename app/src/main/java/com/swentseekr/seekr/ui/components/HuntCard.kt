@@ -39,11 +39,15 @@ import com.swentseekr.seekr.model.hunt.Hunt
  * All layout values (sizes, paddings, colors) are centralized in `HuntCardUIConstants`.
  *
  * @param hunt The Hunt to display (title, authorId, distance, time, difficulty, mainImageUrl).
+ * @param authorName the name of the author that creates the hunt
+ * @param isLiked a boolean that indicates if the hunt is liked or not
+ * @param onLikeClick a callback for liking the hunt
  * @param modifier Optional modifier for external styling or click handling.
  */
 @Composable
 fun HuntCard(
     hunt: Hunt,
+    authorName: String = "",
     isLiked: Boolean = false,
     onLikeClick: (String) -> Unit = {},
     modifier: Modifier = Modifier
@@ -121,7 +125,7 @@ fun HuntCard(
                           lineHeight = 28.sp)
                       Spacer(modifier = Modifier.height(HuntCardUIConstants.Padding4))
                       Text(
-                          text = "${HuntCardScreenStrings.By} ${hunt.authorId}",
+                          text = "${HuntCardScreenStrings.By} " + authorName,
                           fontSize = HuntCardUIConstants.AuthorFont14,
                           color = HuntCardUIConstants.White.copy(alpha = 0.9f),
                           fontWeight = FontWeight.Medium)

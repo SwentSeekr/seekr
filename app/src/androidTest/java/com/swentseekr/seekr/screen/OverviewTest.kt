@@ -18,6 +18,7 @@ import com.swentseekr.seekr.model.hunt.ReviewImageRepositoryLocal
 import com.swentseekr.seekr.model.profile.ProfileRepositoryLocal
 import com.swentseekr.seekr.model.profile.createHunt
 import com.swentseekr.seekr.model.profile.createOverviewTestHunt
+import com.swentseekr.seekr.model.profile.sampleProfileWithPseudonym
 import com.swentseekr.seekr.ui.components.HuntCard
 import com.swentseekr.seekr.ui.components.HuntCardScreenStrings
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
@@ -55,6 +56,12 @@ class OverviewScreenTest {
           time = 60.0,
           distance = 5.0)
 
+  private val profileAlice =
+      sampleProfileWithPseudonym(
+          uid = "author_123",
+          pseudonym = "Alice",
+      )
+
   @Before
   fun setUp() = runTest {
     fakeHuntRepository = HuntsRepositoryLocal()
@@ -63,6 +70,7 @@ class OverviewScreenTest {
     fakeImageRepository = ReviewImageRepositoryLocal()
 
     fakeHuntRepository.addHunt(testHunt)
+    fakeProfileRepository.addProfile(profileAlice)
 
     viewModel =
         HuntCardViewModel(
@@ -119,7 +127,9 @@ class OverviewScreenTest {
 
   @Test
   fun huntCard_displaysLikeButton() {
-    composeTestRule.setContent { HuntCard(hunt = testHunt, isLiked = false, onLikeClick = {}) }
+    composeTestRule.setContent {
+      HuntCard(hunt = testHunt, authorName = "Alice", isLiked = false, onLikeClick = {})
+    }
 
     composeTestRule
         .onNodeWithTag(HuntCardScreenStrings.LikeButton)
@@ -132,7 +142,11 @@ class OverviewScreenTest {
     var clickedHuntId: String? = null
 
     composeTestRule.setContent {
-      HuntCard(hunt = testHunt, isLiked = false, onLikeClick = { huntId -> clickedHuntId = huntId })
+      HuntCard(
+          hunt = testHunt,
+          authorName = "Alice",
+          isLiked = false,
+          onLikeClick = { huntId -> clickedHuntId = huntId })
     }
 
     composeTestRule.onNodeWithTag(HuntCardScreenStrings.LikeButton).performClick()
@@ -267,7 +281,7 @@ class OverviewScreenTest {
 
   @Test
   fun overviewScreen_showsHuntCardsFromRepository_inLazyList() {
-    val overviewViewModel = OverviewViewModel(fakeHuntRepository)
+    val overviewViewModel = OverviewViewModel(fakeHuntRepository, fakeProfileRepository)
 
     composeTestRule.setContent {
       OverviewScreen(

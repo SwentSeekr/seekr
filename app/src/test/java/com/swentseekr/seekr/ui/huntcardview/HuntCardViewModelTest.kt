@@ -143,15 +143,6 @@ class HuntCardViewModelTest {
     assertFalse(state.isAchieved)
   }
 
-  /** Test that check that the load Author does not crash not really implemented yet */
-  @Test
-  fun loadHuntAuthor_withValidId_doesNotCrash() = runTest {
-    viewModel.loadHuntAuthor(testHunt.uid)
-    advanceUntilIdle()
-
-    assertTrue(true)
-  }
-
   @Test
   fun loadHunt_withUserDoneHunts_marksAchieved() = runTest {
     val userId = "user_done"
@@ -164,15 +155,6 @@ class HuntCardViewModelTest {
 
     val state = viewModel.uiState.value
     assertTrue(state.isAchieved)
-  }
-
-  /** Test that check that the load Author does not crash not really implemented yet */
-  @Test
-  fun loadHuntAuthor_withInvalidId_logsError() = runTest {
-    viewModel.loadHuntAuthor(HuntCardViewModelTestConstantsString.InvalidId)
-    advanceUntilIdle()
-
-    assertTrue(true)
   }
 
   /** Test that loadOtherReview correctly loads reviews */
