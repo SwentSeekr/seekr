@@ -7,28 +7,21 @@ import androidx.compose.ui.unit.sp
 
 object AddReviewScreenDefaults {
   val ChangeAlpha: Float = 0.3f
-  val ChangeAlphaMedium: Float = 0.5f
 
   val ColumnPadding: Dp = 20.dp
-  val ColumnMediumPadding: Dp = 16.dp
   val ColumnVArrangement: Dp = 20.dp
-  val ColumnLittleVArr: Dp = 8.dp
-  val ColumnMediumVArr: Dp = 16.dp
 
   val RowHArrangement: Dp = 12.dp
   val RowStarArrangement: Dp = 4.dp
 
   val CardCornerRadius: Dp = 20.dp
-  val CardMedCornerRadius: Dp = 16.dp
-  val CardNoElevation: Dp = 0.dp
-  val CardLittleElevation: Dp = 2.dp
+  val CardElevation: Dp = 0.dp
 
   val ButtonTonalHeight: Dp = 52.dp
   val ButtonTonalCornerRadius: Dp = 12.dp
   val ButtonWeight: Float = 1f
   val ButtonElevation: Dp = 4.dp
 
-  val TextPadding: Dp = 12.dp
   val TitleFontSize = 24.sp
 
   val ImageSize: Dp = 120.dp
@@ -38,31 +31,45 @@ object AddReviewScreenDefaults {
   val SurfacePadding: Dp = 4.dp
   val SurfaceSize: Dp = 28.dp
   val SurfaceCorners: Dp = 8.dp
+  val SurfaceIconSize: Dp = 14.dp
 
   val IconSize: Dp = 20.dp
   val IconBig: Dp = 40.dp
 
+  val SpacerHeightExtraSmall: Dp = 4.dp
   val SpacerHeightSmall: Dp = 8.dp
   val SpacerHeightMedium: Dp = 16.dp
 
   const val MaxStars = 5
+  const val MinStars = 0
 
   val CommentFieldHeight: Dp = 250.dp
   val CommentFieldCornerRadius: Dp = 16.dp
 
   val SelectedStarColor = Color(0xFFFFC107)
   val UnselectedStarColor = Color.Gray
-  val TopBarBackgroundColor: Color = Color.LightGray
   val CommentLineHeight = 20.sp
   const val CommentMaxLines = 15
   const val Rating: Double = 0.0
+
+  const val DefaultRating: Int = 0
+  const val FirstStarIndex: Int = 1
+  const val RatingStep: Int = 1
+  const val StarSelectedScale: Float = 1.1f
+  const val StarUnselectedScale: Float = 1f
+
+  // Header & photos
+  val HeaderInnerSpacing: Dp = 8.dp
+  val HeaderSubtitleSpacerHeight: Dp = 4.dp
+
+  val PhotosSpacerHeight: Dp = 8.dp
+  const val CommentCharCountAlpha: Float = 0.7f
+  val TrailingTileAlpha: Float = 0.6f
 }
 
 object AddReviewScreenStrings {
-  const val UnknownAuthor = "Unknown Author"
   const val Title = "Add Review Hunt"
   const val BackContentDescription = "Back"
-  const val RateThisHunt = "Rate this Hunt:"
   const val RatingPrefix = "Your rating: "
   const val CommentLabel = "Comment"
   const val CommentPlaceholder = "Leave a comment..."
@@ -70,7 +77,6 @@ object AddReviewScreenStrings {
   const val AddPicturesButtonLabel = "Add Pictures"
   const val CancelButtonLabel = "Cancel"
   const val DoneButtonLabel = "Done"
-  const val LoadingPlaceholder = "Loading..."
   const val ImageMimeType = "image/*"
   const val SelectedImageContentDescriptionPrefix = "Selected Image "
   const val StarContentDescriptionPrefix = "Star "
@@ -103,7 +109,15 @@ object AddReviewScreenStrings {
   const val NEW_REVIEW_TITLE = "New review added"
   const val NEW_REVIEW_MESSAGE = "You added a new review!"
 
+  const val PhotosLabelPrefix = "Photos ("
+  const val PhotosLabelSuffix = ")"
+  const val AddMorePhotosButtonLabel = "Add more"
+
   fun ratingSummary(rating: Int, maxStars: Int): String = "$RatingPrefix$rating /$maxStars"
+
+  fun commentLengthLabel(length: Int): String = "$length chars"
+
+  fun photosHeader(count: Int): String = "$PhotosLabelPrefix$count$PhotosLabelSuffix"
 }
 
 object AddReviewScreenTestTags {
@@ -116,6 +130,10 @@ object AddReviewScreenTestTags {
   const val DONE_BUTTON = "HuntCardReview_DoneButton"
   const val ERROR_MESSAGE = "HuntCardReview_ErrorMessage"
   const val AddPhotoButtonTag = "AddPhotoButton"
+  const val PHOTOS_LAZY_ROW_TAG = "PhotosLazyRow"
+  private const val REMOVE_PHOTO_PREFIX = "RemovePhoto_"
 
   fun starTag(index: Int) = "Star_$index"
+
+  fun removePhotoTag(index: Int) = "$REMOVE_PHOTO_PREFIX$index"
 }

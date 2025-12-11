@@ -44,6 +44,8 @@ class EditHuntViewModel(
    */
   private val pendingDeletionUrls = mutableListOf<String>()
 
+  private var pendingMainImageDeletionUrl: String? = null
+
   /**
    * Loads the hunt with the given [id] and initializes the UI state for editing.
    *
@@ -128,6 +130,27 @@ class EditHuntViewModel(
   }
 
   /**
+   * Removes the currently selected main image from the hunt.
+   *
+   * This function performs two actions:
+   * 1. If a remote image exists (i.e., `mainImageUrl` is not blank), its URL is stored in
+   *    [pendingMainImageDeletionUrl] so that it can be deleted from the backend later.
+   * 2. Updates the UI state by clearing the main image preview with [updateMainImageUri].
+   *
+   * This ensures that the UI reflects the removal immediately while still allowing the repository
+   * or ViewModel to handle the actual remote deletion when appropriate.
+   */
+  override fun removeMainImage() {
+    val currentUrl = uiState.value.mainImageUrl
+    if (currentUrl.isNotBlank()) {
+      pendingMainImageDeletionUrl = currentUrl
+    }
+
+    // Remove from UI
+    updateMainImageUri(null)
+  }
+
+  /**
    * Persists the edited [hunt] using the underlying [HuntsRepository].
    *
    * This method:
@@ -141,8 +164,8 @@ class EditHuntViewModel(
   override suspend fun persist(hunt: Hunt) {
     val id = requireNotNull(huntId)
 
-    // Take an immutable snapshot of the URLs to remove.
     val removedOtherImages = pendingDeletionUrls.toList()
+    val removedMain = pendingMainImageDeletionUrl
 
     repository.editHunt(
         huntID = id,
@@ -150,10 +173,10 @@ class EditHuntViewModel(
         mainImageUri = mainImageUri,
         addedOtherImages = otherImagesUris,
         removedOtherImages = removedOtherImages,
-    )
+        removedMainImageUrl = removedMain)
 
-    // Clear the internal mutable state once the operation has been requested.
     pendingDeletionUrls.clear()
+    pendingMainImageDeletionUrl = null
   }
 
   /**

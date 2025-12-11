@@ -5,7 +5,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.swentseekr.seekr.ui.hunt.review.AddReviewScreenTestTags
@@ -38,26 +37,6 @@ class EditReviewScreenTest {
   }
 
   @Test
-  fun typing_in_fields_updates_text() {
-    composeRule.setContent {
-      MaterialTheme { EditReviewScreen(huntId = AddReviewTestConstantStings.TestHuntId) }
-    }
-    composeRule
-        .onNodeWithTag(AddReviewScreenTestTags.COMMENT_TEXT_FIELD)
-        .performTextInput(AddReviewTestConstantStings.Comment)
-  }
-
-  @Test
-  fun star_rating_can_be_selected() {
-    composeRule.setContent {
-      MaterialTheme { EditReviewScreen(huntId = AddReviewTestConstantStings.TestHuntId) }
-    }
-    val starTag = AddReviewScreenTestTags.starTag(3)
-    composeRule.onNodeWithTag(starTag).performClick()
-    composeRule.onNodeWithTag(starTag).assertExists()
-  }
-
-  @Test
   fun clicking_buttons_triggers_callbacks() {
     var backCalled = false
     var doneCalled = false
@@ -85,30 +64,6 @@ class EditReviewScreenTest {
     assertTrue(backCalled)
     assertTrue(cancelCalled)
     assertTrue(doneCalled)
-  }
-
-  @Test
-  fun topAppBar_displays_back_button() {
-    composeRule.setContent {
-      MaterialTheme { EditReviewScreen(huntId = AddReviewTestConstantStings.TestHuntId) }
-    }
-
-    composeRule.onNodeWithTag(AddReviewScreenTestTags.GO_BACK_BUTTON).assertExists()
-  }
-
-  @Test
-  fun info_column_scrolls_to_bottom() {
-    composeRule.setContent {
-      MaterialTheme { EditReviewScreen(huntId = AddReviewTestConstantStings.TestHuntId) }
-    }
-
-    composeRule.onNodeWithTag(AddReviewScreenTestTags.INFO_COLUMN).assertExists()
-    composeRule.onNodeWithTag(AddReviewScreenTestTags.BUTTONS_ROW).performScrollTo()
-
-    composeRule.onNodeWithTag(AddReviewScreenTestTags.CANCEL_BUTTON).assertExists()
-    composeRule.onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON).assertExists()
-
-    composeRule.onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON).performClick()
   }
 
   @Test

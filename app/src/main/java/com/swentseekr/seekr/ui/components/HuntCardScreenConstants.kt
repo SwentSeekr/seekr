@@ -41,37 +41,38 @@ object HuntCardScreenDefaults {
   val ImageIndicatorDotSpacing: Dp = 4.dp
   val ImageIndicatorTopPadding: Dp = 4.dp
   const val ImageCarouselRotationCenterDegrees: Float = 0f
-  const val ImageIndicatorLastIndexOffset = 1
+  const val ImageIndicatorLastIndexOffset: Int = 1
 
-  val Padding20 = 20.dp
-  val Padding12 = 12.dp
-  val Padding16 = 16.dp
-  val Padding8 = 8.dp
-  val Padding4 = 4.dp
-  val Padding40 = 40.dp
-  val Padding2 = 2.dp
+  val Padding20: Dp = 20.dp
+  val Padding12: Dp = 12.dp
+  val Padding16: Dp = 16.dp
+  val Padding8: Dp = 8.dp
+  val Padding4: Dp = 4.dp
+  val Padding40: Dp = 40.dp
+  val Padding2: Dp = 2.dp
+  val Spacing6: Dp = 6.dp
 
-  val IconSize18 = 18.dp
-  val IconSize24 = 24.dp
-  val IconSize32 = 32.dp
-  val IconSize48 = 48.dp
+  val IconSize18: Dp = 18.dp
+  val IconSize24: Dp = 24.dp
+  val IconSize32: Dp = 32.dp
+  val IconSize48: Dp = 48.dp
 
-  val MapHeight250 = 250.dp
-  val AspectRatioHero = 16f / 9f
+  val MapHeight250: Dp = 250.dp
+  val AspectRatioHero: Float = 16f / 9f
 
-  val Alpha = 0.9f
+  val Alpha: Float = 0.9f
 
   val TitleFontSize = 28.sp
   val AuthorFontSize = 16.sp
   val LineHeight = 32.sp
 
-  val CardWeight = 1f
+  val CardWeight: Float = 1f
   val MediumFontSize = 24.sp
   val SmallFontSize = 18.sp
   val DescriptionFontSize = 15.sp
   val DescriptionLineHeight = 22.sp
 
-  val Zoom = 12f
+  val Zoom: Float = 12f
   val OtherLineHeight = 20.sp
   val MinFontSize = 13.sp
 
@@ -79,16 +80,30 @@ object HuntCardScreenDefaults {
   val ImageIndicatorSelectedColor: Color = Color.DarkGray
   val OrangeButton: Color = Color(0xFFFFA726)
 
-  val ScreenBackground = Color(0xFFF8F9FA)
-  val LightGray = Color(0xFFCCCCCC)
+  val ScreenBackground: Color = Color(0xFFF8F9FA)
+  val LightGray: Color = Color(0xFFCCCCCC)
 
-  val ParagraphGray = Color(0xFF444444)
+  val ParagraphGray: Color = Color(0xFF444444)
 
-  val CardSoftGray = Color(0xFFF5F5F5)
+  val CardSoftGray: Color = Color(0xFFF5F5F5)
 
-  // Couleurs spécifiques non présentes dans le thème
-  val ErrorRed = Color(0xFFEF5350)
-  val LikeRedStrong = Color(0xFFFF5252)
+  // Specific colors
+  val ErrorRed: Color = Color(0xFFEF5350)
+  val LikeRedStrong: Color = Color(0xFFFF5252)
+
+  // New: review card visuals & logic constants
+  val ReviewCardCornerRadius: Dp = 16.dp
+  val ZeroElevation: Dp = 0.dp
+  const val DeleteIconAlpha: Float = 0.85f
+
+  const val NoRepliesCount: Int = 0
+  const val SingleReplyCount: Int = 1
+  const val InitialLetterCount: Int = 1
+  const val NoProfilePictureResId: Int = 0
+
+  const val BeginButtonSizeMultiplier: Int = 2
+  const val EndListSpacerMultiplier: Int = 2
+  const val RepliesLabelAlpha: Float = 0.8f
 }
 
 object HuntCardScreenStrings {
@@ -112,6 +127,18 @@ object HuntCardScreenStrings {
   const val StartingPointLabel = "Starting Point"
   const val DistanceLabel = "Distance"
   const val DurationLabel = "Duration"
+
+  // New strings for ModernReviewCard / replies
+  const val SeePictures = "See Pictures"
+  const val HideReplies = "Hide replies"
+  const val ViewRepliesPrefix = "View"
+  const val ReplySingular = "reply"
+  const val ReplyPlural = "replies"
+  const val NoRepliesYet = "No replies yet"
+  const val CurrentUserInitialLabel = "Y"
+
+  const val RepliesViewModelKeyPrefix = "replies_"
+  const val ReviewImagesRoutePrefix = "reviewImages/"
 }
 
 object HuntCardScreenTestTags {
@@ -134,4 +161,9 @@ object HuntCardScreenTestTags {
   const val DELETE_REVIEW_BUTTON = "DeleteReviewButton"
   const val LIKE_BUTTON = "HuntCard_LikeButton"
   const val LAST_SPACER = "HuntCard_LastSpacer"
+
+  // New test tags moved from inline strings
+  const val HUNT_CARD_LIST = "HUNT_CARD_LIST"
+  const val SEE_PICTURES_BUTTON = "SEE_PICTURES_BUTTON"
+  const val NO_REVIEWS_TEXT = "NO_REVIEWS_TEXT"
 }
