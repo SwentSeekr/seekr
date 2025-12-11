@@ -233,11 +233,10 @@ fun HuntCardScreen(
               item {
                 Spacer(
                     modifier =
-                        Modifier
-                    .height(
-                            HuntCardScreenDefaults.Padding40 *
-                                HuntCardScreenDefaults.EndListSpacerMultiplier)
-                    .testTag(HuntCardScreenTestTags.LAST_SPACER))
+                        Modifier.height(
+                                HuntCardScreenDefaults.Padding40 *
+                                    HuntCardScreenDefaults.EndListSpacerMultiplier)
+                            .testTag(HuntCardScreenTestTags.LAST_SPACER))
               }
             }
       }
