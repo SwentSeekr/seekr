@@ -29,7 +29,6 @@ import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 fun EditReviewScreen(
     huntId: String,
     reviewId: String,
-    // reviewViewModel: ReviewHuntViewModel = viewModel(),
     huntCardViewModel: HuntCardViewModel = viewModel(),
     onGoBack: () -> Unit = {},
     onDone: () -> Unit = {},

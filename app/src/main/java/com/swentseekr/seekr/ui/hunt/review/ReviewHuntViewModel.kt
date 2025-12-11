@@ -143,7 +143,13 @@ open class ReviewHuntViewModel(
     }
   }
 
-  fun loadReview(reviewId: String) {
+  /**
+   * Loads a review by its ID and updates the UI state's list of photo URLs.
+   *
+   * @param reviewId Identifier of the review to load.
+   * @return A [kotlinx.coroutines.Job] representing the launched coroutine.
+   */
+  open fun loadReview(reviewId: String) {
     viewModelScope.launch {
       try {
         val review = repositoryReview.getReviewHunt(reviewId)
@@ -492,24 +498,4 @@ open class ReviewHuntViewModel(
     val userId = FirebaseAuth.getInstance().currentUser?.uid ?: AddReviewScreenStrings.User0
     submitReviewHunt(userId, hunt, context)
   }
-
-  /**
-   * Loads a review by its ID and updates the UI state's list of photo URLs.
-   *
-   * @param reviewId Identifier of the review to load.
-   * @return A [kotlinx.coroutines.Job] representing the launched coroutine.
-   */
-  /*
-  fun loadReview(reviewId: String) =
-      viewModelScope.launch {
-        try {
-          val review = repositoryReview.getReviewHunt(reviewId)
-
-          _uiState.update { it.copy(photos = review.photos) }
-        } catch (e: Exception) {
-          Log.e("ReviewHuntViewModel", "Failed to load review $reviewId", e)
-        }
-      }
-
-   */
 }

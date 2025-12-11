@@ -40,7 +40,6 @@ val UICons = AddReviewScreenDefaults
 @Composable
 fun AddReviewScreen(
     huntId: String,
-    // reviewViewModel: ReviewHuntViewModel = viewModel(),
     huntCardViewModel: HuntCardViewModel = viewModel(),
     onGoBack: () -> Unit = {},
     onDone: () -> Unit = {},
