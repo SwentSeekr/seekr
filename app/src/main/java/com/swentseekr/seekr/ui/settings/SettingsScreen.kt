@@ -50,6 +50,7 @@ fun SettingsScreen(
     onSignedOut: () -> Unit = {},
     onGoBack: () -> Unit = {},
     onEditProfile: () -> Unit = {},
+    onViewTerms: () -> Unit = {},
     credentialManager: CredentialManager = CredentialManager.create(LocalContext.current)
 ) {
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -91,7 +92,7 @@ fun SettingsScreen(
             onNotificationsChange = { viewModel.onNotificationsToggleRequested(it, context) },
             onPicturesChange = { viewModel.onPicturesToggleRequested(it, context) },
             onLocalisationChange = { viewModel.onLocalisationToggleRequested(it, context) },
-        )
+            onViewTerms = onViewTerms)
       }
 }
 
@@ -166,6 +167,28 @@ private fun HandlePermissions(viewModel: SettingsViewModel) {
   }
 }
 
+/**
+ * Composable UI for the Settings screen.
+ *
+ * Organized into sections:
+ * - App Info (version display)
+ * - Permissions (notifications, pictures, location toggles)
+ * - Account (edit profile action)
+ * - Legal (terms & conditions link)
+ * - Logout button at bottom (destructive action)
+ *
+ * All interactive elements trigger callbacks provided by parent.
+ *
+ * @param modifier Modifier to adjust layout or styling.
+ * @param onEditProfileClick Called when user taps “Edit Profile”.
+ * @param onLogoutClick Called when user taps “Logout” — typically triggers session end.
+ * @param uiState Current state of settings (e.g., permissions, app version).
+ * @param onNotificationsChange Called when notifications toggle is switched.
+ * @param onPicturesChange Called when pictures permission toggle is switched.
+ * @param onLocalisationChange Called when location permission toggle is switched.
+ * @param onViewTerms Called when user taps “Terms & Conditions” — typically opens a web view or
+ *   dialog.
+ */
 @Composable
 fun SettingsContent(
     modifier: Modifier = Modifier,
@@ -175,6 +198,7 @@ fun SettingsContent(
     onNotificationsChange: (Boolean) -> Unit = {},
     onPicturesChange: (Boolean) -> Unit = {},
     onLocalisationChange: (Boolean) -> Unit = {},
+    onViewTerms: () -> Unit = {}
 ) {
   Column(
       modifier =
@@ -276,6 +300,7 @@ fun SettingsContent(
           item {
             SettingsArrowItem(
                 title = SettingsScreenStrings.APP_CONDITION_LABEL,
+                onClick = onViewTerms,
                 modifier = Modifier.testTag(SettingsScreenTestTags.APP_CONDITION_BUTTON))
           }
         }

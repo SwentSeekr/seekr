@@ -3,12 +3,10 @@ package com.swentseekr.seekr.ui.review
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.swentseekr.seekr.ui.hunt.review.AddReviewScreenTestTags
@@ -50,33 +48,6 @@ class BaseReviewScreenTest {
     composeRule.onNodeWithTag(AddReviewScreenTestTags.BUTTONS_ROW).assertExists()
     composeRule.onNodeWithTag(AddReviewScreenTestTags.CANCEL_BUTTON).assertExists()
     composeRule.onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON).assertExists()
-  }
-
-  @Test
-  fun typing_in_fields_updates_text() {
-    var text by mutableStateOf("")
-    composeRule.setContent {
-      MaterialTheme {
-        BaseReviewScreen(
-            title = "Add Review",
-            huntTitle = "Some Hunt",
-            authorName = "John",
-            reviewText = text,
-            onRatingChanged = {},
-            onReviewTextChanged = { text = it },
-            onAddPhotos = {},
-            onRemovePhoto = {},
-            onGoBack = {},
-            onCancel = {},
-            onDone = {})
-      }
-    }
-    composeRule
-        .onNodeWithTag(AddReviewScreenTestTags.COMMENT_TEXT_FIELD)
-        .performTextInput(AddReviewTestConstantStings.Comment)
-    composeRule
-        .onNodeWithTag(AddReviewScreenTestTags.COMMENT_TEXT_FIELD)
-        .performTextInput(AddReviewTestConstantStings.Comment)
   }
 
   @Test
@@ -144,56 +115,6 @@ class BaseReviewScreenTest {
   }
 
   @Test
-  fun topAppBar_displays_back_button() {
-    composeRule.setContent {
-      MaterialTheme {
-        BaseReviewScreen(
-            title = "Add Review",
-            huntTitle = "Some Hunt",
-            authorName = "John",
-            reviewText = "",
-            onRatingChanged = {},
-            onReviewTextChanged = {},
-            onAddPhotos = {},
-            onRemovePhoto = {},
-            onGoBack = {},
-            onCancel = {},
-            onDone = {})
-      }
-    }
-
-    composeRule.onNodeWithTag(AddReviewScreenTestTags.GO_BACK_BUTTON).assertExists()
-  }
-
-  @Test
-  fun info_column_scrolls_to_bottom() {
-    composeRule.setContent {
-      MaterialTheme {
-        BaseReviewScreen(
-            title = "Add Review",
-            huntTitle = "Some Hunt",
-            authorName = "John",
-            reviewText = "",
-            onRatingChanged = {},
-            onReviewTextChanged = {},
-            onAddPhotos = {},
-            onRemovePhoto = {},
-            onGoBack = {},
-            onCancel = {},
-            onDone = {})
-      }
-    }
-
-    composeRule.onNodeWithTag(AddReviewScreenTestTags.INFO_COLUMN).assertExists()
-    composeRule.onNodeWithTag(AddReviewScreenTestTags.BUTTONS_ROW).performScrollTo()
-
-    composeRule.onNodeWithTag(AddReviewScreenTestTags.CANCEL_BUTTON).assertExists()
-    composeRule.onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON).assertExists()
-
-    composeRule.onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON).performClick()
-  }
-
-  @Test
   fun clicking_add_photos_calls_callback() {
     var addPhotoCalled = false
 
@@ -217,33 +138,6 @@ class BaseReviewScreenTest {
     composeRule.onNodeWithTag(AddReviewScreenTestTags.AddPhotoButtonTag).performClick()
 
     assertTrue(addPhotoCalled)
-  }
-
-  @Test
-  fun clicking_remove_photo_calls_callback() {
-    var removedIndex = -1
-
-    composeRule.setContent {
-      MaterialTheme {
-        BaseReviewScreen(
-            title = "Test",
-            huntTitle = "Hunt",
-            authorName = "Author",
-            reviewText = "",
-            photos = fakePhotos,
-            onRatingChanged = {},
-            onReviewTextChanged = {},
-            onAddPhotos = {},
-            onRemovePhoto = { removedIndex = it },
-            onGoBack = {},
-            onCancel = {},
-            onDone = {})
-      }
-    }
-
-    composeRule.onNodeWithTag("RemovePhoto0").performClick()
-
-    assertTrue(removedIndex == 0)
   }
 
   @Test

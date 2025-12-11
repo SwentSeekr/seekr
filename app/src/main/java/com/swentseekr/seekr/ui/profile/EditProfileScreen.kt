@@ -35,7 +35,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.MAX_BIO_LENGTH
-import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.MAX_PSEUDONYM_LENGTH
 import com.swentseekr.seekr.ui.profile.EditProfileNumberConstants.PROFILE_PIC_DEFAULT
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.BUTTON_CAMERA
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.BUTTON_CANCEL
@@ -47,7 +46,6 @@ import com.swentseekr.seekr.ui.profile.EditProfileStrings.DIALOG_MESSAGE
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.DIALOG_TITLE
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.ERROR_BIO_MAX
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.ERROR_PSEUDONYM_EMPTY
-import com.swentseekr.seekr.ui.profile.EditProfileStrings.ERROR_PSEUDONYM_MAX
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.FIELD_LABEL_BIO
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.FIELD_LABEL_PSEUDONYM
 import com.swentseekr.seekr.ui.profile.EditProfileStrings.SUCCESS_UPDATE
@@ -184,7 +182,9 @@ fun EditProfileScreen(
 
   EditProfileContent(
       uiState = uiState,
-      onPseudonymChange = editProfileViewModel::updatePseudonym,
+      onPseudonymChange = editProfileViewModel::validatePseudonym,
+      pseudonymError = uiState.pseudonymError,
+      isCheckingPseudonym = uiState.isCheckingPseudonym,
       onBioChange = editProfileViewModel::updateBio,
       onCancel = {
         editProfileViewModel.cancelChanges()
@@ -211,19 +211,45 @@ fun createImageUri(context: Context): Uri? {
   }
 }
 
+/**
+ * Composable UI for editing user profile details (pseudonym, bio, profile picture).
+ *
+ * Features:
+ * - Editable pseudonym field with real-time validation and availability checking
+ * - Multi-line bio editor with length limit validation
+ * - Profile picture preview with edit trigger (click to change)
+ * - Loading states during save or validation
+ * - Error/success feedback cards
+ * - Cancel & Save buttons with state-aware enabled/disabled behavior
+ *
+ * @param uiState Current state of the edit profile screen (includes pseudonym, bio, loading, error,
+ *   success flags).
+ * @param onPseudonymChange Called when pseudonym text changes — triggers validation.
+ * @param pseudonymError Optional error message for pseudonym (null if valid).
+ * @param isCheckingPseudonym Indicates if pseudonym availability is being checked (shows loading
+ *   indicator).
+ * @param onBioChange Called when bio text changes — validates length.
+ * @param onCancel Called when user taps “Cancel” — typically dismisses the screen.
+ * @param onSave Called when user taps “Save” — triggers profile update (after validation).
+ * @param onProfilePictureChange Called when user taps profile picture — opens image picker or
+ *   camera.
+ * @param profilePictureUri Optional URI of locally selected image (previewed before upload).
+ */
 @Composable
 fun EditProfileContent(
     uiState: EditProfileUIState,
     onPseudonymChange: (String) -> Unit,
+    pseudonymError: String? = null,
+    isCheckingPseudonym: Boolean = false,
     onBioChange: (String) -> Unit,
     onCancel: () -> Unit,
     onSave: () -> Unit,
     onProfilePictureChange: () -> Unit,
     profilePictureUri: Uri? = null
 ) {
-  var pseudonymError by remember { mutableStateOf<String?>(null) }
   var bioError by remember { mutableStateOf<String?>(null) }
   var localError by remember { mutableStateOf<String?>(null) }
+  var pseudonym = uiState.pseudonym
 
   val isLoading = uiState.isLoading
 
@@ -286,21 +312,41 @@ fun EditProfileContent(
                   modifier = Modifier.padding(UI_C.PADDING_GIGANTIC),
                   verticalArrangement = Arrangement.spacedBy(UI_C.VERTICAL_ARR_MEDIUM)) {
                     OutlinedTextField(
-                        value = uiState.pseudonym,
-                        onValueChange = { newValue ->
-                          if (!isLoading) {
-                            onPseudonymChange(newValue)
-                            pseudonymError =
-                                when {
-                                  newValue.isBlank() -> ERROR_PSEUDONYM_EMPTY
-                                  newValue.length > MAX_PSEUDONYM_LENGTH -> ERROR_PSEUDONYM_MAX
-                                  else -> null
-                                }
-                          }
+                        value = pseudonym,
+                        onValueChange = {
+                          pseudonym = it
+                          onPseudonymChange(it)
                         },
                         label = { Text(FIELD_LABEL_PSEUDONYM) },
                         enabled = !isLoading,
                         isError = pseudonymError != null,
+                        supportingText = {
+                          when {
+                            isCheckingPseudonym -> {
+                              Row(
+                                  verticalAlignment = Alignment.CenterVertically,
+                                  horizontalArrangement = Arrangement.spacedBy(UI_C.SPACER_SMALL)) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(UI_C.SPACER_LARGE),
+                                        strokeWidth = UI_C.STROKE_WIDTH)
+                                    Text(
+                                        EditProfileStrings.CHECKING_AVAILABILITY,
+                                        style = MaterialTheme.typography.bodySmall)
+                                  }
+                            }
+                            pseudonymError != null -> {
+                              Text(pseudonymError, color = MaterialTheme.colorScheme.error)
+                            }
+                          }
+                        },
+                        trailingIcon = {
+                          AnimatedVisibility(
+                              visible = isCheckingPseudonym, enter = fadeIn(), exit = fadeOut()) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(UI_C.SIZE_LARGE),
+                                    strokeWidth = UI_C.STROKE_WIDTH)
+                              }
+                        },
                         modifier =
                             Modifier.fillMaxWidth().testTag(EditProfileTestTags.PSEUDONYM_FIELD),
                         shape = RoundedCornerShape(UI_C.ROUND_CORNER_MID),
@@ -309,17 +355,6 @@ fun EditProfileContent(
                                 unfocusedBorderColor =
                                     MaterialTheme.colorScheme.outline.copy(alpha = UI_C.ALPHA_MID),
                                 focusedBorderColor = MaterialTheme.colorScheme.primary))
-
-                    AnimatedVisibility(
-                        visible = pseudonymError != null,
-                        enter = fadeIn() + scaleIn(),
-                        exit = fadeOut() + scaleOut()) {
-                          Text(
-                              text = pseudonymError ?: "",
-                              color = MaterialTheme.colorScheme.error,
-                              style = MaterialTheme.typography.bodySmall,
-                              modifier = Modifier.padding(start = UI_C.PADDING_SMALL))
-                        }
 
                     OutlinedTextField(
                         value = uiState.bio,
