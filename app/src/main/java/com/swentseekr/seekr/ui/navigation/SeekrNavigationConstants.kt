@@ -34,6 +34,7 @@ object NavigationTestTags {
   const val EDIT_HUNT_SCREEN = "EDIT_HUNT_SCREEN"
   const val REVIEW_HUNT_SCREEN = "REVIEW_HUNT_SCREEN"
   const val SETTINGS_SCREEN = "SETTINGS_SCREEN"
+  const val TERMS_CONDITIONS_SCREEN = "TERMS_CONDITIONS_SCREEN"
   const val EDIT_PROFILE_SCREEN = "EDIT_PROFILE_SCREEN"
 
   // --- review images screen test tag (used by offline nav) ---

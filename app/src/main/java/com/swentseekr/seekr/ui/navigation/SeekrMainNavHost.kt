@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
@@ -42,6 +43,7 @@ import com.swentseekr.seekr.ui.profile.EditProfileScreen
 import com.swentseekr.seekr.ui.profile.ProfileReviewsScreen
 import com.swentseekr.seekr.ui.profile.ProfileScreen
 import com.swentseekr.seekr.ui.settings.SettingsScreen
+import com.swentseekr.seekr.ui.terms.TermsAndConditionsScreen
 
 // Destinations as sealed class
 sealed class SeekrDestination(
@@ -90,6 +92,9 @@ sealed class SeekrDestination(
   object AddHunt : SeekrDestination("add_hunt", "Add Hunt", Icons.Filled.List)
 
   object Settings : SeekrDestination("settings", "Settings", Icons.Filled.List)
+
+  object TermsConditions :
+      SeekrDestination("terms_conditions", "Terms & Conditions", Icons.Filled.Info)
 
   object EditProfile : SeekrDestination("edit_profile", "Edit Profile", Icons.Filled.List)
 
@@ -406,7 +411,22 @@ fun SeekrMainNavHost(
                             navController.navigate(SeekrDestination.EditProfile.route) {
                               launchSingleTop = true
                             }
+                          },
+                          onViewTerms = {
+                            navController.navigate(SeekrDestination.TermsConditions.route) {
+                              launchSingleTop = true
+                            }
                           })
+                    }
+              }
+
+              // Terms and Conditions
+              composable(SeekrDestination.TermsConditions.route) {
+                Surface(
+                    modifier =
+                        Modifier.fillMaxSize()
+                            .testTag(NavigationTestTags.TERMS_CONDITIONS_SCREEN)) {
+                      TermsAndConditionsScreen(onGoBack = { navController.popBackStack() })
                     }
               }
 

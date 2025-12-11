@@ -219,4 +219,24 @@ class OnboardingFlowScreenTest {
     composeTestRule.onNodeWithTag(TERMS_DIALOG, useUnmergedTree = true).assertDoesNotExist()
     composeTestRule.onNodeWithTag(PROFILE_SETUP_DIALOG, useUnmergedTree = true).assertDoesNotExist()
   }
+
+  // -------------------------------------------------------------
+  // 9. Clicks on Terms link, opens new dialog, comes back
+  // -------------------------------------------------------------
+  @Test
+  fun clickingTermsLink_opensAndClosesTermsDialog() {
+    setContent("user1", FakeOnboardingHandler())
+
+    composeTestRule.onNodeWithTag(CONTINUE_BUTTON).performClick()
+
+    composeTestRule.onNodeWithTag(TERMS_DIALOG).assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag(OnboardingFlowTestTags.TERMS).performClick()
+
+    composeTestRule.onNodeWithTag(OnboardingFlowTestTags.TERMS_CONDITION_DIALOG).assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag(OnboardingFlowTestTags.I_DONT_AGREE_BUTTON).performClick()
+
+    composeTestRule.onNodeWithTag(TERMS_DIALOG).assertIsDisplayed()
+  }
 }
