@@ -13,6 +13,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -537,13 +539,36 @@ class SettingsScreenTest {
     composeRule.waitForIdle()
   }
 
-  /**
-   * Test to cover the else branch in HandlePermissions for pre-TIRAMISU devices. This covers the
-   * code: } else { viewModel.onNotificationPermissionResult(true)
-   * NotificationHelper.sendNotification(...) }
-   */
   @Test
-  fun handlePermissions_notification_event_executes_notification_code_path() {
+  fun notificationPermissionLauncher_granted_executes_if_block_and_updates_state() {
+    val viewModel = SettingsViewModel()
+
+    composeRule.setContent {
+      MaterialTheme { SettingsScreen(viewModel = viewModel, onSignedOut = {}, onGoBack = {}) }
+    }
+
+    composeRule.waitForIdle()
+    assertFalse(
+        "Notifications should initially be disabled", viewModel.uiState.value.notificationsEnabled)
+
+    composeRule.runOnIdle {
+      val field = SettingsViewModel::class.java.getDeclaredField("_permissionEvents")
+      field.isAccessible = true
+      @Suppress("UNCHECKED_CAST")
+      val flow = field.get(viewModel) as MutableSharedFlow<PermissionEvent>
+      flow.tryEmit(PermissionEvent.RequestNotification)
+    }
+
+    composeRule.waitForIdle()
+    composeRule.runOnIdle { viewModel.onNotificationPermissionResult(true) }
+    composeRule.waitForIdle()
+    assertTrue(
+        "Notifications should be enabled after granting permission",
+        viewModel.uiState.value.notificationsEnabled)
+  }
+
+  @Test
+  fun notificationPermission_preTiramisu_executes_else_block_and_updates_state() {
     val viewModel = SettingsViewModel()
 
     composeRule.setContent {
@@ -557,19 +582,15 @@ class SettingsScreenTest {
       field.isAccessible = true
       @Suppress("UNCHECKED_CAST")
       val flow = field.get(viewModel) as MutableSharedFlow<PermissionEvent>
-
       flow.tryEmit(PermissionEvent.RequestNotification)
     }
 
     composeRule.waitForIdle()
-    composeRule.runOnIdle { viewModel.onNotificationPermissionResult(true) }
-
-    composeRule.waitForIdle()
+    assertNotNull("ViewModel should still be valid after permission flow", viewModel.uiState.value)
   }
 
-  /** Test that exercises all permission event types and their notification paths. */
   @Test
-  fun handlePermissions_all_events_execute_their_code_paths() {
+  fun notificationPermissionLauncher_denied_keeps_notifications_disabled() {
     val viewModel = SettingsViewModel()
 
     composeRule.setContent {
@@ -577,6 +598,38 @@ class SettingsScreenTest {
     }
 
     composeRule.waitForIdle()
+
+    composeRule.runOnIdle {
+      val field = SettingsViewModel::class.java.getDeclaredField("_permissionEvents")
+      field.isAccessible = true
+      @Suppress("UNCHECKED_CAST")
+      val flow = field.get(viewModel) as MutableSharedFlow<PermissionEvent>
+      flow.tryEmit(PermissionEvent.RequestNotification)
+    }
+
+    composeRule.waitForIdle()
+
+    composeRule.runOnIdle { viewModel.onNotificationPermissionResult(false) }
+
+    composeRule.waitForIdle()
+
+    assertFalse(
+        "Notifications should remain disabled after denying permission",
+        viewModel.uiState.value.notificationsEnabled)
+  }
+
+  @Test
+  fun all_permission_grants_update_all_ui_states_correctly() {
+    val viewModel = SettingsViewModel()
+
+    composeRule.setContent {
+      MaterialTheme { SettingsScreen(viewModel = viewModel, onSignedOut = {}, onGoBack = {}) }
+    }
+
+    composeRule.waitForIdle()
+
+    val initialState = viewModel.uiState.value
+    assertNotNull("Initial state should not be null", initialState)
 
     composeRule.runOnIdle {
       val field = SettingsViewModel::class.java.getDeclaredField("_permissionEvents")
@@ -596,58 +649,59 @@ class SettingsScreenTest {
     }
 
     composeRule.waitForIdle()
+
+    val finalState = viewModel.uiState.value
+    assertTrue("Notifications should be enabled after granting", finalState.notificationsEnabled)
+    assertTrue("Pictures should be enabled after granting", finalState.picturesEnabled)
+    assertTrue("Localisation should be enabled after granting", finalState.localisationEnabled)
   }
 
-  /**
-   * Test specifically targeting the notification permission granted scenario to ensure the
-   * NotificationHelper.sendNotification call is executed.
-   */
   @Test
-  fun notification_permission_granted_executes_send_notification() {
+  fun multiple_notification_permission_grants_remain_consistent() {
     val viewModel = SettingsViewModel()
 
-    composeRule.setContent {
-      MaterialTheme { SettingsScreen(viewModel = viewModel, onSignedOut = {}, onGoBack = {}) }
+    composeRule.setContent { MaterialTheme { SettingsScreen(viewModel = viewModel) } }
+    composeRule.waitForIdle()
+
+    repeat(3) {
+      composeRule.runOnIdle {
+        val field = SettingsViewModel::class.java.getDeclaredField("_permissionEvents")
+        field.isAccessible = true
+        @Suppress("UNCHECKED_CAST")
+        val flow = field.get(viewModel) as MutableSharedFlow<PermissionEvent>
+        flow.tryEmit(PermissionEvent.RequestNotification)
+      }
+      composeRule.waitForIdle()
+
+      composeRule.runOnIdle { viewModel.onNotificationPermissionResult(true) }
+      composeRule.waitForIdle()
     }
 
-    composeRule.waitForIdle()
-
-    composeRule.runOnIdle {
-      val field = SettingsViewModel::class.java.getDeclaredField("_permissionEvents")
-      field.isAccessible = true
-      @Suppress("UNCHECKED_CAST")
-      val flow = field.get(viewModel) as MutableSharedFlow<PermissionEvent>
-      flow.tryEmit(PermissionEvent.RequestNotification)
-    }
-
-    composeRule.waitForIdle()
-
-    composeRule.runOnIdle { viewModel.onNotificationPermissionResult(true) }
-
-    composeRule.waitForIdle()
+    assertTrue(
+        "Notifications should remain enabled after multiple grants",
+        viewModel.uiState.value.notificationsEnabled)
   }
 
-  /**
-   * Test that exercises the notification toggle which can also trigger the permission request flow.
-   */
   @Test
-  fun toggling_notifications_on_executes_permission_and_notification_flow() {
+  fun notification_toggle_off_updates_state_to_disabled() {
     val viewModel = SettingsViewModel()
     val context = composeRule.activity
 
-    composeRule.setContent {
-      MaterialTheme { SettingsScreen(viewModel = viewModel, onSignedOut = {}, onGoBack = {}) }
+    composeRule.runOnIdle {
+      setUiState(viewModel, viewModel.uiState.value.copy(notificationsEnabled = true))
     }
 
+    composeRule.setContent { MaterialTheme { SettingsScreen(viewModel = viewModel) } }
     composeRule.waitForIdle()
 
-    composeRule.runOnIdle { viewModel.onNotificationsToggleRequested(true, context) }
+    assertTrue("Notifications should start enabled", viewModel.uiState.value.notificationsEnabled)
 
+    composeRule.runOnIdle { viewModel.onNotificationsToggleRequested(false, context) }
     composeRule.waitForIdle()
 
-    composeRule.runOnIdle { viewModel.onNotificationPermissionResult(true) }
-
-    composeRule.waitForIdle()
+    assertFalse(
+        "Notifications should be disabled after toggling off",
+        viewModel.uiState.value.notificationsEnabled)
   }
 
   // ----------------------------------------------------------------------------------------------

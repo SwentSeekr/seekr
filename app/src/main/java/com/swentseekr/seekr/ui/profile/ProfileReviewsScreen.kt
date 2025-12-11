@@ -168,7 +168,8 @@ fun ProfileReviewsScreen(
                                       reviewId,
                                       review.authorId,
                                       currentUserId = profileViewModel.currentUid)
-                                })
+                                },
+                                reviewHuntViewModel = reviewHuntViewModel)
                           }
                     }
                   }

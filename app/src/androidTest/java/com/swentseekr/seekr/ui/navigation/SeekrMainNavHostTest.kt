@@ -855,4 +855,27 @@ class SeekrNavigationTest {
     node(SettingsScreenTestTags.APP_CONDITION_BUTTON).performClick()
     node(NavigationTestTags.TERMS_CONDITIONS_SCREEN).assertIsDisplayed()
   }
+
+  @Test
+  fun deepLink_navigates_to_huntCard_and_removes_intent_extra() {
+    val deepLinkId = "deep-123"
+    compose.activityRule.scenario.onActivity { activity ->
+      activity.intent.putExtra(SeekrNavigationDefaults.HUNT_ID, deepLinkId)
+    }
+
+    compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
+
+    waitUntilTrue(MED) {
+      compose
+          .onNodeWithTag(NavigationTestTags.HUNTCARD_SCREEN, useUnmergedTree = true)
+          .assertIsDisplayed()
+      true
+    }
+
+    compose.activityRule.scenario.onActivity { activity ->
+      assert(activity.intent.getStringExtra(SeekrNavigationDefaults.HUNT_ID) == null) {
+        "HUNT_ID should be removed after navigation"
+      }
+    }
+  }
 }

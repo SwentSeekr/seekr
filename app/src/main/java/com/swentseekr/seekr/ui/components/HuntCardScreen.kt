@@ -230,6 +230,7 @@ fun HuntCardScreen(
                       authorProfile = reviewAuthorProfile,
                       currentUserId = currentUserId,
                       navController = navController,
+                      reviewHuntViewModel = reviewViewModel,
                       onDeleteReview = { reviewId ->
                         huntCardViewModel.deleteReview(
                             review.huntId, reviewId, review.authorId, currentUserId)
@@ -626,15 +627,11 @@ fun ModernReviewCard(
     authorProfile: Profile?,
     currentUserId: String?,
     navController: NavHostController,
+    reviewHuntViewModel: ReviewHuntViewModel,
     onDeleteReview: (String) -> Unit,
 ) {
 
   val authorId = review.authorId
-
-  val isCurrentId = currentUserId == authorId
-  LaunchedEffect(authorId) { reviewHuntViewModel.loadAuthorProfile(authorId) }
-  val authorProfile = uiState.authorProfiles[authorId]
-
   val isCurrentUser = currentUserId == authorId
 
   val profilePictureRes =
@@ -682,6 +679,7 @@ fun ModernReviewCard(
 
           ReviewCardPhotosSection(
               review = review,
+              navController = navController,
               onSeePhotosClick = {
                 reviewHuntViewModel.loadReviewImages(review.photos)
                 navController.navigate(
@@ -776,6 +774,7 @@ private fun ReviewCardComment(review: HuntReview) {
 @Composable
 private fun ReviewCardPhotosSection(
     review: HuntReview,
+    navController: NavHostController,
     onSeePhotosClick: () -> Unit,
 ) {
   if (review.photos.isNotEmpty()) {
@@ -811,8 +810,6 @@ private fun ReviewCardPhotosSection(
                       fontSize = HuntCardScreenDefaults.MinFontSize)
                 }
           }
-              "${HuntCardScreenStrings.SeePictures} (${review.photos.size})",
-              fontSize = HuntCardScreenDefaults.MinFontSize)
         }
   }
 }
