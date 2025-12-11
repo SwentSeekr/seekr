@@ -14,6 +14,7 @@ object TermsScreenConstants {
   val TEXT_SPACING = 12.dp
   val LINE_HEIGHT = 24.sp
   val TOP_SPACER = 8.dp
+
   val BOTTOM_SPACER = 24.dp
 }
 
