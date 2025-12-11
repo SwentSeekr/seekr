@@ -152,4 +152,134 @@ class ProfileReviewsScreenTest {
         .assertIsDisplayed()
         .assertTextContains("4.2/5.0 - 2 reviews")
   }
+  /*@Test
+  fun testHuntHeaderClickableNavigates() {
+      lateinit var navController: NavHostController
+
+      val fakeHuntsRepository = HuntsRepositoryLocal()
+      val fakeReviewRepository = HuntReviewRepositoryLocal()
+      val fakeProfileRepository = ProfileRepositoryLocal()
+      val fakeImageRepository = ReviewImageRepositoryLocal()
+
+      val hunt = sampleProfile.myHunts[0]
+      runBlocking {
+          fakeHuntsRepository.addHunt(hunt)
+          sampleReviews.forEach { review ->
+              fakeReviewRepository.addReviewHunt(review)
+          }
+      }
+
+      val reviewHuntViewModel = ReviewHuntViewModel(
+          fakeHuntsRepository,
+          fakeReviewRepository,
+          fakeProfileRepository,
+          fakeImageRepository,
+          dispatcher = Dispatchers.Main
+      )
+
+      composeTestRule.setContent {
+          navController = rememberNavController()
+          ProfileReviewsScreen(
+              userId = sampleProfile.uid,
+              profileViewModel = ProfileViewModel(),
+              onGoBack = {},
+              navController = navController,
+              testProfile = sampleProfile,
+              testReviews = sampleReviews,
+              reviewHuntViewModel = reviewHuntViewModel
+          )
+      }
+
+      val huntId = hunt.uid
+
+      composeTestRule.waitForIdle()
+
+      composeTestRule.mainClock.advanceTimeBy(1000)
+      composeTestRule.waitForIdle()
+
+      composeTestRule.onNodeWithTag(ProfileReviewsTestTags.REVIEWS_LIST)
+          .performScrollToNode(hasTestTag("hunt_header_$huntId"))
+
+      composeTestRule.onNodeWithTag("hunt_header_$huntId")
+          .assertIsDisplayed()
+          .performClick()
+
+      assertTrue(navController.currentBackStackEntry?.destination?.route?.contains(huntId) == true)
+  }*/
+
+  @Test
+  fun testDividerItemsAreDisplayed() {
+    composeTestRule.setContent {
+      val navController = rememberNavController()
+      ProfileReviewsScreen(
+          userId = sampleProfile.uid,
+          profileViewModel = ProfileViewModel(),
+          navController = navController,
+          testProfile = sampleProfile,
+          testReviews = sampleReviews)
+    }
+
+    sampleProfile.myHunts.forEach { hunt ->
+      composeTestRule.onNodeWithTag("divider_${hunt.uid}").assertIsDisplayed()
+    }
+  }
+
+  @Test
+  fun testDividerItemsRendered() {
+    composeTestRule.setContent {
+      ProfileReviewsScreen(
+          userId = sampleProfile.uid,
+          profileViewModel = ProfileViewModel(),
+          onGoBack = {},
+          navController = rememberNavController(),
+          testProfile = sampleProfile,
+          testReviews = sampleReviews)
+    }
+
+    val huntId = sampleProfile.myHunts[0].uid
+    composeTestRule.onNode(hasTestTag("divider_$huntId")).assertIsDisplayed()
+  }
+
+  /*@Test
+  fun testLoadHuntAndAuthorCalledForEachReview() {
+      val reviewHuntViewModel = object : ReviewHuntViewModel(
+          HuntsRepositoryLocal(),
+          HuntReviewRepositoryLocal(),
+          ProfileRepositoryLocal(),
+          ReviewImageRepositoryLocal()
+      ) {
+          val loadedHunts = mutableListOf<String>()
+          val loadedAuthors = mutableListOf<String>()
+
+          override fun loadHunt(huntId: String) {
+              loadedHunts.add(huntId)
+          }
+
+          override fun loadAuthorProfile(userId: String) {
+              loadedAuthors.add(userId)
+          }
+      }
+
+      composeTestRule.setContent {
+          ProfileReviewsScreen(
+              userId = sampleProfile.uid,
+              profileViewModel = ProfileViewModel(),
+              reviewHuntViewModel = reviewHuntViewModel,
+              onGoBack = {},
+              navController = rememberNavController(),
+              testProfile = sampleProfile,
+              testReviews = sampleReviews
+          )
+      }
+
+      composeTestRule.waitForIdle()
+
+      sampleReviews.map { it.huntId }.distinct().forEach { huntId ->
+          assertTrue(reviewHuntViewModel.loadedHunts.contains(huntId))
+      }
+      sampleReviews.forEach { review ->
+          assertTrue(reviewHuntViewModel.loadedAuthors.contains(review.authorId))
+      }
+
+  }*/
 }

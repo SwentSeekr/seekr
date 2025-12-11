@@ -90,6 +90,8 @@ open class ReviewHuntViewModel(
   /** Public immutable [StateFlow] exposing the current [ReviewHuntUIState]. */
   open val uiState: StateFlow<ReviewHuntUIState> = _uiState.asStateFlow()
 
+  private val _huntsById = MutableStateFlow<Map<String, Hunt>>(emptyMap())
+  val huntsById: StateFlow<Map<String, Hunt>> = _huntsById.asStateFlow()
   /**
    * Clears any existing error message in the UI state.
    *
@@ -129,8 +131,22 @@ open class ReviewHuntViewModel(
     viewModelScope.launch {
       try {
         val hunt = repositoryHunt.getHunt(huntId)
-        // _uiState.value = ReviewHuntUIState(hunt = hunt)
-        _uiState.update { it.copy(hunt = hunt) }
+
+        val reviews = repositoryReview.getHuntReviews(huntId)
+
+        val updatedReviewRate =
+            if (reviews.isNotEmpty()) {
+              reviews.map { it.rating }.average()
+            } else {
+              0.0
+            }
+
+        val updatedHunt = hunt.copy(reviewRate = updatedReviewRate)
+
+        if (_uiState.value.hunt == null || _uiState.value.huntId == huntId) {
+          _uiState.update { it.copy(hunt = hunt, huntId = huntId) }
+        }
+        _huntsById.update { current -> current + (huntId to updatedHunt) }
       } catch (e: Exception) {
         Log.e(
             AddReviewScreenStrings.ReviewViewModel,

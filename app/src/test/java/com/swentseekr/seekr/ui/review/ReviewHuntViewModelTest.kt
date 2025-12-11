@@ -715,4 +715,53 @@ class ReviewHuntViewModelTest {
     // loadAuthorProfile only logs, it doesn't touch errorMsg
     assertNull(state.errorMsg)
   }
+
+  @Test
+  fun loadHunt_calculatesUpdatedReviewRate() = runTest {
+    val review1 =
+        HuntReview(
+            reviewId = "r1",
+            authorId = "user1",
+            huntId = testHunt.uid,
+            rating = 3.0,
+            comment = "Good hunt",
+            photos = emptyList())
+    val review2 =
+        HuntReview(
+            reviewId = "r2",
+            authorId = "user2",
+            huntId = testHunt.uid,
+            rating = 5.0,
+            comment = "Excellent!",
+            photos = emptyList())
+    fakeReviewRepository.addReviewHunt(review1)
+    fakeReviewRepository.addReviewHunt(review2)
+
+    viewModel.loadHunt(testHunt.uid)
+    advanceUntilIdle()
+
+    val state = viewModel.uiState.value
+    val expectedAverage = (3.0 + 5.0) / 2
+    assertNotNull(state.hunt)
+    assertEquals(testHunt.uid, state.hunt?.uid)
+    assertEquals(expectedAverage, state.hunt?.reviewRate)
+
+    val huntsById = viewModel.huntsById.value
+    assertTrue(huntsById.containsKey(testHunt.uid))
+    assertEquals(expectedAverage, huntsById[testHunt.uid]?.reviewRate)
+  }
+
+  @Test
+  fun loadHunt_withNoReviews_setsReviewRateToZero() = runTest {
+    val huntId = testHunt.uid
+
+    fakeHuntsRepository.addHunt(testHunt)
+
+    viewModel.loadHunt(huntId)
+    advanceUntilIdle()
+
+    val updatedHunt = viewModel.huntsById.value[huntId]
+    assertNotNull(updatedHunt)
+    assertEquals(0.0, updatedHunt!!.reviewRate, 0.0)
+  }
 }

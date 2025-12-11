@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.profile
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -64,13 +66,15 @@ fun ProfileReviewsScreen(
     onGoBack: () -> Unit = {},
     navController: NavHostController,
     testProfile: Profile? = null,
-    testReviews: List<HuntReview>? = null
+    testReviews: List<HuntReview>? = null,
+    reviewHuntViewModel: ReviewHuntViewModel = viewModel(),
 ) {
   val uiState by profileViewModel.uiState.collectAsState()
   val profile = testProfile ?: uiState.profile
   val reviews = testReviews ?: profileViewModel.reviewsState.collectAsState().value
   val totalReviews = reviews.size
   val reviewHuntViewModel: ReviewHuntViewModel = viewModel()
+  val huntsById = reviewHuntViewModel.huntsById.collectAsState().value
 
   LaunchedEffect(userId) { if (testProfile == null) profileViewModel.loadProfile(userId) }
   LaunchedEffect(profile) {
@@ -114,9 +118,19 @@ fun ProfileReviewsScreen(
                   Text(
                       text =
                           if (totalReviews == 1)
-                              "${String.format("%.1f",profile.author.reviewRate)}/${MAX_RATING} - $totalReviews review"
+                              "${
+                                    String.format(
+                                        "%.1f",
+                                        profile.author.reviewRate
+                                    )
+                                }/${MAX_RATING} - $totalReviews review"
                           else
-                              "${String.format("%.1f", profile.author.reviewRate)}/${MAX_RATING} - $totalReviews reviews",
+                              "${
+                                    String.format(
+                                        "%.1f",
+                                        profile.author.reviewRate
+                                    )
+                                }/${MAX_RATING} - $totalReviews reviews",
                       style = MaterialTheme.typography.bodyMedium,
                       modifier = Modifier.testTag(ProfileReviewsTestTags.RATING_TEXT))
                 }
@@ -128,11 +142,14 @@ fun ProfileReviewsScreen(
 
             // ProfileReviewsScreen
             LaunchedEffect(reviews) {
-              reviews.forEach { review ->
-                reviewHuntViewModel.loadHunt(review.huntId)
-                reviewHuntViewModel.loadAuthorProfile(review.authorId)
-              }
+              reviews
+                  .map { it.huntId }
+                  .distinct()
+                  .forEach { huntId -> reviewHuntViewModel.loadHunt(huntId) }
+              reviews.forEach { review -> reviewHuntViewModel.loadAuthorProfile(review.authorId) }
             }
+
+            val groupedReviews = reviews.groupBy { it.huntId }
 
             // Scrollable list of reviews
             LazyColumn(
@@ -149,23 +166,55 @@ fun ProfileReviewsScreen(
                           textAlign = TextAlign.Center)
                     }
                   } else {
-                    items(reviews) { review ->
-                      Box(
-                          modifier =
-                              Modifier.testTag(
-                                  ProfileReviewsTestTags.reviewCardTag(review.reviewId))) {
-                            ModernReviewCard(
-                                review = review,
-                                reviewHuntViewModel = reviewHuntViewModel,
-                                currentUserId = profileViewModel.currentUid,
-                                navController = navController,
-                                onDeleteReview = { reviewId ->
-                                  reviewHuntViewModel.deleteReview(
-                                      reviewId,
-                                      review.authorId,
-                                      currentUserId = profileViewModel.currentUid)
-                                })
-                          }
+                    groupedReviews.forEach { (huntId, huntReviews) ->
+                      val hunt = huntsById[huntId]
+
+                      // --- SECTION HEADER ---
+                      if (hunt != null) {
+                        item(key = "hunt_header_$huntId") {
+                          Column(
+                              Modifier.fillMaxWidth()
+                                  .clickable { navController.navigate("hunt/${hunt.uid}") }
+                                  .padding(16.dp)
+                                  .testTag("hunt_header_$huntId")) {
+                                Text(
+                                    text = hunt.title, style = MaterialTheme.typography.titleMedium)
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    text =
+                                        "${
+                                                String.format(
+                                                    "%.1f",
+                                                    hunt.reviewRate
+                                                )
+                                            }/$MAX_RATING",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.primary)
+                              }
+                        }
+                      }
+                      items(huntReviews, key = { it.reviewId }) { review ->
+                        Box(
+                            modifier =
+                                Modifier.testTag(
+                                    ProfileReviewsTestTags.reviewCardTag(review.reviewId))) {
+                              ModernReviewCard(
+                                  review = review,
+                                  reviewHuntViewModel = reviewHuntViewModel,
+                                  currentUserId = profileViewModel.currentUid,
+                                  navController = navController,
+                                  onDeleteReview = { reviewId ->
+                                    reviewHuntViewModel.deleteReview(
+                                        reviewId,
+                                        review.authorId,
+                                        currentUserId = profileViewModel.currentUid)
+                                  })
+                            }
+                      }
+                      item(key = "divider_$huntId") {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 8.dp).testTag("divider_$huntId"))
+                      }
                     }
                   }
                 }
