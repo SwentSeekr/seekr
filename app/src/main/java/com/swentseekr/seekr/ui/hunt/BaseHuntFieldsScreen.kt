@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.hunt
 
+import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -49,6 +50,8 @@ import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.BUTTON_REMOVE_IMAGE
 import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.CONTENT_DESC_ADDITIONAL_IMAGE
 import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.CONTENT_DESC_MAIN_IMAGE
 import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.DELETE_ICON_DESC
+import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.DELETE_MAIN_IMAGE
+import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.IMAGE_LAUNCH
 import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.LABEL_ADDITIONAL_IMAGES
 import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.LABEL_IMAGES
 import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsStrings.LABEL_MAIN_IMAGE
@@ -598,17 +601,9 @@ private fun SelectLocationsButton(
 /**
  * Renders the complete image management section of the hunt form.
  *
- * This includes:
- * - Selecting a main image via gallery or camera.
- * - Selecting additional images (multiple) via gallery or camera.
- * - Displaying previews of existing or newly added images.
- * - Removing main or additional images.
- *
- * This composable manages internal activity launchers for the camera and gallery, while delegating
- * data updates to [imageCallbacks].
- *
- * @param uiState Current UI state containing all image-related information.
- * @param imageCallbacks Callbacks triggered when adding or removing images.
+ * Shows:
+ * - Main image picker or preview
+ * - Additional images picker + list
  */
 @Composable
 private fun ImagesSection(
@@ -616,34 +611,7 @@ private fun ImagesSection(
     imageCallbacks: ImageCallbacks,
 ) {
   val context = LocalContext.current
-
-  // GALLERY
-  val imagePickerLauncher =
-      rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        imageCallbacks.onSelectImage(uri)
-      }
-
-  val multipleImagesLauncher =
-      rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
-        imageCallbacks.onSelectOtherImages(uris)
-      }
-
-  // CAMERA
-  var mainCameraUri by remember { mutableStateOf<Uri?>(null) }
-  val mainCameraLauncher =
-      rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-        if (success && mainCameraUri != null) {
-          imageCallbacks.onSelectImage(mainCameraUri!!)
-        }
-      }
-
-  var otherCameraUri by remember { mutableStateOf<Uri?>(null) }
-  val otherCameraLauncher =
-      rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-        if (success && otherCameraUri != null) {
-          imageCallbacks.onSelectOtherImages(listOf(otherCameraUri!!))
-        }
-      }
+  val launchers = rememberImageLaunchers(context, imageCallbacks)
 
   val combinedImages =
       uiState.otherImagesUrls.map { OtherImage.Remote(it) } +
@@ -658,111 +626,213 @@ private fun ImagesSection(
         Column(
             modifier = Modifier.padding(UICons.CardPadding),
             verticalArrangement = Arrangement.spacedBy(UICons.CardVArrangement)) {
-
-              // HEADER
               Text(
                   LABEL_IMAGES,
                   style = MaterialTheme.typography.titleMedium,
                   color = MaterialTheme.colorScheme.onSurface)
 
-              // MAIN IMAGE
-              Column(verticalArrangement = Arrangement.spacedBy(UICons.SpacerHeightSmall)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween) {
-                      Text(
-                          LABEL_MAIN_IMAGE,
-                          style = MaterialTheme.typography.labelLarge,
-                          color = MaterialTheme.colorScheme.onSurfaceVariant)
+              MainImageSection(
+                  mainImageUrl = uiState.mainImageUrl,
+                  launchers = launchers,
+                  imageCallbacks = imageCallbacks)
 
-                      if (!uiState.mainImageUrl.isNullOrBlank()) {
-                        Text(
-                            "1 $UNIT_IMAGE",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary)
-                      }
-                    }
-
-                if (uiState.mainImageUrl.isNullOrBlank()) {
-                  Row(
-                      modifier = Modifier.fillMaxWidth(),
-                      horizontalArrangement = Arrangement.spacedBy(UICons.RowHArrangement)) {
-                        ImageActionButton(
-                            label = BUTTON_GALLERY,
-                            icon = R.drawable.gallerie_image,
-                            onClick = { imagePickerLauncher.launch("image/*") },
-                            modifier = Modifier.weight(UICons.WeightTextField))
-
-                        ImageActionButton(
-                            label = BUTTON_CAMERA,
-                            icon = R.drawable.camera_icon,
-                            onClick = {
-                              val uri = createImageUri(context)
-                              if (uri != null) {
-                                mainCameraUri = uri
-                                mainCameraLauncher.launch(uri)
-                              }
-                            },
-                            modifier = Modifier.weight(UICons.WeightTextField))
-                      }
-                } else {
-                  MainImagePreview(
-                      imageUrl = uiState.mainImageUrl,
-                      onDelete = { imageCallbacks.onRemoveMainImage() })
-                }
-              }
-
-              // DIVIDER
               HorizontalDivider(
                   thickness = UICons.DividerThickness,
                   color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = UICons.ChangeAlpha))
 
-              // ADDITIONAL IMAGES
-              Column(verticalArrangement = Arrangement.spacedBy(UICons.SpacerHeightSmall)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween) {
-                      Text(
-                          LABEL_ADDITIONAL_IMAGES,
-                          style = MaterialTheme.typography.labelLarge,
-                          color = MaterialTheme.colorScheme.onSurfaceVariant)
-
-                      if (combinedImages.isNotEmpty()) {
-                        Text(
-                            "${combinedImages.size} ${
-                                if (combinedImages.size == 1) UNIT_IMAGE else UNIT_IMAGES
-                            }",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary)
-                      }
-                    }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(UICons.RowHArrangement)) {
-                      ImageActionButton(
-                          label = BUTTON_GALLERY,
-                          icon = R.drawable.gallerie_image,
-                          onClick = { multipleImagesLauncher.launch("image/*") },
-                          modifier = Modifier.weight(UICons.WeightTextField))
-
-                      ImageActionButton(
-                          label = BUTTON_CAMERA,
-                          icon = R.drawable.camera_icon,
-                          onClick = {
-                            val uri = createImageUri(context)
-                            if (uri != null) {
-                              otherCameraUri = uri
-                              otherCameraLauncher.launch(uri)
-                            }
-                          },
-                          modifier = Modifier.weight(UICons.WeightTextField))
-                    }
-
-                AdditionalImagesList(images = combinedImages, imageCallbacks = imageCallbacks)
-              }
+              OtherImagesSection(
+                  combinedImages = combinedImages,
+                  launchers = launchers,
+                  imageCallbacks = imageCallbacks)
             }
       }
+}
+
+/**
+ * Creates and remembers all Activity Result launchers used for image selection.
+ *
+ * This encapsulates:
+ * - Picking a main image from the gallery.
+ * - Picking additional images from the gallery.
+ * - Capturing a main image with the camera.
+ * - Capturing additional images with the camera.
+ *
+ * Each launcher delegates its result to the appropriate callback in [imageCallbacks], while URIs
+ * for camera captures are managed via internal remembered state.
+ *
+ * Extracting this into a helper reduces the cognitive complexity of [ImagesSection] and cleanly
+ * groups all launcher-related logic.
+ *
+ * @param context Android context used for creating temporary image URIs.
+ * @param imageCallbacks Callbacks to propagate selected images to the ViewModel layer.
+ * @return An [ImageLaunchers] container grouping all launcher actions.
+ */
+@Composable
+private fun rememberImageLaunchers(
+    context: Context,
+    imageCallbacks: ImageCallbacks
+): ImageLaunchers {
+
+  var mainCameraUri by remember { mutableStateOf<Uri?>(null) }
+  var otherCameraUri by remember { mutableStateOf<Uri?>(null) }
+
+  val pickMain =
+      rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        imageCallbacks.onSelectImage(uri)
+      }
+
+  val pickOthers =
+      rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
+        imageCallbacks.onSelectOtherImages(uris)
+      }
+
+  val captureMain =
+      rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success && mainCameraUri != null) imageCallbacks.onSelectImage(mainCameraUri!!)
+      }
+
+  val captureOther =
+      rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success && otherCameraUri != null)
+            imageCallbacks.onSelectOtherImages(listOf(otherCameraUri!!))
+      }
+
+  return ImageLaunchers(
+      pickMain = { pickMain.launch(IMAGE_LAUNCH) },
+      pickOthers = { pickOthers.launch(IMAGE_LAUNCH) },
+      captureMain = {
+        createImageUri(context)?.let { uri ->
+          mainCameraUri = uri
+          captureMain.launch(uri)
+        }
+      },
+      captureOthers = {
+        createImageUri(context)?.let { uri ->
+          otherCameraUri = uri
+          captureOther.launch(uri)
+        }
+      })
+}
+
+/**
+ * Holds all launcher actions required for image selection and capture.
+ *
+ * This abstraction allows UI composables to initiate image-related actions without managing
+ * Activity Result launchers directly.
+ *
+ * @property pickMain Launches gallery picker for selecting the main image.
+ * @property pickOthers Launches gallery picker for selecting multiple additional images.
+ * @property captureMain Launches camera to take a new main image.
+ * @property captureOthers Launches camera to take new additional images.
+ */
+private data class ImageLaunchers(
+    val pickMain: () -> Unit,
+    val pickOthers: () -> Unit,
+    val captureMain: () -> Unit,
+    val captureOthers: () -> Unit,
+)
+
+/**
+ * Displays and manages the UI for selecting or previewing the main hunt image.
+ *
+ * Behavior:
+ * - If no image is set: shows two buttons (Gallery / Camera).
+ * - If an image exists: shows a preview card with a delete button.
+ *
+ * Extracted from [ImagesSection] to reduce composable size and complexity.
+ *
+ * @param mainImageUrl Current main image URL (local or remote). A blank string means none is set.
+ * @param launchers Actions for picking or capturing images.
+ * @param imageCallbacks Callbacks used to remove or update the main image.
+ */
+@Composable
+private fun MainImageSection(
+    mainImageUrl: String?,
+    launchers: ImageLaunchers,
+    imageCallbacks: ImageCallbacks
+) {
+  Column(verticalArrangement = Arrangement.spacedBy(UICons.SpacerHeightSmall)) {
+    SectionHeader(title = LABEL_MAIN_IMAGE, count = if (mainImageUrl.isNullOrBlank()) 0 else 1)
+
+    if (mainImageUrl.isNullOrBlank()) {
+      Row(horizontalArrangement = Arrangement.spacedBy(UICons.RowHArrangement)) {
+        ImageActionButton(
+            label = BUTTON_GALLERY,
+            icon = R.drawable.gallerie_image,
+            onClick = launchers.pickMain,
+            modifier = Modifier.weight(UICons.WeightTextField))
+        ImageActionButton(
+            label = BUTTON_CAMERA,
+            icon = R.drawable.camera_icon,
+            onClick = launchers.captureMain,
+            modifier = Modifier.weight(UICons.WeightTextField))
+      }
+    } else {
+      MainImagePreview(imageUrl = mainImageUrl, onDelete = imageCallbacks.onRemoveMainImage)
+    }
+  }
+}
+
+/**
+ * Displays and manages the UI for selecting and previewing additional hunt images.
+ *
+ * Includes:
+ * - Buttons for selecting images from the gallery or camera.
+ * - A list of previews for both remote and local images.
+ *
+ * Extracted from [ImagesSection] to isolate the additional-images logic.
+ *
+ * @param combinedImages Flattened list of remote and local additional images.
+ * @param launchers Actions for picking or capturing additional images.
+ * @param imageCallbacks Callbacks invoked when removing or adding images.
+ */
+@Composable
+private fun OtherImagesSection(
+    combinedImages: List<OtherImage>,
+    launchers: ImageLaunchers,
+    imageCallbacks: ImageCallbacks
+) {
+  Column(verticalArrangement = Arrangement.spacedBy(UICons.SpacerHeightSmall)) {
+    SectionHeader(title = LABEL_ADDITIONAL_IMAGES, count = combinedImages.size)
+
+    Row(horizontalArrangement = Arrangement.spacedBy(UICons.RowHArrangement)) {
+      ImageActionButton(
+          label = BUTTON_GALLERY,
+          icon = R.drawable.gallerie_image,
+          onClick = launchers.pickOthers,
+          modifier = Modifier.weight(UICons.WeightTextField))
+      ImageActionButton(
+          label = BUTTON_CAMERA,
+          icon = R.drawable.camera_icon,
+          onClick = launchers.captureOthers,
+          modifier = Modifier.weight(UICons.WeightTextField))
+    }
+
+    AdditionalImagesList(images = combinedImages, imageCallbacks = imageCallbacks)
+  }
+}
+
+/**
+ * Displays a small header row for an image subsection, including:
+ * - The section title (e.g., "Main image", "Additional images")
+ * - An optional count of images currently attached
+ *
+ * This improves readability and avoids repeating layout code.
+ *
+ * @param title The label displayed on the left.
+ * @param count Number of images in the section; no count is shown when zero.
+ */
+@Composable
+private fun SectionHeader(title: String, count: Int) {
+  Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+    Text(title, style = MaterialTheme.typography.labelLarge)
+    if (count > 0) {
+      Text(
+          "$count ${if (count == 1) UNIT_IMAGE else UNIT_IMAGES}",
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.primary)
+    }
+  }
 }
 
 /**
@@ -842,7 +912,7 @@ private fun MainImagePreview(
 
           TextButton(
               onClick = onDelete,
-              modifier = Modifier.fillMaxWidth().testTag("delete_main_image"),
+              modifier = Modifier.fillMaxWidth().testTag(DELETE_MAIN_IMAGE),
               colors =
                   ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)) {
                 Icon(

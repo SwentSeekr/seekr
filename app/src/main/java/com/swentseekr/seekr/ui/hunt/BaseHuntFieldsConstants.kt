@@ -83,6 +83,9 @@ object BaseHuntFieldsStrings {
 
   // Tags
   const val REMOVE_BUTTON_TAG_PREFIX = "removeButton_"
+
+  const val IMAGE_LAUNCH = "image/*"
+  const val DELETE_MAIN_IMAGE = "delete_main_image"
 }
 
 object BaseHuntFieldsUi {
