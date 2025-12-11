@@ -5,8 +5,8 @@ object ReviewImagesScreenConstantStings {
   const val Photo1 = "photo1"
   const val Photo2 = "photo2"
   const val Photo3 = "photo3"
-  const val TestTagImage = "REVIEW_IMAGES_SCREEN"
-  const val BackButtonTag = "back_button"
+
+  // Messages
   const val TexteButton = "Back button should have triggered onGoBack"
   const val TestNumber = "2"
   const val Expected = "Expected"
