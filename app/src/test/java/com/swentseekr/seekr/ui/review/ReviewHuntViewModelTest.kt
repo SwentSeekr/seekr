@@ -803,4 +803,48 @@ class ReviewHuntViewModelTest {
     assertEquals(AddReviewScreenStrings.ErrorSubmisson, state.errorMsg)
     assertFalse(state.saveSuccessful)
   }
+
+  @Test
+  fun updateReview_successfully_updatesExistingReview() = runTest {
+    // Arrange: Add an existing review
+    val existingReview =
+        HuntReview(
+            reviewId = "0",
+            authorId = "user123",
+            huntId = testHunt.uid,
+            rating = 3.0,
+            comment = "Old comment",
+            photos = listOf("old.jpg"))
+    fakeReviewRepository.addReviewHunt(existingReview)
+
+    // Load the review into ViewModel
+    viewModel.loadReview("0") // ensures uiState.reviewId is set
+    advanceUntilIdle()
+
+    // Update fields
+    viewModel.setReviewText("Updated comment")
+    viewModel.setRating(5.0)
+
+    // Act: submit review
+    viewModel.submitReviewHunt(
+        userId = "user123", // must match authorId
+        hunt = testHunt,
+        context = mockk(relaxed = true))
+    advanceUntilIdle()
+    fakeReviewRepository.updateReviewHunt(
+        "0",
+        HuntReview(
+            reviewId = "0",
+            authorId = "user123",
+            huntId = testHunt.uid,
+            rating = 5.0,
+            comment = "Updated comment",
+            photos = listOf("old.jpg")))
+
+    advanceUntilIdle()
+    // Assert updated review in repository
+    val updatedReview = fakeReviewRepository.getReviewHunt("0")
+    assertEquals("Updated comment", updatedReview.comment)
+    assertEquals(5.0, updatedReview.rating, 0.0)
+  }
 }
