@@ -84,7 +84,8 @@ class DotMenuTest {
           currentUserId = review.authorId,
           navController = rememberNavController(),
           onDeleteReview = { deleteClicked = true },
-          onEdit = { editClicked = true })
+          onEdit = { editClicked = true },
+          authorProfile = null)
     }
 
     // Open menu
