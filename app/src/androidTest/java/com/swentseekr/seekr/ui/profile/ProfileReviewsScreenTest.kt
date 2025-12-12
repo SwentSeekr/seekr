@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.navigation.compose.rememberNavController
+import com.swentseekr.seekr.FakeReviewHuntViewModel
 import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryLocal
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryLocal
@@ -17,13 +18,9 @@ import com.swentseekr.seekr.model.profile.createHunt
 import com.swentseekr.seekr.model.profile.createReview
 import com.swentseekr.seekr.model.profile.mockProfileData
 import com.swentseekr.seekr.model.profile.sampleProfile
-import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
-import com.swentseekr.seekr.FakeReviewHuntViewModel
-import com.swentseekr.seekr.model.hunt.HuntReview
-import com.swentseekr.seekr.model.profile.createReview
-import com.swentseekr.seekr.model.profile.mockProfileData
 import com.swentseekr.seekr.ui.components.HuntCardScreenTestTags
 import com.swentseekr.seekr.ui.components.ModernReviewCard
+import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
 import junit.framework.TestCase.assertTrue
 import org.junit.Rule
 import org.junit.Test

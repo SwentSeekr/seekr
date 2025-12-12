@@ -212,7 +212,7 @@ fun ProfileReviewsScreen(
                                         review.authorId,
                                         currentUserId = profileViewModel.currentUid)
                                   },
-                              onEdit = { editReview })
+                                  onEdit = { editReview })
                             }
                       }
                       val huntDivider = String.format(DIVIDER, huntId)
