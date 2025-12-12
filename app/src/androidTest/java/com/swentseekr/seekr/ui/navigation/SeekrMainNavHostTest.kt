@@ -883,198 +883,202 @@ class SeekrNavigationTest {
       assert(activity.intent.getStringExtra(SeekrNavigationDefaults.HUNT_ID) == null) {
         NAVIGATION_MESSAGE
       }
-  fun editReview_route_parameters_passed_correctly() {
-    val testHuntId = "param-hunt-999"
-    val testReviewId = "param-review-999"
+      fun editReview_route_parameters_passed_correctly() {
+        val testHuntId = "param-hunt-999"
+        val testReviewId = "param-review-999"
 
-    compose.runOnUiThread {
-      compose.activity.setContent {
-        val navController = rememberNavController()
-        SeekrMainNavHost(navController = navController, testMode = true)
+        compose.runOnUiThread {
+          compose.activity.setContent {
+            val navController = rememberNavController()
+            SeekrMainNavHost(navController = navController, testMode = true)
 
-        LaunchedEffect(Unit) {
-          val route = SeekrDestination.EditReview.createRoute(testHuntId, testReviewId)
-          assert(route == "edit_review/$testHuntId/$testReviewId")
-          navController.navigate(route)
-        }
-      }
-    }
-
-    // Wait for screen to appear
-    waitUntilTrue(MED) {
-      compose
-          .onAllNodesWithTag(NavigationTestTags.EDIT_REVIEW_HUNT_SCREEN, useUnmergedTree = true)
-          .fetchSemanticsNodes()
-          .isNotEmpty()
-    }
-
-    node(NavigationTestTags.EDIT_REVIEW_HUNT_SCREEN).assertIsDisplayed()
-  }
-
-  @Test
-  fun editReview_onCancel_pops_back_stack() {
-    val huntId = "cancel-hunt-789"
-    val reviewId = "cancel-review-789"
-
-    compose.runOnUiThread {
-      compose.activity.setContent {
-        val navController = rememberNavController()
-        SeekrMainNavHost(navController = navController, testMode = true)
-
-        LaunchedEffect(Unit) {
-          navController.navigate(SeekrDestination.EditReview.createRoute(huntId, reviewId))
-        }
-      }
-    }
-
-    // Wait for EditReview screen
-    waitUntilTrue(MED) {
-      compose
-          .onAllNodesWithTag(NavigationTestTags.EDIT_REVIEW_HUNT_SCREEN, useUnmergedTree = true)
-          .fetchSemanticsNodes()
-          .isNotEmpty()
-    }
-
-    // click Cancel button
-    val cancelClicked =
-        runCatching {
-              compose
-                  .onNodeWithTag("CANCEL_BUTTON", useUnmergedTree = true)
-                  .assertExists()
-                  .performClick()
-              true
+            LaunchedEffect(Unit) {
+              val route = SeekrDestination.EditReview.createRoute(testHuntId, testReviewId)
+              assert(route == "edit_review/$testHuntId/$testReviewId")
+              navController.navigate(route)
             }
-            .getOrDefault(false)
-
-    if (!cancelClicked) {
-      compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
-    }
-
-    // No more in edit
-    waitUntilTrue(MED) {
-      compose
-          .onAllNodesWithTag(NavigationTestTags.EDIT_REVIEW_HUNT_SCREEN, useUnmergedTree = true)
-          .fetchSemanticsNodes()
-          .isEmpty()
-    }
-  }
-
-  @Test
-  fun editReview_onGoBack_pops_back_stack() {
-    val huntId = "goback-hunt-456"
-    val reviewId = "goback-review-456"
-
-    compose.runOnUiThread {
-      compose.activity.setContent {
-        val navController = rememberNavController()
-        SeekrMainNavHost(navController = navController, testMode = true)
-
-        LaunchedEffect(Unit) {
-          navController.navigate(SeekrDestination.EditReview.createRoute(huntId, reviewId))
-        }
-      }
-    }
-
-    // Wait for EditReview screen
-    waitUntilTrue(MED) {
-      compose
-          .onAllNodesWithTag(NavigationTestTags.EDIT_REVIEW_HUNT_SCREEN, useUnmergedTree = true)
-          .fetchSemanticsNodes()
-          .isNotEmpty()
-    }
-
-    node(NavigationTestTags.EDIT_REVIEW_HUNT_SCREEN).assertIsDisplayed()
-
-    // click the back button in the edit review screen if found
-    val backButtonClicked =
-        runCatching {
-              compose
-                  .onNodeWithTag("GO_BACK_BUTTON", useUnmergedTree = true)
-                  .assertExists()
-                  .performClick()
-              true
-            }
-            .getOrDefault(false)
-
-    if (!backButtonClicked) {
-      compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
-    }
-
-    //  No more in edit
-    waitUntilTrue(MED) {
-      compose
-          .onAllNodesWithTag(NavigationTestTags.EDIT_REVIEW_HUNT_SCREEN, useUnmergedTree = true)
-          .fetchSemanticsNodes()
-          .isEmpty()
-    }
-  }
-
-  @Test
-  fun editReview_onDone_pops_back_stack() = runTest {
-    val huntId = "done-hunt-123"
-    val reviewId = "done-review-123"
-    val authorId = "done-author-123"
-
-    val hunt = createHunt(uid = huntId, title = "Done Hunt").copy(authorId = authorId)
-    val review =
-        HuntReview(
-            reviewId = reviewId,
-            authorId = authorId,
-            huntId = huntId,
-            rating = 5.0,
-            comment = "Updated review",
-            photos = emptyList())
-
-    val fakeReviewRepo = HuntReviewRepositoryLocal()
-    runBlocking { fakeReviewRepo.addReviewHunt(review) }
-
-    val prevReview = HuntReviewRepositoryProvider.repository
-
-    try {
-      HuntReviewRepositoryProvider.repository = fakeReviewRepo
-
-      compose.runOnUiThread {
-        compose.activity.setContent {
-          val navController = rememberNavController()
-          SeekrMainNavHost(navController = navController, testMode = true)
-
-          LaunchedEffect(Unit) {
-            navController.navigate(SeekrDestination.EditReview.createRoute(huntId, reviewId))
           }
         }
+
+        // Wait for screen to appear
+        waitUntilTrue(MED) {
+          compose
+              .onAllNodesWithTag(NavigationTestTags.EDIT_REVIEW_HUNT_SCREEN, useUnmergedTree = true)
+              .fetchSemanticsNodes()
+              .isNotEmpty()
+        }
+
+        node(NavigationTestTags.EDIT_REVIEW_HUNT_SCREEN).assertIsDisplayed()
       }
 
-      // Wait for EditReview screen
-      waitUntilTrue(MED) {
-        compose
-            .onAllNodesWithTag(NavigationTestTags.EDIT_REVIEW_HUNT_SCREEN, useUnmergedTree = true)
-            .fetchSemanticsNodes()
-            .isNotEmpty()
+      @Test
+      fun editReview_onCancel_pops_back_stack() {
+        val huntId = "cancel-hunt-789"
+        val reviewId = "cancel-review-789"
+
+        compose.runOnUiThread {
+          compose.activity.setContent {
+            val navController = rememberNavController()
+            SeekrMainNavHost(navController = navController, testMode = true)
+
+            LaunchedEffect(Unit) {
+              navController.navigate(SeekrDestination.EditReview.createRoute(huntId, reviewId))
+            }
+          }
+        }
+
+        // Wait for EditReview screen
+        waitUntilTrue(MED) {
+          compose
+              .onAllNodesWithTag(NavigationTestTags.EDIT_REVIEW_HUNT_SCREEN, useUnmergedTree = true)
+              .fetchSemanticsNodes()
+              .isNotEmpty()
+        }
+
+        // click Cancel button
+        val cancelClicked =
+            runCatching {
+                  compose
+                      .onNodeWithTag("CANCEL_BUTTON", useUnmergedTree = true)
+                      .assertExists()
+                      .performClick()
+                  true
+                }
+                .getOrDefault(false)
+
+        if (!cancelClicked) {
+          compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
+        }
+
+        // No more in edit
+        waitUntilTrue(MED) {
+          compose
+              .onAllNodesWithTag(NavigationTestTags.EDIT_REVIEW_HUNT_SCREEN, useUnmergedTree = true)
+              .fetchSemanticsNodes()
+              .isEmpty()
+        }
       }
 
-      node(NavigationTestTags.EDIT_REVIEW_HUNT_SCREEN).assertIsDisplayed()
+      @Test
+      fun editReview_onGoBack_pops_back_stack() {
+        val huntId = "goback-hunt-456"
+        val reviewId = "goback-review-456"
 
-      // click Done button
-      val doneClicked =
-          runCatching {
-                compose.onNodeWithTag("DONE_BUTTON", useUnmergedTree = true).performClick()
-                true
+        compose.runOnUiThread {
+          compose.activity.setContent {
+            val navController = rememberNavController()
+            SeekrMainNavHost(navController = navController, testMode = true)
+
+            LaunchedEffect(Unit) {
+              navController.navigate(SeekrDestination.EditReview.createRoute(huntId, reviewId))
+            }
+          }
+        }
+
+        // Wait for EditReview screen
+        waitUntilTrue(MED) {
+          compose
+              .onAllNodesWithTag(NavigationTestTags.EDIT_REVIEW_HUNT_SCREEN, useUnmergedTree = true)
+              .fetchSemanticsNodes()
+              .isNotEmpty()
+        }
+
+        node(NavigationTestTags.EDIT_REVIEW_HUNT_SCREEN).assertIsDisplayed()
+
+        // click the back button in the edit review screen if found
+        val backButtonClicked =
+            runCatching {
+                  compose
+                      .onNodeWithTag("GO_BACK_BUTTON", useUnmergedTree = true)
+                      .assertExists()
+                      .performClick()
+                  true
+                }
+                .getOrDefault(false)
+
+        if (!backButtonClicked) {
+          compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
+        }
+
+        //  No more in edit
+        waitUntilTrue(MED) {
+          compose
+              .onAllNodesWithTag(NavigationTestTags.EDIT_REVIEW_HUNT_SCREEN, useUnmergedTree = true)
+              .fetchSemanticsNodes()
+              .isEmpty()
+        }
+      }
+
+      @Test
+      fun editReview_onDone_pops_back_stack() = runTest {
+        val huntId = "done-hunt-123"
+        val reviewId = "done-review-123"
+        val authorId = "done-author-123"
+
+        val hunt = createHunt(uid = huntId, title = "Done Hunt").copy(authorId = authorId)
+        val review =
+            HuntReview(
+                reviewId = reviewId,
+                authorId = authorId,
+                huntId = huntId,
+                rating = 5.0,
+                comment = "Updated review",
+                photos = emptyList())
+
+        val fakeReviewRepo = HuntReviewRepositoryLocal()
+        runBlocking { fakeReviewRepo.addReviewHunt(review) }
+
+        val prevReview = HuntReviewRepositoryProvider.repository
+
+        try {
+          HuntReviewRepositoryProvider.repository = fakeReviewRepo
+
+          compose.runOnUiThread {
+            compose.activity.setContent {
+              val navController = rememberNavController()
+              SeekrMainNavHost(navController = navController, testMode = true)
+
+              LaunchedEffect(Unit) {
+                navController.navigate(SeekrDestination.EditReview.createRoute(huntId, reviewId))
               }
-              .getOrDefault(false)
+            }
+          }
 
-      if (!doneClicked) {
-        compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
-      }
+          // Wait for EditReview screen
+          waitUntilTrue(MED) {
+            compose
+                .onAllNodesWithTag(
+                    NavigationTestTags.EDIT_REVIEW_HUNT_SCREEN, useUnmergedTree = true)
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+          }
 
-      // No more in edit
-      waitUntilTrue(MED) {
-        compose
-            .onAllNodesWithTag(NavigationTestTags.EDIT_REVIEW_HUNT_SCREEN, useUnmergedTree = true)
-            .fetchSemanticsNodes()
-            .isEmpty()
+          node(NavigationTestTags.EDIT_REVIEW_HUNT_SCREEN).assertIsDisplayed()
+
+          // click Done button
+          val doneClicked =
+              runCatching {
+                    compose.onNodeWithTag("DONE_BUTTON", useUnmergedTree = true).performClick()
+                    true
+                  }
+                  .getOrDefault(false)
+
+          if (!doneClicked) {
+            compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
+          }
+
+          // No more in edit
+          waitUntilTrue(MED) {
+            compose
+                .onAllNodesWithTag(
+                    NavigationTestTags.EDIT_REVIEW_HUNT_SCREEN, useUnmergedTree = true)
+                .fetchSemanticsNodes()
+                .isEmpty()
+          }
+        } finally {
+          HuntReviewRepositoryProvider.repository = prevReview
+        }
       }
-    } finally {
-      HuntReviewRepositoryProvider.repository = prevReview
     }
   }
 }
