@@ -207,3 +207,16 @@ object ProfileUIConstantsDefaults {
   // ---- WEIGHTS ----
   const val Weight = 1f
 }
+
+object ProfileReviewsScreenConstant {
+  const val SPACER_HEIGHT = 4
+  const val HORIZONTAL_DIVIDER_PADDING = 8
+  const val COLUMN_PADDING = 16
+  const val SINGLE_REVIEW = "%s/%s - %d review"
+  const val MULTIPLE_REVIEWS = "%s/%s - %d reviews"
+  const val STRING_FORMAT = "%.1f"
+  const val HEADER_KEY = "hunt_header_%s"
+  const val DETAIL_ROUTE = "hunt/%s"
+  const val RATING_FORMAT = "%s/%s"
+  const val DIVIDER = "divider_%s"
+}

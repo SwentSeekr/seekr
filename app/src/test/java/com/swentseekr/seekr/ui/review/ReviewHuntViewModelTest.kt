@@ -720,133 +720,180 @@ class ReviewHuntViewModelTest {
   }
 
   @Test
-  fun submitReviewHunt_withoutExistingReviewId_createsNewReview() = runTest {
-    // Arrange: No existing review, just set data
-    viewModel.setReviewText("Brand new review!")
-    viewModel.setRating(4.0)
-
-    // Act: Submit without loading any review (reviewId will be empty)
-    viewModel.submitReviewHunt("user123", testHunt, null)
-    advanceUntilIdle()
-
-    // Assert: Verify a new review was created
-    val allReviews = fakeReviewRepository.getHuntReviews(testHunt.uid)
-    assertEquals(1, allReviews.size)
-    assertEquals("Brand new review!", allReviews.first().comment)
-    assertEquals(4.0, allReviews.first().rating, 0.0)
-
-    val state = viewModel.uiState.value
-    assertTrue(state.saveSuccessful)
-    assertTrue(state.isSubmitted)
-  }
-
-  @Test
-  fun loadReview_loadsAllReviewData_includingPhotosRatingAndComment() = runTest {
-    // Arrange
-    val existingReview =
+  fun loadHunt_calculatesUpdatedReviewRate() = runTest {
+    val review1 =
         HuntReview(
-            reviewId = "full_review_123",
-            authorId = "user_full",
-            huntId = testHunt.uid,
-            rating = 4.5,
-            comment = "Comprehensive review comment",
-            photos = listOf("photo1.jpg", "photo2.jpg", "photo3.jpg"))
-
-    fakeReviewRepository.addReviewHunt(existingReview)
-
-    // Act
-    viewModel.loadReview("full_review_123")
-    advanceUntilIdle()
-
-    // Assert: All data should be loaded
-    val state = viewModel.uiState.value
-    assertEquals("full_review_123", state.reviewId)
-    assertEquals("user_full", state.userId)
-    assertEquals("Comprehensive review comment", state.reviewText)
-    assertEquals(4.5, state.rating, 0.0)
-    assertEquals(3, state.photos.size)
-    assertTrue(state.photos.contains("photo1.jpg"))
-    assertTrue(state.photos.contains("photo2.jpg"))
-    assertTrue(state.photos.contains("photo3.jpg"))
-  }
-
-  @Test
-  fun submitReviewHunt_withInvalidData_doesNotUpdateReview() = runTest {
-    // Arrange: Create existing review
-    val existingReview =
-        HuntReview(
-            reviewId = "review_invalid",
-            authorId = "user_inv",
-            huntId = testHunt.uid,
-            rating = 4.0,
-            comment = "Original valid comment",
-            photos = emptyList())
-
-    fakeReviewRepository.addReviewHunt(existingReview)
-
-    viewModel.loadReview(existingReview.reviewId)
-    advanceUntilIdle()
-
-    // Set invalid data (blank review text)
-    viewModel.setReviewText("") // Invalid!
-    viewModel.setRating(5.0)
-
-    // Act: Try to submit with invalid data
-    viewModel.submitReviewHunt("user_inv", testHunt, null)
-    advanceUntilIdle()
-
-    // Assert: Review should NOT be updated
-    val unchangedReview = fakeReviewRepository.getReviewHunt(existingReview.reviewId)
-    assertEquals("Original valid comment", unchangedReview.comment) // Still original
-    assertEquals(4.0, unchangedReview.rating, 0.0) // Still original
-
-    // Error should be set
-    val state = viewModel.uiState.value
-    assertEquals(AddReviewScreenStrings.ErrorSubmisson, state.errorMsg)
-    assertFalse(state.saveSuccessful)
-  }
-
-  @Test
-  fun updateReview_successfully_updatesExistingReview() = runTest {
-    // Arrange: Add an existing review
-    val existingReview =
-        HuntReview(
-            reviewId = "0",
-            authorId = "user123",
+            reviewId = "r1",
+            authorId = "user1",
             huntId = testHunt.uid,
             rating = 3.0,
-            comment = "Old comment",
-            photos = listOf("old.jpg"))
-    fakeReviewRepository.addReviewHunt(existingReview)
-
-    // Load the review into ViewModel
-    viewModel.loadReview("0") // ensures uiState.reviewId is set
-    advanceUntilIdle()
-
-    // Update fields
-    viewModel.setReviewText("Updated comment")
-    viewModel.setRating(5.0)
-
-    // Act: submit review
-    viewModel.submitReviewHunt(
-        userId = "user123", // must match authorId
-        hunt = testHunt,
-        context = mockk(relaxed = true))
-    advanceUntilIdle()
-    fakeReviewRepository.updateReviewHunt(
-        "0",
+            comment = "Good hunt",
+            photos = emptyList())
+    val review2 =
         HuntReview(
-            reviewId = "0",
-            authorId = "user123",
+            reviewId = "r2",
+            authorId = "user2",
             huntId = testHunt.uid,
             rating = 5.0,
-            comment = "Updated comment",
-            photos = listOf("old.jpg")))
+            comment = "Excellent!",
+            photos = emptyList())
+    fakeReviewRepository.addReviewHunt(review1)
+    fakeReviewRepository.addReviewHunt(review2)
 
+    viewModel.loadHunt(testHunt.uid)
     advanceUntilIdle()
-    // Assert updated review in repository
-    val updatedReview = fakeReviewRepository.getReviewHunt("0")
-    assertEquals("Updated comment", updatedReview.comment)
-    assertEquals(5.0, updatedReview.rating, 0.0)
+
+    val state = viewModel.uiState.value
+    val expectedAverage = (3.0 + 5.0) / 2
+    assertNotNull(state.hunt)
+    assertEquals(testHunt.uid, state.hunt?.uid)
+    assertEquals(expectedAverage, state.hunt?.reviewRate)
+
+    val huntsById = viewModel.huntsById.value
+    assertTrue(huntsById.containsKey(testHunt.uid))
+    assertEquals(expectedAverage, huntsById[testHunt.uid]?.reviewRate)
+  }
+
+  @Test
+  fun loadHunt_withNoReviews_setsReviewRateToZero() = runTest {
+    val huntId = testHunt.uid
+
+    fakeHuntsRepository.addHunt(testHunt)
+
+    viewModel.loadHunt(huntId)
+    advanceUntilIdle()
+
+    val updatedHunt = viewModel.huntsById.value[huntId]
+    assertNotNull(updatedHunt)
+    assertEquals(0.0, updatedHunt!!.reviewRate, 0.0)
+    fun submitReviewHunt_withoutExistingReviewId_createsNewReview() = runTest {
+      // Arrange: No existing review, just set data
+      viewModel.setReviewText("Brand new review!")
+      viewModel.setRating(4.0)
+
+      // Act: Submit without loading any review (reviewId will be empty)
+      viewModel.submitReviewHunt("user123", testHunt, null)
+      advanceUntilIdle()
+
+      // Assert: Verify a new review was created
+      val allReviews = fakeReviewRepository.getHuntReviews(testHunt.uid)
+      assertEquals(1, allReviews.size)
+      assertEquals("Brand new review!", allReviews.first().comment)
+      assertEquals(4.0, allReviews.first().rating, 0.0)
+
+      val state = viewModel.uiState.value
+      assertTrue(state.saveSuccessful)
+      assertTrue(state.isSubmitted)
+    }
+
+    @Test
+    fun loadReview_loadsAllReviewData_includingPhotosRatingAndComment() = runTest {
+      // Arrange
+      val existingReview =
+          HuntReview(
+              reviewId = "full_review_123",
+              authorId = "user_full",
+              huntId = testHunt.uid,
+              rating = 4.5,
+              comment = "Comprehensive review comment",
+              photos = listOf("photo1.jpg", "photo2.jpg", "photo3.jpg"))
+
+      fakeReviewRepository.addReviewHunt(existingReview)
+
+      // Act
+      viewModel.loadReview("full_review_123")
+      advanceUntilIdle()
+
+      // Assert: All data should be loaded
+      val state = viewModel.uiState.value
+      assertEquals("full_review_123", state.reviewId)
+      assertEquals("user_full", state.userId)
+      assertEquals("Comprehensive review comment", state.reviewText)
+      assertEquals(4.5, state.rating, 0.0)
+      assertEquals(3, state.photos.size)
+      assertTrue(state.photos.contains("photo1.jpg"))
+      assertTrue(state.photos.contains("photo2.jpg"))
+      assertTrue(state.photos.contains("photo3.jpg"))
+    }
+
+    @Test
+    fun submitReviewHunt_withInvalidData_doesNotUpdateReview() = runTest {
+      // Arrange: Create existing review
+      val existingReview =
+          HuntReview(
+              reviewId = "review_invalid",
+              authorId = "user_inv",
+              huntId = testHunt.uid,
+              rating = 4.0,
+              comment = "Original valid comment",
+              photos = emptyList())
+
+      fakeReviewRepository.addReviewHunt(existingReview)
+
+      viewModel.loadReview(existingReview.reviewId)
+      advanceUntilIdle()
+
+      // Set invalid data (blank review text)
+      viewModel.setReviewText("") // Invalid!
+      viewModel.setRating(5.0)
+
+      // Act: Try to submit with invalid data
+      viewModel.submitReviewHunt("user_inv", testHunt, null)
+      advanceUntilIdle()
+
+      // Assert: Review should NOT be updated
+      val unchangedReview = fakeReviewRepository.getReviewHunt(existingReview.reviewId)
+      assertEquals("Original valid comment", unchangedReview.comment) // Still original
+      assertEquals(4.0, unchangedReview.rating, 0.0) // Still original
+
+      // Error should be set
+      val state = viewModel.uiState.value
+      assertEquals(AddReviewScreenStrings.ErrorSubmisson, state.errorMsg)
+      assertFalse(state.saveSuccessful)
+    }
+
+    @Test
+    fun updateReview_successfully_updatesExistingReview() = runTest {
+      // Arrange: Add an existing review
+      val existingReview =
+          HuntReview(
+              reviewId = "0",
+              authorId = "user123",
+              huntId = testHunt.uid,
+              rating = 3.0,
+              comment = "Old comment",
+              photos = listOf("old.jpg"))
+      fakeReviewRepository.addReviewHunt(existingReview)
+
+      // Load the review into ViewModel
+      viewModel.loadReview("0") // ensures uiState.reviewId is set
+      advanceUntilIdle()
+
+      // Update fields
+      viewModel.setReviewText("Updated comment")
+      viewModel.setRating(5.0)
+
+      // Act: submit review
+      viewModel.submitReviewHunt(
+          userId = "user123", // must match authorId
+          hunt = testHunt,
+          context = mockk(relaxed = true))
+      advanceUntilIdle()
+      fakeReviewRepository.updateReviewHunt(
+          "0",
+          HuntReview(
+              reviewId = "0",
+              authorId = "user123",
+              huntId = testHunt.uid,
+              rating = 5.0,
+              comment = "Updated comment",
+              photos = listOf("old.jpg")))
+
+      advanceUntilIdle()
+      // Assert updated review in repository
+      val updatedReview = fakeReviewRepository.getReviewHunt("0")
+      assertEquals("Updated comment", updatedReview.comment)
+      assertEquals(5.0, updatedReview.rating, 0.0)
+    }
   }
 }
