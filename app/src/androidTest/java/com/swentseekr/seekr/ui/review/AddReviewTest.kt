@@ -9,9 +9,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.swentseekr.seekr.ui.hunt.review.AddReviewScreen
 import com.swentseekr.seekr.ui.hunt.review.AddReviewScreenTestTags
-import com.swentseekr.seekr.ui.hunt.review.ReviewHuntUIState
-import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.swentseekr.seekr.ui.hunt.review.BaseReviewScreen
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -68,28 +66,59 @@ class HuntCardReviewScreenTest {
 
   @Test
   fun photos_lazyRow_isDisplayed_whenPhotosExist() {
-    // Create a fake ViewModel
-    val fakeViewModel =
-        object : ReviewHuntViewModel() {
-          override val uiState =
-              MutableStateFlow(
-                  ReviewHuntUIState(
-                      photos =
-                          listOf(
-                              AddReviewTestConstantStings.Photo1,
-                              AddReviewTestConstantStings.Photo2),
-                      rating = 0.0,
-                  ))
-        }
-
     composeRule.setContent {
       MaterialTheme {
-        AddReviewScreen(
-            huntId = AddReviewTestConstantStings.TestHuntId, reviewViewModel = fakeViewModel)
+        // Use BaseReviewScreen directly to control the state
+        BaseReviewScreen(
+            title = "Add Review",
+            huntTitle = "Test Hunt",
+            authorName = "Test Author",
+            rating = 3.0,
+            reviewText = "Great hunt!",
+            photos = listOf(AddReviewTestConstantStings.Photo1, AddReviewTestConstantStings.Photo2),
+            isReviewTextError = false,
+            isDoneEnabled = true,
+            reviewTextErrorMessage = null,
+            onRatingChanged = {},
+            onReviewTextChanged = {},
+            onAddPhotos = {},
+            onRemovePhoto = {},
+            onGoBack = {},
+            onCancel = {},
+            onDone = {})
       }
     }
 
     // Assert that the LazyRow is displayed
-    composeRule.onNodeWithTag(AddReviewTestConstantStings.TestTagLazyRow).assertExists()
+    composeRule.onNodeWithTag(AddReviewScreenTestTags.PHOTOS_LAZY_ROW_TAG).assertExists()
+  }
+
+  @Test
+  fun addPhotoButton_isDisplayed_whenPhotosEmpty() {
+    composeRule.setContent {
+      MaterialTheme {
+        BaseReviewScreen(
+            title = "Add Review",
+            huntTitle = "Test Hunt",
+            authorName = "Test Author",
+            rating = 0.0,
+            reviewText = "",
+            photos = emptyList(), // No photos
+            isReviewTextError = false,
+            isDoneEnabled = false,
+            reviewTextErrorMessage = null,
+            onRatingChanged = {},
+            onReviewTextChanged = {},
+            onAddPhotos = {},
+            onRemovePhoto = {},
+            onGoBack = {},
+            onCancel = {},
+            onDone = {})
+      }
+    }
+
+    // Assert that the Add Photos button is displayed instead of LazyRow
+    composeRule.onNodeWithTag(AddReviewScreenTestTags.AddPhotoButtonTag).assertExists()
+    composeRule.onNodeWithTag(AddReviewScreenTestTags.PHOTOS_LAZY_ROW_TAG).assertDoesNotExist()
   }
 }
