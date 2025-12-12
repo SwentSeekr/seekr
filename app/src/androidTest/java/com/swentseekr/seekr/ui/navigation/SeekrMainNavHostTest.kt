@@ -282,7 +282,7 @@ class SeekrNavigationTest {
       compose.waitForIdle()
 
       compose
-          .onNodeWithTag("HUNT_CARD_LIST", useUnmergedTree = true)
+          .onNodeWithTag(HuntCardScreenTestTags.HUNT_CARD_LIST, useUnmergedTree = true)
           .performScrollToNode(hasTestTag(HuntCardScreenTestTags.EDIT_HUNT_BUTTON))
 
       compose.waitForIdle()
