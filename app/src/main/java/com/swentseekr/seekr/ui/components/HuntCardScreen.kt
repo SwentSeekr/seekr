@@ -20,9 +20,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
@@ -30,6 +30,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -43,6 +45,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -108,6 +112,7 @@ fun HuntCardScreen(
     beginHunt: () -> Unit = {},
     addReview: () -> Unit = {},
     editHunt: () -> Unit = {},
+    editReview: (String) -> Unit = {},
     navController: NavHostController
 ) {
   val uiState by huntCardViewModel.uiState.collectAsState()
@@ -214,7 +219,7 @@ fun HuntCardScreen(
               }
 
               // Reviews list
-              if (reviews.isEmpty()) {
+              if (reviews.isNullOrEmpty()) {
                 item { ModernEmptyReviewsState() }
               } else {
                 items(reviews) { review ->
@@ -226,7 +231,8 @@ fun HuntCardScreen(
                       onDeleteReview = { reviewId ->
                         huntCardViewModel.deleteReview(
                             review.huntId, reviewId, review.authorId, currentUserId)
-                      })
+                      },
+                      onEdit = editReview)
                 }
               }
 
@@ -620,6 +626,7 @@ fun ModernReviewCard(
     currentUserId: String?,
     navController: NavHostController,
     onDeleteReview: (String) -> Unit,
+    onEdit: (String) -> Unit = {}
 ) {
   val uiState by reviewHuntViewModel.uiState.collectAsState()
 
@@ -666,7 +673,7 @@ fun ModernReviewCard(
               isCurrentUser = isCurrentUser,
               profilePictureRes = profilePictureRes,
               onDeleteReview = { onDeleteReview(review.reviewId) },
-          )
+              onEdit = { onEdit(review.reviewId) })
 
           Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding8))
 
@@ -698,7 +705,8 @@ private fun ReviewCardHeader(
     authorName: String,
     isCurrentUser: Boolean,
     profilePictureRes: Int,
-    onDeleteReview: () -> Unit,
+    onDeleteReview: (String) -> Unit,
+    onEdit: (String) -> Unit
 ) {
   Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
     if (profilePictureRes != HuntCardScreenDefaults.NoProfilePictureResId) {
@@ -741,14 +749,11 @@ private fun ReviewCardHeader(
 
     if (isCurrentUser) {
       IconButton(
-          onClick = onDeleteReview,
+          onClick = { onDeleteReview(review.reviewId) },
           modifier = Modifier.testTag(HuntCardScreenTestTags.DELETE_REVIEW_BUTTON)) {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = HuntCardScreenStrings.ReviewDeleteButton,
-                tint =
-                    MaterialTheme.colorScheme.error.copy(
-                        alpha = HuntCardScreenDefaults.DeleteIconAlpha))
+            DotMenu(
+                onEdit = { onEdit(review.reviewId) },
+                onDelete = { onDeleteReview(review.reviewId) })
           }
     }
   }
@@ -785,6 +790,35 @@ private fun ReviewCardPhotosSection(
               "${HuntCardScreenStrings.SeePictures} (${review.photos.size})",
               fontSize = HuntCardScreenDefaults.MinFontSize)
         }
+  }
+}
+
+@Composable
+fun DotMenu(onEdit: () -> Unit, onDelete: () -> Unit) {
+  var expanded by remember { mutableStateOf(false) }
+  Box {
+    IconButton(
+        onClick = { expanded = true },
+        modifier = Modifier.testTag(HuntCardScreenTestTags.DOTBUTOON)) {
+          Icon(imageVector = Icons.Default.MoreVert, contentDescription = "Menu")
+        }
+    DropdownMenu(expanded, onDismissRequest = { expanded = false }) {
+      DropdownMenuItem(
+          text = { Text("Edit") },
+          onClick = {
+            expanded = false
+            onEdit()
+          },
+          modifier = Modifier.testTag(HuntCardScreenTestTags.EDIT_BUTTON))
+
+      DropdownMenuItem(
+          text = { Text("Delete") },
+          onClick = {
+            expanded = false
+            onDelete()
+          },
+          modifier = Modifier.testTag(HuntCardScreenTestTags.DELETE_BUTTON))
+    }
   }
 }
 

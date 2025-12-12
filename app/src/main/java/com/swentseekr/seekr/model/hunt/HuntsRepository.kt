@@ -55,13 +55,15 @@ interface HuntsRepository {
    * @param mainImageUri optional new main image (null = unchanged).
    * @param addedOtherImages new other images selected by the user.
    * @param removedOtherImages list of URLs of images that must be deleted from storage.
+   * @param removedMainImageUrl URL of the main image that must be deleted from storage.
    */
   suspend fun editHunt(
       huntID: String,
       newValue: Hunt,
       mainImageUri: Uri? = null,
       addedOtherImages: List<Uri> = emptyList(),
-      removedOtherImages: List<String> = emptyList()
+      removedOtherImages: List<String> = emptyList(),
+      removedMainImageUrl: String? = ""
   )
 
   /**

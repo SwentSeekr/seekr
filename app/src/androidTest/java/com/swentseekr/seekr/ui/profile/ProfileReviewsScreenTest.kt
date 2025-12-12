@@ -18,6 +18,12 @@ import com.swentseekr.seekr.model.profile.createReview
 import com.swentseekr.seekr.model.profile.mockProfileData
 import com.swentseekr.seekr.model.profile.sampleProfile
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
+import com.swentseekr.seekr.FakeReviewHuntViewModel
+import com.swentseekr.seekr.model.hunt.HuntReview
+import com.swentseekr.seekr.model.profile.createReview
+import com.swentseekr.seekr.model.profile.mockProfileData
+import com.swentseekr.seekr.ui.components.HuntCardScreenTestTags
+import com.swentseekr.seekr.ui.components.ModernReviewCard
 import junit.framework.TestCase.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -46,6 +52,7 @@ class ProfileReviewsScreenTest {
           profileViewModel = ProfileViewModel(),
           reviewHuntViewModel = reviewHuntViewModel,
           onGoBack = onGoBack,
+          editReview = {},
           navController = navController,
           testProfile = profile,
           testReviews = reviews,
@@ -74,7 +81,18 @@ class ProfileReviewsScreenTest {
   @Test
   fun testBackButton_clickable() {
     var backClicked = false
-    setContent(onGoBack = { backClicked = true })
+    composeTestRule.setContent {
+      val navController = rememberNavController()
+      ProfileReviewsScreen(
+          userId = sampleProfile.uid,
+          profileViewModel = ProfileViewModel(),
+          onGoBack = { backClicked = true },
+          editReview = {},
+          navController = navController,
+          testProfile = sampleProfile,
+          testReviews = sampleReviews)
+    }
+
     composeTestRule.onNodeWithTag(ProfileReviewsTestTags.BACK_BUTTON).performClick()
     assertTrue(backClicked)
   }
@@ -93,6 +111,7 @@ class ProfileReviewsScreenTest {
           userId = "someUserId",
           profileViewModel = ProfileViewModel(),
           onGoBack = {},
+          editReview = {},
           navController = navController,
           testProfile = null,
           testReviews = emptyList())
@@ -191,6 +210,7 @@ class ProfileReviewsScreenTest {
           userId = sampleProfile.uid,
           profileViewModel = ProfileViewModel(),
           onGoBack = {},
+          editReview = {},
           navController = navController,
           testProfile = sampleProfile,
           testReviews = sampleReviews)
@@ -224,5 +244,34 @@ class ProfileReviewsScreenTest {
         .assertIsDisplayed()
 
     composeTestRule.onNodeWithTag("hunt_header_unknown_hunt").assertDoesNotExist()
+  }
+
+  @Test
+  fun reviewCard_shows_edit_menu_for_current_user() {
+    val currentUserId = "user123"
+    val review =
+        HuntReview(
+            reviewId = "review1",
+            authorId = currentUserId,
+            huntId = "hunt1",
+            comment = "Compétent",
+            rating = 5.0,
+            photos = emptyList())
+
+    composeTestRule.setContent {
+      ModernReviewCard(
+          review = review,
+          reviewHuntViewModel = FakeReviewHuntViewModel(),
+          currentUserId = currentUserId,
+          navController = rememberNavController(),
+          onDeleteReview = {},
+          onEdit = {})
+    }
+
+    // Open the menu
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.DOTBUTOON).performClick()
+
+    // Check Edit button is displayed
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.EDIT_BUTTON).assertIsDisplayed()
   }
 }

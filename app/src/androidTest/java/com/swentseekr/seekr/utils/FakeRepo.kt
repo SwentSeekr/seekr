@@ -26,7 +26,8 @@ class FakeRepoSuccess(
       updatedHunt: Hunt,
       mainImageUri: Uri?,
       addedOtherImages: List<Uri>,
-      removedOtherImages: List<String>
+      removedOtherImages: List<String>,
+      removedMainImageUrl: String?
   ) = Unit
 
   override suspend fun deleteHunt(uid: String) = Unit
@@ -50,7 +51,8 @@ class FakeRepoEmpty : HuntsRepository {
       updatedHunt: Hunt,
       mainImageUri: Uri?,
       addedOtherImages: List<Uri>,
-      removedOtherImages: List<String>
+      removedOtherImages: List<String>,
+      removedMainImageUrl: String?
   ) = Unit
 
   override suspend fun deleteHunt(uid: String) = Unit
@@ -74,7 +76,8 @@ class FakeRepoThrows(private val message: String) : HuntsRepository {
       updatedHunt: Hunt,
       mainImageUri: Uri?,
       addedOtherImages: List<Uri>,
-      removedOtherImages: List<String>
+      removedOtherImages: List<String>,
+      removedMainImageUrl: String?
   ) = Unit
 
   override suspend fun deleteHunt(uid: String) = Unit

@@ -63,7 +63,8 @@ class MapTest {
             newValue: Hunt,
             mainImageUri: Uri?,
             addedOtherImages: List<Uri>,
-            removedOtherImages: List<String>
+            removedOtherImages: List<String>,
+            removedMainImageUrl: String?
         ) {}
 
         override suspend fun deleteHunt(uid: String) {}

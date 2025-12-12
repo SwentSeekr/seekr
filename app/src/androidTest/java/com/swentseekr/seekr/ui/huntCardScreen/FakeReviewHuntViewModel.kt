@@ -10,8 +10,13 @@ class FakeReviewHuntViewModel : ReviewHuntViewModel() {
 
   private val _uiState = MutableStateFlow(ReviewHuntUIState())
   override val uiState: StateFlow<ReviewHuntUIState> = _uiState
+  var loadReviewCalled = false
 
   override fun loadHunt(huntId: String) {}
+
+  override fun loadReview(reviewId: String) {
+    loadReviewCalled = true
+  }
 
   override fun loadAuthorProfile(authorId: String) {}
 
