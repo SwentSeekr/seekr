@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.navigation
 
+import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -187,6 +189,23 @@ fun SeekrMainNavHost(
     reviewViewModelFactory: (() -> ReviewHuntViewModel)? = null,
     testMode: Boolean = false
 ) {
+  val context = LocalContext.current
+  val activity = context as? Activity
+
+  // Read huntId if app was launched/tapped via notification
+  val deepLinkHuntId = remember {
+    activity?.intent?.getStringExtra(SeekrNavigationDefaults.HUNT_ID)
+  }
+
+  // Navigate exactly once when a notification tap occurs
+  LaunchedEffect(deepLinkHuntId) {
+    if (deepLinkHuntId != null) {
+      navController.navigate(SeekrDestination.HuntCard.createRoute(deepLinkHuntId)) {
+        launchSingleTop = true
+      }
+      activity?.intent?.removeExtra(SeekrNavigationDefaults.HUNT_ID) // prevent re-trigger
+    }
+  }
 
   fun NavHostController.goToProfileReviews(userId: String?) {
     if (!userId.isNullOrBlank()) {

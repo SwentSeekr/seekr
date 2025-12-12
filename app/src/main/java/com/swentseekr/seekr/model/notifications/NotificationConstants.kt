@@ -1,6 +1,7 @@
 package com.swentseekr.seekr.model.notifications
 
 object NotificationConstants {
+  const val NULL_PENDING_INTENT_REQUEST_CODE = 0
 
   // MyFirebaseMessagingService constants
   const val COLLECTION_PROFILES = "profiles"
@@ -14,4 +15,5 @@ object NotificationConstants {
   // NotificationHelper constants
   const val CHANNEL_ID = "default_channel"
   const val GENERAL_CHANNEL_NAME = "General Notifications"
+  const val HUNT_ID = "huntId"
 }

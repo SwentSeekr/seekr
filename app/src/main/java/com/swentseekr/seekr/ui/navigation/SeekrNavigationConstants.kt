@@ -15,6 +15,7 @@ object SeekrNavigationDefaults {
   // Route + arg name for the review images screen (used online & offline)
   const val REVIEW_IMAGES_ROUTE = "reviewImages/{reviewId}"
   const val REVIEW_IMAGES_REVIEW_ID_ARG = "reviewId"
+  const val HUNT_ID = "huntId"
 }
 
 /**

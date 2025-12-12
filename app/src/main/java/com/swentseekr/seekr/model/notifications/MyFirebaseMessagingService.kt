@@ -5,6 +5,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.swentseekr.seekr.model.notifications.NotificationConstants.HUNT_ID
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
@@ -12,7 +13,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     val title =
         remoteMessage.notification?.title ?: NotificationConstants.DEFAULT_NOTIFICATION_TITLE
     val body = remoteMessage.notification?.body ?: NotificationConstants.DEFAULT_NOTIFICATION_BODY
-    NotificationHelper.sendNotification(this, title, body)
+    val huntId = remoteMessage.data[HUNT_ID]
+    NotificationHelper.sendNotification(this, title, body, huntId)
   }
 
   override fun onNewToken(token: String) {

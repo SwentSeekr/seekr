@@ -15,12 +15,18 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.swentseekr.seekr.FakeReviewHuntViewModel
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.model.profile.createHunt
+import com.swentseekr.seekr.model.profile.createReview
 import com.swentseekr.seekr.ui.components.HuntCardScreen
 import com.swentseekr.seekr.ui.components.HuntCardScreenStrings
 import com.swentseekr.seekr.ui.components.HuntCardScreenTestTags
+import com.swentseekr.seekr.ui.components.HuntCardScreenTestTags.REVIEW_COMMENT
+import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
+import kotlin.apply
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -316,14 +322,12 @@ class HuntCardScreenTest {
 
     composeTestRule.setContent {
       HuntCardScreen(
-          huntId = HuntCardScreenConstantStrings.TestHunt,
-          huntCardViewModel = fakeVm,
-          navController = rememberNavController())
+          huntId = "testHunt", huntCardViewModel = fakeVm, navController = rememberNavController())
     }
 
     val likeButton = composeTestRule.onNodeWithTag(HuntCardScreenTestTags.LIKE_BUTTON)
 
-    assertTrue(!fakeVm.uiState.value.isLiked)
+    assertFalse(fakeVm.uiState.value.isLiked)
 
     likeButton.performClick()
     composeTestRule.waitForIdle()
@@ -331,7 +335,7 @@ class HuntCardScreenTest {
 
     likeButton.performClick()
     composeTestRule.waitForIdle()
-    assertTrue(!fakeVm.uiState.value.isLiked)
+    assertFalse(fakeVm.uiState.value.isLiked)
   }
 
   @Test
@@ -402,5 +406,145 @@ class HuntCardScreenTest {
 
     // Then: the "Add review" button should NOT be in the tree at all
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.REVIEW_BUTTON).assertDoesNotExist()
+  }
+
+  @Test
+  fun reviewWithEmptyCommentDoesNotShowCommentText() {
+    val hunt = createHunt(uid = "hunt1", title = "Test Hunt")
+    val review = createReview(comment = "")
+
+    val viewModel =
+        FakeHuntCardViewModel(hunt).apply {
+          freezeReviews = true
+          setReviewsForTest(listOf(review))
+          setCurrentUserIdForTest("user1")
+        }
+
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = hunt.uid, huntCardViewModel = viewModel, navController = rememberNavController())
+    }
+
+    composeTestRule.waitForIdle()
+
+    composeTestRule
+        .onNodeWithTag(HuntCardScreenTestTags.HUNT_CARD_LIST)
+        .performScrollToNode(hasTestTag(HuntCardScreenTestTags.REVIEW_CARD))
+
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.REVIEW_CARD).assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag(REVIEW_COMMENT).assertDoesNotExist()
+  }
+
+  @Test
+  fun huntCardScreeLoadingStateShowsCircularProgress() {
+    val viewModel = FakeHuntCardViewModel(hunt = null)
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = "nonExistingHunt",
+          huntCardViewModel = viewModel,
+          navController = rememberNavController())
+    }
+
+    composeTestRule
+        .onNodeWithTag(HuntCardScreenTestTags.CIRCULAR_PROGRESS_INDICATOR)
+        .assertIsDisplayed()
+  }
+
+  @Test
+  fun reviewWithNoPhotosDoesNotShowSeePicturesButton() {
+    val hunt = createHunt(uid = "hunt1", title = "Test Hunt")
+    val review = createReview(photos = emptyList())
+
+    val viewModel =
+        FakeHuntCardViewModel(hunt).apply {
+          freezeReviews = true
+          setReviewsForTest(listOf(review))
+        }
+
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = hunt.uid, huntCardViewModel = viewModel, navController = rememberNavController())
+    }
+
+    composeTestRule.waitForIdle()
+
+    composeTestRule
+        .onNodeWithTag(HuntCardScreenTestTags.HUNT_CARD_LIST)
+        .performScrollToNode(hasTestTag(HuntCardScreenTestTags.REVIEW_CARD))
+
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.SEE_PICTURES_BUTTON).assertDoesNotExist()
+  }
+
+  @Test
+  fun emptyReviewsShowEmptyState() {
+    val hunt = createHunt(uid = "hunt1", title = "Test Hunt")
+    val viewModel = FakeHuntCardViewModel(hunt).apply { setReviewsForTest(emptyList()) }
+
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = hunt.uid, huntCardViewModel = viewModel, navController = rememberNavController())
+    }
+
+    composeTestRule.waitForIdle()
+
+    composeTestRule
+        .onNodeWithTag(HuntCardScreenTestTags.HUNT_CARD_LIST)
+        .performScrollToNode(hasTestTag(HuntCardScreenTestTags.MODERN_EMPTY_REVIEWS_STATE))
+
+    composeTestRule
+        .onNodeWithTag(HuntCardScreenTestTags.MODERN_EMPTY_REVIEWS_STATE)
+        .assertIsDisplayed()
+  }
+
+  @Test
+  fun nonEmptyReviewsShowReviewCardsWithAuthorProfiles() {
+    val hunt = createHunt(uid = "hunt1", title = "Test Hunt")
+    val review = createReview(authorId = "author1", comment = "Great hunt!")
+    val viewModel =
+        FakeHuntCardViewModel(hunt).apply {
+          setCurrentUserIdForTest("author1")
+          setReviewsForTest(listOf(review))
+        }
+
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = hunt.uid, huntCardViewModel = viewModel, navController = rememberNavController())
+    }
+
+    composeTestRule.waitForIdle()
+
+    composeTestRule
+        .onNodeWithTag(HuntCardScreenTestTags.HUNT_CARD_LIST)
+        .performScrollToNode(hasTestTag(HuntCardScreenTestTags.REVIEW_CARD))
+
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.REVIEW_CARD).assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.HUNT_CARD_LIST)
+  }
+
+  @Test
+  fun reviewWithPhotosShowsSeePicturesButton() {
+    val hunt = createHunt(uid = "hunt1", title = "Test Hunt")
+    val review = createReview(photos = listOf("photo1.jpg", "photo2.jpg"))
+
+    val viewModel =
+        FakeHuntCardViewModel(hunt).apply {
+          freezeReviews = true
+          setReviewsForTest(listOf(review))
+        }
+
+    composeTestRule.setContent {
+      HuntCardScreen(
+          huntId = hunt.uid, huntCardViewModel = viewModel, navController = rememberNavController())
+    }
+
+    composeTestRule.waitForIdle()
+
+    composeTestRule
+        .onNodeWithTag(HuntCardScreenTestTags.HUNT_CARD_LIST)
+        .performScrollToNode(hasTestTag(HuntCardScreenTestTags.REVIEW_CARD))
+
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.SEE_PICTURES_BUTTON).assertIsDisplayed()
   }
 }

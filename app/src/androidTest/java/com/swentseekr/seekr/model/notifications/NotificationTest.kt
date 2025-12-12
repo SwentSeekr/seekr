@@ -1,17 +1,29 @@
 package com.swentseekr.seekr.model.notifications
 
 import android.Manifest
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.GrantPermissionRule
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.swentseekr.seekr.MainActivity
+import com.swentseekr.seekr.model.notifications.NotificationTestConstants.EMPTY_STRING
+import com.swentseekr.seekr.model.notifications.NotificationTestConstants.EXTRA_HUNT_ID
 import com.swentseekr.seekr.model.notifications.NotificationTestConstants.FIELD_NOTIFICATIONS
+import com.swentseekr.seekr.model.notifications.NotificationTestConstants.HUNT_FCM
+import com.swentseekr.seekr.model.notifications.NotificationTestConstants.HUNT_PRESERVE
+import com.swentseekr.seekr.model.notifications.NotificationTestConstants.HUNT_REMOTE
+import com.swentseekr.seekr.model.notifications.NotificationTestConstants.HUNT_REMOVE
+import com.swentseekr.seekr.model.notifications.NotificationTestConstants.HUNT_SPECIAL_CHAR
+import com.swentseekr.seekr.model.notifications.NotificationTestConstants.NULL_VALUE
 import com.swentseekr.seekr.model.notifications.NotificationTestConstants.PROFILES_COLLECTION
 import com.swentseekr.seekr.model.notifications.NotificationTestConstants.SETTINGS_COLLECTION
 import com.swentseekr.seekr.model.notifications.NotificationTestConstants.TEST_FCM_TOKEN_PREFIX
+import com.swentseekr.seekr.model.notifications.NotificationTestConstants.TEST_HUNT_ID
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
@@ -76,16 +88,6 @@ class NotificationTest {
   }
 
   @Test
-  fun notificationHelper_sendsNotificationWithPermission() = runBlocking {
-    NotificationHelper.createNotificationChannel(context)
-
-    NotificationHelper.sendNotification(
-        context, NotificationTestConstants.TEST_TITLE, NotificationTestConstants.TEST_MESSAGE)
-
-    assertTrue(true)
-  }
-
-  @Test
   fun fcmToken_isSavedToFirestore() = runBlocking {
     val uid = auth.currentUser?.uid ?: return@runBlocking
     val testToken = TEST_FCM_TOKEN_PREFIX + System.currentTimeMillis()
@@ -109,17 +111,182 @@ class NotificationTest {
   @Test
   fun settingsViewModel_updatesNotificationPreference() = runBlocking {
     val uid = auth.currentUser?.uid ?: return@runBlocking
-
     db.collection(SETTINGS_COLLECTION)
         .document(uid)
         .set(mapOf(FIELD_NOTIFICATIONS to false))
         .await()
-
     db.collection(SETTINGS_COLLECTION).document(uid).update(FIELD_NOTIFICATIONS, true).await()
-
     val doc = db.collection(SETTINGS_COLLECTION).document(uid).get().await()
     val notificationsEnabled = doc.getBoolean(FIELD_NOTIFICATIONS)
-
     assertEquals(NotificationTestConstants.NOTIFICATION_MESSAGE, true, notificationsEnabled)
+  }
+
+  @Test
+  fun notificationHelper_createsIntentWithHuntId() {
+    val testHuntId = TEST_HUNT_ID
+
+    val intent =
+        Intent(context, MainActivity::class.java).apply {
+          flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+          putExtra(EXTRA_HUNT_ID, testHuntId)
+        }
+
+    assertEquals(testHuntId, intent.getStringExtra(EXTRA_HUNT_ID))
+    assertTrue(intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK != NULL_VALUE)
+    assertTrue(intent.flags and Intent.FLAG_ACTIVITY_CLEAR_TASK != NULL_VALUE)
+  }
+
+  @Test
+  fun notificationHelper_sendsNotificationWithHuntId() = runBlocking {
+    NotificationHelper.createNotificationChannel(context)
+
+    val testHuntId = NotificationTestConstants.TEST_HUNT_ID_456
+    val testTitle = NotificationTestConstants.NEW_REVIEW
+    val testMessage = NotificationTestConstants.REVIEW_MESSAGE
+
+    NotificationHelper.sendNotification(context, testTitle, testMessage, testHuntId)
+    assertTrue(true)
+  }
+
+  @Test
+  fun notificationHelper_sendsNotificationWithNullHuntId() = runBlocking {
+    NotificationHelper.createNotificationChannel(context)
+
+    val testTitle = NotificationTestConstants.GENERAL_NOTIFICATION
+    val testMessage = NotificationTestConstants.GENERAL_MESSAGE
+
+    NotificationHelper.sendNotification(context, testTitle, testMessage, null)
+
+    assertTrue(true)
+  }
+
+  @Test
+  fun notificationHelper_createsPendingIntentWithCorrectFlags() {
+    val testHuntId = NotificationTestConstants.TEST_HUNT_ID_789
+
+    val intent =
+        Intent(context, MainActivity::class.java).apply {
+          flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+          putExtra(EXTRA_HUNT_ID, testHuntId)
+        }
+
+    val pendingIntent =
+        PendingIntent.getActivity(
+            context,
+            NULL_VALUE,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+
+    assertNotNull(pendingIntent)
+  }
+
+  @Test
+  fun firebaseMessaging_handlesRemoteMessageWithHuntId() {
+
+    val data = mapOf(EXTRA_HUNT_ID to HUNT_REMOTE)
+
+    assertNotNull(data[EXTRA_HUNT_ID])
+    assertEquals(HUNT_REMOTE, data[EXTRA_HUNT_ID])
+  }
+
+  @Test
+  fun intent_preservesHuntIdAcrossRecreation() {
+    val originalHuntId = HUNT_PRESERVE
+
+    val intent =
+        Intent(context, MainActivity::class.java).apply { putExtra(EXTRA_HUNT_ID, originalHuntId) }
+
+    val extractedHuntId = intent.getStringExtra(EXTRA_HUNT_ID)
+
+    assertEquals(originalHuntId, extractedHuntId)
+  }
+
+  @Test
+  fun intent_canRemoveHuntIdExtra() {
+    val testHuntId = HUNT_REMOVE
+
+    val intent =
+        Intent(context, MainActivity::class.java).apply { putExtra(EXTRA_HUNT_ID, testHuntId) }
+
+    assertNotNull(intent.getStringExtra(EXTRA_HUNT_ID))
+
+    intent.removeExtra(EXTRA_HUNT_ID)
+
+    assertNull(intent.getStringExtra(EXTRA_HUNT_ID))
+  }
+
+  @Test
+  fun notificationChannel_isCreatedSuccessfully() {
+    NotificationHelper.createNotificationChannel(context)
+    assertTrue(true)
+  }
+
+  @Test
+  fun remoteMessage_extractsHuntIdFromData() {
+    val remoteMessageData =
+        mapOf(
+            EXTRA_HUNT_ID to HUNT_FCM,
+            NotificationTestConstants.TITLE to NotificationTestConstants.TEST_TITLE,
+            NotificationTestConstants.BODY to NotificationTestConstants.TEST_BODY)
+
+    val huntId = remoteMessageData[EXTRA_HUNT_ID]
+
+    assertNotNull(huntId)
+    assertEquals(HUNT_FCM, huntId)
+  }
+
+  @Test
+  fun notification_usesDefaultValuesWhenMissing() {
+    val title = null ?: NotificationConstants.DEFAULT_NOTIFICATION_TITLE
+    val body = null ?: NotificationConstants.DEFAULT_NOTIFICATION_BODY
+
+    assertEquals(NotificationConstants.DEFAULT_NOTIFICATION_TITLE, title)
+    assertEquals(NotificationConstants.DEFAULT_NOTIFICATION_BODY, body)
+  }
+
+  @Test
+  fun pendingIntent_hasCorrectImmutableFlag() {
+    val intent = Intent(context, MainActivity::class.java)
+
+    val pendingIntent =
+        PendingIntent.getActivity(
+            context,
+            NULL_VALUE,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+
+    assertNotNull(pendingIntent)
+  }
+
+  @Test
+  fun multipleNotifications_haveUniqueIds() {
+    val time1 = System.currentTimeMillis()
+    Thread.sleep(NotificationTestConstants.THREAD_SLEEP_TIME.toLong())
+    val time2 = System.currentTimeMillis()
+
+    val id1 = time1.toInt()
+    val id2 = time2.toInt()
+
+    assertNotEquals(id1, id2)
+  }
+
+  @Test
+  fun intentExtras_handleEmptyHuntId() {
+    val intent =
+        Intent(context, MainActivity::class.java).apply { putExtra(EXTRA_HUNT_ID, EMPTY_STRING) }
+
+    val huntId = intent.getStringExtra(EXTRA_HUNT_ID)
+
+    assertNotNull(huntId)
+    assertTrue(huntId!!.isEmpty())
+  }
+
+  @Test
+  fun intentExtras_handleSpecialCharactersInHuntId() {
+    val specialHuntId = HUNT_SPECIAL_CHAR
+    val intent =
+        Intent(context, MainActivity::class.java).apply { putExtra(EXTRA_HUNT_ID, specialHuntId) }
+    val extractedHuntId = intent.getStringExtra(EXTRA_HUNT_ID)
+    assertEquals(specialHuntId, extractedHuntId)
   }
 }

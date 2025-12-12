@@ -262,7 +262,8 @@ class ProfileReviewsScreenTest {
           currentUserId = currentUserId,
           navController = rememberNavController(),
           onDeleteReview = {},
-          onEdit = {})
+          onEdit = {},
+          authorProfile = null)
     }
 
     // Open the menu

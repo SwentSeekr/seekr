@@ -52,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -71,6 +72,7 @@ import com.swentseekr.seekr.ui.hunt.review.replies.ReviewRepliesViewModel
 import com.swentseekr.seekr.ui.hunt.review.replies.ReviewRepliesViewModelFactory
 import com.swentseekr.seekr.ui.huntcardview.HuntCardUiState
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
+import com.swentseekr.seekr.ui.profile.Profile
 import com.swentseekr.seekr.ui.profile.ProfilePicture
 
 /**
@@ -126,7 +128,11 @@ fun HuntCardScreen(
   val reviews = uiState.reviewList
 
   val currentUserId = uiState.currentUserId
+  LoadHuntCardScreenData(huntId, uiState, huntCardViewModel)
 
+  LaunchedEffect(reviews) {
+    reviews.forEach { review -> reviewViewModel.loadAuthorProfile(review.authorId) }
+  }
   val isAuthor = currentUserId == authorId
 
   val hasUserReview = currentUserId != null && reviews.any { it.authorId == currentUserId }
@@ -174,9 +180,11 @@ fun HuntCardScreen(
       modifier = modifier.fillMaxSize(),
       containerColor = HuntCardScreenDefaults.ScreenBackground) { innerPadding ->
         if (hunt == null) {
-          Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-          }
+          Box(
+              Modifier.fillMaxSize().testTag(HuntCardScreenTestTags.CIRCULAR_PROGRESS_INDICATOR),
+              contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+              }
           return@Scaffold
         }
 
@@ -223,11 +231,14 @@ fun HuntCardScreen(
                 item { ModernEmptyReviewsState() }
               } else {
                 items(reviews) { review ->
+                  val reviewAuthorProfile =
+                      reviewViewModel.uiState.collectAsState().value.authorProfiles[review.authorId]
                   ModernReviewCard(
                       review = review,
-                      reviewHuntViewModel = reviewViewModel,
+                      authorProfile = reviewAuthorProfile,
                       currentUserId = currentUserId,
                       navController = navController,
+                      reviewHuntViewModel = reviewViewModel,
                       onDeleteReview = { reviewId ->
                         huntCardViewModel.deleteReview(
                             review.huntId, reviewId, review.authorId, currentUserId)
@@ -491,28 +502,39 @@ fun ModernMapSection(hunt: Hunt) {
               color = MaterialTheme.colorScheme.onSurface)
 
           Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding12))
+          if (!LocalInspectionMode.current) {
 
-          val startPosition = LatLng(hunt.start.latitude, hunt.start.longitude)
-          val cameraPositionState = rememberCameraPositionState {
-            position = CameraPosition.fromLatLngZoom(startPosition, HuntCardScreenDefaults.Zoom)
+            val startPosition = LatLng(hunt.start.latitude, hunt.start.longitude)
+            val cameraPositionState = rememberCameraPositionState {
+              position = CameraPosition.fromLatLngZoom(startPosition, HuntCardScreenDefaults.Zoom)
+            }
+
+            Box(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .height(HuntCardScreenDefaults.MapHeight250)
+                        .clip(RoundedCornerShape(HuntCardScreenDefaults.CornerRadius))
+                        .testTag(HuntCardScreenTestTags.MAP_CONTAINER)) {
+                  GoogleMap(
+                      modifier = Modifier.matchParentSize(),
+                      cameraPositionState = cameraPositionState) {
+                        Marker(
+                            state = MarkerState(position = startPosition),
+                            title =
+                                "${HuntCardScreenStrings.ReviewMarkerTitlePrefix}${hunt.start.name}",
+                            snippet = hunt.start.name.ifBlank { null })
+                      }
+                }
+          } else {
+            // Test/Preview: placeholder Box
+            Box(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .height(HuntCardScreenDefaults.MapHeight250)
+                        .clip(RoundedCornerShape(HuntCardScreenDefaults.CornerRadius))
+                        .background(Color.LightGray)
+                        .testTag(HuntCardScreenTestTags.MAP_CONTAINER))
           }
-
-          Box(
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .height(HuntCardScreenDefaults.MapHeight250)
-                      .clip(RoundedCornerShape(HuntCardScreenDefaults.CornerRadius))
-                      .testTag(HuntCardScreenTestTags.MAP_CONTAINER)) {
-                GoogleMap(
-                    modifier = Modifier.matchParentSize(),
-                    cameraPositionState = cameraPositionState) {
-                      Marker(
-                          state = MarkerState(position = startPosition),
-                          title =
-                              "${HuntCardScreenStrings.ReviewMarkerTitlePrefix}${hunt.start.name}",
-                          snippet = hunt.start.name.ifBlank { null })
-                    }
-              }
         }
       }
 }
@@ -584,7 +606,10 @@ fun ModernActionButtons(
 @Composable
 fun ModernEmptyReviewsState() {
   Box(
-      modifier = Modifier.fillMaxWidth().padding(vertical = HuntCardScreenDefaults.Padding40),
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(vertical = HuntCardScreenDefaults.Padding40)
+              .testTag(HuntCardScreenTestTags.MODERN_EMPTY_REVIEWS_STATE),
       contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
           Icon(
@@ -622,18 +647,15 @@ fun ModernEmptyReviewsState() {
 @Composable
 fun ModernReviewCard(
     review: HuntReview,
-    reviewHuntViewModel: ReviewHuntViewModel,
+    authorProfile: Profile?,
     currentUserId: String?,
     navController: NavHostController,
+    reviewHuntViewModel: ReviewHuntViewModel,
     onDeleteReview: (String) -> Unit,
     onEdit: (String) -> Unit = {}
 ) {
-  val uiState by reviewHuntViewModel.uiState.collectAsState()
 
   val authorId = review.authorId
-  LaunchedEffect(authorId) { reviewHuntViewModel.loadAuthorProfile(authorId) }
-  val authorProfile = uiState.authorProfiles[authorId]
-
   val isCurrentUser = currentUserId == authorId
 
   val profilePictureRes =
@@ -681,6 +703,7 @@ fun ModernReviewCard(
 
           ReviewCardPhotosSection(
               review = review,
+              navController = navController,
               onSeePhotosClick = {
                 reviewHuntViewModel.loadReviewImages(review.photos)
                 navController.navigate(
@@ -720,7 +743,8 @@ private fun ReviewCardHeader(
                   .clip(CircleShape)
                   .background(
                       if (isCurrentUser) MaterialTheme.colorScheme.primary
-                      else MaterialTheme.colorScheme.tertiary),
+                      else MaterialTheme.colorScheme.tertiary)
+                  .testTag(HuntCardScreenTestTags.REVIEW_PROFILE_INITIALS),
           contentAlignment = Alignment.Center) {
             val initial = authorId.take(HuntCardScreenDefaults.InitialLetterCount).uppercase()
 
@@ -766,13 +790,15 @@ private fun ReviewCardComment(review: HuntReview) {
         text = review.comment,
         fontSize = HuntCardScreenDefaults.DescriptionFontSize,
         lineHeight = HuntCardScreenDefaults.OtherLineHeight,
-        color = MaterialTheme.colorScheme.onSurface)
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.testTag(HuntCardScreenTestTags.REVIEW_COMMENT))
   }
 }
 
 @Composable
 private fun ReviewCardPhotosSection(
     review: HuntReview,
+    navController: NavHostController,
     onSeePhotosClick: () -> Unit,
 ) {
   if (review.photos.isNotEmpty()) {
@@ -787,8 +813,7 @@ private fun ReviewCardPhotosSection(
                 contentColor = MaterialTheme.colorScheme.onSurface),
         shape = RoundedCornerShape(HuntCardScreenDefaults.Padding8)) {
           Text(
-              "${HuntCardScreenStrings.SeePictures} (${review.photos.size})",
-              fontSize = HuntCardScreenDefaults.MinFontSize)
+              "See Pictures (${review.photos.size})", fontSize = HuntCardScreenDefaults.MinFontSize)
         }
   }
 }

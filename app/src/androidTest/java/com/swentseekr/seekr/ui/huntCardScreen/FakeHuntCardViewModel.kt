@@ -7,7 +7,14 @@ import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-class FakeHuntCardViewModel(hunt: Hunt) : HuntCardViewModel() { // Inherit from HuntCardViewModel
+class FakeHuntCardViewModel(
+    hunt: Hunt?,
+    private val onDeleteReviewCallback:
+        ((huntId: String, reviewId: String, authorId: String, currentUserId: String) -> Unit)? =
+        null
+) : HuntCardViewModel() { // Inherit from HuntCardViewModel
+  var freezeReviews = false
+
   private val _uiState =
       MutableStateFlow(
           HuntCardUiState(
@@ -37,11 +44,15 @@ class FakeHuntCardViewModel(hunt: Hunt) : HuntCardViewModel() { // Inherit from 
   }
 
   override fun loadCurrentUserID() {
-    _uiState.value = _uiState.value.copy(currentUserId = "fakeUser123")
+    if (!freezeReviews) {
+      _uiState.value = _uiState.value.copy(currentUserId = "fakeUser123")
+    }
   }
 
   override fun loadHunt(huntId: String) {
-    _uiState.value = _uiState.value.copy(hunt = _uiState.value.hunt?.copy(uid = huntId))
+    if (!freezeReviews) {
+      _uiState.value = _uiState.value.copy(hunt = _uiState.value.hunt?.copy(uid = huntId))
+    }
   }
 
   override fun loadOtherReview(huntId: String) {}
