@@ -62,7 +62,7 @@ fun ReviewScreenContent(
 
   BaseReviewScreen(
       title = title,
-      huntTitle = uiState.hunt?.title ?: "Loading...",
+      huntTitle = uiState.hunt?.title ?: AddReviewScreenStrings.Loading,
       authorName = author,
       rating = uiState.rating,
       reviewText = uiState.reviewText,

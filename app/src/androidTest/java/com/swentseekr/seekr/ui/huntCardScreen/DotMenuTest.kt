@@ -23,10 +23,10 @@ class DotMenuTest {
     composeRule.setContent { DotMenu(onEdit = { editClicked = true }, onDelete = {}) }
 
     // Open menu
-    composeRule.onNodeWithTag("DOT_MENU_BUTTON").performClick()
+    composeRule.onNodeWithTag(HuntCardScreenTestTags.DOTBUTOON).performClick()
 
     // Click Edit
-    composeRule.onNodeWithTag("DOT_MENU_EDIT").assertIsDisplayed().performClick()
+    composeRule.onNodeWithTag(HuntCardScreenTestTags.EDIT_BUTTON).assertIsDisplayed().performClick()
 
     assertTrue(editClicked)
   }

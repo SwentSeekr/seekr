@@ -153,9 +153,6 @@ open class ReviewHuntViewModel(
     viewModelScope.launch {
       try {
         val review = repositoryReview.getReviewHunt(reviewId)
-        // _uiState.value = ReviewHuntUIState(hunt = hunt)
-
-        // Update only review-specific fields, preserve hunt data
         _uiState.update { currentState ->
           currentState.copy(
               reviewId = reviewId,
@@ -255,14 +252,16 @@ open class ReviewHuntViewModel(
 
         if (context != null) {
           NotificationHelper.sendNotification(
-              context, "Review Updated", "Your review has been updated successfully")
+              context,
+              AddReviewScreenStrings.UpdateReview,
+              AddReviewScreenStrings.UpdateReviewSucess)
         }
 
         _uiState.value =
             _uiState.value.copy(saveSuccessful = true, errorMsg = null, isSubmitted = true)
       } catch (e: Exception) {
-        Log.e(AddReviewScreenStrings.ReviewViewModel, "Error updating review", e)
-        setErrorMsg("Failed to update review: ${e.message}")
+        Log.e(AddReviewScreenStrings.ReviewViewModel, AddReviewScreenStrings.UpdateReviewFail, e)
+        setErrorMsg("${AddReviewScreenStrings.UpdateReviewFailSetMsg} ${e.message}")
         _uiState.value = _uiState.value.copy(saveSuccessful = false)
       }
     }
