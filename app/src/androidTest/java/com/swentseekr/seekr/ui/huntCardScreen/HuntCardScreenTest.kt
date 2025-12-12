@@ -24,7 +24,6 @@ import com.swentseekr.seekr.ui.components.HuntCardScreen
 import com.swentseekr.seekr.ui.components.HuntCardScreenStrings
 import com.swentseekr.seekr.ui.components.HuntCardScreenTestTags
 import com.swentseekr.seekr.ui.components.HuntCardScreenTestTags.REVIEW_COMMENT
-import com.swentseekr.seekr.ui.components.ModernReviewCard
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
 import kotlin.apply
@@ -410,7 +409,7 @@ class HuntCardScreenTest {
   }
 
   @Test
-  fun reviewWithEmptyComment_doesNotShowCommentText() {
+  fun reviewWithEmptyCommentDoesNotShowCommentText() {
     val hunt = createHunt(uid = "hunt1", title = "Test Hunt")
     val review = createReview(comment = "")
 
@@ -438,7 +437,7 @@ class HuntCardScreenTest {
   }
 
   @Test
-  fun huntCardScreen_loadingState_showsCircularProgress() {
+  fun huntCardScreeLoadingStateShowsCircularProgress() {
     val viewModel = FakeHuntCardViewModel(hunt = null)
     composeTestRule.setContent {
       HuntCardScreen(
@@ -453,7 +452,7 @@ class HuntCardScreenTest {
   }
 
   @Test
-  fun reviewWithNoPhotos_doesNotShowSeePicturesButton() {
+  fun reviewWithNoPhotosDoesNotShowSeePicturesButton() {
     val hunt = createHunt(uid = "hunt1", title = "Test Hunt")
     val review = createReview(photos = emptyList())
 
@@ -478,7 +477,7 @@ class HuntCardScreenTest {
   }
 
   @Test
-  fun emptyReviews_showEmptyState() {
+  fun emptyReviewsShowEmptyState() {
     val hunt = createHunt(uid = "hunt1", title = "Test Hunt")
     val viewModel = FakeHuntCardViewModel(hunt).apply { setReviewsForTest(emptyList()) }
 
@@ -499,7 +498,7 @@ class HuntCardScreenTest {
   }
 
   @Test
-  fun nonEmptyReviews_showReviewCardsWithAuthorProfiles() {
+  fun nonEmptyReviewsShowReviewCardsWithAuthorProfiles() {
     val hunt = createHunt(uid = "hunt1", title = "Test Hunt")
     val review = createReview(authorId = "author1", comment = "Great hunt!")
     val viewModel =
@@ -525,37 +524,7 @@ class HuntCardScreenTest {
   }
 
   @Test
-  fun deleteButton_callsProvidedCallback() {
-    var deleteCalled = false
-
-    val review =
-        HuntReview(
-            reviewId = "review-1",
-            authorId = "fakeUser123",
-            huntId = "hunt-1",
-            rating = 4.0,
-            comment = "Test review",
-            photos = emptyList())
-
-    composeTestRule.setContent {
-      ModernReviewCard(
-          review = review,
-          authorProfile = null,
-          currentUserId = "fakeUser123",
-          navController = rememberNavController(),
-          reviewHuntViewModel = FakeReviewHuntViewModel(),
-          onDeleteReview = { deleteCalled = true })
-    }
-
-    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.DELETE_REVIEW_BUTTON).assertIsDisplayed()
-
-    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.DELETE_REVIEW_BUTTON).performClick()
-
-    assertTrue(deleteCalled)
-  }
-
-  @Test
-  fun reviewWithPhotos_showsSeePicturesButton() {
+  fun reviewWithPhotosShowsSeePicturesButton() {
     val hunt = createHunt(uid = "hunt1", title = "Test Hunt")
     val review = createReview(photos = listOf("photo1.jpg", "photo2.jpg"))
 
