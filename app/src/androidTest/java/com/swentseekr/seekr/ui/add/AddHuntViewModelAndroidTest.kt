@@ -211,6 +211,28 @@ class AddHuntViewModelAndroidTest {
     assertEquals(0, pointsSecondAttach[0].imageIndex)
   }
 
+  @Test
+  fun removeMainImage_clearsMainImageUrl_andMainImageUri() = runTest {
+    // Arrange: set a main image
+    val uri = Uri.parse("file://main-to-remove.png")
+    viewModel.updateMainImageUri(uri)
+
+    // Ensure state was updated
+    val before = viewModel.uiState.value.mainImageUrl
+    assertEquals(uri.toString(), before)
+    assertEquals(uri, viewModel.mainImageUri)
+
+    // Act: call function to cover BaseHuntViewModel.removeMainImage()
+    viewModel.removeMainImage()
+
+    // Assert: UI state cleared
+    val after = viewModel.uiState.value.mainImageUrl
+    assertEquals("", after)
+
+    // Assert: AddHuntViewModel.mainImageUri cleared
+    assertNull(viewModel.mainImageUri)
+  }
+
   private fun setValidState(points: List<Location>) {
     viewModel.setTitle("T")
     viewModel.setDescription("D")

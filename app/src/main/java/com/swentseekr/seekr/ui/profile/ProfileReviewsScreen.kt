@@ -62,6 +62,7 @@ fun ProfileReviewsScreen(
     userId: String,
     profileViewModel: ProfileViewModel = viewModel(),
     onGoBack: () -> Unit = {},
+    editReview: () -> Unit = {},
     navController: NavHostController,
     testProfile: Profile? = null,
     testReviews: List<HuntReview>? = null
@@ -169,7 +170,8 @@ fun ProfileReviewsScreen(
                                       review.authorId,
                                       currentUserId = profileViewModel.currentUid)
                                 },
-                                reviewHuntViewModel = reviewHuntViewModel)
+                                reviewHuntViewModel = reviewHuntViewModel,
+                                onEdit = { editReview })
                           }
                     }
                   }

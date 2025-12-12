@@ -134,7 +134,7 @@ fun BaseHuntScreen(
                 onSelectOtherImages = vm::updateOtherImagesUris,
                 onRemoveOtherImage = vm::removeOtherImage, // Local URIs.
                 onRemoveExistingImage = vm::removeExistingOtherImage, // Remote URLs (Firestore).
-            ),
+                onRemoveMainImage = { vm.removeMainImage() }),
         navigationCallbacks = HuntNavigationCallbacks(onGoBack = onGoBack),
         deleteAction = deleteAction,
     )

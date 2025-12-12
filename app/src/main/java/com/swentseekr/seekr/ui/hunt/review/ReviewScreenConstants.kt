@@ -85,6 +85,7 @@ object AddReviewScreenStrings {
   const val RemovePhotoContentDescription = "Remove photo"
 
   const val User0 = "0"
+  const val Loading = "Loading..."
 
   const val ErrorSubmisson = "At least one field is not valid"
   const val ErrorLoadingHunt = "Error loading Hunt by ID:"
@@ -112,6 +113,10 @@ object AddReviewScreenStrings {
   const val PhotosLabelPrefix = "Photos ("
   const val PhotosLabelSuffix = ")"
   const val AddMorePhotosButtonLabel = "Add more"
+  const val UpdateReview = "Review Updated"
+  const val UpdateReviewSucess = "Your review has been updated successfully"
+  const val UpdateReviewFail = "Error updating review"
+  const val UpdateReviewFailSetMsg = "Failed to update review:"
 
   fun ratingSummary(rating: Int, maxStars: Int): String = "$RatingPrefix$rating /$maxStars"
 

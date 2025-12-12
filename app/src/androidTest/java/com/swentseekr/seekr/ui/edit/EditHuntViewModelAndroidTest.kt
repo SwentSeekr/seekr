@@ -256,6 +256,39 @@ class EditHuntViewModelAndroidTest {
     }
   }
 
+  @Test
+  fun removeMainImage_savesUrlForDeletion_andClearsMainImageUrl() = runTest {
+    // Arrange: create and load a hunt with a main image
+    createHunt()
+    advanceUntilIdle()
+
+    val id = repository.getAllHunts().first().uid
+    editVM.load(id)
+    advanceUntilIdle()
+
+    // The createHunt() helper sets a main image via AddHuntViewModel
+    val before = editVM.uiState.value.mainImageUrl
+    assertNotNull(before)
+    assertTrue(before!!.isNotBlank())
+
+    // Act
+    editVM.removeMainImage()
+    advanceUntilIdle()
+
+    // Assert: UI main image should be cleared
+    assertEquals("", editVM.uiState.value.mainImageUrl)
+
+    // Assert: old URL should be stored for deletion
+    val pendingField =
+        EditHuntViewModel::class
+            .java
+            .getDeclaredField("pendingMainImageDeletionUrl")
+            .apply { isAccessible = true }
+            .get(editVM)
+
+    assertEquals(before, pendingField)
+  }
+
   // Helpers -------------------------------------------------------------
 
   private fun createHunt() {

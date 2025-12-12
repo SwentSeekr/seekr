@@ -34,7 +34,8 @@ class HuntsRepositoryLocal : HuntsRepository {
       newValue: Hunt,
       _mainImageUri: Uri?,
       _addedOtherImages: List<Uri>,
-      _removedOtherImages: List<String>
+      _removedOtherImages: List<String>,
+      _removedMainImageUrl: String?
   ) {
     val index = hunts.indexOfFirst { it.uid == huntID }
     if (index != -1) {
