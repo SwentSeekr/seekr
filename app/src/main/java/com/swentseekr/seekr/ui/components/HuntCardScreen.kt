@@ -251,8 +251,9 @@ fun HuntCardScreen(
                 Spacer(
                     modifier =
                         Modifier.height(
-                            HuntCardScreenDefaults.Padding40 *
-                                HuntCardScreenDefaults.EndListSpacerMultiplier))
+                                HuntCardScreenDefaults.Padding40 *
+                                    HuntCardScreenDefaults.EndListSpacerMultiplier)
+                            .testTag(HuntCardScreenTestTags.LAST_SPACER))
               }
             }
       }
@@ -570,7 +571,10 @@ fun ModernActionButtons(
       horizontalArrangement = Arrangement.End) {
         Button(
             onClick = onActionClick,
-            modifier = Modifier.testTag(HuntCardScreenTestTags.REVIEW_BUTTON),
+            modifier =
+                Modifier.testTag(
+                    if (isCurrentId) (HuntCardScreenTestTags.EDIT_HUNT_BUTTON)
+                    else HuntCardScreenTestTags.REVIEW_BUTTON),
             colors =
                 ButtonDefaults.buttonColors(
                     containerColor =

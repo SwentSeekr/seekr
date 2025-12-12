@@ -193,18 +193,127 @@ class SeekrNavigationTest {
   }
 
   @Test
-  fun profile_click_my_hunt_opens_edit_hunt_and_hides_bar() {
+  fun profile_click_my_hunt_opens_hunt_card_screen() {
+    // Go to the profile tab (first time)
     goToProfileTab()
 
-    // first MyHunt card
-    firstNode("HUNT_CARD_hunt123").performClick()
-
-    // wait for EditHunt wrapper tag
-    waitUntilTrue(SHORT) {
-      node(NavigationTestTags.EDIT_HUNT_SCREEN).assertIsDisplayed()
-      true
+    // Wait until the MyHunt card appears
+    waitUntilTrue(MED) {
+      compose
+          .onAllNodesWithTag("HUNT_CARD_hunt123", useUnmergedTree = true)
+          .fetchSemanticsNodes()
+          .isNotEmpty()
     }
-    node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
+
+    // Click on the MyHunt card
+    compose.onNodeWithTag("HUNT_CARD_hunt123", useUnmergedTree = true).assertExists().performClick()
+
+    // Wait for HuntCard screen to appear
+    waitUntilTrue(MED) {
+      compose
+          .onAllNodesWithTag(NavigationTestTags.HUNTCARD_SCREEN, useUnmergedTree = true)
+          .fetchSemanticsNodes()
+          .isNotEmpty()
+    }
+
+    compose
+        .onNodeWithTag(NavigationTestTags.HUNTCARD_SCREEN, useUnmergedTree = true)
+        .assertIsDisplayed()
+  }
+
+  @Test
+  fun huntCard_clickEditButton_navigatesToEditHuntScreen() {
+    // Use "fakeUser123" to match what FakeHuntCardViewModel.loadCurrentUserID() sets
+    val currentUserId = "fakeUser123"
+
+    // FIRST create the hunt with the correct authorId
+    val hunt =
+        createHunt(uid = "hunt123", title = "Test Hunt for Editing").copy(authorId = currentUserId)
+
+    // THEN pass it to the ViewModel so it's in the initial state
+    val viewModel = FakeHuntCardViewModel(hunt)
+
+    // Verify the ViewModel has the correct data
+    assert(viewModel.uiState.value.hunt?.authorId == currentUserId) {
+      "Hunt authorId doesn't match: ${viewModel.uiState.value.hunt?.authorId} != $currentUserId"
+    }
+
+    // Setup profile repo with the author's profile
+    val fakeProfileRepo =
+        ProfileRepositoryLocal().apply {
+          addProfile(sampleProfileWithPseudonym(currentUserId, "Test Author"))
+        }
+
+    withFakeRepos(FakeRepoSuccess(listOf(hunt)), fakeProfileRepo) {
+      compose.runOnUiThread {
+        compose.activity.setContent {
+          SeekrMainNavHost(testMode = true, huntCardViewModelFactory = { viewModel })
+        }
+      }
+
+      // Navigate to Profile tab
+      goToProfileTab()
+
+      // Wait until the hunt card appears
+      waitUntilTrue(MED) {
+        compose
+            .onAllNodesWithTag("HUNT_CARD_hunt123", useUnmergedTree = true)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+      }
+
+      // Click on the hunt card
+      compose
+          .onNodeWithTag("HUNT_CARD_hunt123", useUnmergedTree = true)
+          .assertExists()
+          .performClick()
+
+      // Wait for HuntCard screen to appear
+      waitUntilTrue(MED) {
+        compose
+            .onAllNodesWithTag(NavigationTestTags.HUNTCARD_SCREEN, useUnmergedTree = true)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+      }
+
+      compose
+          .onNodeWithTag(NavigationTestTags.HUNTCARD_SCREEN, useUnmergedTree = true)
+          .assertIsDisplayed()
+
+      // Give extra time for the lazy column to fully compose
+      compose.waitForIdle()
+
+      compose
+          .onNodeWithTag(HuntCardScreenTestTags.HUNT_CARD_LIST, useUnmergedTree = true)
+          .performScrollToNode(hasTestTag(HuntCardScreenTestTags.EDIT_HUNT_BUTTON))
+
+      compose.waitForIdle()
+
+      // Scroll to the Edit button
+      compose
+          .onNodeWithTag("HUNT_CARD_LIST", useUnmergedTree = true)
+          .performScrollToNode(hasTestTag(HuntCardScreenTestTags.EDIT_HUNT_BUTTON))
+
+      // Click the Edit Hunt button
+      compose
+          .onNodeWithTag(HuntCardScreenTestTags.EDIT_HUNT_BUTTON, useUnmergedTree = true)
+          .assertExists()
+          .assertIsDisplayed()
+          .performClick()
+
+      // Wait for EditHunt screen to appear
+      compose.waitUntil(MED) {
+        compose
+            .onAllNodesWithTag(NavigationTestTags.EDIT_HUNT_SCREEN, useUnmergedTree = true)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+      }
+
+      // Verify we're on the EditHunt screen
+      compose
+          .onNodeWithTag(NavigationTestTags.EDIT_HUNT_SCREEN, useUnmergedTree = true)
+          .assertIsDisplayed()
+    }
   }
 
   @Test
@@ -336,97 +445,6 @@ class SeekrNavigationTest {
           .onAllNodes(hasTestTag(NavigationTestTags.HUNTCARD_SCREEN), useUnmergedTree = true)
           .onFirst()
           .assertExists()
-    }
-  }
-
-  @Test
-  fun profile_myHunt_edit_flow_uses_mockProfileData_and_onDone_returns_to_profile() {
-    // Seed repo so EditHuntViewModel.load("hunt123") succeeds (matches mockProfileData()).
-    val seeded = createHunt(uid = "hunt123", title = "City Exploration")
-
-    withFakeRepo(FakeRepoSuccess(listOf(seeded))) {
-      // Compose with testMode so Profile uses mockProfileData() and exposes HUNT_CARD_0.
-      compose.runOnUiThread { compose.activity.setContent { SeekrMainNavHost(testMode = true) } }
-
-      // Go to Profile tab.
-      goToProfileTab()
-
-      // Open the first My Hunt card -> navigates to EditHunt(hunt123).
-      firstNode("HUNT_CARD_hunt123").assertIsDisplayed().performClick()
-      waitUntilTrue(MED) {
-        node(NavigationTestTags.EDIT_HUNT_SCREEN).assertIsDisplayed()
-        true
-      }
-
-      // Bottom bar should be hidden on EditHunt.
-      node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
-
-      // BEST EFFORT: try to go through the "select locations" branch, then cancel (no-ops if
-      // absent).
-      runCatching {
-            listOf(
-                    { tryClickByTag("SELECT_LOCATIONS", "HUNT_SELECT_LOCATIONS", "POINTS_PICKER") },
-                    { tryClickByDesc("Select locations", "Pick points", "Select points") },
-                    { tryClickByText("Select locations", "Select points", "Add points") },
-                )
-                .any { it() }
-
-            listOf(
-                    { tryClickByTag("CANCEL", "MAP_CANCEL", "Back") },
-                    { tryClickByDesc("Cancel", "Back") },
-                    { tryClickByText("Cancel", "Back") },
-                )
-                .any { it() }
-          }
-          .getOrNull()
-
-      // Try to SAVE to trigger onDone() → back to Profile.
-      val didClickSave =
-          listOf<(Unit) -> Boolean>(
-                  {
-                    listOf(
-                            "SAVE",
-                            "SAVE_BUTTON",
-                            "HUNT_SAVE",
-                            "EDIT_SAVE",
-                            "SAVE_HUNT",
-                            "HUNT_SUBMIT",
-                            "SUBMIT_BUTTON")
-                        .any { tag -> tryClickByTag(tag) }
-                  },
-                  { arrayOf("Save", "Done").any { d -> tryClickByDesc(d) } },
-                  {
-                    arrayOf("Save", "SAVE", "Save Hunt", "Done", "DONE").any { t ->
-                      tryClickByText(t)
-                    }
-                  },
-              )
-              .any { it(Unit) }
-
-      if (didClickSave) {
-        // After save/onDone we expect to be back on Profile with bottom bar visible.
-        waitUntilTrue(LONG) {
-          node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
-          true
-        }
-        val editGone =
-            compose
-                .onAllNodes(hasTestTag(NavigationTestTags.EDIT_HUNT_SCREEN), useUnmergedTree = true)
-                .fetchSemanticsNodes()
-                .isEmpty()
-        assert(editGone) { "EditHunt wrapper should be dismissed after save/onDone." }
-      } else {
-        // If we couldn't find a Save control, at least exercise back navigation.
-        compose.activityRule.scenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
-        waitUntilTrue(MED) {
-          node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
-          true
-        }
-      }
-
-      // Final sanity: we're back in a tab destination (Profile) and the bottom bar is visible.
-      node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
-      node(NavigationTestTags.PROFILE_TAB).assertIsDisplayed()
     }
   }
 
