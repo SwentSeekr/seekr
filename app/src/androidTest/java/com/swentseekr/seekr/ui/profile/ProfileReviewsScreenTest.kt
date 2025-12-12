@@ -8,8 +8,12 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.navigation.compose.rememberNavController
+import com.swentseekr.seekr.FakeReviewHuntViewModel
+import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.model.profile.createReview
 import com.swentseekr.seekr.model.profile.mockProfileData
+import com.swentseekr.seekr.ui.components.HuntCardScreenTestTags
+import com.swentseekr.seekr.ui.components.ModernReviewCard
 import junit.framework.TestCase.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -33,6 +37,7 @@ class ProfileReviewsScreenTest {
           userId = sampleProfile.uid,
           profileViewModel = ProfileViewModel(),
           onGoBack = {},
+          editReview = {},
           navController = navController,
           testProfile = sampleProfile,
           testReviews = sampleReviews)
@@ -64,6 +69,7 @@ class ProfileReviewsScreenTest {
           userId = sampleProfile.uid,
           profileViewModel = ProfileViewModel(),
           onGoBack = { backClicked = true },
+          editReview = {},
           navController = navController,
           testProfile = sampleProfile,
           testReviews = sampleReviews)
@@ -81,6 +87,7 @@ class ProfileReviewsScreenTest {
           userId = sampleProfile.uid,
           profileViewModel = ProfileViewModel(),
           onGoBack = {},
+          editReview = {},
           navController = navController,
           testProfile = sampleProfile,
           testReviews = emptyList())
@@ -97,6 +104,7 @@ class ProfileReviewsScreenTest {
           userId = "someUserId",
           profileViewModel = ProfileViewModel(),
           onGoBack = {},
+          editReview = {},
           navController = navController,
           testProfile = null,
           testReviews = emptyList())
@@ -121,6 +129,7 @@ class ProfileReviewsScreenTest {
           userId = testProfile.uid,
           profileViewModel = ProfileViewModel(),
           onGoBack = {},
+          editReview = {},
           navController = navController,
           testProfile = testProfile,
           testReviews = singleReview)
@@ -142,6 +151,7 @@ class ProfileReviewsScreenTest {
           userId = testProfile.uid,
           profileViewModel = ProfileViewModel(),
           onGoBack = {},
+          editReview = {},
           navController = navController,
           testProfile = testProfile,
           testReviews = sampleReviews)
@@ -151,5 +161,34 @@ class ProfileReviewsScreenTest {
         .onNodeWithTag(ProfileReviewsTestTags.RATING_TEXT)
         .assertIsDisplayed()
         .assertTextContains("4.2/5.0 - 2 reviews")
+  }
+
+  @Test
+  fun reviewCard_shows_edit_menu_for_current_user() {
+    val currentUserId = "user123"
+    val review =
+        HuntReview(
+            reviewId = "review1",
+            authorId = currentUserId,
+            huntId = "hunt1",
+            comment = "Compétent",
+            rating = 5.0,
+            photos = emptyList())
+
+    composeTestRule.setContent {
+      ModernReviewCard(
+          review = review,
+          reviewHuntViewModel = FakeReviewHuntViewModel(),
+          currentUserId = currentUserId,
+          navController = rememberNavController(),
+          onDeleteReview = {},
+          onEdit = {})
+    }
+
+    // Open the menu
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.DOTBUTOON).performClick()
+
+    // Check Edit button is displayed
+    composeTestRule.onNodeWithTag(HuntCardScreenTestTags.EDIT_BUTTON).assertIsDisplayed()
   }
 }

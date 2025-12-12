@@ -47,6 +47,7 @@ import kotlinx.coroutines.launch
 data class ReviewHuntUIState(
     val hunt: Hunt? = null,
     val huntId: String = AddReviewScreenStrings.Empty,
+    val reviewId: String = AddReviewScreenStrings.Empty,
     val userId: String = AddReviewScreenStrings.Empty,
     val reviewText: String = AddReviewScreenStrings.Empty,
     val rating: Double = AddReviewScreenDefaults.Rating,
@@ -89,6 +90,8 @@ open class ReviewHuntViewModel(
 
   /** Public immutable [StateFlow] exposing the current [ReviewHuntUIState]. */
   open val uiState: StateFlow<ReviewHuntUIState> = _uiState.asStateFlow()
+
+  private var lastSavedReview: ReviewHuntUIState? = null
 
   /**
    * Clears any existing error message in the UI state.
@@ -135,6 +138,33 @@ open class ReviewHuntViewModel(
         Log.e(
             AddReviewScreenStrings.ReviewViewModel,
             "${AddReviewScreenStrings.ErrorLoadingHunt} $huntId",
+            e)
+      }
+    }
+  }
+
+  /**
+   * Loads a review by its ID and updates the UI state's list of photo URLs.
+   *
+   * @param reviewId Identifier of the review to load.
+   * @return A [kotlinx.coroutines.Job] representing the launched coroutine.
+   */
+  open fun loadReview(reviewId: String) {
+    viewModelScope.launch {
+      try {
+        val review = repositoryReview.getReviewHunt(reviewId)
+        _uiState.update { currentState ->
+          currentState.copy(
+              reviewId = reviewId,
+              userId = review.authorId,
+              reviewText = review.comment,
+              photos = review.photos,
+              rating = review.rating)
+        }
+      } catch (e: Exception) {
+        Log.e(
+            AddReviewScreenStrings.ReviewViewModel,
+            "${AddReviewScreenStrings.ErrorLoadingHunt} $reviewId",
             e)
       }
     }
@@ -203,6 +233,39 @@ open class ReviewHuntViewModel(
     }
   }
 
+  /** Updates an existing review in the repository. */
+  private fun updateReviewInRepository(reviewId: String, hunt: Hunt, context: Context?) {
+    viewModelScope.launch {
+      try {
+        val updatedReview =
+            HuntReview(
+                reviewId = reviewId, // Use existing review ID
+                authorId =
+                    FirebaseAuth.getInstance().currentUser?.uid ?: AddReviewScreenStrings.User0,
+                huntId = hunt.uid,
+                rating = _uiState.value.rating,
+                comment = _uiState.value.reviewText,
+                photos = _uiState.value.photos)
+
+        // Update the review instead of adding a new one
+        repositoryReview.updateReviewHunt(reviewId, updatedReview)
+
+        if (context != null) {
+          NotificationHelper.sendNotification(
+              context,
+              AddReviewScreenStrings.UpdateReview,
+              AddReviewScreenStrings.UpdateReviewSucess)
+        }
+
+        _uiState.value =
+            _uiState.value.copy(saveSuccessful = true, errorMsg = null, isSubmitted = true)
+      } catch (e: Exception) {
+        Log.e(AddReviewScreenStrings.ReviewViewModel, AddReviewScreenStrings.UpdateReviewFail, e)
+        setErrorMsg("${AddReviewScreenStrings.UpdateReviewFailSetMsg} ${e.message}")
+        _uiState.value = _uiState.value.copy(saveSuccessful = false)
+      }
+    }
+  }
   /**
    * Deletes a review (and its associated photos) if the given user is the author.
    *
@@ -288,8 +351,12 @@ open class ReviewHuntViewModel(
       setErrorMsg(AddReviewScreenStrings.ErrorSubmisson)
       return
     }
-    _uiState.value = _uiState.value.copy(isSubmitted = true)
-    reviewHuntToRepository(userId, hunt, context)
+    if (state.reviewId.isNotEmpty()) {
+      updateReviewInRepository(state.reviewId, hunt, context)
+    } else {
+      _uiState.value = _uiState.value.copy(isSubmitted = true)
+      reviewHuntToRepository(userId, hunt, context)
+    }
   }
 
   /**
@@ -430,20 +497,4 @@ open class ReviewHuntViewModel(
     val userId = FirebaseAuth.getInstance().currentUser?.uid ?: AddReviewScreenStrings.User0
     submitReviewHunt(userId, hunt, context)
   }
-
-  /**
-   * Loads a review by its ID and updates the UI state's list of photo URLs.
-   *
-   * @param reviewId Identifier of the review to load.
-   * @return A [kotlinx.coroutines.Job] representing the launched coroutine.
-   */
-  fun loadReview(reviewId: String) =
-      viewModelScope.launch {
-        try {
-          val review = repositoryReview.getReviewHunt(reviewId)
-          _uiState.update { it.copy(photos = review.photos) }
-        } catch (e: Exception) {
-          Log.e("ReviewHuntViewModel", "Failed to load review $reviewId", e)
-        }
-      }
 }
