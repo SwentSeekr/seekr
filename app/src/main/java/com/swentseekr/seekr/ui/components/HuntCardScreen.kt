@@ -814,23 +814,6 @@ private fun ReviewCardPhotosSection(
         shape = RoundedCornerShape(HuntCardScreenDefaults.Padding8)) {
           Text(
               "See Pictures (${review.photos.size})", fontSize = HuntCardScreenDefaults.MinFontSize)
-
-          /*if (review.photos.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding12))
-
-            Button(
-                onClick = { navController.navigate("reviewImages/${review.reviewId}") },
-                modifier = Modifier.testTag("SEE_PICTURES_BUTTON"),
-                colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = HuntCardScreenDefaults.CardSoftGray,
-                        contentColor = MaterialTheme.colorScheme.onSurface),
-                shape = RoundedCornerShape(HuntCardScreenDefaults.Padding8)) {
-                  Text(
-                      "See Pictures (${review.photos.size})",
-                      fontSize = HuntCardScreenDefaults.MinFontSize)
-                }
-          }*/
         }
   }
 }
