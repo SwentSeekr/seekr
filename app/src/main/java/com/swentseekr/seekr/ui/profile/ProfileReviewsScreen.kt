@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.ui.components.MAX_RATING
 import com.swentseekr.seekr.ui.components.ModernReviewCard
@@ -67,14 +67,15 @@ fun ProfileReviewsScreen(
     navController: NavHostController,
     testProfile: Profile? = null,
     testReviews: List<HuntReview>? = null,
-    reviewHuntViewModel: ReviewHuntViewModel = viewModel(),
+    reviewHuntViewModel: ReviewHuntViewModel = viewModel(), // for testing
+    testHuntsById: Map<String, Hunt>? = null // for testing
 ) {
   val uiState by profileViewModel.uiState.collectAsState()
   val profile = testProfile ?: uiState.profile
   val reviews = testReviews ?: profileViewModel.reviewsState.collectAsState().value
   val totalReviews = reviews.size
-  val reviewHuntViewModel: ReviewHuntViewModel = viewModel()
-  val huntsById = reviewHuntViewModel.huntsById.collectAsState().value
+  val reviewHuntViewModel: ReviewHuntViewModel = reviewHuntViewModel
+  val huntsById = testHuntsById ?: reviewHuntViewModel.huntsById.collectAsState().value
 
   LaunchedEffect(userId) { if (testProfile == null) profileViewModel.loadProfile(userId) }
   LaunchedEffect(profile) {

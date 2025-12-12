@@ -8,8 +8,16 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.navigation.compose.rememberNavController
+import com.swentseekr.seekr.model.hunt.HuntReview
+import com.swentseekr.seekr.model.hunt.HuntReviewRepositoryLocal
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryLocal
+import com.swentseekr.seekr.model.hunt.ReviewImageRepositoryLocal
+import com.swentseekr.seekr.model.profile.ProfileRepositoryLocal
+import com.swentseekr.seekr.model.profile.createHunt
 import com.swentseekr.seekr.model.profile.createReview
 import com.swentseekr.seekr.model.profile.mockProfileData
+import com.swentseekr.seekr.model.profile.sampleProfile
+import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
 import junit.framework.TestCase.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -25,25 +33,33 @@ class ProfileReviewsScreenTest {
           createReview(reviewId = "review1", huntId = sampleProfile.myHunts[0].uid),
           createReview(reviewId = "review2", huntId = sampleProfile.myHunts[0].uid))
 
-  @Test
-  fun testProfileReviewsScreen_displaysAllElements() {
+  private fun setContent(
+      profile: Profile = sampleProfile,
+      reviews: List<HuntReview> = sampleReviews,
+      reviewHuntViewModel: ReviewHuntViewModel = ReviewHuntViewModel(),
+      onGoBack: () -> Unit = {}
+  ) {
     composeTestRule.setContent {
       val navController = rememberNavController()
       ProfileReviewsScreen(
-          userId = sampleProfile.uid,
+          userId = profile.uid,
           profileViewModel = ProfileViewModel(),
-          onGoBack = {},
+          reviewHuntViewModel = reviewHuntViewModel,
+          onGoBack = onGoBack,
           navController = navController,
-          testProfile = sampleProfile,
-          testReviews = sampleReviews)
+          testProfile = profile,
+          testReviews = reviews,
+          testHuntsById = profile.myHunts.associateBy { it.uid })
     }
+  }
 
+  @Test
+  fun testProfileReviewsScreen_displaysAllElements() {
+    setContent()
     composeTestRule.onNodeWithTag(ProfileReviewsTestTags.TOP_BAR).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileReviewsTestTags.BACK_BUTTON).assertIsDisplayed()
-
     composeTestRule.onNodeWithTag(ProfileReviewsTestTags.RATING_SUMMARY).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileReviewsTestTags.RATING_TEXT).assertIsDisplayed()
-
     sampleReviews.forEach { review ->
       composeTestRule
           .onNodeWithTag(ProfileReviewsTestTags.REVIEWS_LIST)
@@ -58,34 +74,14 @@ class ProfileReviewsScreenTest {
   @Test
   fun testBackButton_clickable() {
     var backClicked = false
-    composeTestRule.setContent {
-      val navController = rememberNavController()
-      ProfileReviewsScreen(
-          userId = sampleProfile.uid,
-          profileViewModel = ProfileViewModel(),
-          onGoBack = { backClicked = true },
-          navController = navController,
-          testProfile = sampleProfile,
-          testReviews = sampleReviews)
-    }
-
+    setContent(onGoBack = { backClicked = true })
     composeTestRule.onNodeWithTag(ProfileReviewsTestTags.BACK_BUTTON).performClick()
     assertTrue(backClicked)
   }
 
   @Test
   fun testNoReviewsMessageDisplayedWhenEmpty() {
-    composeTestRule.setContent {
-      val navController = rememberNavController()
-      ProfileReviewsScreen(
-          userId = sampleProfile.uid,
-          profileViewModel = ProfileViewModel(),
-          onGoBack = {},
-          navController = navController,
-          testProfile = sampleProfile,
-          testReviews = emptyList())
-    }
-
+    setContent(reviews = emptyList())
     composeTestRule.onNodeWithTag(ProfileReviewsTestTags.EMPTY_MESSAGE).assertIsDisplayed()
   }
 
@@ -101,7 +97,6 @@ class ProfileReviewsScreenTest {
           testProfile = null,
           testReviews = emptyList())
     }
-
     composeTestRule.onNodeWithTag(ProfileReviewsTestTags.SCREEN).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileReviewsTestTags.LOADING).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileReviewsTestTags.RATING_SUMMARY).assertDoesNotExist()
@@ -109,177 +104,125 @@ class ProfileReviewsScreenTest {
   }
 
   @Test
-  fun testRatingTextSingularReview() {
-    val singleReview =
-        listOf(createReview(reviewId = "review1", huntId = sampleProfile.myHunts[0].uid))
+  fun testRatingText_singularReview() {
+    val singularReviewProfile =
+        sampleProfile.copy(author = sampleProfile.author.copy(reviewRate = 4.5))
 
-    val testProfile = sampleProfile.copy(author = sampleProfile.author.copy(reviewRate = 4.5))
-
-    composeTestRule.setContent {
-      val navController = rememberNavController()
-      ProfileReviewsScreen(
-          userId = testProfile.uid,
-          profileViewModel = ProfileViewModel(),
-          onGoBack = {},
-          navController = navController,
-          testProfile = testProfile,
-          testReviews = singleReview)
-    }
-
+    setContent(profile = singularReviewProfile, reviews = listOf(sampleReviews[0]))
     composeTestRule
         .onNodeWithTag(ProfileReviewsTestTags.RATING_TEXT)
-        .assertIsDisplayed()
         .assertTextContains("4.5/5.0 - 1 review")
   }
 
   @Test
-  fun testRatingTextMultipleReviews() {
-    val testProfile = sampleProfile.copy(author = sampleProfile.author.copy(reviewRate = 4.2))
+  fun testRatingText_multipleReviews() {
+    val multipleReviewsProfile =
+        sampleProfile.copy(author = sampleProfile.author.copy(reviewRate = 4.2))
 
-    composeTestRule.setContent {
-      val navController = rememberNavController()
-      ProfileReviewsScreen(
-          userId = testProfile.uid,
-          profileViewModel = ProfileViewModel(),
-          onGoBack = {},
-          navController = navController,
-          testProfile = testProfile,
-          testReviews = sampleReviews)
-    }
-
+    setContent(profile = multipleReviewsProfile, reviews = sampleReviews)
     composeTestRule
         .onNodeWithTag(ProfileReviewsTestTags.RATING_TEXT)
-        .assertIsDisplayed()
         .assertTextContains("4.2/5.0 - 2 reviews")
   }
-  /*@Test
-  fun testHuntHeaderClickableNavigates() {
-      lateinit var navController: NavHostController
-
-      val fakeHuntsRepository = HuntsRepositoryLocal()
-      val fakeReviewRepository = HuntReviewRepositoryLocal()
-      val fakeProfileRepository = ProfileRepositoryLocal()
-      val fakeImageRepository = ReviewImageRepositoryLocal()
-
-      val hunt = sampleProfile.myHunts[0]
-      runBlocking {
-          fakeHuntsRepository.addHunt(hunt)
-          sampleReviews.forEach { review ->
-              fakeReviewRepository.addReviewHunt(review)
-          }
-      }
-
-      val reviewHuntViewModel = ReviewHuntViewModel(
-          fakeHuntsRepository,
-          fakeReviewRepository,
-          fakeProfileRepository,
-          fakeImageRepository,
-          dispatcher = Dispatchers.Main
-      )
-
-      composeTestRule.setContent {
-          navController = rememberNavController()
-          ProfileReviewsScreen(
-              userId = sampleProfile.uid,
-              profileViewModel = ProfileViewModel(),
-              onGoBack = {},
-              navController = navController,
-              testProfile = sampleProfile,
-              testReviews = sampleReviews,
-              reviewHuntViewModel = reviewHuntViewModel
-          )
-      }
-
-      val huntId = hunt.uid
-
-      composeTestRule.waitForIdle()
-
-      composeTestRule.mainClock.advanceTimeBy(1000)
-      composeTestRule.waitForIdle()
-
-      composeTestRule.onNodeWithTag(ProfileReviewsTestTags.REVIEWS_LIST)
-          .performScrollToNode(hasTestTag("hunt_header_$huntId"))
-
-      composeTestRule.onNodeWithTag("hunt_header_$huntId")
-          .assertIsDisplayed()
-          .performClick()
-
-      assertTrue(navController.currentBackStackEntry?.destination?.route?.contains(huntId) == true)
-  }*/
 
   @Test
-  fun testDividerItemsAreDisplayed() {
-    composeTestRule.setContent {
-      val navController = rememberNavController()
-      ProfileReviewsScreen(
-          userId = sampleProfile.uid,
-          profileViewModel = ProfileViewModel(),
-          navController = navController,
-          testProfile = sampleProfile,
-          testReviews = sampleReviews)
-    }
+  fun testDividerAndHuntHeadersDisplayed() {
+    val hunt1 = createHunt(uid = "hunt1", title = "First Hunt")
+    val hunt2 = createHunt(uid = "hunt2", title = "Second Hunt")
+    val profile = sampleProfile(myHunts = listOf(hunt1, hunt2), uid = "user123")
+    val reviews =
+        listOf(
+            createReview(reviewId = "review1", huntId = hunt1.uid),
+            createReview(reviewId = "review2", huntId = hunt2.uid))
+    setContent(profile = profile, reviews = reviews)
 
-    sampleProfile.myHunts.forEach { hunt ->
-      composeTestRule.onNodeWithTag("divider_${hunt.uid}").assertIsDisplayed()
+    listOf(hunt1, hunt2).forEach { hunt ->
+      composeTestRule
+          .onNodeWithTag(ProfileReviewsTestTags.REVIEWS_LIST)
+          .performScrollToNode(hasTestTag("hunt_header_${hunt.uid}"))
+      composeTestRule.onNodeWithTag("hunt_header_${hunt.uid}").assertIsDisplayed()
+      composeTestRule.onNode(hasTestTag("divider_${hunt.uid}")).assertIsDisplayed()
     }
   }
 
   @Test
-  fun testDividerItemsRendered() {
-    composeTestRule.setContent {
-      ProfileReviewsScreen(
-          userId = sampleProfile.uid,
-          profileViewModel = ProfileViewModel(),
-          onGoBack = {},
-          navController = rememberNavController(),
-          testProfile = sampleProfile,
-          testReviews = sampleReviews)
-    }
-
-    val huntId = sampleProfile.myHunts[0].uid
-    composeTestRule.onNode(hasTestTag("divider_$huntId")).assertIsDisplayed()
-  }
-
-  /*@Test
   fun testLoadHuntAndAuthorCalledForEachReview() {
-      val reviewHuntViewModel = object : ReviewHuntViewModel(
-          HuntsRepositoryLocal(),
-          HuntReviewRepositoryLocal(),
-          ProfileRepositoryLocal(),
-          ReviewImageRepositoryLocal()
-      ) {
-          val loadedHunts = mutableListOf<String>()
-          val loadedAuthors = mutableListOf<String>()
-
+    val loadedHunts = mutableListOf<String>()
+    val loadedAuthors = mutableListOf<String>()
+    val fakeViewModel =
+        object :
+            ReviewHuntViewModel(
+                HuntsRepositoryLocal(),
+                HuntReviewRepositoryLocal(),
+                ProfileRepositoryLocal(),
+                ReviewImageRepositoryLocal()) {
           override fun loadHunt(huntId: String) {
-              loadedHunts.add(huntId)
+            loadedHunts.add(huntId)
           }
 
           override fun loadAuthorProfile(userId: String) {
-              loadedAuthors.add(userId)
+            loadedAuthors.add(userId)
           }
-      }
+        }
 
-      composeTestRule.setContent {
-          ProfileReviewsScreen(
-              userId = sampleProfile.uid,
-              profileViewModel = ProfileViewModel(),
-              reviewHuntViewModel = reviewHuntViewModel,
-              onGoBack = {},
-              navController = rememberNavController(),
-              testProfile = sampleProfile,
-              testReviews = sampleReviews
-          )
-      }
+    setContent(reviewHuntViewModel = fakeViewModel)
 
-      composeTestRule.waitForIdle()
+    composeTestRule.waitForIdle()
 
-      sampleReviews.map { it.huntId }.distinct().forEach { huntId ->
-          assertTrue(reviewHuntViewModel.loadedHunts.contains(huntId))
-      }
-      sampleReviews.forEach { review ->
-          assertTrue(reviewHuntViewModel.loadedAuthors.contains(review.authorId))
-      }
+    sampleReviews.map { it.huntId }.distinct().forEach { assertTrue(loadedHunts.contains(it)) }
+    sampleReviews.forEach { assertTrue(loadedAuthors.contains(it.authorId)) }
+  }
 
-  }*/
+  @Test
+  fun testDeleteReviewCallback() {
+    setContent()
+    val firstReviewId = sampleReviews[0].reviewId
+    composeTestRule
+        .onNodeWithTag(ProfileReviewsTestTags.reviewCardTag(firstReviewId))
+        .assertIsDisplayed()
+        .performClick()
+  }
+
+  @Test
+  fun testHuntHeaderDisplaysWhenHuntIsAvailable() {
+    composeTestRule.setContent {
+      val navController = rememberNavController()
+      ProfileReviewsScreen(
+          userId = sampleProfile.uid,
+          profileViewModel = ProfileViewModel(),
+          onGoBack = {},
+          navController = navController,
+          testProfile = sampleProfile,
+          testReviews = sampleReviews)
+    }
+
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag(ProfileReviewsTestTags.REVIEWS_LIST).assertIsDisplayed()
+
+    sampleReviews.forEach { review ->
+      composeTestRule
+          .onNodeWithTag(ProfileReviewsTestTags.REVIEWS_LIST)
+          .performScrollToNode(hasTestTag(ProfileReviewsTestTags.reviewCardTag(review.reviewId)))
+
+      composeTestRule
+          .onNodeWithTag(ProfileReviewsTestTags.reviewCardTag(review.reviewId))
+          .assertIsDisplayed()
+    }
+  }
+
+  @Test
+  fun testHuntHeaderWithNullHuntDoesNotRender() {
+    val reviewWithUnknownHunt = listOf(createReview(reviewId = "reviewX", huntId = "unknown_hunt"))
+
+    setContent(reviews = reviewWithUnknownHunt)
+
+    composeTestRule.waitForIdle()
+
+    composeTestRule
+        .onNodeWithTag(ProfileReviewsTestTags.reviewCardTag("reviewX"))
+        .assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("hunt_header_unknown_hunt").assertDoesNotExist()
+  }
 }
