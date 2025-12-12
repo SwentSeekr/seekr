@@ -340,6 +340,7 @@ fun SeekrMainNavHost(
                           navController.navigate(SeekrDestination.EditHunt.createRoute(huntId)) {
                             launchSingleTop = true
                           }
+                        },
                         editReview = { reviewId ->
                           navController.navigate(
                               SeekrDestination.EditReview.createRoute(huntId, reviewId)) {
