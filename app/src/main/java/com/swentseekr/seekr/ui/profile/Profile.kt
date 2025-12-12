@@ -248,11 +248,7 @@ fun ProfileScreen(
 
                     val base = Modifier.testTag(ProfileTestTags.getTestTagForHuntCard(hunt, index))
 
-                    val clickable =
-                        if (selectedTab == ProfileTab.MY_HUNTS)
-                            base.clickable { onMyHuntClick(hunt.uid) }
-                        else base
-
+                    val clickable = base.clickable { onMyHuntClick(hunt.uid) }
                     HuntCard(
                         hunt = hunt,
                         isLiked = profile.likedHunts.any { it.uid == hunt.uid },
