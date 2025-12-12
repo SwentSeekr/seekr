@@ -23,6 +23,37 @@ import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.map.MapScreenDefaults
 import com.swentseekr.seekr.ui.map.PermissionRequestPopup
 
+/**
+ * Base screen used to add checkpoints on a map.
+ *
+ * This composable displays a Google Map allowing the user to place checkpoints by tapping on the
+ * map, name them, optionally attach an image, and preview the result before final confirmation.
+ *
+ * Responsibilities:
+ * - Requests and reacts to location permission state.
+ * - Centers the map on the user’s current location when permission is granted.
+ * - Allows manual placement of checkpoints via map taps.
+ * - Opens the system image picker to attach an image to a checkpoint.
+ * - Forwards the selected checkpoint location and image URI to the caller.
+ *
+ * Behavior details:
+ * - When location permission is granted, the map re-centers on the user's last known location.
+ * - When a checkpoint is added, the image picker is launched and the result is delivered through
+ *   [onCheckpointImagePicked].
+ * - The map stops auto-centering on the user once the user manually interacts with it.
+ *
+ * This composable is intentionally stateless with respect to persistence; all checkpoint handling
+ * and final validation are delegated to the caller via callbacks.
+ *
+ * @param onDone Called when the user finishes adding checkpoints and confirms the action.
+ * @param initPoints Optional initial list of points to display on the map. Useful when editing an
+ *   existing hunt or restoring UI state.
+ * @param onCancel Called when the user cancels checkpoint creation.
+ * @param testMode When true, skips certain behaviors (e.g., location re-centering) to ensure
+ *   reproducible results during automated tests.
+ * @param onCheckpointImagePicked Called when an image is selected for a checkpoint, providing the
+ *   checkpoint [Location] and the selected image [Uri].
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BaseAddPointsMapScreen(
@@ -34,7 +65,6 @@ fun BaseAddPointsMapScreen(
 ) {
   var points by remember { mutableStateOf(initPoints) }
   val cameraPositionState = rememberCameraPositionState()
-  var shouldRecenterOnUser by remember { mutableStateOf(false) }
 
   val context = LocalContext.current
   val locationPermission = Manifest.permission.ACCESS_FINE_LOCATION
@@ -47,15 +77,12 @@ fun BaseAddPointsMapScreen(
       rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
           granted ->
         hasLocationPermission = granted
-        if (granted) shouldRecenterOnUser = true
       }
 
   LaunchedEffect(Unit) {
     hasLocationPermission =
         ContextCompat.checkSelfPermission(context, locationPermission) ==
             PackageManager.PERMISSION_GRANTED
-
-    if (hasLocationPermission) shouldRecenterOnUser = true
   }
 
   LaunchedEffect(hasLocationPermission, mapLoaded) {
@@ -69,7 +96,9 @@ fun BaseAddPointsMapScreen(
               CameraUpdateFactory.newLatLngZoom(target, MapScreenDefaults.UserLocationZoom))
         }
       }
-    } catch (_: SecurityException) {}
+    } catch (_: SecurityException) {
+      return@LaunchedEffect
+    }
   }
 
   var showNameDialog by remember { mutableStateOf(false) }
@@ -111,7 +140,7 @@ fun BaseAddPointsMapScreen(
           Button(
               onClick = { onDone(points) },
               modifier = Modifier.fillMaxWidth().testTag(AddPointsMapScreenTestTags.CONFIRM_BUTTON),
-              enabled = points.size >= 2,
+              enabled = points.size >= MapScreenDefaults.MinScore,
           ) {
             Text("${AddPointsMapScreenDefaults.ConfirmButtonLabel} (${points.size})")
           }
