@@ -43,6 +43,16 @@ import com.swentseekr.seekr.ui.components.ModernReviewCard
 import com.swentseekr.seekr.ui.components.Rating
 import com.swentseekr.seekr.ui.components.RatingType
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
+import com.swentseekr.seekr.ui.profile.ProfileReviewsScreenConstant.COLUMN_PADDING
+import com.swentseekr.seekr.ui.profile.ProfileReviewsScreenConstant.DETAIL_ROUTE
+import com.swentseekr.seekr.ui.profile.ProfileReviewsScreenConstant.DIVIDER
+import com.swentseekr.seekr.ui.profile.ProfileReviewsScreenConstant.HEADER_KEY
+import com.swentseekr.seekr.ui.profile.ProfileReviewsScreenConstant.HORIZONTAL_DIVIDER_PADDING
+import com.swentseekr.seekr.ui.profile.ProfileReviewsScreenConstant.MULTIPLE_REVIEWS
+import com.swentseekr.seekr.ui.profile.ProfileReviewsScreenConstant.RATING_FORMAT
+import com.swentseekr.seekr.ui.profile.ProfileReviewsScreenConstant.SINGLE_REVIEW
+import com.swentseekr.seekr.ui.profile.ProfileReviewsScreenConstant.SPACER_HEIGHT
+import com.swentseekr.seekr.ui.profile.ProfileReviewsScreenConstant.STRING_FORMAT
 
 object ProfileReviewsTestTags {
   const val SCREEN = "PROFILE_REVIEWS_SCREEN"
@@ -118,20 +128,11 @@ fun ProfileReviewsScreen(
                   Spacer(modifier = Modifier.width(8.dp))
                   Text(
                       text =
-                          if (totalReviews == 1)
-                              "${
-                                    String.format(
-                                        "%.1f",
-                                        profile.author.reviewRate
-                                    )
-                                }/${MAX_RATING} - $totalReviews review"
-                          else
-                              "${
-                                    String.format(
-                                        "%.1f",
-                                        profile.author.reviewRate
-                                    )
-                                }/${MAX_RATING} - $totalReviews reviews",
+                          String.format(
+                              if (totalReviews == 1) SINGLE_REVIEW else MULTIPLE_REVIEWS,
+                              String.format(STRING_FORMAT, profile.author.reviewRate),
+                              MAX_RATING,
+                              totalReviews),
                       style = MaterialTheme.typography.bodyMedium,
                       modifier = Modifier.testTag(ProfileReviewsTestTags.RATING_TEXT))
                 }
@@ -172,23 +173,23 @@ fun ProfileReviewsScreen(
 
                       // --- SECTION HEADER ---
                       if (hunt != null) {
-                        item(key = "hunt_header_$huntId") {
+                        val headerKey = String.format(HEADER_KEY, huntId)
+                        val detailRoute = String.format(DETAIL_ROUTE, hunt.uid)
+                        item(key = headerKey) {
                           Column(
                               Modifier.fillMaxWidth()
-                                  .clickable { navController.navigate("hunt/${hunt.uid}") }
-                                  .padding(16.dp)
-                                  .testTag("hunt_header_$huntId")) {
+                                  .clickable { navController.navigate(detailRoute) }
+                                  .padding(COLUMN_PADDING.dp)
+                                  .testTag(headerKey)) {
                                 Text(
                                     text = hunt.title, style = MaterialTheme.typography.titleMedium)
-                                Spacer(Modifier.height(4.dp))
+                                Spacer(Modifier.height(SPACER_HEIGHT.dp))
                                 Text(
                                     text =
-                                        "${
-                                                String.format(
-                                                    "%.1f",
-                                                    hunt.reviewRate
-                                                )
-                                            }/$MAX_RATING",
+                                        String.format(
+                                            RATING_FORMAT,
+                                            String.format("%.1f", hunt.reviewRate),
+                                            MAX_RATING),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.primary)
                               }
@@ -212,9 +213,12 @@ fun ProfileReviewsScreen(
                                   })
                             }
                       }
-                      item(key = "divider_$huntId") {
+                      val huntDivider = String.format(DIVIDER, huntId)
+                      item(key = huntDivider) {
                         HorizontalDivider(
-                            modifier = Modifier.padding(vertical = 8.dp).testTag("divider_$huntId"))
+                            modifier =
+                                Modifier.padding(vertical = HORIZONTAL_DIVIDER_PADDING.dp)
+                                    .testTag(huntDivider))
                       }
                     }
                   }
