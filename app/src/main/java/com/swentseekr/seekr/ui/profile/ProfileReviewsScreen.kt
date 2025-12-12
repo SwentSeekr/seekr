@@ -87,6 +87,7 @@ fun ProfileReviewsScreen(
   val totalReviews = reviews.size
   val reviewHuntViewModel: ReviewHuntViewModel = reviewHuntViewModel
   val huntsById = testHuntsById ?: reviewHuntViewModel.huntsById.collectAsState().value
+  val reviewHuntState by reviewHuntViewModel.uiState.collectAsState()
 
   LaunchedEffect(userId) { if (testProfile == null) profileViewModel.loadProfile(userId) }
   LaunchedEffect(profile) {
@@ -219,9 +220,7 @@ fun ProfileReviewsScreen(
                                         currentUserId = profileViewModel.currentUid)
                                   },
                                   onEdit = { editReview },
-                                  authorProfile =
-                                      reviewHuntViewModel.uiState.value.authorProfiles[
-                                              review.authorId])
+                                  authorProfile = reviewHuntState.authorProfiles[review.authorId])
                             }
                       }
                       val huntDivider = String.format(DIVIDER, huntId)
