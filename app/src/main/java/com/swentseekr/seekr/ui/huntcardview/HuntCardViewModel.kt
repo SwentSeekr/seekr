@@ -103,10 +103,10 @@ open class HuntCardViewModel(
         _uiState.value = _uiState.value.copy(authorProfile = profile)
       } catch (e: Exception) {
         Log.e(
-            HuntCardViewModelConstants.HuntCardTag,
-            "${HuntCardViewModelConstants.ErrorLoadingProfil} $userID",
+            HuntCardViewModelConstants.HUNT_CARD_TAG,
+            "${HuntCardViewModelConstants.ERROR_LOADING_PROFILE} $userID",
             e)
-        setErrorMsg(HuntCardViewModelConstants.ErrorLoadingProfileSetMsg)
+        setErrorMsg(HuntCardViewModelConstants.ERROR_LOADING_PROFILE_SET_MSG)
       }
     }
   }
@@ -127,10 +127,10 @@ open class HuntCardViewModel(
                     _uiState.value.authorProfiles.toMutableMap().apply { put(userId, profile) })
       } catch (e: Exception) {
         Log.e(
-            HuntCardViewModelConstants.HuntCardTag,
-            "${HuntCardViewModelConstants.ErrorAuthor} $userId",
+            HuntCardViewModelConstants.HUNT_CARD_TAG,
+            "${HuntCardViewModelConstants.ERROR_AUTHOR} $userId",
             e)
-        setErrorMsg(HuntCardViewModelConstants.ErrorAuthorSetMsg)
+        setErrorMsg(HuntCardViewModelConstants.ERROR_AUTHOR_SET_MSG)
       }
     }
   }
@@ -144,15 +144,15 @@ open class HuntCardViewModel(
     viewModelScope.launch {
       try {
         val userID =
-            FirebaseAuth.getInstance().currentUser?.uid ?: HuntCardViewModelConstants.UnknownUser
+            FirebaseAuth.getInstance().currentUser?.uid ?: HuntCardViewModelConstants.UNKNOWN_USER
         _uiState.value = _uiState.value.copy(currentUserId = userID)
         loadLikedHuntsCache(userID)
       } catch (e: Exception) {
         Log.e(
-            HuntCardViewModelConstants.HuntCardTag,
-            HuntCardViewModelConstants.ErrorLoadingCurrentUser,
+            HuntCardViewModelConstants.HUNT_CARD_TAG,
+            HuntCardViewModelConstants.ERROR_LOADING_CURRENT_USER,
             e)
-        setErrorMsg(HuntCardViewModelConstants.ErrorLodingCurrentUserSetMsg)
+        setErrorMsg(HuntCardViewModelConstants.ERROR_LOADING_CURRENT_USER_SET_MSG)
       }
     }
   }
@@ -163,7 +163,7 @@ open class HuntCardViewModel(
         val likedHunts = profileRepository.getLikedHunts(userId)
         _likedHuntsCache.value = likedHunts.map { it.uid }.toSet()
       } catch (e: Exception) {
-        Log.e(HuntCardViewModelConstants.HuntCardTag, HuntCardViewModelConstants.ErrorCacheLike, e)
+        Log.e(HuntCardViewModelConstants.HUNT_CARD_TAG, HuntCardViewModelConstants.ERROR_CACHE_LIKE, e)
       }
     }
   }
@@ -180,10 +180,10 @@ open class HuntCardViewModel(
         _uiState.value = _uiState.value.copy(reviewList = reviews)
       } catch (e: Exception) {
         Log.e(
-            HuntCardViewModelConstants.ReviewHuntTag,
-            "${HuntCardViewModelConstants.ErrorLoadingOtherReviews} $huntID",
+            HuntCardViewModelConstants.REVIEW_HUNT_TAG,
+            "${HuntCardViewModelConstants.ERROR_LOADING_OTHER_REVIEWS} $huntID",
             e)
-        setErrorMsg(HuntCardViewModelConstants.ErrorLoadingOtherReviewsSetMsg)
+        setErrorMsg(HuntCardViewModelConstants.ERROR_LOADING_OTHER_REVIEWS_SET_MSG)
       }
     }
   }
@@ -220,10 +220,10 @@ open class HuntCardViewModel(
                 hunt = hunt, isLiked = isLiked, isAchieved = isAchieved, reviewList = reviews)
       } catch (e: Exception) {
         Log.e(
-            HuntCardViewModelConstants.HuntCardTag,
-            "${HuntCardViewModelConstants.ErrorLoadingHunt} $huntID",
+            HuntCardViewModelConstants.HUNT_CARD_TAG,
+            "${HuntCardViewModelConstants.ERROR_LOADING_HUNT} $huntID",
             e)
-        setErrorMsg(HuntCardViewModelConstants.ErrorLoadingHuntSetMsg)
+        setErrorMsg(HuntCardViewModelConstants.ERROR_LOADING_HUNT_SET_MSG)
       }
     }
   }
@@ -239,10 +239,10 @@ open class HuntCardViewModel(
         huntRepository.deleteHunt(huntID)
       } catch (e: Exception) {
         Log.e(
-            HuntCardViewModelConstants.HuntCardTag,
-            "${HuntCardViewModelConstants.ErrorDeleteHunt} $huntID",
+            HuntCardViewModelConstants.HUNT_CARD_TAG,
+            "${HuntCardViewModelConstants.ERROR_DELETE_HUNT} $huntID",
             e)
-        setErrorMsg(HuntCardViewModelConstants.ErrorDeleteHuntSetMsg)
+        setErrorMsg(HuntCardViewModelConstants.ERROR_DELETE_HUNT_SET_MSG)
       }
     }
   }
@@ -264,7 +264,7 @@ open class HuntCardViewModel(
   ) {
     viewModelScope.launch {
       try {
-        val currentUid = currentUserId ?: HuntCardViewModelConstants.NoUser
+        val currentUid = currentUserId ?: HuntCardViewModelConstants.NO_USER
         if (userID == currentUid) {
           val review = reviewRepository.getReviewHunt(reviewID)
           val photosToDelete = review.photos
@@ -273,23 +273,23 @@ open class HuntCardViewModel(
               imageRepository.deleteReviewPhoto(photoUrl)
             } catch (e: Exception) {
               Log.e(
-                  HuntCardViewModelConstants.ReviewHuntTag,
-                  "${HuntCardViewModelConstants.ErrorDeletingPhoto} $photoUrl",
+                  HuntCardViewModelConstants.REVIEW_HUNT_TAG,
+                  "${HuntCardViewModelConstants.ERROR_DELETING_PHOTO} $photoUrl",
                   e)
-              setErrorMsg("${HuntCardViewModelConstants.ErrorDeletingPhotoSetMsg} ${e.message}")
+              setErrorMsg("${HuntCardViewModelConstants.ERROR_DELETING_PHOTO_SET_MSG} ${e.message}")
             }
           }
           reviewRepository.deleteReviewHunt(reviewId = reviewID)
           loadOtherReview(huntID)
         } else {
-          setErrorMsg(HuntCardViewModelConstants.ErrorDeleteReviewSetMsg)
+          setErrorMsg(HuntCardViewModelConstants.ERROR_DELETE_REVIEW_SET_MSG)
         }
       } catch (e: Exception) {
         Log.e(
-            HuntCardViewModelConstants.ReviewHuntTag,
-            HuntCardViewModelConstants.ErrorDeletingReview,
+            HuntCardViewModelConstants.REVIEW_HUNT_TAG,
+            HuntCardViewModelConstants.ERROR_DELETING_REVIEW,
             e)
-        setErrorMsg("${HuntCardViewModelConstants.ErrorDeletingReviewSetMsg} ${e.message}")
+        setErrorMsg("${HuntCardViewModelConstants.ERROR_DELETING_REVIEW_SET_MSG} ${e.message}")
       }
     }
   }
@@ -306,10 +306,10 @@ open class HuntCardViewModel(
         huntRepository.editHunt(huntID, newValue)
       } catch (e: Exception) {
         Log.e(
-            HuntCardViewModelConstants.HuntCardTag,
-            "${HuntCardViewModelConstants.ErrorEditHunt} $huntID",
+            HuntCardViewModelConstants.HUNT_CARD_TAG,
+            "${HuntCardViewModelConstants.ERROR_EDIT_HUNT} $huntID",
             e)
-        setErrorMsg(HuntCardViewModelConstants.ErrorEditHuntSetMsg)
+        setErrorMsg(HuntCardViewModelConstants.ERROR_EDIT_HUNT_SET_MSG)
       }
     }
   }
@@ -343,7 +343,7 @@ open class HuntCardViewModel(
               if (currentlyLiked) add(huntID) else remove(huntID)
             }
         _uiState.value = _uiState.value.copy(isLiked = currentlyLiked)
-        setErrorMsg("${HuntCardViewModelConstants.ErrorOnLike} ${e.message}")
+        setErrorMsg("${HuntCardViewModelConstants.ERROR_ON_LIKE} ${e.message}")
       }
     }
   }
@@ -382,19 +382,19 @@ open class HuntCardViewModel(
     // This will be added to the AchivedList in the profile
     val hunt = currentHuntUiState.hunt
     if (hunt == null) {
-      setErrorMsg(HuntCardViewModelConstants.ErrorOnDoneLoading)
+      setErrorMsg(HuntCardViewModelConstants.ERROR_ON_DONE_LOADING)
     } else {
       viewModelScope.launch {
         try {
           // Call the suspend function inside a coroutine
-          profileRepository.addDoneHunt(currentUserId ?: HuntCardViewModelConstants.Empty, hunt)
+          profileRepository.addDoneHunt(currentUserId ?: HuntCardViewModelConstants.EMPTY, hunt)
 
           // Update UI state
           _uiState.value = currentHuntUiState.copy(isAchieved = true)
         } catch (e: Exception) {
           Log.e(
-              HuntCardViewModelConstants.HuntCardTag, HuntCardViewModelConstants.ErrorOnDonClick, e)
-          setErrorMsg("${HuntCardViewModelConstants.ErrorOnDoneClickSetMsg} ${e.message}")
+              HuntCardViewModelConstants.HUNT_CARD_TAG, HuntCardViewModelConstants.ERROR_ON_DONE_CLICK, e)
+          setErrorMsg("${HuntCardViewModelConstants.ERROR_ON_DONE_CLICK_SET_MSG} ${e.message}")
         }
       }
     }

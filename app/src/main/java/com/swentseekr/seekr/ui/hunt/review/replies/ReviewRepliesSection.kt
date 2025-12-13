@@ -49,9 +49,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.times
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.swentseekr.seekr.model.hunt.review.HuntReviewReply
-import com.swentseekr.seekr.ui.hunt.review.replies.ReviewRepliesStrings.HideReplies
-import com.swentseekr.seekr.ui.hunt.review.replies.ReviewRepliesValues.AuthorIdMaxLength
-import com.swentseekr.seekr.ui.hunt.review.replies.ReviewRepliesValues.SingleReplyCount
 import com.swentseekr.seekr.ui.theme.Green
 
 // ---------- Shared shapes ----------
@@ -200,7 +197,7 @@ fun ReviewRepliesCollapsedHeader(
                   contentDescription = null,
                   tint =
                       MaterialTheme.colorScheme.primary.copy(
-                          alpha = ReviewRepliesAlphas.RootHeaderIcon),
+                          alpha = ReviewRepliesAlphas.ROOT_HEADER_ICON),
                   modifier = Modifier.size(ReviewRepliesDimensions.RootHeaderIconSize))
               Spacer(modifier = Modifier.width(ReviewRepliesDimensions.RootHeaderIconSpacing))
               Text(
@@ -235,7 +232,7 @@ fun ReviewRepliesExpandedContent(
 
     val composerConfig =
         RedditComposerConfig(
-            placeholder = ReviewRepliesStrings.RootComposerPlaceholder,
+            placeholder = ReviewRepliesStrings.ROOT_COMPOSER_PLACEHOLDER,
             compact = false,
             onTextChanged = callbacks.onRootReplyTextChanged,
             onSend = callbacks.onSendRootReply,
@@ -314,13 +311,13 @@ fun RedditReplyItem(
               .padding(start = depthIndent)
               .testTag("${ReviewRepliesTestTags.REPLY_ITEM_PREFIX}${reply.replyId}"),
       horizontalArrangement = Arrangement.Start) {
-        if (node.depth > ReviewRepliesValues.RootDepth) {
+        if (node.depth > ReviewRepliesValues.ROOT_DEPTH) {
           ReplyThreadLine()
         }
 
         Column(
             modifier =
-                Modifier.weight(ReviewRepliesValues.FullWeight)
+                Modifier.weight(ReviewRepliesValues.FULL_WEIGHT)
                     .padding(bottom = ReviewRepliesDimensions.ReplyVerticalSpacing)) {
               ReplyCard(
                   node = node,
@@ -342,7 +339,7 @@ fun ReplyThreadLine() {
               .height(IntrinsicSize.Min)
               .background(
                   MaterialTheme.colorScheme.outlineVariant.copy(
-                      alpha = ReviewRepliesAlphas.OutlineVariant),
+                      alpha = ReviewRepliesAlphas.OUTLINE_VARIANT),
                   shape = threadLineShape,
               ),
   )
@@ -419,13 +416,13 @@ fun ReplyHeader(
         color = MaterialTheme.colorScheme.onSurface)
 
     Text(
-        text = ReviewRepliesStrings.JustNow,
+        text = ReviewRepliesStrings.JUST_NOW,
         style = MaterialTheme.typography.bodySmall,
         color =
             MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                alpha = ReviewRepliesAlphas.ReplyTimestamp))
+                alpha = ReviewRepliesAlphas.REPLY_TIMESTAMP))
 
-    Spacer(modifier = Modifier.weight(ReviewRepliesValues.FullWeight))
+    Spacer(modifier = Modifier.weight(ReviewRepliesValues.FULL_WEIGHT))
 
     if (node.isMine && !reply.isDeleted) {
       IconButton(
@@ -435,10 +432,10 @@ fun ReplyHeader(
                   .testTag("${ReviewRepliesTestTags.REPLY_DELETE_BUTTON_PREFIX}${reply.replyId}")) {
             Icon(
                 imageVector = Icons.Default.Delete,
-                contentDescription = ReviewRepliesStrings.DeleteContentDescription,
+                contentDescription = ReviewRepliesStrings.DELETE_CONTENT_DESCRIPTION,
                 tint =
                     MaterialTheme.colorScheme.error.copy(
-                        alpha = ReviewRepliesAlphas.DeleteIconAlpha),
+                        alpha = ReviewRepliesAlphas.DELETE_ICON_ALPHA),
                 modifier = Modifier.size(ReviewRepliesDimensions.DeleteIconSize))
           }
     }
@@ -453,8 +450,8 @@ fun ReplyHeader(
 fun ReplyAvatar(node: ReplyNodeUiState) {
   val reply = node.reply
   val avatarText =
-      if (node.isMine) ReviewRepliesStrings.You
-      else reply.authorId.take(SingleReplyCount).uppercase()
+      if (node.isMine) ReviewRepliesStrings.YOU
+      else reply.authorId.take(ReviewRepliesValues.SINGLE_REPLY_COUNT).uppercase()
 
   Box(
       modifier =
@@ -477,12 +474,12 @@ fun ReplyAvatar(node: ReplyNodeUiState) {
 @Composable
 fun ReplyBody(reply: HuntReviewReply) {
   Text(
-      text = if (reply.isDeleted) ReviewRepliesStrings.Deleted else reply.comment,
+      text = if (reply.isDeleted) ReviewRepliesStrings.DELETE else reply.comment,
       style = MaterialTheme.typography.bodyMedium,
       color =
           if (reply.isDeleted)
               MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                  alpha = ReviewRepliesAlphas.DeletedReply)
+                  alpha = ReviewRepliesAlphas.DELETED_REPLY)
           else MaterialTheme.colorScheme.onSurface,
       lineHeight = ReviewRepliesDimensions.ReplyTextLineHeight)
 }
@@ -508,7 +505,7 @@ fun ReplyActions(
                   ReplyTarget.Reply(reviewId = reply.reviewId, parentReplyId = reply.replyId))
             })
 
-        if (node.totalChildrenCount > ReviewRepliesValues.RootDepth) {
+        if (node.totalChildrenCount > ReviewRepliesValues.ROOT_DEPTH) {
           RepliesToggleButton(
               node = node,
               onToggle = { callbacks.onToggleReplyThread(reply.replyId) },
@@ -531,11 +528,11 @@ fun ReplyButton(onClick: () -> Unit) {
               contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.Send,
-            contentDescription = ReviewRepliesStrings.ReplyContentDescription,
+            contentDescription = ReviewRepliesStrings.REPLY_CONTENT_DESCRIPTION,
             modifier = Modifier.size(ReviewRepliesDimensions.ReplyButtonIconSize))
         Spacer(modifier = Modifier.width(ReviewRepliesDimensions.ReplyButtonIconSpacing))
         Text(
-            text = ReviewRepliesStrings.Reply,
+            text = ReviewRepliesStrings.REPLY,
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Medium)
       }
@@ -562,7 +559,7 @@ fun RepliesToggleButton(
     Icon(
         imageVector =
             if (node.isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-        contentDescription = if (node.isExpanded) HideReplies else ReviewRepliesStrings.ShowReplies,
+        contentDescription = if (node.isExpanded) ReviewRepliesStrings.HIDE_REPLIES else ReviewRepliesStrings.SHOW_REPLIES,
         modifier = Modifier.size(ReviewRepliesDimensions.ReplyButtonIconSize))
     Spacer(modifier = Modifier.width(ReviewRepliesDimensions.ReplyButtonIconSpacing))
     Text(
@@ -598,7 +595,7 @@ fun InlineReplyComposer(
 
   val composerConfig =
       RedditComposerConfig(
-          placeholder = ReviewRepliesStrings.InlineReplyPlaceholder,
+          placeholder = ReviewRepliesStrings.INLINE_REPLY_PLACEHOLDER,
           compact = true,
           onTextChanged = { newText -> callbacks.onReplyTextChanged(target, newText) },
           onSend = { callbacks.onSendReply(target) },
@@ -668,7 +665,7 @@ fun CollapsedComposerButton(
                   style = MaterialTheme.typography.bodyMedium,
                   color =
                       MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                          alpha = ReviewRepliesAlphas.RootHeaderPlaceholder))
+                          alpha = ReviewRepliesAlphas.ROOT_HEADER_PLACEHOLDER))
             }
       }
 }
@@ -684,7 +681,7 @@ fun ExpandedComposerContent(
 ) {
   val outlineColor =
       MaterialTheme.colorScheme.outlineVariant.copy(
-          alpha = ReviewRepliesAlphas.OutlineVariantBorder)
+          alpha = ReviewRepliesAlphas.OUTLINE_VARIANT_BORDER)
 
   Surface(
       modifier =
@@ -698,7 +695,7 @@ fun ExpandedComposerContent(
       shape = expandedComposerShape,
       color =
           MaterialTheme.colorScheme.surfaceVariant.copy(
-              alpha = ReviewRepliesAlphas.ComposerSurfaceAlpha),
+              alpha = ReviewRepliesAlphas.COMPOSER_SURFACE_ALPHA),
       border =
           BorderStroke(
               width = ReviewRepliesDimensions.OutlineBorderWidth,
@@ -716,7 +713,7 @@ fun ExpandedComposerContent(
                   state = state,
                   config = config,
                   modifier =
-                      Modifier.weight(ReviewRepliesValues.FullWeight)
+                      Modifier.weight(ReviewRepliesValues.FULL_WEIGHT)
                           .testTag(ReviewRepliesTestTags.ROOT_INLINE_TEXT_FIELD),
               )
 
@@ -750,7 +747,7 @@ fun ComposerTextField(
             style = MaterialTheme.typography.bodyMedium,
             color =
                 MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                    alpha = ReviewRepliesAlphas.ComposerPlaceholder))
+                    alpha = ReviewRepliesAlphas.COMPOSER_PLACEHOLDER))
       },
       singleLine = true,
       textStyle = MaterialTheme.typography.bodyMedium,
@@ -791,12 +788,12 @@ fun ComposerSendButton(
               Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.Send,
-                    contentDescription = ReviewRepliesStrings.SendContentDescription,
+                    contentDescription = ReviewRepliesStrings.SEND_CONTENT_DESCRIPTION,
                     tint =
                         if (isActive) Green
                         else
                             MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                alpha = ReviewRepliesAlphas.InactiveSendIcon),
+                                alpha = ReviewRepliesAlphas.INACTIVE_SEND_ICON),
                     modifier = Modifier.size(ReviewRepliesDimensions.SendIconSize))
               }
             }
@@ -807,25 +804,25 @@ fun ComposerSendButton(
 
 /** Returns a localized label for the total number of replies at the root level. */
 private fun replyCountLabel(totalCount: Int): String {
-  return if (totalCount > ReviewRepliesValues.RootDepth) {
+  return if (totalCount > ReviewRepliesValues.ROOT_DEPTH) {
     val unit =
-        if (totalCount == ReviewRepliesValues.RootDepth + SingleReplyCount)
-            ReviewRepliesStrings.ReplyUnitSingular
-        else ReviewRepliesStrings.ReplyUnitPlural
+        if (totalCount == ReviewRepliesValues.ROOT_DEPTH + ReviewRepliesValues.SINGLE_REPLY_COUNT)
+            ReviewRepliesStrings.REPLY_UNIT_PLURAL
+        else ReviewRepliesStrings.REPLY_UNIT_PLURAL
     "$totalCount $unit"
   } else {
-    ReviewRepliesStrings.BeTheFirstToReply
+    ReviewRepliesStrings.BE_THE_FIRST_TO_REPLY
   }
 }
 
 /** Returns a localized label for the number of child replies of a node. */
 private fun childRepliesLabel(isExpanded: Boolean, totalChildren: Int): String {
-  if (isExpanded) return ReviewRepliesStrings.HideReplies
+  if (isExpanded) return ReviewRepliesStrings.HIDE_REPLIES
 
   val unit =
-      if (totalChildren == ReviewRepliesValues.RootDepth + SingleReplyCount)
-          ReviewRepliesStrings.ReplyUnitSingular
-      else ReviewRepliesStrings.ReplyUnitPlural
+      if (totalChildren == ReviewRepliesValues.ROOT_DEPTH + ReviewRepliesValues.SINGLE_REPLY_COUNT)
+          ReviewRepliesStrings.REPLY_UNIT_PLURAL
+      else ReviewRepliesStrings.REPLY_UNIT_PLURAL
 
   return "$totalChildren $unit"
 }
@@ -833,10 +830,10 @@ private fun childRepliesLabel(isExpanded: Boolean, totalChildren: Int): String {
 /** Returns the display label for the reply author, including handling for the current user. */
 private fun authorLabel(node: ReplyNodeUiState): String {
   return if (node.isMine) {
-    ReviewRepliesStrings.You
+    ReviewRepliesStrings.YOU
   } else {
-    "${ReviewRepliesStrings.ReplyAuthorPrefix}${
-            node.reply.authorId.take(AuthorIdMaxLength)
+    "${ReviewRepliesStrings.REPLY_AUTHOR_PREFIX}${
+            node.reply.authorId.take(ReviewRepliesValues.AUTHOR_ID_MAX_LENGTH)
         }"
   }
 }

@@ -86,6 +86,11 @@ object BaseHuntFieldsStrings {
 
   const val IMAGE_LAUNCH = "image/*"
   const val DELETE_MAIN_IMAGE = "delete_main_image"
+  const val NAME_1= "P1"
+  const val NAME_2= "P2"
+  const val OTHER_IMAGES= "otherImage_"
+  const val MORE_DESCRIPTION = "More actions"
+
 }
 
 object BaseHuntFieldsUi {
@@ -135,6 +140,16 @@ object BaseHuntFieldsUi {
 
   // Divider
   val DividerThickness: Dp = 1.dp
+}
+
+object BaseHuntConstantsDefault {
+  const val DEFAULT_LATITUDE_1: Double= 0.0
+  const val DEFAULT_LONGITUDE_1: Double= 0.0
+  const val DEFAULT_LATITUDE_2: Double= 1.0
+  const val DEFAULT_LONGITUDE_2: Double= 1.0
+  const val POLYLINE= 2
+  const val ONE = 1
+
 }
 
 object HuntScreenTestTags {

@@ -21,11 +21,10 @@ class HuntsRepositoryLocal : HuntsRepository {
 
   override suspend fun getHunt(huntID: String): Hunt {
     return hunts.find { it.uid == huntID }
-        ?: throw IllegalArgumentException("Hunt with ID $huntID is not found")
+        ?: throw IllegalArgumentException("${HuntsRepositoryLocalConstantsString.HUNT_ID} $huntID ${HuntsRepositoryLocalConstantsString.NOT_FOUND}")
   }
 
   override suspend fun addHunt(hunt: Hunt, mainImageUri: Uri?, otherImageUris: List<Uri>) {
-    // Ici, comme c’est local, on ne gère pas les images.
     hunts.add(hunt)
   }
 
@@ -41,14 +40,14 @@ class HuntsRepositoryLocal : HuntsRepository {
     if (index != -1) {
       hunts[index] = newValue
     } else {
-      throw IllegalArgumentException("Hunt with ID $huntID is not found")
+      throw IllegalArgumentException("${HuntsRepositoryLocalConstantsString.HUNT_ID} $huntID ${HuntsRepositoryLocalConstantsString.NOT_FOUND}")
     }
   }
 
   override suspend fun deleteHunt(huntID: String) {
     val wasRemoved = hunts.removeIf { it.uid == huntID }
     if (!wasRemoved) {
-      throw IllegalArgumentException("Hunt with ID $huntID is not found")
+      throw IllegalArgumentException("${HuntsRepositoryLocalConstantsString.HUNT_ID} $huntID ${HuntsRepositoryLocalConstantsString.NOT_FOUND}")
     }
   }
 }

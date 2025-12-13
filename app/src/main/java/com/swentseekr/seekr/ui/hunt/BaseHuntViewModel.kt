@@ -101,7 +101,7 @@ abstract class BaseHuntViewModel(
     val state = _uiState.value
 
     if (!state.isValid) {
-      setErrorMsg("Please fill all required fields before saving the hunt.")
+      setErrorMsg(BaseHuntViewModelMessages.NOT_ALL_FIELD_FILL)
       return false
     }
 
@@ -111,7 +111,7 @@ abstract class BaseHuntViewModel(
     }
 
     if (FirebaseAuth.getInstance().currentUser?.uid == null) {
-      setErrorMsg("You must be logged in to perform this action.")
+      setErrorMsg(BaseHuntViewModelMessages.MUST_LOGIN)
       return false
     }
 
@@ -119,7 +119,7 @@ abstract class BaseHuntViewModel(
         try {
           buildHunt(state)
         } catch (e: Exception) {
-          setErrorMsg(e.message ?: "Failed to build Hunt from UI state.")
+          setErrorMsg(e.message ?: BaseHuntViewModelMessages.FAIL_BUILD)
           return false
         }
 
@@ -129,10 +129,11 @@ abstract class BaseHuntViewModel(
         _uiState.value = _uiState.value.copy(errorMsg = null, saveSuccessful = true)
       } catch (e: Exception) {
         Log.e(
-            this@BaseHuntViewModel::class.simpleName ?: "BaseHuntViewModel", "Error saving Hunt", e)
+            this@BaseHuntViewModel::class.simpleName ?: BaseHuntViewModelMessages.BASE_VIEW_MODEL,
+            BaseHuntViewModelMessages.ERROR_SAVING, e)
         _uiState.value =
             _uiState.value.copy(
-                errorMsg = "Failed to save Hunt: ${e.message}", saveSuccessful = false)
+                errorMsg = "${BaseHuntViewModelMessages.FAIL_SAVE} ${e.message}", saveSuccessful = false)
       }
     }
     return true
@@ -142,21 +143,21 @@ abstract class BaseHuntViewModel(
   fun setTitle(title: String) {
     _uiState.value =
         _uiState.value.copy(
-            title = title, invalidTitleMsg = if (title.isBlank()) "Title cannot be empty" else null)
+            title = title, invalidTitleMsg = if (title.isBlank()) BaseHuntViewModelMessages.TITLE_EMPTY else null)
   }
 
   fun setDescription(desc: String) {
     _uiState.value =
         _uiState.value.copy(
             description = desc,
-            invalidDescriptionMsg = if (desc.isBlank()) "Description cannot be empty" else null)
+            invalidDescriptionMsg = if (desc.isBlank()) BaseHuntViewModelMessages.DESCRIPTION_EMPTY else null)
   }
 
   fun setTime(time: String) {
     _uiState.value =
         _uiState.value.copy(
             time = time,
-            invalidTimeMsg = if (time.toDoubleOrNull() == null) "Invalid time format" else null)
+            invalidTimeMsg = if (time.toDoubleOrNull() == null) BaseHuntViewModelMessages.INVALID_TIME else null)
   }
 
   fun setDistance(distance: String) {
@@ -164,7 +165,7 @@ abstract class BaseHuntViewModel(
         _uiState.value.copy(
             distance = distance,
             invalidDistanceMsg =
-                if (distance.toDoubleOrNull() == null) "Invalid distance format" else null)
+                if (distance.toDoubleOrNull() == null) BaseHuntViewModelMessages.INVALID_DISTANCE else null)
   }
 
   fun setDifficulty(difficulty: Difficulty) {
@@ -176,8 +177,8 @@ abstract class BaseHuntViewModel(
   }
 
   fun setPoints(points: List<Location>): Boolean {
-    if (points.size < 2) {
-      setErrorMsg("A hunt must have at least a start and end point.")
+    if (points.size < BaseHuntViewModelDefault.MIN_SET_POINT) {
+      setErrorMsg(BaseHuntViewModelMessages.INVALID_SET_POINT)
       return false
     }
     _uiState.value = _uiState.value.copy(points = points)

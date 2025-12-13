@@ -60,25 +60,25 @@ fun ReviewImagesScreen(
   val scroll = rememberScrollState()
   val pagerState = rememberPagerState(pageCount = { photoUrls.size })
   var showFullScreen by remember { mutableStateOf(false) }
-  var fullscreenIndex by remember { mutableStateOf(ReviewImagesScreenConstants.StartIndex) }
+  var fullscreenIndex by remember { mutableStateOf(ReviewImagesScreenConstants.START_INDEX) }
 
   Scaffold(
       topBar = {
         TopAppBar(
-            title = { Text(ReviewImagesScreenConstantsStrings.Title) },
+            title = { Text(ReviewImagesScreenConstantsStrings.TITLE) },
             navigationIcon = {
               IconButton(
                   onClick = onGoBack,
-                  modifier = Modifier.testTag(ReviewImagesScreenConstantsStrings.BackButtonTag)) {
+                  modifier = Modifier.testTag(ReviewImagesScreenConstantsStrings.BACK_BUTTON_TAG)) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                         contentDescription =
-                            ReviewImagesScreenConstantsStrings.BackButtonDescription)
+                            ReviewImagesScreenConstantsStrings.BACK_BUTTON_DESCRIPTION)
                   }
             },
-            modifier = Modifier.testTag(ReviewImagesScreenConstantsStrings.TopBarTestTag))
+            modifier = Modifier.testTag(ReviewImagesScreenConstantsStrings.TOP_BAR_TEST_TAG))
       },
-      modifier = Modifier.testTag(ReviewImagesScreenConstantsStrings.ReviewImagesScreenTestTag)) {
+      modifier = Modifier.testTag(ReviewImagesScreenConstantsStrings.REVIEW_IMAGES_SCREEN_TEST_TAG)) {
           innerPadding ->
         Column(
             modifier =
@@ -87,15 +87,15 @@ fun ReviewImagesScreen(
                     .padding(ReviewImagesScreenConstants.PaddingColumn)
                     .padding(innerPadding)
                     .verticalScroll(scroll)
-                    .testTag(ReviewImagesScreenConstantsStrings.ReviewImagesColumnTestTag)) {
-              val index = pagerState.currentPage + ReviewImagesScreenConstants.One
+                    .testTag(ReviewImagesScreenConstantsStrings.REVIEW_IMAGES_COLUMN_TEST_TAG)) {
+              val index = pagerState.currentPage + ReviewImagesScreenConstants.ONE
 
               HorizontalPager(
                   state = pagerState,
                   modifier =
                       Modifier.fillMaxWidth()
                           .height(ReviewImagesScreenConstants.PagerHeight)
-                          .testTag(ReviewImagesScreenConstantsStrings.ReviewImagePagerTestTag)) {
+                          .testTag(ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_PAGER_TEST_TAG)) {
                       page ->
                     Box(
                         modifier =
@@ -106,7 +106,7 @@ fun ReviewImagesScreen(
                                   showFullScreen = true
                                 }
                                 .testTag(
-                                    "${ReviewImagesScreenConstantsStrings.ReviewImageBoxTestTag}$page")) {
+                                    "${ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_BOX_TEST_TAG}$page")) {
                           AsyncImage(
                               model = photoUrls[page],
                               contentDescription = null,
@@ -118,7 +118,7 @@ fun ReviewImagesScreen(
                                           RoundedCornerShape(
                                               ReviewImagesScreenConstants.ImageCornerRadius))
                                       .testTag(
-                                          "${ReviewImagesScreenConstantsStrings.ReviewImageAsycTestTag}$page"),
+                                          "${ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_ASYC_TEST_TAG}$page"),
                               contentScale = ContentScale.Fit,
                               placeholder = painterResource(R.drawable.logo_seekr),
                               error = painterResource(R.drawable.logo_seekr),
@@ -135,7 +135,7 @@ fun ReviewImagesScreen(
                   style = MaterialTheme.typography.titleMedium,
                   modifier =
                       Modifier.align(Alignment.CenterHorizontally)
-                          .testTag(ReviewImagesScreenConstantsStrings.ReviewImageTextBottomTestTag))
+                          .testTag(ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_TEXT_BOTTOM_TEST_TAG))
             }
       }
 
@@ -157,13 +157,13 @@ fun FullScreenImageViewer(
       onDismissRequest = onClose,
       properties =
           DialogProperties(
-              usePlatformDefaultWidth = ReviewImagesScreenConstants.UsePlatformDefaultWidth)) {
+              usePlatformDefaultWidth = ReviewImagesScreenConstants.USE_PLATFORM_DEFAULT_WIDTH)) {
         Box(
             modifier =
                 Modifier.fillMaxSize()
                     .background(Color.Black)
                     .testTag(
-                        ReviewImagesScreenConstantsStrings.ReviewImageFullScreenDialogTestTag)) {
+                        ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_FULL_SCREEN_DIALOG_TEST_TAG)) {
               val pagerState =
                   rememberPagerState(initialPage = startIndex, pageCount = { images.size })
 
@@ -173,18 +173,18 @@ fun FullScreenImageViewer(
                       Modifier.fillMaxSize()
                           .testTag(
                               ReviewImagesScreenConstantsStrings
-                                  .ReviewImageFullScreenPagerTestTag)) { page ->
+                                  .REVIEW_IMAGE_FULL_SCREEN_PAGER_TEST_TAG)) { page ->
                     AsyncImage(
                         model = images[page],
                         contentDescription =
-                            "${ReviewImagesScreenConstantsStrings.ReviewImageFullScreenImageDescription} ${page + ReviewImagesScreenConstants.One}",
+                            "${ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_FULL_SCREEN_IMAGE_DESCRIPTION} ${page + ReviewImagesScreenConstants.ONE}",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Fit,
                     )
                   }
 
               // Top overlay with close + index
-              val currentIndex = pagerState.currentPage + ReviewImagesScreenConstants.One
+              val currentIndex = pagerState.currentPage + ReviewImagesScreenConstants.ONE
 
               Box(
                   modifier =
@@ -197,7 +197,7 @@ fun FullScreenImageViewer(
                                           Color.Black.copy(
                                               alpha =
                                                   ReviewImagesScreenConstants
-                                                      .FullScreenOverlayStartAlpha),
+                                                      .FULL_SCREEN_OVERLAY_START_ALPHA),
                                           Color.Transparent)))
                           .padding(
                               horizontal = ReviewImagesScreenConstants.FullScreenPadding,
@@ -210,7 +210,7 @@ fun FullScreenImageViewer(
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription =
-                                    ReviewImagesScreenConstantsStrings.CloseContentDescription,
+                                    ReviewImagesScreenConstantsStrings.CLOSE_CONTENT_DESCRIPTION,
                                 tint = Color.White)
                           }
 

@@ -73,7 +73,7 @@ fun HuntCard(
                               topEnd = HuntCardUIConstants.CornerRadius))) {
                 AsyncImage(
                     model = hunt.mainImageUrl.takeIf { it.isNotBlank() },
-                    contentDescription = HuntCardScreenStrings.HuntPictureDescription,
+                    contentDescription = HuntCardScreenStrings.HUNT_PICTURE_DESCRIPTION,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
                     placeholder = painterResource(R.drawable.empty_image),
@@ -102,10 +102,10 @@ fun HuntCard(
                     modifier =
                         Modifier.align(Alignment.TopEnd)
                             .padding(HuntCardUIConstants.Padding8)
-                            .testTag(HuntCardScreenStrings.LikeButton)) {
+                            .testTag(HuntCardScreenStrings.LIKE_BUTTON)) {
                       Icon(
                           imageVector = Icons.Filled.Favorite,
-                          contentDescription = HuntCardScreenStrings.LikeButton,
+                          contentDescription = HuntCardScreenStrings.LIKE_BUTTON,
                           tint =
                               if (isLiked) HuntCardUIConstants.LikeRed
                               else HuntCardScreenDefaults.LightGray,
@@ -125,9 +125,9 @@ fun HuntCard(
                           lineHeight = 28.sp)
                       Spacer(modifier = Modifier.height(HuntCardUIConstants.Padding4))
                       Text(
-                          text = "${HuntCardScreenStrings.By} " + authorName,
+                          text = "${HuntCardScreenStrings.BY} " + authorName,
                           fontSize = HuntCardUIConstants.AuthorFont14,
-                          color = HuntCardUIConstants.White.copy(alpha = 0.9f),
+                          color = HuntCardUIConstants.White.copy(alpha = HuntCardScreenDefaults.TEXT_COLOR_FACTOR),
                           fontWeight = FontWeight.Medium)
                     }
               }
@@ -144,16 +144,16 @@ fun HuntCard(
                 ModernStatChip(
                     icon = StatIcon.Vector(Icons.Filled.LocationOn),
                     value = "${hunt.distance}",
-                    unit = HuntCardScreenStrings.DistanceUnit,
-                    modifier = Modifier.weight(1f))
+                    unit = HuntCardScreenStrings.DISTANCE_UNIT,
+                    modifier = Modifier.weight(HuntCardScreenDefaults.WEIGHT_LOCATION_MODIFIER))
 
                 Spacer(modifier = Modifier.width(HuntCardUIConstants.Padding8))
 
                 ModernStatChip(
                     icon = StatIcon.PainterIcon(painter = painterResource(R.drawable.clock)),
                     value = "${hunt.time}",
-                    unit = HuntCardScreenStrings.TimeUnit,
-                    modifier = Modifier.weight(1f))
+                    unit = HuntCardScreenStrings.TIME_UNIT,
+                    modifier = Modifier.weight(HuntCardScreenDefaults.WEIGHT_TIME_MODIFIER))
               }
         }
       }

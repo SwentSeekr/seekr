@@ -35,7 +35,7 @@ fun EditHuntScreen(
   val scope = rememberCoroutineScope()
 
   BaseHuntScreen(
-      title = "Edit your Hunt",
+      title = EditHuntConstantsStrings.TITLE,
       vm = editHuntViewModel,
       onGoBack = onGoBack,
       onDone = onDone,

@@ -44,6 +44,8 @@ object OnboardingFlowStrings {
       "Pseudonym is invalid. It must be between 3 and 30 characters."
   const val ERROR_PSEUDONYM_TAKEN = "This pseudonym is already taken. Please choose another one."
   const val CHECKING_AVAILABILITY = "Checking availability..."
+  const val SPACER= " "
+  const val INITIAL= ""
 }
 
 object OnboardingFlowDimensions {

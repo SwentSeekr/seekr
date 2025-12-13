@@ -40,16 +40,16 @@ class AuthRepositoryFirebase(
         val user =
             auth.signInWithCredential(firebaseCred).await().user
                 ?: return Result.failure(
-                    IllegalStateException("Login failed : Could not retrieve user information"))
+                    IllegalStateException(AuthRepositoryFirebaseConstantsString.ERROR_INFO_NOT_FOUND))
 
         return Result.success(user)
       } else {
         return Result.failure(
-            IllegalStateException("Login failed: Credential is not of type Google ID"))
+            IllegalStateException(AuthRepositoryFirebaseConstantsString.ERROR_CREDENTIAL))
       }
     } catch (e: Exception) {
       Result.failure(
-          IllegalStateException("Login failed: ${e.localizedMessage ?: "Unexpected error."}"))
+          IllegalStateException("${AuthRepositoryFirebaseConstantsString.ERROR_FAIL_LOGIN} ${e.localizedMessage ?: AuthRepositoryFirebaseConstantsString.UNEXPECTED_ERROR}"))
     }
   }
 
@@ -61,7 +61,7 @@ class AuthRepositoryFirebase(
       Result.success(Unit)
     } catch (e: Exception) {
       Result.failure(
-          IllegalStateException("Logout failed: ${e.localizedMessage ?: "Unexpected error."}"))
+          IllegalStateException("${AuthRepositoryFirebaseConstantsString.ERROR_FAIL_LOGIN} ${e.localizedMessage ?: AuthRepositoryFirebaseConstantsString.UNEXPECTED_ERROR}"))
     }
   }
 }

@@ -118,20 +118,23 @@ fun BaseAddPointsMapScreen(
           })
 
   if (testMode) {
-    LaunchedEffect(Unit) { points = listOf(Location(0.0, 0.0, "P1"), Location(1.0, 1.0, "P2")) }
+    LaunchedEffect(Unit) { points = listOf(Location(BaseHuntConstantsDefault.DEFAULT_LATITUDE_1,
+        BaseHuntConstantsDefault.DEFAULT_LONGITUDE_1, BaseHuntFieldsStrings.NAME_1),
+        Location(BaseHuntConstantsDefault.DEFAULT_LATITUDE_2,BaseHuntConstantsDefault.DEFAULT_LONGITUDE_2,
+        BaseHuntFieldsStrings.NAME_2)) }
   }
 
   Scaffold(
       topBar = {
         TopAppBar(
-            title = { Text(AddPointsMapScreenDefaults.TitleText) },
+            title = { Text(AddPointsMapScreenDefaults.TITLE_TEXT) },
             navigationIcon = {
               IconButton(
                   onClick = onCancel,
                   modifier = Modifier.testTag(AddPointsMapScreenTestTags.CANCEL_BUTTON)) {
                     Icon(
                         Icons.Default.ArrowBack,
-                        contentDescription = AddPointsMapScreenDefaults.BackContentDescription)
+                        contentDescription = AddPointsMapScreenDefaults.BACK_CONTENT_DESCRIPTION)
                   }
             })
       },
@@ -142,7 +145,7 @@ fun BaseAddPointsMapScreen(
               modifier = Modifier.fillMaxWidth().testTag(AddPointsMapScreenTestTags.CONFIRM_BUTTON),
               enabled = points.size >= MapScreenDefaults.MinScore,
           ) {
-            Text("${AddPointsMapScreenDefaults.ConfirmButtonLabel} (${points.size})")
+            Text("${AddPointsMapScreenDefaults.CONFIRM_BUTTON_LABEL} (${points.size})")
           }
         }
       }) { padding ->
@@ -163,7 +166,7 @@ fun BaseAddPointsMapScreen(
                       snippet = point.description.ifBlank { null })
                 }
 
-                if (points.size >= 2) {
+                if (points.size >= BaseHuntConstantsDefault.POLYLINE) {
                   Polyline(
                       points = points.map { LatLng(it.latitude, it.longitude) },
                       color = MaterialTheme.colorScheme.primary)
@@ -185,7 +188,7 @@ fun BaseAddPointsMapScreen(
           val newLocation = Location(latLng.latitude, latLng.longitude, name, description)
           points = points + newLocation
           pendingLocation = newLocation
-          imagePickerLauncher.launch("image/*")
+          imagePickerLauncher.launch(BaseHuntFieldsStrings.IMAGE_LAUNCH)
         }
         showNameDialog = false
       })

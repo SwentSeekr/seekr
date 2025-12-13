@@ -42,25 +42,25 @@ class ReviewImagesScreenTest {
 
     // Screen root
     composeRule
-        .onNodeWithTag(ReviewImagesScreenConstantsStrings.ReviewImagesScreenTestTag)
+        .onNodeWithTag(ReviewImagesScreenConstantsStrings.REVIEW_IMAGES_SCREEN_TEST_TAG)
         .assertIsDisplayed()
 
     // Top bar
-    composeRule.onNodeWithTag(ReviewImagesScreenConstantsStrings.TopBarTestTag).assertIsDisplayed()
+    composeRule.onNodeWithTag(ReviewImagesScreenConstantsStrings.TOP_BAR_TEST_TAG).assertIsDisplayed()
 
     // Column
     composeRule
-        .onNodeWithTag(ReviewImagesScreenConstantsStrings.ReviewImagesColumnTestTag)
+        .onNodeWithTag(ReviewImagesScreenConstantsStrings.REVIEW_IMAGES_COLUMN_TEST_TAG)
         .assertIsDisplayed()
 
     // Bottom info text
     composeRule
-        .onNodeWithTag(ReviewImagesScreenConstantsStrings.ReviewImageTextBottomTestTag)
+        .onNodeWithTag(ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_TEXT_BOTTOM_TEST_TAG)
         .assertIsDisplayed()
 
     // Back button
     composeRule
-        .onNodeWithTag(ReviewImagesScreenConstantsStrings.BackButtonTag)
+        .onNodeWithTag(ReviewImagesScreenConstantsStrings.BACK_BUTTON_TAG)
         .assertIsDisplayed()
         .performClick()
 
@@ -80,12 +80,12 @@ class ReviewImagesScreenTest {
     composeRule.waitForIdle()
 
     val pager =
-        composeRule.onNodeWithTag(ReviewImagesScreenConstantsStrings.ReviewImagePagerTestTag)
+        composeRule.onNodeWithTag(ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_PAGER_TEST_TAG)
     pager.assertIsDisplayed()
 
     // Initial index
     composeRule
-        .onNodeWithTag(ReviewImagesScreenConstantsStrings.ReviewImageTextBottomTestTag)
+        .onNodeWithTag(ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_TEXT_BOTTOM_TEST_TAG)
         .assertTextEquals("1/${photos.size}")
 
     // Swipe to page 2
@@ -94,7 +94,7 @@ class ReviewImagesScreenTest {
     composeRule.waitForIdle()
 
     composeRule
-        .onNodeWithTag(ReviewImagesScreenConstantsStrings.ReviewImageTextBottomTestTag)
+        .onNodeWithTag(ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_TEXT_BOTTOM_TEST_TAG)
         .assertTextEquals("2/${photos.size}")
 
     // Swipe to page 3
@@ -103,7 +103,7 @@ class ReviewImagesScreenTest {
     composeRule.waitForIdle()
 
     composeRule
-        .onNodeWithTag(ReviewImagesScreenConstantsStrings.ReviewImageTextBottomTestTag)
+        .onNodeWithTag(ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_TEXT_BOTTOM_TEST_TAG)
         .assertTextEquals("3/${photos.size}")
   }
 
@@ -116,11 +116,11 @@ class ReviewImagesScreenTest {
     composeRule.waitForIdle()
 
     composeRule
-        .onNodeWithTag(ReviewImagesScreenConstantsStrings.ReviewImagePagerTestTag)
+        .onNodeWithTag(ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_PAGER_TEST_TAG)
         .assertIsDisplayed()
 
     composeRule
-        .onNodeWithTag(ReviewImagesScreenConstantsStrings.ReviewImageTextBottomTestTag)
+        .onNodeWithTag(ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_TEXT_BOTTOM_TEST_TAG)
         .assertIsDisplayed()
         .assertTextEquals("1/1")
   }
@@ -137,18 +137,18 @@ class ReviewImagesScreenTest {
 
     // Swipe to second image in main pager
     val mainPager =
-        composeRule.onNodeWithTag(ReviewImagesScreenConstantsStrings.ReviewImagePagerTestTag)
+        composeRule.onNodeWithTag(ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_PAGER_TEST_TAG)
     mainPager.performTouchInput { swipeLeft() }
 
     composeRule.mainClock.advanceTimeBy(time)
     composeRule.waitForIdle()
 
     composeRule
-        .onNodeWithTag(ReviewImagesScreenConstantsStrings.ReviewImageTextBottomTestTag)
+        .onNodeWithTag(ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_TEXT_BOTTOM_TEST_TAG)
         .assertTextEquals("2/${photos.size}")
 
     // Open fullscreen for second image
-    val baseBoxTag = ReviewImagesScreenConstantsStrings.ReviewImageBoxTestTag
+    val baseBoxTag = ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_BOX_TEST_TAG
     composeRule.onNodeWithTag("${baseBoxTag}1").performClick()
     composeRule.waitForIdle()
     composeRule.mainClock.advanceTimeBy(time)
@@ -156,20 +156,20 @@ class ReviewImagesScreenTest {
 
     composeRule
         .onNodeWithTag(
-            ReviewImagesScreenConstantsStrings.ReviewImageFullScreenDialogTestTag,
+            ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_FULL_SCREEN_DIALOG_TEST_TAG,
             useUnmergedTree = true)
         .assertExists()
 
     composeRule
         .onNodeWithTag(
-            ReviewImagesScreenConstantsStrings.ReviewImageFullScreenPagerTestTag,
+            ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_FULL_SCREEN_PAGER_TEST_TAG,
             useUnmergedTree = true)
         .assertExists()
 
     // Close fullscreen
     composeRule
         .onNodeWithTag(
-            ReviewImagesScreenConstantsStrings.ReviewImageFullScreenDialogTestTag,
+            ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_FULL_SCREEN_DIALOG_TEST_TAG,
             useUnmergedTree = true)
         .performClick()
 

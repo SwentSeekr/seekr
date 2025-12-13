@@ -397,7 +397,7 @@ private fun BaseHuntTopBar(
           }
 
           IconButton(onClick = { showDeleteButton = !showDeleteButton }) {
-            Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "More actions")
+            Icon(imageVector = Icons.Filled.MoreVert, contentDescription = BaseHuntFieldsStrings.MORE_DESCRIPTION)
           }
         }
       },
@@ -828,7 +828,7 @@ private fun SectionHeader(title: String, count: Int) {
     Text(title, style = MaterialTheme.typography.labelLarge)
     if (count > 0) {
       Text(
-          "$count ${if (count == 1) UNIT_IMAGE else UNIT_IMAGES}",
+          "$count ${if (count == BaseHuntConstantsDefault.ONE) UNIT_IMAGE else UNIT_IMAGES}",
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.primary)
     }
@@ -995,7 +995,7 @@ private fun AdditionalImageItem(
                   model = model,
                   contentDescription = CONTENT_DESC_ADDITIONAL_IMAGE,
                   modifier =
-                      Modifier.testTag("otherImage_$tagSuffix")
+                      Modifier.testTag("${BaseHuntFieldsStrings.OTHER_IMAGES}$tagSuffix")
                           .size(UICons.ImageThumbSize)
                           .clip(RoundedCornerShape(UICons.ImageThumbCornerRadius)),
                   contentScale = ContentScale.Crop,

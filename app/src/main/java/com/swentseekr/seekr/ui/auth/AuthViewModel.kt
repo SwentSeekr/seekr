@@ -21,6 +21,7 @@ import com.swentseekr.seekr.model.authentication.AuthRepositoryFirebase
 import com.swentseekr.seekr.model.authentication.OnboardingHandler
 import com.swentseekr.seekr.model.profile.ProfileRepository
 import com.swentseekr.seekr.model.profile.ProfileRepositoryFirestore
+import com.swentseekr.seekr.model.profile.ProfileRepositoryStrings
 import com.swentseekr.seekr.ui.auth.AuthViewModelMessages.DEFAULT_SIGN_IN_FAILURE
 import com.swentseekr.seekr.ui.auth.AuthViewModelMessages.NO_GOOGLE_ACCOUNT
 import com.swentseekr.seekr.ui.auth.AuthViewModelMessages.NO_PROVIDER_AVAILABLE
@@ -128,7 +129,7 @@ class AuthViewModel(
       } catch (e: GetCredentialException) {
         val message =
             when {
-              e.localizedMessage?.contains("no provider", ignoreCase = true) == true ->
+              e.localizedMessage?.contains(AuthViewModelMessages .NO_PROVIDER, ignoreCase = true) == true ->
                   NO_PROVIDER_AVAILABLE
               else -> credentialFailure(e.localizedMessage)
             }

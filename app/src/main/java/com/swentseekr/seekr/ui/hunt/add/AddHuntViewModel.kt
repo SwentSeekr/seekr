@@ -10,10 +10,11 @@ class AddHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.repo
     BaseHuntViewModel(repository) {
 
   var mainImageUri: Uri? = null
+    val UNKNOWN = "unknown"
 
   override fun buildHunt(state: HuntUIState): Hunt {
     val uid = repository.getNewUid()
-    val authorId = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown"
+    val authorId = FirebaseAuth.getInstance().currentUser?.uid ?:UNKNOWN
 
     return Hunt(
         uid = uid,

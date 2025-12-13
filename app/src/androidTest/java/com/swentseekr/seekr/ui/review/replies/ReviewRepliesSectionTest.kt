@@ -94,7 +94,7 @@ class ReviewRepliesUiTest {
             isSendingReply = false,
             errorMessage = null,
             replies = emptyList(),
-            totalReplyCount = ReviewRepliesValues.RootDepth,
+            totalReplyCount = ReviewRepliesValues.ROOT_DEPTH,
             childReplyTexts = emptyMap(),
         )
 
@@ -110,7 +110,7 @@ class ReviewRepliesUiTest {
     composeRule
         .onNodeWithTag(ReviewRepliesTestTags.ROOT_SEE_REPLIES)
         .assertIsDisplayed()
-        .assertTextContains(ReviewRepliesStrings.BeTheFirstToReply)
+        .assertTextContains(ReviewRepliesStrings.BE_THE_FIRST_TO_REPLY)
   }
 
   @Test
@@ -233,7 +233,7 @@ class ReviewRepliesUiTest {
     }
 
     // Click on the "Reply" button (by text)
-    composeRule.onNodeWithText(ReviewRepliesStrings.Reply).assertIsDisplayed().performClick()
+    composeRule.onNodeWithText(ReviewRepliesStrings.REPLY).assertIsDisplayed().performClick()
 
     // We don't deeply assert the target content; coverage > correctness here
     assert(replyActionCalledWith is ReplyTarget.Reply)
@@ -332,7 +332,7 @@ class ReviewRepliesUiTest {
               ),
           config =
               RedditComposerConfig(
-                  placeholder = ReviewRepliesStrings.RootComposerPlaceholder,
+                  placeholder = ReviewRepliesStrings.ROOT_COMPOSER_PLACEHOLDER,
                   compact = false,
                   onTextChanged = { newText -> textState.value = newText },
                   onSend = {},

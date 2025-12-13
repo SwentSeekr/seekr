@@ -19,6 +19,8 @@ import com.swentseekr.seekr.model.hunt.ReviewImageRepositoryProvider
 import com.swentseekr.seekr.model.notifications.NotificationHelper
 import com.swentseekr.seekr.model.profile.ProfileRepository
 import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
+import com.swentseekr.seekr.ui.components.MAX_RATING
+import com.swentseekr.seekr.ui.components.MIN_RATING
 import com.swentseekr.seekr.ui.profile.Profile
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -46,11 +48,11 @@ import kotlinx.coroutines.launch
  */
 data class ReviewHuntUIState(
     val hunt: Hunt? = null,
-    val huntId: String = AddReviewScreenStrings.Empty,
-    val reviewId: String = AddReviewScreenStrings.Empty,
-    val userId: String = AddReviewScreenStrings.Empty,
-    val reviewText: String = AddReviewScreenStrings.Empty,
-    val rating: Double = AddReviewScreenDefaults.Rating,
+    val huntId: String = AddReviewScreenStrings.EMPTY,
+    val reviewId: String = AddReviewScreenStrings.EMPTY,
+    val userId: String = AddReviewScreenStrings.EMPTY,
+    val reviewText: String = AddReviewScreenStrings.EMPTY,
+    val rating: Double = AddReviewScreenDefaults.RATING,
     val isSubmitted: Boolean = false,
     val photos: List<String> = emptyList(),
     val errorMsg: String? = null,
@@ -141,7 +143,7 @@ open class ReviewHuntViewModel(
             if (reviews.isNotEmpty()) {
               reviews.map { it.rating }.average()
             } else {
-              0.0
+                AddReviewScreenDefaults.MIN_RATING
             }
 
         val updatedHunt = hunt.copy(reviewRate = updatedReviewRate)
@@ -152,8 +154,8 @@ open class ReviewHuntViewModel(
         _huntsById.update { current -> current + (huntId to updatedHunt) }
       } catch (e: Exception) {
         Log.e(
-            AddReviewScreenStrings.ReviewViewModel,
-            "${AddReviewScreenStrings.ErrorLoadingHunt} $huntId",
+            AddReviewScreenStrings.REVIEW_VIEW_MODEL,
+            "${AddReviewScreenStrings.ERROR_LOADING_HUNT} $huntId",
             e)
       }
     }
@@ -179,8 +181,8 @@ open class ReviewHuntViewModel(
         }
       } catch (e: Exception) {
         Log.e(
-            AddReviewScreenStrings.ReviewViewModel,
-            "${AddReviewScreenStrings.ErrorLoadingHunt} $reviewId",
+            AddReviewScreenStrings.REVIEW_VIEW_MODEL,
+            "${AddReviewScreenStrings.ERROR_LOADING_HUNT} $reviewId",
             e)
       }
     }
@@ -201,8 +203,8 @@ open class ReviewHuntViewModel(
         }
       } catch (e: Exception) {
         Log.e(
-            AddReviewScreenStrings.HuntCardViewModel,
-            "${AddReviewScreenStrings.ErrorLoadingProfil} $userId",
+            AddReviewScreenStrings.HUNT_CARD_VIEW_MODEL,
+            "${AddReviewScreenStrings.ERROR_LOADING_PROFILE} $userId",
             e)
       }
     }
@@ -243,8 +245,8 @@ open class ReviewHuntViewModel(
         _uiState.value =
             _uiState.value.copy(saveSuccessful = true, errorMsg = null, isSubmitted = true)
       } catch (e: Exception) {
-        Log.e(AddReviewScreenStrings.ReviewViewModel, AddReviewScreenStrings.ErrorReviewHunt, e)
-        setErrorMsg("${AddReviewScreenStrings.FailSubmitReview} ${e.message}")
+        Log.e(AddReviewScreenStrings.REVIEW_VIEW_MODEL, AddReviewScreenStrings.ERROR_REVIEW_HUNT, e)
+        setErrorMsg("${AddReviewScreenStrings.FAIL_SUBMIT_REVIEW} ${e.message}")
         _uiState.value = _uiState.value.copy(saveSuccessful = false)
       }
     }
@@ -258,7 +260,7 @@ open class ReviewHuntViewModel(
             HuntReview(
                 reviewId = reviewId, // Use existing review ID
                 authorId =
-                    FirebaseAuth.getInstance().currentUser?.uid ?: AddReviewScreenStrings.User0,
+                    FirebaseAuth.getInstance().currentUser?.uid ?: AddReviewScreenStrings.USER_0,
                 huntId = hunt.uid,
                 rating = _uiState.value.rating,
                 comment = _uiState.value.reviewText,
@@ -270,15 +272,15 @@ open class ReviewHuntViewModel(
         if (context != null) {
           NotificationHelper.sendNotification(
               context,
-              AddReviewScreenStrings.UpdateReview,
-              AddReviewScreenStrings.UpdateReviewSucess)
+              AddReviewScreenStrings.UPDATE_REVIEW,
+              AddReviewScreenStrings.UPDATE_REVIEW_SUCCESS)
         }
 
         _uiState.value =
             _uiState.value.copy(saveSuccessful = true, errorMsg = null, isSubmitted = true)
       } catch (e: Exception) {
-        Log.e(AddReviewScreenStrings.ReviewViewModel, AddReviewScreenStrings.UpdateReviewFail, e)
-        setErrorMsg("${AddReviewScreenStrings.UpdateReviewFailSetMsg} ${e.message}")
+        Log.e(AddReviewScreenStrings.REVIEW_VIEW_MODEL, AddReviewScreenStrings.UPDATE_REVIEW_FAIL, e)
+        setErrorMsg("${AddReviewScreenStrings.UPDATE_REVIEW_FAIL_SET_MSG} ${e.message}")
         _uiState.value = _uiState.value.copy(saveSuccessful = false)
       }
     }
@@ -299,7 +301,7 @@ open class ReviewHuntViewModel(
   ) {
     viewModelScope.launch {
       try {
-        val currentUid = currentUserId ?: AddReviewScreenStrings.NoCurrentUser
+        val currentUid = currentUserId ?: AddReviewScreenStrings.NO_CURRENT_USER
         if (userID == currentUid) {
           val review = repositoryReview.getReviewHunt(reviewID)
           val photosToDelete = review.photos
@@ -308,18 +310,18 @@ open class ReviewHuntViewModel(
               imageRepository.deleteReviewPhoto(photoUrl)
             } catch (e: Exception) {
               Log.e(
-                  AddReviewScreenStrings.ReviewViewModel,
-                  "${AddReviewScreenStrings.ErrorDeletingPhoto} $photoUrl",
+                  AddReviewScreenStrings.REVIEW_VIEW_MODEL,
+                  "${AddReviewScreenStrings.ERROR_DELETING_PHOTO} $photoUrl",
                   e)
             }
           }
           repositoryReview.deleteReviewHunt(reviewId = reviewID)
         } else {
-          setErrorMsg(AddReviewScreenStrings.ErrorDeleteReview)
+          setErrorMsg(AddReviewScreenStrings.ERROR_DELETE_REVIEW)
         }
       } catch (e: Exception) {
-        Log.e(AddReviewScreenStrings.ReviewViewModel, AddReviewScreenStrings.ErrorDeleteHunt, e)
-        setErrorMsg("${AddReviewScreenStrings.FailDeleteHunt} ${e.message}")
+        Log.e(AddReviewScreenStrings.REVIEW_VIEW_MODEL, AddReviewScreenStrings.ERROR_DELETE_HUNT, e)
+        setErrorMsg("${AddReviewScreenStrings.FAIL_DELETE_HUNT} ${e.message}")
       }
     }
   }
@@ -334,7 +336,7 @@ open class ReviewHuntViewModel(
     _uiState.value =
         _uiState.value.copy(
             reviewText = text,
-            invalidReviewText = if (text.isBlank()) AddReviewScreenStrings.ReviewNotEmpty else null)
+            invalidReviewText = if (text.isBlank()) AddReviewScreenStrings.REVIEW_NOT_EMPTY else null)
   }
 
   /**
@@ -348,7 +350,7 @@ open class ReviewHuntViewModel(
         _uiState.value.copy(
             rating = rating,
             invalidRating =
-                if (rating <= 0.0 || rating > 5.0) AddReviewScreenStrings.InvalidRating else null)
+                if (rating <= MIN_RATING || rating > MAX_RATING) AddReviewScreenStrings.INVALID_RATING else null)
   }
 
   /**
@@ -365,7 +367,7 @@ open class ReviewHuntViewModel(
   fun submitReviewHunt(userId: String, hunt: Hunt, context: Context?) {
     val state = _uiState.value
     if (!state.isValid) {
-      setErrorMsg(AddReviewScreenStrings.ErrorSubmisson)
+      setErrorMsg(AddReviewScreenStrings.ERROR_SUBMISSION)
       return
     }
     if (state.reviewId.isNotEmpty()) {
@@ -396,7 +398,7 @@ open class ReviewHuntViewModel(
       } catch (e: Exception) {
         _uiState.value =
             _uiState.value.copy(
-                errorMsg = "${AddReviewScreenStrings.ErrorAddingPhoto} ${e.message}")
+                errorMsg = "${AddReviewScreenStrings.ERROR_ADDING_PHOTO} ${e.message}")
       }
     }
   }
@@ -416,7 +418,7 @@ open class ReviewHuntViewModel(
       } catch (e: Exception) {
         _uiState.value =
             _uiState.value.copy(
-                errorMsg = "${AddReviewScreenStrings.ErrorDeletingImages} ${e.message}")
+                errorMsg = "${AddReviewScreenStrings.ERROR_DELETING_IMAGES} ${e.message}")
       }
     }
   }
@@ -454,7 +456,7 @@ open class ReviewHuntViewModel(
     if (_uiState.value.saveSuccessful) {
       clearFormCancel()
     } else {
-      setErrorMsg(AddReviewScreenStrings.ErrorClearSubmitReview)
+      setErrorMsg(AddReviewScreenStrings.ERROR_CLEAR_SUBMIT_REVIEW)
     }
   }
 
@@ -473,7 +475,7 @@ open class ReviewHuntViewModel(
         } catch (e: Exception) {
           _uiState.value =
               _uiState.value.copy(
-                  errorMsg = "${AddReviewScreenStrings.ErrorCancleImage} ${e.message}")
+                  errorMsg = "${AddReviewScreenStrings.ERROR_CANCEL_IMAGE} ${e.message}")
         }
       }
     }
@@ -490,8 +492,8 @@ open class ReviewHuntViewModel(
   fun clearFormCancel() {
     _uiState.value =
         _uiState.value.copy(
-            reviewText = AddReviewScreenStrings.Empty,
-            rating = AddReviewScreenDefaults.Rating,
+            reviewText = AddReviewScreenStrings.EMPTY,
+            rating = AddReviewScreenDefaults.RATING,
             photos = emptyList(),
             isSubmitted = false,
             saveSuccessful = false,
@@ -511,7 +513,7 @@ open class ReviewHuntViewModel(
    * @return Unit
    */
   fun submitCurrentUserReview(hunt: Hunt, context: Context?) {
-    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: AddReviewScreenStrings.User0
+    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: AddReviewScreenStrings.USER_0
     submitReviewHunt(userId, hunt, context)
   }
 }

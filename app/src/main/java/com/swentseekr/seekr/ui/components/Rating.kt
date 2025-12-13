@@ -15,11 +15,11 @@ const val MAX_RATING = 5.0
 const val MIN_RATING = 0.0
 
 object RatingTestTags {
-  fun full(index: Int, type: RatingType) = "${type.name}_FULL_$index"
+  fun full(index: Int, type: RatingType) = "${type.name}${RatingConstantsStrings.FULL}$index"
 
-  fun half(type: RatingType) = "${type.name}_HALF"
+  fun half(type: RatingType) = "${type.name}${RatingConstantsStrings.HALF}"
 
-  fun empty(index: Int, type: RatingType) = "${type.name}_EMPTY_$index"
+  fun empty(index: Int, type: RatingType) = "${type.name}${RatingConstantsStrings.EMPTY}$index"
 }
 
 /**
@@ -30,7 +30,7 @@ object RatingTestTags {
  */
 @Composable
 fun Rating(rating: Double, type: RatingType) {
-  check(rating in MIN_RATING..MAX_RATING) { "Rating must be between $MIN_RATING and $MAX_RATING" }
+  check(rating in MIN_RATING..MAX_RATING) { "${RatingConstantsStrings.RATING_CONDITION} $MIN_RATING ${RatingConstantsStrings.AND} $MAX_RATING" }
 
   val (fullImage, halfImage, emptyImage) =
       when (type) {
@@ -40,25 +40,25 @@ fun Rating(rating: Double, type: RatingType) {
       }
   Row {
     val full = rating.toInt()
-    val hasHalf = (rating - full) >= 0.5
-    val empty = (MAX_RATING - full - if (hasHalf) 1 else 0).toInt()
+    val hasHalf = (rating - full) >= RatingConstantsDefault.HALF
+    val empty = (MAX_RATING - full - if (hasHalf) RatingConstantsDefault.HAS_STAR_HALF else RatingConstantsDefault.HAS_NO_STAR_HALF).toInt()
 
     repeat(full) { index ->
       Image(
           painter = painterResource(fullImage),
-          contentDescription = "Full Rating",
+          contentDescription = RatingConstantsStrings.FULL_RATING,
           modifier = Modifier.size(ICON_SIZE).testTag(RatingTestTags.full(index, type)))
     }
     if (hasHalf) {
       Image(
           painter = painterResource(halfImage),
-          contentDescription = "Half Rating",
+          contentDescription = RatingConstantsStrings.HALF_RATING,
           modifier = Modifier.size(ICON_SIZE).testTag(RatingTestTags.half(type)))
     }
     repeat(empty) { index ->
       Image(
           painter = painterResource(emptyImage),
-          contentDescription = "Empty Rating",
+          contentDescription = RatingConstantsStrings.EMPTY_RATING,
           modifier = Modifier.size(ICON_SIZE).testTag(RatingTestTags.empty(index, type)))
     }
   }
