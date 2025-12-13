@@ -2,7 +2,6 @@ package com.swentseekr.seekr.model.authentication
 
 import androidx.credentials.Credential
 import androidx.credentials.CustomCredential
-import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -27,9 +26,18 @@ class AuthRepositoryFirebase(
     private val helper: GoogleSignInHelper = DefaultGoogleSignInHelper()
 ) : AuthRepository {
 
-  fun getGoogleSignInOption(serverClientId: String) =
-      GetSignInWithGoogleOption.Builder(serverClientId = serverClientId).build()
-
+  /**
+   * Signs in a user to Firebase using a Google credential.
+   *
+   * This method expects a [CustomCredential] containing a Google ID token. If the credential is
+   * valid, it authenticates the user with Firebase and returns the corresponding [FirebaseUser].
+   *
+   * @param credential The credential returned by the Credential Manager.
+   * @return [Result.success] containing the authenticated [FirebaseUser] on success, or
+   *   [Result.failure] if authentication fails or the credential type is invalid.
+   * @throws IllegalStateException wrapped in [Result.failure] if authentication fails due to
+   *   invalid credentials or unexpected Firebase errors.
+   */
   override suspend fun signInWithGoogle(credential: Credential): Result<FirebaseUser> {
     return try {
       if (credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
@@ -53,6 +61,13 @@ class AuthRepositoryFirebase(
     }
   }
 
+  /**
+   * Signs out the currently authenticated user from Firebase.
+   *
+   * @return [Result.success] if the sign-out operation completes successfully, or [Result.failure]
+   *   if an error occurs during sign-out.
+   * @throws IllegalStateException wrapped in [Result.failure] if Firebase sign-out fails.
+   */
   override fun signOut(): Result<Unit> {
     return try {
       // Firebase sign out
