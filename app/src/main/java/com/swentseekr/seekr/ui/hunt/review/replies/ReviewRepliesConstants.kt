@@ -14,12 +14,12 @@ object ReviewRepliesStrings {
   const val REPLY = "Reply"
   const val DELETE = "Delete"
   const val ERROR_EMPTY_REPLY = "Reply cannot be empty."
-  const val YOU= "You"
+  const val YOU = "You"
 
   // New strings used by the Reddit-style UI
   const val ROOT_COMPOSER_PLACEHOLDER = "What are your thoughts?"
   const val INLINE_REPLY_PLACEHOLDER = "Write a reply..."
-  const val  DELETED = "[deleted]"
+  const val DELETED = "[deleted]"
   const val BE_THE_FIRST_TO_REPLY = "Be the first to reply"
   const val REPLY_UNIT_SINGULAR = "reply"
   const val REPLY_UNIT_PLURAL = "replies"
@@ -29,7 +29,7 @@ object ReviewRepliesStrings {
   const val ERROR_DELETE_NOT_OWNER = "You can only delete your own replies."
   const val ErrorRefreshReplies = "Failed to refresh replies"
   const val ERROR_SEND_REPLY = "Failed to send reply."
-  const val ERROR_DELETE_REPLY= "Failed to delete reply."
+  const val ERROR_DELETE_REPLY = "Failed to delete reply."
   const val JUST_NOW = " · just now"
   const val REPLY_AUTHOR_PREFIX = "u/"
 

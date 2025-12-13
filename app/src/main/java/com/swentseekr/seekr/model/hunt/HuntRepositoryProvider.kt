@@ -13,16 +13,25 @@ object HuntRepositoryProvider {
   val defaultHunt =
       Hunt(
           uid = HuntRepositoryProviderConstantsString.HUNT_ID,
-          start = Location(HuntRepositoryProviderConstantsDefault.START_LATITUDE,
-              HuntRepositoryProviderConstantsDefault.START_LONGITUDE,
-              HuntRepositoryProviderConstantsString.START_NAME),
-          end = Location(HuntRepositoryProviderConstantsDefault.END_LATITUDE, HuntRepositoryProviderConstantsDefault.END_LONGITUDE,
-              HuntRepositoryProviderConstantsString.END_NAME),
+          start =
+              Location(
+                  HuntRepositoryProviderConstantsDefault.START_LATITUDE,
+                  HuntRepositoryProviderConstantsDefault.START_LONGITUDE,
+                  HuntRepositoryProviderConstantsString.START_NAME),
+          end =
+              Location(
+                  HuntRepositoryProviderConstantsDefault.END_LATITUDE,
+                  HuntRepositoryProviderConstantsDefault.END_LONGITUDE,
+                  HuntRepositoryProviderConstantsString.END_NAME),
           middlePoints =
               listOf(
-                  Location(HuntRepositoryProviderConstantsDefault.SECOND_LATITUDE, HuntRepositoryProviderConstantsDefault.SECONDE_LONGITUDE,
+                  Location(
+                      HuntRepositoryProviderConstantsDefault.SECOND_LATITUDE,
+                      HuntRepositoryProviderConstantsDefault.SECONDE_LONGITUDE,
                       HuntRepositoryProviderConstantsString.SECOND_NAME),
-                  Location(HuntRepositoryProviderConstantsDefault.OTHER_LATITUDE, HuntRepositoryProviderConstantsDefault.OTHER_LONGITUDE,
+                  Location(
+                      HuntRepositoryProviderConstantsDefault.OTHER_LATITUDE,
+                      HuntRepositoryProviderConstantsDefault.OTHER_LONGITUDE,
                       HuntRepositoryProviderConstantsString.OTHER_NAME)),
           status = HuntStatus.FUN,
           title = HuntRepositoryProviderConstantsString.TITLE,
@@ -34,7 +43,7 @@ object HuntRepositoryProvider {
           mainImageUrl = HuntRepositoryProviderConstantsDefault.IMAGE.toString(),
           reviewRate = HuntRepositoryProviderConstantsDefault.RATING)
 
-    // Unused anymore so no need magic values can remove this
+  // Unused anymore so no need magic values can remove this
   private val _repository: HuntsRepository =
       HuntsRepositoryLocal().apply {
         val sampleHunts =

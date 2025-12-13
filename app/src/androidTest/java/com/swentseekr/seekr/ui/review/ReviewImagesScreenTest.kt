@@ -46,7 +46,9 @@ class ReviewImagesScreenTest {
         .assertIsDisplayed()
 
     // Top bar
-    composeRule.onNodeWithTag(ReviewImagesScreenConstantsStrings.TOP_BAR_TEST_TAG).assertIsDisplayed()
+    composeRule
+        .onNodeWithTag(ReviewImagesScreenConstantsStrings.TOP_BAR_TEST_TAG)
+        .assertIsDisplayed()
 
     // Column
     composeRule

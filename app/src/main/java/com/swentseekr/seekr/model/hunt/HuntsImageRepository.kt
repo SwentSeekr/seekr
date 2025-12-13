@@ -17,7 +17,9 @@ class HuntsImageRepository(private val storage: FirebaseStorage = FirebaseStorag
   private val rootRef = storage.reference.child(HuntsImageRepositoryConstantsString.PATH)
 
   override suspend fun uploadMainImage(huntId: String, imageUri: Uri): String {
-    val ref = rootRef.child("$huntId${HuntsImageRepositoryConstantsString.MAIN}${System.currentTimeMillis()}${HuntsImageRepositoryConstantsString.FORMAT}")
+    val ref =
+        rootRef.child(
+            "$huntId${HuntsImageRepositoryConstantsString.MAIN}${System.currentTimeMillis()}${HuntsImageRepositoryConstantsString.FORMAT}")
     ref.putFile(imageUri).await()
     return ref.downloadUrl.await().toString()
   }
@@ -52,21 +54,29 @@ class HuntsImageRepository(private val storage: FirebaseStorage = FirebaseStorag
     try {
       val folder = rootRef.child(huntId)
       // Avoid infity waits by setting a timeout for listing files
-      val list = withTimeoutOrNull(HuntsImageRepositoryConstantsDefault.TIME_OUT) { folder.listAll().await() }
+      val list =
+          withTimeoutOrNull(HuntsImageRepositoryConstantsDefault.TIME_OUT) {
+            folder.listAll().await()
+          }
 
       if (list != null) {
         list.items.forEach {
           runCatching { it.delete().await() }
               .onFailure { e ->
-                Log.w(HuntsImageRepositoryConstantsString.TAG, "${HuntsImageRepositoryConstantsString.ERROR_DELETE} ${it.name}: ${e.message}")
+                Log.w(
+                    HuntsImageRepositoryConstantsString.TAG,
+                    "${HuntsImageRepositoryConstantsString.ERROR_DELETE} ${it.name}: ${e.message}")
               }
         }
       } else {
         Log.w(
-          HuntsImageRepositoryConstantsString.TAG, "${HuntsImageRepositoryConstantsString.ERROR_TIMEOUT} $huntId ${HuntsImageRepositoryConstantsString.ERROR_POSSIBLE}")
+            HuntsImageRepositoryConstantsString.TAG,
+            "${HuntsImageRepositoryConstantsString.ERROR_TIMEOUT} $huntId ${HuntsImageRepositoryConstantsString.ERROR_POSSIBLE}")
       }
     } catch (e: Exception) {
-      Log.w(HuntsImageRepositoryConstantsString.TAG, "${HuntsImageRepositoryConstantsString.ERROR_UNEXPECTED} $huntId: ${e.message}")
+      Log.w(
+          HuntsImageRepositoryConstantsString.TAG,
+          "${HuntsImageRepositoryConstantsString.ERROR_UNEXPECTED} $huntId: ${e.message}")
     }
   }
 
@@ -75,7 +85,10 @@ class HuntsImageRepository(private val storage: FirebaseStorage = FirebaseStorag
       val ref = storage.getReferenceFromUrl(url)
       ref.delete().await()
     } catch (e: Exception) {
-      Log.w(HuntsImageRepositoryConstantsString.TAG_FIRESTORE, "${HuntsImageRepositoryConstantsString.ERROR_DELETING} $url", e)
+      Log.w(
+          HuntsImageRepositoryConstantsString.TAG_FIRESTORE,
+          "${HuntsImageRepositoryConstantsString.ERROR_DELETING} $url",
+          e)
     }
   }
 }

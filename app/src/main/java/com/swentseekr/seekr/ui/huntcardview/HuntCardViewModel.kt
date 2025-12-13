@@ -163,7 +163,10 @@ open class HuntCardViewModel(
         val likedHunts = profileRepository.getLikedHunts(userId)
         _likedHuntsCache.value = likedHunts.map { it.uid }.toSet()
       } catch (e: Exception) {
-        Log.e(HuntCardViewModelConstants.HUNT_CARD_TAG, HuntCardViewModelConstants.ERROR_CACHE_LIKE, e)
+        Log.e(
+            HuntCardViewModelConstants.HUNT_CARD_TAG,
+            HuntCardViewModelConstants.ERROR_CACHE_LIKE,
+            e)
       }
     }
   }
@@ -393,7 +396,9 @@ open class HuntCardViewModel(
           _uiState.value = currentHuntUiState.copy(isAchieved = true)
         } catch (e: Exception) {
           Log.e(
-              HuntCardViewModelConstants.HUNT_CARD_TAG, HuntCardViewModelConstants.ERROR_ON_DONE_CLICK, e)
+              HuntCardViewModelConstants.HUNT_CARD_TAG,
+              HuntCardViewModelConstants.ERROR_ON_DONE_CLICK,
+              e)
           setErrorMsg("${HuntCardViewModelConstants.ERROR_ON_DONE_CLICK_SET_MSG} ${e.message}")
         }
       }

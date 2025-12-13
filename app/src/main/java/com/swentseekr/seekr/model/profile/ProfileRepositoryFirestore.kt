@@ -41,11 +41,12 @@ class ProfileRepositoryFirestore(
                     ProfileRepositoryConstants.LOCATION_FIELD_NAME to hunt.end.name),
             ProfileRepositoryConstants.HUNT_FIELD_MIDDLE_POINTS to
                 hunt.middlePoints.map {
-                  mapOf(ProfileRepositoryConstants.LOCATION_FIELD_LATITUDE  to it.latitude,
+                  mapOf(
+                      ProfileRepositoryConstants.LOCATION_FIELD_LATITUDE to it.latitude,
                       ProfileRepositoryConstants.LOCATION_FIELD_LONGITUDE to it.longitude,
                       ProfileRepositoryConstants.LOCATION_FIELD_NAME to it.name)
                 },
-            ProfileRepositoryConstants. HUNT_FIELD_DIFFICULTY to hunt.difficulty.name,
+            ProfileRepositoryConstants.HUNT_FIELD_DIFFICULTY to hunt.difficulty.name,
             ProfileRepositoryConstants.HUNT_FIELD_STATUS to hunt.status.name,
             ProfileRepositoryConstants.HUNT_FIELD_AUTHOR_ID to hunt.authorId,
             ProfileRepositoryConstants.HUNT_FIELD_TIME to hunt.time,
@@ -173,7 +174,9 @@ class ProfileRepositoryFirestore(
       val snapshot = profilesCollection.get().await()
 
       snapshot.documents.mapNotNull { doc ->
-        val author = doc[ProfileRepositoryConstants.PROFILE_FIELD_AUTHOR] as? Map<*, *> ?: return@mapNotNull null
+        val author =
+            doc[ProfileRepositoryConstants.PROFILE_FIELD_AUTHOR] as? Map<*, *>
+                ?: return@mapNotNull null
         val pseudonym = author[ProfileRepositoryConstants.PROFILE_FIELD_PSEUDONYM] as? String
         pseudonym?.takeIf { it.isNotBlank() }
       }
@@ -219,7 +222,8 @@ class ProfileRepositoryFirestore(
                 ProfileRepositoryConstants.AUTHOR_PSEUDONYM to profile.author.pseudonym,
                 ProfileRepositoryConstants.AUTHOR_BIO to profile.author.bio,
                 ProfileRepositoryConstants.AUTHOR_PROFILE_PICTURE to profile.author.profilePicture,
-                ProfileRepositoryConstants.AUTHOR_PROFILE_PICTURE_URL to profile.author.profilePictureUrl,
+                ProfileRepositoryConstants.AUTHOR_PROFILE_PICTURE_URL to
+                    profile.author.profilePictureUrl,
                 ProfileRepositoryConstants.AUTHOR_REVIEW_RATE to profile.author.reviewRate,
                 ProfileRepositoryConstants.AUTHOR_SPORT_RATE to profile.author.sportRate))
         .await()
@@ -235,7 +239,9 @@ class ProfileRepositoryFirestore(
   }
 
   override suspend fun uploadProfilePicture(userId: String, uri: Uri): String {
-    val storageRef = storage.reference.child("${ProfileRepositoryConstants.PATH_PROFILE_PICTURE}$userId${ProfileRepositoryConstants.FORMAT}")
+    val storageRef =
+        storage.reference.child(
+            "${ProfileRepositoryConstants.PATH_PROFILE_PICTURE}$userId${ProfileRepositoryConstants.FORMAT}")
     val docRef = db.collection(ProfileRepositoryConstants.PROFILES_COLLECTION).document(userId)
 
     return try {
@@ -395,14 +401,29 @@ class ProfileRepositoryFirestore(
         document[ProfileRepositoryConstants.PROFILE_FIELD_AUTHOR] as? Map<*, *> ?: return null
     val author =
         Author(
-            hasCompletedOnboarding = authorMap[ProfileRepositoryConstants.COMPLETE_ONBOARD] as? Boolean ?: false,
-            hasAcceptedTerms = authorMap[ProfileRepositoryConstants.ACCEPT_TERMS] as? Boolean ?: false,
-            pseudonym = authorMap[ProfileRepositoryConstants.PROFILE_FIELD_PSEUDONYM] as? String ?: DEFAULT_EMPTY_VALUE,
-            bio = authorMap[ProfileRepositoryConstants.HUNT_FIELD_BIO] as? String ?: DEFAULT_EMPTY_VALUE,
-            profilePicture = (authorMap[ProfileRepositoryConstants.HUNT_FIELD_PROFILE_PICTURE] as? Long ?: ProfileRepositoryConstants.DEFAULT_PROFILE_PICTURE_LONG).toInt(),
-            reviewRate = authorMap[ProfileRepositoryConstants.HUNT_FIELD_REVIEW_RATE] as? Double ?: ProfileRepositoryConstants.DEFAULT_HUNT_REVIEW_RATE,
-            sportRate = authorMap[ProfileRepositoryConstants.SPORT_RATE] as? Double ?: ProfileRepositoryConstants.DEFAULT_SPORT_RATE,
-            profilePictureUrl = authorMap[ProfileRepositoryConstants.PROFILE_PICTURE_URL] as? String ?: DEFAULT_EMPTY_VALUE)
+            hasCompletedOnboarding =
+                authorMap[ProfileRepositoryConstants.COMPLETE_ONBOARD] as? Boolean ?: false,
+            hasAcceptedTerms =
+                authorMap[ProfileRepositoryConstants.ACCEPT_TERMS] as? Boolean ?: false,
+            pseudonym =
+                authorMap[ProfileRepositoryConstants.PROFILE_FIELD_PSEUDONYM] as? String
+                    ?: DEFAULT_EMPTY_VALUE,
+            bio =
+                authorMap[ProfileRepositoryConstants.HUNT_FIELD_BIO] as? String
+                    ?: DEFAULT_EMPTY_VALUE,
+            profilePicture =
+                (authorMap[ProfileRepositoryConstants.HUNT_FIELD_PROFILE_PICTURE] as? Long
+                        ?: ProfileRepositoryConstants.DEFAULT_PROFILE_PICTURE_LONG)
+                    .toInt(),
+            reviewRate =
+                authorMap[ProfileRepositoryConstants.HUNT_FIELD_REVIEW_RATE] as? Double
+                    ?: ProfileRepositoryConstants.DEFAULT_HUNT_REVIEW_RATE,
+            sportRate =
+                authorMap[ProfileRepositoryConstants.SPORT_RATE] as? Double
+                    ?: ProfileRepositoryConstants.DEFAULT_SPORT_RATE,
+            profilePictureUrl =
+                authorMap[ProfileRepositoryConstants.PROFILE_PICTURE_URL] as? String
+                    ?: DEFAULT_EMPTY_VALUE)
 
     // Fetch associated hunts only for this user
     val myHunts = huntsRepository.getAllHunts().filter { it.authorId == uid }.toMutableList()

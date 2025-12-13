@@ -130,10 +130,12 @@ abstract class BaseHuntViewModel(
       } catch (e: Exception) {
         Log.e(
             this@BaseHuntViewModel::class.simpleName ?: BaseHuntViewModelMessages.BASE_VIEW_MODEL,
-            BaseHuntViewModelMessages.ERROR_SAVING, e)
+            BaseHuntViewModelMessages.ERROR_SAVING,
+            e)
         _uiState.value =
             _uiState.value.copy(
-                errorMsg = "${BaseHuntViewModelMessages.FAIL_SAVE} ${e.message}", saveSuccessful = false)
+                errorMsg = "${BaseHuntViewModelMessages.FAIL_SAVE} ${e.message}",
+                saveSuccessful = false)
       }
     }
     return true
@@ -143,21 +145,24 @@ abstract class BaseHuntViewModel(
   fun setTitle(title: String) {
     _uiState.value =
         _uiState.value.copy(
-            title = title, invalidTitleMsg = if (title.isBlank()) BaseHuntViewModelMessages.TITLE_EMPTY else null)
+            title = title,
+            invalidTitleMsg = if (title.isBlank()) BaseHuntViewModelMessages.TITLE_EMPTY else null)
   }
 
   fun setDescription(desc: String) {
     _uiState.value =
         _uiState.value.copy(
             description = desc,
-            invalidDescriptionMsg = if (desc.isBlank()) BaseHuntViewModelMessages.DESCRIPTION_EMPTY else null)
+            invalidDescriptionMsg =
+                if (desc.isBlank()) BaseHuntViewModelMessages.DESCRIPTION_EMPTY else null)
   }
 
   fun setTime(time: String) {
     _uiState.value =
         _uiState.value.copy(
             time = time,
-            invalidTimeMsg = if (time.toDoubleOrNull() == null) BaseHuntViewModelMessages.INVALID_TIME else null)
+            invalidTimeMsg =
+                if (time.toDoubleOrNull() == null) BaseHuntViewModelMessages.INVALID_TIME else null)
   }
 
   fun setDistance(distance: String) {
@@ -165,7 +170,8 @@ abstract class BaseHuntViewModel(
         _uiState.value.copy(
             distance = distance,
             invalidDistanceMsg =
-                if (distance.toDoubleOrNull() == null) BaseHuntViewModelMessages.INVALID_DISTANCE else null)
+                if (distance.toDoubleOrNull() == null) BaseHuntViewModelMessages.INVALID_DISTANCE
+                else null)
   }
 
   fun setDifficulty(difficulty: Difficulty) {

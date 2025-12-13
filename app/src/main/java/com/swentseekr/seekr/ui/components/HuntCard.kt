@@ -127,7 +127,9 @@ fun HuntCard(
                       Text(
                           text = "${HuntCardScreenStrings.BY} " + authorName,
                           fontSize = HuntCardUIConstants.AuthorFont14,
-                          color = HuntCardUIConstants.White.copy(alpha = HuntCardScreenDefaults.TEXT_COLOR_FACTOR),
+                          color =
+                              HuntCardUIConstants.White.copy(
+                                  alpha = HuntCardScreenDefaults.TEXT_COLOR_FACTOR),
                           fontWeight = FontWeight.Medium)
                     }
               }

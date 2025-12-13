@@ -36,7 +36,7 @@ object HuntCardScreenDefaults {
   const val IMAGE_CAROUSEL_INTERPOLATION_MIN_FRACTION: Float = 0f
   const val IMAGE_CAROUSEL_INTERPOLATION_MAX_FRACTION: Float = 1f
   const val FULL_SCREEN_IMAGE_HEIGHT_FRACTION: Float = 0.9f
-  const val TEXT_COLOR_FACTOR:Float = 0.9f
+  const val TEXT_COLOR_FACTOR: Float = 0.9f
   const val WEIGHT_LOCATION_MODIFIER: Float = 1f
   const val WEIGHT_TIME_MODIFIER: Float = 1f
 
@@ -108,8 +108,8 @@ object HuntCardScreenDefaults {
   const val BEGIN_BUTTON_SIZE_MULTIPLIER: Int = 2
   const val END_LIST_SPACER_MULTIPLIER: Int = 2
   const val RepliesLabelAlpha: Float = 0.8f
-  const val BACKGROUND_ALPHA:Float= 0.8f
-  const val START: Float =  200f
+  const val BACKGROUND_ALPHA: Float = 0.8f
+  const val START: Float = 200f
 }
 
 object HuntCardScreenStrings {

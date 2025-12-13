@@ -176,7 +176,8 @@ fun BaseReviewScreen(
                               onRatingChanged = onRatingChanged)
 
                           AnimatedVisibility(
-                              visible = rating >= AddReviewScreenDefaults.FIRST_STAR_INDEX.toDouble(),
+                              visible =
+                                  rating >= AddReviewScreenDefaults.FIRST_STAR_INDEX.toDouble(),
                               enter = fadeIn() + scaleIn(),
                               exit = fadeOut() + scaleOut()) {
                                 Text(

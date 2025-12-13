@@ -27,15 +27,15 @@ object PreviewHuntStrings {
   const val PREVIEW_LOCATION = "Preview Location"
   const val HUNT_ID = "preview"
   const val AUTHOR_ID = "preview"
-
 }
-object PreviewHuntConstantsDefault{
-  const val DEFAULT_VALUE_TIME: Double= 0.0
-  const val DEFAULT_VALUE_DISTANCE: Double= 0.0
-  const val DEFAULT_VALUE_RATING: Double= 0.0
-  const val DEFAULT_LATITUDE: Double= 0.0
-  const val DEFAULT_LONGITUDE: Double= 0.0
-  const val MIDDLE_VALUE_MIN_VALUE= 2
+
+object PreviewHuntConstantsDefault {
+  const val DEFAULT_VALUE_TIME: Double = 0.0
+  const val DEFAULT_VALUE_DISTANCE: Double = 0.0
+  const val DEFAULT_VALUE_RATING: Double = 0.0
+  const val DEFAULT_LATITUDE: Double = 0.0
+  const val DEFAULT_LONGITUDE: Double = 0.0
+  const val MIDDLE_VALUE_MIN_VALUE = 2
   const val ONE = 1
 }
 

@@ -143,7 +143,7 @@ open class ReviewHuntViewModel(
             if (reviews.isNotEmpty()) {
               reviews.map { it.rating }.average()
             } else {
-                AddReviewScreenDefaults.MIN_RATING
+              AddReviewScreenDefaults.MIN_RATING
             }
 
         val updatedHunt = hunt.copy(reviewRate = updatedReviewRate)
@@ -279,7 +279,8 @@ open class ReviewHuntViewModel(
         _uiState.value =
             _uiState.value.copy(saveSuccessful = true, errorMsg = null, isSubmitted = true)
       } catch (e: Exception) {
-        Log.e(AddReviewScreenStrings.REVIEW_VIEW_MODEL, AddReviewScreenStrings.UPDATE_REVIEW_FAIL, e)
+        Log.e(
+            AddReviewScreenStrings.REVIEW_VIEW_MODEL, AddReviewScreenStrings.UPDATE_REVIEW_FAIL, e)
         setErrorMsg("${AddReviewScreenStrings.UPDATE_REVIEW_FAIL_SET_MSG} ${e.message}")
         _uiState.value = _uiState.value.copy(saveSuccessful = false)
       }
@@ -336,7 +337,8 @@ open class ReviewHuntViewModel(
     _uiState.value =
         _uiState.value.copy(
             reviewText = text,
-            invalidReviewText = if (text.isBlank()) AddReviewScreenStrings.REVIEW_NOT_EMPTY else null)
+            invalidReviewText =
+                if (text.isBlank()) AddReviewScreenStrings.REVIEW_NOT_EMPTY else null)
   }
 
   /**
@@ -350,7 +352,9 @@ open class ReviewHuntViewModel(
         _uiState.value.copy(
             rating = rating,
             invalidRating =
-                if (rating <= MIN_RATING || rating > MAX_RATING) AddReviewScreenStrings.INVALID_RATING else null)
+                if (rating <= MIN_RATING || rating > MAX_RATING)
+                    AddReviewScreenStrings.INVALID_RATING
+                else null)
   }
 
   /**

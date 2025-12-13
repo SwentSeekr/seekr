@@ -1,31 +1,32 @@
 package com.swentseekr.seekr.model.hunt
 
 object HuntsRepositoryFirestoreConstantsStrings {
-    const val AUTHOR_ID= "authorId"
-    const val HUNT= "Hunt with ID"
-    const val NOT_FOUND = "is not found"
-    const val EMPTY = ""
-    const val TAG = "HuntsRepositoryFirestore"
-    const val ERROR_IMAGE_UPLOADING= "Image upload failed for hunt"
-    const val ERROR_CLEANUP= "Cleanup after failed upload failed"
-    const val START= "start"
-    const val LATITUDE= "latitude"
-    const val LONGITUDE= "longitude"
-    const val NAME= "name"
-    const val DESCRIPTION = "description"
-    const val IMAGE_INDEX = "imageIndex"
-    const val END = "end"
-    const val MIIDDLE_POINT= "middlePoints"
-    const val STATUS= "status"
-    const val TITLE= "title"
-    const val TIME = "time"
-    const val DISTANCE= "distance"
-    const val DIFFICULTY = "difficulty"
-    const val MAIN_IMAGE= "mainImageUrl"
-    const val OTHER_IMAGE= "otherImagesUrls"
-    const val RATING_REVIEW= "reviewRate"
-    const val ERROR_CONVERTING = "Error converting document to Hunt"
+  const val AUTHOR_ID = "authorId"
+  const val HUNT = "Hunt with ID"
+  const val NOT_FOUND = "is not found"
+  const val EMPTY = ""
+  const val TAG = "HuntsRepositoryFirestore"
+  const val ERROR_IMAGE_UPLOADING = "Image upload failed for hunt"
+  const val ERROR_CLEANUP = "Cleanup after failed upload failed"
+  const val START = "start"
+  const val LATITUDE = "latitude"
+  const val LONGITUDE = "longitude"
+  const val NAME = "name"
+  const val DESCRIPTION = "description"
+  const val IMAGE_INDEX = "imageIndex"
+  const val END = "end"
+  const val MIIDDLE_POINT = "middlePoints"
+  const val STATUS = "status"
+  const val TITLE = "title"
+  const val TIME = "time"
+  const val DISTANCE = "distance"
+  const val DIFFICULTY = "difficulty"
+  const val MAIN_IMAGE = "mainImageUrl"
+  const val OTHER_IMAGE = "otherImagesUrls"
+  const val RATING_REVIEW = "reviewRate"
+  const val ERROR_CONVERTING = "Error converting document to Hunt"
 }
-object HuntsRepositoryFirestoreConstantsDefault{
-    const val ZERO: Double =0.0
+
+object HuntsRepositoryFirestoreConstantsDefault {
+  const val ZERO: Double = 0.0
 }

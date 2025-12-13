@@ -57,8 +57,8 @@ object AddReviewScreenDefaults {
   const val RATING_STEP: Int = 1
   const val STAR_SELECTED_SCALE: Float = 1.1f
   const val STAR_UNSELECTED_SCALE: Float = 1f
-  const val MIN_RATING: Double= 0.0
-  const val MAX_RATING : Double=0.0
+  const val MIN_RATING: Double = 0.0
+  const val MAX_RATING: Double = 0.0
 
   // Header & photos
   val HeaderInnerSpacing: Dp = 8.dp
@@ -119,9 +119,9 @@ object AddReviewScreenStrings {
   const val UPDATE_REVIEW_SUCCESS = "Your review has been updated successfully"
   const val UPDATE_REVIEW_FAIL = "Error updating review"
   const val UPDATE_REVIEW_FAIL_SET_MSG = "Failed to update review:"
-  const val ADD_KEY="add_"
-  const  val EDIT_KEY= "edit_"
-  const val EDIT_TITLE=  "Edit Review Hunt"
+  const val ADD_KEY = "add_"
+  const val EDIT_KEY = "edit_"
+  const val EDIT_TITLE = "Edit Review Hunt"
   const val UNKNOWN = "Unknown Author"
 
   fun ratingSummary(rating: Int, maxStars: Int): String = "$RATING_PREFIX$rating /$maxStars"
@@ -129,7 +129,6 @@ object AddReviewScreenStrings {
   fun commentLengthLabel(length: Int): String = "$length chars"
 
   fun photosHeader(count: Int): String = "$PHOTOS_LABEL_PREFIX$count$PHOTOS_LABEL_SUFFIX"
-
 }
 
 object AddReviewScreenTestTags {

@@ -292,7 +292,11 @@ private fun HuntImagePage(
                 Modifier.fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = HuntCardScreenDefaults.BACKGROUND_ALPHA)),
+                            colors =
+                                listOf(
+                                    Color.Transparent,
+                                    Color.Black.copy(
+                                        alpha = HuntCardScreenDefaults.BACKGROUND_ALPHA)),
                             startY = HuntCardScreenDefaults.START))) {}
       }
 }

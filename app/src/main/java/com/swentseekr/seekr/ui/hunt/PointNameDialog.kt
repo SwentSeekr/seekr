@@ -43,7 +43,8 @@ fun PointNameDialog(show: Boolean, onDismiss: () -> Unit, onConfirm: (String, St
               label = { Text(AddPointsMapScreenDefaults.POINTS_NAME) },
               supportingText = {
                 if (isError) {
-                  Text(AddPointsMapScreenDefaults.NOT_EMPTY, color = MaterialTheme.colorScheme.error)
+                  Text(
+                      AddPointsMapScreenDefaults.NOT_EMPTY, color = MaterialTheme.colorScheme.error)
                 }
               },
               modifier =

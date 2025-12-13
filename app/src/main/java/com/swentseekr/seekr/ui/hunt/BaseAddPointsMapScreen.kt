@@ -118,10 +118,18 @@ fun BaseAddPointsMapScreen(
           })
 
   if (testMode) {
-    LaunchedEffect(Unit) { points = listOf(Location(BaseHuntConstantsDefault.DEFAULT_LATITUDE_1,
-        BaseHuntConstantsDefault.DEFAULT_LONGITUDE_1, BaseHuntFieldsStrings.NAME_1),
-        Location(BaseHuntConstantsDefault.DEFAULT_LATITUDE_2,BaseHuntConstantsDefault.DEFAULT_LONGITUDE_2,
-        BaseHuntFieldsStrings.NAME_2)) }
+    LaunchedEffect(Unit) {
+      points =
+          listOf(
+              Location(
+                  BaseHuntConstantsDefault.DEFAULT_LATITUDE_1,
+                  BaseHuntConstantsDefault.DEFAULT_LONGITUDE_1,
+                  BaseHuntFieldsStrings.NAME_1),
+              Location(
+                  BaseHuntConstantsDefault.DEFAULT_LATITUDE_2,
+                  BaseHuntConstantsDefault.DEFAULT_LONGITUDE_2,
+                  BaseHuntFieldsStrings.NAME_2))
+    }
   }
 
   Scaffold(

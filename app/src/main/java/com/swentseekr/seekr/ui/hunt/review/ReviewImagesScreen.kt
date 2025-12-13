@@ -78,7 +78,8 @@ fun ReviewImagesScreen(
             },
             modifier = Modifier.testTag(ReviewImagesScreenConstantsStrings.TOP_BAR_TEST_TAG))
       },
-      modifier = Modifier.testTag(ReviewImagesScreenConstantsStrings.REVIEW_IMAGES_SCREEN_TEST_TAG)) {
+      modifier =
+          Modifier.testTag(ReviewImagesScreenConstantsStrings.REVIEW_IMAGES_SCREEN_TEST_TAG)) {
           innerPadding ->
         Column(
             modifier =
@@ -95,7 +96,8 @@ fun ReviewImagesScreen(
                   modifier =
                       Modifier.fillMaxWidth()
                           .height(ReviewImagesScreenConstants.PagerHeight)
-                          .testTag(ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_PAGER_TEST_TAG)) {
+                          .testTag(
+                              ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_PAGER_TEST_TAG)) {
                       page ->
                     Box(
                         modifier =
@@ -135,7 +137,8 @@ fun ReviewImagesScreen(
                   style = MaterialTheme.typography.titleMedium,
                   modifier =
                       Modifier.align(Alignment.CenterHorizontally)
-                          .testTag(ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_TEXT_BOTTOM_TEST_TAG))
+                          .testTag(
+                              ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_TEXT_BOTTOM_TEST_TAG))
             }
       }
 
@@ -163,7 +166,8 @@ fun FullScreenImageViewer(
                 Modifier.fillMaxSize()
                     .background(Color.Black)
                     .testTag(
-                        ReviewImagesScreenConstantsStrings.REVIEW_IMAGE_FULL_SCREEN_DIALOG_TEST_TAG)) {
+                        ReviewImagesScreenConstantsStrings
+                            .REVIEW_IMAGE_FULL_SCREEN_DIALOG_TEST_TAG)) {
               val pagerState =
                   rememberPagerState(initialPage = startIndex, pageCount = { images.size })
 

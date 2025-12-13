@@ -30,7 +30,9 @@ object RatingTestTags {
  */
 @Composable
 fun Rating(rating: Double, type: RatingType) {
-  check(rating in MIN_RATING..MAX_RATING) { "${RatingConstantsStrings.RATING_CONDITION} $MIN_RATING ${RatingConstantsStrings.AND} $MAX_RATING" }
+  check(rating in MIN_RATING..MAX_RATING) {
+    "${RatingConstantsStrings.RATING_CONDITION} $MIN_RATING ${RatingConstantsStrings.AND} $MAX_RATING"
+  }
 
   val (fullImage, halfImage, emptyImage) =
       when (type) {
@@ -41,7 +43,12 @@ fun Rating(rating: Double, type: RatingType) {
   Row {
     val full = rating.toInt()
     val hasHalf = (rating - full) >= RatingConstantsDefault.HALF
-    val empty = (MAX_RATING - full - if (hasHalf) RatingConstantsDefault.HAS_STAR_HALF else RatingConstantsDefault.HAS_NO_STAR_HALF).toInt()
+    val empty =
+        (MAX_RATING -
+                full -
+                if (hasHalf) RatingConstantsDefault.HAS_STAR_HALF
+                else RatingConstantsDefault.HAS_NO_STAR_HALF)
+            .toInt()
 
     repeat(full) { index ->
       Image(

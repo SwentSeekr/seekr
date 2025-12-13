@@ -559,7 +559,9 @@ fun RepliesToggleButton(
     Icon(
         imageVector =
             if (node.isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-        contentDescription = if (node.isExpanded) ReviewRepliesStrings.HIDE_REPLIES else ReviewRepliesStrings.SHOW_REPLIES,
+        contentDescription =
+            if (node.isExpanded) ReviewRepliesStrings.HIDE_REPLIES
+            else ReviewRepliesStrings.SHOW_REPLIES,
         modifier = Modifier.size(ReviewRepliesDimensions.ReplyButtonIconSize))
     Spacer(modifier = Modifier.width(ReviewRepliesDimensions.ReplyButtonIconSpacing))
     Text(

@@ -397,7 +397,9 @@ private fun BaseHuntTopBar(
           }
 
           IconButton(onClick = { showDeleteButton = !showDeleteButton }) {
-            Icon(imageVector = Icons.Filled.MoreVert, contentDescription = BaseHuntFieldsStrings.MORE_DESCRIPTION)
+            Icon(
+                imageVector = Icons.Filled.MoreVert,
+                contentDescription = BaseHuntFieldsStrings.MORE_DESCRIPTION)
           }
         }
       },

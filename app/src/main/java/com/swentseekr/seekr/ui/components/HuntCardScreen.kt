@@ -754,7 +754,8 @@ private fun ReviewCardHeader(
 
             Text(
                 text =
-                    if (isCurrentUser) HuntCardScreenStrings.CURRENT_USER_INITIAL_LABEL else initial,
+                    if (isCurrentUser) HuntCardScreenStrings.CURRENT_USER_INITIAL_LABEL
+                    else initial,
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
                 color = Color.White)

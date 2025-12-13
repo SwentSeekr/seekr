@@ -9,7 +9,7 @@ object AuthViewModelMessages {
   const val DEFAULT_SIGN_IN_FAILURE = "Unable to complete sign-in right now."
   const val CREDENTIAL_FAILURE_PREFIX = "Failed to get credentials"
   const val UNEXPECTED_ERROR_PREFIX = "Unexpected error"
-    const val NO_PROVIDER= "no provider"
+  const val NO_PROVIDER = "no provider"
 
   fun credentialFailure(detail: String?) =
       if (detail.isNullOrBlank()) CREDENTIAL_FAILURE_PREFIX

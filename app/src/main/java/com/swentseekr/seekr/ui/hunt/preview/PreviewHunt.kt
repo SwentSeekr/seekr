@@ -168,7 +168,9 @@ private fun PreviewStatsSection(ui: HuntUIState) {
         ModernStatCard(
             label = HuntCardScreenStrings.DISTANCE_LABEL,
             value = ui.distance.ifBlank { STRINGS.NOT_SET },
-            unit = if (ui.distance.isNotBlank()) HuntCardScreenStrings.DISTANCE_UNIT else PreviewHuntStrings.DISTANCE_BLANK,
+            unit =
+                if (ui.distance.isNotBlank()) HuntCardScreenStrings.DISTANCE_UNIT
+                else PreviewHuntStrings.DISTANCE_BLANK,
             modifier =
                 Modifier.weight(HuntCardScreenDefaults.CardWeight).testTag(TEST_TAGS.HUNT_DISTANCE))
 
@@ -177,7 +179,9 @@ private fun PreviewStatsSection(ui: HuntUIState) {
         ModernStatCard(
             label = HuntCardScreenStrings.DURATION_LABEL,
             value = ui.time.ifBlank { STRINGS.NOT_SET },
-            unit = if (ui.time.isNotBlank()) HuntCardScreenStrings.HOUR_UNIT else PreviewHuntStrings.TIME_BLANK,
+            unit =
+                if (ui.time.isNotBlank()) HuntCardScreenStrings.HOUR_UNIT
+                else PreviewHuntStrings.TIME_BLANK,
             modifier =
                 Modifier.weight(HuntCardScreenDefaults.CardWeight).testTag(TEST_TAGS.HUNT_TIME))
       }
@@ -286,14 +290,19 @@ private fun PreviewStatusPointsCard(ui: HuntUIState) {
  * temporary Hunt object with the preview data.
  */
 private fun uiStateToHunt(ui: HuntUIState): Hunt {
-  val defaultLocation = Location(latitude = PreviewHuntConstantsDefault.DEFAULT_LATITUDE,
-      longitude = PreviewHuntConstantsDefault.DEFAULT_LONGITUDE, name = PreviewHuntStrings.PREVIEW_LOCATION)
+  val defaultLocation =
+      Location(
+          latitude = PreviewHuntConstantsDefault.DEFAULT_LATITUDE,
+          longitude = PreviewHuntConstantsDefault.DEFAULT_LONGITUDE,
+          name = PreviewHuntStrings.PREVIEW_LOCATION)
 
   val start = ui.points.firstOrNull() ?: defaultLocation
   val end = ui.points.lastOrNull() ?: defaultLocation
   val middlePoints =
-      if (ui.points.size > PreviewHuntConstantsDefault.MIDDLE_VALUE_MIN_VALUE) ui.points.subList(
-          PreviewHuntConstantsDefault.ONE, ui.points.size - PreviewHuntConstantsDefault.ONE) else emptyList()
+      if (ui.points.size > PreviewHuntConstantsDefault.MIDDLE_VALUE_MIN_VALUE)
+          ui.points.subList(
+              PreviewHuntConstantsDefault.ONE, ui.points.size - PreviewHuntConstantsDefault.ONE)
+      else emptyList()
 
   return Hunt(
       uid = PreviewHuntStrings.HUNT_ID,
