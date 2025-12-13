@@ -16,8 +16,14 @@ import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.notifications.NotificationConstants.HUNT_ID
 import com.swentseekr.seekr.model.notifications.NotificationConstants.NULL_PENDING_INTENT_REQUEST_CODE
 
+/** Helper object for creating and sending notifications within the app. */
 object NotificationHelper {
 
+  /**
+   * Creates the default notification channel if running on Android O (API 26) or above.
+   *
+   * @param context Context used to retrieve the NotificationManager system service.
+   */
   fun createNotificationChannel(context: Context) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       val channel =
@@ -33,14 +39,6 @@ object NotificationHelper {
 
   /**
    * Sends a notification to the user with the specified title, message, and optional hunt ID.
-   *
-   * This method:
-   * - Checks the POST_NOTIFICATIONS permission on Android 13 (Tiramisu) and above, returning early
-   *   if the permission is not granted.
-   * - Ensures the notification channel is created before posting the notification.
-   * - Builds an intent that opens `MainActivity` and includes the hunt ID in the extras.
-   * - Uses a `TaskStackBuilder` to create a proper back stack for the activity.
-   * - Posts the notification using `NotificationManagerCompat`.
    *
    * @param context The context used to access system services and create the notification.
    * @param title The title displayed in the notification.
