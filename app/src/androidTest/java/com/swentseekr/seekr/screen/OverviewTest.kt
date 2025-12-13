@@ -132,7 +132,7 @@ class OverviewScreenTest {
     }
 
     composeTestRule
-        .onNodeWithTag(HuntCardScreenStrings.LikeButton)
+        .onNodeWithTag(HuntCardScreenStrings.LIKE_BUTTON)
         .assertExists()
         .assertIsDisplayed()
   }
@@ -149,7 +149,7 @@ class OverviewScreenTest {
           onLikeClick = { huntId -> clickedHuntId = huntId })
     }
 
-    composeTestRule.onNodeWithTag(HuntCardScreenStrings.LikeButton).performClick()
+    composeTestRule.onNodeWithTag(HuntCardScreenStrings.LIKE_BUTTON).performClick()
 
     assertTrue(clickedHuntId == testHunt.uid)
   }
@@ -159,7 +159,7 @@ class OverviewScreenTest {
     composeTestRule.setContent { HuntCard(hunt = testHunt, isLiked = true, onLikeClick = {}) }
 
     composeTestRule
-        .onNodeWithTag(HuntCardScreenStrings.LikeButton)
+        .onNodeWithTag(HuntCardScreenStrings.LIKE_BUTTON)
         .assertExists()
         .assertIsDisplayed()
     // If you expose separate tags for red/gray variants, you can assert them here.
@@ -170,7 +170,7 @@ class OverviewScreenTest {
     composeTestRule.setContent { HuntCard(hunt = testHunt, isLiked = false, onLikeClick = {}) }
 
     composeTestRule
-        .onNodeWithTag(HuntCardScreenStrings.LikeButton)
+        .onNodeWithTag(HuntCardScreenStrings.LIKE_BUTTON)
         .assertExists()
         .assertIsDisplayed()
     // Same note as above about specific color/icon tags.
@@ -197,7 +197,7 @@ class OverviewScreenTest {
           onLikeClick = { huntId -> viewModel.onLikeClick(huntId) })
     }
 
-    composeTestRule.onNodeWithTag(HuntCardScreenStrings.LikeButton).performClick()
+    composeTestRule.onNodeWithTag(HuntCardScreenStrings.LIKE_BUTTON).performClick()
 
     composeTestRule.waitForIdle()
 
@@ -245,11 +245,11 @@ class OverviewScreenTest {
       }
     }
 
-    composeTestRule.onAllNodes(hasTestTag(HuntCardScreenStrings.LikeButton))[1].performClick()
+    composeTestRule.onAllNodes(hasTestTag(HuntCardScreenStrings.LIKE_BUTTON))[1].performClick()
 
     assertTrue(clickedHunts.contains("hunt_2"))
 
-    composeTestRule.onAllNodes(hasTestTag(HuntCardScreenStrings.LikeButton))[0].performClick()
+    composeTestRule.onAllNodes(hasTestTag(HuntCardScreenStrings.LIKE_BUTTON))[0].performClick()
 
     assertTrue(clickedHunts.contains("hunt_1"))
     assertEquals(setOf("hunt_1", "hunt_2"), clickedHunts)

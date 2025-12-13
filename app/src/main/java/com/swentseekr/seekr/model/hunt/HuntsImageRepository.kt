@@ -14,10 +14,12 @@ import kotlinx.coroutines.withTimeoutOrNull
 class HuntsImageRepository(private val storage: FirebaseStorage = FirebaseStorage.getInstance()) :
     IHuntsImageRepository {
 
-  private val rootRef = storage.reference.child("hunts_images")
+  private val rootRef = storage.reference.child(HuntsImageRepositoryConstantsString.PATH)
 
   override suspend fun uploadMainImage(huntId: String, imageUri: Uri): String {
-    val ref = rootRef.child("$huntId/main_${System.currentTimeMillis()}.jpg")
+    val ref =
+        rootRef.child(
+            "$huntId${HuntsImageRepositoryConstantsString.MAIN}${System.currentTimeMillis()}${HuntsImageRepositoryConstantsString.FORMAT}")
     ref.putFile(imageUri).await()
     return ref.downloadUrl.await().toString()
   }
@@ -33,7 +35,7 @@ class HuntsImageRepository(private val storage: FirebaseStorage = FirebaseStorag
                 semaphore.withPermit {
                   val ref =
                       rootRef.child(
-                          "$huntId/other_${System.currentTimeMillis()}_${uri.lastPathSegment ?: "img"}.jpg")
+                          "$huntId${HuntsImageRepositoryConstantsString.OTHER}${System.currentTimeMillis()}${HuntsImageRepositoryConstantsString.UNDERSCORE}${uri.lastPathSegment ?: HuntsImageRepositoryConstantsString.IMAGE}${HuntsImageRepositoryConstantsString.FORMAT}")
 
                   // Upload the file
                   ref.putFile(uri).await()
@@ -52,21 +54,29 @@ class HuntsImageRepository(private val storage: FirebaseStorage = FirebaseStorag
     try {
       val folder = rootRef.child(huntId)
       // Avoid infity waits by setting a timeout for listing files
-      val list = withTimeoutOrNull(2_000) { folder.listAll().await() }
+      val list =
+          withTimeoutOrNull(HuntsImageRepositoryConstantsDefault.TIME_OUT) {
+            folder.listAll().await()
+          }
 
       if (list != null) {
         list.items.forEach {
           runCatching { it.delete().await() }
               .onFailure { e ->
-                Log.w("HuntsImageRepository", "Failed to delete ${it.name}: ${e.message}")
+                Log.w(
+                    HuntsImageRepositoryConstantsString.TAG,
+                    "${HuntsImageRepositoryConstantsString.ERROR_DELETE} ${it.name}: ${e.message}")
               }
         }
       } else {
         Log.w(
-            "HuntsImageRepository", "Timeout listing images for hunt $huntId (likely empty folder)")
+            HuntsImageRepositoryConstantsString.TAG,
+            "${HuntsImageRepositoryConstantsString.ERROR_TIMEOUT} $huntId ${HuntsImageRepositoryConstantsString.ERROR_POSSIBLE}")
       }
     } catch (e: Exception) {
-      Log.w("HuntsImageRepository", "Unexpected error deleting images for $huntId: ${e.message}")
+      Log.w(
+          HuntsImageRepositoryConstantsString.TAG,
+          "${HuntsImageRepositoryConstantsString.ERROR_UNEXPECTED} $huntId: ${e.message}")
     }
   }
 
@@ -75,7 +85,10 @@ class HuntsImageRepository(private val storage: FirebaseStorage = FirebaseStorag
       val ref = storage.getReferenceFromUrl(url)
       ref.delete().await()
     } catch (e: Exception) {
-      Log.w("HuntsRepositoryFirestore", "Failed to delete image: $url", e)
+      Log.w(
+          HuntsImageRepositoryConstantsString.TAG_FIRESTORE,
+          "${HuntsImageRepositoryConstantsString.ERROR_DELETING} $url",
+          e)
     }
   }
 }

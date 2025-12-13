@@ -34,9 +34,9 @@ fun EditReviewScreen(
     onDone: () -> Unit = {},
     onCancel: () -> Unit = {},
 ) {
-  val vm: ReviewHuntViewModel = viewModel(key = "edit_$reviewId")
+  val vm: ReviewHuntViewModel = viewModel(key = "${AddReviewScreenStrings.EDIT_KEY}$reviewId")
   ReviewScreenContent(
-      title = "Edit Review Hunt",
+      title = AddReviewScreenStrings.EDIT_TITLE,
       huntId = huntId,
       reviewId = reviewId,
       onGoBack = onGoBack,

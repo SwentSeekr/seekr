@@ -295,10 +295,10 @@ class HuntCardScreenTest {
 
     composeTestRule
         .onNodeWithTag("HUNT_CARD_LIST")
-        .performScrollToNode(hasText(HuntCardScreenStrings.NoReviews))
+        .performScrollToNode(hasText(HuntCardScreenStrings.NO_REVIEW))
 
     // The "No Reviews" text should be visible
-    composeTestRule.onNodeWithText(HuntCardScreenStrings.NoReviews).assertExists()
+    composeTestRule.onNodeWithText(HuntCardScreenStrings.NO_REVIEW).assertExists()
   }
 
   @Test

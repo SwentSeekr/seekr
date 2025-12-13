@@ -118,7 +118,7 @@ class HuntCardReviewScreenTest {
     }
 
     // Assert that the Add Photos button is displayed instead of LazyRow
-    composeRule.onNodeWithTag(AddReviewScreenTestTags.AddPhotoButtonTag).assertExists()
+    composeRule.onNodeWithTag(AddReviewScreenTestTags.ADD_PHOTO_BUTTON_TEST_TAG).assertExists()
     composeRule.onNodeWithTag(AddReviewScreenTestTags.PHOTOS_LAZY_ROW_TAG).assertDoesNotExist()
   }
 }

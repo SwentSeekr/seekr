@@ -28,7 +28,7 @@ fun PointNameDialog(show: Boolean, onDismiss: () -> Unit, onConfirm: (String, St
 
   AlertDialog(
       onDismissRequest = onDismiss,
-      title = { Text(AddPointsMapScreenDefaults.dialogTitle) },
+      title = { Text(AddPointsMapScreenDefaults.DIALOG_TITLE) },
       text = {
         Column {
           OutlinedTextField(
@@ -37,13 +37,14 @@ fun PointNameDialog(show: Boolean, onDismiss: () -> Unit, onConfirm: (String, St
                 if (it.isNotBlank()) hasTypedBefore = true
                 pointName = it
               },
-              placeholder = { Text(AddPointsMapScreenDefaults.placeholder) },
+              placeholder = { Text(AddPointsMapScreenDefaults.PLACEHOLDER) },
               singleLine = true,
               isError = isError,
-              label = { Text(AddPointsMapScreenDefaults.pointsName) },
+              label = { Text(AddPointsMapScreenDefaults.POINTS_NAME) },
               supportingText = {
                 if (isError) {
-                  Text(AddPointsMapScreenDefaults.notEmpty, color = MaterialTheme.colorScheme.error)
+                  Text(
+                      AddPointsMapScreenDefaults.NOT_EMPTY, color = MaterialTheme.colorScheme.error)
                 }
               },
               modifier =
@@ -52,7 +53,7 @@ fun PointNameDialog(show: Boolean, onDismiss: () -> Unit, onConfirm: (String, St
           OutlinedTextField(
               value = pointDescription,
               onValueChange = { pointDescription = it },
-              label = { Text(AddPointsMapScreenDefaults.description) },
+              label = { Text(AddPointsMapScreenDefaults.DESCRIPTION) },
               modifier =
                   Modifier.fillMaxWidth()
                       .testTag(AddPointsMapScreenTestTags.POINT_DESCRIPTION_FIELD))
@@ -62,10 +63,10 @@ fun PointNameDialog(show: Boolean, onDismiss: () -> Unit, onConfirm: (String, St
         TextButton(
             onClick = { onConfirm(pointName.trim(), pointDescription.trim()) },
             enabled = pointName.trim().isNotBlank()) {
-              Text(AddPointsMapScreenDefaults.add)
+              Text(AddPointsMapScreenDefaults.ADD)
             }
       },
       dismissButton = {
-        TextButton(onClick = onDismiss) { Text(AddPointsMapScreenDefaults.cancel) }
+        TextButton(onClick = onDismiss) { Text(AddPointsMapScreenDefaults.CANCEL) }
       })
 }

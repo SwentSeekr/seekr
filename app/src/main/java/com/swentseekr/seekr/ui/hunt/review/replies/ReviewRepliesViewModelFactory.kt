@@ -30,6 +30,6 @@ class ReviewRepliesViewModelFactory(
     }
 
     throw IllegalArgumentException(
-        ReviewRepliesStrings.ErrorUnknownViewModelClassPrefix + modelClass.name)
+        ReviewRepliesStrings.ERROR_UNKNOWN_VIEW_MODEL_CLASS_PREFIX + modelClass.name)
   }
 }

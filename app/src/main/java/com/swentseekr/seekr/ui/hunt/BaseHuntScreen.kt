@@ -51,7 +51,7 @@ data class DeleteAction(
  */
 @Composable
 fun BaseHuntScreen(
-    title: String = "Add your Hunt",
+    title: String = BaseHuntScreenMessages.DEFAULT_TITLE,
     vm: BaseHuntViewModel,
     onGoBack: () -> Unit = {},
     onDone: () -> Unit = {},

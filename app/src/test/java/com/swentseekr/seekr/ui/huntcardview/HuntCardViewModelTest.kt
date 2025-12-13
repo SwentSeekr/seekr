@@ -252,7 +252,7 @@ class HuntCardViewModelTest {
     val state = viewModel.uiState.value
 
     assertTrue(
-        state.errorMsg?.contains(HuntCardViewModelConstants.ErrorDeletingReviewSetMsg) == true)
+        state.errorMsg?.contains(HuntCardViewModelConstants.ERROR_DELETING_REVIEW_SET_MSG) == true)
   }
 
   /** Test that check the change of the hunt state from dislike to like and from like to dislike */

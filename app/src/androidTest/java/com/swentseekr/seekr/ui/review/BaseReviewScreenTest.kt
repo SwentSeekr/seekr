@@ -135,7 +135,7 @@ class BaseReviewScreenTest {
       }
     }
 
-    composeRule.onNodeWithTag(AddReviewScreenTestTags.AddPhotoButtonTag).performClick()
+    composeRule.onNodeWithTag(AddReviewScreenTestTags.ADD_PHOTO_BUTTON_TEST_TAG).performClick()
 
     assertTrue(addPhotoCalled)
   }
