@@ -6,7 +6,7 @@ package com.swentseekr.seekr.end_to_end
  * Keeping these values centralized ensures the UI assertions and the supporting fake repositories
  * always rely on the exact same literals (title, times, coordinates, etc.).
  */
-object EndToEndHuntFlowTestConstants {
+object EndToEndHuntFlowM3TestConstants {
   const val HUNT_TITLE = "Gorge de l'Areuse"
   const val HUNT_DESCRIPTION = "End-to-end verification hunt."
   const val HUNT_TIME_HOURS = "1.5"
@@ -20,5 +20,6 @@ object EndToEndHuntFlowTestConstants {
   const val END_LAT = 46.962813
   const val END_LNG = 6.820793
   const val REVIEW_RATE = 4.8
+  const val WAIT_MS = 12_000L
   const val DEFAULT_USER_ID = "end-to-end-user"
 }
