@@ -823,7 +823,7 @@ private fun childRepliesLabel(isExpanded: Boolean, totalChildren: Int): String {
 
   val unit =
       if (totalChildren == ReviewRepliesValues.ROOT_DEPTH + ReviewRepliesValues.SINGLE_REPLY_COUNT)
-          ReviewRepliesStrings.REPLY_UNIT_PLURAL
+          ReviewRepliesStrings.REPLY_UNIT_SINGULAR
       else ReviewRepliesStrings.REPLY_UNIT_PLURAL
 
   return "$totalChildren $unit"
