@@ -4,7 +4,6 @@ object HuntsRepositoryFirestoreConstantsStrings {
   const val AUTHOR_ID = "authorId"
   const val HUNT = "Hunt with ID"
   const val NOT_FOUND = "is not found"
-  // const val EMPTY = ""
   const val TAG = "HuntsRepositoryFirestore"
   const val ERROR_IMAGE_UPLOADING = "Image upload failed for hunt"
   const val ERROR_CLEANUP = "Cleanup after failed upload failed"
