@@ -10,31 +10,72 @@ import kotlinx.coroutines.tasks.await
 
 const val HUNTS_COLLECTION_PATH = "hunts"
 
+/**
+ * Firestore implementation of [HuntsRepository] that manages persistence of [Hunt] objects in
+ * Firestore and handles associated image uploads and deletions via [IHuntsImageRepository].
+ *
+ * @property db Firestore instance used for hunt persistence.
+ * @property imageRepo Repository used for managing hunt images in Firebase Storage.
+ */
 class HuntsRepositoryFirestore(
     private val db: FirebaseFirestore,
     private val imageRepo: IHuntsImageRepository = HuntsImageRepository()
 ) : HuntsRepository {
+
+  /**
+   * Generates a new unique hunt identifier using Firestore.
+   *
+   * @return A unique string suitable for use as a hunt ID.
+   */
   override fun getNewUid(): String {
     return db.collection(HUNTS_COLLECTION_PATH).document().id
   }
 
+  /**
+   * Retrieves all hunts stored in Firestore.
+   *
+   * @return A list of all valid [Hunt] objects.
+   */
   override suspend fun getAllHunts(): List<Hunt> {
     val snapshot = db.collection(HUNTS_COLLECTION_PATH).get().await()
     return snapshot.mapNotNull { documentToHunt(it) }
   }
 
+  /**
+   * Retrieves all hunts created by a specific author.
+   *
+   * @param authorID The ID of the hunt author.
+   * @return A list of hunts authored by the given user.
+   */
   override suspend fun getAllMyHunts(authorID: String): List<Hunt> {
     val snapshot =
         db.collection(HUNTS_COLLECTION_PATH).whereEqualTo("authorId", authorID).get().await()
     return snapshot.mapNotNull { documentToHunt(it) }
   }
 
+  /**
+   * Retrieves a single hunt by its unique ID.
+   *
+   * @param huntID The ID of the hunt to retrieve.
+   * @return The corresponding [Hunt].
+   * @throws IllegalArgumentException if the hunt does not exist.
+   */
   override suspend fun getHunt(huntID: String): Hunt {
     val document = db.collection(HUNTS_COLLECTION_PATH).document(huntID).get().await()
     return documentToHunt(document)
         ?: throw IllegalArgumentException("Hunt with ID $huntID is not found")
   }
 
+  /**
+   * Adds a new hunt to Firestore and uploads associated images.
+   *
+   * Image uploads are performed before writing to Firestore.
+   *
+   * @param hunt The hunt data to store.
+   * @param mainImageUri Optional URI of the main image.
+   * @param otherImageUris Optional list of URIs for additional images.
+   * @throws Exception if image upload fails.
+   */
   override suspend fun addHunt(hunt: Hunt, mainImageUri: Uri?, otherImageUris: List<Uri>) {
     var mainImageUrl = ""
     var otherImagesUrls: List<String> = emptyList()
@@ -68,6 +109,16 @@ class HuntsRepositoryFirestore(
     db.collection(HUNTS_COLLECTION_PATH).document(hunt.uid).set(huntWithImages).await()
   }
 
+  /**
+   * Updates an existing hunt and manages image changes.
+   *
+   * @param huntID The ID of the hunt to update.
+   * @param newValue The updated hunt data.
+   * @param mainImageUri Optional new main image.
+   * @param addedOtherImages New secondary images to upload.
+   * @param removedOtherImages URLs of images to delete.
+   * @param removedMainImageUrl URL of the main image to delete, if any.
+   */
   override suspend fun editHunt(
       huntID: String,
       newValue: Hunt,
@@ -102,6 +153,11 @@ class HuntsRepositoryFirestore(
     db.collection(HUNTS_COLLECTION_PATH).document(huntID).set(updatedHunt).await()
   }
 
+  /**
+   * Deletes a hunt and all its associated images.
+   *
+   * @param huntID The ID of the hunt to delete.
+   */
   override suspend fun deleteHunt(huntID: String) {
     imageRepo.deleteAllHuntImages(huntID)
     db.collection(HUNTS_COLLECTION_PATH).document(huntID).delete().await()

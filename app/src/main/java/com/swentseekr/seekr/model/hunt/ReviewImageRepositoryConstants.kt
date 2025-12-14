@@ -1,5 +1,11 @@
 package com.swentseekr.seekr.model.hunt
 
+/**
+ * Constants used by [ReviewImageRepository].
+ *
+ * Provides Firebase Storage paths, file formats, logging tags, and error messages for managing
+ * review images.
+ */
 object ReviewImageRepositoryConstants {
   const val REVIEW_IMAGES_COLLECTION = "review_images"
   const val FORMAT_JPG = ".jpg"
