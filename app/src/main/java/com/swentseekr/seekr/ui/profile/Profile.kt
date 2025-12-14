@@ -70,6 +70,7 @@ object ProfileTestTags {
   const val TAB_MY_HUNTS = "TAB_MY_HUNTS"
   const val TAB_DONE_HUNTS = "TAB_DONE_HUNTS"
   const val TAB_LIKED_HUNTS = "TAB_LIKED_HUNTS"
+  const val LIKE_BUTTON = "_LIKE_BUTTON"
 
   fun getTestTagForHuntCard(hunt: Hunt, index: Int): String = "HUNT_CARD_${hunt.uid}"
 }
@@ -82,11 +83,15 @@ object ProfileConstants {
   val SIZE_MEDIUM_DP = 16.dp
   val SIZE_ICON = 40.dp
 
+  val FONT_TAB_SIZE = 12.sp
   const val LOADING_PROFILE = "Loading profile..."
   const val NO_PROFILE_FOUND = "No profile found"
   const val NO_HUNTS_YET = "No hunts yet"
   const val ADD_DESCRIPTION = "Add"
   const val SETTINGS_DESCRIPTION = "Settings Icon"
+
+  const val ERROR = "Error:"
+  const val PROFILE_PICTURE_DESCRIPTION = "Profile Picture"
 }
 
 // -------------------------
@@ -170,7 +175,9 @@ fun ProfileScreen(
         modifier =
             Modifier.fillMaxSize().background(ProfileUIConstantsDefaults.LightGrayBackground),
         contentAlignment = Alignment.Center) {
-          Text("Error: ${uiState.errorMsg}", color = ProfileUIConstantsDefaults.ErrorRed)
+          Text(
+              "${ProfileConstants.ERROR} ${uiState.errorMsg}",
+              color = ProfileUIConstantsDefaults.ErrorRed)
         }
     return
   }
@@ -255,7 +262,7 @@ fun ProfileScreen(
                         onLikeClick = { _ -> viewModel.toggleLikedHunt(hunt, context) },
                         modifier =
                             clickable.testTag(
-                                "${ProfileTestTags.getTestTagForHuntCard(hunt, index)}_LIKE_BUTTON"))
+                                "${ProfileTestTags.getTestTagForHuntCard(hunt, index)}${ProfileTestTags.LIKE_BUTTON}"))
                   }
                 }
               }
@@ -293,7 +300,7 @@ fun ModernProfileHeader(
                   shape = CircleShape,
                   color =
                       MaterialTheme.colorScheme.onPrimary.copy(
-                          alpha = ProfileUIConstantsDefaults.AlphaLight)) {
+                          alpha = ProfileUIConstantsDefaults.ALPHA_LIGHT)) {
                     IconButton(onClick = onSettings) {
                       Icon(
                           imageVector = Icons.Default.Settings,
@@ -309,7 +316,7 @@ fun ModernProfileHeader(
                   shape = CircleShape,
                   color =
                       MaterialTheme.colorScheme.onPrimary.copy(
-                          alpha = ProfileUIConstantsDefaults.AlphaLight)) {
+                          alpha = ProfileUIConstantsDefaults.ALPHA_LIGHT)) {
                     IconButton(onClick = onGoBack) {
                       Icon(
                           imageVector = Icons.Default.Close,
@@ -332,7 +339,7 @@ fun ModernProfileHeader(
 
             Spacer(modifier = Modifier.width(ProfileUIConstantsDefaults.Padding16))
 
-            Column(modifier = Modifier.weight(ProfileUIConstantsDefaults.Weight)) {
+            Column(modifier = Modifier.weight(ProfileUIConstantsDefaults.WEIGHT)) {
               Text(
                   text = profile.author.pseudonym,
                   fontSize = ProfileUIConstantsDefaults.Font22,
@@ -347,7 +354,7 @@ fun ModernProfileHeader(
                   fontSize = ProfileUIConstantsDefaults.Font14,
                   color =
                       MaterialTheme.colorScheme.onPrimary.copy(
-                          alpha = ProfileUIConstantsDefaults.AlphaMedium),
+                          alpha = ProfileUIConstantsDefaults.ALPHA_MEDIUM),
                   maxLines = 2,
                   modifier = Modifier.testTag(ProfileTestTags.PROFILE_BIO))
             }
@@ -365,7 +372,7 @@ fun ModernProfileHeader(
                     if (reviewCount == SINGLE_REVIEW)
                         String.format(SINGLE_REVIEW_LABEL, reviewCount)
                     else String.format(MULTIPLE_REVIEWS_LABEL, reviewCount),
-                modifier = Modifier.weight(ProfileUIConstantsDefaults.Weight),
+                modifier = Modifier.weight(ProfileUIConstantsDefaults.WEIGHT),
                 testTagValue = ProfileTestTags.PROFILE_REVIEW_RATING,
                 testTagLabel = ProfileTestTags.PROFILE_REVIEWS_COUNT)
 
@@ -375,7 +382,7 @@ fun ModernProfileHeader(
                 icon = painterResource(R.drawable.full_sport),
                 value = String.format(ONE_DECIMAL_FORMAT, profile.author.sportRate),
                 label = String.format(HUNTS_DONE_LABEL, profile.doneHunts.size),
-                modifier = Modifier.weight(ProfileUIConstantsDefaults.Weight),
+                modifier = Modifier.weight(ProfileUIConstantsDefaults.WEIGHT),
                 testTagValue = ProfileTestTags.PROFILE_SPORT_RATING,
                 testTagLabel = ProfileTestTags.PROFILE_HUNTS_DONE_COUNT)
           }
@@ -400,7 +407,7 @@ fun ModernStatCard(
           CardDefaults.cardColors(
               containerColor =
                   MaterialTheme.colorScheme.onPrimary.copy(
-                      alpha = ProfileUIConstantsDefaults.AlphaLight)),
+                      alpha = ProfileUIConstantsDefaults.ALPHA_LIGHT)),
       shape = RoundedCornerShape(ProfileUIConstantsDefaults.Padding12)) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(ProfileUIConstantsDefaults.Padding12),
@@ -426,7 +433,7 @@ fun ModernStatCard(
                     fontSize = ProfileUIConstantsDefaults.Font12,
                     color =
                         MaterialTheme.colorScheme.onPrimary.copy(
-                            alpha = ProfileUIConstantsDefaults.AlphaMedium),
+                            alpha = ProfileUIConstantsDefaults.ALPHA_MEDIUM),
                     modifier = Modifier.testTag(testTagLabel))
               }
             }
@@ -458,12 +465,12 @@ fun ModernCustomToolbar(selectedTab: ProfileTab, onTabSelected: (ProfileTab) -> 
                 val backgroundColor =
                     if (isSelected)
                         ProfileUIConstantsDefaults.ToolbarGreen.copy(
-                            alpha = ProfileUIConstantsDefaults.AlphaLight)
+                            alpha = ProfileUIConstantsDefaults.ALPHA_LIGHT)
                     else Color.Transparent
 
                 Surface(
                     modifier =
-                        Modifier.weight(ProfileUIConstantsDefaults.Weight)
+                        Modifier.weight(ProfileUIConstantsDefaults.WEIGHT)
                             .padding(horizontal = ProfileUIConstantsDefaults.Padding8)
                             .clickable { onTabSelected(item.tab) }
                             .semantics { this.backgroundColor = color }
@@ -486,13 +493,13 @@ fun ModernCustomToolbar(selectedTab: ProfileTab, onTabSelected: (ProfileTab) -> 
                                 text =
                                     when (item.tab) {
                                       ProfileTab.MY_HUNTS ->
-                                          ProfileUIConstantsDefaults.TabMyHuntsLabel
+                                          ProfileUIConstantsDefaults.TAB_MY_HUNTS_LABEL
                                       ProfileTab.DONE_HUNTS ->
-                                          ProfileUIConstantsDefaults.TabDoneLabel
+                                          ProfileUIConstantsDefaults.TAB_DONE_LABEL
                                       ProfileTab.LIKED_HUNTS ->
-                                          ProfileUIConstantsDefaults.TabLikedLabel
+                                          ProfileUIConstantsDefaults.TAB_LIKED_LABEL
                                     },
-                                fontSize = 12.sp,
+                                fontSize = ProfileConstants.FONT_TAB_SIZE,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                 color = color)
                           }

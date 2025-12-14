@@ -9,7 +9,7 @@ object SeekrNavigationDefaults {
   val BottomBarContainerColor: Color = GrassGreen
   val BottomBarIconColor: Color = Black
   val ScaffoldContainerColor: Color = White
-  const val IgnoredTestTag = "IGNORED"
+  const val IGNORED_TEST_TAG = "IGNORED"
 
   // --- Offline / shared extra routes ---
   // Route + arg name for the review images screen (used online & offline)

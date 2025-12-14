@@ -48,7 +48,7 @@ import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.ui.components.HuntCard
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
-import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Alpha02
+import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.ALPHA_02
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Border1
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Border2
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.FilterItemPadding
@@ -62,7 +62,7 @@ import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding12
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding16
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding2
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding8
-import com.swentseekr.seekr.ui.overview.OverviewScreenStrings.FilterBy
+import com.swentseekr.seekr.ui.overview.OverviewScreenStrings.FILTER_BY
 
 /**
  * Overview screen displaying the main hunt discovery experience.
@@ -122,7 +122,7 @@ fun OverviewScreen(
                   .pullRefresh(pullRefreshState)) {
             LazyColumn(
                 modifier = modifier.testTag(OverviewScreenTestTags.HUNT_LIST).fillMaxSize(),
-                contentPadding = PaddingValues(bottom = OverviewScreenDefaults.VerticalPadding16),
+                contentPadding = PaddingValues(bottom = VerticalPadding16),
                 horizontalAlignment = Alignment.CenterHorizontally) {
                   item {
                     // MODERN SEARCH BAR
@@ -156,7 +156,7 @@ fun OverviewScreen(
                     // Retrieve correct profile for THIS hunt
                     val authorProfile = uiStateHuntCard.authorProfiles[authorId]
                     val author =
-                        authorProfile?.author?.pseudonym ?: OverviewScreenStrings.UnKnownAuthor
+                        authorProfile?.author?.pseudonym ?: OverviewScreenStrings.UNKNOWN_AUTHOR
 
                     HuntCard(
                         hunt.hunt,
@@ -202,12 +202,12 @@ fun ModernHeader() {
               .background(MaterialTheme.colorScheme.onPrimary)
               .padding(horizontal = HorizontalPadding20, vertical = VerticalPadding16)) {
         Text(
-            text = OverviewScreenStrings.Title,
+            text = OverviewScreenStrings.TITLE,
             fontSize = OverviewScreenDefaults.DiscoverFontSize,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface)
         Text(
-            text = OverviewScreenStrings.SubTitle,
+            text = OverviewScreenStrings.SUB_TITLE,
             fontSize = OverviewScreenDefaults.NextAdventureFontSize,
             color = Gray666,
             modifier = Modifier.padding(top = FilterItemPadding))
@@ -248,7 +248,7 @@ fun ModernSearchBar(
       onActiveChange = onActiveChange,
       placeholder = {
         Text(
-            OverviewScreenStrings.SearchPlaceholder,
+            OverviewScreenStrings.SEARCH_PLACEHOLDER,
             color = OverviewScreenDefaults.Gray999,
             style = MaterialTheme.typography.bodyMedium)
       },
@@ -256,7 +256,7 @@ fun ModernSearchBar(
         if (query.isEmpty()) {
           Icon(
               imageVector = Icons.Default.Search,
-              contentDescription = OverviewScreenStrings.SearchIconDescription,
+              contentDescription = OverviewScreenStrings.SEARCH_ICON_DESCRIPTION,
               tint = Gray666)
         } else null
       },
@@ -264,7 +264,7 @@ fun ModernSearchBar(
         if (query.isNotEmpty()) {
           Icon(
               imageVector = Icons.Default.Clear,
-              contentDescription = OverviewScreenStrings.ClearIconDescription,
+              contentDescription = OverviewScreenStrings.CLEAR_ICON_DESCRIPTION,
               tint = Gray666,
               modifier = Modifier.clickable { onClear() })
         } else null
@@ -313,7 +313,7 @@ fun ModernFilterBar(
   ) {
     // SECTION TITLE
     Text(
-        text = FilterBy,
+        text = FILTER_BY,
         fontSize = SmallFontSize,
         fontWeight = FontWeight.SemiBold,
         color = Gray666,
@@ -393,7 +393,7 @@ fun ModernFilterChip(
       colors =
           FilterChipDefaults.filterChipColors(
               containerColor = MaterialTheme.colorScheme.onPrimary,
-              selectedContainerColor = color.copy(alpha = Alpha02),
+              selectedContainerColor = color.copy(alpha = ALPHA_02),
               labelColor = Gray666,
               selectedLabelColor = color),
       border =

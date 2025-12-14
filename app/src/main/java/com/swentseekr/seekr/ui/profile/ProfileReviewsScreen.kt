@@ -54,20 +54,6 @@ import com.swentseekr.seekr.ui.profile.ProfileReviewsScreenConstant.SINGLE_REVIE
 import com.swentseekr.seekr.ui.profile.ProfileReviewsScreenConstant.SPACER_HEIGHT
 import com.swentseekr.seekr.ui.profile.ProfileReviewsScreenConstant.STRING_FORMAT
 
-object ProfileReviewsTestTags {
-  const val SCREEN = "PROFILE_REVIEWS_SCREEN"
-  const val LOADING = "PROFILE_REVIEWS_LOADING"
-  const val TOP_BAR = "PROFILE_REVIEWS_TOP_BAR"
-  const val BACK_BUTTON = "PROFILE_REVIEWS_BACK_BUTTON"
-  const val RATING_SUMMARY = "PROFILE_REVIEWS_RATING_SUMMARY"
-  const val RATING_TEXT = "PROFILE_REVIEWS_RATING_TEXT"
-  const val DIVIDER = "PROFILE_REVIEWS_DIVIDER"
-  const val REVIEWS_LIST = "PROFILE_REVIEWS_LIST"
-  const val EMPTY_MESSAGE = "PROFILE_REVIEWS_EMPTY_MESSAGE"
-
-  fun reviewCardTag(reviewId: String) = "REVIEW_CARD_$reviewId"
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileReviewsScreen(
@@ -105,14 +91,14 @@ fun ProfileReviewsScreen(
       topBar = {
         TopAppBar(
             modifier = Modifier.testTag(ProfileReviewsTestTags.TOP_BAR),
-            title = { Text("Reviews") },
+            title = { Text(ProfileReviewsScreenConstant.REVIEWS) },
             navigationIcon = {
               IconButton(
                   onClick = onGoBack,
                   modifier = Modifier.testTag(ProfileReviewsTestTags.BACK_BUTTON)) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back")
+                        contentDescription = ProfileReviewsScreenConstant.BACK)
                   }
             })
       }) { padding ->
@@ -129,15 +115,17 @@ fun ProfileReviewsScreen(
             Row(
                 modifier =
                     Modifier.fillMaxWidth()
-                        .padding(16.dp)
+                        .padding(ProfileReviewsScreenConstant.Padding16)
                         .testTag(ProfileReviewsTestTags.RATING_SUMMARY),
                 verticalAlignment = Alignment.CenterVertically) {
                   Rating(rating = profile.author.reviewRate, RatingType.STAR)
-                  Spacer(modifier = Modifier.width(8.dp))
+                  Spacer(modifier = Modifier.width(ProfileReviewsScreenConstant.Padding08))
                   Text(
                       text =
                           String.format(
-                              if (totalReviews == 1) SINGLE_REVIEW else MULTIPLE_REVIEWS,
+                              if (totalReviews == ProfileReviewsScreenConstant.ONE_REVIEW)
+                                  SINGLE_REVIEW
+                              else MULTIPLE_REVIEWS,
                               String.format(STRING_FORMAT, profile.author.reviewRate),
                               MAX_RATING,
                               totalReviews),
@@ -164,14 +152,14 @@ fun ProfileReviewsScreen(
             // Scrollable list of reviews
             LazyColumn(
                 modifier = Modifier.fillMaxSize().testTag(ProfileReviewsTestTags.REVIEWS_LIST),
-                contentPadding = PaddingValues(vertical = 8.dp)) {
+                contentPadding = PaddingValues(vertical = ProfileReviewsScreenConstant.Padding08)) {
                   if (reviews.isEmpty()) {
                     item {
                       Text(
-                          text = "No reviews yet",
+                          text = ProfileReviewsScreenConstant.NO_REVIEW,
                           modifier =
                               Modifier.fillMaxWidth()
-                                  .padding(16.dp)
+                                  .padding(ProfileReviewsScreenConstant.Padding16)
                                   .testTag(ProfileReviewsTestTags.EMPTY_MESSAGE),
                           textAlign = TextAlign.Center)
                     }
@@ -196,7 +184,7 @@ fun ProfileReviewsScreen(
                                     text =
                                         String.format(
                                             RATING_FORMAT,
-                                            String.format("%.1f", hunt.reviewRate),
+                                            String.format(STRING_FORMAT, hunt.reviewRate),
                                             MAX_RATING),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.primary)

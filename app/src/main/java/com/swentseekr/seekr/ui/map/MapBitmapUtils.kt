@@ -6,6 +6,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.swentseekr.seekr.ui.map.MapScreenStrings.BEEN_LOADED
+import com.swentseekr.seekr.ui.map.MapScreenStrings.ERROR_RESOURCE_ID
 
 /**
  * Converts a vector drawable resource into a [BitmapDescriptor] that can be used as a custom marker
@@ -27,7 +29,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 fun bitmapDescriptorFromVector(context: Context, vectorResId: Int): BitmapDescriptor {
   val vectorDrawable =
       ContextCompat.getDrawable(context, vectorResId)
-          ?: error("Resource ID $vectorResId could not be loaded as a drawable.")
+          ?: error("$ERROR_RESOURCE_ID $vectorResId $BEEN_LOADED")
   vectorDrawable.setBounds(0, 0, vectorDrawable.intrinsicWidth, vectorDrawable.intrinsicHeight)
 
   val bitmap = createBitmap(vectorDrawable.intrinsicWidth, vectorDrawable.intrinsicHeight)

@@ -79,6 +79,8 @@ object EditProfileNumberConstants {
   const val MIN_PSEUDONYM_LENGTH = 3
 
   val STROKE_WIDTH = 2.dp
+  const val IS_LOADING: Float = 0.95f
+  const val IS_NOT_LOADING: Float = 1f
 }
 
 object EditProfileStrings {
@@ -121,6 +123,8 @@ object EditProfileStrings {
   const val NEW_TEST_BIO = "New bio text"
 
   const val CHECKING_AVAILABILITY = "Checking availability..."
+
+  const val ERROR_LAUNCH_CAMERA = "Failed to launch camera:"
 }
 
 /**
@@ -191,32 +195,18 @@ object ProfileUIConstantsDefaults {
   val ProfileHeaderGradientEnd = Color(0xFFE8847C)
 
   // ---- TEST STRINGS ----
-  const val TabMyHuntsLabel = "My Hunts"
-  const val TabDoneLabel = "Done"
-  const val TabLikedLabel = "Liked"
+  const val TAB_MY_HUNTS_LABEL = "My Hunts"
+  const val TAB_DONE_LABEL = "Done"
+  const val TAB_LIKED_LABEL = "Liked"
 
   // ---- EMPTY STATE ----
   val EmptyIconSize = 64.dp
   val EmptyTextColor = Color(0xFF999999)
-  const val EmptyText = "No hunts yet"
 
   // ---- ALPHA VALUES ----
-  const val AlphaLight = 0.1f
-  const val AlphaMedium = 0.85f
-  const val AlphaLow = 0.2f
-  // ---- WEIGHTS ----
-  const val Weight = 1f
-}
+  const val ALPHA_LIGHT = 0.1f
+  const val ALPHA_MEDIUM = 0.85f
 
-object ProfileReviewsScreenConstant {
-  const val SPACER_HEIGHT = 4
-  const val HORIZONTAL_DIVIDER_PADDING = 8
-  const val COLUMN_PADDING = 16
-  const val SINGLE_REVIEW = "%s/%s - %d review"
-  const val MULTIPLE_REVIEWS = "%s/%s - %d reviews"
-  const val STRING_FORMAT = "%.1f"
-  const val HEADER_KEY = "hunt_header_%s"
-  const val DETAIL_ROUTE = "hunt/%s"
-  const val RATING_FORMAT = "%s/%s"
-  const val DIVIDER = "divider_%s"
+  // ---- WEIGHTS ----
+  const val WEIGHT = 1f
 }

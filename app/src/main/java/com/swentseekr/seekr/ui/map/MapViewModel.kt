@@ -10,6 +10,7 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntRepositoryProvider
 import com.swentseekr.seekr.model.hunt.HuntsRepository
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.ui.map.MapScreenDefaults.ONE
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,7 +35,7 @@ import kotlinx.coroutines.withContext
  * @property currentDistanceToNextMeters distance from user to next checkpoint in meters.
  */
 data class MapUIState(
-    val target: LatLng = LatLng(MapConfig.DefaultLat, MapConfig.DefaultLng),
+    val target: LatLng = LatLng(MapConfig.DEFAULT_LAT, MapConfig.DEFAULT_LNG),
     val hunts: List<Hunt> = emptyList(),
     val selectedHunt: Hunt? = null,
     val isFocused: Boolean = false,
@@ -42,8 +43,8 @@ data class MapUIState(
     val route: List<LatLng> = emptyList(),
     val isRouteLoading: Boolean = false,
     val isHuntStarted: Boolean = false,
-    val validatedCount: Int = MapConfig.DefaultValidatedCount,
-    val validationRadiusMeters: Int = MapConfig.ValidationRadiusMeters,
+    val validatedCount: Int = MapConfig.DEFAULT_VALIDATED_COUNT,
+    val validationRadiusMeters: Int = MapConfig.VALIDATION_RADIUS_METERS,
     val currentDistanceToNextMeters: Int? = null
 )
 
@@ -110,7 +111,9 @@ class MapViewModel(
   /** Enters focused mode for the selected hunt and triggers route computation. */
   fun onViewHuntClick() {
     _uiState.value = _uiState.value.copy(isFocused = true, route = emptyList())
-    viewModelScope.launch { computeRouteForSelectedHunt(travelMode = MapConfig.TravelModeWalking) }
+    viewModelScope.launch {
+      computeRouteForSelectedHunt(travelMode = MapConfig.TRAVEL_MODE_WALKING)
+    }
   }
 
   /**
@@ -128,7 +131,7 @@ class MapViewModel(
             isFocused = false,
             route = emptyList(),
             isHuntStarted = false,
-            validatedCount = MapConfig.DefaultValidatedCount,
+            validatedCount = MapConfig.DEFAULT_VALIDATED_COUNT,
             currentDistanceToNextMeters = null,
             errorMsg = null,
         )
@@ -142,7 +145,7 @@ class MapViewModel(
             selectedHunt = null,
             route = emptyList(),
             isHuntStarted = false,
-            validatedCount = MapConfig.DefaultValidatedCount,
+            validatedCount = MapConfig.DEFAULT_VALIDATED_COUNT,
             currentDistanceToNextMeters = null)
   }
 
@@ -158,11 +161,12 @@ class MapViewModel(
 
         val targetLocation =
             hunts.firstOrNull()?.start
-                ?: Location(MapConfig.DefaultLat, MapConfig.DefaultLng, MapConfig.DefaultCityName)
+                ?: Location(
+                    MapConfig.DEFAULT_LAT, MapConfig.DEFAULT_LNG, MapConfig.DEFAULT_CITY_NAME)
 
         _uiState.value = MapUIState(target = targetLocation.toLatLng(), hunts = hunts)
       } catch (e: Exception) {
-        setErrorMsg(MapScreenStrings.ErrorLoadHuntsPrefix + (e.message ?: ""))
+        setErrorMsg(MapScreenStrings.ERROR_LOAD_HUNTS_PREFIX + (e.message ?: ""))
       }
     }
   }
@@ -173,7 +177,7 @@ class MapViewModel(
    * @param travelMode mode used by Directions API (e.g., "walking").
    */
   private suspend fun computeRouteForSelectedHunt(
-      travelMode: String = MapConfig.TravelModeWalking
+      travelMode: String = MapConfig.TRAVEL_MODE_WALKING
   ) {
     val hunt = _uiState.value.selectedHunt ?: return
     _uiState.value = _uiState.value.copy(isRouteLoading = true)
@@ -194,7 +198,7 @@ class MapViewModel(
       clearErrorMsg()
       _uiState.value = _uiState.value.copy(route = points, isRouteLoading = false)
     } catch (e: Exception) {
-      setErrorMsg(MapScreenStrings.ErrorRoutePrefix + (e.message ?: ""))
+      setErrorMsg(MapScreenStrings.ERROR_ROUTE_PREFIX + (e.message ?: ""))
       _uiState.value = _uiState.value.copy(isRouteLoading = false, route = emptyList())
     }
   }
@@ -226,10 +230,12 @@ class MapViewModel(
             isFocused = true,
             route = emptyList(),
             isHuntStarted = true,
-            validatedCount = MapConfig.DefaultValidatedCount,
+            validatedCount = MapConfig.DEFAULT_VALIDATED_COUNT,
             currentDistanceToNextMeters = null)
 
-    viewModelScope.launch { computeRouteForSelectedHunt(travelMode = MapConfig.TravelModeWalking) }
+    viewModelScope.launch {
+      computeRouteForSelectedHunt(travelMode = MapConfig.TRAVEL_MODE_WALKING)
+    }
   }
 
   /**
@@ -258,7 +264,7 @@ class MapViewModel(
     val within = distanceMetersDouble <= state.validationRadiusMeters
 
     if (within) {
-      val newValidated = state.validatedCount + 1
+      val newValidated = state.validatedCount + ONE
       val newDistance =
           computeDistanceToNextPoint(
               hunt = hunt, validatedCount = newValidated, currentLocation = currentLocation)
@@ -273,9 +279,9 @@ class MapViewModel(
           state.copy(
               currentDistanceToNextMeters = distanceInt,
               errorMsg =
-                  MapScreenStrings.ErrorTooFarPrefix +
-                      MapConfig.ValidationRadiusMeters +
-                      MapScreenStrings.DistanceMetersSuffix)
+                  MapScreenStrings.ERROR_TOO_FAR_PREFIX +
+                      MapConfig.VALIDATION_RADIUS_METERS +
+                      MapScreenStrings.DISTANCE_METERS_SUFFIX)
     }
   }
 
@@ -303,14 +309,14 @@ class MapViewModel(
                   destLat = nextPoint.latitude,
                   destLng = nextPoint.longitude,
                   waypoints = emptyList(),
-                  travelMode = MapConfig.TravelModeWalking,
+                  travelMode = MapConfig.TRAVEL_MODE_WALKING,
                   apiKey = BuildConfig.MAPS_API_KEY)
             }
 
         _uiState.value =
             _uiState.value.copy(route = points, isRouteLoading = false, errorMsg = null)
       } catch (e: Exception) {
-        setErrorMsg(MapScreenStrings.ErrorRoutePrefix + (e.message ?: ""))
+        setErrorMsg(MapScreenStrings.ERROR_ROUTE_PREFIX + (e.message ?: ""))
         _uiState.value = _uiState.value.copy(isRouteLoading = false, route = emptyList())
       }
     }
@@ -326,7 +332,7 @@ class MapViewModel(
     val hunt = state.selectedHunt ?: return
 
     if (!isHuntFullyValidated(hunt, state.validatedCount)) {
-      setErrorMsg(MapScreenStrings.ErrorIncompleteHunt)
+      setErrorMsg(MapScreenStrings.ERROR_INCOMPLETE_HUNT)
       return
     }
 
@@ -336,13 +342,13 @@ class MapViewModel(
         _uiState.value =
             state.copy(
                 isHuntStarted = false,
-                validatedCount = MapConfig.DefaultValidatedCount,
+                validatedCount = MapConfig.DEFAULT_VALIDATED_COUNT,
                 isFocused = false,
                 selectedHunt = null,
                 route = emptyList(),
                 currentDistanceToNextMeters = null)
       } catch (e: Exception) {
-        setErrorMsg(MapScreenStrings.ErrorFinishHuntPrefix + (e.message ?: ""))
+        setErrorMsg(MapScreenStrings.ERROR_FINISH_HUNT_PREFIX + (e.message ?: ""))
       }
     }
   }

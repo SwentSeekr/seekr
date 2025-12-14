@@ -132,7 +132,7 @@ fun SeekrNavigationBar(
                 is SeekrDestination.Overview -> NavigationTestTags.OVERVIEW_TAB
                 is SeekrDestination.Map -> NavigationTestTags.MAP_TAB
                 is SeekrDestination.Profile -> NavigationTestTags.PROFILE_TAB
-                else -> SeekrNavigationDefaults.IgnoredTestTag
+                else -> SeekrNavigationDefaults.IGNORED_TEST_TAG
               }
 
           val isSelected = currentDestination.route == dest.route
@@ -150,7 +150,7 @@ fun SeekrNavigationBar(
                                 Modifier.size(BottomNavUIConstants.IconHaloSize)
                                     .background(
                                         color =
-                                            iconColor.copy(alpha = BottomNavUIConstants.HaloAlpha),
+                                            iconColor.copy(alpha = BottomNavUIConstants.HALO_ALPHA),
                                         shape = BottomNavUIConstants.HaloShape))
                         Icon(
                             dest.icon,

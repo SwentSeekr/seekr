@@ -6,6 +6,7 @@ import com.google.maps.android.PolyUtil
 import com.google.maps.android.SphericalUtil
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.ui.map.MapScreenDefaults.DEFAULT_MIN_POINT
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
@@ -93,7 +94,7 @@ fun computeDistanceToNextPoint(hunt: Hunt, validatedCount: Int, currentLocation:
  * @return true if all required checkpoints have been validated.
  */
 fun isHuntFullyValidated(hunt: Hunt, validatedCount: Int): Boolean {
-  val total = 2 + hunt.middlePoints.size
+  val total = DEFAULT_MIN_POINT + hunt.middlePoints.size
   return validatedCount >= total
 }
 
@@ -182,7 +183,7 @@ private fun buildDirectionsUrl(
           }
           .joinToString(UrlParams.AND)
 
-  return URL("${MapConfig.DirectionsBaseUrl}?$params")
+  return URL("${MapConfig.DIRECTIONS_BASE_URL}?$params")
 }
 
 /**
@@ -194,8 +195,8 @@ private fun buildDirectionsUrl(
 var directionsConnectionFactory: (URL) -> HttpURLConnection = { url ->
   (url.openConnection() as HttpURLConnection).apply {
     requestMethod = HttpConstants.REQUEST_METHOD_GET
-    connectTimeout = MapConfig.DirectionsConnectTimeoutMs
-    readTimeout = MapConfig.DirectionsReadTimeoutMs
+    connectTimeout = MapConfig.DIRECTIONS_CONNECT_TIMEOUT_MS
+    readTimeout = MapConfig.DIRECTIONS_READ_TIMEOUT_MS
     doInput = true
   }
 }

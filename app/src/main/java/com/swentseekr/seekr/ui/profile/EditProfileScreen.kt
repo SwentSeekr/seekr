@@ -90,8 +90,11 @@ fun EditProfileScreen(
       cameraPhotoUri.value = uri
       cameraLauncher.launch(uri)
     } catch (e: Exception) {
-      cameraError = "Failed to launch camera: ${e.message}"
-      Log.e(EditProfileStrings.CAMERA_LAUNCH, "Failed to launch camera: ${e.message}", e)
+      cameraError = "${EditProfileStrings.ERROR_LAUNCH_CAMERA} ${e.message}"
+      Log.e(
+          EditProfileStrings.CAMERA_LAUNCH,
+          "${EditProfileStrings.ERROR_LAUNCH_CAMERA} ${e.message}",
+          e)
     }
   }
 
@@ -253,7 +256,10 @@ fun EditProfileContent(
 
   val isLoading = uiState.isLoading
 
-  val scale by animateFloatAsState(if (isLoading) 0.95f else 1f)
+  val scale by
+      animateFloatAsState(
+          if (isLoading) EditProfileNumberConstants.IS_LOADING
+          else EditProfileNumberConstants.IS_NOT_LOADING)
 
   Column(
       modifier =

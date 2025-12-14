@@ -98,8 +98,8 @@ class MapViewModelTest {
 
     // Without advancing, uiState still has default target, which matches fallback constants.
     val state = vm.uiState.value
-    assertEquals(MapConfig.DefaultLat, state.target.latitude, 1e-6)
-    assertEquals(MapConfig.DefaultLng, state.target.longitude, 1e-6)
+    assertEquals(MapConfig.DEFAULT_LAT, state.target.latitude, 1e-6)
+    assertEquals(MapConfig.DEFAULT_LNG, state.target.longitude, 1e-6)
     assertTrue(state.hunts.isEmpty())
   }
 
@@ -113,7 +113,7 @@ class MapViewModelTest {
 
         val state = vm.uiState.value
         assertNotNull(state.errorMsg)
-        assertTrue(state.errorMsg!!.contains(MapScreenStrings.ErrorLoadHuntsPrefix))
+        assertTrue(state.errorMsg!!.contains(MapScreenStrings.ERROR_LOAD_HUNTS_PREFIX))
         assertTrue(state.hunts.isEmpty())
       }
 
@@ -273,12 +273,12 @@ class MapViewModelTest {
     withFakeDirectionsBody(body) {
       val points =
           requestDirectionsPolyline(
-              originLat = MapConfig.DefaultLat,
-              originLng = MapConfig.DefaultLng,
-              destLat = MapConfig.DefaultLat + 0.01,
-              destLng = MapConfig.DefaultLng + 0.01,
+              originLat = MapConfig.DEFAULT_LAT,
+              originLng = MapConfig.DEFAULT_LNG,
+              destLat = MapConfig.DEFAULT_LAT + 0.01,
+              destLng = MapConfig.DEFAULT_LNG + 0.01,
               waypoints = emptyList(),
-              travelMode = MapConfig.TravelModeWalking,
+              travelMode = MapConfig.TRAVEL_MODE_WALKING,
               apiKey = "test-key")
 
       assertEquals(3, points.size)
@@ -312,12 +312,12 @@ class MapViewModelTest {
     withFakeDirectionsBody(body) {
       val points =
           requestDirectionsPolyline(
-              originLat = MapConfig.DefaultLat,
-              originLng = MapConfig.DefaultLng,
-              destLat = MapConfig.DefaultLat + 0.01,
-              destLng = MapConfig.DefaultLng + 0.01,
+              originLat = MapConfig.DEFAULT_LAT,
+              originLng = MapConfig.DEFAULT_LNG,
+              destLat = MapConfig.DEFAULT_LAT + 0.01,
+              destLng = MapConfig.DEFAULT_LNG + 0.01,
               waypoints = emptyList(),
-              travelMode = MapConfig.TravelModeWalking,
+              travelMode = MapConfig.TRAVEL_MODE_WALKING,
               apiKey = "test-key")
 
       assertEquals(2, points.size)
@@ -342,12 +342,12 @@ class MapViewModelTest {
     withFakeDirectionsBody(body) {
       try {
         requestDirectionsPolyline(
-            originLat = MapConfig.DefaultLat,
-            originLng = MapConfig.DefaultLng,
-            destLat = MapConfig.DefaultLat + 0.01,
-            destLng = MapConfig.DefaultLng + 0.01,
+            originLat = MapConfig.DEFAULT_LAT,
+            originLng = MapConfig.DEFAULT_LNG,
+            destLat = MapConfig.DEFAULT_LAT + 0.01,
+            destLng = MapConfig.DEFAULT_LNG + 0.01,
             waypoints = emptyList(),
-            travelMode = MapConfig.TravelModeWalking,
+            travelMode = MapConfig.TRAVEL_MODE_WALKING,
             apiKey = "test-key")
         fail("Expected IllegalStateException for error status")
       } catch (e: IllegalStateException) {
@@ -488,7 +488,7 @@ class MapViewModelTest {
 
     val errorMsg = state.errorMsg
     assertNotNull(errorMsg)
-    assertTrue(errorMsg!!.contains(MapScreenStrings.ErrorIncompleteHunt))
+    assertTrue(errorMsg!!.contains(MapScreenStrings.ERROR_INCOMPLETE_HUNT))
   }
 
   @OptIn(ExperimentalCoroutinesApi::class)
@@ -531,7 +531,7 @@ class MapViewModelTest {
         assertFalse(state.isFocused)
         assertFalse(state.isHuntStarted)
         assertTrue(state.route.isEmpty())
-        assertEquals(MapConfig.DefaultValidatedCount, state.validatedCount)
+        assertEquals(MapConfig.DEFAULT_VALIDATED_COUNT, state.validatedCount)
         assertNull(state.currentDistanceToNextMeters)
         assertNull(state.errorMsg)
       }

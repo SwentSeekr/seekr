@@ -59,6 +59,9 @@ object SettingsScreenStrings {
 
   const val TEST_NOTIFICATION = "notification"
   const val TEST_REPOSITORY = "repository"
+  const val ACCOUNT = "Account"
+  const val LEGAL = "Legal"
+  const val PACKAGE = "package"
 }
 
 object SettingsScreenTestTags {

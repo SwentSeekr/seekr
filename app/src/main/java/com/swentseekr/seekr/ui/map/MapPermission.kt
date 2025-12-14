@@ -39,7 +39,7 @@ fun PermissionRequestPopup(onRequestPermission: () -> Unit) {
                   modifier = Modifier.padding(MapScreenDefaults.OverlayInnerPadding).fillMaxWidth(),
                   horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = MapScreenStrings.PermissionExplanation,
+                        text = MapScreenStrings.PERMISSION_EXPLANATION,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier =
@@ -56,7 +56,7 @@ fun PermissionRequestPopup(onRequestPermission: () -> Unit) {
                                 .padding(top = MapScreenDefaults.PopupSpacing)
                                 .testTag(MapScreenTestTags.GRANT_LOCATION_PERMISSION)) {
                           Text(
-                              MapScreenStrings.GrantPermission,
+                              MapScreenStrings.GRANT_PERMISSION,
                               color = MaterialTheme.colorScheme.onSurface)
                         }
                   }

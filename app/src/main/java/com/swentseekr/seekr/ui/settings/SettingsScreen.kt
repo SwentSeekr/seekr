@@ -268,7 +268,7 @@ fun SettingsContent(
 
           item {
             Text(
-                "Account",
+                SettingsScreenStrings.ACCOUNT,
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
                 modifier =
@@ -287,7 +287,7 @@ fun SettingsContent(
 
           item {
             Text(
-                "Legal",
+                SettingsScreenStrings.LEGAL,
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
                 modifier =

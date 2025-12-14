@@ -117,8 +117,8 @@ class MapTest {
     composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_CANCEL).assertIsDisplayed()
     composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_VIEW).assertIsDisplayed()
     composeRule.onNodeWithText(Constants.FAKE).assertIsDisplayed()
-    composeRule.onNodeWithText(MapScreenStrings.Cancel).assertIsDisplayed()
-    composeRule.onNodeWithText(MapScreenStrings.ViewHunt).assertIsDisplayed()
+    composeRule.onNodeWithText(MapScreenStrings.CANCEL).assertIsDisplayed()
+    composeRule.onNodeWithText(MapScreenStrings.VIEW_HUNT).assertIsDisplayed()
   }
 
   @Test
@@ -129,7 +129,7 @@ class MapTest {
 
     composeRule.onNodeWithTag(MapScreenTestTags.POPUP_CARD).assertDoesNotExist()
     composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_BACK).assertIsDisplayed()
-    composeRule.onNodeWithText(MapScreenStrings.BackToAllHunts).assertIsDisplayed()
+    composeRule.onNodeWithText(MapScreenStrings.BACK_TO_ALL_HUNTS).assertIsDisplayed()
   }
 
   @Test
@@ -221,7 +221,7 @@ class MapTest {
     composeRule
         .onNodeWithTag(MapScreenTestTags.BUTTON_BACK)
         .assertIsDisplayed()
-        .assertTextContains(MapScreenStrings.StopHunt)
+        .assertTextContains(MapScreenStrings.STOP_HUNT)
 
     composeRule.onNodeWithTag(MapScreenTestTags.BUTTON_BACK).performClick()
 
@@ -229,7 +229,7 @@ class MapTest {
     composeRule.onNodeWithTag(MapScreenTestTags.CONFIRM).assertIsDisplayed()
     composeRule
         .onNodeWithTag(MapScreenTestTags.CONFIRM)
-        .assertTextContains(MapScreenStrings.ConfirmStopHunt)
+        .assertTextContains(MapScreenStrings.CONFIRM_STOP_HUNT)
   }
 
   @Test
