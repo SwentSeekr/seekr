@@ -9,40 +9,58 @@ import com.swentseekr.seekr.model.hunt.HuntStatus
  */
 object ProfileRepositoryConstants {
 
-  // Firestore Collection names
+  // ------------------------
+  // Firestore Collection Names
+  // ------------------------
   const val PROFILES_COLLECTION = "profiles"
   const val HUNTS_COLLECTION = "hunts"
 
-  // Default Profile values
+  // ------------------------
+  // Default Profile Values
+  // ------------------------
   const val DEFAULT_USER_NAME = "New User"
   const val DEFAULT_USER_BIO = ""
   const val DEFAULT_PROFILE_PICTURE = 0
   const val DEFAULT_REVIEW_RATE = 0.0
   const val DEFAULT_SPORT_RATE = 0.0
-  // Default hunt values
+
+  // ------------------------
+  // Default Hunt Values
+  // ------------------------
   const val DEFAULT_HUNT_TIME = 0.0
   const val DEFAULT_HUNT_DISTANCE = 0.0
   const val DEFAULT_HUNT_REVIEW_RATE = 0.0
   const val DEFAULT_HUNT_MAIN_IMAGE_URL = ""
 
-  // Default Location values
+  // ------------------------
+  // Default Location Values
+  // ------------------------
   const val DEFAULT_LOCATION_LAT = 0.0
   const val DEFAULT_LOCATION_LNG = 0.0
   const val DEFAULT_LOCATION_NAME = ""
 
-  // Default Difficulty and Status values
+  // ------------------------
+  // Default Difficulty and Status
+  // ------------------------
   val DEFAULT_DIFFICULTY = Difficulty.EASY
   val DEFAULT_STATUS = HuntStatus.FUN
 
-  // Error messages and logging
+  // ------------------------
+  // Logging Tags
+  // ------------------------
   const val FIRESTORE_WRITE_FAILED_LOG_TAG = "ProfileRepo"
   const val UPLOAD_FAILED_LOG_TAG = "UploadProfilePicture"
 
-  // Other constants
+  // ------------------------
+  // Profile Field Names
+  // ------------------------
   const val PROFILE_FIELD_AUTHOR = "author"
   const val PROFILE_FIELD_DONE_HUNTS = "doneHunts"
   const val PROFILE_FIELD_LIKED_HUNTS = "likedHunts"
-  const val PROFILE_FIELD_MY_HUNTS = "myHunts"
+
+  // ------------------------
+  // Hunt Field Names
+  // ------------------------
   const val HUNT_FIELD_UID = "uid"
   const val HUNT_FIELD_AUTHOR_ID = "authorId"
   const val HUNT_FIELD_TITLE = "title"
@@ -56,10 +74,18 @@ object ProfileRepositoryConstants {
   const val HUNT_FIELD_MIDDLE_POINTS = "middlePoints"
   const val HUNT_FIELD_DIFFICULTY = "difficulty"
   const val HUNT_FIELD_STATUS = "status"
+
+  // ------------------------
+  // Location Field Names
+  // ------------------------
   const val LOCATION_FIELD_LATITUDE = "latitude"
   const val LOCATION_FIELD_LONGITUDE = "longitude"
   const val LOCATION_FIELD_NAME = "name"
   const val LOCATION_FIELD_DESCRIPTION = "description"
+
+  // ------------------------
+  // Misc
+  // ------------------------
   const val LOCAL_PROFILE_PICTURE_PREFIX = "local://profile-picture/"
   const val DEFAULT_EMPTY_VALUE = ""
 }
