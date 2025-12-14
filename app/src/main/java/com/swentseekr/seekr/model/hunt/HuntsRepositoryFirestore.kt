@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreConstantsDefault.ZERO
 import com.swentseekr.seekr.model.map.Location
 import kotlin.String
 import kotlinx.coroutines.tasks.await
@@ -25,14 +26,18 @@ class HuntsRepositoryFirestore(
 
   override suspend fun getAllMyHunts(authorID: String): List<Hunt> {
     val snapshot =
-        db.collection(HUNTS_COLLECTION_PATH).whereEqualTo("authorId", authorID).get().await()
+        db.collection(HUNTS_COLLECTION_PATH)
+            .whereEqualTo(HuntsRepositoryFirestoreConstantsStrings.AUTHOR_ID, authorID)
+            .get()
+            .await()
     return snapshot.mapNotNull { documentToHunt(it) }
   }
 
   override suspend fun getHunt(huntID: String): Hunt {
     val document = db.collection(HUNTS_COLLECTION_PATH).document(huntID).get().await()
     return documentToHunt(document)
-        ?: throw IllegalArgumentException("Hunt with ID $huntID is not found")
+        ?: throw IllegalArgumentException(
+            "${HuntsRepositoryFirestoreConstantsStrings.HUNT} $huntID ${HuntsRepositoryFirestoreConstantsStrings.NOT_FOUND}")
   }
 
   override suspend fun addHunt(hunt: Hunt, mainImageUri: Uri?, otherImageUris: List<Uri>) {
@@ -50,13 +55,19 @@ class HuntsRepositoryFirestore(
         otherImagesUrls = imageRepo.uploadOtherImages(hunt.uid, otherImageUris)
       }
     } catch (e: Exception) {
-      Log.e("HuntsRepositoryFirestore", "Image upload failed for hunt ${hunt.uid}", e)
+      Log.e(
+          HuntsRepositoryFirestoreConstantsStrings.TAG,
+          "${HuntsRepositoryFirestoreConstantsStrings.ERROR_IMAGE_UPLOADING} ${hunt.uid}",
+          e)
 
       // Optionally clean up any uploaded images if partial success occurred
       try {
         imageRepo.deleteAllHuntImages(hunt.uid)
       } catch (cleanupError: Exception) {
-        Log.w("HuntsRepositoryFirestore", "Cleanup after failed upload failed", cleanupError)
+        Log.w(
+            HuntsRepositoryFirestoreConstantsStrings.TAG,
+            HuntsRepositoryFirestoreConstantsStrings.ERROR_CLEANUP,
+            cleanupError)
       }
 
       // Rethrow to signal failure to upper layers (so ViewModel can show an error)
@@ -117,50 +128,68 @@ class HuntsRepositoryFirestore(
     return try {
       val uid = document.id
 
-      val startData = document.get("start") as? Map<*, *>
+      val startData = document.get(HuntsRepositoryFirestoreConstantsStrings.START) as? Map<*, *>
       val start =
           startData?.let {
             Location(
-                latitude = it["latitude"] as? Double ?: 0.0,
-                longitude = it["longitude"] as? Double ?: 0.0,
-                name = it["name"] as? String ?: "",
-                description = it["description"] as? String ?: "",
-                imageIndex = (it["imageIndex"] as? Long)?.toInt())
+                latitude = it[HuntsRepositoryFirestoreConstantsStrings.LATITUDE] as? Double ?: ZERO,
+                longitude =
+                    it[HuntsRepositoryFirestoreConstantsStrings.LONGITUDE] as? Double ?: ZERO,
+                name = it[HuntsRepositoryFirestoreConstantsStrings.NAME] as? String ?: "",
+                description =
+                    it[HuntsRepositoryFirestoreConstantsStrings.DESCRIPTION] as? String ?: "",
+                imageIndex =
+                    (it[HuntsRepositoryFirestoreConstantsStrings.IMAGE_INDEX] as? Long)?.toInt())
           } ?: Location(0.0, 0.0, "")
 
-      val endData = document.get("end") as? Map<*, *>
+      val endData = document.get(HuntsRepositoryFirestoreConstantsStrings.END) as? Map<*, *>
       val end =
           endData?.let {
             Location(
-                latitude = it["latitude"] as? Double ?: 0.0,
-                longitude = it["longitude"] as? Double ?: 0.0,
-                name = it["name"] as? String ?: "",
-                description = it["description"] as? String ?: "",
-                imageIndex = (it["imageIndex"] as? Long)?.toInt())
-          } ?: Location(0.0, 0.0, "")
-      val middlePointsData = document.get("middlePoints") as? List<Map<*, *>>
+                latitude = it[HuntsRepositoryFirestoreConstantsStrings.LATITUDE] as? Double ?: ZERO,
+                longitude =
+                    it[HuntsRepositoryFirestoreConstantsStrings.LONGITUDE] as? Double ?: ZERO,
+                name = it[HuntsRepositoryFirestoreConstantsStrings.NAME] as? String ?: "",
+                description =
+                    it[HuntsRepositoryFirestoreConstantsStrings.DESCRIPTION] as? String ?: "",
+                imageIndex =
+                    (it[HuntsRepositoryFirestoreConstantsStrings.IMAGE_INDEX] as? Long)?.toInt())
+          } ?: Location(ZERO, ZERO, "")
+      val middlePointsData =
+          document.get(HuntsRepositoryFirestoreConstantsStrings.MIDDLE_POINT) as? List<Map<*, *>>
       val middlePoints =
           middlePointsData?.map {
             Location(
-                latitude = it["latitude"] as? Double ?: 0.0,
-                longitude = it["longitude"] as? Double ?: 0.0,
-                name = it["name"] as? String ?: "",
-                description = it["description"] as? String ?: "",
-                imageIndex = (it["imageIndex"] as? Long)?.toInt())
+                latitude = it[HuntsRepositoryFirestoreConstantsStrings.LATITUDE] as? Double ?: ZERO,
+                longitude =
+                    it[HuntsRepositoryFirestoreConstantsStrings.LONGITUDE] as? Double ?: ZERO,
+                name = it[HuntsRepositoryFirestoreConstantsStrings.NAME] as? String ?: "",
+                description =
+                    it[HuntsRepositoryFirestoreConstantsStrings.DESCRIPTION] as? String ?: "",
+                imageIndex =
+                    (it[HuntsRepositoryFirestoreConstantsStrings.IMAGE_INDEX] as? Long)?.toInt())
           } ?: emptyList()
-      val statusString = document.getString("status") ?: return null
+      val statusString =
+          document.getString(HuntsRepositoryFirestoreConstantsStrings.STATUS) ?: return null
       val status = HuntStatus.valueOf(statusString)
-      val title = document.getString("title") ?: return null
-      val description = document.getString("description") ?: return null
-      val time = document.getDouble("time") ?: return null
-      val distance = document.getDouble("distance") ?: return null
-      val difficultyString = document.getString("difficulty") ?: return null
+      val title = document.getString(HuntsRepositoryFirestoreConstantsStrings.TITLE) ?: return null
+      val description =
+          document.getString(HuntsRepositoryFirestoreConstantsStrings.DESCRIPTION) ?: return null
+      val time = document.getDouble(HuntsRepositoryFirestoreConstantsStrings.TIME) ?: return null
+      val distance =
+          document.getDouble(HuntsRepositoryFirestoreConstantsStrings.DISTANCE) ?: return null
+      val difficultyString =
+          document.getString(HuntsRepositoryFirestoreConstantsStrings.DIFFICULTY) ?: return null
       val difficulty = Difficulty.valueOf(difficultyString)
-      val authorId = document.getString("authorId") ?: return null
-      val mainImageUrl = document.getString("mainImageUrl") ?: ""
+      val authorId =
+          document.getString(HuntsRepositoryFirestoreConstantsStrings.AUTHOR_ID) ?: return null
+      val mainImageUrl =
+          document.getString(HuntsRepositoryFirestoreConstantsStrings.MAIN_IMAGE) ?: ""
       val otherImagesUrls =
-          (document.get("otherImagesUrls") as? List<*>)?.filterIsInstance<String>() ?: emptyList()
-      val reviewRate = document.getDouble("reviewRate") ?: return null
+          (document.get(HuntsRepositoryFirestoreConstantsStrings.OTHER_IMAGE) as? List<*>)
+              ?.filterIsInstance<String>() ?: emptyList()
+      val reviewRate =
+          document.getDouble(HuntsRepositoryFirestoreConstantsStrings.RATING_REVIEW) ?: return null
 
       Hunt(
           uid = uid,
@@ -178,7 +207,10 @@ class HuntsRepositoryFirestore(
           otherImagesUrls = otherImagesUrls,
           reviewRate = reviewRate)
     } catch (e: Exception) {
-      Log.e("HuntsRepositoryFirestore", "Error converting document to Hunt", e)
+      Log.e(
+          HuntsRepositoryFirestoreConstantsStrings.TAG,
+          HuntsRepositoryFirestoreConstantsStrings.ERROR_CONVERTING,
+          e)
       null
     }
   }

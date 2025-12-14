@@ -13,21 +13,37 @@ object HuntRepositoryProvider {
   val defaultHunt =
       Hunt(
           uid = "",
-          start = Location(40.7128, -74.0060, "New York"),
-          end = Location(40.730610, -73.935242, "Brooklyn"),
+          start =
+              Location(
+                  HuntRepositoryProviderConstantsDefault.START_LATITUDE,
+                  HuntRepositoryProviderConstantsDefault.START_LONGITUDE,
+                  HuntRepositoryProviderConstantsString.START_NAME),
+          end =
+              Location(
+                  HuntRepositoryProviderConstantsDefault.END_LATITUDE,
+                  HuntRepositoryProviderConstantsDefault.END_LONGITUDE,
+                  HuntRepositoryProviderConstantsString.END_NAME),
           middlePoints =
               listOf(
-                  Location(40.718, -73.999, "Chinatown"), Location(40.725, -73.98, "East Village")),
+                  Location(
+                      HuntRepositoryProviderConstantsDefault.SECOND_LATITUDE,
+                      HuntRepositoryProviderConstantsDefault.SECOND_LONGITUDE,
+                      HuntRepositoryProviderConstantsString.SECOND_NAME),
+                  Location(
+                      HuntRepositoryProviderConstantsDefault.OTHER_LATITUDE,
+                      HuntRepositoryProviderConstantsDefault.OTHER_LONGITUDE,
+                      HuntRepositoryProviderConstantsString.OTHER_NAME)),
           status = HuntStatus.FUN,
-          title = "City Exploration",
-          description = "Discover hidden gems in the city",
-          time = 2.5,
-          distance = 5.0,
+          title = HuntRepositoryProviderConstantsString.TITLE,
+          description = HuntRepositoryProviderConstantsString.DESCRIPTION,
+          time = HuntRepositoryProviderConstantsDefault.TIME,
+          distance = HuntRepositoryProviderConstantsDefault.DISTANCE,
           difficulty = Difficulty.EASY,
-          authorId = "0",
-          mainImageUrl = 0.toString(),
-          reviewRate = 4.5)
+          authorId = HuntRepositoryProviderConstantsString.AUTHOR_ID,
+          mainImageUrl = HuntRepositoryProviderConstantsDefault.IMAGE.toString(),
+          reviewRate = HuntRepositoryProviderConstantsDefault.RATING)
 
+  // Unused anymore so no need magic values can remove this
   private val _repository: HuntsRepository =
       HuntsRepositoryLocal().apply {
         val sampleHunts =

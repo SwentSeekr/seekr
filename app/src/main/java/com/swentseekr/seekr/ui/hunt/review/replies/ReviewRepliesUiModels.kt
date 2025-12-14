@@ -60,7 +60,7 @@ data class ReviewRepliesUiState(
     /** True while a reply is currently being sent. */
     val isSendingReply: Boolean = false,
     /** Current text in the inline composer for the root review. */
-    val rootReplyText: String = ReviewRepliesUiModelConstants.rootReplyBaseText,
+    val rootReplyText: String = ReviewRepliesUiModelConstants.ROOT_BASE_REPLY_TEXT,
     /**
      * Map from parent reply ID to current composer text for that reply. This drives the inline
      * reply fields under each reply.
@@ -69,5 +69,5 @@ data class ReviewRepliesUiState(
     /** Optional error message to briefly show near the replies section. */
     val errorMessage: String? = null,
     val isRootExpanded: Boolean = false,
-    val totalReplyCount: Int = ReviewRepliesUiModelConstants.totalReplyBaseCount,
+    val totalReplyCount: Int = ReviewRepliesUiModelConstants.TOTAL_REPLY_BASE_COUNT,
 )

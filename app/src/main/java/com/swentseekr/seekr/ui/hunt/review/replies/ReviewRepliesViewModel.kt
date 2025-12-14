@@ -97,7 +97,7 @@ class ReviewRepliesViewModel(
   fun sendReply(target: ReplyTarget) {
     val currentUserId = currentUserIdOrNull()
     if (currentUserId == null) {
-      _uiState.update { it.copy(errorMessage = ReviewRepliesStrings.ErrorSignInToReply) }
+      _uiState.update { it.copy(errorMessage = ReviewRepliesStrings.ERROR_SIGN_IN_TO_REPLY) }
       return
     }
 
@@ -109,7 +109,7 @@ class ReviewRepliesViewModel(
         }
 
     if (text.isBlank()) {
-      _uiState.update { it.copy(errorMessage = ReviewRepliesStrings.ErrorEmptyReply) }
+      _uiState.update { it.copy(errorMessage = ReviewRepliesStrings.ERROR_EMPTY_REPLY) }
       return
     }
 
@@ -155,7 +155,7 @@ class ReviewRepliesViewModel(
       } catch (e: Exception) {
         _uiState.update {
           it.copy(
-              errorMessage = e.message ?: ReviewRepliesStrings.ErrorSendReply,
+              errorMessage = e.message ?: ReviewRepliesStrings.ERROR_SEND_REPLY,
           )
         }
       } finally {
@@ -167,18 +167,18 @@ class ReviewRepliesViewModel(
   fun deleteReply(replyId: String) {
     val currentUserId = currentUserIdOrNull()
     if (currentUserId == null) {
-      _uiState.update { it.copy(errorMessage = ReviewRepliesStrings.ErrorSignInToDelete) }
+      _uiState.update { it.copy(errorMessage = ReviewRepliesStrings.ERROR_SIGN_IN_TO_DELETE) }
       return
     }
 
     val reply = allReplies.find { it.replyId == replyId }
     if (reply == null) {
-      _uiState.update { it.copy(errorMessage = ReviewRepliesStrings.ErrorReplyNotFound) }
+      _uiState.update { it.copy(errorMessage = ReviewRepliesStrings.ERROR_REPLY_NOT_FOUND) }
       return
     }
 
     if (reply.authorId != currentUserId) {
-      _uiState.update { it.copy(errorMessage = ReviewRepliesStrings.ErrorDeleteNotOwner) }
+      _uiState.update { it.copy(errorMessage = ReviewRepliesStrings.ERROR_DELETE_NOT_OWNER) }
       return
     }
 
@@ -188,7 +188,7 @@ class ReviewRepliesViewModel(
       } catch (e: Exception) {
         _uiState.update {
           it.copy(
-              errorMessage = e.message ?: ReviewRepliesStrings.ErrorDeleteReply,
+              errorMessage = e.message ?: ReviewRepliesStrings.ERROR_DELETE_REPLY,
           )
         }
       }

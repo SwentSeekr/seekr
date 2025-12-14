@@ -27,21 +27,25 @@ object HuntCardScreenDefaults {
   val CornerRadius: Dp = 12.dp
   val ProfilePictureSize: Dp = 32.dp
   val ImageCarouselHeight: Dp = 120.dp
-  const val ImageCarouselMinScale: Float = 0.85f
-  const val ImageCarouselMaxScale: Float = 1.08f
-  const val ImageCarouselSideRotationDegrees: Float = 10f
-  const val ImageCarouselOverlayMaxAlpha: Float = 0.35f
-  const val ImageCarouselOverlayMinAlpha: Float = 0f
-  const val ImageCarouselCameraDistanceFactor: Float = 8f
-  const val ImageCarouselInterpolationMinFraction: Float = 0f
-  const val ImageCarouselInterpolationMaxFraction: Float = 1f
-  const val FullScreenImageHeightFraction: Float = 0.9f
+  const val IMAGE_CAROUSEL_MIN_SCALE: Float = 0.85f
+  const val IMAGE_CAROUSEL_MAX_SCALE: Float = 1.08f
+  const val IMAGE_CAROUSEL_SIDE_ROTATION_DEGREE: Float = 10f
+  const val IMAGE_CAROUSEL_OVERLAYER_MAX_ALPHA: Float = 0.35f
+  const val IMAGE_CAROUSEL_OVERLAYER_MIN_ALPHA: Float = 0f
+  const val IMAGE_CAROUSEL_DISTANCE_FACTOR: Float = 8f
+  const val IMAGE_CAROUSEL_INTERPOLATION_MIN_FRACTION: Float = 0f
+  const val IMAGE_CAROUSEL_INTERPOLATION_MAX_FRACTION: Float = 1f
+  const val FULL_SCREEN_IMAGE_HEIGHT_FRACTION: Float = 0.9f
+  const val TEXT_COLOR_FACTOR: Float = 0.9f
+  const val WEIGHT_LOCATION_MODIFIER: Float = 1f
+  const val WEIGHT_TIME_MODIFIER: Float = 1f
+
   val ImageIndicatorDotSize: Dp = 6.dp
   val ImageIndicatorDotSelectedSize: Dp = 8.dp
   val ImageIndicatorDotSpacing: Dp = 4.dp
   val ImageIndicatorTopPadding: Dp = 4.dp
-  const val ImageCarouselRotationCenterDegrees: Float = 0f
-  const val ImageIndicatorLastIndexOffset: Int = 1
+  const val IMAGE_CAROUSEL_ROTATION_CENTER_DEGREES: Float = 0f
+  const val IMAGE_INDICATOR_LAST_INDEX_OFFSET: Int = 1
 
   val Padding20: Dp = 20.dp
   val Padding12: Dp = 12.dp
@@ -94,51 +98,42 @@ object HuntCardScreenDefaults {
   // New: review card visuals & logic constants
   val ReviewCardCornerRadius: Dp = 16.dp
   val ZeroElevation: Dp = 0.dp
-  const val DeleteIconAlpha: Float = 0.85f
 
-  const val NoRepliesCount: Int = 0
-  const val SingleReplyCount: Int = 1
-  const val InitialLetterCount: Int = 1
-  const val NoProfilePictureResId: Int = 0
+  const val INITIAL_LETTER_COUNT: Int = 1
+  const val NO_PROFILE_PICTURE_RES_ID: Int = 0
 
-  const val BeginButtonSizeMultiplier: Int = 2
-  const val EndListSpacerMultiplier: Int = 2
-  const val RepliesLabelAlpha: Float = 0.8f
+  const val BEGIN_BUTTON_SIZE_MULTIPLIER: Int = 2
+  const val END_LIST_SPACER_MULTIPLIER: Int = 2
+  const val BACKGROUND_ALPHA: Float = 0.8f
+  const val START: Float = 200f
 }
 
 object HuntCardScreenStrings {
-  const val BackContentDescription = "Back"
-  const val LikeButton = "Like Button"
-  const val HuntPictureDescription = "Hunt Picture"
-  const val DistanceUnit = "km"
-  const val TimeUnit = "h"
-  const val By = "by"
-  const val HourUnit = "h"
-  const val BeginHunt = "Begin Hunt"
-  const val AddReview = "Add Review"
-  const val EditHunt = "Edit Hunt"
-  const val Reviews = "Reviews : "
+  const val BACK_CONTENT_DESCRIPTION = "Back"
+  const val LIKE_BUTTON = "Like Button"
+  const val HUNT_PICTURE_DESCRIPTION = "Hunt Picture"
+  const val DISTANCE_UNIT = "km"
+  const val TIME_UNIT = "h"
+  const val BY = "by"
+  const val HOUR_UNIT = "h"
+  const val BEGIN_HUNT = "Begin Hunt"
+  const val ADD_REVIEW = "Add Review"
+  const val EDIT_HUNT = "Edit Hunt"
+  const val REVIEWS = "Reviews : "
   const val ReviewDeleteButton = "Delete Review"
-  const val NoReviews = "No reviews yet."
-  const val FullScreenImageDescription = "Full-screen hunt image"
-  const val ReviewMarkerTitlePrefix = "Start: "
-  const val UnknownAuthor = "Unknown Author"
-  const val DescriptionLabel = "Description"
-  const val StartingPointLabel = "Starting Point"
-  const val DistanceLabel = "Distance"
-  const val DurationLabel = "Duration"
+  const val NO_REVIEW = "No reviews yet."
+  const val FULL_SCREEN_DESCRIPTION = "Full-screen hunt image"
+  const val REVIEW_MARKER_PREFIX = "Start: "
+  const val UNKNOWN_AUTHOR = "Unknown Author"
+  const val DESCRIPTION_LABEL = "Description"
+  const val START_POINT_LABEL = "Starting Point"
+  const val DISTANCE_LABEL = "Distance"
+  const val DURATION_LABEL = "Duration"
 
-  // New strings for ModernReviewCard / replies
-  const val SeePictures = "See Pictures"
-  const val HideReplies = "Hide replies"
-  const val ViewRepliesPrefix = "View"
-  const val ReplySingular = "reply"
-  const val ReplyPlural = "replies"
-  const val NoRepliesYet = "No replies yet"
-  const val CurrentUserInitialLabel = "Y"
+  const val CURRENT_USER_INITIAL_LABEL = "Y"
 
-  const val RepliesViewModelKeyPrefix = "replies_"
-  const val ReviewImagesRoutePrefix = "reviewImages/"
+  const val REPLIES_VIEW_MODEL_PREFIX = "replies_"
+  const val REVIEW_IMAGE_PREFIX = "reviewImages/"
 }
 
 object HuntCardScreenTestTags {

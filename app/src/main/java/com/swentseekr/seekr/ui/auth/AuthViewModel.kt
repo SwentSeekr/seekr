@@ -128,8 +128,8 @@ class AuthViewModel(
       } catch (e: GetCredentialException) {
         val message =
             when {
-              e.localizedMessage?.contains("no provider", ignoreCase = true) == true ->
-                  NO_PROVIDER_AVAILABLE
+              e.localizedMessage?.contains(AuthViewModelMessages.NO_PROVIDER, ignoreCase = true) ==
+                  true -> NO_PROVIDER_AVAILABLE
               else -> credentialFailure(e.localizedMessage)
             }
         _uiState.update {

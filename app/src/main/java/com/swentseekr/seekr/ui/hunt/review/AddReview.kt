@@ -45,9 +45,9 @@ fun AddReviewScreen(
     onDone: () -> Unit = {},
     onCancel: () -> Unit = {},
 ) {
-  val vm: ReviewHuntViewModel = viewModel(key = "add_$huntId")
+  val vm: ReviewHuntViewModel = viewModel(key = "${AddReviewScreenStrings.ADD_KEY}$huntId")
   ReviewScreenContent(
-      title = AddReviewScreenStrings.Title,
+      title = AddReviewScreenStrings.TITLE,
       huntId = huntId,
       reviewId = "",
       onGoBack = onGoBack,
@@ -69,23 +69,23 @@ fun AddReviewScreen(
  */
 @Composable
 fun StarRatingBar(
-    maxStars: Int = AddReviewScreenDefaults.MaxStars,
-    rating: Int = AddReviewScreenDefaults.DefaultRating,
+    maxStars: Int = AddReviewScreenDefaults.MAX_STARS,
+    rating: Int = AddReviewScreenDefaults.DEFAULT_RATING,
     onRatingChanged: (Int) -> Unit
 ) {
   val starCount =
-      if (maxStars > AddReviewScreenDefaults.MinStars) maxStars
-      else AddReviewScreenDefaults.MaxStars
+      if (maxStars > AddReviewScreenDefaults.MIN_STARS) maxStars
+      else AddReviewScreenDefaults.MAX_STARS
 
   Row(
       modifier = Modifier.testTag(AddReviewScreenTestTags.RATING_BAR),
       horizontalArrangement = Arrangement.spacedBy(UICons.RowStarArrangement)) {
-        for (i in AddReviewScreenDefaults.FirstStarIndex..starCount) {
+        for (i in AddReviewScreenDefaults.FIRST_STAR_INDEX..starCount) {
           val scale by
               animateFloatAsState(
                   targetValue =
-                      if (i <= rating) AddReviewScreenDefaults.StarSelectedScale
-                      else AddReviewScreenDefaults.StarUnselectedScale,
+                      if (i <= rating) AddReviewScreenDefaults.STAR_SELECTED_SCALE
+                      else AddReviewScreenDefaults.STAR_UNSELECTED_SCALE,
                   animationSpec =
                       spring(
                           dampingRatio = Spring.DampingRatioMediumBouncy,
@@ -93,7 +93,7 @@ fun StarRatingBar(
 
           Icon(
               imageVector = if (i <= rating) Icons.Filled.Star else Icons.Outlined.Star,
-              contentDescription = "${AddReviewScreenStrings.StarContentDescriptionPrefix}$i",
+              contentDescription = "${AddReviewScreenStrings.STAR_CONTENT_DESCRIPTION_PREFIX}$i",
               tint =
                   if (i <= rating) AddReviewScreenDefaults.SelectedStarColor
                   else AddReviewScreenDefaults.UnselectedStarColor,
@@ -102,7 +102,7 @@ fun StarRatingBar(
                       .scale(scale)
                       .clickable {
                         if (i == rating) {
-                          onRatingChanged(i - AddReviewScreenDefaults.RatingStep)
+                          onRatingChanged(i - AddReviewScreenDefaults.RATING_STEP)
                         } else {
                           onRatingChanged(i)
                         }

@@ -848,7 +848,7 @@ class ReviewHuntViewModelTest {
 
       // Error should be set
       val state = viewModel.uiState.value
-      assertEquals(AddReviewScreenStrings.ErrorSubmisson, state.errorMsg)
+      assertEquals(AddReviewScreenStrings.ERROR_SUBMISSION, state.errorMsg)
       assertFalse(state.saveSuccessful)
     }
 

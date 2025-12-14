@@ -140,7 +140,7 @@ fun HuntCardScreen(
 
   val actionButton = if (isAuthor) editHunt else addReview
   val actionIcon = if (isAuthor) Icons.Filled.Edit else Icons.Filled.Star
-  val authorName = authorProfile?.author?.pseudonym ?: HuntCardScreenStrings.UnknownAuthor
+  val authorName = authorProfile?.author?.pseudonym ?: HuntCardScreenStrings.UNKNOWN_AUTHOR
 
   Scaffold(
       topBar = {
@@ -152,7 +152,7 @@ fun HuntCardScreen(
                   onClick = onGoBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = HuntCardScreenStrings.BackContentDescription,
+                        contentDescription = HuntCardScreenStrings.BACK_CONTENT_DESCRIPTION,
                         tint = MaterialTheme.colorScheme.onPrimary)
                   }
             },
@@ -167,13 +167,13 @@ fun HuntCardScreen(
                 Modifier.testTag(HuntCardScreenTestTags.BEGIN_BUTTON)
                     .size(
                         HuntCardScreenDefaults.IconSize32 *
-                            HuntCardScreenDefaults.BeginButtonSizeMultiplier),
+                            HuntCardScreenDefaults.BEGIN_BUTTON_SIZE_MULTIPLIER),
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
             shape = CircleShape) {
               Icon(
                   imageVector = Icons.Filled.PlayArrow,
-                  contentDescription = HuntCardScreenStrings.BeginHunt,
+                  contentDescription = HuntCardScreenStrings.BEGIN_HUNT,
                   modifier = Modifier.size(HuntCardScreenDefaults.IconSize32))
             }
       },
@@ -214,7 +214,7 @@ fun HuntCardScreen(
               // Reviews header
               item {
                 Text(
-                    HuntCardScreenStrings.Reviews,
+                    HuntCardScreenStrings.REVIEWS,
                     fontSize = HuntCardScreenDefaults.SmallFontSize,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -252,7 +252,7 @@ fun HuntCardScreen(
                     modifier =
                         Modifier.height(
                                 HuntCardScreenDefaults.Padding40 *
-                                    HuntCardScreenDefaults.EndListSpacerMultiplier)
+                                    HuntCardScreenDefaults.END_LIST_SPACER_MULTIPLIER)
                             .testTag(HuntCardScreenTestTags.LAST_SPACER))
               }
             }
@@ -343,7 +343,7 @@ fun ModernHeroImageSection(
           Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding8))
 
           Text(
-              text = "${HuntCardScreenStrings.By} $authorName",
+              text = "${HuntCardScreenStrings.BY} $authorName",
               fontSize = HuntCardScreenDefaults.AuthorFontSize,
               color =
                   MaterialTheme.colorScheme.onPrimary.copy(alpha = HuntCardScreenDefaults.Alpha),
@@ -374,17 +374,17 @@ fun ModernStatsSection(hunt: Hunt) {
                   vertical = HuntCardScreenDefaults.Padding20),
       horizontalArrangement = Arrangement.SpaceEvenly) {
         ModernStatCard(
-            label = HuntCardScreenStrings.DistanceLabel,
+            label = HuntCardScreenStrings.DISTANCE_LABEL,
             value = "${hunt.distance}",
-            unit = HuntCardScreenStrings.DistanceUnit,
+            unit = HuntCardScreenStrings.DISTANCE_UNIT,
             modifier = Modifier.weight(HuntCardScreenDefaults.CardWeight))
 
         Spacer(modifier = Modifier.width(HuntCardScreenDefaults.Padding12))
 
         ModernStatCard(
-            label = HuntCardScreenStrings.DurationLabel,
+            label = HuntCardScreenStrings.DURATION_LABEL,
             value = "${hunt.time}",
-            unit = HuntCardScreenStrings.HourUnit,
+            unit = HuntCardScreenStrings.HOUR_UNIT,
             modifier = Modifier.weight(HuntCardScreenDefaults.CardWeight))
       }
 }
@@ -458,7 +458,7 @@ fun ModernDescriptionSection(description: String) {
       shape = RoundedCornerShape(HuntCardScreenDefaults.CornerRadius)) {
         Column(modifier = Modifier.padding(HuntCardScreenDefaults.Padding20)) {
           Text(
-              text = HuntCardScreenStrings.DescriptionLabel,
+              text = HuntCardScreenStrings.DESCRIPTION_LABEL,
               fontSize = HuntCardScreenDefaults.SmallFontSize,
               fontWeight = FontWeight.Bold,
               color = MaterialTheme.colorScheme.onSurface)
@@ -497,7 +497,7 @@ fun ModernMapSection(hunt: Hunt) {
       shape = RoundedCornerShape(HuntCardScreenDefaults.CornerRadius)) {
         Column(modifier = Modifier.padding(HuntCardScreenDefaults.Padding20)) {
           Text(
-              text = HuntCardScreenStrings.StartingPointLabel,
+              text = HuntCardScreenStrings.START_POINT_LABEL,
               fontSize = HuntCardScreenDefaults.SmallFontSize,
               fontWeight = FontWeight.Bold,
               color = MaterialTheme.colorScheme.onSurface)
@@ -522,7 +522,7 @@ fun ModernMapSection(hunt: Hunt) {
                         Marker(
                             state = MarkerState(position = startPosition),
                             title =
-                                "${HuntCardScreenStrings.ReviewMarkerTitlePrefix}${hunt.start.name}",
+                                "${HuntCardScreenStrings.REVIEW_MARKER_PREFIX}${hunt.start.name}",
                             snippet = hunt.start.name.ifBlank { null })
                       }
                 }
@@ -590,8 +590,8 @@ fun ModernActionButtons(
 
               Text(
                   text =
-                      if (isCurrentId) HuntCardScreenStrings.EditHunt
-                      else HuntCardScreenStrings.AddReview,
+                      if (isCurrentId) HuntCardScreenStrings.EDIT_HUNT
+                      else HuntCardScreenStrings.ADD_REVIEW,
                   fontSize = HuntCardScreenDefaults.DescriptionFontSize,
                   fontWeight = FontWeight.SemiBold)
             }
@@ -625,7 +625,7 @@ fun ModernEmptyReviewsState() {
           Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding12))
 
           Text(
-              text = HuntCardScreenStrings.NoReviews,
+              text = HuntCardScreenStrings.NO_REVIEW,
               modifier = Modifier.testTag(HuntCardScreenTestTags.NO_REVIEWS_TEXT))
         }
       }
@@ -663,13 +663,13 @@ fun ModernReviewCard(
   val isCurrentUser = currentUserId == authorId
 
   val profilePictureRes =
-      authorProfile?.author?.profilePicture ?: HuntCardScreenDefaults.NoProfilePictureResId
-  val authorName = authorProfile?.author?.pseudonym ?: HuntCardScreenStrings.UnknownAuthor
+      authorProfile?.author?.profilePicture ?: HuntCardScreenDefaults.NO_PROFILE_PICTURE_RES_ID
+  val authorName = authorProfile?.author?.pseudonym ?: HuntCardScreenStrings.UNKNOWN_AUTHOR
 
   // Replies ViewModel for this specific review
   val repliesViewModel: ReviewRepliesViewModel =
       viewModel(
-          key = "${HuntCardScreenStrings.RepliesViewModelKeyPrefix}${review.reviewId}",
+          key = "${HuntCardScreenStrings.REPLIES_VIEW_MODEL_PREFIX}${review.reviewId}",
           factory =
               ReviewRepliesViewModelFactory(
                   reviewId = review.reviewId,
@@ -711,7 +711,7 @@ fun ModernReviewCard(
               onSeePhotosClick = {
                 reviewHuntViewModel.loadReviewImages(review.photos)
                 navController.navigate(
-                    "${HuntCardScreenStrings.ReviewImagesRoutePrefix}${review.reviewId}")
+                    "${HuntCardScreenStrings.REVIEW_IMAGE_PREFIX}${review.reviewId}")
               },
           )
 
@@ -736,7 +736,7 @@ private fun ReviewCardHeader(
     onEdit: (String) -> Unit
 ) {
   Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-    if (profilePictureRes != HuntCardScreenDefaults.NoProfilePictureResId) {
+    if (profilePictureRes != HuntCardScreenDefaults.NO_PROFILE_PICTURE_RES_ID) {
       ProfilePicture(
           profilePictureRes = profilePictureRes,
           modifier = Modifier.size(HuntCardScreenDefaults.ProfilePictureSize).clip(CircleShape))
@@ -750,11 +750,12 @@ private fun ReviewCardHeader(
                       else MaterialTheme.colorScheme.tertiary)
                   .testTag(HuntCardScreenTestTags.REVIEW_PROFILE_INITIALS),
           contentAlignment = Alignment.Center) {
-            val initial = authorId.take(HuntCardScreenDefaults.InitialLetterCount).uppercase()
+            val initial = authorId.take(HuntCardScreenDefaults.INITIAL_LETTER_COUNT).uppercase()
 
             Text(
                 text =
-                    if (isCurrentUser) HuntCardScreenStrings.CurrentUserInitialLabel else initial,
+                    if (isCurrentUser) HuntCardScreenStrings.CURRENT_USER_INITIAL_LABEL
+                    else initial,
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
                 color = Color.White)
@@ -879,7 +880,7 @@ fun LikeButton(
       modifier = modifier.testTag(HuntCardScreenTestTags.LIKE_BUTTON)) {
         Icon(
             imageVector = Icons.Default.Favorite,
-            contentDescription = HuntCardScreenStrings.LikeButton,
+            contentDescription = HuntCardScreenStrings.LIKE_BUTTON,
             tint =
                 if (isLiked) HuntCardScreenDefaults.LikeRedStrong
                 else HuntCardScreenDefaults.LightGray,

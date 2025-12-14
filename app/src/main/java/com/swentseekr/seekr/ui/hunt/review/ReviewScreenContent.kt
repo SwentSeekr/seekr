@@ -57,12 +57,12 @@ fun ReviewScreenContent(
           contract = ActivityResultContracts.GetMultipleContents(),
           onResult = { uris -> uris.forEach { uri -> reviewViewModel.addPhoto(uri.toString()) } })
 
-  val author = authorProfile?.author?.pseudonym ?: ("Unknown Author")
+  val author = authorProfile?.author?.pseudonym ?: (AddReviewScreenStrings.UNKNOWN)
   val context = LocalContext.current
 
   BaseReviewScreen(
       title = title,
-      huntTitle = uiState.hunt?.title ?: AddReviewScreenStrings.Loading,
+      huntTitle = uiState.hunt?.title ?: AddReviewScreenStrings.LOADING,
       authorName = author,
       rating = uiState.rating,
       reviewText = uiState.reviewText,
@@ -71,7 +71,7 @@ fun ReviewScreenContent(
       isDoneEnabled = uiState.isValid,
       onRatingChanged = { reviewViewModel.updateRating(it.toDouble()) },
       onReviewTextChanged = { reviewViewModel.setReviewText(it) },
-      onAddPhotos = { imagePickerLauncher.launch(AddReviewScreenStrings.ImageMimeType) },
+      onAddPhotos = { imagePickerLauncher.launch(AddReviewScreenStrings.IMAGE_MIME_TYPE) },
       onRemovePhoto = { index -> reviewViewModel.removePhoto(uiState.photos[index]) },
       onGoBack = onGoBack,
       onCancel = {

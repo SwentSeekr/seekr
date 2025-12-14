@@ -145,7 +145,7 @@ private fun PreviewHeroSection(ui: HuntUIState) {
           Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding8))
 
           Text(
-              text = "${HuntCardScreenStrings.By} ${STRINGS.AUTHOR_PREVIEW}",
+              text = "${HuntCardScreenStrings.BY} ${STRINGS.AUTHOR_PREVIEW}",
               fontSize = HuntCardScreenDefaults.AuthorFontSize,
               color =
                   MaterialTheme.colorScheme.onPrimary.copy(alpha = HuntCardScreenDefaults.Alpha),
@@ -166,18 +166,20 @@ private fun PreviewStatsSection(ui: HuntUIState) {
                   vertical = HuntCardScreenDefaults.Padding20),
       horizontalArrangement = Arrangement.SpaceEvenly) {
         ModernStatCard(
-            label = HuntCardScreenStrings.DistanceLabel,
+            label = HuntCardScreenStrings.DISTANCE_LABEL,
             value = ui.distance.ifBlank { STRINGS.NOT_SET },
-            unit = if (ui.distance.isNotBlank()) HuntCardScreenStrings.DistanceUnit else "",
+            unit = if (ui.distance.isNotBlank()) HuntCardScreenStrings.DISTANCE_UNIT else "",
             modifier =
                 Modifier.weight(HuntCardScreenDefaults.CardWeight).testTag(TEST_TAGS.HUNT_DISTANCE))
 
         Spacer(modifier = Modifier.width(HuntCardScreenDefaults.Padding12))
 
         ModernStatCard(
-            label = HuntCardScreenStrings.DurationLabel,
+            label = HuntCardScreenStrings.DURATION_LABEL,
             value = ui.time.ifBlank { STRINGS.NOT_SET },
-            unit = if (ui.time.isNotBlank()) HuntCardScreenStrings.HourUnit else "",
+            unit =
+                if (ui.time.isNotBlank()) HuntCardScreenStrings.HOUR_UNIT
+                else PreviewHuntStrings.TIME_BLANK,
             modifier =
                 Modifier.weight(HuntCardScreenDefaults.CardWeight).testTag(TEST_TAGS.HUNT_TIME))
       }
@@ -201,7 +203,7 @@ private fun PreviewDescriptionCard(ui: HuntUIState) {
       shape = RoundedCornerShape(HuntCardScreenDefaults.CornerRadius)) {
         Column(modifier = Modifier.padding(HuntCardScreenDefaults.Padding20)) {
           Text(
-              text = HuntCardScreenStrings.DescriptionLabel,
+              text = HuntCardScreenStrings.DESCRIPTION_LABEL,
               fontSize = HuntCardScreenDefaults.SmallFontSize,
               fontWeight = FontWeight.Bold,
               color = MaterialTheme.colorScheme.onSurface)
@@ -242,7 +244,7 @@ private fun PreviewStatusPointsCard(ui: HuntUIState) {
       shape = RoundedCornerShape(HuntCardScreenDefaults.CornerRadius)) {
         Column(modifier = Modifier.padding(HuntCardScreenDefaults.Padding20)) {
           Text(
-              text = "Hunt Details",
+              text = PreviewHuntStrings.DETAILS_HUNT,
               fontSize = HuntCardScreenDefaults.SmallFontSize,
               fontWeight = FontWeight.Bold,
               color = MaterialTheme.colorScheme.onSurface)
@@ -286,27 +288,34 @@ private fun PreviewStatusPointsCard(ui: HuntUIState) {
  * temporary Hunt object with the preview data.
  */
 private fun uiStateToHunt(ui: HuntUIState): Hunt {
-  val defaultLocation = Location(latitude = 0.0, longitude = 0.0, name = "Preview Location")
+  val defaultLocation =
+      Location(
+          latitude = PreviewHuntConstantsDefault.DEFAULT_LATITUDE,
+          longitude = PreviewHuntConstantsDefault.DEFAULT_LONGITUDE,
+          name = PreviewHuntStrings.PREVIEW_LOCATION)
 
   val start = ui.points.firstOrNull() ?: defaultLocation
   val end = ui.points.lastOrNull() ?: defaultLocation
   val middlePoints =
-      if (ui.points.size > 2) ui.points.subList(1, ui.points.size - 1) else emptyList()
+      if (ui.points.size > PreviewHuntConstantsDefault.MIDDLE_VALUE_MIN_VALUE)
+          ui.points.subList(
+              PreviewHuntConstantsDefault.ONE, ui.points.size - PreviewHuntConstantsDefault.ONE)
+      else emptyList()
 
   return Hunt(
-      uid = "preview",
+      uid = PreviewHuntStrings.HUNT_ID,
       start = start,
       end = end,
       middlePoints = middlePoints,
       status = ui.status ?: HuntStatus.FUN, // fallback status for preview
       title = ui.title.ifBlank { STRINGS.HUNT_TITLE_FALLBACK },
       description = ui.description.ifBlank { STRINGS.NO_DESCRIPTION },
-      time = ui.time.toDoubleOrNull() ?: 0.0,
-      distance = ui.distance.toDoubleOrNull() ?: 0.0,
+      time = ui.time.toDoubleOrNull() ?: PreviewHuntConstantsDefault.DEFAULT_VALUE_TIME,
+      distance = ui.distance.toDoubleOrNull() ?: PreviewHuntConstantsDefault.DEFAULT_VALUE_DISTANCE,
       difficulty = ui.difficulty ?: Difficulty.EASY,
-      authorId = "preview",
+      authorId = PreviewHuntStrings.AUTHOR_ID,
       otherImagesUrls = ui.otherImagesUris.map { it.toString() },
       mainImageUrl = ui.mainImageUrl,
-      reviewRate = 0.0 // preview has no real rating
+      reviewRate = PreviewHuntConstantsDefault.DEFAULT_VALUE_RATING // preview has no real rating
       )
 }
