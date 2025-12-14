@@ -49,7 +49,7 @@ fun AddReviewScreen(
   ReviewScreenContent(
       title = AddReviewScreenStrings.TITLE,
       huntId = huntId,
-      reviewId = AddReviewScreenStrings.EMPTY,
+      reviewId = "",
       onGoBack = onGoBack,
       onDone = onDone,
       onCancel = onCancel,

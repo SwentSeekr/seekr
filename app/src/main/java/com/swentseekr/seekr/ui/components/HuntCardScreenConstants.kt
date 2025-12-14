@@ -130,13 +130,6 @@ object HuntCardScreenStrings {
   const val DISTANCE_LABEL = "Distance"
   const val DURATION_LABEL = "Duration"
 
-  // New strings for ModernReviewCard / replies
-  const val SeePictures = "See Pictures"
-  const val HideReplies = "Hide replies"
-  const val ViewRepliesPrefix = "View"
-  const val ReplySingular = "reply"
-  const val ReplyPlural = "replies"
-  const val NoRepliesYet = "No replies yet"
   const val CURRENT_USER_INITIAL_LABEL = "Y"
 
   const val REPLIES_VIEW_MODEL_PREFIX = "replies_"

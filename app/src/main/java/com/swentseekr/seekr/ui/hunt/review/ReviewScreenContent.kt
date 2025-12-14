@@ -48,7 +48,7 @@ fun ReviewScreenContent(
   }
 
   val hunt2 = uiState.hunt
-  val authorId = hunt2?.authorId ?: AddReviewScreenStrings.EMPTY
+  val authorId = hunt2?.authorId ?: ""
   LaunchedEffect(authorId) { huntCardViewModel.loadAuthorProfile(authorId) }
   val authorProfile = uiStateHuntCard.authorProfile
   val hunt = uiState.hunt

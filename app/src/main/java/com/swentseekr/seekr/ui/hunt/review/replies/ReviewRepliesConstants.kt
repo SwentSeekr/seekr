@@ -19,7 +19,6 @@ object ReviewRepliesStrings {
   // New strings used by the Reddit-style UI
   const val ROOT_COMPOSER_PLACEHOLDER = "What are your thoughts?"
   const val INLINE_REPLY_PLACEHOLDER = "Write a reply..."
-  const val DELETED = "[deleted]"
   const val BE_THE_FIRST_TO_REPLY = "Be the first to reply"
   const val REPLY_UNIT_SINGULAR = "reply"
   const val REPLY_UNIT_PLURAL = "replies"
@@ -27,7 +26,7 @@ object ReviewRepliesStrings {
   const val ERROR_SIGN_IN_TO_DELETE = "You must be signed in to delete a reply."
   const val ERROR_REPLY_NOT_FOUND = "Reply not found."
   const val ERROR_DELETE_NOT_OWNER = "You can only delete your own replies."
-  const val ErrorRefreshReplies = "Failed to refresh replies"
+
   const val ERROR_SEND_REPLY = "Failed to send reply."
   const val ERROR_DELETE_REPLY = "Failed to delete reply."
   const val JUST_NOW = " · just now"

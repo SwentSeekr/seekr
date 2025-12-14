@@ -94,7 +94,7 @@ fun BaseReviewScreen(
     photos: List<String> = emptyList(),
     isReviewTextError: Boolean = false,
     isDoneEnabled: Boolean = false,
-    reviewTextErrorMessage: String? = AddReviewScreenStrings.EMPTY,
+    reviewTextErrorMessage: String? = "",
     onRatingChanged: (Int) -> Unit,
     onReviewTextChanged: (String) -> Unit,
     onAddPhotos: () -> Unit,

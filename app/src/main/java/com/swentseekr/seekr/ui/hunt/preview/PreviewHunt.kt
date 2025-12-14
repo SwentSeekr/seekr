@@ -168,9 +168,7 @@ private fun PreviewStatsSection(ui: HuntUIState) {
         ModernStatCard(
             label = HuntCardScreenStrings.DISTANCE_LABEL,
             value = ui.distance.ifBlank { STRINGS.NOT_SET },
-            unit =
-                if (ui.distance.isNotBlank()) HuntCardScreenStrings.DISTANCE_UNIT
-                else PreviewHuntStrings.DISTANCE_BLANK,
+            unit = if (ui.distance.isNotBlank()) HuntCardScreenStrings.DISTANCE_UNIT else "",
             modifier =
                 Modifier.weight(HuntCardScreenDefaults.CardWeight).testTag(TEST_TAGS.HUNT_DISTANCE))
 

@@ -390,7 +390,7 @@ open class HuntCardViewModel(
       viewModelScope.launch {
         try {
           // Call the suspend function inside a coroutine
-          profileRepository.addDoneHunt(currentUserId ?: HuntCardViewModelConstants.EMPTY, hunt)
+          profileRepository.addDoneHunt(currentUserId ?: "", hunt)
 
           // Update UI state
           _uiState.value = currentHuntUiState.copy(isAchieved = true)

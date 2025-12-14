@@ -48,10 +48,10 @@ import kotlinx.coroutines.launch
  */
 data class ReviewHuntUIState(
     val hunt: Hunt? = null,
-    val huntId: String = AddReviewScreenStrings.EMPTY,
-    val reviewId: String = AddReviewScreenStrings.EMPTY,
-    val userId: String = AddReviewScreenStrings.EMPTY,
-    val reviewText: String = AddReviewScreenStrings.EMPTY,
+    val huntId: String = "",
+    val reviewId: String = "",
+    val userId: String = "",
+    val reviewText: String = "",
     val rating: Double = AddReviewScreenDefaults.RATING,
     val isSubmitted: Boolean = false,
     val photos: List<String> = emptyList(),
@@ -496,7 +496,7 @@ open class ReviewHuntViewModel(
   fun clearFormCancel() {
     _uiState.value =
         _uiState.value.copy(
-            reviewText = AddReviewScreenStrings.EMPTY,
+            reviewText = "",
             rating = AddReviewScreenDefaults.RATING,
             photos = emptyList(),
             isSubmitted = false,

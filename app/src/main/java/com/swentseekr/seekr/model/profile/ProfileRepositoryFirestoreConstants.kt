@@ -62,7 +62,7 @@ object ProfileRepositoryConstants {
   const val LOCATION_FIELD_NAME = "name"
   const val LOCATION_FIELD_DESCRIPTION = "description"
   const val LOCAL_PROFILE_PICTURE_PREFIX = "local://profile-picture/"
-  const val DEFAULT_VALUE = ""
+
   const val AUTHOR_PSEUDONYM = "author.pseudonym"
   const val AUTHOR_BIO = "author.bio"
   const val AUTHOR_PROFILE_PICTURE = "author.profilePicture"

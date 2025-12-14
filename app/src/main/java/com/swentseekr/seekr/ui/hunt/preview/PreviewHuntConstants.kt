@@ -21,7 +21,6 @@ object PreviewHuntStrings {
   const val BACK_CONTENT_DESC = "Go back"
 
   const val CONFIRM_BUTTON = "Confirm"
-  const val DISTANCE_BLANK = ""
   const val TIME_BLANK = ""
   const val DETAILS_HUNT = "Hunt Details"
   const val PREVIEW_LOCATION = "Preview Location"

@@ -107,7 +107,6 @@ object AddReviewScreenStrings {
   const val ERROR_DELETING_IMAGES = "Failed to delete image:"
   const val ERROR_CANCEL_IMAGE = "Failed to cancel image selection."
   const val ERROR_CLEAR_SUBMIT_REVIEW = "Cannot clear form, review not submitted successfully."
-  const val EMPTY = ""
 
   const val NEW_REVIEW_TITLE = "New review added"
   const val NEW_REVIEW_MESSAGE = "You added a new review!"
