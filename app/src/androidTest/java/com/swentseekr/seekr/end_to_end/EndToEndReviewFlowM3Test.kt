@@ -218,6 +218,22 @@ class EndToEndReviewFlowM3Test {
   }
 
   /**
+   * Returns whether at least one Compose node with the given test [tag] exists in the semantics
+   * tree.
+   *
+   * @param tag The Compose test tag to search for.
+   * @return `true` if at least one node with the given tag exists; `false` otherwise.
+   */
+  private fun existsByTag(tag: String): Boolean =
+      runCatching {
+            composeRule
+                .onAllNodesWithTag(tag, useUnmergedTree = true)
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+          }
+          .getOrDefault(false)
+
+  /**
    * Opens the root reply composer by expanding the replies section and expanding the composer if it
    * starts collapsed.
    *
@@ -228,19 +244,10 @@ class EndToEndReviewFlowM3Test {
       maxSwipes: Int = EndToEndReviewFlowM3TestConstants.MAX_SCROLL_ATTEMPTS,
       timeoutMillis: Long = EndToEndReviewFlowM3TestConstants.WAIT_MS,
   ) {
-    fun exists(tag: String): Boolean =
-        runCatching {
-              composeRule
-                  .onAllNodesWithTag(tag, useUnmergedTree = true)
-                  .fetchSemanticsNodes()
-                  .isNotEmpty()
-            }
-            .getOrDefault(false)
-
     repeat(maxSwipes) {
-      if (exists(ReviewRepliesTestTags.ROOT_INLINE_TEXT_FIELD)) return
+      if (existsByTag(ReviewRepliesTestTags.ROOT_INLINE_TEXT_FIELD)) return
 
-      if (exists(ReviewRepliesTestTags.ROOT_SEE_REPLIES)) {
+      if (existsByTag(ReviewRepliesTestTags.ROOT_SEE_REPLIES)) {
         runCatching {
           composeRule
               .onNodeWithTag(ReviewRepliesTestTags.ROOT_SEE_REPLIES, useUnmergedTree = true)
@@ -249,8 +256,8 @@ class EndToEndReviewFlowM3Test {
         }
       }
 
-      if (exists(ReviewRepliesTestTags.ROOT_INLINE_COMPOSER) &&
-          !exists(ReviewRepliesTestTags.ROOT_INLINE_TEXT_FIELD)) {
+      if (existsByTag(ReviewRepliesTestTags.ROOT_INLINE_COMPOSER) &&
+          !existsByTag(ReviewRepliesTestTags.ROOT_INLINE_TEXT_FIELD)) {
         runCatching {
           composeRule
               .onNodeWithTag(ReviewRepliesTestTags.ROOT_INLINE_COMPOSER, useUnmergedTree = true)
@@ -259,7 +266,7 @@ class EndToEndReviewFlowM3Test {
         }
       }
 
-      if (!exists(ReviewRepliesTestTags.ROOT_INLINE_TEXT_FIELD)) {
+      if (!existsByTag(ReviewRepliesTestTags.ROOT_INLINE_TEXT_FIELD)) {
         runCatching {
           composeRule
               .onNodeWithTag(HuntCardScreenTestTags.HUNT_CARD_LIST, useUnmergedTree = true)
@@ -521,15 +528,7 @@ class EndToEndReviewFlowM3Test {
       failOnTimeout: Boolean = true,
   ): Boolean {
     return try {
-      composeRule.waitUntil(timeoutMillis) {
-        runCatching {
-              composeRule
-                  .onAllNodesWithTag(tag, useUnmergedTree = true)
-                  .fetchSemanticsNodes()
-                  .isNotEmpty()
-            }
-            .getOrDefault(false)
-      }
+      composeRule.waitUntil(timeoutMillis) { existsByTag(tag) }
       true
     } catch (e: ComposeTimeoutException) {
       if (failOnTimeout) throw e else false
