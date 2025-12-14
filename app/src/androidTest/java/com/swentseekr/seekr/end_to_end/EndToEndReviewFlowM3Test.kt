@@ -180,7 +180,7 @@ class EndToEndReviewFlowM3Test {
   private fun scrollUntilVisible(
       target: SemanticsMatcher,
       scrollContainerTag: String,
-      maxSwipes: Int = 10,
+      maxSwipes: Int = EndToEndReviewFlowM3TestConstants.MAX_SCROLL_ATTEMPTS,
   ) {
     fun exists(): Boolean =
         runCatching { composeRule.onAllNodes(target, useUnmergedTree = true).fetchSemanticsNodes() }
@@ -225,7 +225,7 @@ class EndToEndReviewFlowM3Test {
    * @param timeoutMillis Timeout used for the final wait on the text field.
    */
   private fun openRootReplyComposerIfNeeded(
-      maxSwipes: Int = 10,
+      maxSwipes: Int = EndToEndReviewFlowM3TestConstants.MAX_SCROLL_ATTEMPTS,
       timeoutMillis: Long = EndToEndReviewFlowM3TestConstants.WAIT_MS,
   ) {
     fun exists(tag: String): Boolean =
