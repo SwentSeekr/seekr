@@ -169,13 +169,16 @@ class EndToEndHuntFlowTest {
 
   /** Fills every field in the Add Hunt screen using the predefined constants. */
   private fun populateAddHuntForm() {
+    val fields =
+        mapOf(
+            HuntScreenTestTags.INPUT_HUNT_TITLE to EndToEndHuntFlowM3TestConstants.HUNT_TITLE,
+            HuntScreenTestTags.INPUT_HUNT_DESCRIPTION to
+                EndToEndHuntFlowM3TestConstants.HUNT_DESCRIPTION,
+            HuntScreenTestTags.INPUT_HUNT_TIME to EndToEndHuntFlowM3TestConstants.HUNT_TIME_HOURS,
+            HuntScreenTestTags.INPUT_HUNT_DISTANCE to
+                EndToEndHuntFlowM3TestConstants.HUNT_DISTANCE_KM)
 
-    replaceText(HuntScreenTestTags.INPUT_HUNT_TITLE, EndToEndHuntFlowM3TestConstants.HUNT_TITLE)
-    replaceText(
-        HuntScreenTestTags.INPUT_HUNT_DESCRIPTION, EndToEndHuntFlowM3TestConstants.HUNT_DESCRIPTION)
-    replaceText(HuntScreenTestTags.INPUT_HUNT_TIME, EndToEndHuntFlowM3TestConstants.HUNT_TIME_HOURS)
-    replaceText(
-        HuntScreenTestTags.INPUT_HUNT_DISTANCE, EndToEndHuntFlowM3TestConstants.HUNT_DISTANCE_KM)
+    fields.forEach { (tag, value) -> replaceText(tag, value) }
 
     composeRule.onNodeWithTag(HuntScreenTestTags.DROPDOWN_STATUS).performClick()
     composeRule.onNodeWithText(HuntStatus.FUN.name).performClick()
@@ -250,9 +253,10 @@ class EndToEndHuntFlowTest {
 
     huntsRepository.addHunt(hunt)
 
-    val updatedProfile = profileRepository.getProfile(testUserId)
-    updatedProfile?.myHunts?.add(hunt)
-    profileRepository.updateProfile(updatedProfile!!)
+    profileRepository.getProfile(testUserId)?.let { profile ->
+      profile.myHunts.add(hunt)
+      profileRepository.updateProfile(profile)
+    } ?: error("Profile not found for user $testUserId")
 
     hunt
   }
