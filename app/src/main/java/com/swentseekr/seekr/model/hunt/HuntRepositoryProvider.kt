@@ -12,7 +12,7 @@ import kotlinx.coroutines.runBlocking
 object HuntRepositoryProvider {
   val defaultHunt =
       Hunt(
-          uid = HuntRepositoryProviderConstantsString.HUNT_ID,
+          uid = "",
           start =
               Location(
                   HuntRepositoryProviderConstantsDefault.START_LATITUDE,
@@ -27,7 +27,7 @@ object HuntRepositoryProvider {
               listOf(
                   Location(
                       HuntRepositoryProviderConstantsDefault.SECOND_LATITUDE,
-                      HuntRepositoryProviderConstantsDefault.SECONDE_LONGITUDE,
+                      HuntRepositoryProviderConstantsDefault.SECOND_LONGITUDE,
                       HuntRepositoryProviderConstantsString.SECOND_NAME),
                   Location(
                       HuntRepositoryProviderConstantsDefault.OTHER_LATITUDE,

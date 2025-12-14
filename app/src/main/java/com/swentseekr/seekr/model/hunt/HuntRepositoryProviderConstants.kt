@@ -1,7 +1,6 @@
 package com.swentseekr.seekr.model.hunt
 
 object HuntRepositoryProviderConstantsString {
-  const val HUNT_ID = ""
   const val START_NAME = "New York"
   const val END_NAME = "Brooklyn"
   const val SECOND_NAME = "Chinatown"
@@ -17,7 +16,7 @@ object HuntRepositoryProviderConstantsDefault {
   const val END_LATITUDE = 40.730610
   const val END_LONGITUDE = -73.935242
   const val SECOND_LATITUDE = 40.718
-  const val SECONDE_LONGITUDE = -73.999
+  const val SECOND_LONGITUDE = -73.999
   const val OTHER_LATITUDE = 40.725
   const val OTHER_LONGITUDE = -73.98
   const val TIME = 2.5

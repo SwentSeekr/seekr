@@ -4,7 +4,7 @@ object HuntReviewRepositoryFirestoreConstantsStrings {
   const val HUNT_START = "Hunt with Id"
   const val NOT_FOUND = "is not found"
   const val REVIEW_NOT_BLANK = "Review ID cannot be blank."
-  const val USER_NOT_LONGIN = "User not logged in"
+  const val USER_NOT_LOGIN = "User not logged in"
   const val FIELD = "huntId"
   const val AUTHOR_ID = "authorId"
   const val RATING = "rating"

@@ -98,16 +98,12 @@ object HuntCardScreenDefaults {
   // New: review card visuals & logic constants
   val ReviewCardCornerRadius: Dp = 16.dp
   val ZeroElevation: Dp = 0.dp
-  const val DeleteIconAlpha: Float = 0.85f
 
-  const val NoRepliesCount: Int = 0
-  const val SingleReplyCount: Int = 1
   const val INITIAL_LETTER_COUNT: Int = 1
   const val NO_PROFILE_PICTURE_RES_ID: Int = 0
 
   const val BEGIN_BUTTON_SIZE_MULTIPLIER: Int = 2
   const val END_LIST_SPACER_MULTIPLIER: Int = 2
-  const val RepliesLabelAlpha: Float = 0.8f
   const val BACKGROUND_ALPHA: Float = 0.8f
   const val START: Float = 200f
 }

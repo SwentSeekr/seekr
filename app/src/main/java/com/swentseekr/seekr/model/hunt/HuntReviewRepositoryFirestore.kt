@@ -39,7 +39,7 @@ class HuntReviewRepositoryFirestore(private val db: FirebaseFirestore) : HuntRev
     val currentUserId =
         FirebaseAuth.getInstance().currentUser?.uid
             ?: throw IllegalStateException(
-                HuntReviewRepositoryFirestoreConstantsStrings.USER_NOT_LONGIN)
+                HuntReviewRepositoryFirestoreConstantsStrings.USER_NOT_LOGIN)
     val snapshot =
         db.collection(HUNT_REVIEW_COLLECTION_PATH)
             .whereEqualTo(HuntReviewRepositoryFirestoreConstantsStrings.FIELD, huntId)

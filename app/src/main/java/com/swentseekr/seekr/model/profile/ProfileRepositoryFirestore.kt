@@ -12,7 +12,7 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestore
 import com.swentseekr.seekr.model.map.Location
-import com.swentseekr.seekr.model.profile.ProfileRepositoryConstants.DEFAULT_EMPTY_VALUE
+import com.swentseekr.seekr.model.profile.ProfileRepositoryConstants.DEFAULT_VALUE
 import com.swentseekr.seekr.ui.profile.Profile
 import kotlinx.coroutines.tasks.await
 
@@ -64,7 +64,7 @@ class ProfileRepositoryFirestore(
      *   information.
      */
     fun mapToHunt(map: Map<*, *>): Hunt? {
-      val uid = map[ProfileRepositoryConstants.HUNT_FIELD_UID] as? String ?: DEFAULT_EMPTY_VALUE
+      val uid = map[ProfileRepositoryConstants.HUNT_FIELD_UID] as? String ?: DEFAULT_VALUE
       val title = map[ProfileRepositoryConstants.HUNT_FIELD_TITLE] as? String ?: return null
       val description =
           map[ProfileRepositoryConstants.HUNT_FIELD_DESCRIPTION] as? String ?: return null
@@ -106,7 +106,7 @@ class ProfileRepositoryFirestore(
             HuntStatus.valueOf(it as String)
           } ?: ProfileRepositoryConstants.DEFAULT_STATUS
       val authorId =
-          map[ProfileRepositoryConstants.HUNT_FIELD_AUTHOR_ID] as? String ?: DEFAULT_EMPTY_VALUE
+          map[ProfileRepositoryConstants.HUNT_FIELD_AUTHOR_ID] as? String ?: DEFAULT_VALUE
 
       return Hunt(
           uid = uid,
@@ -202,7 +202,7 @@ class ProfileRepositoryFirestore(
                     profilePicture = ProfileRepositoryConstants.DEFAULT_PROFILE_PICTURE,
                     reviewRate = ProfileRepositoryConstants.DEFAULT_REVIEW_RATE,
                     sportRate = ProfileRepositoryConstants.DEFAULT_SPORT_RATE,
-                    profilePictureUrl = DEFAULT_EMPTY_VALUE),
+                    profilePictureUrl = DEFAULT_VALUE),
             myHunts = mutableListOf(),
             doneHunts = mutableListOf(),
             likedHunts = mutableListOf())
@@ -372,7 +372,7 @@ class ProfileRepositoryFirestore(
             HuntStatus.valueOf(it)
           } ?: ProfileRepositoryConstants.DEFAULT_STATUS
       val authorId =
-          document.getString(ProfileRepositoryConstants.HUNT_FIELD_AUTHOR_ID) ?: DEFAULT_EMPTY_VALUE
+          document.getString(ProfileRepositoryConstants.HUNT_FIELD_AUTHOR_ID) ?: DEFAULT_VALUE
 
       Hunt(
           uid = uid,
@@ -407,10 +407,8 @@ class ProfileRepositoryFirestore(
                 authorMap[ProfileRepositoryConstants.ACCEPT_TERMS] as? Boolean ?: false,
             pseudonym =
                 authorMap[ProfileRepositoryConstants.PROFILE_FIELD_PSEUDONYM] as? String
-                    ?: DEFAULT_EMPTY_VALUE,
-            bio =
-                authorMap[ProfileRepositoryConstants.HUNT_FIELD_BIO] as? String
-                    ?: DEFAULT_EMPTY_VALUE,
+                    ?: DEFAULT_VALUE,
+            bio = authorMap[ProfileRepositoryConstants.HUNT_FIELD_BIO] as? String ?: DEFAULT_VALUE,
             profilePicture =
                 (authorMap[ProfileRepositoryConstants.HUNT_FIELD_PROFILE_PICTURE] as? Long
                         ?: ProfileRepositoryConstants.DEFAULT_PROFILE_PICTURE_LONG)
@@ -423,7 +421,7 @@ class ProfileRepositoryFirestore(
                     ?: ProfileRepositoryConstants.DEFAULT_SPORT_RATE,
             profilePictureUrl =
                 authorMap[ProfileRepositoryConstants.PROFILE_PICTURE_URL] as? String
-                    ?: DEFAULT_EMPTY_VALUE)
+                    ?: DEFAULT_VALUE)
 
     // Fetch associated hunts only for this user
     val myHunts = huntsRepository.getAllHunts().filter { it.authorId == uid }.toMutableList()

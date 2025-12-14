@@ -41,7 +41,7 @@ class HuntsRepositoryFirestore(
   }
 
   override suspend fun addHunt(hunt: Hunt, mainImageUri: Uri?, otherImageUris: List<Uri>) {
-    var mainImageUrl = HuntsRepositoryFirestoreConstantsStrings.EMPTY
+    var mainImageUrl = ""
     var otherImagesUrls: List<String> = emptyList()
 
     try {
@@ -135,15 +135,12 @@ class HuntsRepositoryFirestore(
                 latitude = it[HuntsRepositoryFirestoreConstantsStrings.LATITUDE] as? Double ?: ZERO,
                 longitude =
                     it[HuntsRepositoryFirestoreConstantsStrings.LONGITUDE] as? Double ?: ZERO,
-                name =
-                    it[HuntsRepositoryFirestoreConstantsStrings.NAME] as? String
-                        ?: HuntsRepositoryFirestoreConstantsStrings.EMPTY,
+                name = it[HuntsRepositoryFirestoreConstantsStrings.NAME] as? String ?: "",
                 description =
-                    it[HuntsRepositoryFirestoreConstantsStrings.DESCRIPTION] as? String
-                        ?: HuntsRepositoryFirestoreConstantsStrings.EMPTY,
+                    it[HuntsRepositoryFirestoreConstantsStrings.DESCRIPTION] as? String ?: "",
                 imageIndex =
                     (it[HuntsRepositoryFirestoreConstantsStrings.IMAGE_INDEX] as? Long)?.toInt())
-          } ?: Location(0.0, 0.0, HuntsRepositoryFirestoreConstantsStrings.EMPTY)
+          } ?: Location(0.0, 0.0, "")
 
       val endData = document.get(HuntsRepositoryFirestoreConstantsStrings.END) as? Map<*, *>
       val end =
@@ -152,29 +149,23 @@ class HuntsRepositoryFirestore(
                 latitude = it[HuntsRepositoryFirestoreConstantsStrings.LATITUDE] as? Double ?: ZERO,
                 longitude =
                     it[HuntsRepositoryFirestoreConstantsStrings.LONGITUDE] as? Double ?: ZERO,
-                name =
-                    it[HuntsRepositoryFirestoreConstantsStrings.NAME] as? String
-                        ?: HuntsRepositoryFirestoreConstantsStrings.EMPTY,
+                name = it[HuntsRepositoryFirestoreConstantsStrings.NAME] as? String ?: "",
                 description =
-                    it[HuntsRepositoryFirestoreConstantsStrings.DESCRIPTION] as? String
-                        ?: HuntsRepositoryFirestoreConstantsStrings.EMPTY,
+                    it[HuntsRepositoryFirestoreConstantsStrings.DESCRIPTION] as? String ?: "",
                 imageIndex =
                     (it[HuntsRepositoryFirestoreConstantsStrings.IMAGE_INDEX] as? Long)?.toInt())
-          } ?: Location(ZERO, ZERO, HuntsRepositoryFirestoreConstantsStrings.EMPTY)
+          } ?: Location(ZERO, ZERO, "")
       val middlePointsData =
-          document.get(HuntsRepositoryFirestoreConstantsStrings.MIIDDLE_POINT) as? List<Map<*, *>>
+          document.get(HuntsRepositoryFirestoreConstantsStrings.MIDDLE_POINT) as? List<Map<*, *>>
       val middlePoints =
           middlePointsData?.map {
             Location(
                 latitude = it[HuntsRepositoryFirestoreConstantsStrings.LATITUDE] as? Double ?: ZERO,
                 longitude =
                     it[HuntsRepositoryFirestoreConstantsStrings.LONGITUDE] as? Double ?: ZERO,
-                name =
-                    it[HuntsRepositoryFirestoreConstantsStrings.NAME] as? String
-                        ?: HuntsRepositoryFirestoreConstantsStrings.EMPTY,
+                name = it[HuntsRepositoryFirestoreConstantsStrings.NAME] as? String ?: "",
                 description =
-                    it[HuntsRepositoryFirestoreConstantsStrings.DESCRIPTION] as? String
-                        ?: HuntsRepositoryFirestoreConstantsStrings.EMPTY,
+                    it[HuntsRepositoryFirestoreConstantsStrings.DESCRIPTION] as? String ?: "",
                 imageIndex =
                     (it[HuntsRepositoryFirestoreConstantsStrings.IMAGE_INDEX] as? Long)?.toInt())
           } ?: emptyList()
@@ -193,8 +184,7 @@ class HuntsRepositoryFirestore(
       val authorId =
           document.getString(HuntsRepositoryFirestoreConstantsStrings.AUTHOR_ID) ?: return null
       val mainImageUrl =
-          document.getString(HuntsRepositoryFirestoreConstantsStrings.MAIN_IMAGE)
-              ?: HuntsRepositoryFirestoreConstantsStrings.EMPTY
+          document.getString(HuntsRepositoryFirestoreConstantsStrings.MAIN_IMAGE) ?: ""
       val otherImagesUrls =
           (document.get(HuntsRepositoryFirestoreConstantsStrings.OTHER_IMAGE) as? List<*>)
               ?.filterIsInstance<String>() ?: emptyList()

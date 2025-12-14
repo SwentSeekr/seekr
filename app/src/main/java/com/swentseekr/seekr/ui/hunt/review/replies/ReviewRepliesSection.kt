@@ -809,7 +809,7 @@ private fun replyCountLabel(totalCount: Int): String {
   return if (totalCount > ReviewRepliesValues.ROOT_DEPTH) {
     val unit =
         if (totalCount == ReviewRepliesValues.ROOT_DEPTH + ReviewRepliesValues.SINGLE_REPLY_COUNT)
-            ReviewRepliesStrings.REPLY_UNIT_PLURAL
+            ReviewRepliesStrings.REPLY_UNIT_SINGULAR
         else ReviewRepliesStrings.REPLY_UNIT_PLURAL
     "$totalCount $unit"
   } else {
