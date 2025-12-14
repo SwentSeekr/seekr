@@ -82,7 +82,7 @@ class EndToEndHuntFlowTest {
   private lateinit var testProfile: Profile
   private var testUserId: String = EndToEndHuntFlowM3TestConstants.DEFAULT_USER_ID
 
-  /** Prepares Firebase auth, injects local repositories, and boots the main nav host. */
+  /** Prepares Firebase auth, injects repositories, and boots the main nav host. */
   @Before
   fun setupEnvironment() = runBlocking {
     FirebaseTestEnvironment.setup()
@@ -119,7 +119,7 @@ class EndToEndHuntFlowTest {
     mapViewModel = ViewModelProvider(composeRule.activity)[MapViewModel::class.java]
   }
 
-  /** Restores repository providers and signs out of the fake auth session. */
+  /** Restores repository providers and signs out */
   @After
   fun tearDownEnvironment() = runBlocking {
     if (FirebaseTestEnvironment.isEmulatorActive()) {
