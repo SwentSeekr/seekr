@@ -21,5 +21,6 @@ object EndToEndReviewFlowM3TestConstants {
   const val REVIEWER_PSEUDONYM = "Curious Isaac Reviewer"
   const val REVIEWER_BIO = "Original spiker"
   const val WAIT_MS = 12_000L
+  const val MAX_SCROLL_ATTEMPTS = 10
   const val DEFAULT_USER_ID = "defaultUserM3"
 }
