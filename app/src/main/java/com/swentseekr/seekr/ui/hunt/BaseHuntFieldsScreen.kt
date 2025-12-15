@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material3.*
@@ -28,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
@@ -223,14 +223,15 @@ fun ValidatedOutlinedField(
  * - Location selection button.
  * - Image selection and management.
  * - Save button.
+ * - Delete button (when enabled).
  *
  * @param title Title displayed in the top bar.
  * @param uiState Current UI state of the hunt form.
  * @param fieldCallbacks Group of callbacks handling field changes and save action.
  * @param imageCallbacks Group of callbacks handling image selection and removal.
  * @param navigationCallbacks Callbacks related to navigation events (e.g. back navigation).
- * @param deleteAction Configuration for the optional delete action in the top bar. The delete
- *   button is shown only when [DeleteAction.show] is `true` and [DeleteAction.onClick] is non-null.
+ * @param deleteAction Configuration for the optional delete action. The delete button is shown only
+ *   when [DeleteAction.show] is `true` and [DeleteAction.onClick] is non-null.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -245,10 +246,7 @@ fun BaseHuntFieldsScreen(
   val scrollState = rememberScrollState()
 
   Scaffold(
-      topBar = {
-        BaseHuntTopBar(
-            title = title, onGoBack = navigationCallbacks.onGoBack, deleteAction = deleteAction)
-      },
+      topBar = { BaseHuntTopBar(title = title, onGoBack = navigationCallbacks.onGoBack) },
       modifier = Modifier.testTag(HuntScreenTestTags.ADD_HUNT_SCREEN)) { paddingValues ->
         Box(
             modifier =
@@ -337,8 +335,13 @@ fun BaseHuntFieldsScreen(
 
                     Spacer(modifier = Modifier.height(UICons.SpacerHeightSmall))
 
-                    // Save button at the bottom of the form.
+                    // Save button
                     SaveHuntButton(enabled = uiState.isValid, onSave = fieldCallbacks.onSave)
+
+                    // Delete button (only shown when deleteAction.show is true)
+                    if (deleteAction.show && deleteAction.onClick != null) {
+                      DeleteHuntButton(onClick = deleteAction.onClick)
+                    }
 
                     Spacer(modifier = Modifier.height(UICons.SpacerHeight))
                   }
@@ -347,25 +350,17 @@ fun BaseHuntFieldsScreen(
 }
 
 /**
- * Top app bar for the hunt form, including navigation and optional delete action.
- *
- * The delete button is displayed only when [deleteAction.show] is `true` and [deleteAction.onClick]
- * is non-null. When the "Delete" button is tapped, the callback is invoked directly with no
- * built-in confirmation.
+ * Top app bar for the hunt form with simplified navigation.
  *
  * @param title Title text displayed in the top bar.
  * @param onGoBack Callback invoked when the back button is pressed.
- * @param deleteAction Configuration for the optional delete action.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BaseHuntTopBar(
     title: String,
     onGoBack: () -> Unit,
-    deleteAction: DeleteAction,
 ) {
-  var showDeleteButton by rememberSaveable { mutableStateOf(false) }
-
   TopAppBar(
       title = { Text(title, style = MaterialTheme.typography.headlineSmall) },
       navigationIcon = {
@@ -373,34 +368,6 @@ private fun BaseHuntTopBar(
           Icon(
               imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
               contentDescription = BACK_CONTENT_DESC)
-        }
-      },
-      actions = {
-        if (deleteAction.show && deleteAction.onClick != null) {
-
-          if (showDeleteButton) {
-            Button(
-                onClick = deleteAction.onClick,
-                modifier = Modifier.padding(end = UICons.SpacerHeightSmall),
-                colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = MaterialTheme.colorScheme.onError),
-                shape = RoundedCornerShape(UICons.ButtonCornerRadius)) {
-                  Icon(
-                      painter = painterResource(R.drawable.ic_delete),
-                      contentDescription = DELETE_ICON_DESC,
-                      modifier = Modifier.size(UICons.IconSize))
-                  Spacer(modifier = Modifier.width(UICons.SpacerHeightSmall))
-                  Text(BUTTON_DELETE)
-                }
-          }
-
-          IconButton(onClick = { showDeleteButton = !showDeleteButton }) {
-            Icon(
-                imageVector = Icons.Filled.MoreVert,
-                contentDescription = BaseHuntFieldsStrings.MORE_DESCRIPTION)
-          }
         }
       },
       colors =
@@ -992,7 +959,7 @@ private fun AdditionalImageItem(
         Row(
             modifier = Modifier.fillMaxWidth().padding(UICons.CardRowPadding),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+            verticalAlignment = Alignment.CenterVertically) {
               AsyncImage(
                   model = model,
                   contentDescription = CONTENT_DESC_ADDITIONAL_IMAGE,
@@ -1055,5 +1022,41 @@ private fun SaveHuntButton(
               disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
               disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
         Text(BaseHuntFieldsStrings.BUTTON_SAVE_HUNT, style = MaterialTheme.typography.titleMedium)
+      }
+}
+
+/**
+ * Modern delete button integrated into the form layout.
+ *
+ * Styled with error colors and a subtle outline to indicate destructive action while maintaining
+ * visual harmony with the rest of the form.
+ *
+ * @param onClick Callback invoked when the delete button is pressed.
+ */
+@Composable
+private fun DeleteHuntButton(
+    onClick: () -> Unit,
+) {
+  OutlinedButton(
+      onClick = onClick,
+      modifier =
+          Modifier.fillMaxWidth()
+              .height(UICons.ButtonHeight)
+              .testTag(HuntScreenTestTags.BUTTON_DELETE_HUNT),
+      shape = RoundedCornerShape(UICons.ButtonCornerRadius),
+      colors =
+          ButtonDefaults.outlinedButtonColors(
+              containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f),
+              contentColor = MaterialTheme.colorScheme.error),
+      border =
+          BorderStroke(
+              width = UICons.SpacerHeightTiny,
+              color = MaterialTheme.colorScheme.error.copy(alpha = 0.5f))) {
+        Icon(
+            painter = painterResource(R.drawable.ic_delete),
+            contentDescription = DELETE_ICON_DESC,
+            modifier = Modifier.size(UICons.IconSize))
+        Spacer(modifier = Modifier.width(UICons.SpacerHeightSmall))
+        Text(BUTTON_DELETE, style = MaterialTheme.typography.titleMedium)
       }
 }
