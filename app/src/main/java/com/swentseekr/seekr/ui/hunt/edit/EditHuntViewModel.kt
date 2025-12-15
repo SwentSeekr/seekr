@@ -82,7 +82,7 @@ class EditHuntViewModel(
       huntId = id
     } catch (e: Exception) {
       huntId = null
-      setErrorMsg("Failed to load hunt: ${e.message}")
+      setErrorMsg("${EditHuntConstantsStrings.FAIL_LOADING} ${e.message}")
     }
   }
 
@@ -93,14 +93,14 @@ class EditHuntViewModel(
    * The author is resolved from [FirebaseAuth] and falls back to `"unknown"` if not authenticated.
    */
   override fun buildHunt(state: HuntUIState): Hunt {
-    val id = requireNotNull(huntId) { "No hunt loaded to edit." }
-    val authorId = FirebaseAuth.getInstance().currentUser?.uid ?: "unknown"
+    val id = requireNotNull(huntId) { EditHuntConstantsStrings.NO_HUNT_LOADED }
+    val authorId = FirebaseAuth.getInstance().currentUser?.uid ?: EditHuntConstantsStrings.UNKNOWN
 
     return Hunt(
         uid = id,
         start = state.points.first(),
         end = state.points.last(),
-        middlePoints = state.points.drop(1).dropLast(1),
+        middlePoints = state.points.drop(EditHuntConstants.DROP).dropLast(EditHuntConstants.DROP),
         status = state.status!!,
         title = state.title,
         description = state.description,
@@ -188,11 +188,11 @@ class EditHuntViewModel(
    * [setErrorMsg].
    */
   suspend fun deleteCurrentHunt() {
-    val id = requireNotNull(huntId) { "No hunt loaded to delete." }
+    val id = requireNotNull(huntId) { EditHuntConstantsStrings.NO_HUNT_LOADED_DELETE }
     try {
       repository.deleteHunt(id)
     } catch (e: Exception) {
-      setErrorMsg("Failed to delete hunt: ${e.message}")
+      setErrorMsg("${EditHuntConstantsStrings.FAIL_DELETE} ${e.message}")
     }
   }
 }

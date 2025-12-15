@@ -113,7 +113,7 @@ fun TermsDialog(onAccepted: () -> Unit, onTermsClicked: () -> Unit = {}) {
   val termsAndConditions = OnboardingFlowStrings.TERMS_TITLE
 
   val annotatedText = buildAnnotatedString {
-    append(OnboardingFlowStrings.TERMS_MESSAGE_1 + " ")
+    append(OnboardingFlowStrings.TERMS_MESSAGE_1 + OnboardingFlowStrings.SPACER)
 
     // Add clickable link
     pushLink(
@@ -122,7 +122,7 @@ fun TermsDialog(onAccepted: () -> Unit, onTermsClicked: () -> Unit = {}) {
     withStyle(SpanStyle(color = Color.Blue)) { append(termsAndConditions) }
     pop()
 
-    append(" " + OnboardingFlowStrings.TERMS_MESSAGE_2)
+    append(OnboardingFlowStrings.SPACER + OnboardingFlowStrings.TERMS_MESSAGE_2)
   }
 
   AlertDialog(
@@ -178,8 +178,8 @@ fun ProfileSetupDialog(
     onPseudonymChange: (String) -> Unit,
     onFinished: (String, String) -> Unit
 ) {
-  var pseudonym by remember { mutableStateOf("") }
-  var bio by remember { mutableStateOf("") }
+  var pseudonym by remember { mutableStateOf(OnboardingFlowStrings.INITIAL) }
+  var bio by remember { mutableStateOf(OnboardingFlowStrings.INITIAL) }
 
   AlertDialog(
       onDismissRequest = {},

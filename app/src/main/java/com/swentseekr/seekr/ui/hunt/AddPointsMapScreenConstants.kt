@@ -4,17 +4,17 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 object AddPointsMapScreenDefaults {
-  const val TitleText = "Select Hunt Points"
-  const val BackContentDescription = "Back"
-  const val ConfirmButtonLabel = "Confirm Points"
+  const val TITLE_TEXT = "Select Hunt Points"
+  const val BACK_CONTENT_DESCRIPTION = "Back"
+  const val CONFIRM_BUTTON_LABEL = "Confirm Points"
   val BottomPadding: Dp = 16.dp
-  const val dialogTitle = "Give your checkpoint a name and an optional description."
-  const val description = "Description"
-  const val add = "Add"
-  const val cancel = "Cancel"
-  const val placeholder = "e.g. Louvre museum"
-  const val pointsName = "Point's name"
-  const val notEmpty = "The name cannot be empty"
+  const val DIALOG_TITLE = "Give your checkpoint a name and an optional description."
+  const val DESCRIPTION = "Description"
+  const val ADD = "Add"
+  const val CANCEL = "Cancel"
+  const val PLACEHOLDER = "e.g. Louvre museum"
+  const val POINTS_NAME = "Point's name"
+  const val NOT_EMPTY = "The name cannot be empty"
 }
 
 object AddPointsMapScreenTestTags {

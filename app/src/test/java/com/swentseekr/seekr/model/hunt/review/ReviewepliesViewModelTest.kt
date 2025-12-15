@@ -88,7 +88,7 @@ class ReviewRepliesViewModelTest {
         advanceUntilIdle()
 
         val state = vm.uiState.value
-        assertEquals(ReviewRepliesStrings.ErrorSignInToReply, state.errorMessage)
+        assertEquals(ReviewRepliesStrings.ERROR_SIGN_IN_TO_REPLY, state.errorMessage)
         assertTrue(fakeRepository.addedReplies.isEmpty())
       }
 
@@ -106,7 +106,7 @@ class ReviewRepliesViewModelTest {
         advanceUntilIdle()
 
         val state = vm.uiState.value
-        assertEquals(ReviewRepliesStrings.ErrorEmptyReply, state.errorMessage)
+        assertEquals(ReviewRepliesStrings.ERROR_EMPTY_REPLY, state.errorMessage)
         assertTrue(fakeRepository.addedReplies.isEmpty())
       }
 
@@ -162,7 +162,7 @@ class ReviewRepliesViewModelTest {
         advanceUntilIdle()
 
         val state = vm.uiState.value
-        assertEquals(ReviewRepliesStrings.ErrorDeleteNotOwner, state.errorMessage)
+        assertEquals(ReviewRepliesStrings.ERROR_DELETE_NOT_OWNER, state.errorMessage)
         assertTrue(fakeRepository.deletedReplyIds.isEmpty())
       }
 

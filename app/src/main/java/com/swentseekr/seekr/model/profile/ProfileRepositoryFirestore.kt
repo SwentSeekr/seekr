@@ -12,7 +12,6 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestore
 import com.swentseekr.seekr.model.map.Location
-import com.swentseekr.seekr.model.profile.ProfileRepositoryConstants.DEFAULT_EMPTY_VALUE
 import com.swentseekr.seekr.ui.profile.Profile
 import kotlinx.coroutines.tasks.await
 
@@ -41,30 +40,33 @@ class ProfileRepositoryFirestore(
      */
     fun huntToMap(hunt: Hunt): Map<String, Any?> =
         mapOf(
-            "uid" to hunt.uid,
-            "title" to hunt.title,
-            "description" to hunt.description,
-            "start" to
+            ProfileRepositoryConstants.HUNT_FIELD_UID to hunt.uid,
+            ProfileRepositoryConstants.HUNT_FIELD_TITLE to hunt.title,
+            ProfileRepositoryConstants.HUNT_FIELD_DESCRIPTION to hunt.description,
+            ProfileRepositoryConstants.HUNT_FIELD_START to
                 mapOf(
-                    "latitude" to hunt.start.latitude,
-                    "longitude" to hunt.start.longitude,
-                    "name" to hunt.start.name),
-            "end" to
+                    ProfileRepositoryConstants.LOCATION_FIELD_LATITUDE to hunt.start.latitude,
+                    ProfileRepositoryConstants.LOCATION_FIELD_LONGITUDE to hunt.start.longitude,
+                    ProfileRepositoryConstants.LOCATION_FIELD_NAME to hunt.start.name),
+            ProfileRepositoryConstants.HUNT_FIELD_END to
                 mapOf(
-                    "latitude" to hunt.end.latitude,
-                    "longitude" to hunt.end.longitude,
-                    "name" to hunt.end.name),
-            "middlePoints" to
+                    ProfileRepositoryConstants.LOCATION_FIELD_LATITUDE to hunt.end.latitude,
+                    ProfileRepositoryConstants.LOCATION_FIELD_LONGITUDE to hunt.end.longitude,
+                    ProfileRepositoryConstants.LOCATION_FIELD_NAME to hunt.end.name),
+            ProfileRepositoryConstants.HUNT_FIELD_MIDDLE_POINTS to
                 hunt.middlePoints.map {
-                  mapOf("latitude" to it.latitude, "longitude" to it.longitude, "name" to it.name)
+                  mapOf(
+                      ProfileRepositoryConstants.LOCATION_FIELD_LATITUDE to it.latitude,
+                      ProfileRepositoryConstants.LOCATION_FIELD_LONGITUDE to it.longitude,
+                      ProfileRepositoryConstants.LOCATION_FIELD_NAME to it.name)
                 },
-            "difficulty" to hunt.difficulty.name,
-            "status" to hunt.status.name,
-            "authorId" to hunt.authorId,
-            "time" to hunt.time,
-            "distance" to hunt.distance,
-            "reviewRate" to hunt.reviewRate,
-            "mainImageUrl" to hunt.mainImageUrl)
+            ProfileRepositoryConstants.HUNT_FIELD_DIFFICULTY to hunt.difficulty.name,
+            ProfileRepositoryConstants.HUNT_FIELD_STATUS to hunt.status.name,
+            ProfileRepositoryConstants.HUNT_FIELD_AUTHOR_ID to hunt.authorId,
+            ProfileRepositoryConstants.HUNT_FIELD_TIME to hunt.time,
+            ProfileRepositoryConstants.HUNT_FIELD_DISTANCE to hunt.distance,
+            ProfileRepositoryConstants.HUNT_FIELD_REVIEW_RATE to hunt.reviewRate,
+            ProfileRepositoryConstants.HUNT_FIELD_MAIN_IMAGE_URL to hunt.mainImageUrl)
 
     /**
      * Converts a [Map] representation of a hunt back into a [Hunt] object. This function extracts
@@ -76,7 +78,7 @@ class ProfileRepositoryFirestore(
      *   information.
      */
     fun mapToHunt(map: Map<*, *>): Hunt? {
-      val uid = map[ProfileRepositoryConstants.HUNT_FIELD_UID] as? String ?: DEFAULT_EMPTY_VALUE
+      val uid = map[ProfileRepositoryConstants.HUNT_FIELD_UID] as? String ?: ""
       val title = map[ProfileRepositoryConstants.HUNT_FIELD_TITLE] as? String ?: return null
       val description =
           map[ProfileRepositoryConstants.HUNT_FIELD_DESCRIPTION] as? String ?: return null
@@ -117,8 +119,7 @@ class ProfileRepositoryFirestore(
           map[ProfileRepositoryConstants.HUNT_FIELD_STATUS]?.let {
             HuntStatus.valueOf(it as String)
           } ?: ProfileRepositoryConstants.DEFAULT_STATUS
-      val authorId =
-          map[ProfileRepositoryConstants.HUNT_FIELD_AUTHOR_ID] as? String ?: DEFAULT_EMPTY_VALUE
+      val authorId = map[ProfileRepositoryConstants.HUNT_FIELD_AUTHOR_ID] as? String ?: ""
 
       return Hunt(
           uid = uid,
@@ -204,14 +205,16 @@ class ProfileRepositoryFirestore(
       val snapshot = profilesCollection.get().await()
 
       snapshot.documents.mapNotNull { doc ->
-        val author = doc["author"] as? Map<*, *> ?: return@mapNotNull null
-        val pseudonym = author["pseudonym"] as? String
+        val author =
+            doc[ProfileRepositoryConstants.PROFILE_FIELD_AUTHOR] as? Map<*, *>
+                ?: return@mapNotNull null
+        val pseudonym = author[ProfileRepositoryConstants.PROFILE_FIELD_PSEUDONYM] as? String
         pseudonym?.takeIf { it.isNotBlank() }
       }
     } catch (e: Exception) {
       Log.e(
           ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
-          "Failed to fetch pseudonyms",
+          ProfileRepositoryStrings.FAIL_PSEUDONYM,
           e)
       emptyList()
     }
@@ -237,7 +240,7 @@ class ProfileRepositoryFirestore(
                     profilePicture = ProfileRepositoryConstants.DEFAULT_PROFILE_PICTURE,
                     reviewRate = ProfileRepositoryConstants.DEFAULT_REVIEW_RATE,
                     sportRate = ProfileRepositoryConstants.DEFAULT_SPORT_RATE,
-                    profilePictureUrl = DEFAULT_EMPTY_VALUE),
+                    profilePictureUrl = ""),
             myHunts = mutableListOf(),
             doneHunts = mutableListOf(),
             likedHunts = mutableListOf())
@@ -255,17 +258,18 @@ class ProfileRepositoryFirestore(
     val currentUser = auth.currentUser ?: return
     Log.i(
         ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
-        "Writing profile for UID=${currentUser.uid}")
+        "${ProfileRepositoryStrings.WRITING_ERROR}${currentUser.uid}")
     val userDocRef = profilesCollection.document(currentUser.uid)
     userDocRef
         .update(
             mapOf(
-                "author.pseudonym" to profile.author.pseudonym,
-                "author.bio" to profile.author.bio,
-                "author.profilePicture" to profile.author.profilePicture,
-                "author.profilePictureUrl" to profile.author.profilePictureUrl,
-                "author.reviewRate" to profile.author.reviewRate,
-                "author.sportRate" to profile.author.sportRate))
+                ProfileRepositoryConstants.AUTHOR_PSEUDONYM to profile.author.pseudonym,
+                ProfileRepositoryConstants.AUTHOR_BIO to profile.author.bio,
+                ProfileRepositoryConstants.AUTHOR_PROFILE_PICTURE to profile.author.profilePicture,
+                ProfileRepositoryConstants.AUTHOR_PROFILE_PICTURE_URL to
+                    profile.author.profilePictureUrl,
+                ProfileRepositoryConstants.AUTHOR_REVIEW_RATE to profile.author.reviewRate,
+                ProfileRepositoryConstants.AUTHOR_SPORT_RATE to profile.author.sportRate))
         .await()
   }
 
@@ -294,13 +298,15 @@ class ProfileRepositoryFirestore(
    * @throws Exception if storage or Firestore operations fail.
    */
   override suspend fun uploadProfilePicture(userId: String, uri: Uri): String {
-    val storageRef = storage.reference.child("profile_pictures/$userId.jpg")
-    val docRef = db.collection("profiles").document(userId)
+    val storageRef =
+        storage.reference.child(
+            "${ProfileRepositoryConstants.PATH_PROFILE_PICTURE}$userId${ProfileRepositoryConstants.FORMAT}")
+    val docRef = db.collection(ProfileRepositoryConstants.PROFILES_COLLECTION).document(userId)
 
     return try {
       storageRef.putFile(uri).await()
       val url = storageRef.downloadUrl.await().toString()
-      docRef.update("author.profilePictureUrl", url).await()
+      docRef.update(ProfileRepositoryConstants.AUTHOR_PROFILE_PICTURE_URL, url).await()
       url
     } catch (e: Exception) {
       Log.e(
@@ -385,7 +391,7 @@ class ProfileRepositoryFirestore(
       if (isAlreadyAdded) {
         Log.i(
             ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
-            "Hunt '${hunt.title}' is already in the doneHunts list for user $userId")
+            "${ProfileRepositoryStrings.HUNTS}${hunt.title}${ProfileRepositoryStrings.ALREADY_DONE} $userId")
         return
       }
 
@@ -395,11 +401,11 @@ class ProfileRepositoryFirestore(
       userDocRef.update(ProfileRepositoryConstants.PROFILE_FIELD_DONE_HUNTS, updatedList).await()
       Log.i(
           ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
-          "Added done hunt '${hunt.title}' for user $userId")
+          "${ProfileRepositoryStrings.ADDED_DONE}${hunt.title}${ProfileRepositoryStrings.USER} $userId")
     } catch (e: Exception) {
       Log.e(
           ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
-          "Failed to add done hunt for user $userId",
+          "${ProfileRepositoryStrings.FAIL_ADD_DONE} $userId",
           e)
       throw e
     }
@@ -455,8 +461,7 @@ class ProfileRepositoryFirestore(
           document.getString(ProfileRepositoryConstants.HUNT_FIELD_STATUS)?.let {
             HuntStatus.valueOf(it)
           } ?: ProfileRepositoryConstants.DEFAULT_STATUS
-      val authorId =
-          document.getString(ProfileRepositoryConstants.HUNT_FIELD_AUTHOR_ID) ?: DEFAULT_EMPTY_VALUE
+      val authorId = document.getString(ProfileRepositoryConstants.HUNT_FIELD_AUTHOR_ID) ?: ""
 
       Hunt(
           uid = uid,
@@ -491,18 +496,29 @@ class ProfileRepositoryFirestore(
         document[ProfileRepositoryConstants.PROFILE_FIELD_AUTHOR] as? Map<*, *> ?: return null
     val author =
         Author(
-            hasCompletedOnboarding = authorMap["hasCompletedOnboarding"] as? Boolean ?: false,
-            hasAcceptedTerms = authorMap["hasAcceptedTerms"] as? Boolean ?: false,
-            pseudonym = authorMap["pseudonym"] as? String ?: DEFAULT_EMPTY_VALUE,
-            bio = authorMap["bio"] as? String ?: DEFAULT_EMPTY_VALUE,
-            profilePicture = (authorMap["profilePicture"] as? Long ?: 0L).toInt(),
-            reviewRate = authorMap["reviewRate"] as? Double ?: 0.0,
-            sportRate = authorMap["sportRate"] as? Double ?: 0.0,
-            profilePictureUrl = authorMap["profilePictureUrl"] as? String ?: DEFAULT_EMPTY_VALUE)
+            hasCompletedOnboarding =
+                authorMap[ProfileRepositoryConstants.COMPLETE_ONBOARD] as? Boolean ?: false,
+            hasAcceptedTerms =
+                authorMap[ProfileRepositoryConstants.ACCEPT_TERMS] as? Boolean ?: false,
+            pseudonym =
+                authorMap[ProfileRepositoryConstants.PROFILE_FIELD_PSEUDONYM] as? String ?: "",
+            bio = authorMap[ProfileRepositoryConstants.HUNT_FIELD_BIO] as? String ?: "",
+            profilePicture =
+                (authorMap[ProfileRepositoryConstants.HUNT_FIELD_PROFILE_PICTURE] as? Long
+                        ?: ProfileRepositoryConstants.DEFAULT_PROFILE_PICTURE_LONG)
+                    .toInt(),
+            reviewRate =
+                authorMap[ProfileRepositoryConstants.HUNT_FIELD_REVIEW_RATE] as? Double
+                    ?: ProfileRepositoryConstants.DEFAULT_HUNT_REVIEW_RATE,
+            sportRate =
+                authorMap[ProfileRepositoryConstants.SPORT_RATE] as? Double
+                    ?: ProfileRepositoryConstants.DEFAULT_SPORT_RATE,
+            profilePictureUrl =
+                authorMap[ProfileRepositoryConstants.PROFILE_PICTURE_URL] as? String ?: "")
 
     val myHunts = huntsRepository.getAllHunts().filter { it.authorId == uid }.toMutableList()
     val doneHunts =
-        db.collection("users")
+        db.collection(ProfileRepositoryConstants.USERS)
             .document(uid)
             .collection(ProfileRepositoryConstants.PROFILE_FIELD_DONE_HUNTS)
             .get()
@@ -548,10 +564,10 @@ class ProfileRepositoryFirestore(
   override suspend fun completeOnboarding(userId: String, pseudonym: String, bio: String) {
     val updates =
         mapOf(
-            "author.hasCompletedOnboarding" to true,
-            "author.hasAcceptedTerms" to true,
-            "author.pseudonym" to pseudonym,
-            "author.bio" to bio)
+            ProfileRepositoryConstants.AUTHOR_COMPLETE_ONBOARD to true,
+            ProfileRepositoryConstants.AUTHOR_ACCEPT_TERMS to true,
+            ProfileRepositoryConstants.AUTHOR_PSEUDONYM to pseudonym,
+            ProfileRepositoryConstants.AUTHOR_BIO to bio)
 
     profilesCollection.document(userId).update(updates).await()
   }
@@ -580,7 +596,7 @@ class ProfileRepositoryFirestore(
       if (alreadyLiked) {
         Log.i(
             ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
-            "Hunt '${hunt.title}' is already liked by user $userId")
+            "${ProfileRepositoryStrings.HUNTS}${hunt.title}${ProfileRepositoryStrings.ALREADY_LIKED} $userId")
         return
       }
 
@@ -590,7 +606,7 @@ class ProfileRepositoryFirestore(
     } catch (e: Exception) {
       Log.e(
           ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
-          "Failed to add liked hunt for user $userId",
+          "${ProfileRepositoryStrings.FAIL_ADD_LIKE} $userId",
           e)
       throw e
     }
@@ -621,7 +637,7 @@ class ProfileRepositoryFirestore(
     } catch (e: Exception) {
       Log.e(
           ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
-          "Failed to remove liked hunt for user $userId",
+          "${ProfileRepositoryStrings.FAIL_REMOVE_LIKE} $userId",
           e)
       throw e
     }

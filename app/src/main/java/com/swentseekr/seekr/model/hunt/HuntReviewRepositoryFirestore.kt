@@ -30,7 +30,8 @@ class HuntReviewRepositoryFirestore(private val db: FirebaseFirestore) : HuntRev
   override suspend fun getReviewHunt(reviewId: String): HuntReview {
     val document = db.collection(HUNT_REVIEW_COLLECTION_PATH).document(reviewId).get().await()
     return documentToHuntReview(document)
-        ?: throw IllegalArgumentException("Hunt with Id ${reviewId} is not found")
+        ?: throw IllegalArgumentException(
+            "${HuntReviewRepositoryFirestoreConstantsStrings.HUNT_START} ${reviewId} ${HuntReviewRepositoryFirestoreConstantsStrings.NOT_FOUND}")
   }
 
   /**
@@ -43,7 +44,9 @@ class HuntReviewRepositoryFirestore(private val db: FirebaseFirestore) : HuntRev
    * @throws IllegalArgumentException if the review ID is blank.
    */
   override suspend fun addReviewHunt(review: HuntReview) {
-    require(review.reviewId.isNotBlank()) { "Review ID cannot be blank." }
+    require(review.reviewId.isNotBlank()) {
+      HuntReviewRepositoryFirestoreConstantsStrings.REVIEW_NOT_BLANK
+    }
     db.collection(HUNT_REVIEW_COLLECTION_PATH).document(review.reviewId).set(review).await()
   }
 
@@ -77,9 +80,15 @@ class HuntReviewRepositoryFirestore(private val db: FirebaseFirestore) : HuntRev
    * @throws IllegalStateException if no user is currently logged in.
    */
   override suspend fun getHuntReviews(huntId: String): List<HuntReview> {
-    FirebaseAuth.getInstance().currentUser?.uid ?: throw IllegalStateException("User not logged in")
+    val currentUserId =
+        FirebaseAuth.getInstance().currentUser?.uid
+            ?: throw IllegalStateException(
+                HuntReviewRepositoryFirestoreConstantsStrings.USER_NOT_LOGIN)
     val snapshot =
-        db.collection(HUNT_REVIEW_COLLECTION_PATH).whereEqualTo("huntId", huntId).get().await()
+        db.collection(HUNT_REVIEW_COLLECTION_PATH)
+            .whereEqualTo(HuntReviewRepositoryFirestoreConstantsStrings.FIELD, huntId)
+            .get()
+            .await()
     return snapshot.mapNotNull { documentToHuntReview(it) }
   }
 
@@ -94,11 +103,17 @@ class HuntReviewRepositoryFirestore(private val db: FirebaseFirestore) : HuntRev
   private fun documentToHuntReview(document: DocumentSnapshot): HuntReview? {
     return try {
       val reviewID = document.id
-      val authorID = document.getString("authorId") ?: return null
-      val huntID = document.getString("huntId") ?: return null
-      val rating = document.getDouble("rating") ?: return null
-      val comment = document.getString("comment") ?: return null
-      val photos = document.get("photos") as? List<String> ?: emptyList()
+      val authorID =
+          document.getString(HuntReviewRepositoryFirestoreConstantsStrings.AUTHOR_ID) ?: return null
+      val huntID =
+          document.getString(HuntReviewRepositoryFirestoreConstantsStrings.FIELD) ?: return null
+      val rating =
+          document.getDouble(HuntReviewRepositoryFirestoreConstantsStrings.RATING) ?: return null
+      val comment =
+          document.getString(HuntReviewRepositoryFirestoreConstantsStrings.COMMENT) ?: return null
+      val photos =
+          document.get(HuntReviewRepositoryFirestoreConstantsStrings.PHOTOS) as? List<String>
+              ?: emptyList()
 
       HuntReview(
           reviewId = reviewID,
@@ -108,7 +123,10 @@ class HuntReviewRepositoryFirestore(private val db: FirebaseFirestore) : HuntRev
           comment = comment,
           photos = photos)
     } catch (e: Exception) {
-      Log.e("HuntReviewRepositoryFirestore", "Error converting document to HuntReview", e)
+      Log.e(
+          HuntReviewRepositoryFirestoreConstantsStrings.TAG,
+          HuntReviewRepositoryFirestoreConstantsStrings.ERROR_MSG,
+          e)
       null
     }
   }

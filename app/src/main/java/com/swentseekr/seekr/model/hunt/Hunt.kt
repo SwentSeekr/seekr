@@ -88,8 +88,8 @@ fun DifficultyColor(difficulty: Difficulty): Color {
  */
 fun StatusColor(status: HuntStatus): Int {
   return when (status) {
-    HuntStatus.FUN -> 0x60BA37 // Green
-    HuntStatus.DISCOVER -> 0xFFDFAD // Yellow
-    HuntStatus.SPORT -> 0xFFC1C1 // Red
+    HuntStatus.FUN -> HuntConstants.FUN_COLOR // Green
+    HuntStatus.DISCOVER -> HuntConstants.DISCOVER_COLOR // Yellow
+    HuntStatus.SPORT -> HuntConstants.SPORT_COLOR // Red
   }
 }

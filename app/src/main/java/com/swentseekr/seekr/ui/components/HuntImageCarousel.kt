@@ -27,8 +27,8 @@ import androidx.compose.ui.util.lerp
 import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
-import com.swentseekr.seekr.ui.components.HuntCardScreenDefaults.ImageCarouselRotationCenterDegrees
-import com.swentseekr.seekr.ui.components.HuntCardScreenDefaults.ImageIndicatorLastIndexOffset
+import com.swentseekr.seekr.ui.components.HuntCardScreenDefaults.IMAGE_CAROUSEL_ROTATION_CENTER_DEGREES
+import com.swentseekr.seekr.ui.components.HuntCardScreenDefaults.IMAGE_INDICATOR_LAST_INDEX_OFFSET
 import com.swentseekr.seekr.ui.theme.Black
 import kotlin.math.absoluteValue
 
@@ -121,10 +121,10 @@ private fun HuntImageFullScreenDialog(
     ) {
       AsyncImage(
           model = currentImage,
-          contentDescription = HuntCardScreenStrings.FullScreenImageDescription,
+          contentDescription = HuntCardScreenStrings.FULL_SCREEN_DESCRIPTION,
           modifier =
               Modifier.fillMaxWidth()
-                  .fillMaxHeight(HuntCardScreenDefaults.FullScreenImageHeightFraction)
+                  .fillMaxHeight(HuntCardScreenDefaults.FULL_SCREEN_IMAGE_HEIGHT_FRACTION)
                   .testTag(HuntCardScreenTestTags.IMAGE_FULLSCREEN),
           placeholder = painterResource(R.drawable.empty_image),
           error = painterResource(R.drawable.empty_image),
@@ -199,42 +199,42 @@ private fun rememberPageTransforms(
   // Clamp offset to the expected interpolation range [0, 1].
   val clampedOffset =
       pageOffset.coerceIn(
-          HuntCardScreenDefaults.ImageCarouselInterpolationMinFraction,
-          HuntCardScreenDefaults.ImageCarouselInterpolationMaxFraction,
+          HuntCardScreenDefaults.IMAGE_CAROUSEL_INTERPOLATION_MIN_FRACTION,
+          HuntCardScreenDefaults.IMAGE_CAROUSEL_INTERPOLATION_MAX_FRACTION,
       )
 
   // Fraction increases as the page gets closer to the center (1f = fully centered).
   val interpolationFraction =
-      HuntCardScreenDefaults.ImageCarouselInterpolationMaxFraction - clampedOffset
+      HuntCardScreenDefaults.IMAGE_CAROUSEL_INTERPOLATION_MAX_FRACTION - clampedOffset
 
   // Scale: center image is larger, side images are slightly smaller.
   val scale =
       lerp(
-          start = HuntCardScreenDefaults.ImageCarouselMinScale,
-          stop = HuntCardScreenDefaults.ImageCarouselMaxScale,
+          start = HuntCardScreenDefaults.IMAGE_CAROUSEL_MIN_SCALE,
+          stop = HuntCardScreenDefaults.IMAGE_CAROUSEL_MAX_SCALE,
           fraction = interpolationFraction,
       )
 
   // Rotation: pages rotate around the Y axis to create a "carousel" perspective effect.
   val sideRotation =
       if (page < pagerState.currentPage) {
-        HuntCardScreenDefaults.ImageCarouselSideRotationDegrees
+        HuntCardScreenDefaults.IMAGE_CAROUSEL_SIDE_ROTATION_DEGREE
       } else {
-        -HuntCardScreenDefaults.ImageCarouselSideRotationDegrees
+        -HuntCardScreenDefaults.IMAGE_CAROUSEL_SIDE_ROTATION_DEGREE
       }
 
   val rotationY =
       lerp(
           start = sideRotation,
-          stop = ImageCarouselRotationCenterDegrees,
+          stop = IMAGE_CAROUSEL_ROTATION_CENTER_DEGREES,
           fraction = interpolationFraction,
       )
 
   // Overlay: side images are darker, center image has no overlay.
   val overlayAlpha =
       lerp(
-          start = HuntCardScreenDefaults.ImageCarouselOverlayMaxAlpha,
-          stop = HuntCardScreenDefaults.ImageCarouselOverlayMinAlpha,
+          start = HuntCardScreenDefaults.IMAGE_CAROUSEL_OVERLAYER_MAX_ALPHA,
+          stop = HuntCardScreenDefaults.IMAGE_CAROUSEL_OVERLAYER_MIN_ALPHA,
           fraction = interpolationFraction,
       )
 
@@ -264,7 +264,7 @@ private fun HuntImagePage(
   // Compute camera distance in px from dp using the current density.
   val density = LocalDensity.current
   val cameraDistancePx =
-      with(density) { HuntCardScreenDefaults.ImageCarouselCameraDistanceFactor.dp.toPx() }
+      with(density) { HuntCardScreenDefaults.IMAGE_CAROUSEL_DISTANCE_FACTOR.dp.toPx() }
 
   Box(
       modifier =
@@ -292,8 +292,12 @@ private fun HuntImagePage(
                 Modifier.fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f)),
-                            startY = 200f))) {}
+                            colors =
+                                listOf(
+                                    Color.Transparent,
+                                    Color.Black.copy(
+                                        alpha = HuntCardScreenDefaults.BACKGROUND_ALPHA)),
+                            startY = HuntCardScreenDefaults.START))) {}
       }
 }
 
@@ -311,7 +315,7 @@ private fun HuntImageIndicators(
     currentPage: Int,
 ) {
   // No indicator when there is only a single image.
-  if (imagesCount <= ImageIndicatorLastIndexOffset) return
+  if (imagesCount <= IMAGE_INDICATOR_LAST_INDEX_OFFSET) return
 
   Spacer(modifier = Modifier.height(HuntCardScreenDefaults.ImageIndicatorTopPadding))
 
@@ -339,7 +343,7 @@ private fun HuntImageIndicators(
       )
 
       // Add spacing between dots except after the last one.
-      if (index != imagesCount - ImageIndicatorLastIndexOffset) {
+      if (index != imagesCount - IMAGE_INDICATOR_LAST_INDEX_OFFSET) {
         Spacer(modifier = Modifier.width(HuntCardScreenDefaults.ImageIndicatorDotSpacing))
       }
     }

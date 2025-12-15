@@ -89,12 +89,12 @@ fun BaseReviewScreen(
     title: String,
     huntTitle: String,
     authorName: String,
-    rating: Double = AddReviewScreenDefaults.Rating,
+    rating: Double = AddReviewScreenDefaults.RATING,
     reviewText: String,
     photos: List<String> = emptyList(),
     isReviewTextError: Boolean = false,
     isDoneEnabled: Boolean = false,
-    reviewTextErrorMessage: String? = AddReviewScreenStrings.Empty,
+    reviewTextErrorMessage: String? = "",
     onRatingChanged: (Int) -> Unit,
     onReviewTextChanged: (String) -> Unit,
     onAddPhotos: () -> Unit,
@@ -119,7 +119,7 @@ fun BaseReviewScreen(
                   onClick = onGoBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = AddReviewScreenStrings.BackContentDescription)
+                        contentDescription = AddReviewScreenStrings.BACK_CONTENT_DESCRIPTION)
                   }
             },
             colors =
@@ -161,7 +161,7 @@ fun BaseReviewScreen(
                               fontWeight = FontWeight.Bold)
 
                           Text(
-                              text = "${AddReviewScreenStrings.By} $authorName",
+                              text = "${AddReviewScreenStrings.BY} $authorName",
                               style = MaterialTheme.typography.bodySmall,
                               color = MaterialTheme.colorScheme.onSurfaceVariant)
 
@@ -172,16 +172,17 @@ fun BaseReviewScreen(
 
                           StarRatingBar(
                               rating = rating.toInt(),
-                              maxStars = AddReviewScreenDefaults.MaxStars,
+                              maxStars = AddReviewScreenDefaults.MAX_STARS,
                               onRatingChanged = onRatingChanged)
 
                           AnimatedVisibility(
-                              visible = rating >= AddReviewScreenDefaults.FirstStarIndex.toDouble(),
+                              visible =
+                                  rating >= AddReviewScreenDefaults.FIRST_STAR_INDEX.toDouble(),
                               enter = fadeIn() + scaleIn(),
                               exit = fadeOut() + scaleOut()) {
                                 Text(
                                     AddReviewScreenStrings.ratingSummary(
-                                        rating.toInt(), AddReviewScreenDefaults.MaxStars),
+                                        rating.toInt(), AddReviewScreenDefaults.MAX_STARS),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.primary)
                               }
@@ -197,8 +198,8 @@ fun BaseReviewScreen(
                           .fillMaxWidth()
                           .heightIn(min = UICons.CommentFieldHeight)
                           .testTag(AddReviewScreenTestTags.COMMENT_TEXT_FIELD),
-                  label = { Text(AddReviewScreenStrings.CommentLabel) },
-                  placeholder = { Text(AddReviewScreenStrings.CommentPlaceholder) },
+                  label = { Text(AddReviewScreenStrings.COMMENT_LABEL) },
+                  placeholder = { Text(AddReviewScreenStrings.COMMENT_PLACEHOLDER) },
                   isError = isReviewTextError,
                   supportingText = {
                     Column(modifier = Modifier.fillMaxWidth()) {
@@ -220,7 +221,7 @@ fun BaseReviewScreen(
                                 style = MaterialTheme.typography.bodySmall,
                                 color =
                                     MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                        alpha = AddReviewScreenDefaults.CommentCharCountAlpha))
+                                        alpha = AddReviewScreenDefaults.COMMENT_CHAR_COUNT_ALPHA))
                           }
                     }
                   },
@@ -228,7 +229,7 @@ fun BaseReviewScreen(
                       LocalTextStyle.current.copy(
                           lineHeight = AddReviewScreenDefaults.CommentLineHeight),
                   singleLine = false,
-                  maxLines = AddReviewScreenDefaults.CommentMaxLines,
+                  maxLines = AddReviewScreenDefaults.COMMENT_MAX_LINES,
                   shape = RoundedCornerShape(UICons.CommentFieldCornerRadius),
                   colors =
                       OutlinedTextFieldDefaults.colors(
@@ -245,15 +246,15 @@ fun BaseReviewScreen(
                     modifier =
                         Modifier.fillMaxWidth()
                             .height(UICons.ButtonTonalHeight)
-                            .testTag(AddReviewScreenTestTags.AddPhotoButtonTag),
+                            .testTag(AddReviewScreenTestTags.ADD_PHOTO_BUTTON_TEST_TAG),
                     shape = RoundedCornerShape(UICons.ButtonTonalCornerRadius)) {
                       Icon(
                           imageVector = Icons.Default.AddCircle,
-                          contentDescription = AddReviewScreenStrings.AddPhotoContentDescription,
+                          contentDescription = AddReviewScreenStrings.ADD_PHOTO_CONTENT_DESCRIPTION,
                           modifier = Modifier.size(UICons.IconSize))
                       Spacer(modifier = Modifier.width(UICons.SpacerHeightSmall))
                       Text(
-                          AddReviewScreenStrings.AddPicturesButtonLabel,
+                          AddReviewScreenStrings.ADD_PICTURES_BUTTON_LABEL,
                           style = MaterialTheme.typography.titleSmall)
                     }
               } else {
@@ -268,7 +269,7 @@ fun BaseReviewScreen(
                             color = MaterialTheme.colorScheme.onSurface)
                         TextButton(onClick = onAddPhotos) {
                           Text(
-                              text = AddReviewScreenStrings.AddMorePhotosButtonLabel,
+                              text = AddReviewScreenStrings.ADD_MORE_PHOTOS_BUTTON_LABEL,
                               style = MaterialTheme.typography.labelMedium,
                               color = MaterialTheme.colorScheme.primary)
                         }
@@ -284,7 +285,7 @@ fun BaseReviewScreen(
                             AsyncImage(
                                 model = photos[index],
                                 contentDescription =
-                                    "${AddReviewScreenStrings.SelectedImageContentDescriptionPrefix}$index",
+                                    "${AddReviewScreenStrings.SELECTED_IMAGE_CONTENT_DESCRIPTION_PREFIX}$index",
                                 modifier =
                                     Modifier.size(UICons.ImageSize)
                                         .clip(RoundedCornerShape(UICons.ImageCorners))
@@ -306,7 +307,7 @@ fun BaseReviewScreen(
                                   Icon(
                                       imageVector = Icons.Default.Close,
                                       contentDescription =
-                                          AddReviewScreenStrings.RemovePhotoContentDescription,
+                                          AddReviewScreenStrings.REMOVE_PHOTO_CONTENT_DESCRIPTION,
                                       tint = MaterialTheme.colorScheme.onErrorContainer,
                                       modifier =
                                           Modifier.padding(UICons.SurfacePadding)
@@ -329,7 +330,7 @@ fun BaseReviewScreen(
                                 Icon(
                                     imageVector = Icons.Default.Add,
                                     contentDescription =
-                                        AddReviewScreenStrings.AddPhotoContentDescription,
+                                        AddReviewScreenStrings.ADD_PHOTO_CONTENT_DESCRIPTION,
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant)
                               }
                         }
@@ -351,7 +352,7 @@ fun BaseReviewScreen(
                                 .height(UICons.ButtonTonalHeight)
                                 .testTag(AddReviewScreenTestTags.CANCEL_BUTTON),
                         shape = RoundedCornerShape(UICons.ButtonTonalCornerRadius)) {
-                          Text(AddReviewScreenStrings.CancelButtonLabel)
+                          Text(AddReviewScreenStrings.CANCEL_BUTTON_LABEL)
                         }
                     Button(
                         onClick = onDone,
@@ -365,7 +366,7 @@ fun BaseReviewScreen(
                         elevation =
                             ButtonDefaults.buttonElevation(
                                 defaultElevation = UICons.ButtonElevation)) {
-                          Text(AddReviewScreenStrings.DoneButtonLabel)
+                          Text(AddReviewScreenStrings.DONE_BUTTON_LABEL)
                         }
                   }
 

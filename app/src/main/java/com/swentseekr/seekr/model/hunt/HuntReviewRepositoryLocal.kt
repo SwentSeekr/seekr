@@ -22,7 +22,8 @@ open class HuntReviewRepositoryLocal : HuntReviewRepository {
         return reviews[i]
       }
     }
-    throw IllegalArgumentException("Hunt with ID $reviewId is not found")
+    throw IllegalArgumentException(
+        "${HuntReviewRepositoryLocalConstantsString.HUNT_START} $reviewId ${HuntReviewRepositoryLocalConstantsString.NOT_FOUND}")
   }
 
   /** Adds a new review to the in-memory list. */
@@ -38,14 +39,16 @@ open class HuntReviewRepositoryLocal : HuntReviewRepository {
         return
       }
     }
-    throw IllegalArgumentException("Review with ID $reviewId is not found")
+    throw IllegalArgumentException(
+        "${HuntReviewRepositoryLocalConstantsString.REVIEW_START} $reviewId ${HuntReviewRepositoryLocalConstantsString.NOT_FOUND}")
   }
 
   /** Deletes a review by ID or throws [IllegalArgumentException] if not found. */
   override suspend fun deleteReviewHunt(reviewId: String) {
     val wasRemoved = reviews.removeIf { it.reviewId == reviewId }
     if (!wasRemoved) {
-      throw IllegalArgumentException("Review with ID $reviewId is not found")
+      throw IllegalArgumentException(
+          "${HuntReviewRepositoryLocalConstantsString.REVIEW_START} $reviewId ${HuntReviewRepositoryLocalConstantsString.NOT_FOUND}")
     }
   }
 

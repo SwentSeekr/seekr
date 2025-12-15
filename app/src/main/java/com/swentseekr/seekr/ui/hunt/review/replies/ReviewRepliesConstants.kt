@@ -9,36 +9,35 @@ import androidx.compose.ui.unit.sp
  * NOTE: later you can move these to your centralized localization system.
  */
 object ReviewRepliesStrings {
-  const val HideReplies = "Hide replies"
-  const val ShowReplies = "Show replies"
-  const val Reply = "Reply"
-  const val Delete = "Delete"
-  const val ErrorEmptyReply = "Reply cannot be empty."
-  const val You = "You"
+  const val HIDE_REPLIES = "Hide replies"
+  const val SHOW_REPLIES = "Show replies"
+  const val REPLY = "Reply"
+  const val DELETE = "Delete"
+  const val ERROR_EMPTY_REPLY = "Reply cannot be empty."
+  const val YOU = "You"
 
   // New strings used by the Reddit-style UI
-  const val RootComposerPlaceholder = "What are your thoughts?"
-  const val InlineReplyPlaceholder = "Write a reply..."
-  const val Deleted = "[deleted]"
-  const val BeTheFirstToReply = "Be the first to reply"
-  const val ReplyUnitSingular = "reply"
-  const val ReplyUnitPlural = "replies"
-  const val ErrorSignInToReply = "You must be signed in to reply."
-  const val ErrorSignInToDelete = "You must be signed in to delete a reply."
-  const val ErrorReplyNotFound = "Reply not found."
-  const val ErrorDeleteNotOwner = "You can only delete your own replies."
-  const val ErrorRefreshReplies = "Failed to refresh replies"
-  const val ErrorSendReply = "Failed to send reply."
-  const val ErrorDeleteReply = "Failed to delete reply."
-  const val JustNow = " · just now"
-  const val ReplyAuthorPrefix = "u/"
+  const val ROOT_COMPOSER_PLACEHOLDER = "What are your thoughts?"
+  const val INLINE_REPLY_PLACEHOLDER = "Write a reply..."
+  const val BE_THE_FIRST_TO_REPLY = "Be the first to reply"
+  const val REPLY_UNIT_SINGULAR = "reply"
+  const val REPLY_UNIT_PLURAL = "replies"
+  const val ERROR_SIGN_IN_TO_REPLY = "You must be signed in to reply."
+  const val ERROR_SIGN_IN_TO_DELETE = "You must be signed in to delete a reply."
+  const val ERROR_REPLY_NOT_FOUND = "Reply not found."
+  const val ERROR_DELETE_NOT_OWNER = "You can only delete your own replies."
 
-  const val ReplyContentDescription = "Reply"
-  const val DeleteContentDescription = "Delete"
-  const val SendContentDescription = "Send"
+  const val ERROR_SEND_REPLY = "Failed to send reply."
+  const val ERROR_DELETE_REPLY = "Failed to delete reply."
+  const val JUST_NOW = " · just now"
+  const val REPLY_AUTHOR_PREFIX = "u/"
+
+  const val REPLY_CONTENT_DESCRIPTION = "Reply"
+  const val DELETE_CONTENT_DESCRIPTION = "Delete"
+  const val SEND_CONTENT_DESCRIPTION = "Send"
 
   // Factory / internal error strings
-  const val ErrorUnknownViewModelClassPrefix = "Unknown ViewModel class: "
+  const val ERROR_UNKNOWN_VIEW_MODEL_CLASS_PREFIX = "Unknown ViewModel class: "
 }
 
 /** Layout / typography constants for the replies UI. */
@@ -110,24 +109,24 @@ object ReviewRepliesDimensions {
 
 /** Alpha constants for various UI elements. */
 object ReviewRepliesAlphas {
-  const val RootHeaderIcon = 0.8f
-  const val RootHeaderPlaceholder = 0.6f
-  const val ReplyTimestamp = 0.6f
-  const val DeletedReply = 0.5f
-  const val ComposerPlaceholder = 0.5f
-  const val OutlineVariant = 0.4f
-  const val OutlineVariantBorder = 0.5f
-  const val InactiveSendIcon = 0.5f
-  const val ComposerSurfaceAlpha = 0.3f
-  const val DeleteIconAlpha = 0.7f
+  const val ROOT_HEADER_ICON = 0.8f
+  const val ROOT_HEADER_PLACEHOLDER = 0.6f
+  const val REPLY_TIMESTAMP = 0.6f
+  const val DELETED_REPLY = 0.5f
+  const val COMPOSER_PLACEHOLDER = 0.5f
+  const val OUTLINE_VARIANT = 0.4f
+  const val OUTLINE_VARIANT_BORDER = 0.5f
+  const val INACTIVE_SEND_ICON = 0.5f
+  const val COMPOSER_SURFACE_ALPHA = 0.3f
+  const val DELETE_ICON_ALPHA = 0.7f
 }
 
 /** Non-UI numeric constants. */
 object ReviewRepliesValues {
-  const val RootDepth = 0
-  const val FullWeight = 1f
-  const val SingleReplyCount = RootDepth + 1
-  const val AuthorIdMaxLength = 10
+  const val ROOT_DEPTH = 0
+  const val FULL_WEIGHT = 1f
+  const val SINGLE_REPLY_COUNT = ROOT_DEPTH + 1
+  const val AUTHOR_ID_MAX_LENGTH = 10
 }
 
 /** Test tags for the replies UI, to be used in Compose UI tests. */
@@ -150,6 +149,6 @@ object ReviewRepliesTestTags {
 
 /** Constants for ReviewRepliesUiModel. */
 object ReviewRepliesUiModelConstants {
-  const val totalReplyBaseCount = 0
-  const val rootReplyBaseText = ""
+  const val TOTAL_REPLY_BASE_COUNT = 0
+  const val ROOT_BASE_REPLY_TEXT = ""
 }
