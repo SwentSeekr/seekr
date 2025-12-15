@@ -45,7 +45,6 @@ fun EditHuntScreen(
           DeleteAction(
               show = true,
               onClick = {
-                // Delete the current hunt and navigate back when the operation completes.
                 scope.launch {
                   editHuntViewModel.deleteCurrentHunt()
                   onGoBack()
