@@ -2,16 +2,8 @@ package com.swentseekr.seekr.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
-
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
-
 val DifficultyEasy = Color(0xFF4CAF50)
-val DifficultyIntermediate = Color(0xFFFFA726)
+val Orange = Color(0xFFFFA726)
 val DifficultyHard = Color(0xFFEF5350)
 
 val StatusFun = Color(0xFF9C27B0)
@@ -19,7 +11,6 @@ val StatusDiscover = Color(0xFF2196F3)
 val StatusSport = Color(0xFFFF5722)
 
 val Blue = Color(0xFF2196F3)
-val Orange = Color(0xFFFFA64D)
 
 val MediumYellow = Color(0xFFFFDFAD)
 val DifficultRed = Color(0xFFFFC1C1)
@@ -39,8 +30,6 @@ val Transparent = Color(0x00000000)
 // ---- Primary & Secondary ----
 val Green = Color(0xFF059D58)
 val Salmon = Color(0xFFE8847C)
-val GrayBackgound = Color(0xFFF2F2F2)
-val GrassGreen = Color(0xFFC5E1A5)
 
 val LightGrayBackgound = Color(0xFFF8F9FA)
 val White = Color(0xFFFFFFFF)

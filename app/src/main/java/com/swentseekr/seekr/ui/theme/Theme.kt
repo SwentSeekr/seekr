@@ -48,7 +48,8 @@ class AppColors(
     val difficultyIntermediate: Color,
     val mapRoute: Color,
     val liked: Color,
-    val disliked: Color
+    val disliked: Color,
+    val orangeButton: Color
 )
 
 val LocalAppColors = staticCompositionLocalOf {
@@ -57,11 +58,12 @@ val LocalAppColors = staticCompositionLocalOf {
         statusSport = StatusSport,
         difficultyEasy = DifficultyEasy,
         difficultyHard = DifficultyHard,
-        difficultyIntermediate = DifficultyIntermediate,
+        difficultyIntermediate = Orange,
         statusDiscover = StatusDiscover,
         mapRoute = Blue,
         liked = RedLike,
-        disliked = GrayDislike
+        disliked = GrayDislike,
+        orangeButton = Orange
     )
 }
 

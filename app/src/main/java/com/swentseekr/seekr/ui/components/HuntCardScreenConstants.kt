@@ -80,21 +80,6 @@ object HuntCardScreenDefaults {
   val OtherLineHeight = 20.sp
   val MinFontSize = 13.sp
 
-  val ImageIndicatorUnselectedColor: Color = Color.LightGray
-  val ImageIndicatorSelectedColor: Color = Color.DarkGray
-  val OrangeButton: Color = Color(0xFFFFA726)
-
-  val ScreenBackground: Color = Color(0xFFF8F9FA)
-  val LightGray: Color = Color(0xFFCCCCCC)
-
-  val ParagraphGray: Color = Color(0xFF444444)
-
-  val CardSoftGray: Color = Color(0xFFF5F5F5)
-
-  // Specific colors
-  val ErrorRed: Color = Color(0xFFEF5350)
-  val LikeRedStrong: Color = Color(0xFFFF5252)
-
   // New: review card visuals & logic constants
   val ReviewCardCornerRadius: Dp = 16.dp
   val ZeroElevation: Dp = 0.dp
