@@ -51,7 +51,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -216,8 +215,7 @@ fun HuntCardScreen(
               item {
                 Text(
                     HuntCardScreenStrings.REVIEWS,
-                    fontSize = HuntCardScreenDefaults.SmallFontSize, //AAA
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier =
                         Modifier.fillMaxWidth()
@@ -414,7 +412,7 @@ fun ModernStatCard(label: String, value: String, unit: String, modifier: Modifie
             horizontalAlignment = Alignment.CenterHorizontally) {
               Text(
                   text = label,
-                  style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
+                  style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
                           color = MaterialTheme.colorScheme.onSecondary)
 
               Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding4))
@@ -456,7 +454,7 @@ fun ModernDescriptionSection(description: String) {
         Column(modifier = Modifier.padding(HuntCardScreenDefaults.Padding20)) {
           Text(
               text = HuntCardScreenStrings.DESCRIPTION_LABEL,
-              style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+              style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                       color = MaterialTheme.colorScheme.onSurface)
           Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding12))
 
@@ -493,8 +491,7 @@ fun ModernMapSection(hunt: Hunt) {
         Column(modifier = Modifier.padding(HuntCardScreenDefaults.Padding20)) {
           Text(
               text = HuntCardScreenStrings.START_POINT_LABEL,
-              fontSize = HuntCardScreenDefaults.SmallFontSize, //AA
-              fontWeight = FontWeight.Bold,
+              style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
               color = MaterialTheme.colorScheme.onSurface)
 
           Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding12))
@@ -588,8 +585,8 @@ fun ModernActionButtons(
                   text =
                       if (isCurrentId) HuntCardScreenStrings.EDIT_HUNT
                       else HuntCardScreenStrings.ADD_REVIEW,
-                  fontSize = HuntCardScreenDefaults.DescriptionFontSize, //AA
-                  fontWeight = FontWeight.SemiBold)
+                  style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
+              )
             }
       }
 }
@@ -616,7 +613,7 @@ fun ModernEmptyReviewsState() {
               imageVector = Icons.Filled.Star,
               contentDescription = null,
               modifier = Modifier.size(HuntCardScreenDefaults.IconSize48),
-              tint = MaterialTheme.colorScheme.primaryContainer)
+              tint = MaterialTheme.colorScheme.onTertiaryContainer)
 
           Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding12))
 
@@ -752,7 +749,7 @@ private fun ReviewCardHeader(
                 text =
                     if (isCurrentUser) HuntCardScreenStrings.CURRENT_USER_INITIAL_LABEL
                     else initial,
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onPrimary)
           }
     }
@@ -812,7 +809,7 @@ private fun ReviewCardPhotosSection(
                 contentColor = MaterialTheme.colorScheme.onSurface),
         shape = RoundedCornerShape(HuntCardScreenDefaults.Padding8)) {
           Text(
-              "See Pictures (${review.photos.size})", fontSize = HuntCardScreenDefaults.MinFontSize)
+              "See Pictures (${review.photos.size})", style = MaterialTheme.typography.bodyMedium)
         }
   }
 }

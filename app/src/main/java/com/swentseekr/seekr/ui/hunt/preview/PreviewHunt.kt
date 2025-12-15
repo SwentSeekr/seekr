@@ -71,7 +71,7 @@ fun PreviewHuntScreen(
             })
       },
       modifier = Modifier.testTag(TEST_TAGS.PREVIEW_HUNT_SCREEN),
-      containerColor = HuntCardScreenDefaults.ScreenBackground) { innerPadding ->
+      containerColor = MaterialTheme.colorScheme.background) { innerPadding ->
         Column(
             modifier = modifier.fillMaxSize().padding(innerPadding).verticalScroll(scroll),
             verticalArrangement = Arrangement.Top) {
@@ -214,7 +214,7 @@ private fun PreviewDescriptionCard(ui: HuntUIState) {
               text = descriptionText,
               fontSize = HuntCardScreenDefaults.DescriptionFontSize,
               lineHeight = HuntCardScreenDefaults.DescriptionLineHeight,
-              color = HuntCardScreenDefaults.ParagraphGray)
+              color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
       }
 }
@@ -261,7 +261,7 @@ private fun PreviewStatusPointsCard(ui: HuntUIState) {
             Text(
                 text = ui.status?.name ?: STRINGS.NOT_SET,
                 fontSize = HuntCardScreenDefaults.DescriptionFontSize,
-                color = HuntCardScreenDefaults.ParagraphGray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.testTag(TEST_TAGS.HUNT_STATUS))
           }
 
@@ -277,7 +277,7 @@ private fun PreviewStatusPointsCard(ui: HuntUIState) {
             Text(
                 text = ui.points.size.toString(),
                 fontSize = HuntCardScreenDefaults.DescriptionFontSize,
-                color = HuntCardScreenDefaults.ParagraphGray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.testTag(TEST_TAGS.HUNT_POINTS))
           }
         }

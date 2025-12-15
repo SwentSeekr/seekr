@@ -7,7 +7,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -141,7 +141,7 @@ fun BaseAddPointsMapScreen(
                   onClick = onCancel,
                   modifier = Modifier.testTag(AddPointsMapScreenTestTags.CANCEL_BUTTON)) {
                     Icon(
-                        Icons.Default.ArrowBack,
+                        Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = AddPointsMapScreenDefaults.BACK_CONTENT_DESCRIPTION)
                   }
             })
