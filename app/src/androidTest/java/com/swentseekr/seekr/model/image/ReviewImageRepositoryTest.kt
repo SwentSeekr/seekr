@@ -46,14 +46,14 @@ class ReviewImageRepositoryTest {
   @After
   fun tearDown() = runBlocking {
     // Clean up: delete all uploaded files under review_photos
-    val list = storage.reference.child("review_photos").listAll().await()
+    val list = storage.reference.child(ReviewImagesRepositoryTestConstants.PATH).listAll().await()
     list.items.forEach { it.delete().await() }
     FirebaseAuth.getInstance().signOut()
   }
 
   /** Utility to create a temporary image file and return its Uri */
   private fun createTempUri(prefix: String = "test_img"): Uri {
-    val file = File.createTempFile(prefix, ".jpg")
+    val file = File.createTempFile(prefix, ReviewImagesRepositoryTestConstants.FORMAT)
     file.writeText("fake image content")
     return Uri.fromFile(file)
   }
@@ -63,9 +63,11 @@ class ReviewImageRepositoryTest {
     val uri = createTempUri("main")
     val url = repository.uploadReviewPhoto(userId, uri)
 
-    assertTrue("URL should not be empty", url.isNotEmpty())
+    assertTrue(ReviewImagesRepositoryTestConstants.URL_NOT_EMPTY, url.isNotEmpty())
     assertTrue(
-        "URL should start with http(s)://", url.startsWith("http://") || url.startsWith("https://"))
+        "URL should start with http(s)://",
+        url.startsWith(ReviewImagesRepositoryTestConstants.URL_STARTER) ||
+            url.startsWith(ReviewImagesRepositoryTestConstants.URL_STARTER))
   }
 
   @Test
@@ -85,7 +87,7 @@ class ReviewImageRepositoryTest {
     // Verify deletion
     try {
       storage.getReferenceFromUrl(url.toString()).metadata.await()
-      fail("File should have been deleted")
+      fail(ReviewImagesRepositoryTestConstants.FAIL_DELETE)
     } catch (e: Exception) {
       // expected
     }
@@ -131,10 +133,10 @@ class ReviewImageRepositoryTest {
 
     try {
       repository.uploadReviewPhoto(userId, badUri)
-      fail("Expected an exception but upload succeeded")
+      fail(ReviewImagesRepositoryTestConstants.UPLOAD_SUCCESSFULLY)
     } catch (e: Exception) {
       // SUCCESS: the catch block was executed and the exception was rethrown
-      assertTrue("Exception should be thrown for invalid URI", true)
+      assertTrue(ReviewImagesRepositoryTestConstants.EXCEPTION_INVALID_URI, true)
     }
   }
 }

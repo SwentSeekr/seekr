@@ -67,7 +67,9 @@ class HuntCardTest {
     composeTestRule.setContent { HuntCard(hunt, modifier = Modifier.Companion.padding(2.dp)) }
 
     // On recherche l’icône favorite par son contentDescription
-    composeTestRule.onNodeWithContentDescription("Like Button").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithContentDescription(HuntCardScreenConstantStrings.LIKE_BUTTON_LABEL)
+        .assertIsDisplayed()
   }
 
   @Test
@@ -83,7 +85,9 @@ class HuntCardTest {
           modifier = Modifier.padding(2.dp))
     }
 
-    composeTestRule.onNodeWithContentDescription("Like Button").performClick()
+    composeTestRule
+        .onNodeWithContentDescription(HuntCardScreenConstantStrings.LIKE_BUTTON_LABEL)
+        .performClick()
 
     assert(clickedHuntId == hunt.uid)
   }
@@ -96,6 +100,8 @@ class HuntCardTest {
       HuntCard(hunt, isLiked = true, onLikeClick = {}, modifier = Modifier.padding(2.dp))
     }
 
-    composeTestRule.onNodeWithContentDescription("Like Button").assertExists()
+    composeTestRule
+        .onNodeWithContentDescription(HuntCardScreenConstantStrings.LIKE_BUTTON_LABEL)
+        .assertExists()
   }
 }
