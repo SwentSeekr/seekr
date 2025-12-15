@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.*
@@ -54,60 +53,103 @@ sealed class SeekrDestination(
     val label: String,
     val icon: androidx.compose.ui.graphics.vector.ImageVector
 ) {
-  object Overview : SeekrDestination("overview", "Overview", Icons.AutoMirrored.Filled.List)
+  object Overview :
+      SeekrDestination(
+          SeekrNavigationDefaults.OVERVIEW_ROUTE,
+          SeekrNavigationDefaults.OVERVIEW_LABEL,
+          Icons.AutoMirrored.Filled.List)
 
-  object Map : SeekrDestination("map", "Map", Icons.Filled.Place)
+  object Map :
+      SeekrDestination(
+          SeekrNavigationDefaults.MAP_ROUTE, SeekrNavigationDefaults.MAP_LABEL, Icons.Filled.Place)
 
-  object Profile : SeekrDestination("profile", "Profile", Icons.Filled.Person) {
-    fun createRoute(userId: String) = "profile/$userId"
+  object Profile :
+      SeekrDestination(
+          SeekrNavigationDefaults.PROFILE_ROUTE,
+          SeekrNavigationDefaults.PROFILE_LABEL,
+          Icons.Filled.Person) {
+    fun createRoute(userId: String) = "${SeekrNavigationDefaults.PROFILE_PATH}$userId"
 
     const val ARG_USER_ID = "userId"
 
     object Reviews :
         SeekrDestination(
-            route = "profile/{${ARG_USER_ID}}/reviews",
-            label = "Profile Reviews",
+            route =
+                "${SeekrNavigationDefaults.PROFILE_PATH}{${ARG_USER_ID}}${SeekrNavigationDefaults.REVIEWS_PATH}",
+            label = SeekrNavigationDefaults.PROFILE_REVIEWS_LABEL,
             icon = Icons.AutoMirrored.Filled.List) {
-      fun createRoute(userId: String) = "profile/$userId/reviews"
+      fun createRoute(userId: String) =
+          "${SeekrNavigationDefaults.PROFILE_PATH}$userId${SeekrNavigationDefaults.REVIEWS_PATH}"
 
       const val ARG_USER_ID = Profile.ARG_USER_ID
     }
   }
 
-  object HuntCard : SeekrDestination("hunt/{huntId}", "Hunt", Icons.Filled.List) {
-    fun createRoute(huntId: String) = "hunt/$huntId"
+  object HuntCard :
+      SeekrDestination(
+          SeekrNavigationDefaults.HUNT_CARD_ROUTE,
+          SeekrNavigationDefaults.HUNT_CARD_LABEL,
+          Icons.AutoMirrored.Filled.List) {
+    fun createRoute(huntId: String) = "${SeekrNavigationDefaults.HUNT_PATH}$huntId"
 
     const val ARG_HUNT_ID = "huntId"
   }
 
-  object EditHunt : SeekrDestination("edit_hunt/{huntId}", "Edit Hunt", Icons.Filled.List) {
-    fun createRoute(huntId: String) = "edit_hunt/$huntId"
+  object EditHunt :
+      SeekrDestination(
+          SeekrNavigationDefaults.EDIT_HUNT_ROUTE,
+          SeekrNavigationDefaults.EDIT_HUNT_LABEL,
+          Icons.AutoMirrored.Filled.List) {
+    fun createRoute(huntId: String) = "${SeekrNavigationDefaults.EDIT_HUNT_PATH}$huntId"
 
     const val ARG_HUNT_ID = "huntId"
   }
 
-  object AddReview : SeekrDestination("add_review/{huntId}", "Add Review", Icons.Filled.List) {
-    fun createRoute(huntId: String) = "add_review/$huntId"
+  object AddReview :
+      SeekrDestination(
+          SeekrNavigationDefaults.ADD_REVIEW_ROUTE,
+          SeekrNavigationDefaults.ADD_REVIEW_LABEL,
+          Icons.AutoMirrored.Filled.List) {
+    fun createRoute(huntId: String) = "${SeekrNavigationDefaults.ADD_REVIEW_PATH}$huntId"
 
     const val ARG_HUNT_ID = "huntId"
   }
 
   object EditReview :
-      SeekrDestination("edit_review/{huntId}/{reviewId}", "Edit Review", Icons.Filled.List) {
-    fun createRoute(huntId: String, reviewId: String) = "edit_review/$huntId/$reviewId"
+      SeekrDestination(
+          SeekrNavigationDefaults.EDIT_REVIEW_ROUTE,
+          SeekrNavigationDefaults.EDIT_REVIEW_LABEL,
+          Icons.AutoMirrored.Filled.List) {
+    fun createRoute(huntId: String, reviewId: String) =
+        "${SeekrNavigationDefaults.EDIT_REVIEW_PATH}$huntId/$reviewId"
 
     const val ARG_HUNT_ID = "huntId"
     const val ARG_REVIEW_ID = "reviewId"
   }
 
-  object AddHunt : SeekrDestination("add_hunt", "Add Hunt", Icons.Filled.List)
+  object AddHunt :
+      SeekrDestination(
+          SeekrNavigationDefaults.ADD_HUNT_ROUTE,
+          SeekrNavigationDefaults.ADD_HUNT_LABEL,
+          Icons.AutoMirrored.Filled.List)
 
-  object Settings : SeekrDestination("settings", "Settings", Icons.Filled.List)
+  object Settings :
+      SeekrDestination(
+          SeekrNavigationDefaults.SETTINGS_ROUTE,
+          SeekrNavigationDefaults.SETTINGS_LABEL,
+          Icons.AutoMirrored.Filled.List)
 
   object TermsConditions :
-      SeekrDestination("terms_conditions", "Terms & Conditions", Icons.Filled.Info)
+      SeekrDestination(
+          SeekrNavigationDefaults.TERMS_AND_CONDITION_ROUTE,
+          SeekrNavigationDefaults.TERMS_AND_CONDITION_LABEL,
+          Icons.Filled.Info)
 
-  object EditProfile : SeekrDestination("edit_profile", "Edit Profile", Icons.Filled.List)
+  object EditProfile :
+      SeekrDestination(
+          SeekrNavigationDefaults.EDIT_PROFILE_ROUTE,
+          SeekrNavigationDefaults.EDIT_PROFILE_LABEL,
+          Icons.AutoMirrored.Filled.List)
 
   companion object {
     val all = listOf(Overview, Map, Profile)
@@ -132,7 +174,7 @@ fun SeekrNavigationBar(
                 is SeekrDestination.Overview -> NavigationTestTags.OVERVIEW_TAB
                 is SeekrDestination.Map -> NavigationTestTags.MAP_TAB
                 is SeekrDestination.Profile -> NavigationTestTags.PROFILE_TAB
-                else -> SeekrNavigationDefaults.IgnoredTestTag
+                else -> SeekrNavigationDefaults.IGNORED_TEST_TAG
               }
 
           val isSelected = currentDestination.route == dest.route
@@ -150,7 +192,7 @@ fun SeekrNavigationBar(
                                 Modifier.size(BottomNavUIConstants.IconHaloSize)
                                     .background(
                                         color =
-                                            iconColor.copy(alpha = BottomNavUIConstants.HaloAlpha),
+                                            iconColor.copy(alpha = BottomNavUIConstants.HALO_ALPHA),
                                         shape = BottomNavUIConstants.HaloShape))
                         Icon(
                             dest.icon,
@@ -288,7 +330,8 @@ fun SeekrMainNavHost(
               }
               // Public profile
               composable(
-                  route = "profile/{${SeekrDestination.Profile.ARG_USER_ID}}",
+                  route =
+                      "${SeekrNavigationDefaults.PROFILE_PATH}{${SeekrDestination.Profile.ARG_USER_ID}}",
                   arguments =
                       listOf(
                           navArgument(SeekrDestination.Profile.ARG_USER_ID) {
@@ -504,19 +547,29 @@ fun SeekrMainNavHost(
 
               // Review Images Screen
               composable(
-                  route = "reviewImages/{reviewId}",
-                  arguments = listOf(navArgument("reviewId") { type = NavType.StringType })) {
-                      backStackEntry ->
-                    val reviewId = backStackEntry.arguments?.getString("reviewId").orEmpty()
+                  route = SeekrNavigationDefaults.REVIEW_IMAGES_ROUTE,
+                  arguments =
+                      listOf(
+                          navArgument(SeekrNavigationDefaults.REVIEW_IMAGES_REVIEW_ID_ARG) {
+                            type = NavType.StringType
+                          })) { backStackEntry ->
+                    val reviewId =
+                        backStackEntry.arguments
+                            ?.getString(SeekrNavigationDefaults.REVIEW_IMAGES_REVIEW_ID_ARG)
+                            .orEmpty()
 
                     val reviewHuntViewModel: ReviewHuntViewModel = viewModel()
                     LaunchedEffect(reviewId) { reviewHuntViewModel.loadReview(reviewId) }
                     val uiState by reviewHuntViewModel.uiState.collectAsState()
 
-                    Surface(modifier = Modifier.fillMaxSize().testTag("IMAGE_REVIEW_SCREEN")) {
-                      ReviewImagesScreen(
-                          photoUrls = uiState.photos, onGoBack = { navController.popBackStack() })
-                    }
+                    Surface(
+                        modifier =
+                            Modifier.fillMaxSize()
+                                .testTag(NavigationTestTags.IMAGE_REVIEW_SCREEN)) {
+                          ReviewImagesScreen(
+                              photoUrls = uiState.photos,
+                              onGoBack = { navController.popBackStack() })
+                        }
                   }
 
               // Edit Profile (new)
@@ -533,9 +586,12 @@ fun SeekrMainNavHost(
               }
 
               composable(
-                  route = "profile/{userId}/reviews",
-                  arguments = listOf(navArgument("userId") { type = NavType.StringType })) {
-                      backStackEntry ->
+                  route = SeekrNavigationDefaults.PROFILE_REVIEWS_ROUTE,
+                  arguments =
+                      listOf(
+                          navArgument(SeekrNavigationDefaults.USER_ID) {
+                            type = NavType.StringType
+                          })) { backStackEntry ->
                     val userId =
                         backStackEntry.arguments
                             ?.getString(SeekrDestination.Profile.Reviews.ARG_USER_ID)

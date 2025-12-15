@@ -71,7 +71,8 @@ fun BoxScope.FocusedHuntControls(
       colors = ButtonDefaults.textButtonColors(containerColor = Green, contentColor = White)) {
         Text(
             text =
-                if (isHuntStarted) MapScreenStrings.StopHunt else MapScreenStrings.BackToAllHunts,
+                if (isHuntStarted) MapScreenStrings.STOP_HUNT
+                else MapScreenStrings.BACK_TO_ALL_HUNTS,
             style = MaterialTheme.typography.bodyMedium)
       }
 
@@ -106,7 +107,7 @@ private fun BoxScope.FocusedHuntBottomCard(
     onValidateCurrentLocation: () -> Unit,
     onFinishHunt: ((suspend (Hunt) -> Unit)?) -> Unit,
 ) {
-  val totalPoints = selectedHunt.middlePoints.size + MapScreenDefaults.MinScore
+  val totalPoints = selectedHunt.middlePoints.size + MapScreenDefaults.MIN_SCORE
   val validated = uiState.validatedCount
   val distanceToNext = uiState.currentDistanceToNextMeters
   val currentCheckpointInfo = calculateCurrentCheckpointInfo(selectedHunt, validated)
@@ -174,14 +175,14 @@ internal fun FullscreenCheckpointImage(
     Box(
         modifier =
             Modifier.fillMaxSize()
-                .background(Black.copy(alpha = MapScreenDefaults.BackgroundOpacity))) {
+                .background(Black.copy(alpha = MapScreenDefaults.BACKGROUND_OPACITY))) {
           AsyncImage(
               model = imageUrl,
               contentDescription = contentDescription,
               modifier =
                   Modifier.align(Alignment.Center)
                       .fillMaxWidth()
-                      .fillMaxHeight(MapScreenDefaults.BackgroundOpacity),
+                      .fillMaxHeight(MapScreenDefaults.BACKGROUND_OPACITY),
               contentScale = ContentScale.Fit,
               error = painterResource(R.drawable.empty_image),
           )
@@ -193,12 +194,12 @@ internal fun FullscreenCheckpointImage(
                       .padding(MapScreenDefaults.IconPadding)
                       .size(MapScreenDefaults.IconSize)
                       .background(
-                          color = Black.copy(alpha = MapScreenDefaults.IconBackground),
+                          color = Black.copy(alpha = MapScreenDefaults.ICON_BACKGROUND_ALPHA),
                           shape = CircleShape)
                       .testTag(MapScreenTestTags.CLOSE_CHECKPOINT_IMAGE)) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = MapScreenStrings.Cancel,
+                    contentDescription = MapScreenStrings.CANCEL,
                     tint = White)
               }
         }
@@ -237,8 +238,8 @@ private fun calculateCurrentCheckpointInfo(
  */
 private fun buildDistanceSuffix(distanceToNext: Int?): String =
     distanceToNext?.let {
-      "${MapScreenStrings.IN}$it${MapScreenStrings.DistanceMetersSuffix}${MapScreenStrings.SLASH}" +
-          "${MapConfig.ValidationRadiusMeters}${MapScreenStrings.DistanceMetersSuffix}"
+      "${MapScreenStrings.IN}$it${MapScreenStrings.DISTANCE_METERS_SUFFIX}${MapScreenStrings.SLASH}" +
+          "${MapConfig.VALIDATION_RADIUS_METERS}${MapScreenStrings.DISTANCE_METERS_SUFFIX}"
     } ?: ""
 
 /**
@@ -268,7 +269,7 @@ private fun ProgressHeader(validated: Int, totalPoints: Int) {
       modifier = Modifier.fillMaxWidth(),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically) {
-        Text(text = MapScreenStrings.Progress, style = MaterialTheme.typography.bodyMedium)
+        Text(text = MapScreenStrings.PROGRESS, style = MaterialTheme.typography.bodyMedium)
         Text(
             modifier = Modifier.testTag(MapScreenTestTags.PROGRESS),
             text = "$validated${MapScreenStrings.SLASH}$totalPoints",
@@ -326,7 +327,7 @@ fun NextCheckpointSection(
   if (!imageUrl.isNullOrBlank()) {
     AsyncImage(
         model = imageUrl,
-        contentDescription = checkpointName + MapScreenStrings.HuntImageDescriptionSuffix,
+        contentDescription = checkpointName + MapScreenStrings.HUNT_IMAGE_DESCRIPTION_SUFFIX,
         modifier =
             Modifier.fillMaxWidth()
                 .height(MapScreenDefaults.PopupImageSize)
@@ -341,7 +342,7 @@ fun NextCheckpointSection(
   }
 
   Text(
-      text = "${MapScreenStrings.NextStopPrefix}$checkpointName$distanceSuffix",
+      text = "${MapScreenStrings.NEXT_STOP_PREFIX}$checkpointName$distanceSuffix",
       style = MaterialTheme.typography.titleSmall)
 
   if (checkpointDescription.isNotBlank()) {
@@ -409,7 +410,7 @@ private fun StartHuntButton(onStartHunt: () -> Unit) {
         modifier = Modifier.testTag(MapScreenTestTags.START),
         onClick = onStartHunt,
         colors = ButtonDefaults.buttonColors(containerColor = Green, contentColor = White)) {
-          Text(MapScreenStrings.StartHunt)
+          Text(MapScreenStrings.START_HUNT)
         }
   }
 }
@@ -437,7 +438,7 @@ private fun HuntActionsRow(
             modifier = Modifier.testTag(MapScreenTestTags.VALIDATE),
             onClick = onValidateCurrentLocation,
             colors = ButtonDefaults.textButtonColors(contentColor = Green)) {
-              Text(MapScreenStrings.Validate)
+              Text(MapScreenStrings.VALIDATE)
             }
 
         Button(
@@ -450,7 +451,7 @@ private fun HuntActionsRow(
                     ProfileRepositoryProvider.repository.addDoneHunt(userId, finished)
                   }
                 } catch (e: Exception) {
-                  android.util.Log.e(MapScreenTestTags.MAP_SCREEN, MapScreenStrings.Fail, e)
+                  android.util.Log.e(MapScreenTestTags.MAP_SCREEN, MapScreenStrings.FAIL, e)
                 }
               }
             },
@@ -458,7 +459,7 @@ private fun HuntActionsRow(
             colors =
                 ButtonDefaults.buttonColors(
                     containerColor = if (canFinish) Green else GrayDislike, contentColor = White)) {
-              Text(MapScreenStrings.FinishHunt)
+              Text(MapScreenStrings.FINISH_HUNT)
             }
       }
 }
@@ -474,12 +475,12 @@ fun StopHuntDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
   AlertDialog(
       modifier = Modifier.testTag(MapScreenTestTags.STOP_POPUP),
       onDismissRequest = onDismiss,
-      title = { Text(MapScreenStrings.StopHuntTitle) },
-      text = { Text(MapScreenStrings.StopHuntMessage) },
+      title = { Text(MapScreenStrings.STOP_HUNT_TITLE) },
+      text = { Text(MapScreenStrings.STOP_HUNT_MESSAGE) },
       confirmButton = {
         TextButton(modifier = Modifier.testTag(MapScreenTestTags.CONFIRM), onClick = onConfirm) {
-          Text(MapScreenStrings.ConfirmStopHunt)
+          Text(MapScreenStrings.CONFIRM_STOP_HUNT)
         }
       },
-      dismissButton = { TextButton(onClick = onDismiss) { Text(MapScreenStrings.Cancel) } })
+      dismissButton = { TextButton(onClick = onDismiss) { Text(MapScreenStrings.CANCEL) } })
 }

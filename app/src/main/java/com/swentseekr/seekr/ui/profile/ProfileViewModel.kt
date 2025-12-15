@@ -69,7 +69,10 @@ class ProfileViewModel(
           val reviews = HuntReviewRepositoryProvider.repository.getHuntReviews(hunt.uid)
           total += reviews.size
         } catch (e: Exception) {
-          Log.e("ProfileViewModel", "Failed to load reviews for hunt ${hunt.uid}", e)
+          Log.e(
+              ProfileViewModelConstants.PROFILE_VIEW_MODEL_TEST_TAG,
+              "${ProfileViewModelConstants.FAIL_LOAD_REVIEWS} ${hunt.uid}",
+              e)
         }
       }
       _totalReviews.value = total
@@ -91,7 +94,9 @@ class ProfileViewModel(
         val likedHunts = repository.getLikedHunts(uidToLoad)
 
         if (profile == null) {
-          updateUiState { it.copy(errorMsg = "Profile not found", isLoading = false) }
+          updateUiState {
+            it.copy(errorMsg = ProfileViewModelConstants.PROFILE_NOT_FOUND, isLoading = false)
+          }
           return@launch
         }
 
@@ -111,8 +116,9 @@ class ProfileViewModel(
         }
       } catch (e: Exception) {
         val msg =
-            if (e.message?.contains("not found", ignoreCase = true) == true) "Profile not found"
-            else e.message ?: "Failed to load profile"
+            if (e.message?.contains(ProfileViewModelConstants.NOT_FOUND, ignoreCase = true) == true)
+                ProfileViewModelConstants.PROFILE_NOT_FOUND
+            else e.message ?: ProfileViewModelConstants.FAIL_LOAD_PROFILE
 
         updateUiState { it.copy(errorMsg = msg, isLoading = false) }
       }
@@ -136,21 +142,26 @@ class ProfileViewModel(
   }
 
   private fun calculateAverageReview(myHunts: List<Hunt>): Double {
-    if (myHunts.isEmpty()) return 0.0
-    return myHunts.map { it.reviewRate }.average().coerceIn(0.0, 5.0)
+    if (myHunts.isEmpty()) return ProfileViewModelNumbers.MIN_REVIEW_RATE
+    return myHunts
+        .map { it.reviewRate }
+        .average()
+        .coerceIn(ProfileViewModelNumbers.MIN_REVIEW_RATE, ProfileViewModelNumbers.MAX_REVIEW_RATE)
   }
 
   private fun calculateAverageSport(doneHunts: List<Hunt>): Double {
-    if (doneHunts.isEmpty()) return 0.0
+    if (doneHunts.isEmpty()) return ProfileViewModelNumbers.MIN_SPORT_RATE
     val points =
         doneHunts.map {
           when (it.difficulty) {
-            Difficulty.EASY -> 1.0
-            Difficulty.INTERMEDIATE -> 3.0
-            Difficulty.DIFFICULT -> 5.0
+            Difficulty.EASY -> ProfileViewModelNumbers.EASY_SPORT_RATE
+            Difficulty.INTERMEDIATE -> ProfileViewModelNumbers.INTERMEDIATE_SPORT_RATE
+            Difficulty.DIFFICULT -> ProfileViewModelNumbers.DIFFICULT_SPORT_RATE
           }
         }
-    return points.average().coerceIn(0.0, 5.0)
+    return points
+        .average()
+        .coerceIn(ProfileViewModelNumbers.MIN_SPORT_RATE, ProfileViewModelNumbers.MAX_SPORT_RATE)
   }
 
   fun refreshUIState(context: Context? = null) {
@@ -198,7 +209,7 @@ class ProfileViewModel(
           } else state
         }
       } catch (e: Exception) {
-        _uiState.value = _uiState.value.copy(errorMsg = "Failed to load hunts")
+        _uiState.value = _uiState.value.copy(errorMsg = ProfileViewModelConstants.FAIL_LOAD_HUNTS)
       }
     }
   }
@@ -262,7 +273,7 @@ class ProfileViewModel(
 
         context?.let { ProfileCache.saveProfile(it, updatedProfile) }
       } catch (e: Exception) {
-        Log.e("PROFILE", "Failed to toggle liked hunt", e)
+        Log.e(ProfileViewModelConstants.PROFILE_TEST_TAG, ProfileViewModelConstants.FAIL_LIKE, e)
       }
     }
   }

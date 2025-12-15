@@ -11,21 +11,21 @@ object MapScreenDefaults {
   val PopupSpacing: Dp = 6.dp
   val PopupImageSize: Dp = 125.dp
   val PopupImageCornerRadius: Dp = 8.dp
-  const val ChipBackgroundAlpha: Float = 0.25f
-  const val ChipContentDarkenFactor: Float = 0.7f
-  const val BackgroundOpacity: Float = 0.9f
+  const val CHIP_BACKGROUND_ALPHA: Float = 0.25f
+  const val CHIP_CONTENT_DARKEN_FACTOR: Float = 0.7f
+  const val BACKGROUND_OPACITY: Float = 0.9f
 
   val ChipHorizontalPadding: Dp = 8.dp
   val ChipVerticalPadding: Dp = 4.dp
   val ChipCornerRadius: Dp = 50.dp
-  const val UnitPointSize = 1
-  const val MaxLines = 2
-  const val MinScore = 2
+  const val UNIT_POINT_SIZE = 1
+  const val MAX_LINES = 2
+  const val MIN_SCORE = 2
 
-  const val UserLocationZoom = 16f
-  const val FocusedZoom = 15f
-  const val BoundsPadding = 100
-  const val RouteStrokeWidth = 12f
+  const val USER_LOCATION_ZOOM = 16f
+  const val FOCUSED_ZOOM = 15f
+  const val BOUNDS_PADDING = 100
+  const val ROUTE_STROKE_WIDTH = 12f
 
   val MarkerImageSize = 50.dp
   val MarkerCornerRadius = 8.dp
@@ -38,61 +38,66 @@ object MapScreenDefaults {
   val ProgressBarHeight: Dp = 6.dp
   val ProgressTickSpacing: Dp = 4.dp
   val ProgressSegmentCornerRadius: Dp = 4.dp
-  val CustomMarkerBorderWidth: Float = 5f
+  const val CUSTOM_MARKER_BORDER_WIDTH: Float = 5f
   val IconPadding: Dp = 16.dp
   val IconSize: Dp = 36.dp
-  val IconBackground: Float = 0.6f
+  const val ICON_BACKGROUND_ALPHA: Float = 0.6f
+  const val DEFAULT_MIN_POINT = 2
+  const val ONE = 1
 }
 
 object MapConfig {
-  const val DefaultLat = 46.519962
-  const val DefaultLng = 6.633597
-  const val DefaultCityName = "Lausanne"
+  const val DEFAULT_LAT = 46.519962
+  const val DEFAULT_LNG = 6.633597
+  const val DEFAULT_CITY_NAME = "Lausanne"
 
-  const val DirectionsConnectTimeoutMs = 15_000
-  const val DirectionsReadTimeoutMs = 15_000
-  const val DirectionsBaseUrl = "https://maps.googleapis.com/maps/api/directions/json"
-  const val TravelModeWalking = "walking"
+  const val DIRECTIONS_CONNECT_TIMEOUT_MS = 15_000
+  const val DIRECTIONS_READ_TIMEOUT_MS = 15_000
+  const val DIRECTIONS_BASE_URL = "https://maps.googleapis.com/maps/api/directions/json"
+  const val TRAVEL_MODE_WALKING = "walking"
 
-  const val DefaultValidatedCount = 0
-  const val ValidationRadiusMeters = 25
+  const val DEFAULT_VALIDATED_COUNT = 0
+  const val VALIDATION_RADIUS_METERS = 25
   const val LOCATION_UPDATE_INTERVAL_MS = 2000L
   const val LOCATION_FASTEST_INTERVAL_MS = 1000L
 }
 
 object MapScreenStrings {
-  const val StartPrefix = "Start: "
-  const val EndPrefix = "End: "
-  const val HuntImageDescriptionSuffix = " image"
-  const val PermissionExplanation =
+  const val START_PREFIX = "Start: "
+  const val END_PREFIX = "End: "
+  const val HUNT_IMAGE_DESCRIPTION_SUFFIX = " image"
+  const val PERMISSION_EXPLANATION =
       "Seekr needs access to your location to display hunts near you on the map!"
-  const val GrantPermission = "Grant Location Permission"
-  const val BackToAllHunts = "Back to all hunts"
-  const val Cancel = "Cancel"
-  const val ViewHunt = "View Hunt"
-  const val Progress = "Progress: "
-  const val StartHunt = "Start Hunt"
-  const val Validate = "Validate"
-  const val FinishHunt = "Finish hunt"
-  const val StopHunt = "Stop hunt"
+  const val GRANT_PERMISSION = "Grant Location Permission"
+  const val BACK_TO_ALL_HUNTS = "Back to all hunts"
+  const val CANCEL = "Cancel"
+  const val VIEW_HUNT = "View Hunt"
+  const val PROGRESS = "Progress: "
+  const val START_HUNT = "Start Hunt"
+  const val VALIDATE = "Validate"
+  const val FINISH_HUNT = "Finish hunt"
+  const val STOP_HUNT = "Stop hunt"
 
-  const val StopHuntTitle = "Stop current hunt?"
-  const val StopHuntMessage =
+  const val STOP_HUNT_TITLE = "Stop current hunt?"
+  const val STOP_HUNT_MESSAGE =
       "Are you sure you want to stop this hunt? Your current progress will be lost."
-  const val ConfirmStopHunt = "Stop"
+  const val CONFIRM_STOP_HUNT = "Stop"
 
-  const val NextStopPrefix = "Next stop: "
-  const val DistanceMetersSuffix = " m"
-  const val ErrorTooFarPrefix = "You are too far from the checkpoint. Minimum distance: "
+  const val NEXT_STOP_PREFIX = "Next stop: "
+  const val DISTANCE_METERS_SUFFIX = " m"
+  const val ERROR_TOO_FAR_PREFIX = "You are too far from the checkpoint. Minimum distance: "
 
-  const val ErrorLoadHuntsPrefix = "Failed to load hunts: "
-  const val ErrorRoutePrefix = "Failed to get route: "
-  const val ErrorFinishHuntPrefix = "Failed to finish hunt: "
-  const val ErrorIncompleteHunt = "You still have checkpoints to validate."
+  const val ERROR_LOAD_HUNTS_PREFIX = "Failed to load hunts: "
+  const val ERROR_ROUTE_PREFIX = "Failed to get route: "
+  const val ERROR_FINISH_HUNT_PREFIX = "Failed to finish hunt: "
+  const val ERROR_INCOMPLETE_HUNT = "You still have checkpoints to validate."
 
-  const val Fail = "Failed to add done hunt"
+  const val FAIL = "Failed to add done hunt"
   const val IN = " in "
   const val SLASH = " / "
+
+  const val ERROR_RESOURCE_ID = "Resource ID"
+  const val BEEN_LOADED = "could not be loaded as a drawable."
 }
 
 object MapScreenTestTags {

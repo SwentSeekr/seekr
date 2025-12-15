@@ -93,7 +93,7 @@ fun BaseAddPointsMapScreen(
         if (location != null) {
           val target = LatLng(location.latitude, location.longitude)
           cameraPositionState.move(
-              CameraUpdateFactory.newLatLngZoom(target, MapScreenDefaults.UserLocationZoom))
+              CameraUpdateFactory.newLatLngZoom(target, MapScreenDefaults.USER_LOCATION_ZOOM))
         }
       }
     } catch (_: SecurityException) {
@@ -151,7 +151,7 @@ fun BaseAddPointsMapScreen(
           Button(
               onClick = { onDone(points) },
               modifier = Modifier.fillMaxWidth().testTag(AddPointsMapScreenTestTags.CONFIRM_BUTTON),
-              enabled = points.size >= MapScreenDefaults.MinScore,
+              enabled = points.size >= MapScreenDefaults.MIN_SCORE,
           ) {
             Text("${AddPointsMapScreenDefaults.CONFIRM_BUTTON_LABEL} (${points.size})")
           }

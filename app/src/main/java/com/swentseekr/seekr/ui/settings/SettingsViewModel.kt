@@ -206,7 +206,7 @@ class SettingsViewModel(private val authRepository: AuthRepository = AuthReposit
   private fun openAppSettings(context: Context) {
     val intent =
         Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-          data = Uri.fromParts("package", context.packageName, null)
+          data = Uri.fromParts(SettingsScreenStrings.PACKAGE, context.packageName, null)
         }
     context.startActivity(intent)
   }
