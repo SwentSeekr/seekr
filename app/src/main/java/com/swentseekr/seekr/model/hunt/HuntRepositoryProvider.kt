@@ -2,6 +2,8 @@ package com.swentseekr.seekr.model.hunt
 
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
+import com.swentseekr.seekr.model.map.Location
+import kotlinx.coroutines.runBlocking
 
 /**
  * Provides a single instance of the repository in the app. `repository` is mutable for testing
