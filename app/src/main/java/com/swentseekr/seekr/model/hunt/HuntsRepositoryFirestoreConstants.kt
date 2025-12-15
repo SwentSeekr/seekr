@@ -24,6 +24,8 @@ object HuntsRepositoryFirestoreConstantsStrings {
   const val OTHER_IMAGE = "otherImagesUrls"
   const val RATING_REVIEW = "reviewRate"
   const val ERROR_CONVERTING = "Error converting document to Hunt"
+  const val HUNT_REVIEW_REPLY_COLLECTION_PATH = "huntReviewReplies"
+  const val FIELD_HUNT_ID = "huntId"
 }
 
 object HuntsRepositoryFirestoreConstantsDefault {
