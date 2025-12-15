@@ -67,7 +67,9 @@ fun SettingsScreen(
             title = {
               Text(
                   SettingsScreenStrings.TOP_BAR_TITLE,
-                  style = MaterialTheme.typography.headlineSmall)
+                  style = MaterialTheme.typography.headlineSmall,
+                  color = MaterialTheme.colorScheme.onSurface
+              )
             },
             navigationIcon = {
               IconButton(
@@ -75,7 +77,9 @@ fun SettingsScreen(
                   modifier = Modifier.testTag(SettingsScreenTestTags.BACK_BUTTON)) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = SettingsScreenStrings.BACK_CONTENT_DESCRIPTION)
+                        contentDescription = SettingsScreenStrings.BACK_CONTENT_DESCRIPTION,
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
                   }
             },
             colors =
@@ -320,10 +324,13 @@ fun SettingsContent(
               Icon(
                   imageVector = Icons.Filled.AccountCircle,
                   contentDescription = null,
+                  tint = MaterialTheme.colorScheme.onErrorContainer,
                   modifier = Modifier.padding(end = UI_SET.PADDING_TINY))
               Text(
                   text = SettingsScreenStrings.LOGOUT_LABEL,
-                  style = MaterialTheme.typography.titleMedium)
+                  style = MaterialTheme.typography.titleMedium,
+                  color = MaterialTheme.colorScheme.onErrorContainer
+              )
             }
       }
 }

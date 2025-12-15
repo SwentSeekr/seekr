@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -41,7 +42,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.swentseekr.seekr.model.hunt.Difficulty
@@ -52,17 +52,16 @@ import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Alpha02
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Border1
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Border2
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.FilterItemPadding
-import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Gray666
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.HorizontalPadding20
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.SearchBarCornerRadius
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.SearchBarElevation
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.SearchBarHeight
-import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.SmallFontSize
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding12
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding16
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding2
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding8
 import com.swentseekr.seekr.ui.overview.OverviewScreenStrings.FilterBy
+import com.swentseekr.seekr.ui.theme.LocalAppColors
 
 /**
  * Overview screen displaying the main hunt discovery experience.
@@ -104,7 +103,7 @@ fun OverviewScreen(
       rememberPullRefreshState(
           refreshing = uiState.isRefreshing, onRefresh = { overviewViewModel.refreshUIState() })
 
-  Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.onPrimary)) {
+  Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
     Column(
         modifier = Modifier.fillMaxWidth().testTag(OverviewScreenTestTags.OVERVIEW_SCREEN),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -122,7 +121,7 @@ fun OverviewScreen(
                   .pullRefresh(pullRefreshState)) {
             LazyColumn(
                 modifier = modifier.testTag(OverviewScreenTestTags.HUNT_LIST).fillMaxSize(),
-                contentPadding = PaddingValues(bottom = OverviewScreenDefaults.VerticalPadding16),
+                contentPadding = PaddingValues(bottom = VerticalPadding16),
                 horizontalAlignment = Alignment.CenterHorizontally) {
                   item {
                     // MODERN SEARCH BAR
@@ -203,13 +202,12 @@ fun ModernHeader() {
               .padding(horizontal = HorizontalPadding20, vertical = VerticalPadding16)) {
         Text(
             text = OverviewScreenStrings.Title,
-            fontSize = OverviewScreenDefaults.DiscoverFontSize,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.onSurface)
         Text(
             text = OverviewScreenStrings.SubTitle,
-            fontSize = OverviewScreenDefaults.NextAdventureFontSize,
-            color = Gray666,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier.padding(top = FilterItemPadding))
       }
 }
@@ -249,7 +247,7 @@ fun ModernSearchBar(
       placeholder = {
         Text(
             OverviewScreenStrings.SearchPlaceholder,
-            color = OverviewScreenDefaults.Gray999,
+            color = MaterialTheme.colorScheme.outline,
             style = MaterialTheme.typography.bodyMedium)
       },
       leadingIcon = {
@@ -257,7 +255,7 @@ fun ModernSearchBar(
           Icon(
               imageVector = Icons.Default.Search,
               contentDescription = OverviewScreenStrings.SearchIconDescription,
-              tint = Gray666)
+              tint = MaterialTheme.colorScheme.tertiary)
         } else null
       },
       trailingIcon = {
@@ -265,7 +263,7 @@ fun ModernSearchBar(
           Icon(
               imageVector = Icons.Default.Clear,
               contentDescription = OverviewScreenStrings.ClearIconDescription,
-              tint = Gray666,
+              tint = MaterialTheme.colorScheme.tertiary,
               modifier = Modifier.clickable { onClear() })
         } else null
       },
@@ -314,9 +312,8 @@ fun ModernFilterBar(
     // SECTION TITLE
     Text(
         text = FilterBy,
-        fontSize = SmallFontSize,
-        fontWeight = FontWeight.SemiBold,
-        color = Gray666,
+        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+        color = MaterialTheme.colorScheme.tertiary,
         modifier = Modifier.padding(horizontal = HorizontalPadding20, vertical = VerticalPadding8))
 
     val huntStatuses = remember { HuntStatus.values() }
@@ -386,15 +383,15 @@ fun ModernFilterChip(
       label = {
         Text(
             text = text,
-            fontSize = SmallFontSize,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium)
+            style = if (isSelected) MaterialTheme.typography.bodyLarge
+            else MaterialTheme.typography.bodyMedium)
       },
       modifier = modifier,
       colors =
           FilterChipDefaults.filterChipColors(
               containerColor = MaterialTheme.colorScheme.onPrimary,
               selectedContainerColor = color.copy(alpha = Alpha02),
-              labelColor = Gray666,
+              labelColor = MaterialTheme.colorScheme.tertiary,
               selectedLabelColor = color),
       border =
           FilterChipDefaults.filterChipBorder(
@@ -414,11 +411,12 @@ fun ModernFilterChip(
  *
  * @param status HuntStatus value.
  */
+@Composable
 fun getStatusColor(status: HuntStatus): Color {
   return when (status) {
-    HuntStatus.FUN -> OverviewScreenDefaults.StatusFun // Purple
-    HuntStatus.DISCOVER -> OverviewScreenDefaults.StatusDiscover // Blue
-    HuntStatus.SPORT -> OverviewScreenDefaults.StatusSport // Orange-red
+    HuntStatus.FUN -> LocalAppColors.current.statusFun
+    HuntStatus.DISCOVER -> LocalAppColors.current.statusDiscover
+    HuntStatus.SPORT -> LocalAppColors.current.statusSport
   }
 }
 
@@ -429,11 +427,12 @@ fun getStatusColor(status: HuntStatus): Color {
  *
  * @param difficulty The selected difficulty.
  */
+@Composable
 fun getDifficultyColor(difficulty: Difficulty): Color {
   return when (difficulty) {
-    Difficulty.EASY -> OverviewScreenDefaults.DifficultyEasy // Green
-    Difficulty.INTERMEDIATE -> OverviewScreenDefaults.DifficultyIntermediate // Orange
-    Difficulty.DIFFICULT -> OverviewScreenDefaults.DifficultyHard // Red
+    Difficulty.EASY -> LocalAppColors.current.difficultyEasy
+    Difficulty.INTERMEDIATE -> LocalAppColors.current.difficultyIntermediate
+    Difficulty.DIFFICULT -> LocalAppColors.current.difficultyHard
   }
 }
 
@@ -467,7 +466,7 @@ fun FilterButton(
               containerColor =
                   if (isSelected) MaterialTheme.colorScheme.primary
                   else MaterialTheme.colorScheme.onSecondary),
-      modifier = modifier.padding(OverviewScreenDefaults.FilterItemPadding)) {
+      modifier = modifier.padding(FilterItemPadding)) {
         Text(text)
       }
 }

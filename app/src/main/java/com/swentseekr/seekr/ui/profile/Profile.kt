@@ -33,7 +33,6 @@ import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.author.Author
@@ -46,6 +45,7 @@ import com.swentseekr.seekr.ui.profile.ProfileScreenConstants.MULTIPLE_REVIEWS_L
 import com.swentseekr.seekr.ui.profile.ProfileScreenConstants.ONE_DECIMAL_FORMAT
 import com.swentseekr.seekr.ui.profile.ProfileScreenConstants.SINGLE_REVIEW
 import com.swentseekr.seekr.ui.profile.ProfileScreenConstants.SINGLE_REVIEW_LABEL
+import com.swentseekr.seekr.ui.theme.ProfileTypography
 import kotlinx.serialization.Serializable
 
 // -------------------------
@@ -78,8 +78,7 @@ object ProfileTestTags {
 // ORIGINAL CONSTANTS
 // -------------------------
 object ProfileConstants {
-  val TEXT_SIZE_LOADING = 18.sp
-  val SIZE_MEDIUM_DP = 16.dp
+    val SIZE_MEDIUM_DP = 16.dp
   val SIZE_ICON = 40.dp
 
   const val LOADING_PROFILE = "Loading profile..."
@@ -149,17 +148,17 @@ fun ProfileScreen(
     Box(
         modifier =
             Modifier.fillMaxSize()
-                .background(ProfileUIConstantsDefaults.LightGrayBackground)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .testTag(ProfileTestTags.PROFILE_LOADING),
         contentAlignment = Alignment.Center) {
           Column(
               horizontalAlignment = Alignment.CenterHorizontally,
               verticalArrangement = Arrangement.Center) {
-                CircularProgressIndicator(color = ProfileUIConstantsDefaults.LoadingIndicatorGreen)
+                CircularProgressIndicator(color =  MaterialTheme.colorScheme.primary)
                 Text(
                     text = ProfileConstants.LOADING_PROFILE,
-                    color = ProfileUIConstantsDefaults.LoadingGray,
-                    fontSize = ProfileConstants.TEXT_SIZE_LOADING,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = ProfileTypography.bodyMedium,
                     modifier = Modifier.padding(top = ProfileConstants.SIZE_MEDIUM_DP))
               }
         }
@@ -168,9 +167,10 @@ fun ProfileScreen(
   if (uiState.errorMsg != null) {
     Box(
         modifier =
-            Modifier.fillMaxSize().background(ProfileUIConstantsDefaults.LightGrayBackground),
+            Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant),
         contentAlignment = Alignment.Center) {
-          Text("Error: ${uiState.errorMsg}", color = ProfileUIConstantsDefaults.ErrorRed)
+          Text("Error: ${uiState.errorMsg}", color = MaterialTheme.colorScheme.error,
+              style = ProfileTypography.bodyLarge)
         }
     return
   }
@@ -181,9 +181,9 @@ fun ProfileScreen(
     AnimatedVisibility(visible = !uiState.isLoading, enter = fadeIn(), exit = fadeOut()) {
       Box(
           modifier =
-              Modifier.fillMaxSize().background(ProfileUIConstantsDefaults.LightGrayBackground),
+              Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant),
           contentAlignment = Alignment.Center) {
-            Text(ProfileConstants.NO_PROFILE_FOUND, color = ProfileUIConstantsDefaults.LoadingGray)
+            Text(ProfileConstants.NO_PROFILE_FOUND, color = MaterialTheme.colorScheme.onSurfaceVariant, style = ProfileTypography.bodyLarge)
           }
     }
     return
@@ -207,7 +207,7 @@ fun ProfileScreen(
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = ProfileConstants.ADD_DESCRIPTION,
-                    modifier = Modifier.size(ProfileUIConstantsDefaults.Size28))
+                    modifier = Modifier.size(ProfileUIConstantsDefaults.Size28)) //AA
               }
         }
       },
@@ -281,7 +281,7 @@ fun ModernProfileHeader(
                       colors =
                           listOf(
                               MaterialTheme.colorScheme.primary,
-                              ProfileUIConstantsDefaults.ProfileHeaderGradientEnd)))) {
+                              MaterialTheme.colorScheme.secondary)))) {
         Column(modifier = Modifier.fillMaxWidth().padding(ProfileUIConstantsDefaults.Padding20)) {
 
           // TOP RIGHT BUTTON : SETTINGS or BACK
@@ -335,8 +335,7 @@ fun ModernProfileHeader(
             Column(modifier = Modifier.weight(ProfileUIConstantsDefaults.Weight)) {
               Text(
                   text = profile.author.pseudonym,
-                  fontSize = ProfileUIConstantsDefaults.Font22,
-                  fontWeight = FontWeight.Bold,
+                  style = ProfileTypography.titleLarge,
                   color = MaterialTheme.colorScheme.onPrimary,
                   modifier = Modifier.testTag(ProfileTestTags.PROFILE_PSEUDONYM))
 
@@ -344,7 +343,7 @@ fun ModernProfileHeader(
 
               Text(
                   text = profile.author.bio,
-                  fontSize = ProfileUIConstantsDefaults.Font14,
+                  style = ProfileTypography.bodyMedium,
                   color =
                       MaterialTheme.colorScheme.onPrimary.copy(
                           alpha = ProfileUIConstantsDefaults.AlphaMedium),
@@ -416,14 +415,13 @@ fun ModernStatCard(
               Column {
                 Text(
                     text = "$value/${MAX_RATING}",
-                    fontSize = ProfileUIConstantsDefaults.Font16,
-                    fontWeight = FontWeight.Bold,
+                    style = ProfileTypography.bodyLarge,
                     color = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.testTag(testTagValue))
 
                 Text(
                     text = label,
-                    fontSize = ProfileUIConstantsDefaults.Font12,
+                    style = ProfileTypography.labelSmall,
                     color =
                         MaterialTheme.colorScheme.onPrimary.copy(
                             alpha = ProfileUIConstantsDefaults.AlphaMedium),
@@ -449,18 +447,14 @@ fun ModernCustomToolbar(selectedTab: ProfileTab, onTabSelected: (ProfileTab) -> 
             modifier =
                 Modifier.fillMaxWidth().padding(vertical = ProfileUIConstantsDefaults.Padding8),
             horizontalArrangement = Arrangement.SpaceEvenly) {
+            val selectedColor = MaterialTheme.colorScheme.primary
+            val unselectedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
               tabs.forEach { item ->
                 val isSelected = selectedTab == item.tab
-                val color =
-                    if (isSelected) ProfileUIConstantsDefaults.ToolbarGreen
-                    else ProfileUIConstantsDefaults.TabInactiveGray
-
-                val backgroundColor =
-                    if (isSelected)
-                        ProfileUIConstantsDefaults.ToolbarGreen.copy(
-                            alpha = ProfileUIConstantsDefaults.AlphaLight)
-                    else Color.Transparent
-
+                  val color = if (isSelected) selectedColor else unselectedColor
+                  val backgroundColor =
+                    if (isSelected) selectedColor.copy(alpha = 0.1f)
+                        else Color.Transparent
                 Surface(
                     modifier =
                         Modifier.weight(ProfileUIConstantsDefaults.Weight)
@@ -477,7 +471,7 @@ fun ModernCustomToolbar(selectedTab: ProfileTab, onTabSelected: (ProfileTab) -> 
                             Icon(
                                 imageVector = item.icon,
                                 contentDescription = item.tab.name,
-                                tint = color,
+                                tint = if (isSelected) selectedColor else unselectedColor ,
                                 modifier = Modifier.size(ProfileUIConstantsDefaults.Size24))
 
                             Spacer(modifier = Modifier.height(ProfileUIConstantsDefaults.Padding4))
@@ -492,8 +486,10 @@ fun ModernCustomToolbar(selectedTab: ProfileTab, onTabSelected: (ProfileTab) -> 
                                       ProfileTab.LIKED_HUNTS ->
                                           ProfileUIConstantsDefaults.TabLikedLabel
                                     },
-                                fontSize = 12.sp,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                style = if (isSelected)
+                                    ProfileTypography.labelSmall.copy(fontWeight = FontWeight.Bold)
+                                else
+                                    ProfileTypography.labelSmall,
                                 color = color)
                           }
                     }
@@ -519,14 +515,15 @@ fun ModernEmptyHuntsState(selectedTab: ProfileTab) {
               imageVector = icon,
               contentDescription = null,
               modifier = Modifier.size(ProfileUIConstantsDefaults.EmptyIconSize),
-              tint = ProfileUIConstantsDefaults.IconGray)
+              tint = MaterialTheme.colorScheme.onSurfaceVariant
+          )
 
           Spacer(modifier = Modifier.height(ProfileUIConstantsDefaults.Padding16))
 
           Text(
               text = ProfileConstants.NO_HUNTS_YET,
-              color = ProfileUIConstantsDefaults.EmptyTextColor,
-              fontSize = ProfileUIConstantsDefaults.Font16,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              style = ProfileTypography.bodyLarge,
               modifier = Modifier.testTag(ProfileTestTags.EMPTY_HUNTS_MESSAGE))
         }
       }

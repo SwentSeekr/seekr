@@ -9,31 +9,56 @@ val Pink80 = Color(0xFFEFB8C8)
 val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
-val GrassGreen = Color(0xFF4CAF50)
-val Black = Color(0xFF000000)
-val White = Color(0xFFFFFFFF)
 
-val Green = Color(0xFF059D58)
+val DifficultyEasy = Color(0xFF4CAF50)
+val DifficultyIntermediate = Color(0xFFFFA726)
+val DifficultyHard = Color(0xFFEF5350)
+
+val StatusFun = Color(0xFF9C27B0)
+val StatusDiscover = Color(0xFF2196F3)
+val StatusSport = Color(0xFFFF5722)
+val GrassGreen = Color(0xFF4CAF50)
+
 val Blue = Color(0xFF2196F3)
 val Orange = Color(0xFFFFA64D)
-val GrayBackgound = Color(0xFFF2F2F2)
 
 val MediumYellow = Color(0xFFFFDFAD)
 val DifficultRed = Color(0xFFFFC1C1)
 
-val Salmon = Color(0xFFE8847C)
-
 val GrayDislike = Color(0xFF666666)
 val RedLike = Color(0xFFF90606)
 val EasyGreen = Color(0xFFB0D4B1)
-
-val YellowStar = Color(0xFFE7CD0C)
-val GrayStar = Color(0xFF838382)
-val RedRanking = Color(0xFFFF3C00)
-val GrayRanking = Color(0xFF838382)
 
 val LightError = Color(0xFFBA1A1A)
 val LightOnError = Color(0xFFFFFFFF)
 
 val DarkError = Color(0xFFFFB4AB)
 val DarkOnError = Color(0xFF690005)
+
+
+// ---- Primary & Secondary ----
+val Green = Color(0xFF059D58)
+val Salmon = Color(0xFFE8847C)
+val GrayBackgound = Color(0xFFF2F2F2)
+
+val LightGrayBackgound = Color(0xFFF8F9FA)
+val White = Color(0xFFFFFFFF)
+val Black = Color(0xFF000000)
+
+// ---- Text & Icons ----
+val LoadingGray = Color(0xFF666666)
+val TabInactiveGray = Color(0xFF999999)
+val IconGray = Color(0xFFCCCCCC)
+val EmptyTextColor = Color(0xFF999999)
+
+// ---- Status / Actions ----
+val LoadingIndicatorGreen = Green
+val ErrorRed = Color(0xFFEF5350)
+val AlphaLightColor = Green.copy(alpha = 0.1f)
+val AlphaMediumColor = Black.copy(alpha = 0.85f)
+
+// ---- Stars / Ratings ----
+val YellowStar = Color(0xFFE7CD0C)
+val GrayStar = Color(0xFF838382)
+val RedRanking = Color(0xFFFF3C00)
+val GrayRanking = Color(0xFF838382)

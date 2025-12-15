@@ -155,37 +155,20 @@ object ProfileUIConstantsDefaults {
   val Padding12 = 12.dp
   val Padding16 = 16.dp
   val Padding20 = 20.dp
-  val Padding24 = 24.dp
-  val Padding32 = 32.dp
+
   val Padding60 = 60.dp
 
   // ---- SIZES ----
-  val Size2 = 2.dp
-  val Size8 = 8.dp
-  val Size16 = 16.dp
+
   val Size20 = 20.dp
   val Size24 = 24.dp
   val Size28 = 28.dp
-  val Size40 = 40.dp
-  val Size64 = 64.dp
   val Size70 = 70.dp
 
-  // ---- FONT SIZES ----
-  val Font12 = 12.sp
-  val Font14 = 14.sp
-  val Font16 = 16.sp
-  val Font18 = 18.sp
-  val Font20 = 20.sp
-  val Font22 = 22.sp
 
-  // ---- COLORS ----
-  val LightGrayBackground = Color(0xFFF8F9FA)
-  val LoadingGray = Color(0xFF666666)
-  val LoadingIndicatorGreen = Color(0xFF00C853)
-  val ErrorRed = Color(0xFFEF5350)
-  val ToolbarGreen = Color(0xFF00C853)
-  val TabInactiveGray = Color(0xFF999999)
-  val IconGray = Color(0xFFCCCCCC)
+
+
+
 
   // ---- PROFILE HEADER ----
   val ProfileHeaderGradientEnd = Color(0xFFE8847C)
@@ -197,7 +180,6 @@ object ProfileUIConstantsDefaults {
 
   // ---- EMPTY STATE ----
   val EmptyIconSize = 64.dp
-  val EmptyTextColor = Color(0xFF999999)
   const val EmptyText = "No hunts yet"
 
   // ---- ALPHA VALUES ----
