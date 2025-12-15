@@ -162,4 +162,5 @@ object HuntScreenTestTags {
   const val ERROR_MESSAGE = "errorMessage"
   const val ADD_HUNT_SCREEN = "AddHuntScreen"
   const val COLLUMN_HUNT_FIELDS = "ColumnHuntFields"
+  const val BUTTON_DELETE_HUNT = "buttonDeleteHunt"
 }
