@@ -2,6 +2,7 @@ package com.swentseekr.seekr.ui.hunt.review.replies
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,6 +47,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.swentseekr.seekr.model.hunt.review.HuntReviewReply
@@ -363,7 +365,7 @@ fun ReplyCard(
       modifier =
           Modifier.fillMaxWidth()
               .background(
-                  MaterialTheme.colorScheme.surface,
+                  MaterialTheme.colorScheme.surfaceVariant,
                   shape = replyCardShape,
               )
               .padding(ReviewRepliesDimensions.ReplyCardPadding)) {
@@ -650,7 +652,7 @@ fun CollapsedComposerButton(
               .height(ReviewRepliesDimensions.CollapsedComposerHeight),
       colors =
           ButtonDefaults.outlinedButtonColors(
-              containerColor = MaterialTheme.colorScheme.surface,
+              containerColor = MaterialTheme.colorScheme.surfaceVariant,
               contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
       border =
           BorderStroke(

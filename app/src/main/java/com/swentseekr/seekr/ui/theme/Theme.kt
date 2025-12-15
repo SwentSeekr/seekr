@@ -24,14 +24,18 @@ private val LightColorScheme =
         onTertiary = Black,
         background = LightGrayBackgound,
         onBackground = Black,
-        surface = White,
+        surface = LightGrayBackgound,
         onSurface = Black,
-        surfaceVariant = LightGrayBackgound,
+        surfaceVariant = White,
         onSurfaceVariant = LoadingGray,
         outline = TabInactiveGray,
         error = LightError,
         onError = LightOnError,
-        surfaceContainer = EasyGreen
+        primaryContainer = LightGrayBackgound,
+        onPrimaryContainer = Black,
+        surfaceContainer = EasyGreen,
+        tertiaryContainer = StatBackground ,
+        onTertiaryContainer = StatTextDark
     )
 
 @Stable
@@ -41,7 +45,10 @@ class AppColors(
     val statusDiscover: Color,
     val difficultyEasy: Color,
     val difficultyHard: Color,
-    val difficultyIntermediate: Color
+    val difficultyIntermediate: Color,
+    val mapRoute: Color,
+    val liked: Color,
+    val disliked: Color
 )
 
 val LocalAppColors = staticCompositionLocalOf {
@@ -51,7 +58,10 @@ val LocalAppColors = staticCompositionLocalOf {
         difficultyEasy = DifficultyEasy,
         difficultyHard = DifficultyHard,
         difficultyIntermediate = DifficultyIntermediate,
-        statusDiscover = StatusDiscover
+        statusDiscover = StatusDiscover,
+        mapRoute = Blue,
+        liked = RedLike,
+        disliked = GrayDislike
     )
 }
 
@@ -59,16 +69,16 @@ val LocalAppColors = staticCompositionLocalOf {
 fun SampleAppTheme(
     content: @Composable () -> Unit
 ) {
-  val colorScheme = LightColorScheme
+    val colorScheme = LightColorScheme
     val appColors = LocalAppColors.current
     val view = LocalView.current
-  if (!view.isInEditMode) {
-    SideEffect {
-      val window = (view.context as Activity).window
-      window.statusBarColor = colorScheme.primary.toArgb()
-      WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = colorScheme.primary.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
+        }
     }
-  }
 
     CompositionLocalProvider(LocalAppColors provides appColors) {
         MaterialTheme(

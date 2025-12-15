@@ -8,23 +8,20 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.ui.theme.LocalAppColors
 
 /**
  * Displays a modern, image-focused card preview of a Hunt.
@@ -52,25 +49,26 @@ fun HuntCard(
     onLikeClick: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-  Card(
-      modifier =
-          modifier
-              .padding(HuntCardUIConstants.CardPadding)
-              .fillMaxWidth(HuntCardUIConstants.CardWidthFraction),
-      colors = CardDefaults.cardColors(containerColor = Color.White),
-      elevation = CardDefaults.cardElevation(defaultElevation = HuntCardUIConstants.CardElevation),
-      shape = RoundedCornerShape(HuntCardUIConstants.CornerRadius)) {
+    val colors = LocalAppColors.current
+    Card(
+        modifier =
+            modifier
+                .padding(HuntCardUIConstants.CardPadding)
+                .fillMaxWidth(HuntCardUIConstants.CardWidthFraction),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        elevation = CardDefaults.cardElevation(defaultElevation = HuntCardUIConstants.CardElevation),
+        shape = RoundedCornerShape(HuntCardUIConstants.CornerRadius)) {
         Column(modifier = Modifier.fillMaxWidth()) {
 
-          // IMAGE WITH GRADIENT
-          Box(
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .height(HuntCardUIConstants.ImageHeight)
-                      .clip(
-                          RoundedCornerShape(
-                              topStart = HuntCardUIConstants.CornerRadius,
-                              topEnd = HuntCardUIConstants.CornerRadius))) {
+            // IMAGE WITH GRADIENT
+            Box(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .height(HuntCardUIConstants.ImageHeight)
+                        .clip(
+                            RoundedCornerShape(
+                                topStart = HuntCardUIConstants.CornerRadius,
+                                topEnd = HuntCardUIConstants.CornerRadius))) {
                 AsyncImage(
                     model = hunt.mainImageUrl.takeIf { it.isNotBlank() },
                     contentDescription = HuntCardScreenStrings.HUNT_PICTURE_DESCRIPTION,
@@ -87,8 +85,8 @@ fun HuntCard(
                                 Brush.verticalGradient(
                                     colors =
                                         listOf(
-                                            HuntCardUIConstants.Black30,
-                                            HuntCardUIConstants.Black70))))
+                                            MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
+                                            MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)))))
 
                 // DIFFICULTY BADGE (top-left)
                 ModernDifficultyBadge(
@@ -103,46 +101,44 @@ fun HuntCard(
                         Modifier.align(Alignment.TopEnd)
                             .padding(HuntCardUIConstants.Padding8)
                             .testTag(HuntCardScreenStrings.LIKE_BUTTON)) {
-                      Icon(
-                          imageVector = Icons.Filled.Favorite,
-                          contentDescription = HuntCardScreenStrings.LIKE_BUTTON,
-                          tint =
-                              if (isLiked) HuntCardUIConstants.LikeRed
-                              else HuntCardScreenDefaults.LightGray,
-                          modifier = Modifier.size(HuntCardUIConstants.IconSize28))
-                    }
+                    Icon(
+                        imageVector = Icons.Filled.Favorite,
+                        contentDescription = HuntCardScreenStrings.LIKE_BUTTON,
+                        tint =
+                            if (isLiked) colors.liked
+                            else colors.disliked,
+                        modifier = Modifier.size(HuntCardUIConstants.IconSize28))
+                }
 
                 // TITLE + AUTHOR
                 Column(
                     modifier =
                         Modifier.align(Alignment.BottomStart)
                             .padding(HuntCardUIConstants.Padding16)) {
-                      Text(
-                          text = hunt.title,
-                          fontSize = HuntCardUIConstants.TitleFont24,
-                          fontWeight = FontWeight.Bold,
-                          color = HuntCardUIConstants.White,
-                          lineHeight = 28.sp)
-                      Spacer(modifier = Modifier.height(HuntCardUIConstants.Padding4))
-                      Text(
-                          text = "${HuntCardScreenStrings.BY} " + authorName,
-                          fontSize = HuntCardUIConstants.AuthorFont14,
-                          color =
-                              HuntCardUIConstants.White.copy(
-                                  alpha = HuntCardScreenDefaults.TEXT_COLOR_FACTOR),
-                          fontWeight = FontWeight.Medium)
-                    }
-              }
+                    Text(
+                        text = hunt.title,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onPrimary)
+                    Spacer(modifier = Modifier.height(HuntCardUIConstants.Padding4))
+                    Text(
+                        text = "${HuntCardScreenStrings.BY} " + authorName,
+                        style = MaterialTheme.typography.labelSmall,
+                        color =
+                            MaterialTheme.colorScheme.onPrimary.copy(
+                                alpha = HuntCardScreenDefaults.TEXT_COLOR_FACTOR),
+                    )
+                }
+            }
 
-          // STATS ROW
-          Row(
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .padding(
-                          horizontal = HuntCardUIConstants.Padding16,
-                          vertical = HuntCardUIConstants.Padding16),
-              horizontalArrangement = Arrangement.SpaceEvenly,
-              verticalAlignment = Alignment.CenterVertically) {
+            // STATS ROW
+            Row(
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .padding(
+                            horizontal = HuntCardUIConstants.Padding16,
+                            vertical = HuntCardUIConstants.Padding16),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically) {
                 ModernStatChip(
                     icon = StatIcon.Vector(Icons.Filled.LocationOn),
                     value = "${hunt.distance}",
@@ -156,9 +152,9 @@ fun HuntCard(
                     value = "${hunt.time}",
                     unit = HuntCardScreenStrings.TIME_UNIT,
                     modifier = Modifier.weight(HuntCardScreenDefaults.WEIGHT_TIME_MODIFIER))
-              }
+            }
         }
-      }
+    }
 }
 
 /**
@@ -174,29 +170,29 @@ fun HuntCard(
  */
 @Composable
 fun ModernDifficultyBadge(difficulty: Difficulty, modifier: Modifier = Modifier) {
-  val (bg, textColor) =
-      when (difficulty) {
-        Difficulty.EASY -> HuntCardUIConstants.DifficultyEasy to HuntCardUIConstants.White
-        Difficulty.INTERMEDIATE ->
-            HuntCardUIConstants.DifficultyIntermediate to HuntCardUIConstants.White
-        Difficulty.DIFFICULT -> HuntCardUIConstants.DifficultyHard to HuntCardUIConstants.White
-      }
+    val colors = LocalAppColors.current
+    val (bg, textColor) =
+        when (difficulty) {
+            Difficulty.EASY -> colors.difficultyEasy to MaterialTheme.colorScheme.onPrimary
+            Difficulty.INTERMEDIATE ->
+                colors.difficultyIntermediate to MaterialTheme.colorScheme.onPrimary
+            Difficulty.DIFFICULT -> colors.difficultyHard to MaterialTheme.colorScheme.onPrimary
+        }
 
-  Surface(
-      modifier = modifier,
-      shape = RoundedCornerShape(HuntCardUIConstants.DifficultyBadgeCorner),
-      color = bg,
-      shadowElevation = HuntCardUIConstants.BadgeElevation) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(HuntCardUIConstants.DifficultyBadgeCorner),
+        color = bg,
+        shadowElevation = HuntCardUIConstants.BadgeElevation) {
         Text(
             text = difficulty.toString(),
             modifier =
                 Modifier.padding(
                     horizontal = HuntCardUIConstants.Padding12,
                     vertical = HuntCardUIConstants.Padding6),
-            fontSize = HuntCardUIConstants.DifficultyFont12,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.labelSmall,
             color = textColor)
-      }
+    }
 }
 
 /**
@@ -211,9 +207,9 @@ fun ModernDifficultyBadge(difficulty: Difficulty, modifier: Modifier = Modifier)
  * SVG-based icons without changing its public API.
  */
 sealed class StatIcon {
-  data class Vector(val icon: ImageVector) : StatIcon()
+    data class Vector(val icon: ImageVector) : StatIcon()
 
-  data class PainterIcon(val painter: Painter) : StatIcon()
+    data class PainterIcon(val painter: Painter) : StatIcon()
 }
 
 /**
@@ -236,10 +232,10 @@ sealed class StatIcon {
  */
 @Composable
 fun ModernStatChip(icon: StatIcon, value: String, unit: String, modifier: Modifier = Modifier) {
-  Surface(
-      modifier = modifier,
-      shape = RoundedCornerShape(HuntCardUIConstants.StatChipCorner),
-      color = HuntCardUIConstants.StatBackground) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(HuntCardUIConstants.StatChipCorner),
+        color = MaterialTheme.colorScheme.tertiaryContainer) {
         Row(
             modifier =
                 Modifier.padding(
@@ -247,28 +243,27 @@ fun ModernStatChip(icon: StatIcon, value: String, unit: String, modifier: Modifi
                     vertical = HuntCardUIConstants.Padding10),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center) {
-              when (icon) {
+            when (icon) {
                 is StatIcon.Vector ->
                     Icon(
                         imageVector = icon.icon,
                         contentDescription = null,
-                        tint = HuntCardUIConstants.StatIconGray,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(HuntCardUIConstants.StatIconSize))
                 is StatIcon.PainterIcon ->
                     Icon(
                         painter = icon.painter,
                         contentDescription = null,
-                        tint = HuntCardUIConstants.StatIconGray,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(HuntCardUIConstants.StatIconSize))
-              }
-
-              Spacer(modifier = Modifier.width(HuntCardUIConstants.Padding6))
-
-              Text(
-                  text = "$value $unit",
-                  fontSize = HuntCardUIConstants.StatFont14,
-                  fontWeight = FontWeight.SemiBold,
-                  color = HuntCardUIConstants.StatTextDark)
             }
-      }
+
+            Spacer(modifier = Modifier.width(HuntCardUIConstants.Padding6))
+
+            Text(
+                text = "$value $unit",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onTertiaryContainer)
+        }
+    }
 }

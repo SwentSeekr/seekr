@@ -17,7 +17,6 @@ val DifficultyHard = Color(0xFFEF5350)
 val StatusFun = Color(0xFF9C27B0)
 val StatusDiscover = Color(0xFF2196F3)
 val StatusSport = Color(0xFFFF5722)
-val GrassGreen = Color(0xFF4CAF50)
 
 val Blue = Color(0xFF2196F3)
 val Orange = Color(0xFFFFA64D)
@@ -35,11 +34,13 @@ val LightOnError = Color(0xFFFFFFFF)
 val DarkError = Color(0xFFFFB4AB)
 val DarkOnError = Color(0xFF690005)
 
+val Transparent = Color(0x00000000)
 
 // ---- Primary & Secondary ----
 val Green = Color(0xFF059D58)
 val Salmon = Color(0xFFE8847C)
 val GrayBackgound = Color(0xFFF2F2F2)
+val GrassGreen = Color(0xFFC5E1A5)
 
 val LightGrayBackgound = Color(0xFFF8F9FA)
 val White = Color(0xFFFFFFFF)
@@ -50,6 +51,9 @@ val LoadingGray = Color(0xFF666666)
 val TabInactiveGray = Color(0xFF999999)
 val IconGray = Color(0xFFCCCCCC)
 val EmptyTextColor = Color(0xFF999999)
+
+val StatTextDark = Color(0xFF333333)
+val StatBackground = Color(0xFFF5F5F5)
 
 // ---- Status / Actions ----
 val LoadingIndicatorGreen = Green

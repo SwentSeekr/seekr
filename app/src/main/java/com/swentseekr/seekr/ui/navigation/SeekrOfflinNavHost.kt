@@ -3,6 +3,7 @@ package com.swentseekr.seekr.ui.navigation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -74,7 +75,7 @@ fun SeekrOfflineNavHost(
 
   Scaffold(
       modifier = Modifier.fillMaxSize(),
-      containerColor = SeekrNavigationDefaults.ScaffoldContainerColor,
+      containerColor = MaterialTheme.colorScheme.surfaceVariant,
       bottomBar = {
         if (showBottomBar) {
           SeekrNavigationBar(
@@ -90,7 +91,7 @@ fun SeekrOfflineNavHost(
         NavHost(
             navController = navController,
             startDestination = SeekrDestination.Overview.route,
-            modifier = Modifier.fillMaxSize().padding(innerPadding).background(White)) {
+            modifier = Modifier.fillMaxSize().padding(innerPadding).background(MaterialTheme.colorScheme.surfaceVariant)) {
 
               // OFFLINE OVERVIEW → stored hunts, clone of original overview UI, but using
               // offlineHunts.

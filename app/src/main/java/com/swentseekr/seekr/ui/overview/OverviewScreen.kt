@@ -103,7 +103,7 @@ fun OverviewScreen(
       rememberPullRefreshState(
           refreshing = uiState.isRefreshing, onRefresh = { overviewViewModel.refreshUIState() })
 
-  Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
+  Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
     Column(
         modifier = Modifier.fillMaxWidth().testTag(OverviewScreenTestTags.OVERVIEW_SCREEN),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -198,7 +198,7 @@ fun ModernHeader() {
   Column(
       modifier =
           Modifier.fillMaxWidth()
-              .background(MaterialTheme.colorScheme.onPrimary)
+              .background(MaterialTheme.colorScheme.background)
               .padding(horizontal = HorizontalPadding20, vertical = VerticalPadding16)) {
         Text(
             text = OverviewScreenStrings.Title,
@@ -305,7 +305,7 @@ fun ModernFilterBar(
   Column(
       modifier =
           Modifier.fillMaxWidth()
-              .background(MaterialTheme.colorScheme.onPrimary)
+              .background(MaterialTheme.colorScheme.background)
               .padding(vertical = VerticalPadding12),
       horizontalAlignment = Alignment.Start,
   ) {

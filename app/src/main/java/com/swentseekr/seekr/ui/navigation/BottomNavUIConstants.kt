@@ -1,7 +1,6 @@
 package com.swentseekr.seekr.ui.navigation
 
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 /**
@@ -21,7 +20,4 @@ object BottomNavUIConstants {
 
   // Shapes
   val HaloShape = CircleShape
-
-  // Indicator
-  val IndicatorColorTransparent = Color.Transparent
 }
