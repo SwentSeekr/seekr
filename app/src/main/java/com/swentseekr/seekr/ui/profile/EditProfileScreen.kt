@@ -465,7 +465,7 @@ fun EditProfileContent(
                                       .testTag(EditProfileTestTags.ERROR_MESSAGE))
                       uiState.errorMsg != null ->
                           Text(
-                              "Error: ${uiState.errorMsg}",
+                              "${EditProfileStrings.ERROR_START} ${uiState.errorMsg}",
                               color = MaterialTheme.colorScheme.onErrorContainer,
                               modifier =
                                   Modifier.padding(UI_C.PADDING_BIG)

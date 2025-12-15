@@ -355,7 +355,7 @@ fun ModernProfileHeader(
                   color =
                       MaterialTheme.colorScheme.onPrimary.copy(
                           alpha = ProfileUIConstantsDefaults.ALPHA_MEDIUM),
-                  maxLines = 2,
+                  maxLines = ProfileScreenConstants.MAX_LINE,
                   modifier = Modifier.testTag(ProfileTestTags.PROFILE_BIO))
             }
           }

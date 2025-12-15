@@ -15,8 +15,6 @@ import androidx.compose.ui.unit.sp
  * the project.
  */
 object ProfileScreenConstants {
-  val ICON_BUTTON_SIZE_DP = 40.dp
-  const val ICON_BUTTON_WHITE_ALPHA = 0.9f
   const val ICON_BUTTON_GOBACK = "Go Back"
   const val SINGLE_REVIEW = 1
 
@@ -25,6 +23,7 @@ object ProfileScreenConstants {
   const val MULTIPLE_REVIEWS_LABEL = "- %d reviews"
   const val HUNTS_DONE_LABEL = "%d Hunts done"
   const val EMPTY_REVIEW_RATE = 0.0
+  const val MAX_LINE = 2
 }
 
 /** Centralized constants for UI dimensions. */
@@ -43,7 +42,6 @@ object EditProfileNumberConstants {
   val SCREEN_PADDING = 24.dp
 
   val SPACER_TINY = 4.dp
-  val SPACER_MEDIUM = 12.dp
   val SPACER_LARGE = 16.dp
   val SPACER_SMALL = 8.dp
 
@@ -84,7 +82,6 @@ object EditProfileNumberConstants {
 }
 
 object EditProfileStrings {
-  const val PLUS = "+"
   const val DIALOG_TITLE = "Choose Image"
   const val DIALOG_MESSAGE = "Pick a source for your new profile picture"
 
@@ -112,6 +109,7 @@ object EditProfileStrings {
   const val LOAD_USER_ERROR = "User not loaded"
   const val CAMERA_PERMISSION_ERROR = "Could not create image file. Check storage permissions."
   const val ERROR = "Error"
+  const val ERROR_START = "Error:"
   const val OK = "OK"
   const val IMAGE = "image/*"
   const val IMAGE_JPEG = "image/jpeg"
@@ -159,27 +157,21 @@ object ProfileUIConstantsDefaults {
   val Padding12 = 12.dp
   val Padding16 = 16.dp
   val Padding20 = 20.dp
-  val Padding24 = 24.dp
-  val Padding32 = 32.dp
+
   val Padding60 = 60.dp
 
   // ---- SIZES ----
-  val Size2 = 2.dp
-  val Size8 = 8.dp
-  val Size16 = 16.dp
+
   val Size20 = 20.dp
   val Size24 = 24.dp
   val Size28 = 28.dp
-  val Size40 = 40.dp
-  val Size64 = 64.dp
   val Size70 = 70.dp
 
   // ---- FONT SIZES ----
   val Font12 = 12.sp
   val Font14 = 14.sp
   val Font16 = 16.sp
-  val Font18 = 18.sp
-  val Font20 = 20.sp
+
   val Font22 = 22.sp
 
   // ---- COLORS ----
