@@ -90,7 +90,7 @@ sealed class SeekrDestination(
       SeekrDestination(
           SeekrNavigationDefaults.HUNT_CARD_ROUTE,
           SeekrNavigationDefaults.HUNT_CARD_LABEL,
-          Icons.Filled.List) {
+          Icons.AutoMirrored.Filled.List) {
     fun createRoute(huntId: String) = "${SeekrNavigationDefaults.HUNT_PATH}$huntId"
 
     const val ARG_HUNT_ID = "huntId"
@@ -100,7 +100,7 @@ sealed class SeekrDestination(
       SeekrDestination(
           SeekrNavigationDefaults.EDIT_HUNT_ROUTE,
           SeekrNavigationDefaults.EDIT_HUNT_LABEL,
-          Icons.Filled.List) {
+          Icons.AutoMirrored.Filled.List) {
     fun createRoute(huntId: String) = "${SeekrNavigationDefaults.EDIT_HUNT_PATH}$huntId"
 
     const val ARG_HUNT_ID = "huntId"
@@ -110,7 +110,7 @@ sealed class SeekrDestination(
       SeekrDestination(
           SeekrNavigationDefaults.ADD_REVIEW_ROUTE,
           SeekrNavigationDefaults.ADD_REVIEW_LABEL,
-          Icons.Filled.List) {
+          Icons.AutoMirrored.Filled.List) {
     fun createRoute(huntId: String) = "${SeekrNavigationDefaults.ADD_REVIEW_PATH}$huntId"
 
     const val ARG_HUNT_ID = "huntId"
@@ -120,7 +120,7 @@ sealed class SeekrDestination(
       SeekrDestination(
           SeekrNavigationDefaults.EDIT_REVIEW_ROUTE,
           SeekrNavigationDefaults.EDIT_REVIEW_LABEL,
-          Icons.Filled.List) {
+          Icons.AutoMirrored.Filled.List) {
     fun createRoute(huntId: String, reviewId: String) =
         "${SeekrNavigationDefaults.EDIT_REVIEW_PATH}$huntId/$reviewId"
 
@@ -132,13 +132,13 @@ sealed class SeekrDestination(
       SeekrDestination(
           SeekrNavigationDefaults.ADD_HUNT_ROUTE,
           SeekrNavigationDefaults.ADD_HUNT_LABEL,
-          Icons.Filled.List)
+          Icons.AutoMirrored.Filled.List)
 
   object Settings :
       SeekrDestination(
           SeekrNavigationDefaults.SETTINGS_ROUTE,
           SeekrNavigationDefaults.SETTINGS_LABEL,
-          Icons.Filled.List)
+          Icons.AutoMirrored.Filled.List)
 
   object TermsConditions :
       SeekrDestination(
@@ -150,7 +150,7 @@ sealed class SeekrDestination(
       SeekrDestination(
           SeekrNavigationDefaults.EDIT_PROFILE_ROUTE,
           SeekrNavigationDefaults.EDIT_PROFILE_LABEL,
-          Icons.Filled.List)
+          Icons.AutoMirrored.Filled.List)
 
   companion object {
     val all = listOf(Overview, Map, Profile)
