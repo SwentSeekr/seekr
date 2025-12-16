@@ -41,7 +41,8 @@ object OnboardingFlowStrings {
 
   // ----------------------
   // Welcome Dialog
-  // ----------------------  const val WELCOME_TITLE = "Welcome to Seekr 👋"
+  // ----------------------
+  const val WELCOME_TITLE = "Welcome to Seekr 👋"
   const val WELCOME_MESSAGE =
       "Thank you for joining Seekr! Let's get started with a quick onboarding to set up your profile."
   const val CONTINUE_BUTTON = "Continue"

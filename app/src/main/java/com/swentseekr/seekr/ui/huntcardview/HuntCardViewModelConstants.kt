@@ -36,6 +36,7 @@ object HuntCardViewModelConstants {
   const val ERROR_DELETE_REVIEW_SET_MSG = "You can only delete your own review."
   const val ERROR_EDIT_HUNT = "Error in editing Hunt by ID:"
   const val ERROR_EDIT_HUNT_SET_MSG = "Failed to update hunt."
+  const val ERROR_DELETING_REVIEW_SET_MSG = "Failed to delete Hunt:"
 
   // -------------------
   // Hunt completion errors
