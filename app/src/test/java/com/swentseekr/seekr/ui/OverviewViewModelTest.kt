@@ -13,6 +13,13 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
+/**
+ * Unit tests for the OverviewViewModel.
+ *
+ * This test suite verifies the functionality of loading hunts,
+ * refreshing the UI state, searching, liking hunts,
+ * and applying filters in the OverviewViewModel.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 class OverviewViewModelTest {
   companion object {

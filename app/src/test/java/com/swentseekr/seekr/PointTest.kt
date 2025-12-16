@@ -3,6 +3,12 @@ package com.swentseekr.seekr
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
+/**
+ * Unit tests for the Point data class.
+ *
+ * This test suite verifies the distance calculation
+ * between two Point instances.
+ */
 class PointTest {
 
   @Test

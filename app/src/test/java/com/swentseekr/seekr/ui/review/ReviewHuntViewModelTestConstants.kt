@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.review
 
+/** Constants used in ReviewHuntViewModel unit tests. */
 object ReviewHuntViewModelTestConstantsStrings {
   const val TEST_HUNT_ID = "hunt123"
   const val START_LABEL = "Start"
