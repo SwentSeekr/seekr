@@ -36,6 +36,14 @@ import com.swentseekr.seekr.ui.terms.TermsScreenConstants
 import com.swentseekr.seekr.ui.terms.TermsScreenStrings
 import com.swentseekr.seekr.ui.terms.TermsSection
 
+/**
+ * Main onboarding flow composable that manages the sequence of onboarding steps for a new user.
+ *
+ * @param userId The unique identifier of the user undergoing onboarding.
+ * @param onboardingHandler Handles the onboarding completion logic for the user.
+ * @param vm Optional [OnboardingViewModel] instance managing state; defaults to `viewModel()`.
+ * @param onDone Callback invoked after the onboarding flow completes successfully.
+ */
 @Composable
 fun OnboardingFlow(
     userId: String,
