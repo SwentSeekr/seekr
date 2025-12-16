@@ -86,6 +86,8 @@ object HuntCardScreenDefaults {
   const val END_LIST_SPACER_MULTIPLIER: Int = 2
   const val BACKGROUND_ALPHA: Float = 0.8f
   const val START: Float = 200f
+
+  val boarderStrokeWidth = 1.dp
 }
 
 object HuntCardScreenStrings {

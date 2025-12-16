@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -65,6 +66,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.model.hunt.review.HuntReviewReplyRepositoryProvider
+import com.swentseekr.seekr.ui.components.HuntCardScreenDefaults.boarderStrokeWidth
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
 import com.swentseekr.seekr.ui.hunt.review.replies.ReviewRepliesSection
 import com.swentseekr.seekr.ui.hunt.review.replies.ReviewRepliesViewModel
@@ -681,6 +683,9 @@ fun ModernReviewCard(
               }
               .testTag(HuntCardScreenTestTags.REVIEW_CARD),
       colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+      border =
+          BorderStroke(
+              width = boarderStrokeWidth, color = MaterialTheme.colorScheme.outlineVariant),
       elevation =
           CardDefaults.cardElevation(defaultElevation = HuntCardScreenDefaults.ZeroElevation),
       shape = RoundedCornerShape(HuntCardScreenDefaults.ReviewCardCornerRadius)) {

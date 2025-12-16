@@ -147,7 +147,7 @@ private fun PreviewHeroSection(ui: HuntUIState) {
               text = "${HuntCardScreenStrings.BY} ${STRINGS.AUTHOR_PREVIEW}",
               style = MaterialTheme.typography.bodyMedium,
               color =
-                  MaterialTheme.colorScheme.onPrimary.copy(alpha = HuntCardScreenDefaults.Alpha),
+                  MaterialTheme.colorScheme.onPrimary.copy(alpha = HuntCardScreenDefaults.ALPHA),
               fontWeight = FontWeight.Medium,
               modifier = Modifier.testTag(TEST_TAGS.HUNT_AUTHOR_PREVIEW))
         }

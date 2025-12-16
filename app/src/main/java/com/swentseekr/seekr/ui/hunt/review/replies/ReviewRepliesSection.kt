@@ -785,7 +785,7 @@ fun ComposerSendButton(
                     imageVector = Icons.AutoMirrored.Filled.Send,
                     contentDescription = ReviewRepliesStrings.SEND_CONTENT_DESCRIPTION,
                     tint =
-                        if (isActive) MaterialTheme.colorScheme.primary
+                        if (isActive) MaterialTheme.colorScheme.onPrimary
                         else
                             MaterialTheme.colorScheme.onSurfaceVariant.copy(
                                 alpha = ReviewRepliesAlphas.INACTIVE_SEND_ICON),
