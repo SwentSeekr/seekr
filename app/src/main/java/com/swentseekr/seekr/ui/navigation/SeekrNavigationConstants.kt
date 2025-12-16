@@ -1,7 +1,7 @@
 package com.swentseekr.seekr.ui.navigation
 
 object SeekrNavigationDefaults {
-  const val IgnoredTestTag = "IGNORED"
+  const val IGNORED_TEST_TAG = "IGNORED"
 
   // --- Offline / shared extra routes ---
   // Route + arg name for the review images screen (used online & offline)
