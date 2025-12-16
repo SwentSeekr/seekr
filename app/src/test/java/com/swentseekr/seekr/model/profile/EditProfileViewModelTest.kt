@@ -35,6 +35,9 @@ class EditProfileViewModelTest {
     private const val SPORT_RATE = 4.0
     private const val OLD_URL = "https://old.url/image.jpg"
     private const val NEW_URL = "https://new.url/image.jpg"
+    private const val PROFILE_NOT_FOUND = "Profile not found"
+    private const val FIRESTORE_ERROR = "Firestore error"
+    private const val USER_NOT_LOADED = "User not loaded"
   }
 
   private val testDispatcher = StandardTestDispatcher()
@@ -145,7 +148,7 @@ class EditProfileViewModelTest {
   fun loadProfile_missingProfile_setsErrorMsg() = runTest {
     loadProfile(profile = null)
     val state = getState()
-    assertEquals("Profile not found", state.errorMsg)
+    assertEquals(PROFILE_NOT_FOUND, state.errorMsg)
     assertFalse(state.isLoading)
   }
 
@@ -157,7 +160,7 @@ class EditProfileViewModelTest {
     saveProfile()
     val state = getState()
     assertFalse(state.success)
-    assertEquals("Profile not found", state.errorMsg)
+    assertEquals(PROFILE_NOT_FOUND, state.errorMsg)
   }
 
   @Test
@@ -249,7 +252,7 @@ class EditProfileViewModelTest {
     saveProfile()
     val state = getState()
     assertFalse(state.success)
-    assertEquals("Firestore error", state.errorMsg)
+    assertEquals(FIRESTORE_ERROR, state.errorMsg)
   }
 
   @Test
@@ -362,7 +365,7 @@ class EditProfileViewModelTest {
     saveProfile()
     val state = getState()
     assertFalse(state.success)
-    assertEquals("User not loaded", state.errorMsg)
+    assertEquals(USER_NOT_LOADED, state.errorMsg)
   }
 
   @Test
@@ -380,7 +383,7 @@ class EditProfileViewModelTest {
     saveProfile()
     val state = getState()
     assertFalse(state.success)
-    assertEquals("Firestore error", state.errorMsg)
+    assertEquals(FIRESTORE_ERROR, state.errorMsg)
   }
 
   @Test

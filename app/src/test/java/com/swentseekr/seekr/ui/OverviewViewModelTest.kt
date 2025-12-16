@@ -15,6 +15,19 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class OverviewViewModelTest {
+  companion object {
+    private const val IS_REFRESH_FALSE = "isRefreshing should be false after initial load"
+    private const val ERROR_MESSAGE_NULL = "errorMsg should be null after successful load"
+    private const val IS_REFRESH_FALSE_AFTER_REFRESH = "isRefreshing should be false after refresh"
+    private const val ERROR_MESSAGE_NULL_AFTER_REFRESH =
+        "errorMsg should be null after successful refresh"
+    private const val SEARCH_NOT_START_REFRESH = "Search should not start a refresh"
+    private const val LIKE_NOT_TOGGLING = "Like toggling should not affect refreshing"
+    private const val CLEAN_SEARCH = "Clearing search should not affect refreshing"
+    private const val STATUS_NOT_REFRESHING = "Status filter selection should not affect refreshing"
+    private const val DIFFICULTY_NOT_REFRESHING =
+        "Difficulty filter selection should not affect refreshing"
+  }
 
   private lateinit var viewModel: OverviewViewModel
   private lateinit var fakeRepository: HuntsRepositoryLocal
@@ -82,8 +95,8 @@ class OverviewViewModelTest {
     assertEquals(2, state.hunts.size)
     assertTrue(state.hunts.any { it.hunt.uid == "1" })
     assertTrue(state.hunts.any { it.hunt.uid == "2" })
-    assertFalse("isRefreshing should be false after initial load", state.isRefreshing)
-    assertNull("errorMsg should be null after successful load", state.errorMsg)
+    assertFalse(IS_REFRESH_FALSE, state.isRefreshing)
+    assertNull(ERROR_MESSAGE_NULL, state.errorMsg)
   }
 
   /** Test that calling refreshUIState reloads hunts and resets the refreshing flag. */
@@ -97,8 +110,8 @@ class OverviewViewModelTest {
 
     val state = viewModel.uiState.value
     assertEquals(2, state.hunts.size)
-    assertFalse("isRefreshing should be false after refresh", state.isRefreshing)
-    assertNull("errorMsg should be null after successful refresh", state.errorMsg)
+    assertFalse(IS_REFRESH_FALSE_AFTER_REFRESH, state.isRefreshing)
+    assertNull(ERROR_MESSAGE_NULL_AFTER_REFRESH, state.errorMsg)
   }
 
   /** Test that changing the search term filters the hunts correctly based on the search input. */
@@ -112,7 +125,7 @@ class OverviewViewModelTest {
 
     assertEquals(1, state.hunts.size)
     assertEquals("Fun Hunt", state.hunts[0].hunt.title)
-    assertFalse("Search should not start a refresh", state.isRefreshing)
+    assertFalse(SEARCH_NOT_START_REFRESH, state.isRefreshing)
   }
 
   /** Test that clicking the like button toggles the liked status of a hunt item. */
@@ -123,12 +136,12 @@ class OverviewViewModelTest {
     viewModel.onLikeClick(huntId)
     var state = viewModel.uiState.value
     assertTrue(state.hunts.first { it.hunt.uid == huntId }.isLiked)
-    assertFalse("Like toggling should not affect refreshing", state.isRefreshing)
+    assertFalse(LIKE_NOT_TOGGLING, state.isRefreshing)
 
     viewModel.onLikeClick(huntId)
     state = viewModel.uiState.value
     assertFalse(state.hunts.first { it.hunt.uid == huntId }.isLiked)
-    assertFalse("Like toggling should not affect refreshing", state.isRefreshing)
+    assertFalse(LIKE_NOT_TOGGLING, state.isRefreshing)
   }
 
   /** Test that clearing the search resets the filtered list to show all hunts. */
@@ -141,7 +154,7 @@ class OverviewViewModelTest {
     viewModel.onClearSearch()
     val resetState = viewModel.uiState.value
     assertEquals(2, resetState.hunts.size)
-    assertFalse("Clearing search should not affect refreshing", resetState.isRefreshing)
+    assertFalse(CLEAN_SEARCH, resetState.isRefreshing)
   }
 
   /** Test that selecting a status filter correctly filters the hunts by the selected status. */
@@ -152,7 +165,7 @@ class OverviewViewModelTest {
 
     assertEquals(1, state.hunts.size)
     assertEquals(HuntStatus.SPORT, state.hunts[0].hunt.status)
-    assertFalse("Status filter selection should not affect refreshing", state.isRefreshing)
+    assertFalse(STATUS_NOT_REFRESHING, state.isRefreshing)
   }
 
   /**
@@ -165,6 +178,6 @@ class OverviewViewModelTest {
 
     assertEquals(1, state.hunts.size)
     assertEquals(Difficulty.DIFFICULT, state.hunts[0].hunt.difficulty)
-    assertFalse("Difficulty filter selection should not affect refreshing", state.isRefreshing)
+    assertFalse(DIFFICULTY_NOT_REFRESHING, state.isRefreshing)
   }
 }
