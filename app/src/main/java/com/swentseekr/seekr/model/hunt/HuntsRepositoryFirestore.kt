@@ -182,7 +182,7 @@ class HuntsRepositoryFirestore(
     val reviews =
         reviewsSnapshot.documents.mapNotNull { doc ->
           val reviewId = doc.id
-          val photos = (doc.get("photos") as? List<*>)?.filterIsInstance<String>().orEmpty()
+          val photos = (doc["photos"] as? List<*>)?.filterIsInstance<String>().orEmpty()
           reviewId to photos
         }
 
