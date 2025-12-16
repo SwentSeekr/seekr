@@ -19,6 +19,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+/**
+ * Unit tests for the ProfileCache class.
+ *
+ * This test suite verifies the functionality of saving,
+ * observing, and clearing cached user profiles.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 class ProfileCacheTest {

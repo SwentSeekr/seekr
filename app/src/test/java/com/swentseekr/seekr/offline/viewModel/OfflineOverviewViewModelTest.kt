@@ -9,6 +9,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
+/**
+ * Unit tests for OfflineOverviewViewModel.
+ *
+ * Verifies search, status and difficulty filtering logic,
+ * as well as correct state updates and filter toggling.
+ */
+
 class OfflineOverviewViewModelTest {
 
   private fun dummyLocation(): Location {

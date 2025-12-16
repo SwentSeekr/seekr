@@ -23,6 +23,14 @@ import org.junit.Rule
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
+/**
+ * Unit tests for ReviewRepliesViewModel.
+ *
+ * Covers reply text handling, sending and deleting replies,
+ * toggle logic for reply threads and inline composers,
+ * and error cases using a lightweight fake repository.
+ */
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class ReviewRepliesViewModelTest {
 

@@ -12,11 +12,19 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
+// Constants for test verification
 const val NEW_NOTIFICATION = "New Notification"
 const val HELLO = "Hello"
 const val WORLD = "World"
 const val EMPTY_STRING = ""
 
+/**
+ * Unit tests for [MyFirebaseMessagingService].
+ *
+ * This test suite verifies the behavior of the Firebase Messaging Service,
+ * including handling incoming messages and token updates, by mocking
+ * Firebase Auth and Firestore interactions.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 class MyFirebaseMessagingServiceTest {
   private lateinit var service: MyFirebaseMessagingService

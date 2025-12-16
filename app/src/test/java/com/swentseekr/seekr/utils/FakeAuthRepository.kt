@@ -5,6 +5,15 @@ import com.google.firebase.auth.FirebaseUser
 import io.mockk.every
 import io.mockk.mockk
 
+/**
+ * A fake implementation of [AuthRepository] for testing purposes.
+ *
+ * This class simulates authentication behavior, allowing tests to
+ * control success and failure scenarios.
+ *
+ * @param shouldFail If true, authentication methods will simulate failures.
+ */
+
 class FakeAuthRepository(private val shouldFail: Boolean = false) : AuthRepository {
 
   private var signedInUser: FirebaseUser? = null

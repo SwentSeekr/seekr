@@ -11,10 +11,18 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
+/** Shared constants for the `EditHuntViewModelTest`. */
 object EditHuntViewModelTestContantsMessage {
   const val FAIL_DELETE = "Failed to delete hunt: Network error"
   const val NO_HUNT_LOADED = "No hunt loaded to delete."
 }
+
+/**
+ * Unit tests for EditHuntViewModel delete logic.
+ *
+ * Verifies successful deletion, error handling,
+ * and behavior when no hunt is loaded.
+ */
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class EditHuntViewModelTest {

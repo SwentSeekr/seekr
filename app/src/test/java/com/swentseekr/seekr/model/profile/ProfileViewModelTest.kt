@@ -16,6 +16,13 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
+/**
+ * Unit tests for the ProfileViewModel.
+ *
+ * This test suite verifies loading, updating, and refreshing profiles,
+ * as well as error handling and computed profile statistics.
+ */
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileViewModelTest {
   companion object {
