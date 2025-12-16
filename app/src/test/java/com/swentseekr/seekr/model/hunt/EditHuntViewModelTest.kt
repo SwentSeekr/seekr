@@ -20,10 +20,8 @@ object EditHuntViewModelTestContantsMessage {
 /**
  * Unit tests for EditHuntViewModel delete logic.
  *
- * Verifies successful deletion, error handling,
- * and behavior when no hunt is loaded.
+ * Verifies successful deletion, error handling, and behavior when no hunt is loaded.
  */
-
 @OptIn(ExperimentalCoroutinesApi::class)
 class EditHuntViewModelTest {
 

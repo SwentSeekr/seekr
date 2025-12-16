@@ -20,9 +20,9 @@ import org.junit.runner.RunWith
 /**
  * UI tests for the BaseReviewScreen composable.
  *
- * This test suite verifies that the base review screen components are displayed
- * correctly and that user interactions, such as selecting a star rating,
- * entering review text, adding photos, and clicking buttons, function as expected.
+ * This test suite verifies that the base review screen components are displayed correctly and that
+ * user interactions, such as selecting a star rating, entering review text, adding photos, and
+ * clicking buttons, function as expected.
  */
 @RunWith(AndroidJUnit4::class)
 class BaseReviewScreenTest {

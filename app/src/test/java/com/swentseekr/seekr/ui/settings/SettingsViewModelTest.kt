@@ -38,9 +38,8 @@ import org.robolectric.annotation.Config
 /**
  * Unit tests for the SettingsViewModel.
  *
- * This test suite verifies permission handling, toggle requests,
- * sign-out functionality, and state updates by mocking the
- * authentication repository and Android context interactions.
+ * This test suite verifies permission handling, toggle requests, sign-out functionality, and state
+ * updates by mocking the authentication repository and Android context interactions.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)

@@ -14,11 +14,9 @@ import org.junit.Test
 /**
  * UI tests for the SignInScreen composable.
  *
- * This test suite verifies that the sign-in screen components are displayed
- * correctly and that user interactions, such as clicking the login button,
- * function as expected.
+ * This test suite verifies that the sign-in screen components are displayed correctly and that user
+ * interactions, such as clicking the login button, function as expected.
  */
-
 class SignInScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()

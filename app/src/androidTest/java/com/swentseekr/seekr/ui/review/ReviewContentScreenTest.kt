@@ -16,8 +16,8 @@ import org.junit.Test
 /**
  * UI tests for the ReviewScreenContent composable.
  *
- * This test suite verifies that when a non-empty reviewId is provided,
- * the loadReview() method of the ReviewHuntViewModel is called.
+ * This test suite verifies that when a non-empty reviewId is provided, the loadReview() method of
+ * the ReviewHuntViewModel is called.
  */
 class ReviewContentScreenTest {
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()

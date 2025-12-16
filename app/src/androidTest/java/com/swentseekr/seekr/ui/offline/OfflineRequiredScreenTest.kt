@@ -8,12 +8,12 @@ import androidx.compose.ui.test.performClick
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
+
 /**
  * UI tests for the OfflineRequiredScreen composable.
  *
- * This test suite verifies that the OfflineRequiredScreen displays
- * the correct texts and invokes the provided callback when the
- * "Open Settings" button is clicked.
+ * This test suite verifies that the OfflineRequiredScreen displays the correct texts and invokes
+ * the provided callback when the "Open Settings" button is clicked.
  */
 class OfflineRequiredScreenTest {
 

@@ -19,11 +19,10 @@ import org.junit.Test
 /**
  * Integration tests for the ReviewImageRepository using Firebase Storage.
  *
- * This test suite verifies upload and deletion of review images, ensuring
- * correct URL generation, safe deletion behavior, and proper error handling
- * when interacting with the Firebase Storage emulator.
+ * This test suite verifies upload and deletion of review images, ensuring correct URL generation,
+ * safe deletion behavior, and proper error handling when interacting with the Firebase Storage
+ * emulator.
  */
-
 class ReviewImageRepositoryTest {
 
   private lateinit var repository: ReviewImageRepository

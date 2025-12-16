@@ -20,12 +20,10 @@ import org.junit.Test
 /**
  * Firestore integration tests for the HuntsRepository.
  *
- * This test suite validates CRUD operations on hunts, including ID generation,
- * retrieval, updates, deletions, and image handling logic, using the Firebase
- * test environment and emulator-backed Firestore.
+ * This test suite validates CRUD operations on hunts, including ID generation, retrieval, updates,
+ * deletions, and image handling logic, using the Firebase test environment and emulator-backed
+ * Firestore.
  */
-
-
 class HuntsRepositoryFirestoreTest {
 
   private lateinit var repository: HuntsRepository

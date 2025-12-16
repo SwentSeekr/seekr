@@ -32,10 +32,9 @@ import org.junit.runner.RunWith
 /**
  * UI tests for the SettingsScreen composable.
  *
- * This test suite verifies that the settings screen components are displayed
- * correctly and that user interactions, such as clicking buttons and toggles,
- * function as expected. It also tests the integration with the SettingsViewModel
- * to ensure that UI state changes are reflected properly.
+ * This test suite verifies that the settings screen components are displayed correctly and that
+ * user interactions, such as clicking buttons and toggles, function as expected. It also tests the
+ * integration with the SettingsViewModel to ensure that UI state changes are reflected properly.
  */
 @RunWith(AndroidJUnit4::class)
 class SettingsScreenTest {

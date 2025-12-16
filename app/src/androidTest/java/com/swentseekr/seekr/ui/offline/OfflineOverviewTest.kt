@@ -11,12 +11,12 @@ import junit.framework.TestCase.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+
 /**
  * UI tests for the OfflineOverviewScreen composable.
  *
- * This test suite verifies that the offline overview screen components are displayed
- * correctly and that user interactions, such as clicking the show downloaded hunts button,
- * function as expected.
+ * This test suite verifies that the offline overview screen components are displayed correctly and
+ * that user interactions, such as clicking the show downloaded hunts button, function as expected.
  */
 @RunWith(AndroidJUnit4::class)
 class OfflineOverviewTest {

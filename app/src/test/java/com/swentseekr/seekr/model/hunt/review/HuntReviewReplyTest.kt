@@ -6,10 +6,9 @@ import org.junit.Test
 /**
  * Unit tests for the HuntReviewReply data model.
  *
- * This test suite verifies correct field initialization, copy behavior,
- * and equality semantics of the HuntReviewReply class.
+ * This test suite verifies correct field initialization, copy behavior, and equality semantics of
+ * the HuntReviewReply class.
  */
-
 class HuntReviewReplyTest {
 
   @Test

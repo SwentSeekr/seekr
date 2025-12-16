@@ -52,9 +52,8 @@ object TestTags {
 /**
  * UI tests for SeekrMainNavHost navigation behavior.
  *
- * This test suite verifies navigation between tabs and screens,
- * bottom bar visibility, and interaction flows using fake repositories
- * to provide controlled data for hunts and profiles.
+ * This test suite verifies navigation between tabs and screens, bottom bar visibility, and
+ * interaction flows using fake repositories to provide controlled data for hunts and profiles.
  */
 @RunWith(AndroidJUnit4::class)
 class SeekrNavigationTest {

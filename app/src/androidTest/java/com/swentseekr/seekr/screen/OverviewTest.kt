@@ -37,9 +37,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/**
- * Constants used in Overview screen tests.
- */
+/** Constants used in Overview screen tests. */
 object ConstantsTests {
   const val FILTER_BUTTON_TEST_TAG = "FilterButton_"
 }
@@ -47,11 +45,10 @@ object ConstantsTests {
 /**
  * UI tests for the Overview screen and related components.
  *
- * This test suite validates the behavior of the overview UI, including filter bars,
- * hunt cards, like interactions, LazyColumn rendering, and integration with
- * ViewModels using local (fake) repositories.
+ * This test suite validates the behavior of the overview UI, including filter bars, hunt cards,
+ * like interactions, LazyColumn rendering, and integration with ViewModels using local (fake)
+ * repositories.
  */
-
 @RunWith(AndroidJUnit4::class)
 class OverviewScreenTest {
 

@@ -36,8 +36,8 @@ fun hasBackgroundColor(expected: Color) = SemanticsMatcher.expectValue(Backgroun
 /**
  * UI tests for the ProfileScreen composable.
  *
- * This test suite verifies the correct display and behavior of the ProfileScreen,
- * including profile information, hunt lists, tab switching, and empty states.
+ * This test suite verifies the correct display and behavior of the ProfileScreen, including profile
+ * information, hunt lists, tab switching, and empty states.
  */
 class ProfileScreenTest {
   @get:Rule val composeTestRule = createComposeRule()

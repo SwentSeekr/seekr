@@ -21,9 +21,8 @@ const val EMPTY_STRING = ""
 /**
  * Unit tests for [MyFirebaseMessagingService].
  *
- * This test suite verifies the behavior of the Firebase Messaging Service,
- * including handling incoming messages and token updates, by mocking
- * Firebase Auth and Firestore interactions.
+ * This test suite verifies the behavior of the Firebase Messaging Service, including handling
+ * incoming messages and token updates, by mocking Firebase Auth and Firestore interactions.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class MyFirebaseMessagingServiceTest {

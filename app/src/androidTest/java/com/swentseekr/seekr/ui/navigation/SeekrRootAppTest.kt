@@ -28,13 +28,12 @@ import org.junit.runner.RunWith
 /**
  * Integration tests for SeekrRootApp composable.
  *
- * This test suite verifies the behavior of the root application component
- * under various authentication and network conditions, including:
+ * This test suite verifies the behavior of the root application component under various
+ * authentication and network conditions, including:
  * - Logged-out state showing the sign-in screen.
  * - Logged-in state navigating directly to the main app.
  * - Offline state handling with and without cached profile data.
  */
-
 @RunWith(AndroidJUnit4::class)
 class SeekrRootAppTest {
 

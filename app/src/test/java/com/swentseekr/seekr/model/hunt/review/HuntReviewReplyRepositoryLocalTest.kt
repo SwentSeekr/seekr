@@ -9,8 +9,8 @@ import org.junit.Test
 /**
  * Unit tests for the HuntReviewReplyRepositoryLocal class.
  *
- * This test suite verifies the functionality of adding, updating,
- * deleting, and retrieving hunt review replies in the local repository.
+ * This test suite verifies the functionality of adding, updating, deleting, and retrieving hunt
+ * review replies in the local repository.
  */
 class HuntReviewReplyRepositoryLocalTest {
 

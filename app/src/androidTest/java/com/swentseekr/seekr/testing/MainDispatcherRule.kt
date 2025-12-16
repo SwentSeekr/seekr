@@ -12,10 +12,9 @@ import org.junit.runner.Description
 /**
  * JUnit test rule that replaces the Main dispatcher with a test dispatcher.
  *
- * This rule allows deterministic testing of coroutines by controlling
- * the Dispatchers.Main context during unit and integration tests.
+ * This rule allows deterministic testing of coroutines by controlling the Dispatchers.Main context
+ * during unit and integration tests.
  */
-
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainDispatcherRule(val testDispatcher: TestDispatcher = StandardTestDispatcher()) :
     TestWatcher() {

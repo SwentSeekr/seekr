@@ -21,8 +21,8 @@ import org.junit.Test
 /**
  * Unit tests for the InternetConnectivityObserver.
  *
- * This test suite verifies the observer's ability to monitor
- * internet connectivity changes using mocked Android networking components.
+ * This test suite verifies the observer's ability to monitor internet connectivity changes using
+ * mocked Android networking components.
  */
 class InternetConnectivityObserverTest {
 

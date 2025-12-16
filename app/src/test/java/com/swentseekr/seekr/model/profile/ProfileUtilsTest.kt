@@ -13,8 +13,8 @@ import org.junit.Test
 /**
  * Test suite for the ProfileUtils class.
  *
- * This suite verifies the correctness of various utility functions
- * related to profile management, including validation and updates.
+ * This suite verifies the correctness of various utility functions related to profile management,
+ * including validation and updates.
  */
 class ProfileUtilsTest {
 
