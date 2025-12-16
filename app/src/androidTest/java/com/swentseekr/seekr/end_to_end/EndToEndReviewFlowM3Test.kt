@@ -64,6 +64,16 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * End-to-end UI test for the hunt review flow (Milestone 3).
+ *
+ * This test simulates a complete user journey including hunt creation,
+ * review submission, author replies, and verification of profile rating updates.
+ * It integrates navigation, Firebase-backed repositories, and Compose UI interactions
+ * to ensure cross-feature behavior remains correct.
+ */
+
+
 @RunWith(AndroidJUnit4::class)
 class EndToEndReviewFlowM3Test {
 

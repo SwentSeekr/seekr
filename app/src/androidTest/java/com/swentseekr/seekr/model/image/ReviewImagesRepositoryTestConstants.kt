@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.model.image
 
+/** Shared constants for the `ReviewImagesRepositoryTest`. */
 object ReviewImagesRepositoryTestConstants {
   const val PATH = "review_photos"
   const val FORMAT = ".jpg"

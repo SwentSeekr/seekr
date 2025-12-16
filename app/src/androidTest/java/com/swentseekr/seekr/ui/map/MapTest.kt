@@ -20,6 +20,12 @@ import junit.framework.TestCase.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
+/**
+ * UI tests for the Map screen and its interactions.
+ *
+ * This test suite verifies map display, hunt selection,
+ * popup interactions, permission handling, and hunt starting/stopping flows.
+ */
 class MapTest {
 
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()

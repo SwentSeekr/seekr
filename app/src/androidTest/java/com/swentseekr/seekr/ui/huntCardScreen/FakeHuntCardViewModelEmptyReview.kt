@@ -6,6 +6,7 @@ import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+/** A fake HuntCardViewModel with empty review list for testing purposes. */
 class FakeHuntCardViewModelEmptyReview(hunt: Hunt) : HuntCardViewModel() {
   private val _uiState =
       MutableStateFlow(HuntCardUiState(hunt = hunt, isLiked = false, reviewList = emptyList()))

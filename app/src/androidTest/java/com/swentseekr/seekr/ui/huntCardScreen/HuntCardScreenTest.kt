@@ -31,6 +31,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * UI tests for the Hunt Card screen.
+ *
+ * This test suite verifies the presence and behavior of UI elements,
+ * button interactions, like button state management, review display,
+ * map visibility, and loading states within the Hunt Card screen.
+ */
 @RunWith(AndroidJUnit4::class)
 class HuntCardScreenTest {
 

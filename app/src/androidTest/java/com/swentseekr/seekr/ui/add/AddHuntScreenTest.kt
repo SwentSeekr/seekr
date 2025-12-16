@@ -22,7 +22,16 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
+// Shared text constant for the Add Hunt screen
 private val add_hunt_text = "Add your Hunt"
+
+/**
+ * UI tests for the Add Hunt screen.
+ *
+ * This test suite verifies screen initialization, navigation behavior,
+ * form validation, save action enablement, and ViewModel-driven state
+ * handling during the hunt creation flow.
+ */
 
 class AddHuntScreenTest {
 

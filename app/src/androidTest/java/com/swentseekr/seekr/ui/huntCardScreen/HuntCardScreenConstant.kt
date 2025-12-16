@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.huntCardScreen
 
+/** Shared constants for the `HuntCardScreenTest`. */
 object HuntCardScreenConstantStrings {
   const val TEST_HUNT_ID = "hunt123"
   const val TITLE = "City Exploration"
