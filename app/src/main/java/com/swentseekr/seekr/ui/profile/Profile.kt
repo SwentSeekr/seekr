@@ -123,6 +123,37 @@ enum class ProfileTab {
 // -------------------------
 // MAIN SCREEN COMPOSABLE
 // -------------------------
+/**
+ * Main screen displaying a user's profile.
+ *
+ * This screen shows:
+ * - A profile header with avatar, pseudonym, bio, and statistics
+ * - Tabs to switch between the user's hunts, completed hunts, and liked hunts
+ * - A list of hunts corresponding to the selected tab
+ * - A floating action button to add a hunt when viewing own profile
+ * - Loading and error states
+ *
+ * Behavior:
+ * - Loads the profile from the ViewModel unless running in test mode
+ * - Adapts UI depending on whether the profile belongs to the current user
+ * - Supports navigation to hunt details, settings, reviews, and add-hunt flow
+ *
+ * Testing:
+ * - Allows injection of a mock profile
+ * - Exposes extensive test tags for UI testing
+ * - Can simulate public or private profile states
+ *
+ * @param userId Optional ID of the user whose profile is displayed.
+ * @param viewModel ViewModel responsible for loading and managing profile data.
+ * @param onAddHunt Callback invoked when the add-hunt button is clicked.
+ * @param onSettings Callback invoked when the settings button is clicked.
+ * @param onMyHuntClick Callback invoked when a hunt card is clicked, passing the hunt ID.
+ * @param onGoBack Callback invoked when the back button is clicked.
+ * @param testMode Enables test mode, bypassing ViewModel loading.
+ * @param testPublic Forces the profile to behave as a public profile (used for tests).
+ * @param testProfile Optional profile used when test mode is enabled.
+ * @param onReviewsClick Callback invoked when the reviews statistic card is clicked.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
@@ -272,6 +303,21 @@ fun ProfileScreen(
       }
 }
 
+/**
+ * Displays the top section of the profile screen, including:
+ * - Background gradient
+ * - Settings or back button (depending on profile ownership)
+ * - Profile picture, pseudonym, and bio
+ * - Statistics cards for review rating and hunts done
+ *
+ * @param profile The Profile object containing all user information.
+ * @param reviewCount The total number of reviews the user has received.
+ * @param isMyProfile Whether the displayed profile belongs to the current user.
+ * @param testPublic If true, simulates a public profile for testing purposes.
+ * @param onSettings Callback invoked when the settings button is clicked.
+ * @param onGoBack Callback invoked when the back button is clicked.
+ * @param onReviewsClick Callback invoked when the reviews stat card is clicked.
+ */
 @Composable
 fun ModernProfileHeader(
     profile: Profile,
@@ -391,6 +437,19 @@ fun ModernProfileHeader(
       }
 }
 
+/**
+ * Displays a single statistic card with an icon, value, and label.
+ *
+ * This composable is used in the profile header to show review rating and hunts done.
+ *
+ * @param icon The icon to display (Painter resource).
+ * @param value The main numeric value to display (e.g., rating or count).
+ * @param label The label describing the value (e.g., "Reviews" or "Hunts done").
+ * @param onReviewsClick Optional callback when the card is clicked (used for review rating).
+ * @param modifier Modifier for layout and styling.
+ * @param testTagValue Test tag for the Text showing the value (for UI testing).
+ * @param testTagLabel Test tag for the Text showing the label (for UI testing).
+ */
 @Composable
 fun ModernStatCard(
     icon: Painter,
@@ -440,6 +499,14 @@ fun ModernStatCard(
       }
 }
 
+/**
+ * Displays the tab bar for switching between My Hunts, Done Hunts, and Liked Hunts.
+ *
+ * Each tab is represented with an icon and label. Selected tab is highlighted.
+ *
+ * @param selectedTab The currently selected tab.
+ * @param onTabSelected Callback invoked when a tab is selected, passing the chosen tab.
+ */
 @Composable
 fun ModernCustomToolbar(selectedTab: ProfileTab, onTabSelected: (ProfileTab) -> Unit = {}) {
   val tabs =
@@ -508,6 +575,13 @@ fun ModernCustomToolbar(selectedTab: ProfileTab, onTabSelected: (ProfileTab) -> 
       }
 }
 
+/**
+ * Displays an empty state when there are no hunts to show in the selected tab.
+ *
+ * Shows a large icon representing the tab type and a message "No hunts yet".
+ *
+ * @param selectedTab The currently selected tab, which determines the icon to display.
+ */
 @Composable
 fun ModernEmptyHuntsState(selectedTab: ProfileTab) {
   Box(
@@ -541,6 +615,15 @@ fun ModernEmptyHuntsState(selectedTab: ProfileTab) {
 // --------------------------------------------------------
 // LEGACY TOOLBAR (kept for compatibility if still referenced)
 // --------------------------------------------------------
+/**
+ * Legacy toolbar for profile tabs. Kept for backward compatibility.
+ *
+ * Displays a row of tabs (My Hunts, Done Hunts, Liked Hunts) using icons. Highlights the selected
+ * tab with a background color.
+ *
+ * @param selectedTab The currently selected tab.
+ * @param onTabSelected Callback invoked when a tab is selected.
+ */
 @Composable
 fun CustomToolbar(selectedTab: ProfileTab, onTabSelected: (ProfileTab) -> Unit = {}) {
   Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
