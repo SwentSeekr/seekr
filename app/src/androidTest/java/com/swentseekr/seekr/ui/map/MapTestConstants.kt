@@ -9,10 +9,6 @@ object Constants {
   const val HUNT_TIME = 1.0
   const val HUNT_DISTANCE = 2.0
   const val REVIEW_RATE = 4.2
-  const val DEFAULT_LAT = 46.5
-  const val DEFAULT_LNG = 6.6
-  const val FALLBACK_LAT = 46.519962
-  const val FALLBACK_LNG = 6.633597
   const val VALID_LAT = 10.0
   const val VALID_LNG = 20.0
   const val INVALID_LAT = 46.54

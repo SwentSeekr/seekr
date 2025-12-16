@@ -88,7 +88,7 @@ class ProfileRepositoryFirestoreTest {
     repository.createProfile(profile)
 
     val retrieved = repository.getProfile(uid)
-    assertNotNull("Profile should be retrieved after creation", retrieved)
+    assertNotNull(Constants.PROFILE_RETRIEVE, retrieved)
     assertEquals(uid, retrieved?.uid)
     assertEquals("Tester", retrieved?.author?.pseudonym)
   }
@@ -96,7 +96,7 @@ class ProfileRepositoryFirestoreTest {
   @Test
   fun current_user_not_null() = runTest {
     val currentUser = auth.currentUser
-    assertNotNull("FirebaseAuth currentUser should not be null", currentUser)
+    assertNotNull(Constants.FIREBASE_USER_NOT_NULL, currentUser)
   }
 
   @Test
@@ -121,7 +121,7 @@ class ProfileRepositoryFirestoreTest {
     repository.createProfile(profile)
 
     val retrieved = repository.getProfile(uid)
-    assertNotNull("Profile should be retrieved after creation", retrieved)
+    assertNotNull(Constants.PROFILE_RETRIEVE, retrieved)
     assertEquals(uid, retrieved?.uid)
     assertEquals("Tester", retrieved?.author?.pseudonym)
     assertEquals("This is a bio", retrieved?.author?.bio)
@@ -161,7 +161,7 @@ class ProfileRepositoryFirestoreTest {
   fun getProfile_autoCreatesDefault_whenMissing() = runTest {
     val missingUid = "unknown_user"
     val profile = repository.getProfile(missingUid)
-    assertNotNull("Default profile should be auto-created if missing", profile)
+    assertNotNull(Constants.DEFAULT_PROFILE_CREATION, profile)
     assertEquals(missingUid, profile!!.uid)
     assertEquals("New User", profile.author.pseudonym)
   }
@@ -283,7 +283,7 @@ class ProfileRepositoryFirestoreTest {
 
     val repo = ProfileRepositoryFirestore(db, auth, storage = storage)
     val result = repo.getProfile(uid)
-    assertNull("Profile should be null if author field is missing", result)
+    assertNull(Constants.PROFILE_NULL_IF_FIELD_MISS, result)
   }
 
   @Test
@@ -323,7 +323,7 @@ class ProfileRepositoryFirestoreTest {
   @Test
   fun documentToHunt_returnsNull_onInvalidData() = runTest {
     val db = FirebaseFirestore.getInstance()
-    val docRef = db.collection("hunts").document("invalidHunt")
+    val docRef = db.collection(Constants.PATH_HUNT).document("invalidHunt")
     docRef.set(mapOf("title" to null)).await()
 
     val repo = ProfileRepositoryFirestore(db, auth, storage = storage)
@@ -351,7 +351,7 @@ class ProfileRepositoryFirestoreTest {
     val uid = auth.currentUser!!.uid
 
     val db = FirebaseFirestore.getInstance()
-    val docRef = db.collection("profiles").document(uid)
+    val docRef = db.collection(Constants.PATH_PROFILE).document(uid)
     docRef.set(mapOf("doneHunts" to emptyList<Map<String, Any?>>())).await()
 
     repository.addDoneHunt(uid, hunt)
@@ -369,7 +369,7 @@ class ProfileRepositoryFirestoreTest {
     val uid = auth.currentUser!!.uid
 
     val db = FirebaseFirestore.getInstance()
-    val docRef = db.collection("profiles").document(uid)
+    val docRef = db.collection(Constants.PATH_PROFILE).document(uid)
     val doneHunts =
         listOf(mapOf("uid" to "hunt1", "title" to "Sample Hunt", "description" to "Test Hunt"))
     docRef.set(mapOf("doneHunts" to doneHunts)).await()
@@ -469,7 +469,7 @@ class ProfileRepositoryFirestoreTest {
 
     val needs = repository.checkUserNeedsOnboarding(uid)
 
-    assertTrue("User without profile should need onboarding", needs)
+    assertTrue(Constants.WITHOUT_PROFILE_ONBOARDING, needs)
 
     val created = repository.getProfile(uid)
 
@@ -482,10 +482,8 @@ class ProfileRepositoryFirestoreTest {
     val uid = auth.currentUser!!.uid
 
     val profile = repository.getProfile(uid)
-    assertNotNull("Profile should exist or be auto-created", profile)
-    assertFalse(
-        "User should not have completed onboarding initially",
-        profile!!.author.hasCompletedOnboarding)
+    assertNotNull(Constants.PROFILE_EXIST_CREATE, profile)
+    assertFalse(Constants.PROFILE_NOT_ONBOARDING, profile!!.author.hasCompletedOnboarding)
 
     repository.completeOnboarding(uid, "NewPseudo", "New bio")
 
@@ -586,12 +584,12 @@ class ProfileRepositoryFirestoreTest {
   @Test
   fun removeLikedHunt_doesNothingIfNotLiked() = runTest {
     val uid = auth.currentUser!!.uid
-    db.collection("profiles")
+    db.collection(Constants.PATH_PROFILE)
         .document(uid)
         .set(mapOf(LIKED_HUNTS to emptyList<Map<String, Any?>>()))
         .await()
     repository.removeLikedHunt(uid, hunt.uid)
-    val snapshot = db.collection("profiles").document(uid).get().await()
+    val snapshot = db.collection(Constants.PATH_PROFILE).document(uid).get().await()
     @Suppress(UNCHECKED_CAST)
     val likedHunts = snapshot.get(LIKED_HUNTS) as? List<Map<String, Any?>> ?: emptyList()
     assertTrue(likedHunts.isEmpty())

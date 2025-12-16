@@ -11,6 +11,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.swentseekr.seekr.ui.hunt.review.AddReviewScreenTestTags
 import com.swentseekr.seekr.ui.hunt.review.BaseReviewScreen
+import com.swentseekr.seekr.ui.review.AddReviewTestConstantStrings.PHOTOS_LAZY_ROW_TEST_TAG
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -106,7 +107,7 @@ class BaseReviewScreenTest {
     composeRule.onNodeWithTag(starTag).performClick()
     composeRule
         .onNodeWithTag(AddReviewScreenTestTags.COMMENT_TEXT_FIELD)
-        .performTextInput(AddReviewTestConstantStings.TextInput)
+        .performTextInput(AddReviewTestConstantStrings.TEXT_INPUT)
     composeRule.onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON).performClick()
 
     assertTrue(backCalled)
@@ -160,6 +161,6 @@ class BaseReviewScreenTest {
       }
     }
 
-    composeRule.onNodeWithTag("PhotosLazyRow").assertExists()
+    composeRule.onNodeWithTag(PHOTOS_LAZY_ROW_TEST_TAG).assertExists()
   }
 }

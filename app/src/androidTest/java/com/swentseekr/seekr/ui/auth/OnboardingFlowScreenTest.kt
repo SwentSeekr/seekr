@@ -125,7 +125,9 @@ class OnboardingFlowScreenTest {
     composeTestRule.onNodeWithTag(CHECKBOX_AGREE).performClick()
     composeTestRule.onNodeWithTag(I_AGREE_BUTTON).performClick()
 
-    composeTestRule.onNode(hasText("Pseudonym")).performTextInput("John Doe")
+    composeTestRule
+        .onNode(hasText(OnboardingFlowScreenTestsConstants.PSEUDONYM))
+        .performTextInput("John Doe")
 
     composeTestRule.onNodeWithTag(FINISH_BUTTON).assertIsEnabled()
   }
@@ -151,15 +153,17 @@ class OnboardingFlowScreenTest {
     val pseudo = "Explorer"
     val bio = "Adventure lover"
 
-    composeTestRule.onNode(hasText("Pseudonym")).performTextInput(pseudo)
-    composeTestRule.onNode(hasText("Bio")).performTextInput(bio)
+    composeTestRule
+        .onNode(hasText(OnboardingFlowScreenTestsConstants.PSEUDONYM))
+        .performTextInput(pseudo)
+    composeTestRule.onNode(hasText(OnboardingFlowScreenTestsConstants.BIO)).performTextInput(bio)
     composeTestRule.onNodeWithTag(FINISH_BUTTON).performClick()
 
     // Assertions
-    assertTrue("onboarding handler should be called", handler.called)
-    assertEquals("userId mismatch", userId, handler.userId)
-    assertEquals("pseudonym mismatch", pseudo, handler.pseudo)
-    assertEquals("bio mismatch", bio, handler.bio)
+    assertTrue(OnboardingFlowScreenTestsConstants.ONBOARDING_HANDLER, handler.called)
+    assertEquals(OnboardingFlowScreenTestsConstants.USER_MATCH, userId, handler.userId)
+    assertEquals(OnboardingFlowScreenTestsConstants.PSEUDONYM_MISMATCH, pseudo, handler.pseudo)
+    assertEquals(OnboardingFlowScreenTestsConstants.BIO_MISMATCH, bio, handler.bio)
   }
 
   // -------------------------------------------------------------
@@ -175,11 +179,13 @@ class OnboardingFlowScreenTest {
     composeTestRule.onNodeWithTag(CHECKBOX_AGREE).performClick()
     composeTestRule.onNodeWithTag(I_AGREE_BUTTON).performClick()
 
-    composeTestRule.onNode(hasText("Pseudonym")).performTextInput("UserNoBio")
+    composeTestRule
+        .onNode(hasText(OnboardingFlowScreenTestsConstants.PSEUDONYM))
+        .performTextInput(OnboardingFlowScreenTestsConstants.USER_NO_BIO)
     composeTestRule.onNodeWithTag(FINISH_BUTTON).performClick()
 
     assertTrue(handler.called)
-    assertEquals("UserNoBio", handler.pseudo)
+    assertEquals(OnboardingFlowScreenTestsConstants.USER_NO_BIO, handler.pseudo)
   }
 
   // -------------------------------------------------------------
@@ -208,8 +214,12 @@ class OnboardingFlowScreenTest {
     composeTestRule.onNodeWithTag(CHECKBOX_AGREE).performClick()
     composeTestRule.onNodeWithTag(I_AGREE_BUTTON).performClick()
 
-    composeTestRule.onNode(hasText("Pseudonym")).performTextInput("FinalUser")
-    composeTestRule.onNode(hasText("Bio")).performTextInput("Some bio")
+    composeTestRule
+        .onNode(hasText(OnboardingFlowScreenTestsConstants.PSEUDONYM))
+        .performTextInput("FinalUser")
+    composeTestRule
+        .onNode(hasText(OnboardingFlowScreenTestsConstants.BIO))
+        .performTextInput("Some bio")
     composeTestRule.onNodeWithTag(FINISH_BUTTON).performClick()
 
     done

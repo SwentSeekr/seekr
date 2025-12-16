@@ -29,9 +29,9 @@ class ReviewImagesScreenTest {
   fun reviewImagesScreen_displaysCorrectly() {
     val photos =
         listOf(
-            ReviewImagesScreenConstantStings.Photo1,
-            ReviewImagesScreenConstantStings.Photo2,
-            ReviewImagesScreenConstantStings.Photo3)
+            ReviewImagesScreenConstantStrings.PHOTO_1,
+            ReviewImagesScreenConstantStrings.PHOTO_2,
+            ReviewImagesScreenConstantStrings.PHOTO_3)
     var backClicked = false
 
     composeRule.setContent {
@@ -66,16 +66,16 @@ class ReviewImagesScreenTest {
         .assertIsDisplayed()
         .performClick()
 
-    assert(backClicked) { ReviewImagesScreenConstantStings.TexteButton }
+    assert(backClicked) { ReviewImagesScreenConstantStrings.BACK_BUTTON_ERROR_MESSAGE }
   }
 
   @Test
   fun reviewImagesScreen_swipingChangesImageIndex() {
     val photos =
         listOf(
-            ReviewImagesScreenConstantStings.Photo1,
-            ReviewImagesScreenConstantStings.Photo2,
-            ReviewImagesScreenConstantStings.Photo3)
+            ReviewImagesScreenConstantStrings.PHOTO_1,
+            ReviewImagesScreenConstantStrings.PHOTO_2,
+            ReviewImagesScreenConstantStrings.PHOTO_3)
 
     composeRule.setContent { ReviewImagesScreen(photoUrls = photos, onGoBack = {}) }
 
@@ -111,7 +111,7 @@ class ReviewImagesScreenTest {
 
   @Test
   fun reviewImagesScreen_displaysSingleImage() {
-    val photos = listOf(ReviewImagesScreenConstantStings.Photo1)
+    val photos = listOf(ReviewImagesScreenConstantStrings.PHOTO_1)
 
     composeRule.setContent { ReviewImagesScreen(photoUrls = photos, onGoBack = {}) }
 
@@ -131,9 +131,9 @@ class ReviewImagesScreenTest {
   fun reviewImagesScreen_fullscreenOpensAtCorrectIndex() {
     val photos =
         listOf(
-            ReviewImagesScreenConstantStings.Photo1,
-            ReviewImagesScreenConstantStings.Photo2,
-            ReviewImagesScreenConstantStings.Photo3)
+            ReviewImagesScreenConstantStrings.PHOTO_1,
+            ReviewImagesScreenConstantStrings.PHOTO_2,
+            ReviewImagesScreenConstantStrings.PHOTO_3)
 
     setReviewImagesScreen(photos)
 

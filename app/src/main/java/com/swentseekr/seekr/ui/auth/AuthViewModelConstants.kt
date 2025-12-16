@@ -10,6 +10,7 @@ object AuthViewModelMessages {
   const val CREDENTIAL_FAILURE_PREFIX = "Failed to get credentials"
   const val UNEXPECTED_ERROR_PREFIX = "Unexpected error"
   const val NO_PROVIDER = "no provider"
+  const val ONBOARDING = "New user should need onboarding"
 
   fun credentialFailure(detail: String?) =
       if (detail.isNullOrBlank()) CREDENTIAL_FAILURE_PREFIX

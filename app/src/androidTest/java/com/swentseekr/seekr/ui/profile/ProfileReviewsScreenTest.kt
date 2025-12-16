@@ -155,9 +155,13 @@ class ProfileReviewsScreenTest {
     listOf(hunt1, hunt2).forEach { hunt ->
       composeTestRule
           .onNodeWithTag(ProfileReviewsTestTags.REVIEWS_LIST)
-          .performScrollToNode(hasTestTag("hunt_header_${hunt.uid}"))
-      composeTestRule.onNodeWithTag("hunt_header_${hunt.uid}").assertIsDisplayed()
-      composeTestRule.onNode(hasTestTag("divider_${hunt.uid}")).assertIsDisplayed()
+          .performScrollToNode(hasTestTag("${ProfileTestsConstants.HUNT_HEADER}${hunt.uid}"))
+      composeTestRule
+          .onNodeWithTag("${ProfileTestsConstants.HUNT_HEADER}${hunt.uid}")
+          .assertIsDisplayed()
+      composeTestRule
+          .onNode(hasTestTag("${ProfileTestsConstants.DIVIDER}${hunt.uid}"))
+          .assertIsDisplayed()
     }
   }
 
@@ -240,7 +244,7 @@ class ProfileReviewsScreenTest {
         .onNodeWithTag(ProfileReviewsTestTags.reviewCardTag("reviewX"))
         .assertIsDisplayed()
 
-    composeTestRule.onNodeWithTag("hunt_header_unknown_hunt").assertDoesNotExist()
+    composeTestRule.onNodeWithTag(ProfileTestsConstants.UNKNOWN).assertDoesNotExist()
   }
 
   @Test

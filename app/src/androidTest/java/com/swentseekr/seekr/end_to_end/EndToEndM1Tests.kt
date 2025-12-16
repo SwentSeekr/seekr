@@ -69,15 +69,19 @@ class EndToEndM1Tests {
     // Step 5 – Fill in the required Add Hunt form fields
     composeTestRule
         .onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_TITLE)
-        .performTextInput("E2E Test Hunt")
+        .performTextInput(EndToEndM1TestsConstant.TEST_E2E)
 
     composeTestRule
         .onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_DESCRIPTION)
-        .performTextInput("This hunt is added during an end-to-end test.")
+        .performTextInput(EndToEndM1TestsConstant.SENTENCE)
 
-    composeTestRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_TIME).performTextInput("2.0")
+    composeTestRule
+        .onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_TIME)
+        .performTextInput(EndToEndM1TestsConstant.TEXT_02)
 
-    composeTestRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_DISTANCE).performTextInput("5.5")
+    composeTestRule
+        .onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_DISTANCE)
+        .performTextInput(EndToEndM1TestsConstant.TEXT_55)
 
     // Select hunt status and difficulty
     composeTestRule.onNodeWithTag(HuntScreenTestTags.DROPDOWN_STATUS).performClick()

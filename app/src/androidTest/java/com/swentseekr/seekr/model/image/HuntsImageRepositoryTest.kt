@@ -66,10 +66,12 @@ class HuntsImageRepositoryTest {
     val tempUri = createTempImageFile("main")
     val url = repository.uploadMainImage(huntId, tempUri)
 
-    assertTrue("URL should not be empty", url.isNotEmpty())
+    assertTrue(HuntsImagesRepositoryTestConstants.URL_NOT_EMPTY, url.isNotEmpty())
 
     // Accept both emulator and production URL formats
-    val isValidUrl = url.startsWith("http://") || url.startsWith("https://")
+    val isValidUrl =
+        url.startsWith(HuntsImagesRepositoryTestConstants.URL_STARTER) ||
+            url.startsWith(HuntsImagesRepositoryTestConstants.URL_STARTER)
     assertTrue("URL should look like a valid HTTP(S) path, got: $url", isValidUrl)
   }
 
