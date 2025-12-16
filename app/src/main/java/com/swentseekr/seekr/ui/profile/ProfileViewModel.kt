@@ -61,6 +61,16 @@ class ProfileViewModel(
     _uiState.value = transform(_uiState.value)
   }
 
+  /**
+   * Loads the total number of reviews for a given profile.
+   *
+   * Iterates through all hunts created by the profile and counts the number of reviews associated
+   * with each hunt.
+   *
+   * Errors during review loading are logged but do not stop the process.
+   *
+   * @param profile Profile whose hunts are used to compute total reviews.
+   */
   fun loadTotalReviewsForProfile(profile: Profile) {
     viewModelScope.launch {
       var total = 0
@@ -79,6 +89,20 @@ class ProfileViewModel(
     }
   }
 
+  /**
+   * Loads profile data for a given user.
+   *
+   * Behavior:
+   * - Fetches profile and related hunts (created, completed, liked)
+   * - Computes average review and sport ratings
+   * - Determines whether the loaded profile belongs to the current user
+   * - Optionally caches the profile locally
+   *
+   * Updates loading and error states accordingly.
+   *
+   * @param userId Optional user ID to load. Defaults to current user.
+   * @param context Optional context used for local caching.
+   */
   fun loadProfile(userId: String? = null, context: Context? = null) {
     val uidToLoad = userId ?: currentUid
     if (uidToLoad == null) {
@@ -125,6 +149,20 @@ class ProfileViewModel(
     }
   }
 
+  /**
+   * Builds a profile with computed rating values.
+   *
+   * Computes:
+   * - Average review rating from created hunts
+   * - Average sport rating from completed hunts
+   *
+   * Returns a new profile instance with updated author ratings and refreshed hunt lists.
+   *
+   * @param profile Base profile information.
+   * @param myHunts Hunts created by the user.
+   * @param doneHunts Hunts completed by the user.
+   * @param likedHunts Hunts liked by the user.
+   */
   private fun buildProfileWithComputedRatings(
       profile: Profile,
       myHunts: List<Hunt>,
@@ -141,6 +179,15 @@ class ProfileViewModel(
         likedHunts = likedHunts.toMutableList())
   }
 
+  /**
+   * Calculates the average review rating for the user's hunts.
+   *
+   * If no hunts are available, returns the minimum review rate. The result is clamped between
+   * allowed minimum and maximum values.
+   *
+   * @param myHunts List of hunts created by the user.
+   * @return Average review rating.
+   */
   private fun calculateAverageReview(myHunts: List<Hunt>): Double {
     if (myHunts.isEmpty()) return ProfileViewModelNumbers.MIN_REVIEW_RATE
     return myHunts
@@ -149,6 +196,15 @@ class ProfileViewModel(
         .coerceIn(ProfileViewModelNumbers.MIN_REVIEW_RATE, ProfileViewModelNumbers.MAX_REVIEW_RATE)
   }
 
+  /**
+   * Calculates the average sport rating based on completed hunts.
+   *
+   * Each hunt contributes points depending on its difficulty level. The final value is clamped
+   * between allowed minimum and maximum values.
+   *
+   * @param doneHunts List of hunts completed by the user.
+   * @return Average sport rating.
+   */
   private fun calculateAverageSport(doneHunts: List<Hunt>): Double {
     if (doneHunts.isEmpty()) return ProfileViewModelNumbers.MIN_SPORT_RATE
     val points =
@@ -164,6 +220,14 @@ class ProfileViewModel(
         .coerceIn(ProfileViewModelNumbers.MIN_SPORT_RATE, ProfileViewModelNumbers.MAX_SPORT_RATE)
   }
 
+  /**
+   * Refreshes the current UI state.
+   *
+   * Reloads the profile using the currently displayed profile ID or the logged-in user ID if none
+   * is available.
+   *
+   * @param context Optional context used for local caching.
+   */
   fun refreshUIState(context: Context? = null) {
     {
       val uid = _uiState.value.profile?.uid ?: currentUid
@@ -173,6 +237,17 @@ class ProfileViewModel(
     }
   }
 
+  /**
+   * Updates the current user's profile.
+   *
+   * Behavior:
+   * - Ensures the user is logged in
+   * - Persists profile changes to the repository
+   * - Reloads the profile to refresh computed values
+   *
+   * @param profile Updated profile data.
+   * @param context Optional context used for local caching.
+   */
   fun updateProfile(profile: Profile, context: Context? = null) {
     viewModelScope.launch {
       val uid = currentUid
@@ -190,6 +265,18 @@ class ProfileViewModel(
     }
   }
 
+  /**
+   * Loads all hunts related to a given user.
+   *
+   * Fetches:
+   * - Created hunts
+   * - Completed hunts
+   * - Liked hunts
+   *
+   * Updates the current profile with refreshed hunt data and recomputed ratings.
+   *
+   * @param userId User ID whose hunts should be loaded.
+   */
   fun loadHunts(userId: String) {
     viewModelScope.launch {
       try {
@@ -213,7 +300,15 @@ class ProfileViewModel(
       }
     }
   }
-  // For testing or preview purposes: builds a profile with computed averages
+
+  /**
+   * Builds a profile with computed ratings.
+   *
+   * Intended for testing or preview purposes. Uses the hunts already present in the profile.
+   *
+   * @param profile Base profile data.
+   * @return Profile with computed rating values.
+   */
   fun buildComputedProfile(profile: Profile): Profile {
     return buildProfileWithComputedRatings(
         profile = profile,
@@ -222,6 +317,16 @@ class ProfileViewModel(
         likedHunts = profile.likedHunts)
   }
 
+  /**
+   * Loads all reviews for a given profile.
+   *
+   * Collects reviews from all hunts created by the profile. Updates:
+   * - Review list state
+   * - Total review count
+   * - Average review rating on the profile
+   *
+   * @param profile Profile whose reviews should be loaded.
+   */
   fun loadAllReviewsForProfile(profile: Profile) {
     viewModelScope.launch {
       val allReviews =
@@ -246,6 +351,17 @@ class ProfileViewModel(
     }
   }
 
+  /**
+   * Toggles the liked status of a hunt for the current user.
+   *
+   * If the hunt is already liked, it will be removed from the liked list. If not, it will be added
+   * to the liked list.
+   *
+   * Updates both local UI state and persists changes to the repository.
+   *
+   * @param hunt Hunt to like or unlike.
+   * @param context Optional context used for local caching.
+   */
   fun toggleLikedHunt(hunt: Hunt, context: Context? = null) {
     viewModelScope.launch {
       val currentProfile = _uiState.value.profile ?: return@launch
