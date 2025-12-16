@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.review
 
+/** Shared constants for the `ReviewImagesScreen` tests. */
 object ReviewImagesScreenConstantStrings {
 
   const val PHOTO_1 = "photo1"

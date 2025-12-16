@@ -25,6 +25,13 @@ import junit.framework.TestCase.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
+/**
+ * UI tests for ProfileReviewsScreen.
+ *
+ * This test suite verifies that the ProfileReviewsScreen displays
+ * the correct elements, handles user interactions, and manages
+ * different states such as loading and empty reviews.
+ */
 class ProfileReviewsScreenTest {
 
   @get:Rule val composeTestRule = createComposeRule()
