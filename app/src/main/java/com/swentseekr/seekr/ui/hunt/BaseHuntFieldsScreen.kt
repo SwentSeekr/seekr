@@ -1046,12 +1046,14 @@ private fun DeleteHuntButton(
       shape = RoundedCornerShape(UICons.ButtonCornerRadius),
       colors =
           ButtonDefaults.outlinedButtonColors(
-              containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f),
+              containerColor =
+                  MaterialTheme.colorScheme.errorContainer.copy(
+                      alpha = UICons.DeleteContainerAlpha),
               contentColor = MaterialTheme.colorScheme.error),
       border =
           BorderStroke(
               width = UICons.SpacerHeightTiny,
-              color = MaterialTheme.colorScheme.error.copy(alpha = 0.5f))) {
+              color = MaterialTheme.colorScheme.error.copy(alpha = UICons.DeleteBorderAlpha))) {
         Icon(
             painter = painterResource(R.drawable.ic_delete),
             contentDescription = DELETE_ICON_DESC,
