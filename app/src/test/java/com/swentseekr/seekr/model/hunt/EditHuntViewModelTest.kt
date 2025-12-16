@@ -11,6 +11,11 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
+object EditHuntViewModelTestContantsMessage {
+  const val FAIL_DELETE = "Failed to delete hunt: Network error"
+  const val NO_HUNT_LOADED = "No hunt loaded to delete."
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class EditHuntViewModelTest {
 
@@ -51,7 +56,7 @@ class EditHuntViewModelTest {
     viewModel.deleteCurrentHunt()
 
     val state = viewModel.uiState.value
-    assertEquals("Failed to delete hunt: Network error", state.errorMsg)
+    assertEquals(EditHuntViewModelTestContantsMessage.FAIL_DELETE, state.errorMsg)
   }
 
   @Test
@@ -60,6 +65,6 @@ class EditHuntViewModelTest {
     setHuntId(null)
 
     val ex = assertFailsWith<IllegalArgumentException> { viewModel.deleteCurrentHunt() }
-    assertEquals("No hunt loaded to delete.", ex.message)
+    assertEquals(EditHuntViewModelTestContantsMessage.NO_HUNT_LOADED, ex.message)
   }
 }

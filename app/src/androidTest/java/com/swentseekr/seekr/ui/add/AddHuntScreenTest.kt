@@ -48,7 +48,7 @@ class AddHuntScreenTest {
 
     composeRule.onNodeWithText(add_hunt_text).assertExists()
     composeRule.onNodeWithTag(HuntScreenTestTags.BUTTON_SELECT_LOCATION).assertExists()
-    composeRule.onNodeWithContentDescription("Back").performClick()
+    composeRule.onNodeWithContentDescription(AddTestConstants.BACK_LABEL).performClick()
     assertTrue(backCalled)
   }
 

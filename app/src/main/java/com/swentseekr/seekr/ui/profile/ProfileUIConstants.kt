@@ -14,8 +14,6 @@ import androidx.compose.ui.unit.dp
  * the project.
  */
 object ProfileScreenConstants {
-  val ICON_BUTTON_SIZE_DP = 40.dp
-  const val ICON_BUTTON_WHITE_ALPHA = 0.9f
   const val ICON_BUTTON_GOBACK = "Go Back"
   const val SINGLE_REVIEW = 1
 
@@ -24,6 +22,7 @@ object ProfileScreenConstants {
   const val MULTIPLE_REVIEWS_LABEL = "- %d reviews"
   const val HUNTS_DONE_LABEL = "%d Hunts done"
   const val EMPTY_REVIEW_RATE = 0.0
+  const val MAX_LINE = 2
 }
 
 /** Centralized constants for UI dimensions. */
@@ -42,7 +41,6 @@ object EditProfileNumberConstants {
   val SCREEN_PADDING = 24.dp
 
   val SPACER_TINY = 4.dp
-  val SPACER_MEDIUM = 12.dp
   val SPACER_LARGE = 16.dp
   val SPACER_SMALL = 8.dp
 
@@ -78,10 +76,11 @@ object EditProfileNumberConstants {
   const val MIN_PSEUDONYM_LENGTH = 3
 
   val STROKE_WIDTH = 2.dp
+  const val IS_LOADING: Float = 0.95f
+  const val IS_NOT_LOADING: Float = 1f
 }
 
 object EditProfileStrings {
-  const val PLUS = "+"
   const val DIALOG_TITLE = "Choose Image"
   const val DIALOG_MESSAGE = "Pick a source for your new profile picture"
 
@@ -109,6 +108,7 @@ object EditProfileStrings {
   const val LOAD_USER_ERROR = "User not loaded"
   const val CAMERA_PERMISSION_ERROR = "Could not create image file. Check storage permissions."
   const val ERROR = "Error"
+  const val ERROR_START = "Error:"
   const val OK = "OK"
   const val IMAGE = "image/*"
   const val IMAGE_JPEG = "image/jpeg"
@@ -120,6 +120,8 @@ object EditProfileStrings {
   const val NEW_TEST_BIO = "New bio text"
 
   const val CHECKING_AVAILABILITY = "Checking availability..."
+
+  const val ERROR_LAUNCH_CAMERA = "Failed to launch camera:"
 }
 
 /**
@@ -168,31 +170,17 @@ object ProfileUIConstantsDefaults {
   val ProfileHeaderGradientEnd = Color(0xFFE8847C)
 
   // ---- TEST STRINGS ----
-  const val TabMyHuntsLabel = "My Hunts"
-  const val TabDoneLabel = "Done"
-  const val TabLikedLabel = "Liked"
+  const val TAB_MY_HUNTS_LABEL = "My Hunts"
+  const val TAB_DONE_LABEL = "Done"
+  const val TAB_LIKED_LABEL = "Liked"
 
   // ---- EMPTY STATE ----
   val EmptyIconSize = 64.dp
-  const val EmptyText = "No hunts yet"
 
   // ---- ALPHA VALUES ----
-  const val AlphaLight = 0.1f
-  const val AlphaMedium = 0.85f
-  const val AlphaLow = 0.2f
-  // ---- WEIGHTS ----
-  const val Weight = 1f
-}
+  const val ALPHA_LIGHT = 0.1f
+  const val ALPHA_MEDIUM = 0.85f
 
-object ProfileReviewsScreenConstant {
-  const val SPACER_HEIGHT = 4
-  const val HORIZONTAL_DIVIDER_PADDING = 8
-  const val COLUMN_PADDING = 16
-  const val SINGLE_REVIEW = "%s/%s - %d review"
-  const val MULTIPLE_REVIEWS = "%s/%s - %d reviews"
-  const val STRING_FORMAT = "%.1f"
-  const val HEADER_KEY = "hunt_header_%s"
-  const val DETAIL_ROUTE = "hunt/%s"
-  const val RATING_FORMAT = "%s/%s"
-  const val DIVIDER = "divider_%s"
+  // ---- WEIGHTS ----
+  const val WEIGHT = 1f
 }

@@ -4,11 +4,13 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.swentseekr.seekr.model.profile.createOverviewTestHunt
 import com.swentseekr.seekr.model.profile.sampleProfile
+import com.swentseekr.seekr.offline.cache.ProfileCache
 import com.swentseekr.seekr.ui.auth.SignInScreenTestTags
 import com.swentseekr.seekr.ui.offline.OfflineConstants
 import com.swentseekr.seekr.ui.profile.Profile
@@ -30,11 +32,11 @@ class SeekrRootAppTest {
   @get:Rule val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
   @Before
-  fun setup() {
-    // Make sure Firebase is wired up (emulators if available).
+  fun setup() = runBlocking {
     FirebaseTestEnvironment.setup()
-    // Start from "online" as a default; failures are safely ignored.
     NetworkTestUtils.goOnline()
+    FakeAuthEmulator.signOut()
+    ProfileCache.clear(composeTestRule.activity)
   }
 
   @After
@@ -42,6 +44,7 @@ class SeekrRootAppTest {
     // Restore network + clear auth state at the end of each test run.
     NetworkTestUtils.goOnline()
     FakeAuthEmulator.signOut()
+    ProfileCache.clear(composeTestRule.activity)
   }
 
   /** Helper: sign in only if not already authenticated. */
@@ -119,6 +122,12 @@ class SeekrRootAppTest {
     }
 
     // Check that the offline-required UI is shown.
+    composeTestRule.waitUntil(5_000) {
+      composeTestRule
+          .onAllNodesWithText(OfflineConstants.OFFLINE_TITLE)
+          .fetchSemanticsNodes()
+          .isNotEmpty()
+    }
     composeTestRule.onNodeWithText(OfflineConstants.OFFLINE_TITLE).assertIsDisplayed()
 
     // This click will execute openSettings, hitting:

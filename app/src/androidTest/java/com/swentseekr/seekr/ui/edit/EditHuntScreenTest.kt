@@ -104,7 +104,7 @@ class EditHuntScreenTest {
     // Wait for the hunt to be loaded
     composeRule.waitUntil(timeoutMillis = 5_000) { vm.uiState.value.title.isNotEmpty() }
 
-    composeRule.onNodeWithContentDescription("Back").performClick()
+    composeRule.onNodeWithContentDescription(EditHuntTestConstants.BACK_LABEL).performClick()
     assertTrue(backCalled)
   }
 
@@ -219,16 +219,16 @@ class EditHuntScreenTest {
     composeRule.waitUntil(timeoutMillis = 5_000) { vm.uiState.value.title.isNotEmpty() }
 
     // 4) Initially, the delete button should not be visible
-    composeRule.onNodeWithText("Delete").assertDoesNotExist()
+    composeRule.onNodeWithText(EditHuntTestConstants.DELETE).assertDoesNotExist()
 
     // 5) Click the 3-dots "More actions" icon to toggle the delete button
-    composeRule.onNodeWithContentDescription("More actions").performClick()
+    composeRule.onNodeWithContentDescription(EditHuntTestConstants.MORE_ACTIONS).performClick()
 
     // 6) Now the delete button should be visible in the top bar
-    composeRule.onNodeWithText("Delete").assertIsDisplayed()
+    composeRule.onNodeWithText(EditHuntTestConstants.DELETE).assertIsDisplayed()
 
     // 7) Click "Delete" to trigger deleteCurrentHunt() + onGoBack()
-    composeRule.onNodeWithText("Delete").performClick()
+    composeRule.onNodeWithText(EditHuntTestConstants.DELETE).performClick()
 
     // 8) Wait until onGoBack has been called, which happens after deleteCurrentHunt()
     composeRule.waitUntil(timeoutMillis = 5_000) { backCalled }

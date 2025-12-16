@@ -48,7 +48,7 @@ import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.ui.components.HuntCard
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
-import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Alpha02
+import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.ALPHA_02
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Border1
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Border2
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.FilterItemPadding
@@ -60,7 +60,7 @@ import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding12
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding16
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding2
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding8
-import com.swentseekr.seekr.ui.overview.OverviewScreenStrings.FilterBy
+import com.swentseekr.seekr.ui.overview.OverviewScreenStrings.FILTER_BY
 import com.swentseekr.seekr.ui.theme.LocalAppColors
 
 /**
@@ -155,7 +155,7 @@ fun OverviewScreen(
                     // Retrieve correct profile for THIS hunt
                     val authorProfile = uiStateHuntCard.authorProfiles[authorId]
                     val author =
-                        authorProfile?.author?.pseudonym ?: OverviewScreenStrings.UnKnownAuthor
+                        authorProfile?.author?.pseudonym ?: OverviewScreenStrings.UNKNOWN_AUTHOR
 
                     HuntCard(
                         hunt.hunt,
@@ -201,11 +201,11 @@ fun ModernHeader() {
               .background(MaterialTheme.colorScheme.background)
               .padding(horizontal = HorizontalPadding20, vertical = VerticalPadding16)) {
         Text(
-            text = OverviewScreenStrings.Title,
+            text = OverviewScreenStrings.TITLE,
             style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.onSurface)
         Text(
-            text = OverviewScreenStrings.SubTitle,
+            text = OverviewScreenStrings.SUB_TITLE,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier.padding(top = FilterItemPadding))
@@ -246,7 +246,7 @@ fun ModernSearchBar(
       onActiveChange = onActiveChange,
       placeholder = {
         Text(
-            OverviewScreenStrings.SearchPlaceholder,
+            OverviewScreenStrings.SEARCH_PLACEHOLDER,
             color = MaterialTheme.colorScheme.outline,
             style = MaterialTheme.typography.bodyMedium)
       },
@@ -254,7 +254,7 @@ fun ModernSearchBar(
         if (query.isEmpty()) {
           Icon(
               imageVector = Icons.Default.Search,
-              contentDescription = OverviewScreenStrings.SearchIconDescription,
+              contentDescription = OverviewScreenStrings.SEARCH_PLACEHOLDER,
               tint = MaterialTheme.colorScheme.tertiary)
         } else null
       },
@@ -262,7 +262,7 @@ fun ModernSearchBar(
         if (query.isNotEmpty()) {
           Icon(
               imageVector = Icons.Default.Clear,
-              contentDescription = OverviewScreenStrings.ClearIconDescription,
+              contentDescription = OverviewScreenStrings.CLEAR_ICON_DESCRIPTION,
               tint = MaterialTheme.colorScheme.tertiary,
               modifier = Modifier.clickable { onClear() })
         } else null
@@ -311,7 +311,7 @@ fun ModernFilterBar(
   ) {
     // SECTION TITLE
     Text(
-        text = FilterBy,
+        text = FILTER_BY,
         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
         color = MaterialTheme.colorScheme.tertiary,
         modifier = Modifier.padding(horizontal = HorizontalPadding20, vertical = VerticalPadding8))
@@ -391,7 +391,7 @@ fun ModernFilterChip(
       colors =
           FilterChipDefaults.filterChipColors(
               containerColor = MaterialTheme.colorScheme.onPrimary,
-              selectedContainerColor = color.copy(alpha = Alpha02),
+              selectedContainerColor = color.copy(alpha = ALPHA_02),
               labelColor = MaterialTheme.colorScheme.tertiary,
               selectedLabelColor = color),
       border =

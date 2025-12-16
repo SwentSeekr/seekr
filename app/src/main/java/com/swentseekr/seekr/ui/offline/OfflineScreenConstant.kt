@@ -2,7 +2,6 @@ package com.swentseekr.seekr.ui.offline
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.swentseekr.seekr.model.hunt.Hunt
 
 /**
@@ -50,32 +49,14 @@ object OfflineConstants {
   // --- Profile screen paddings & layout (from OfflineProfileConstants) ---
   val PROFILE_SCREEN_HORIZONTAL_PADDING = 16.dp
   val PROFILE_SCREEN_VERTICAL_PADDING = 8.dp
-  val PROFILE_SECTION_TOP_PADDING = 24.dp
-  val PROFILE_SMALL_PADDING = 4.dp
-  val PROFILE_MEDIUM_PADDING = 16.dp
-  val PROFILE_ICON_VERTICAL_PADDING = 10.dp
-  val PROFILE_ICON_HORIZONTAL_PADDING = 40.dp
-
-  // --- Profile text sizes ---
-  val PROFILE_TEXT_SIZE_PSEUDONYM = 20.sp
-  val PROFILE_TEXT_SIZE_BODY = 16.sp
-  val PROFILE_TEXT_SIZE_SECONDARY = 14.sp
-
-  const val PROFILE_COLUMN_WEIGHT = 1f
 
   // --- Profile text strings ---
   const val OFFLINE_NO_PROFILE = "Offline – no cached profile available"
-  const val NO_HUNTS_YET = "No hunts yet"
-  const val HUNTS_DONE_SUFFIX = " hunts done"
-  const val REVIEWS_SUFFIX = " reviews"
-
-  const val TAB_MY_HUNTS = "My hunts"
-  const val TAB_DONE_HUNTS = "Done hunts"
-  const val TAB_LIKED_HUNTS = "Liked hunts"
 
   // --- Numeric defaults ---
   const val DEFAULT_INT = 0
   const val DEFAULT_DOUBLE = 0.0
+  const val ONE = 1
 
   // --- Empty list default (typed for Hunt) ---
   val DEFAULT_HUNT_LIST: List<Hunt> = emptyList()

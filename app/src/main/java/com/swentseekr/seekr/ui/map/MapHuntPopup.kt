@@ -49,7 +49,7 @@ fun HuntPopup(hunt: Hunt, onViewClick: () -> Unit, onDismiss: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically) {
               AsyncImage(
                   model = hunt.mainImageUrl,
-                  contentDescription = hunt.title + MapScreenStrings.HuntImageDescriptionSuffix,
+                  contentDescription = hunt.title + MapScreenStrings.HUNT_IMAGE_DESCRIPTION_SUFFIX,
                   modifier =
                       Modifier.size(MapScreenDefaults.PopupImageSize)
                           .clip(RoundedCornerShape(MapScreenDefaults.PopupImageCornerRadius))
@@ -69,7 +69,7 @@ fun HuntPopup(hunt: Hunt, onViewClick: () -> Unit, onDismiss: () -> Unit) {
                 Text(
                     hunt.description,
                     style = MaterialTheme.typography.bodySmall,
-                    maxLines = MapScreenDefaults.MaxLines,
+                    maxLines = MapScreenDefaults.MAX_LINES,
                     modifier = Modifier.testTag(MapScreenTestTags.POPUP_DESC))
 
                 Spacer(Modifier.height(MapScreenDefaults.PopupSpacing))
@@ -87,13 +87,13 @@ fun HuntPopup(hunt: Hunt, onViewClick: () -> Unit, onDismiss: () -> Unit) {
                   TextButton(
                       onClick = onDismiss,
                       modifier = Modifier.testTag(MapScreenTestTags.BUTTON_CANCEL)) {
-                        Text(MapScreenStrings.Cancel)
+                        Text(MapScreenStrings.CANCEL)
                       }
 
                   Button(
                       onClick = onViewClick,
                       modifier = Modifier.testTag(MapScreenTestTags.BUTTON_VIEW)) {
-                        Text(MapScreenStrings.ViewHunt)
+                        Text(MapScreenStrings.VIEW_HUNT)
                       }
                 }
               }
@@ -109,10 +109,10 @@ fun HuntPopup(hunt: Hunt, onViewClick: () -> Unit, onDismiss: () -> Unit) {
  */
 @Composable
 private fun HuntMetaChip(label: String, baseColor: Color) {
-  val readableText = baseColor.darken(MapScreenDefaults.ChipContentDarkenFactor)
+  val readableText = baseColor.darken(MapScreenDefaults.CHIP_CONTENT_DARKEN_FACTOR)
 
   Surface(
-      color = baseColor.copy(alpha = MapScreenDefaults.ChipBackgroundAlpha),
+      color = baseColor.copy(alpha = MapScreenDefaults.CHIP_BACKGROUND_ALPHA),
       contentColor = readableText,
       shape = RoundedCornerShape(MapScreenDefaults.ChipCornerRadius)) {
         Text(

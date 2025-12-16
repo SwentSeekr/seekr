@@ -13,6 +13,7 @@ import com.swentseekr.seekr.model.hunt.HuntsRepository
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestore
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.testing.MainDispatcherRule
+import com.swentseekr.seekr.ui.hunt.BaseHuntViewModelMessages
 import com.swentseekr.seekr.ui.hunt.add.AddHuntViewModel
 import com.swentseekr.seekr.ui.hunt.edit.EditHuntViewModel
 import com.swentseekr.seekr.utils.FakeHuntsImageRepository
@@ -108,7 +109,7 @@ class EditHuntViewModelAndroidTest {
         assertThrows(IllegalArgumentException::class.java) {
           editVM.buildHunt(editVM.uiState.value)
         }
-    assertEquals("No hunt loaded to edit.", ex.message)
+    assertEquals(EditHuntTestConstants.NO_HUNT_LOADED, ex.message)
   }
 
   @Test
@@ -128,8 +129,7 @@ class EditHuntViewModelAndroidTest {
     delay(200)
 
     assertFalse(result)
-    assertEquals(
-        "Please fill all required fields before saving the hunt.", editVM.uiState.value.errorMsg)
+    assertEquals(BaseHuntViewModelMessages.NOT_ALL_FIELD_FILL, editVM.uiState.value.errorMsg)
   }
 
   @Test
@@ -150,7 +150,7 @@ class EditHuntViewModelAndroidTest {
     delay(200)
 
     assertFalse(result)
-    assertEquals("You must be logged in to perform this action.", editVM.uiState.value.errorMsg)
+    assertEquals(BaseHuntViewModelMessages.MUST_LOGIN, editVM.uiState.value.errorMsg)
   }
 
   @Test
@@ -207,7 +207,7 @@ class EditHuntViewModelAndroidTest {
 
     val err = editVM.uiState.value.errorMsg
     assertNotNull(err)
-    assertTrue(err!!.startsWith("Failed to load hunt:"))
+    assertTrue(err!!.startsWith(EditHuntTestConstants.FAIL_LOAD_HUNTS))
   }
 
   @Test

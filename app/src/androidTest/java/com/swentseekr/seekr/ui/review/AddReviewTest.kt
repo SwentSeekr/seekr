@@ -22,7 +22,7 @@ class HuntCardReviewScreenTest {
   @Test
   fun screen_displays_all_elements() {
     composeRule.setContent {
-      MaterialTheme { AddReviewScreen(huntId = AddReviewTestConstantStings.TestHuntId) }
+      MaterialTheme { AddReviewScreen(huntId = AddReviewTestConstantStrings.TEST_HUNT_ID) }
     }
 
     composeRule.onNodeWithTag(AddReviewScreenTestTags.GO_BACK_BUTTON).assertExists()
@@ -43,7 +43,7 @@ class HuntCardReviewScreenTest {
     composeRule.setContent {
       MaterialTheme {
         AddReviewScreen(
-            huntId = AddReviewTestConstantStings.TestHuntId,
+            huntId = AddReviewTestConstantStrings.TEST_HUNT_ID,
             onGoBack = { backCalled = true },
             onDone = { doneCalled = true },
             onCancel = { cancelCalled = true })
@@ -56,7 +56,7 @@ class HuntCardReviewScreenTest {
     composeRule.onNodeWithTag(starTag).performClick()
     composeRule
         .onNodeWithTag(AddReviewScreenTestTags.COMMENT_TEXT_FIELD)
-        .performTextInput(AddReviewTestConstantStings.TextInput)
+        .performTextInput(AddReviewTestConstantStrings.TEXT_INPUT)
     composeRule.onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON).performClick()
 
     assertTrue(backCalled)
@@ -75,7 +75,8 @@ class HuntCardReviewScreenTest {
             authorName = "Test Author",
             rating = 3.0,
             reviewText = "Great hunt!",
-            photos = listOf(AddReviewTestConstantStings.Photo1, AddReviewTestConstantStings.Photo2),
+            photos =
+                listOf(AddReviewTestConstantStrings.PHOTO_1, AddReviewTestConstantStrings.PHOTO_2),
             isReviewTextError = false,
             isDoneEnabled = true,
             reviewTextErrorMessage = null,

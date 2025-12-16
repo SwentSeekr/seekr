@@ -16,7 +16,7 @@ object BottomNavUIConstants {
   val IconSizeUnselected = 24.dp
 
   // Colors / Alpha values
-  const val HaloAlpha = 0.12f
+  const val HALO_ALPHA = 0.12f
 
   // Shapes
   val HaloShape = CircleShape

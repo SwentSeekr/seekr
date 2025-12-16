@@ -18,6 +18,10 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileViewModelTest {
+  companion object {
+    private const val PROFILE_NOT_FOUND = "Profile not found"
+    private const val USER_NOT_LOGIN = "User not logged in"
+  }
 
   private lateinit var repository: ProfileRepositoryLocal
   private lateinit var viewModel: ProfileViewModel
@@ -61,7 +65,7 @@ class ProfileViewModelTest {
     viewModel.loadProfile("ghost")
     advanceUntilIdle()
 
-    assertEquals("Profile not found", viewModel.uiState.value.errorMsg)
+    assertEquals(PROFILE_NOT_FOUND, viewModel.uiState.value.errorMsg)
   }
 
   @Test
@@ -69,7 +73,7 @@ class ProfileViewModelTest {
     viewModel.loadProfile("ghost")
     advanceUntilIdle()
     val state = viewModel.uiState.value
-    assertEquals("Profile not found", state.errorMsg)
+    assertEquals(PROFILE_NOT_FOUND, state.errorMsg)
     assertNull(state.profile)
   }
 
@@ -90,7 +94,7 @@ class ProfileViewModelTest {
     viewModelWithoutUid.updateProfile(fake)
     advanceUntilIdle()
     val state = viewModelWithoutUid.uiState.value
-    assertEquals("User not logged in", state.errorMsg)
+    assertEquals(USER_NOT_LOGIN, state.errorMsg)
   }
 
   @Test
@@ -163,7 +167,7 @@ class ProfileViewModelTest {
     viewModelNoUid.loadProfile(null)
     advanceUntilIdle()
 
-    assertEquals("User not logged in", viewModelNoUid.uiState.value.errorMsg)
+    assertEquals(USER_NOT_LOGIN, viewModelNoUid.uiState.value.errorMsg)
   }
 
   @Test

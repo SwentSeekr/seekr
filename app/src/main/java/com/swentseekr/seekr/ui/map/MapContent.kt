@@ -188,7 +188,7 @@ private fun FocusedHuntMarkers(uiState: MapUIState, selectedHunt: Hunt) {
   // Start marker
   Marker(
       state = MarkerState(LatLng(selectedHunt.start.latitude, selectedHunt.start.longitude)),
-      title = "${MapScreenStrings.StartPrefix}${selectedHunt.start.name}",
+      title = "${MapScreenStrings.START_PREFIX}${selectedHunt.start.name}",
       snippet = selectedHunt.start.description.ifBlank { null },
       icon = bitmapDescriptorFromVector(context, R.drawable.ic_start_marker))
 
@@ -203,7 +203,7 @@ private fun FocusedHuntMarkers(uiState: MapUIState, selectedHunt: Hunt) {
   // End marker
   Marker(
       state = MarkerState(LatLng(selectedHunt.end.latitude, selectedHunt.end.longitude)),
-      title = "${MapScreenStrings.EndPrefix}${selectedHunt.end.name}",
+      title = "${MapScreenStrings.END_PREFIX}${selectedHunt.end.name}",
       snippet = selectedHunt.end.description.ifBlank { null },
       icon = bitmapDescriptorFromVector(context, R.drawable.ic_end_marker))
 
@@ -211,7 +211,7 @@ private fun FocusedHuntMarkers(uiState: MapUIState, selectedHunt: Hunt) {
   if (uiState.route.isNotEmpty()) {
     Polyline(
         points = uiState.route,
-        width = MapScreenDefaults.RouteStrokeWidth,
+        width = MapScreenDefaults.ROUTE_STROKE_WIDTH,
         color = appColors.mapRoute)
   }
 }
@@ -231,7 +231,7 @@ private fun FocusedHuntMarkers(uiState: MapUIState, selectedHunt: Hunt) {
 private suspend fun CameraPositionState.animateToHunt(hunt: Hunt, isFocused: Boolean) {
   if (!isFocused) {
     val target = LatLng(hunt.start.latitude, hunt.start.longitude)
-    animate(CameraUpdateFactory.newLatLngZoom(target, MapScreenDefaults.FocusedZoom))
+    animate(CameraUpdateFactory.newLatLngZoom(target, MapScreenDefaults.FOCUSED_ZOOM))
     return
   }
 
@@ -241,12 +241,12 @@ private suspend fun CameraPositionState.animateToHunt(hunt: Hunt, isFocused: Boo
     add(LatLng(hunt.end.latitude, hunt.end.longitude))
   }
 
-  if (points.size == MapScreenDefaults.UnitPointSize) {
-    animate(CameraUpdateFactory.newLatLngZoom(points.first(), MapScreenDefaults.FocusedZoom))
+  if (points.size == MapScreenDefaults.UNIT_POINT_SIZE) {
+    animate(CameraUpdateFactory.newLatLngZoom(points.first(), MapScreenDefaults.FOCUSED_ZOOM))
   } else {
     val bounds = LatLngBounds.Builder().apply { points.forEach { include(it) } }.build()
 
-    animate(CameraUpdateFactory.newLatLngBounds(bounds, MapScreenDefaults.BoundsPadding))
+    animate(CameraUpdateFactory.newLatLngBounds(bounds, MapScreenDefaults.BOUNDS_PADDING))
   }
 }
 
@@ -294,7 +294,7 @@ private fun createRoundedMarkerBitmap(
   val borderPaint =
       Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
-        strokeWidth = MapScreenDefaults.CustomMarkerBorderWidth
+        strokeWidth = MapScreenDefaults.CUSTOM_MARKER_BORDER_WIDTH
         color = boarderColor
       }
 

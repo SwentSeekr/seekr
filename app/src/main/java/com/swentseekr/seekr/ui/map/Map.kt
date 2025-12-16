@@ -258,7 +258,7 @@ private fun MoveCameraToUserLocationEffect(
           val here = LatLng(it.latitude, it.longitude)
           scope.launch {
             cameraPositionState.animate(
-                CameraUpdateFactory.newLatLngZoom(here, MapScreenDefaults.UserLocationZoom))
+                CameraUpdateFactory.newLatLngZoom(here, MapScreenDefaults.USER_LOCATION_ZOOM))
           }
         }
       }
@@ -471,7 +471,7 @@ private fun RouteAndZoomToNextPointEffect(
 
             scope.launch {
               cameraPositionState.animate(
-                  CameraUpdateFactory.newLatLngBounds(bounds, MapScreenDefaults.BoundsPadding))
+                  CameraUpdateFactory.newLatLngBounds(bounds, MapScreenDefaults.BOUNDS_PADDING))
             }
           }
         } catch (_: SecurityException) {

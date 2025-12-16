@@ -38,28 +38,28 @@ class HuntCardScreenTest {
 
   private fun createFakeHunt() =
       Hunt(
-          uid = HuntCardScreenConstantStrings.TestHunt,
+          uid = HuntCardScreenConstantStrings.TEST_HUNT_ID,
           start =
               Location(
-                  HuntCardScreenConstantNumbers.Location1,
-                  HuntCardScreenConstantNumbers.Location2,
-                  HuntCardScreenConstantStrings.Name1),
+                  HuntCardScreenConstantNumbers.LOCATION_LAT_1,
+                  HuntCardScreenConstantNumbers.LOCATION_LNG_1,
+                  HuntCardScreenConstantStrings.LOCATION_NAME_1),
           end =
               Location(
-                  HuntCardScreenConstantNumbers.Location3,
-                  HuntCardScreenConstantNumbers.Location4,
-                  HuntCardScreenConstantStrings.Name2),
+                  HuntCardScreenConstantNumbers.LOCATION_LAT_2,
+                  HuntCardScreenConstantNumbers.LOCATION_LNG_2,
+                  HuntCardScreenConstantStrings.LOCATION_NAME_2),
           middlePoints = emptyList(),
           status = HuntStatus.FUN,
-          title = HuntCardScreenConstantStrings.Title,
-          description = HuntCardScreenConstantStrings.Description,
-          time = HuntCardScreenConstantNumbers.Time,
-          distance = HuntCardScreenConstantNumbers.Distance,
+          title = HuntCardScreenConstantStrings.TITLE,
+          description = HuntCardScreenConstantStrings.DESCRIPTION,
+          time = HuntCardScreenConstantNumbers.TIME_HOURS,
+          distance = HuntCardScreenConstantNumbers.DISTANCE_KM,
           difficulty = Difficulty.DIFFICULT,
-          authorId = HuntCardScreenConstantStrings.AuthorId,
+          authorId = HuntCardScreenConstantStrings.AUTHOR_ID,
           otherImagesUrls = emptyList(),
           mainImageUrl = "",
-          reviewRate = HuntCardScreenConstantNumbers.ReviewRate)
+          reviewRate = HuntCardScreenConstantNumbers.REVIEW_RATE)
 
   private fun setHuntContent(
       hunt: Hunt,
@@ -82,7 +82,7 @@ class HuntCardScreenTest {
   fun testAllUIElementsAreDisplayed() {
     composeTestRule.setContent {
       HuntCardScreen(
-          huntId = HuntCardScreenConstantStrings.TestHunt,
+          huntId = HuntCardScreenConstantStrings.TEST_HUNT_ID,
           huntCardViewModel = FakeHuntCardViewModel(createFakeHunt()),
           onGoBack = {},
           beginHunt = {},
@@ -100,8 +100,8 @@ class HuntCardScreenTest {
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.BEGIN_BUTTON).assertIsDisplayed()
 
     composeTestRule
-        .onNodeWithTag("HUNT_CARD_LIST")
-        .performScrollToNode(hasText(HuntCardScreenConstantStrings.AddReview))
+        .onNodeWithTag(HuntCardScreenTestTags.HUNT_CARD_LIST)
+        .performScrollToNode(hasText(HuntCardScreenConstantStrings.ADD_REVIEW_LABEL))
 
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.REVIEW_BUTTON).assertIsDisplayed()
   }
@@ -114,7 +114,7 @@ class HuntCardScreenTest {
 
     composeTestRule.setContent {
       HuntCardScreen(
-          huntId = HuntCardScreenConstantStrings.TestHunt,
+          huntId = HuntCardScreenConstantStrings.TEST_HUNT_ID,
           huntCardViewModel = FakeHuntCardViewModel(createFakeHunt()),
           onGoBack = { goBackClicked = true },
           beginHunt = { beginClicked = true },
@@ -123,7 +123,7 @@ class HuntCardScreenTest {
     }
 
     composeTestRule
-        .onNodeWithTag("HUNT_CARD_LIST")
+        .onNodeWithTag(HuntCardScreenTestTags.HUNT_CARD_LIST)
         .performScrollToNode(hasTestTag(HuntCardScreenTestTags.REVIEW_BUTTON))
 
     composeTestRule.onNodeWithTag(HuntCardScreenTestTags.GO_BACK_BUTTON).performClick()
@@ -141,7 +141,7 @@ class HuntCardScreenTest {
 
     composeTestRule.setContent {
       HuntCardScreen(
-          huntId = HuntCardScreenConstantStrings.TestHunt,
+          huntId = HuntCardScreenConstantStrings.TEST_HUNT_ID,
           huntCardViewModel = fakeVm,
           navController = rememberNavController())
     }
@@ -168,7 +168,7 @@ class HuntCardScreenTest {
 
     composeTestRule.setContent {
       HuntCardScreen(
-          huntId = HuntCardScreenConstantStrings.TestHunt,
+          huntId = HuntCardScreenConstantStrings.TEST_HUNT_ID,
           huntCardViewModel = fakeVm,
           reviewViewModel = fakeReviewVm,
           navController = rememberNavController())
@@ -176,8 +176,8 @@ class HuntCardScreenTest {
 
     composeTestRule.waitForIdle()
     composeTestRule
-        .onNodeWithTag("HUNT_CARD_LIST")
-        .performScrollToNode(hasText(HuntCardScreenConstantStrings.AddReview))
+        .onNodeWithTag(HuntCardScreenTestTags.HUNT_CARD_LIST)
+        .performScrollToNode(hasText(HuntCardScreenConstantStrings.ADD_REVIEW_LABEL))
     composeTestRule.onAllNodesWithTag(HuntCardScreenTestTags.REVIEW_CARD).onFirst().assertExists()
   }
 
@@ -185,11 +185,11 @@ class HuntCardScreenTest {
   fun testAddReviewButtonShownForOtherUsers() {
     val fakeVm =
         FakeHuntCardViewModel(
-            createFakeHunt().copy(authorId = HuntCardScreenConstantStrings.AuthorId))
+            createFakeHunt().copy(authorId = HuntCardScreenConstantStrings.AUTHOR_ID))
 
     composeTestRule.setContent {
       HuntCardScreen(
-          huntId = HuntCardScreenConstantStrings.TestHunt,
+          huntId = HuntCardScreenConstantStrings.TEST_HUNT_ID,
           huntCardViewModel = fakeVm,
           navController = rememberNavController())
     }
@@ -197,17 +197,19 @@ class HuntCardScreenTest {
     composeTestRule.waitForIdle()
 
     composeTestRule
-        .onNodeWithTag("HUNT_CARD_LIST")
-        .performScrollToNode(hasText(HuntCardScreenConstantStrings.AddReview))
+        .onNodeWithTag(HuntCardScreenTestTags.HUNT_CARD_LIST)
+        .performScrollToNode(hasText(HuntCardScreenConstantStrings.ADD_REVIEW_LABEL))
 
-    composeTestRule.onNodeWithText(HuntCardScreenConstantStrings.AddReview).assertIsDisplayed()
+    composeTestRule
+        .onNodeWithText(HuntCardScreenConstantStrings.ADD_REVIEW_LABEL)
+        .assertIsDisplayed()
   }
 
   @Test
   fun testMapIsVisible() {
     composeTestRule.setContent {
       HuntCardScreen(
-          huntId = HuntCardScreenConstantStrings.TestHunt,
+          huntId = HuntCardScreenConstantStrings.TEST_HUNT_ID,
           huntCardViewModel = FakeHuntCardViewModel(createFakeHunt()),
           navController = rememberNavController())
     }
@@ -220,11 +222,11 @@ class HuntCardScreenTest {
     val huntWithImages =
         createFakeHunt()
             .copy(
-                mainImageUrl = HuntCardScreenConstantStrings.MainImageUrlWithDots,
+                mainImageUrl = HuntCardScreenConstantStrings.MAIN_IMAGE_URL,
                 otherImagesUrls =
                     listOf(
-                        HuntCardScreenConstantStrings.OtherImageUrl2WithDots,
-                        HuntCardScreenConstantStrings.OtherImageUrl3WithDots))
+                        HuntCardScreenConstantStrings.OTHER_IMAGE_URL_2,
+                        HuntCardScreenConstantStrings.OTHER_IMAGE_URL_3))
 
     setHuntContent(hunt = huntWithImages)
 
@@ -243,7 +245,7 @@ class HuntCardScreenTest {
     val singleImageHunt =
         createFakeHunt()
             .copy(
-                mainImageUrl = HuntCardScreenConstantStrings.SingleImageUrl,
+                mainImageUrl = HuntCardScreenConstantStrings.SINGLE_IMAGE_URL,
                 otherImagesUrls = emptyList(),
             )
 
@@ -264,7 +266,7 @@ class HuntCardScreenTest {
     val huntWithImage =
         createFakeHunt()
             .copy(
-                mainImageUrl = HuntCardScreenConstantStrings.FullscreenImageUrl,
+                mainImageUrl = HuntCardScreenConstantStrings.FULLSCREEN_IMAGE_URL,
                 otherImagesUrls = emptyList(),
             )
 
@@ -274,7 +276,7 @@ class HuntCardScreenTest {
     composeTestRule
         .onNodeWithTag(
             HuntCardScreenTestTags.IMAGE_PAGE_PREFIX +
-                HuntCardScreenConstantNumbers.FirstImageIndex)
+                HuntCardScreenConstantNumbers.FIRST_IMAGE_INDEX)
         .assertIsDisplayed()
         .performClick()
 
@@ -294,7 +296,7 @@ class HuntCardScreenTest {
     }
 
     composeTestRule
-        .onNodeWithTag("HUNT_CARD_LIST")
+        .onNodeWithTag(HuntCardScreenTestTags.HUNT_CARD_LIST)
         .performScrollToNode(hasText(HuntCardScreenStrings.NO_REVIEW))
 
     // The "No Reviews" text should be visible
@@ -308,7 +310,7 @@ class HuntCardScreenTest {
 
     composeTestRule.setContent {
       HuntCardScreen(
-          huntId = HuntCardScreenConstantStrings.TestHunt,
+          huntId = HuntCardScreenConstantStrings.TEST_HUNT_ID,
           huntCardViewModel = fakeVm,
           navController = rememberNavController())
     }
@@ -341,11 +343,11 @@ class HuntCardScreenTest {
   @Test
   fun likeButton_updatesUiBasedOnLikedHuntsCache() {
     val fakeVm = FakeHuntCardViewModel(createFakeHunt())
-    fakeVm.setLikedHunts(setOf(HuntCardScreenConstantStrings.TestHunt))
+    fakeVm.setLikedHunts(setOf(HuntCardScreenConstantStrings.TEST_HUNT_ID))
 
     composeTestRule.setContent {
       HuntCardScreen(
-          huntId = HuntCardScreenConstantStrings.TestHunt,
+          huntId = HuntCardScreenConstantStrings.TEST_HUNT_ID,
           huntCardViewModel = fakeVm,
           navController = rememberNavController())
     }
@@ -365,7 +367,7 @@ class HuntCardScreenTest {
 
     composeTestRule.setContent {
       HuntCardScreen(
-          huntId = HuntCardScreenConstantStrings.TestHunt,
+          huntId = HuntCardScreenConstantStrings.TEST_HUNT_ID,
           huntCardViewModel = fakeVm,
           navController = rememberNavController())
     }
@@ -373,13 +375,13 @@ class HuntCardScreenTest {
     composeTestRule.waitForIdle()
 
     assertTrue(fakeVm.uiState.value.currentUserId != null)
-    assertTrue(fakeVm.uiState.value.hunt?.uid == HuntCardScreenConstantStrings.TestHunt)
+    assertTrue(fakeVm.uiState.value.hunt?.uid == HuntCardScreenConstantStrings.TEST_HUNT_ID)
   }
 
   @Test
   fun addReviewButton_isNotShown_whenCurrentUserAlreadyReviewed() {
     // Given: a hunt where the current user is NOT the author
-    val hunt = createFakeHunt().copy(authorId = HuntCardScreenConstantStrings.AuthorIdOther)
+    val hunt = createFakeHunt().copy(authorId = HuntCardScreenConstantStrings.OTHER_AUTHOR_ID)
 
     // Fake VM where current user (set by loadCurrentUserID) has already reviewed the hunt
     val fakeVm =

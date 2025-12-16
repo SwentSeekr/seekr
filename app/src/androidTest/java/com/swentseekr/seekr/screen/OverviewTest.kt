@@ -37,6 +37,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+object ConstantsTests {
+  const val FILTER_BUTTON_TEST_TAG = "FilterButton_"
+}
+
 @RunWith(AndroidJUnit4::class)
 class OverviewScreenTest {
 
@@ -97,9 +101,11 @@ class OverviewScreenTest {
       // Scroll to the button inside the filter bar
       composeTestRule
           .onNodeWithTag(OverviewScreenTestTags.FILTER_BAR)
-          .performScrollToNode(hasTestTag("FilterButton_$index"))
+          .performScrollToNode(hasTestTag("${ConstantsTests.FILTER_BUTTON_TEST_TAG}$index"))
 
-      composeTestRule.onNodeWithTag("FilterButton_$index").assertIsDisplayed()
+      composeTestRule
+          .onNodeWithTag("${ConstantsTests.FILTER_BUTTON_TEST_TAG}$index")
+          .assertIsDisplayed()
     }
   }
 
@@ -227,7 +233,6 @@ class OverviewScreenTest {
 
   @Test
   fun lazyColumn_onLikeClick_dynamicList_isCovered() {
-    val userId = "test_user"
     val hunts =
         listOf(
             createHunt(uid = "hunt_1", title = "Hunt One"),

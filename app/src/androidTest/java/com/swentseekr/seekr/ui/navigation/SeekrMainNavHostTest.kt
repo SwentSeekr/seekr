@@ -40,6 +40,14 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+object TestTags {
+  const val HUNT_CARD = "HUNT_CARD_hunt123"
+  const val PROFILE_REVIEW_SCREEN = "PROFILE_REVIEWS_SCREEN"
+  const val CANCEL = "CANCEL_BUTTON"
+  const val BACK = "GO_BACK_BUTTON"
+  const val DONE = "DONE_BUTTON"
+}
+
 @RunWith(AndroidJUnit4::class)
 class SeekrNavigationTest {
 
@@ -257,14 +265,14 @@ class SeekrNavigationTest {
       // Wait until the hunt card appears
       waitUntilTrue(MED) {
         compose
-            .onAllNodesWithTag("HUNT_CARD_hunt123", useUnmergedTree = true)
+            .onAllNodesWithTag(TestTags.HUNT_CARD, useUnmergedTree = true)
             .fetchSemanticsNodes()
             .isNotEmpty()
       }
 
       // Click on the hunt card
       compose
-          .onNodeWithTag("HUNT_CARD_hunt123", useUnmergedTree = true)
+          .onNodeWithTag(TestTags.HUNT_CARD, useUnmergedTree = true)
           .assertExists()
           .performClick()
 
@@ -291,7 +299,7 @@ class SeekrNavigationTest {
 
       // Scroll to the Edit button
       compose
-          .onNodeWithTag("HUNT_CARD_LIST", useUnmergedTree = true)
+          .onNodeWithTag(HuntCardScreenTestTags.HUNT_CARD_LIST, useUnmergedTree = true)
           .performScrollToNode(hasTestTag(HuntCardScreenTestTags.EDIT_HUNT_BUTTON))
 
       // Click the Edit Hunt button
@@ -557,7 +565,7 @@ class SeekrNavigationTest {
       node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
 
       compose
-          .onNodeWithTag("HUNT_CARD_LIST", useUnmergedTree = true)
+          .onNodeWithTag(HuntCardScreenTestTags.HUNT_CARD_LIST, useUnmergedTree = true)
           .performScrollToNode(hasTestTag(HuntCardScreenTestTags.REVIEW_BUTTON))
 
       // --- CLICK THE REAL BUTTON (Add review or Edit hunt) ---
@@ -735,11 +743,13 @@ class SeekrNavigationTest {
     }
 
     waitUntilTrue(MED) {
-      compose.onNodeWithTag("IMAGE_REVIEW_SCREEN", useUnmergedTree = true).assertExists()
+      compose
+          .onNodeWithTag(NavigationTestTags.IMAGE_REVIEW_SCREEN, useUnmergedTree = true)
+          .assertExists()
       true
     }
 
-    node("IMAGE_REVIEW_SCREEN").assertIsDisplayed()
+    node(NavigationTestTags.IMAGE_REVIEW_SCREEN).assertIsDisplayed()
     node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertDoesNotExist()
 
     // Try to go back
@@ -747,7 +757,7 @@ class SeekrNavigationTest {
 
     waitUntilTrue(MED) {
       compose
-          .onAllNodes(hasTestTag("IMAGE_REVIEW_SCREEN"), useUnmergedTree = true)
+          .onAllNodes(hasTestTag(NavigationTestTags.IMAGE_REVIEW_SCREEN), useUnmergedTree = true)
           .fetchSemanticsNodes()
           .isEmpty()
     }
@@ -768,7 +778,7 @@ class SeekrNavigationTest {
 
     waitUntilTrue(MED) {
       compose
-          .onAllNodes(hasTestTag("PROFILE_REVIEWS_SCREEN"), useUnmergedTree = true)
+          .onAllNodes(hasTestTag(TestTags.PROFILE_REVIEW_SCREEN), useUnmergedTree = true)
           .fetchSemanticsNodes()
           .isNotEmpty()
     }
@@ -957,7 +967,7 @@ class SeekrNavigationTest {
         val cancelClicked =
             runCatching {
                   compose
-                      .onNodeWithTag("CANCEL_BUTTON", useUnmergedTree = true)
+                      .onNodeWithTag(TestTags.CANCEL, useUnmergedTree = true)
                       .assertExists()
                       .performClick()
                   true
@@ -1007,7 +1017,7 @@ class SeekrNavigationTest {
         val backButtonClicked =
             runCatching {
                   compose
-                      .onNodeWithTag("GO_BACK_BUTTON", useUnmergedTree = true)
+                      .onNodeWithTag(TestTags.BACK, useUnmergedTree = true)
                       .assertExists()
                       .performClick()
                   true
@@ -1076,7 +1086,7 @@ class SeekrNavigationTest {
           // click Done button
           val doneClicked =
               runCatching {
-                    compose.onNodeWithTag("DONE_BUTTON", useUnmergedTree = true).performClick()
+                    compose.onNodeWithTag(TestTags.DONE, useUnmergedTree = true).performClick()
                     true
                   }
                   .getOrDefault(false)

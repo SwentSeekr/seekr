@@ -37,24 +37,24 @@ class HuntCardViewModelTest {
           uid = TEST_HUNT_ID,
           start =
               Location(
-                  HuntCardViewModelTestConstantsNumeric.Location1,
-                  HuntCardViewModelTestConstantsNumeric.Location2,
-                  HuntCardViewModelTestConstantsString.Start),
+                  HuntCardViewModelTestConstantsNumeric.LOCATION_1,
+                  HuntCardViewModelTestConstantsNumeric.LOCATION_2,
+                  HuntCardViewModelTestConstantsString.START_LABEL),
           end =
               Location(
-                  HuntCardViewModelTestConstantsNumeric.Location3,
-                  HuntCardViewModelTestConstantsNumeric.Location4,
-                  HuntCardViewModelTestConstantsString.End),
+                  HuntCardViewModelTestConstantsNumeric.LOCATION_3,
+                  HuntCardViewModelTestConstantsNumeric.LOCATION_4,
+                  HuntCardViewModelTestConstantsString.END_LABEL),
           middlePoints = emptyList(),
           status = HuntStatus.FUN,
-          title = HuntCardViewModelTestConstantsString.TestTile,
-          description = HuntCardViewModelTestConstantsString.TestDescription,
-          time = HuntCardViewModelTestConstantsNumeric.Time,
-          distance = HuntCardViewModelTestConstantsNumeric.Distance,
+          title = HuntCardViewModelTestConstantsString.TEST_TITLE,
+          description = HuntCardViewModelTestConstantsString.TEST_DESCRIPTION,
+          time = HuntCardViewModelTestConstantsNumeric.TIME_HOURS,
+          distance = HuntCardViewModelTestConstantsNumeric.DISTANCE_KM,
           difficulty = Difficulty.EASY,
           authorId = TEST_AUTHOR_ID,
           mainImageUrl = "",
-          reviewRate = HuntCardViewModelTestConstantsNumeric.ReviewRate)
+          reviewRate = HuntCardViewModelTestConstantsNumeric.REVIEW_RATE)
 
   @Before
   fun setUp() = runTest {
@@ -94,7 +94,7 @@ class HuntCardViewModelTest {
   /** Test in case of non existing hunt laoded */
   @Test
   fun loadHunt_withInvalidId_logsError() = runTest {
-    viewModel.loadHunt(HuntCardViewModelTestConstantsString.InvalidId)
+    viewModel.loadHunt(HuntCardViewModelTestConstantsString.INVALID_ID)
     advanceUntilIdle()
 
     val state = viewModel.uiState.value
@@ -111,8 +111,8 @@ class HuntCardViewModelTest {
             uid = TEST_AUTHOR_ID,
             author =
                 Author(
-                    pseudonym = HuntCardViewModelTestConstantsString.AuthorName,
-                    bio = HuntCardViewModelTestConstantsString.AuthorBio,
+                    pseudonym = HuntCardViewModelTestConstantsString.AUTHOR_NAME,
+                    bio = HuntCardViewModelTestConstantsString.AUTHOR_BIO,
                     profilePicture = 1)))
 
     viewModel.loadAuthorProfile(TEST_AUTHOR_ID)
@@ -120,15 +120,15 @@ class HuntCardViewModelTest {
 
     val profile = viewModel.uiState.value.authorProfile
     assertNotNull(profile)
-    assertEquals(HuntCardViewModelTestConstantsString.AuthorName, profile?.author?.pseudonym)
+    assertEquals(HuntCardViewModelTestConstantsString.AUTHOR_NAME, profile?.author?.pseudonym)
   }
 
   /** Test that setErrorMsg and clearErrorMsg work correctly */
   @Test
   fun setErrorMsg_and_clearErrorMsg() = runTest {
-    viewModel.setErrorMsg(HuntCardViewModelTestConstantsString.ErrorMessage)
+    viewModel.setErrorMsg(HuntCardViewModelTestConstantsString.ERROR_MESSAGE)
     assertEquals(
-        HuntCardViewModelTestConstantsString.ErrorMessage, viewModel.uiState.value.errorMsg)
+        HuntCardViewModelTestConstantsString.ERROR_MESSAGE, viewModel.uiState.value.errorMsg)
 
     viewModel.clearErrorMsg()
     assertNull(viewModel.uiState.value.errorMsg)
@@ -162,18 +162,18 @@ class HuntCardViewModelTest {
   fun loadOtherReview_populatesReviews() = runTest {
     val review1 =
         HuntReview(
-            HuntCardViewModelTestConstantsString.ReviewId1,
-            HuntCardViewModelTestConstantsString.AuthorId1,
+            HuntCardViewModelTestConstantsString.REVIEW_ID_1,
+            HuntCardViewModelTestConstantsString.AUTHOR_ID_1,
             TEST_HUNT_ID,
-            HuntCardViewModelTestConstantsNumeric.ReviewRate5,
-            HuntCardViewModelTestConstantsString.Comment1)
+            HuntCardViewModelTestConstantsNumeric.REVIEW_RATE_MAX,
+            HuntCardViewModelTestConstantsString.COMMENT_1)
     val review2 =
         HuntReview(
-            HuntCardViewModelTestConstantsString.ReviewId2,
-            HuntCardViewModelTestConstantsString.AuthorId2,
+            HuntCardViewModelTestConstantsString.REVIEW_ID_2,
+            HuntCardViewModelTestConstantsString.AUTHOR_ID_2,
             TEST_HUNT_ID,
-            HuntCardViewModelTestConstantsNumeric.ReviewRate,
-            HuntCardViewModelTestConstantsString.Comment2)
+            HuntCardViewModelTestConstantsNumeric.REVIEW_RATE,
+            HuntCardViewModelTestConstantsString.COMMENT_2)
     fakeRevRepository.addReviewHunt(review1)
     fakeRevRepository.addReviewHunt(review2)
 
@@ -283,14 +283,14 @@ class HuntCardViewModelTest {
 
     // Then
     val state = viewModel.uiState.value
-    assertEquals(HuntCardViewModelTestConstantsString.HuntNotLoaded, state.errorMsg)
+    assertEquals(HuntCardViewModelTestConstantsString.HUNT_NOT_LOADED_MESSAGE, state.errorMsg)
     assertFalse(state.isAchieved)
   }
 
   /** Test that check that the hunt is marked as achieved */
   @Test
   fun onDoneClick_marks_hunt_as_achieved() = runTest {
-    val userId = HuntCardViewModelTestConstantsString.TestUser
+    val userId = HuntCardViewModelTestConstantsString.TEST_USER_ID
     fakeProRepository.addProfile(Profile(uid = userId))
     viewModel.initialize(userId, testHunt)
     advanceUntilIdle()
@@ -310,10 +310,10 @@ class HuntCardViewModelTest {
     try {
       // should get error since no hunt anymore
       fakeRepository.getHunt(testHunt.uid)
-      fail(HuntCardViewModelTestConstantsString.IllegalExeption_Message)
+      fail(HuntCardViewModelTestConstantsString.ILLEGAL_EXCEPTION_MESSAGE)
     } catch (e: IllegalArgumentException) {
       assertEquals(
-          "${HuntCardViewModelTestConstantsString.MessageErrorStart} ${testHunt.uid} ${HuntCardViewModelTestConstantsString.MessageErrorEnd}",
+          "${HuntCardViewModelTestConstantsString.ERROR_MESSAGE_PREFIX} ${testHunt.uid} ${HuntCardViewModelTestConstantsString.ERROR_MESSAGE_SUFFIX}",
           e.message)
     }
   }
@@ -321,7 +321,7 @@ class HuntCardViewModelTest {
   /** Test that check no delete if not valid hunt id */
   @Test
   fun deleteHunt_withInvalidId_logsError() = runTest {
-    viewModel.deleteHunt(HuntCardViewModelTestConstantsString.NonExistingId)
+    viewModel.deleteHunt(HuntCardViewModelTestConstantsString.NON_EXISTING_ID)
     advanceUntilIdle()
 
     // Nothing to assert — just ensures no crash/log handled
@@ -331,18 +331,18 @@ class HuntCardViewModelTest {
   fun deleteReview_userOwnsReview_deletesSuccessfully() = runTest {
     val review =
         HuntReview(
-            reviewId = HuntCardViewModelTestConstantsString.Rev1,
-            authorId = HuntCardViewModelTestConstantsString.AuthorId1,
+            reviewId = HuntCardViewModelTestConstantsString.REVIEW_ID_1,
+            authorId = HuntCardViewModelTestConstantsString.AUTHOR_ID_1,
             huntId = TEST_HUNT_ID,
-            rating = HuntCardViewModelTestConstantsNumeric.ReviewRate,
-            comment = HuntCardViewModelTestConstantsString.Comment2)
+            rating = HuntCardViewModelTestConstantsNumeric.REVIEW_RATE,
+            comment = HuntCardViewModelTestConstantsString.COMMENT_2)
     fakeRevRepository.addReviewHunt(review)
 
     viewModel.deleteReview(
         huntID = TEST_HUNT_ID,
-        reviewID = HuntCardViewModelTestConstantsString.Rev1,
-        userID = HuntCardViewModelTestConstantsString.AuthorId1,
-        currentUserId = HuntCardViewModelTestConstantsString.AuthorId1)
+        reviewID = HuntCardViewModelTestConstantsString.REVIEW_ID_1,
+        userID = HuntCardViewModelTestConstantsString.AUTHOR_ID_1,
+        currentUserId = HuntCardViewModelTestConstantsString.AUTHOR_ID_1)
 
     advanceUntilIdle()
 
@@ -353,23 +353,24 @@ class HuntCardViewModelTest {
   fun deleteReview_wrongUser_setsError() = runTest {
     val review =
         HuntReview(
-            reviewId = HuntCardViewModelTestConstantsString.Rev1,
-            authorId = HuntCardViewModelTestConstantsString.AuthorId1,
+            reviewId = HuntCardViewModelTestConstantsString.REVIEW_ID_1,
+            authorId = HuntCardViewModelTestConstantsString.AUTHOR_ID_1,
             huntId = TEST_HUNT_ID,
-            rating = HuntCardViewModelTestConstantsNumeric.ReviewRate,
-            comment = HuntCardViewModelTestConstantsString.Comment2)
+            rating = HuntCardViewModelTestConstantsNumeric.REVIEW_RATE,
+            comment = HuntCardViewModelTestConstantsString.COMMENT_2)
     fakeRevRepository.addReviewHunt(review)
 
     viewModel.deleteReview(
         huntID = TEST_HUNT_ID,
-        reviewID = HuntCardViewModelTestConstantsString.Rev1,
-        userID = HuntCardViewModelTestConstantsString.AuthorId1,
-        currentUserId = HuntCardViewModelTestConstantsString.Comment3)
+        reviewID = HuntCardViewModelTestConstantsString.REVIEW_ID_1,
+        userID = HuntCardViewModelTestConstantsString.AUTHOR_ID_1,
+        currentUserId = HuntCardViewModelTestConstantsString.COMMENT_3)
 
     advanceUntilIdle()
 
     assertEquals(
-        HuntCardViewModelTestConstantsString.ReviewErrorMessage, viewModel.uiState.value.errorMsg)
+        HuntCardViewModelTestConstantsString.REVIEW_DELETE_ERROR_MESSAGE,
+        viewModel.uiState.value.errorMsg)
 
     // Review must still exist
     assertEquals(1, fakeRevRepository.getHuntReviews(TEST_HUNT_ID).size)
@@ -378,12 +379,12 @@ class HuntCardViewModelTest {
   /** Test that check the edit change correctly the hunt */
   @Test
   fun onEditClick() = runTest {
-    val newHuntValue = testHunt.copy(title = HuntCardViewModelTestConstantsString.EditTitle)
+    val newHuntValue = testHunt.copy(title = HuntCardViewModelTestConstantsString.EDITED_TITLE)
     viewModel.editHunt(testHunt.uid, newHuntValue)
     advanceUntilIdle()
 
     val updatedHunt = fakeRepository.getHunt(testHunt.uid)
-    assertEquals(HuntCardViewModelTestConstantsString.EditTitle, updatedHunt.title)
+    assertEquals(HuntCardViewModelTestConstantsString.EDITED_TITLE, updatedHunt.title)
     assertEquals(newHuntValue, updatedHunt)
   }
 
@@ -392,17 +393,17 @@ class HuntCardViewModelTest {
   fun editHunt_withInvalidId_logsError() = runTest {
     val newHunt =
         testHunt.copy(
-            uid = HuntCardViewModelTestConstantsString.NonExistingId,
-            title = HuntCardViewModelTestConstantsString.Fail)
-    viewModel.editHunt(HuntCardViewModelTestConstantsString.NonExistingId, newHunt)
+            uid = HuntCardViewModelTestConstantsString.NON_EXISTING_ID,
+            title = HuntCardViewModelTestConstantsString.SHOULD_FAIL_MESSAGE)
+    viewModel.editHunt(HuntCardViewModelTestConstantsString.NON_EXISTING_ID, newHunt)
     advanceUntilIdle()
 
     // Verify that the hunt was NOT added or changed
     try {
-      fakeRepository.getHunt(HuntCardViewModelTestConstantsString.NonExistingId)
-      fail(HuntCardViewModelTestConstantsString.IllegalExeption_Message)
+      fakeRepository.getHunt(HuntCardViewModelTestConstantsString.NON_EXISTING_ID)
+      fail(HuntCardViewModelTestConstantsString.ILLEGAL_EXCEPTION_MESSAGE)
     } catch (e: IllegalArgumentException) {
-      assertEquals(HuntCardViewModelTestConstantsString.ErrorMessageNotFound, e.message)
+      assertEquals(HuntCardViewModelTestConstantsString.HUNT_NOT_FOUND_MESSAGE, e.message)
     }
   }
 
