@@ -11,14 +11,19 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.authentication.AuthRepository
+import com.swentseekr.seekr.model.notifications.NotificationTokenService
 import com.swentseekr.seekr.model.profile.ProfileRepository
 import com.swentseekr.seekr.ui.auth.AuthViewModel
 import com.swentseekr.seekr.ui.auth.AuthViewModelMessages
 import io.mockk.MockKAnnotations
+import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -55,10 +60,14 @@ class AuthViewModelTest {
     every { auth.currentUser } returns null
     every { auth.addAuthStateListener(any()) } answers { /* no-op */}
     every { auth.removeAuthStateListener(any()) } answers { /* no-op */}
+
+    mockkObject(NotificationTokenService)
+    coEvery { NotificationTokenService.syncCurrentToken(any()) } just Runs
   }
 
   @After
   fun tearDown() {
+    unmockkObject(NotificationTokenService)
     Dispatchers.resetMain()
   }
 
