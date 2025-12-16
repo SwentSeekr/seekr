@@ -20,7 +20,7 @@ import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
  * @param huntId The unique identifier of the hunt associated with the review.
  * @param reviewId The unique identifier of the review being edited.
  * @param huntCardViewModel The [HuntCardViewModel] instance used to fetch and update review data.
- *                          Defaults to the scoped ViewModel obtained via [viewModel()].
+ *   Defaults to the scoped ViewModel obtained via [viewModel()].
  * @param onGoBack Lambda to be invoked when the user navigates back without saving changes.
  * @param onDone Lambda to be invoked when the user successfully finishes editing the review.
  * @param onCancel Lambda to be invoked when the user cancels editing the review.

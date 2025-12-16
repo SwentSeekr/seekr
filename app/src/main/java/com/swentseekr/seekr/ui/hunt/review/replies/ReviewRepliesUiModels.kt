@@ -50,7 +50,6 @@ data class ReviewRepliesUiState(
     val replies: List<ReplyNodeUiState> = emptyList(),
     val isSendingReply: Boolean = false,
     val rootReplyText: String = ReviewRepliesUiModelConstants.ROOT_BASE_REPLY_TEXT,
-
     val childReplyTexts: Map<String, String> = emptyMap(),
     val errorMessage: String? = null,
     val isRootExpanded: Boolean = false,

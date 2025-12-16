@@ -1,14 +1,6 @@
 package com.swentseekr.seekr.ui.navigation
 
-import androidx.compose.ui.graphics.Color
-import com.swentseekr.seekr.ui.theme.Black
-import com.swentseekr.seekr.ui.theme.GrassGreen
-import com.swentseekr.seekr.ui.theme.White
-
 object SeekrNavigationDefaults {
-  val BottomBarContainerColor: Color = GrassGreen
-  val BottomBarIconColor: Color = Black
-  val ScaffoldContainerColor: Color = White
   const val IGNORED_TEST_TAG = "IGNORED"
 
   // --- Offline / shared extra routes ---

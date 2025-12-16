@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-
 /**
  * Represents the current UI state for a Hunt creation or editing screen.
  *
@@ -75,9 +74,11 @@ data class HuntUIState(
 /**
  * Base ViewModel for Hunt creation and editing screens.
  *
- * Provides state management, field validation, image handling, and persistence logic for Hunt-related screens.
+ * Provides state management, field validation, image handling, and persistence logic for
+ * Hunt-related screens.
  *
- * @param repository The [HuntsRepository] used to persist and retrieve Hunt data. Defaults to [HuntRepositoryProvider.repository].
+ * @param repository The [HuntsRepository] used to persist and retrieve Hunt data. Defaults to
+ *   [HuntRepositoryProvider.repository].
  */
 abstract class BaseHuntViewModel(
     protected val repository: HuntsRepository = HuntRepositoryProvider.repository
@@ -92,23 +93,23 @@ abstract class BaseHuntViewModel(
 
   private val checkpointImages: MutableList<Pair<Location, Uri>> = mutableListOf()
 
-    /**
-     * Attaches registered checkpoint images to the given points and updates their image indexes.
-     *
-     * @param points List of [Location] points.
-     * @return List of [Location] points with updated image indexes assigned.
-     */
+  /**
+   * Attaches registered checkpoint images to the given points and updates their image indexes.
+   *
+   * @param points List of [Location] points.
+   * @return List of [Location] points with updated image indexes assigned.
+   */
   fun registerCheckpointImage(location: Location, uri: Uri?) {
     if (uri == null) return
     checkpointImages.add(location to uri)
   }
 
-    /**
-     * Attaches registered checkpoint images to the given points and updates their image indexes.
-     *
-     * @param points List of [Location] points.
-     * @return List of [Location] points with updated image indexes assigned.
-     */
+  /**
+   * Attaches registered checkpoint images to the given points and updates their image indexes.
+   *
+   * @param points List of [Location] points.
+   * @return List of [Location] points with updated image indexes assigned.
+   */
   fun attachCheckpointImages(points: List<Location>): List<Location> {
     if (checkpointImages.isEmpty()) return points
     val startIndex = otherImagesUris.size
@@ -127,33 +128,33 @@ abstract class BaseHuntViewModel(
     }
   }
 
-    /** Clears the current error message from the UI state. */
-    fun clearErrorMsg() {
+  /** Clears the current error message from the UI state. */
+  fun clearErrorMsg() {
     _uiState.value = _uiState.value.copy(errorMsg = null)
   }
 
-    /**
-     * Sets a new error message in the UI state.
-     *
-     * @param error The error message to display.
-     */
+  /**
+   * Sets a new error message in the UI state.
+   *
+   * @param error The error message to display.
+   */
   protected fun setErrorMsg(error: String) {
     _uiState.value = _uiState.value.copy(errorMsg = error)
   }
 
-    /** Resets the save success flag in the UI state. */
-    fun resetSaveSuccess() {
+  /** Resets the save success flag in the UI state. */
+  fun resetSaveSuccess() {
     _uiState.value = _uiState.value.copy(saveSuccessful = false)
   }
 
-    /**
-     * Submits the current Hunt state.
-     *
-     * Validates fields, handles test mode, checks authentication, builds the Hunt model,
-     * and persists it via [persist]. Updates [HuntUIState] with success or error messages.
-     *
-     * @return true if submission started (state valid), false if validation or authentication failed.
-     */
+  /**
+   * Submits the current Hunt state.
+   *
+   * Validates fields, handles test mode, checks authentication, builds the Hunt model, and persists
+   * it via [persist]. Updates [HuntUIState] with success or error messages.
+   *
+   * @return true if submission started (state valid), false if validation or authentication failed.
+   */
   fun submit(): Boolean {
     val state = _uiState.value
 
@@ -198,11 +199,11 @@ abstract class BaseHuntViewModel(
     return true
   }
 
-    /**
-     * Sets the hunt title and validates it.
-     *
-     * @param title The hunt title entered by the user.
-     */
+  /**
+   * Sets the hunt title and validates it.
+   *
+   * @param title The hunt title entered by the user.
+   */
   fun setTitle(title: String) {
     _uiState.value =
         _uiState.value.copy(
@@ -210,11 +211,11 @@ abstract class BaseHuntViewModel(
             invalidTitleMsg = if (title.isBlank()) BaseHuntViewModelMessages.TITLE_EMPTY else null)
   }
 
-    /**
-     * Sets the hunt description and validates it.
-     *
-     * @param desc The hunt description entered by the user.
-     */
+  /**
+   * Sets the hunt description and validates it.
+   *
+   * @param desc The hunt description entered by the user.
+   */
   fun setDescription(desc: String) {
     _uiState.value =
         _uiState.value.copy(
@@ -223,11 +224,11 @@ abstract class BaseHuntViewModel(
                 if (desc.isBlank()) BaseHuntViewModelMessages.DESCRIPTION_EMPTY else null)
   }
 
-    /**
-     * Sets the estimated time and validates the format.
-     *
-     * @param time The estimated time in hours as a string.
-     */
+  /**
+   * Sets the estimated time and validates the format.
+   *
+   * @param time The estimated time in hours as a string.
+   */
   fun setTime(time: String) {
     _uiState.value =
         _uiState.value.copy(
@@ -236,11 +237,11 @@ abstract class BaseHuntViewModel(
                 if (time.toDoubleOrNull() == null) BaseHuntViewModelMessages.INVALID_TIME else null)
   }
 
-    /**
-     * Sets the estimated distance and validates the format.
-     *
-     * @param distance The estimated distance in km as a string.
-     */
+  /**
+   * Sets the estimated distance and validates the format.
+   *
+   * @param distance The estimated distance in km as a string.
+   */
   fun setDistance(distance: String) {
     _uiState.value =
         _uiState.value.copy(
@@ -250,30 +251,30 @@ abstract class BaseHuntViewModel(
                 else null)
   }
 
-    /**
-     * Sets the hunt difficulty.
-     *
-     * @param difficulty The [Difficulty] level of the hunt.
-     */
+  /**
+   * Sets the hunt difficulty.
+   *
+   * @param difficulty The [Difficulty] level of the hunt.
+   */
   fun setDifficulty(difficulty: Difficulty) {
     _uiState.value = _uiState.value.copy(difficulty = difficulty)
   }
 
-    /**
-     * Sets the hunt status.
-     *
-     * @param status The [HuntStatus] of the hunt.
-     */
+  /**
+   * Sets the hunt status.
+   *
+   * @param status The [HuntStatus] of the hunt.
+   */
   fun setStatus(status: HuntStatus) {
     _uiState.value = _uiState.value.copy(status = status)
   }
 
-    /**
-     * Sets the hunt points and validates minimum point count.
-     *
-     * @param points List of [Location] points.
-     * @return true if points are valid, false if not enough points.
-     */
+  /**
+   * Sets the hunt points and validates minimum point count.
+   *
+   * @param points List of [Location] points.
+   * @return true if points are valid, false if not enough points.
+   */
   fun setPoints(points: List<Location>): Boolean {
     if (points.size < BaseHuntViewModelDefault.MIN_SET_POINT) {
       setErrorMsg(BaseHuntViewModelMessages.INVALID_SET_POINT)
@@ -284,11 +285,11 @@ abstract class BaseHuntViewModel(
     return true
   }
 
-    /**
-     * Updates the main image URI and state.
-     *
-     * @param uri The URI of the main image, or null to remove it.
-     */
+  /**
+   * Updates the main image URI and state.
+   *
+   * @param uri The URI of the main image, or null to remove it.
+   */
   fun updateMainImageUri(uri: Uri?) {
     when (this) {
       is AddHuntViewModel -> this.mainImageUri = uri
@@ -297,66 +298,65 @@ abstract class BaseHuntViewModel(
     _uiState.value = _uiState.value.copy(mainImageUrl = uri?.toString() ?: "")
   }
 
-    /**
-     * Adds other images URIs to the state.
-     *
-     * @param uris List of image URIs to add.
-     */
+  /**
+   * Adds other images URIs to the state.
+   *
+   * @param uris List of image URIs to add.
+   */
   fun updateOtherImagesUris(uris: List<Uri>) {
     otherImagesUris = otherImagesUris + uris
 
     _uiState.value = _uiState.value.copy(otherImagesUris = otherImagesUris)
   }
 
-    /**
-     * Removes an image URI from the other images state.
-     *
-     * @param uri The URI to remove.
-     */
+  /**
+   * Removes an image URI from the other images state.
+   *
+   * @param uri The URI to remove.
+   */
   fun removeOtherImage(uri: Uri) {
     otherImagesUris = otherImagesUris - uri
     _uiState.value = _uiState.value.copy(otherImagesUris = otherImagesUris)
   }
 
-    /** Removes the main image. Can be overridden by subclasses. */
-    open fun removeMainImage() {
+  /** Removes the main image. Can be overridden by subclasses. */
+  open fun removeMainImage() {
     updateMainImageUri(null)
   }
 
-    /** Removes an existing other image (default no-op). Override in subclasses. */
+  /** Removes an existing other image (default no-op). Override in subclasses. */
+  open fun removeExistingOtherImage(url: String) {}
 
-    open fun removeExistingOtherImage(url: String) {
-  }
-
-    /**
-     * Updates the selecting points mode.
-     *
-     * @param isSelecting true if the user is selecting points on the map, false otherwise.
-     */
+  /**
+   * Updates the selecting points mode.
+   *
+   * @param isSelecting true if the user is selecting points on the map, false otherwise.
+   */
   fun setIsSelectingPoints(isSelecting: Boolean) {
     _uiState.value = _uiState.value.copy(isSelectingPoints = isSelecting)
   }
 
-    /**
-     * Enables or disables test mode. In test mode, submission is automatically successful.
-     *
-     * @param enabled true to enable test mode, false to disable.
-     */  fun setTestMode(enabled: Boolean) {
+  /**
+   * Enables or disables test mode. In test mode, submission is automatically successful.
+   *
+   * @param enabled true to enable test mode, false to disable.
+   */
+  fun setTestMode(enabled: Boolean) {
     testMode = enabled
   }
 
-    /**
-     * Builds a [Hunt] model from the current UI state.
-     *
-     * @param state The current [HuntUIState].
-     * @return A [Hunt] object to be persisted.
-     */
+  /**
+   * Builds a [Hunt] model from the current UI state.
+   *
+   * @param state The current [HuntUIState].
+   * @return A [Hunt] object to be persisted.
+   */
   abstract fun buildHunt(state: HuntUIState): Hunt
 
-    /**
-     * Persists a [Hunt] object in the repository.
-     *
-     * @param hunt The [Hunt] to persist.
-     */
+  /**
+   * Persists a [Hunt] object in the repository.
+   *
+   * @param hunt The [Hunt] to persist.
+   */
   protected abstract suspend fun persist(hunt: Hunt)
 }

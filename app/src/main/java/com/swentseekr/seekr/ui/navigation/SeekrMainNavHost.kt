@@ -46,6 +46,7 @@ import com.swentseekr.seekr.ui.profile.ProfileReviewsScreen
 import com.swentseekr.seekr.ui.profile.ProfileScreen
 import com.swentseekr.seekr.ui.settings.SettingsScreen
 import com.swentseekr.seekr.ui.terms.TermsAndConditionsScreen
+import com.swentseekr.seekr.ui.theme.Transparent
 
 /**
  * Sealed class representing each top-level or nested navigation destination in the app.
@@ -163,13 +164,13 @@ sealed class SeekrDestination(
 }
 
 /**
-* Bottom navigation bar for Seekr top-level destinations.
-*
-* Highlights the currently selected destination and supports click events.
-*
-* @param currentDestination currently active [SeekrDestination].
-* @param onTabSelected lambda invoked when a tab is clicked.
-*/
+ * Bottom navigation bar for Seekr top-level destinations.
+ *
+ * Highlights the currently selected destination and supports click events.
+ *
+ * @param currentDestination currently active [SeekrDestination].
+ * @param onTabSelected lambda invoked when a tab is clicked.
+ */
 @Composable
 fun SeekrNavigationBar(
     currentDestination: SeekrDestination,
@@ -229,7 +230,7 @@ fun SeekrNavigationBar(
                       unselectedIconColor = iconColor,
                       selectedTextColor = iconColor,
                       unselectedTextColor = iconColor,
-                      indicatorColor = BottomNavUIConstants.IndicatorColorTransparent))
+                      indicatorColor = Transparent))
         }
       }
 }
@@ -302,7 +303,7 @@ fun SeekrMainNavHost(
 
   Scaffold(
       modifier = Modifier.fillMaxSize(),
-      containerColor = SeekrNavigationDefaults.ScaffoldContainerColor,
+      containerColor = MaterialTheme.colorScheme.surface,
       bottomBar = {
         if (showBottomBar) {
           SeekrNavigationBar(

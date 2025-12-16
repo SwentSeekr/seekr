@@ -14,34 +14,32 @@ val ICON_SIZE = 20.dp
 const val MAX_RATING = 5.0
 const val MIN_RATING = 0.0
 
-/**
- * Provides stable test tags for rating icons, supporting full, half, and empty rating states.
- */
+/** Provides stable test tags for rating icons, supporting full, half, and empty rating states. */
 object RatingTestTags {
-    /**
-     * Returns a test tag for a full icon at the given index and rating type.
-     *
-     * @param index The index of the full rating icon (0-based).
-     * @param type The type of rating (STAR or SPORT).
-     * @return A unique test tag string for the full icon.
-     */
+  /**
+   * Returns a test tag for a full icon at the given index and rating type.
+   *
+   * @param index The index of the full rating icon (0-based).
+   * @param type The type of rating (STAR or SPORT).
+   * @return A unique test tag string for the full icon.
+   */
   fun full(index: Int, type: RatingType) = "${type.name}${RatingConstantsStrings.FULL}$index"
 
-    /**
-     * Returns a test tag for the half icon of a given rating type.
-     *
-     * @param type The type of rating (STAR or SPORT).
-     * @return A unique test tag string for the half icon.
-     */
+  /**
+   * Returns a test tag for the half icon of a given rating type.
+   *
+   * @param type The type of rating (STAR or SPORT).
+   * @return A unique test tag string for the half icon.
+   */
   fun half(type: RatingType) = "${type.name}${RatingConstantsStrings.HALF}"
 
-    /**
-     * Returns a test tag for an empty icon at the given index and rating type.
-     *
-     * @param index The index of the empty rating icon (0-based).
-     * @param type The type of rating (STAR or SPORT).
-     * @return A unique test tag string for the empty icon.
-     */
+  /**
+   * Returns a test tag for an empty icon at the given index and rating type.
+   *
+   * @param index The index of the empty rating icon (0-based).
+   * @param type The type of rating (STAR or SPORT).
+   * @return A unique test tag string for the empty icon.
+   */
   fun empty(index: Int, type: RatingType) = "${type.name}${RatingConstantsStrings.EMPTY}$index"
 }
 
@@ -50,9 +48,7 @@ object RatingTestTags {
  *
  * @param rating The numeric rating (0.0 - 5.0).
  * @param type The type of rating to display (STAR or SPORT).
- *
  * @return A unique test tag string for the full icon.
- *
  */
 @Composable
 fun Rating(rating: Double, type: RatingType) {
@@ -99,8 +95,8 @@ fun Rating(rating: Double, type: RatingType) {
 
 /** Enum representing the type of rating displayed in [Rating]. */
 enum class RatingType {
-    /** Star icons.*/
+  /** Star icons. */
   STAR,
-    /** Sport-themed icons.*/
+  /** Sport-themed icons. */
   SPORT
 }

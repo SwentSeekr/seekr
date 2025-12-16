@@ -22,7 +22,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.swentseekr.seekr.R
@@ -109,11 +108,10 @@ fun SignInScreen(
 fun GoogleSignInButton(onSignInClick: () -> Unit) {
   Button(
       onClick = onSignInClick,
-      colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.background),
+      colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface),
       shape = RoundedCornerShape(SignInScreenDimensions.ButtonCornerRadius),
       border =
-          BorderStroke(
-              SignInScreenDimensions.ButtonBorderWidth, MaterialTheme.colorScheme.tertiary),
+          BorderStroke(SignInScreenDimensions.ButtonBorderWidth, MaterialTheme.colorScheme.surface),
       modifier =
           Modifier.padding(horizontal = SignInScreenDimensions.ButtonHorizontalPadding)
               .height(SignInScreenDimensions.ButtonHeight)
@@ -132,9 +130,8 @@ fun GoogleSignInButton(onSignInClick: () -> Unit) {
 
               Text(
                   text = SignInScreenStrings.SignInButtonLabel,
-                  color = MaterialTheme.colorScheme.onBackground,
-                  fontSize = SignInScreenTypography.ButtonFontSize,
-                  fontWeight = FontWeight.Medium)
+                  color = MaterialTheme.colorScheme.onSurface,
+                  style = MaterialTheme.typography.bodyLarge)
             }
       }
 }

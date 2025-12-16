@@ -35,7 +35,8 @@ data class OnboardingState(
 /**
  * ViewModel managing the onboarding flow and pseudonym validation.
  *
- * Handles step progression, pseudonym validation, availability checks, and final onboarding completion.
+ * Handles step progression, pseudonym validation, availability checks, and final onboarding
+ * completion.
  *
  * @param profileRepository Repository used for profile operations and pseudonym checks.
  */
@@ -139,6 +140,6 @@ class OnboardingViewModel(
    * @param bio User’s bio text.
    */
   override fun completeOnboarding(userId: String, pseudonym: String, bio: String) {
-      // Implementation can call repository or handler to save the user profile
+    // Implementation can call repository or handler to save the user profile
   }
 }

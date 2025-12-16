@@ -43,13 +43,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.times
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.swentseekr.seekr.model.hunt.review.HuntReviewReply
-import com.swentseekr.seekr.ui.theme.Green
+import com.swentseekr.seekr.ui.theme.Transparent
 
 // ----------
 // Shared shapes
@@ -165,7 +164,6 @@ fun ReviewRepliesSection(
   )
 }
 
-
 /**
  * Pure UI composable for rendering replies based on [ReviewRepliesUiState] and
  * [ReviewRepliesCallbacks]. Does not directly access the ViewModel.
@@ -209,7 +207,8 @@ fun ReviewRepliesSectionContent(
  * Shows a summary of the number of replies and allows toggling to expand the thread.
  *
  * @param state The current UI state of the replies section.
- * @param onToggleRootReplies Callback invoked when the user taps the header to expand/collapse replies.
+ * @param onToggleRootReplies Callback invoked when the user taps the header to expand/collapse
+ *   replies.
  */
 @Composable
 fun ReviewRepliesCollapsedHeader(
@@ -221,7 +220,7 @@ fun ReviewRepliesCollapsedHeader(
           Modifier.fillMaxWidth()
               .clickable { onToggleRootReplies() }
               .testTag(ReviewRepliesTestTags.ROOT_SEE_REPLIES),
-      color = Color.Transparent) {
+      color = Transparent) {
         Row(
             modifier =
                 Modifier.padding(
@@ -240,15 +239,14 @@ fun ReviewRepliesCollapsedHeader(
               Text(
                   text = replyCountLabel(state.totalReplyCount),
                   style = MaterialTheme.typography.bodyMedium,
-                  fontWeight = FontWeight.Medium,
                   color = MaterialTheme.colorScheme.primary)
             }
       }
 }
 
 /**
- * Expanded content of the replies section, including the root composer, error messages,
- * and the threaded list of child replies.
+ * Expanded content of the replies section, including the root composer, error messages, and the
+ * threaded list of child replies.
  *
  * @param state Current state of the replies section.
  * @param callbacks Callbacks to handle user interactions.
@@ -427,7 +425,7 @@ fun ReplyCard(
       modifier =
           Modifier.fillMaxWidth()
               .background(
-                  MaterialTheme.colorScheme.surface,
+                  MaterialTheme.colorScheme.surfaceVariant,
                   shape = replyCardShape,
               )
               .padding(ReviewRepliesDimensions.ReplyCardPadding)) {
@@ -461,7 +459,8 @@ fun ReplyCard(
 /**
  * Header section of a reply card.
  *
- * Displays avatar, author name, timestamp, and a delete button if the reply belongs to the current user.
+ * Displays avatar, author name, timestamp, and a delete button if the reply belongs to the current
+ * user.
  *
  * @param node The reply node state containing reply data and metadata.
  * @param callbacks Callbacks to handle delete action.
@@ -480,8 +479,7 @@ fun ReplyHeader(
 
     Text(
         text = authorLabel(node),
-        style = MaterialTheme.typography.bodyMedium,
-        fontWeight = FontWeight.SemiBold,
+        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
         color = MaterialTheme.colorScheme.onSurface)
 
     Text(
@@ -536,12 +534,11 @@ fun ReplyAvatar(node: ReplyNodeUiState) {
         Text(
             text = avatarText,
             style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-            color = if (node.isMine) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = ReviewRepliesDimensions.ReplyAvatarFontSize)
+            color =
+                if (node.isMine) MaterialTheme.colorScheme.onPrimary
+                else MaterialTheme.colorScheme.onSurfaceVariant)
       }
 }
-
 
 /**
  * Body text of a reply.
@@ -623,10 +620,7 @@ fun ReplyButton(onClick: () -> Unit) {
             contentDescription = ReviewRepliesStrings.REPLY_CONTENT_DESCRIPTION,
             modifier = Modifier.size(ReviewRepliesDimensions.ReplyButtonIconSize))
         Spacer(modifier = Modifier.width(ReviewRepliesDimensions.ReplyButtonIconSpacing))
-        Text(
-            text = ReviewRepliesStrings.REPLY,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Medium)
+        Text(text = ReviewRepliesStrings.REPLY, style = MaterialTheme.typography.labelLarge)
       }
 }
 
@@ -663,8 +657,7 @@ fun RepliesToggleButton(
     Spacer(modifier = Modifier.width(ReviewRepliesDimensions.ReplyButtonIconSpacing))
     Text(
         text = childRepliesLabel(node.isExpanded, node.totalChildrenCount),
-        style = MaterialTheme.typography.labelLarge,
-        fontWeight = FontWeight.Medium)
+        style = MaterialTheme.typography.labelLarge)
   }
 }
 
@@ -720,8 +713,8 @@ fun InlineReplyComposer(
 /**
  * Generic Reddit-style composer used for both root and inline reply inputs.
  *
- * Chooses between a collapsed placeholder button and the expanded text input
- * depending on the [state] and [config].
+ * Chooses between a collapsed placeholder button and the expanded text input depending on the
+ * [state] and [config].
  *
  * @param state Current state of the composer (text, expanded, sending).
  * @param config Configuration for placeholder, compact mode, callbacks, and expand behavior.
@@ -751,8 +744,8 @@ fun RedditStyleComposer(
 /**
  * Collapsed representation of the root composer.
  *
- * Displays a placeholder button prompting the user to start a reply.
- * When clicked, it invokes [onExpand] to switch to the expanded composer.
+ * Displays a placeholder button prompting the user to start a reply. When clicked, it invokes
+ * [onExpand] to switch to the expanded composer.
  *
  * @param placeholder Text to display in the collapsed button.
  * @param onExpand Callback invoked when the button is clicked.
@@ -773,7 +766,7 @@ fun CollapsedComposerButton(
               .height(ReviewRepliesDimensions.CollapsedComposerHeight),
       colors =
           ButtonDefaults.outlinedButtonColors(
-              containerColor = MaterialTheme.colorScheme.surface,
+              containerColor = MaterialTheme.colorScheme.surfaceVariant,
               contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
       border =
           BorderStroke(
@@ -794,7 +787,6 @@ fun CollapsedComposerButton(
             }
       }
 }
-
 
 /**
  * Expanded content of the composer, including the text field and send button or progress indicator.
@@ -889,18 +881,18 @@ fun ComposerTextField(
       textStyle = MaterialTheme.typography.bodyMedium,
       colors =
           OutlinedTextFieldDefaults.colors(
-              focusedBorderColor = Color.Transparent,
-              unfocusedBorderColor = Color.Transparent,
-              focusedContainerColor = Color.Transparent,
-              unfocusedContainerColor = Color.Transparent),
+              focusedBorderColor = Transparent,
+              unfocusedBorderColor = Transparent,
+              focusedContainerColor = Transparent,
+              unfocusedContainerColor = Transparent),
   )
 }
 
 /**
  * Send button used in the composer.
  *
- * Handles the disabled state if the text is blank and calls [config.onSend] when clicked.
- * Also collapses the composer if [config.onExpandChange] is provided.
+ * Handles the disabled state if the text is blank and calls [config.onSend] when clicked. Also
+ * collapses the composer if [config.onExpandChange] is provided.
  *
  * @param state Current state of the composer (text, sending).
  * @param config Configuration containing callbacks for sending and expand/collapse.
@@ -934,7 +926,7 @@ fun ComposerSendButton(
                     imageVector = Icons.AutoMirrored.Filled.Send,
                     contentDescription = ReviewRepliesStrings.SEND_CONTENT_DESCRIPTION,
                     tint =
-                        if (isActive) Green
+                        if (isActive) MaterialTheme.colorScheme.onPrimary
                         else
                             MaterialTheme.colorScheme.onSurfaceVariant.copy(
                                 alpha = ReviewRepliesAlphas.INACTIVE_SEND_ICON),
@@ -944,16 +936,17 @@ fun ComposerSendButton(
       }
 }
 
- // ----------
+// ----------
 // Helper functions
- //----------
+// ----------
 
 /**
  * Returns a localized label for the total number of replies at the root level.
  *
  * @param totalCount Total number of replies.
  * @return Localized reply count label.
- */private fun replyCountLabel(totalCount: Int): String {
+ */
+private fun replyCountLabel(totalCount: Int): String {
   return if (totalCount > ReviewRepliesValues.ROOT_DEPTH) {
     val unit =
         if (totalCount == ReviewRepliesValues.ROOT_DEPTH + ReviewRepliesValues.SINGLE_REPLY_COUNT)

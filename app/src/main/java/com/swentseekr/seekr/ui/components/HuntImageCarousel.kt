@@ -8,6 +8,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,7 +17,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
@@ -30,6 +30,7 @@ import com.swentseekr.seekr.R
 import com.swentseekr.seekr.ui.components.HuntCardScreenDefaults.IMAGE_CAROUSEL_ROTATION_CENTER_DEGREES
 import com.swentseekr.seekr.ui.components.HuntCardScreenDefaults.IMAGE_INDICATOR_LAST_INDEX_OFFSET
 import com.swentseekr.seekr.ui.theme.Black
+import com.swentseekr.seekr.ui.theme.Transparent
 import kotlin.math.absoluteValue
 
 /**
@@ -278,8 +279,8 @@ private fun HuntImagePage(
                         Brush.verticalGradient(
                             colors =
                                 listOf(
-                                    Color.Transparent,
-                                    Color.Black.copy(
+                                    Transparent,
+                                    MaterialTheme.colorScheme.onTertiary.copy(
                                         alpha = HuntCardScreenDefaults.BACKGROUND_ALPHA)),
                             startY = HuntCardScreenDefaults.START))) {}
       }
@@ -318,8 +319,8 @@ private fun HuntImageIndicators(
                   )
                   .background(
                       color =
-                          if (isSelected) HuntCardScreenDefaults.ImageIndicatorSelectedColor
-                          else HuntCardScreenDefaults.ImageIndicatorUnselectedColor,
+                          if (isSelected) MaterialTheme.colorScheme.tertiaryContainer
+                          else MaterialTheme.colorScheme.primaryContainer,
                       shape = CircleShape,
                   )
                   .testTag(HuntCardScreenTestTags.IMAGE_INDICATOR_DOT_PREFIX + index),

@@ -17,22 +17,22 @@ object AuthViewModelMessages {
   const val NO_PROVIDER = "no provider"
   const val ONBOARDING = "New user should need onboarding"
 
-    /**
-     * Constructs a detailed credential failure message.
-     *
-     * @param detail Optional additional detail about the failure.
-     * @return Full failure message string.
-     */
+  /**
+   * Constructs a detailed credential failure message.
+   *
+   * @param detail Optional additional detail about the failure.
+   * @return Full failure message string.
+   */
   fun credentialFailure(detail: String?) =
       if (detail.isNullOrBlank()) CREDENTIAL_FAILURE_PREFIX
       else "$CREDENTIAL_FAILURE_PREFIX: $detail"
 
-    /**
-     * Constructs a detailed unexpected error message.
-     *
-     * @param detail Optional additional detail about the error.
-     * @return Full error message string.
-     */
+  /**
+   * Constructs a detailed unexpected error message.
+   *
+   * @param detail Optional additional detail about the error.
+   * @return Full error message string.
+   */
   fun unexpectedFailure(detail: String?) =
       if (detail.isNullOrBlank()) UNEXPECTED_ERROR_PREFIX else "$UNEXPECTED_ERROR_PREFIX: $detail"
 }

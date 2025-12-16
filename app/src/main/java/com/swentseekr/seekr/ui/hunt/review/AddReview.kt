@@ -63,7 +63,7 @@ fun AddReviewScreen(
  * @param maxStars Maximum number of stars in the rating bar.
  * @param rating Current rating value (0 means no stars selected). Defaults to 0.
  * @param onRatingChanged Callback invoked when the user taps a star. Provides the updated rating
- * value.
+ *   value.
  */
 @Composable
 fun StarRatingBar(

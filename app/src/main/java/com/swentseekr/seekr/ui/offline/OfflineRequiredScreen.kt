@@ -74,7 +74,7 @@ fun OfflineRequiredScreen(modifier: Modifier = Modifier, onOpenSettings: () -> U
               onClick = onOpenSettings,
               colors =
                   ButtonDefaults.buttonColors(
-                      containerColor = OfflineConstants.BUTTON_CONTAINER_COLOR,
+                      containerColor = MaterialTheme.colorScheme.primary,
                       contentColor = MaterialTheme.colorScheme.onPrimary)) {
                 Text(text = OfflineConstants.OPEN_SETTINGS_BUTTON)
               }

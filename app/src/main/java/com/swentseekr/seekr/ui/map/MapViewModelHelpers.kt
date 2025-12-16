@@ -16,8 +16,8 @@ import org.json.JSONObject
 /**
  * Converts a domain-level [Location] model into a Google Maps [LatLng] object.
  *
- * @receiver Location to convert.
  * @return a LatLng containing the same latitude and longitude.
+ * @receiver Location to convert.
  */
 fun Location.toLatLng(): LatLng = LatLng(latitude, longitude)
 
@@ -67,7 +67,8 @@ fun distanceMeters(from: LatLng, to: LatLng): Int? =
  * @param from starting coordinate.
  * @param to destination coordinate.
  * @return distance in meters as a double.
- * @throws Exception if the SphericalUtil computation fails. */
+ * @throws Exception if the SphericalUtil computation fails.
+ */
 fun computeDistanceMetersRaw(from: LatLng, to: LatLng): Double =
     SphericalUtil.computeDistanceBetween(from, to)
 
@@ -218,7 +219,8 @@ var directionsConnectionFactory: (URL) -> HttpURLConnection = { url ->
  * Opens an HTTP connection to a Directions API URL using the overridable connection factory.
  *
  * @param url the fully built [URL] for the Directions API request.
- * @return an [HttpURLConnection] ready for input and configured with the proper timeouts and method.
+ * @return an [HttpURLConnection] ready for input and configured with the proper timeouts and
+ *   method.
  */
 private fun openDirectionsConnection(url: URL): HttpURLConnection = directionsConnectionFactory(url)
 

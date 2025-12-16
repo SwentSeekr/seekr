@@ -26,10 +26,10 @@ import androidx.compose.ui.platform.testTag
  *
  * @param show Whether the dialog should be visible.
  * @param onDismiss Lambda invoked when the dialog is dismissed (e.g., cancel or outside tap).
- * @param onConfirm Lambda invoked when the user confirms the dialog with valid input.
- *                  Receives two parameters:
- *                  - The entered point name (String)
- *                  - The entered point description (String)
+ * @param onConfirm Lambda invoked when the user confirms the dialog with valid input. Receives two
+ *   parameters:
+ *     - The entered point name (String)
+ *     - The entered point description (String)
  */
 @Composable
 fun PointNameDialog(show: Boolean, onDismiss: () -> Unit, onConfirm: (String, String) -> Unit) {

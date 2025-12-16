@@ -85,8 +85,8 @@ class AuthViewModel(
     super.onCleared()
   }
 
-    /** Clears the current error message in the UI state. */
-    fun clearErrorMsg() {
+  /** Clears the current error message in the UI state. */
+  fun clearErrorMsg() {
     _uiState.update { it.copy(errorMsg = null) }
   }
 
@@ -98,34 +98,34 @@ class AuthViewModel(
   private fun signInRequest(signInOptions: GetSignInWithGoogleOption) =
       GetCredentialRequest.Builder().addCredentialOption(signInOptions).build()
 
-    /**
-     * Retrieves a credential using the provided [CredentialManager] and [GetCredentialRequest].
-     *
-     * @param context Android context.
-     * @param request Credential request configuration.
-     * @param credentialManager CredentialManager instance.
-     * @return The retrieved credential.
-     * @throws GetCredentialCancellationException If the user cancels the sign-in flow.
-     * @throws NoCredentialException If no credential is available.
-     * @throws GetCredentialException For other credential retrieval failures.
-     */
+  /**
+   * Retrieves a credential using the provided [CredentialManager] and [GetCredentialRequest].
+   *
+   * @param context Android context.
+   * @param request Credential request configuration.
+   * @param credentialManager CredentialManager instance.
+   * @return The retrieved credential.
+   * @throws GetCredentialCancellationException If the user cancels the sign-in flow.
+   * @throws NoCredentialException If no credential is available.
+   * @throws GetCredentialException For other credential retrieval failures.
+   */
   private suspend fun getCredential(
       context: Context,
       request: GetCredentialRequest,
       credentialManager: CredentialManager
   ) = credentialManager.getCredential(context, request).credential
 
-    /**
-     * Initiates Google sign-in for the user.
-     *
-     * Updates [uiState] to reflect loading, success, or failure states.
-     *
-     * @param context Android context.
-     * @param credentialManager CredentialManager instance for retrieving credentials.
-     * @throws GetCredentialCancellationException If the user cancels the sign-in flow.
-     * @throws NoCredentialException If no credential is available.
-     * @throws GetCredentialException For other credential retrieval failures.
-     */
+  /**
+   * Initiates Google sign-in for the user.
+   *
+   * Updates [uiState] to reflect loading, success, or failure states.
+   *
+   * @param context Android context.
+   * @param credentialManager CredentialManager instance for retrieving credentials.
+   * @throws GetCredentialCancellationException If the user cancels the sign-in flow.
+   * @throws NoCredentialException If no credential is available.
+   * @throws GetCredentialException For other credential retrieval failures.
+   */
   fun signIn(context: Context, credentialManager: CredentialManager) {
     if (_uiState.value.isLoading) return
 
@@ -185,13 +185,13 @@ class AuthViewModel(
     }
   }
 
-    /**
-     * Completes the onboarding process for a user.
-     *
-     * @param userId The UID of the user completing onboarding.
-     * @param pseudonym The pseudonym to set for the user.
-     * @param bio The bio to set for the user.
-     */
+  /**
+   * Completes the onboarding process for a user.
+   *
+   * @param userId The UID of the user completing onboarding.
+   * @param pseudonym The pseudonym to set for the user.
+   * @param bio The bio to set for the user.
+   */
   override fun completeOnboarding(userId: String, pseudonym: String, bio: String) {
     viewModelScope.launch {
       profileRepository.completeOnboarding(userId, pseudonym, bio)

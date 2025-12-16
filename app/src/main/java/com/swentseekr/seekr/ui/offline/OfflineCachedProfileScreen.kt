@@ -86,7 +86,7 @@ fun OfflineCachedProfileScreen(profile: Profile?, modifier: Modifier = Modifier)
       Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(
             text = OfflineConstants.OFFLINE_NO_PROFILE,
-            color = MaterialTheme.colorScheme.onSecondary, // GrayDislike via theme
+            color = MaterialTheme.colorScheme.onSecondary,
             style = MaterialTheme.typography.bodyMedium)
       }
       return@Surface

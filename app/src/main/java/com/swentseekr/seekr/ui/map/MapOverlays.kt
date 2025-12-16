@@ -27,10 +27,6 @@ import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
-import com.swentseekr.seekr.ui.theme.Black
-import com.swentseekr.seekr.ui.theme.GrayDislike
-import com.swentseekr.seekr.ui.theme.Green
-import com.swentseekr.seekr.ui.theme.White
 
 /**
  * Displays all overlay controls when a hunt is in "focused" mode.
@@ -68,7 +64,10 @@ fun BoxScope.FocusedHuntControls(
           Modifier.align(Alignment.TopStart)
               .padding(MapScreenDefaults.BackButtonPadding)
               .testTag(MapScreenTestTags.BUTTON_BACK),
-      colors = ButtonDefaults.textButtonColors(containerColor = Green, contentColor = White)) {
+      colors =
+          ButtonDefaults.textButtonColors(
+              containerColor = MaterialTheme.colorScheme.primary,
+              contentColor = MaterialTheme.colorScheme.onPrimary)) {
         Text(
             text =
                 if (isHuntStarted) MapScreenStrings.STOP_HUNT
@@ -168,12 +167,13 @@ private fun BoxScope.FocusedHuntBottomCard(
 /**
  * Displays a full-screen checkpoint image in a dialog.
  *
- * This composable shows an image in full-screen mode with a semi-transparent background.
- * A close button is provided in the top-right corner to dismiss the dialog.
+ * This composable shows an image in full-screen mode with a semi-transparent background. A close
+ * button is provided in the top-right corner to dismiss the dialog.
  *
  * @param imageUrl The URL of the image to display.
  * @param contentDescription A content description for accessibility purposes.
- * @param onClose Lambda invoked when the user requests to close the full-screen image (e.g., tapping the close icon or dismissing the dialog).
+ * @param onClose Lambda invoked when the user requests to close the full-screen image (e.g.,
+ *   tapping the close icon or dismissing the dialog).
  */
 @Composable
 internal fun FullscreenCheckpointImage(
@@ -185,7 +185,9 @@ internal fun FullscreenCheckpointImage(
     Box(
         modifier =
             Modifier.fillMaxSize()
-                .background(Black.copy(alpha = MapScreenDefaults.BACKGROUND_OPACITY))) {
+                .background(
+                    MaterialTheme.colorScheme.onTertiary.copy(
+                        alpha = MapScreenDefaults.BACKGROUND_OPACITY))) {
           AsyncImage(
               model = imageUrl,
               contentDescription = contentDescription,
@@ -204,13 +206,15 @@ internal fun FullscreenCheckpointImage(
                       .padding(MapScreenDefaults.IconPadding)
                       .size(MapScreenDefaults.IconSize)
                       .background(
-                          color = Black.copy(alpha = MapScreenDefaults.ICON_BACKGROUND_ALPHA),
+                          color =
+                              MaterialTheme.colorScheme.onBackground.copy(
+                                  alpha = MapScreenDefaults.ICON_BACKGROUND_ALPHA),
                           shape = CircleShape)
                       .testTag(MapScreenTestTags.CLOSE_CHECKPOINT_IMAGE)) {
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = MapScreenStrings.CANCEL,
-                    tint = White)
+                    tint = MaterialTheme.colorScheme.onPrimary)
               }
         }
   }
@@ -419,7 +423,10 @@ private fun StartHuntButton(onStartHunt: () -> Unit) {
     Button(
         modifier = Modifier.testTag(MapScreenTestTags.START),
         onClick = onStartHunt,
-        colors = ButtonDefaults.buttonColors(containerColor = Green, contentColor = White)) {
+        colors =
+            ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary)) {
           Text(MapScreenStrings.START_HUNT)
         }
   }
@@ -447,7 +454,8 @@ private fun HuntActionsRow(
         TextButton(
             modifier = Modifier.testTag(MapScreenTestTags.VALIDATE),
             onClick = onValidateCurrentLocation,
-            colors = ButtonDefaults.textButtonColors(contentColor = Green)) {
+            colors =
+                ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)) {
               Text(MapScreenStrings.VALIDATE)
             }
 
@@ -468,7 +476,10 @@ private fun HuntActionsRow(
             enabled = canFinish,
             colors =
                 ButtonDefaults.buttonColors(
-                    containerColor = if (canFinish) Green else GrayDislike, contentColor = White)) {
+                    containerColor =
+                        if (canFinish) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSecondary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary)) {
               Text(MapScreenStrings.FINISH_HUNT)
             }
       }

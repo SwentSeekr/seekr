@@ -3,12 +3,15 @@ package com.swentseekr.seekr.ui.map
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -24,7 +27,7 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.*
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Hunt
-import com.swentseekr.seekr.ui.theme.Blue
+import com.swentseekr.seekr.ui.theme.LocalAppColors
 import kotlin.math.roundToInt
 
 /**
@@ -74,8 +77,7 @@ fun MapContent(
   val mapProperties = MapProperties(isMyLocationEnabled = hasLocationPermission)
 
   GoogleMap(
-      modifier =
-          androidx.compose.ui.Modifier.fillMaxSize().testTag(MapScreenTestTags.GOOGLE_MAP_SCREEN),
+      modifier = Modifier.fillMaxSize().testTag(MapScreenTestTags.GOOGLE_MAP_SCREEN),
       cameraPositionState = cameraPositionState,
       onMapLoaded = onMapLoaded,
       properties = mapProperties,
@@ -125,6 +127,7 @@ private fun HuntImageMarker(hunt: Hunt, onMarkerClick: (Hunt) -> Unit) {
   val density = LocalDensity.current
 
   val (icon, setIcon) = remember(hunt.uid) { mutableStateOf<BitmapDescriptor?>(null) }
+  val borderColor = MaterialTheme.colorScheme.primary.toArgb()
 
   // Load the hunt’s image and create a rounded icon
   LaunchedEffect(hunt.mainImageUrl) {
@@ -148,7 +151,10 @@ private fun HuntImageMarker(hunt: Hunt, onMarkerClick: (Hunt) -> Unit) {
 
     val roundedBitmap =
         createRoundedMarkerBitmap(
-            drawable = drawable, sizePx = sizePx, cornerRadiusPx = cornerRadiusPx)
+            drawable = drawable,
+            sizePx = sizePx,
+            cornerRadiusPx = cornerRadiusPx,
+            boarderColor = borderColor)
 
     setIcon(BitmapDescriptorFactory.fromBitmap(roundedBitmap))
   }
@@ -177,6 +183,7 @@ private fun HuntImageMarker(hunt: Hunt, onMarkerClick: (Hunt) -> Unit) {
 @Composable
 private fun FocusedHuntMarkers(uiState: MapUIState, selectedHunt: Hunt) {
   val context = LocalContext.current
+  val appColors = LocalAppColors.current
 
   // Start marker
   Marker(
@@ -202,7 +209,10 @@ private fun FocusedHuntMarkers(uiState: MapUIState, selectedHunt: Hunt) {
 
   // Route polyline
   if (uiState.route.isNotEmpty()) {
-    Polyline(points = uiState.route, width = MapScreenDefaults.ROUTE_STROKE_WIDTH, color = Blue)
+    Polyline(
+        points = uiState.route,
+        width = MapScreenDefaults.ROUTE_STROKE_WIDTH,
+        color = appColors.mapRoute)
   }
 }
 
@@ -257,13 +267,14 @@ private suspend fun CameraPositionState.animateToHunt(hunt: Hunt, isFocused: Boo
 private fun createRoundedMarkerBitmap(
     drawable: Drawable,
     sizePx: Int,
-    cornerRadiusPx: Float
+    cornerRadiusPx: Float,
+    boarderColor: Int
 ): Bitmap {
   val output = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
   val canvas = Canvas(output)
 
   val path =
-      android.graphics.Path().apply {
+      Path().apply {
         addRoundRect(
             MapScreenDefaults.ZERO_FLOAT,
             MapScreenDefaults.ZERO_FLOAT,
@@ -271,7 +282,7 @@ private fun createRoundedMarkerBitmap(
             sizePx.toFloat(),
             cornerRadiusPx,
             cornerRadiusPx,
-            android.graphics.Path.Direction.CW)
+            Path.Direction.CW)
       }
 
   canvas.clipPath(path)
@@ -284,7 +295,7 @@ private fun createRoundedMarkerBitmap(
       Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeWidth = MapScreenDefaults.CUSTOM_MARKER_BORDER_WIDTH
-        color = com.swentseekr.seekr.ui.theme.Green.toArgb()
+        color = boarderColor
       }
 
   canvas.drawRoundRect(

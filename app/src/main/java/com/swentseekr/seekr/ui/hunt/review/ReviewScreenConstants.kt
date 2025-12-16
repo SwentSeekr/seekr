@@ -5,69 +5,66 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/**
- * Default dimension, color, and numeric constants used in AddReviewScreen.
- */
+/** Default dimension, color, and numeric constants used in AddReviewScreen. */
 object AddReviewScreenDefaults {
 
-  //-------------------
+  // -------------------
   // General layout
-  //-------------------
+  // -------------------
   val ChangeAlpha: Float = 0.3f
   val ColumnPadding: Dp = 20.dp
   val RowHArrangement: Dp = 12.dp
   val RowStarArrangement: Dp = 4.dp
 
-  //-------------------
+  // -------------------
   // Card styling
-  //-------------------
+  // -------------------
   val CardCornerRadius: Dp = 20.dp
   val CardElevation: Dp = 0.dp
 
-  //-------------------
+  // -------------------
   // Buttons
-  //-------------------
+  // -------------------
   val ButtonTonalHeight: Dp = 52.dp
   val ButtonTonalCornerRadius: Dp = 12.dp
   val ButtonWeight: Float = 1f
   val ButtonElevation: Dp = 4.dp
 
-  //-------------------
+  // -------------------
   // Title & text
-  //-------------------
+  // -------------------
   val TitleFontSize = 24.sp
 
-  //-------------------
+  // -------------------
   // Images
-  //-------------------
+  // -------------------
   val ImageSize: Dp = 120.dp
   val ImageCorners: Dp = 12.dp
   val ImageShadow: Dp = 4.dp
 
-  //-------------------
+  // -------------------
   // Surface elements
-  //-------------------
+  // -------------------
   val SurfacePadding: Dp = 4.dp
   val SurfaceSize: Dp = 28.dp
   val SurfaceCorners: Dp = 8.dp
   val SurfaceIconSize: Dp = 14.dp
 
-  //-------------------
+  // -------------------
   // Icons
-  //-------------------
+  // -------------------
   val IconSize: Dp = 20.dp
   val IconBig: Dp = 40.dp
 
-  //-------------------
+  // -------------------
   // Spacers
-  //-------------------
-  val SpacerHeightExtraSmall: Dp = 4.dp
+  // -------------------
   val SpacerHeightSmall: Dp = 8.dp
   val SpacerHeightMedium: Dp = 16.dp
 
-  //-------------------
+  // -------------------
   // Stars and rating
-  //-------------------
+  // -------------------
   const val MAX_STARS = 5
   const val MIN_STARS = 0
   const val FIRST_STAR_INDEX: Int = 1
@@ -81,17 +78,17 @@ object AddReviewScreenDefaults {
   val SelectedStarColor = Color(0xFFFFC107)
   val UnselectedStarColor = Color.Gray
 
-  //-------------------
+  // -------------------
   // Comment field
-  //-------------------
+  // -------------------
   val CommentFieldHeight: Dp = 250.dp
   val CommentFieldCornerRadius: Dp = 16.dp
   val CommentLineHeight = 20.sp
   const val COMMENT_MAX_LINES = 15
 
-  //-------------------
+  // -------------------
   // Header & Photos
-  //-------------------
+  // -------------------
   val HeaderInnerSpacing: Dp = 8.dp
   val HeaderSubtitleSpacerHeight: Dp = 4.dp
   val PhotosSpacerHeight: Dp = 8.dp
@@ -99,15 +96,12 @@ object AddReviewScreenDefaults {
   val TrailingTileAlpha: Float = 0.6f
 }
 
-
-/**
- * Constant strings used in AddReviewScreen.
- */
+/** Constant strings used in AddReviewScreen. */
 object AddReviewScreenStrings {
 
-  //-------------------
+  // -------------------
   // Titles & labels
-  //-------------------
+  // -------------------
   const val TITLE = "Add Review Hunt"
   const val EDIT_TITLE = "Edit Review Hunt"
   const val COMMENT_LABEL = "Comment"
@@ -118,17 +112,17 @@ object AddReviewScreenStrings {
   const val DONE_BUTTON_LABEL = "Done"
   const val IMAGE_MIME_TYPE = "image/*"
 
-  //-------------------
+  // -------------------
   // Author & user
-  //-------------------
+  // -------------------
   const val USER_0 = "0"
   const val BY = "by"
   const val NO_CURRENT_USER = "None (B2)"
   const val UNKNOWN = "Unknown Author"
 
-  //-------------------
+  // -------------------
   // Errors & messages
-  //-------------------
+  // -------------------
   const val ERROR_SUBMISSION = "At least one field is not valid"
   const val ERROR_LOADING_HUNT = "Error loading Hunt by ID:"
   const val ERROR_LOADING_PROFILE = "Error loading user profile for User ID:"
@@ -149,15 +143,15 @@ object AddReviewScreenStrings {
   const val UPDATE_REVIEW_FAIL = "Error updating review"
   const val UPDATE_REVIEW_FAIL_SET_MSG = "Failed to update review:"
 
-  //-------------------
+  // -------------------
   // Notifications
-  //-------------------
+  // -------------------
   const val NEW_REVIEW_TITLE = "New review added"
   const val NEW_REVIEW_MESSAGE = "You added a new review!"
 
-  //-------------------
+  // -------------------
   // UI prefixes & helpers
-  //-------------------
+  // -------------------
   const val PHOTOS_LABEL_PREFIX = "Photos ("
   const val PHOTOS_LABEL_SUFFIX = ")"
   const val ADD_MORE_PHOTOS_BUTTON_LABEL = "Add more"
@@ -192,27 +186,27 @@ object AddReviewScreenStrings {
    * @return A string like "Photos (3)".
    */
   fun photosHeader(count: Int): String = "$PHOTOS_LABEL_PREFIX$count$PHOTOS_LABEL_SUFFIX"
+
   const val RATING_PREFIX = "Your rating: "
   const val STAR_CONTENT_DESCRIPTION_PREFIX = "Star "
   const val SELECTED_IMAGE_CONTENT_DESCRIPTION_PREFIX = "Selected Image "
-  const val BACK_CONTENT_DESCRIPTION = "Back" }
+  const val BACK_CONTENT_DESCRIPTION = "Back"
+}
 
-/**
- * Test tags used in AddReviewScreen.
- */
+/** Test tags used in AddReviewScreen. */
 object AddReviewScreenTestTags {
 
-  //-------------------
+  // -------------------
   // Buttons
-  //-------------------
+  // -------------------
   const val GO_BACK_BUTTON = "HuntCardReview_GoBackButton"
   const val CANCEL_BUTTON = "HuntCardReview_CancelButton"
   const val DONE_BUTTON = "HuntCardReview_DoneButton"
   const val ADD_PHOTO_BUTTON_TEST_TAG = "AddPhotoButton"
 
-  //-------------------
+  // -------------------
   // Layout & fields
-  //-------------------
+  // -------------------
   const val INFO_COLUMN = "HuntCardReview_InfoColumn"
   const val RATING_BAR = "HuntCardReview_RatingBar"
   const val COMMENT_TEXT_FIELD = "HuntCardReview_CommentTextField"
@@ -220,9 +214,9 @@ object AddReviewScreenTestTags {
   const val PHOTOS_LAZY_ROW_TAG = "PhotosLazyRow"
   const val ERROR_MESSAGE = "HuntCardReview_ErrorMessage"
 
-  //-------------------
+  // -------------------
   // Dynamic tags
-  //-------------------
+  // -------------------
   private const val REMOVE_PHOTO_PREFIX = "RemovePhoto_"
 
   /**

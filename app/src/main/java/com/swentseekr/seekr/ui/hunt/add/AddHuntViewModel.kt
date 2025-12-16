@@ -7,15 +7,13 @@ import com.swentseekr.seekr.ui.hunt.BaseHuntViewModel
 import com.swentseekr.seekr.ui.hunt.HuntUIState
 
 /**
- * ViewModel responsible for managing the state and actions
- * related to adding a new hunt.
+ * ViewModel responsible for managing the state and actions related to adding a new hunt.
  *
- * This ViewModel extends [BaseHuntViewModel] and provides
- * logic for building a [Hunt] object and persisting it
- * to the repository.
+ * This ViewModel extends [BaseHuntViewModel] and provides logic for building a [Hunt] object and
+ * persisting it to the repository.
  *
- * @param repository Repository used to persist hunts. Defaults
- *   to the shared instance provided by [HuntRepositoryProvider].
+ * @param repository Repository used to persist hunts. Defaults to the shared instance provided by
+ *   [HuntRepositoryProvider].
  */
 class AddHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.repository) :
     BaseHuntViewModel(repository) {
@@ -23,12 +21,12 @@ class AddHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.repo
   var mainImageUri: Uri? = null
   val UNKNOWN = "unknown"
 
-    /**
-     * Builds a [Hunt] object from the given [HuntUIState].
-     *
-     * @param state The UI state containing user input for the hunt.
-     * @return A new [Hunt] object ready to be persisted.
-     */
+  /**
+   * Builds a [Hunt] object from the given [HuntUIState].
+   *
+   * @param state The UI state containing user input for the hunt.
+   * @return A new [Hunt] object ready to be persisted.
+   */
   override fun buildHunt(state: HuntUIState): Hunt {
     val uid = repository.getNewUid()
     val authorId = FirebaseAuth.getInstance().currentUser?.uid ?: UNKNOWN
@@ -50,12 +48,12 @@ class AddHuntViewModel(repository: HuntsRepository = HuntRepositoryProvider.repo
         reviewRate = state.reviewRate)
   }
 
-    /**
-     * Persists the given [Hunt] to the repository, including
-     * uploading the main and other images if present.
-     *
-     * @param hunt The [Hunt] object to persist.
-     */
+  /**
+   * Persists the given [Hunt] to the repository, including uploading the main and other images if
+   * present.
+   *
+   * @param hunt The [Hunt] object to persist.
+   */
   override suspend fun persist(hunt: Hunt) {
     repository.addHunt(hunt = hunt, mainImageUri = mainImageUri, otherImageUris = otherImagesUris)
   }

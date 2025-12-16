@@ -40,16 +40,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontWeight.Companion.SemiBold
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
+import com.swentseekr.seekr.ui.theme.Transparent
 
 /**
- * Displays a screen showing a list of review images in a horizontal pager, with optional full-screen viewing.
+ * Displays a screen showing a list of review images in a horizontal pager, with optional
+ * full-screen viewing.
  *
- * The user can scroll through images, see the current index, and tap an image to view it in full-screen mode.
+ * The user can scroll through images, see the current index, and tap an image to view it in
+ * full-screen mode.
  *
  * @param photoUrls List of image URLs to display.
  * @param onGoBack Callback invoked when the user taps the back button in the top app bar.
@@ -137,9 +140,7 @@ fun ReviewImagesScreen(
 
               Text(
                   text = "${index}/${photoUrls.size}",
-                  fontSize = AddReviewScreenDefaults.TitleFontSize,
-                  fontWeight = FontWeight.SemiBold,
-                  style = MaterialTheme.typography.titleMedium,
+                  style = MaterialTheme.typography.titleMedium.copy(fontWeight = SemiBold),
                   modifier =
                       Modifier.align(Alignment.CenterHorizontally)
                           .testTag(
@@ -156,8 +157,8 @@ fun ReviewImagesScreen(
 /**
  * Displays a full-screen dialog with a horizontal pager to view images.
  *
- * Includes a top overlay with a close button and the current image index.
- * Swiping horizontally navigates between images.
+ * Includes a top overlay with a close button and the current image index. Swiping horizontally
+ * navigates between images.
  *
  * @param images List of image URLs to display in full-screen mode.
  * @param startIndex The initial image index to display when the viewer opens.
@@ -212,11 +213,11 @@ fun FullScreenImageViewer(
                               Brush.verticalGradient(
                                   colors =
                                       listOf(
-                                          Color.Black.copy(
+                                          MaterialTheme.colorScheme.onBackground.copy(
                                               alpha =
                                                   ReviewImagesScreenConstants
                                                       .FULL_SCREEN_OVERLAY_START_ALPHA),
-                                          Color.Transparent)))
+                                          Transparent)))
                           .padding(
                               horizontal = ReviewImagesScreenConstants.FullScreenPadding,
                               vertical = ReviewImagesScreenConstants.FullScreenPadding)) {
@@ -229,13 +230,13 @@ fun FullScreenImageViewer(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription =
                                     ReviewImagesScreenConstantsStrings.CLOSE_CONTENT_DESCRIPTION,
-                                tint = Color.White)
+                                tint = MaterialTheme.colorScheme.onPrimary)
                           }
 
                           Text(
                               text = "${currentIndex}/${images.size}",
                               style = MaterialTheme.typography.bodyMedium,
-                              color = Color.White)
+                              color = MaterialTheme.colorScheme.onPrimary)
                         }
                   }
             }

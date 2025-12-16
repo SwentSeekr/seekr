@@ -17,13 +17,14 @@ import kotlinx.coroutines.launch
 /**
  * ViewModel managing replies for a single review card.
  *
- * Handles fetching, sending, deleting, and updating replies in a thread-like structure.
- * Maintains UI state including expanded replies, open composers, and error messages.
+ * Handles fetching, sending, deleting, and updating replies in a thread-like structure. Maintains
+ * UI state including expanded replies, open composers, and error messages.
  *
  * @param reviewId The ID of the review this ViewModel is associated with.
  * @param replyRepository Repository used for fetching, adding, and deleting replies.
  * @param dispatcher Coroutine dispatcher used for asynchronous operations.
- * @param currentUserIdProvider Lambda that provides the current authenticated user's ID, or null if not signed in.
+ * @param currentUserIdProvider Lambda that provides the current authenticated user's ID, or null if
+ *   not signed in.
  */
 class ReviewRepliesViewModel(
     private val reviewId: String,
@@ -46,8 +47,8 @@ class ReviewRepliesViewModel(
   /**
    * Initializes listening for replies on this review.
    *
-   * Sets up a coroutine to collect live updates from the repository.
-   * Updates the UI state with loading/error information.
+   * Sets up a coroutine to collect live updates from the repository. Updates the UI state with
+   * loading/error information.
    */
   fun start() {
     if (hasStarted) return
@@ -106,8 +107,7 @@ class ReviewRepliesViewModel(
    */
   fun onToggleComposer(target: ReplyTarget) {
     when (target) {
-      is ReplyTarget.RootReview -> {
-      }
+      is ReplyTarget.RootReview -> {}
       is ReplyTarget.Reply -> {
         val id = target.parentReplyId
         if (!composerOpenReplyIds.add(id)) {
@@ -121,8 +121,8 @@ class ReviewRepliesViewModel(
   /**
    * Sends a reply to the specified target (root review or child reply).
    *
-   * Handles validation, empty text errors, and signing in checks.
-   * Updates the UI state with sending progress and resets composer text upon success.
+   * Handles validation, empty text errors, and signing in checks. Updates the UI state with sending
+   * progress and resets composer text upon success.
    *
    * @param target The target to which the reply should be sent.
    */
@@ -233,8 +233,8 @@ class ReviewRepliesViewModel(
   /**
    * Rebuilds the flattened list of [ReplyNodeUiState] from raw replies.
    *
-   * Takes into account expanded replies, composer visibility, and calculates
-   * total children count for proper thread display.
+   * Takes into account expanded replies, composer visibility, and calculates total children count
+   * for proper thread display.
    *
    * @param rawReplies The raw list of replies fetched from the repository.
    */

@@ -1,18 +1,17 @@
 package com.swentseekr.seekr.ui.navigation
 
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 /**
  * Centralized constants for the Bottom Navigation UI.
  *
- * Provides sizes, colors, shapes, and alpha values used in the bottom navigation bar.
- * Extracted from original hardcoded values to avoid magic numbers and maintain consistency.
+ * Provides sizes, colors, shapes, and alpha values used in the bottom navigation bar. Extracted
+ * from original hardcoded values to avoid magic numbers and maintain consistency.
  */
 object BottomNavUIConstants {
 
-  //-----------
+  // -----------
   // Sizes
   // ----------
   val IconContainerSize = 48.dp
@@ -20,18 +19,13 @@ object BottomNavUIConstants {
   val IconSizeSelected = 24.dp
   val IconSizeUnselected = 24.dp
 
-  //-----------
+  // -----------
   // Colors / Alpha
   // ----------
   const val HALO_ALPHA = 0.12f
 
-  //-----------
+  // -----------
   // Shapes
   // ----------
   val HaloShape = CircleShape
-
-  //-----------
-  // Indicator
-  // ----------
-  val IndicatorColorTransparent = Color.Transparent
 }
