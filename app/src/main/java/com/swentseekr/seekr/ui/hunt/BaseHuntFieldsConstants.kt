@@ -103,6 +103,8 @@ object BaseHuntFieldsUi {
   val FieldCornerRadius: Dp = 16.dp
   val ChangeAlpha: Float = 0.5f
   val Alpha03: Float = 0.3f
+  val DeleteContainerAlpha: Float = 0.1f
+  val DeleteBorderAlpha: Float = 0.5f
   val WeightTextField: Float = 1f
   val DescriptionHeight: Dp = 140.dp
 
