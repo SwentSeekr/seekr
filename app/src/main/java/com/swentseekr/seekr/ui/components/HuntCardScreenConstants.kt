@@ -63,21 +63,17 @@ object HuntCardScreenDefaults {
   val MapHeight250: Dp = 250.dp
   val AspectRatioHero: Float = 16f / 9f
 
-  val Alpha: Float = 0.9f
-
-  val TitleFontSize = 28.sp
-  val AuthorFontSize = 16.sp
+  const val ALPHA = 0.9f
+  const val ALPHA3 = 0.3f
+  const val ALPHA7 = 0.7f
   val LineHeight = 32.sp
 
   val CardWeight: Float = 1f
-  val MediumFontSize = 24.sp
-  val SmallFontSize = 18.sp
-  val DescriptionFontSize = 15.sp
+
   val DescriptionLineHeight = 22.sp
 
   val Zoom: Float = 12f
   val OtherLineHeight = 20.sp
-  val MinFontSize = 13.sp
 
   // New: review card visuals & logic constants
   val ReviewCardCornerRadius: Dp = 16.dp
@@ -114,6 +110,10 @@ object HuntCardScreenStrings {
   const val DISTANCE_LABEL = "Distance"
   const val DURATION_LABEL = "Duration"
 
+  const val MENU = "Menu"
+  const val EDIT = "Edit"
+  const val DELETE = "Delete"
+  const val SEE_PICTURES_STRING = "See Pictures"
   const val CURRENT_USER_INITIAL_LABEL = "Y"
 
   const val REPLIES_VIEW_MODEL_PREFIX = "replies_"

@@ -21,6 +21,8 @@ import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.ui.components.HuntCardScreenDefaults.ALPHA3
+import com.swentseekr.seekr.ui.components.HuntCardScreenDefaults.ALPHA7
 import com.swentseekr.seekr.ui.theme.LocalAppColors
 
 /**
@@ -86,9 +88,9 @@ fun HuntCard(
                                     colors =
                                         listOf(
                                             MaterialTheme.colorScheme.onBackground.copy(
-                                                alpha = 0.3f),
+                                                alpha = ALPHA3),
                                             MaterialTheme.colorScheme.onBackground.copy(
-                                                alpha = 0.7f)))))
+                                                alpha = ALPHA7)))))
 
                 // DIFFICULTY BADGE (top-left)
                 ModernDifficultyBadge(

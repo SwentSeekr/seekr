@@ -344,7 +344,7 @@ fun ModernHeroImageSection(
               text = "${HuntCardScreenStrings.BY} $authorName",
               style = MaterialTheme.typography.bodyMedium,
               color =
-                  MaterialTheme.colorScheme.onPrimary.copy(alpha = HuntCardScreenDefaults.Alpha),
+                  MaterialTheme.colorScheme.onPrimary.copy(alpha = HuntCardScreenDefaults.ALPHA),
               modifier =
                   Modifier.clickable { goProfile(hunt.authorId) }
                       .testTag(HuntCardScreenTestTags.AUTHOR_TEXT))
@@ -808,7 +808,9 @@ private fun ReviewCardPhotosSection(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onSurface),
         shape = RoundedCornerShape(HuntCardScreenDefaults.Padding8)) {
-          Text("See Pictures (${review.photos.size})", style = MaterialTheme.typography.bodyMedium)
+          Text(
+              "${HuntCardScreenStrings.SEE_PICTURES_STRING} (${review.photos.size})",
+              style = MaterialTheme.typography.bodyMedium)
         }
   }
 }
@@ -820,11 +822,12 @@ fun DotMenu(onEdit: () -> Unit, onDelete: () -> Unit) {
     IconButton(
         onClick = { expanded = true },
         modifier = Modifier.testTag(HuntCardScreenTestTags.DOTBUTOON)) {
-          Icon(imageVector = Icons.Default.MoreVert, contentDescription = "Menu")
+          Icon(
+              imageVector = Icons.Default.MoreVert, contentDescription = HuntCardScreenStrings.MENU)
         }
     DropdownMenu(expanded, onDismissRequest = { expanded = false }) {
       DropdownMenuItem(
-          text = { Text("Edit") },
+          text = { Text(HuntCardScreenStrings.EDIT) },
           onClick = {
             expanded = false
             onEdit()
@@ -832,7 +835,7 @@ fun DotMenu(onEdit: () -> Unit, onDelete: () -> Unit) {
           modifier = Modifier.testTag(HuntCardScreenTestTags.EDIT_BUTTON))
 
       DropdownMenuItem(
-          text = { Text("Delete") },
+          text = { Text(HuntCardScreenStrings.DELETE) },
           onClick = {
             expanded = false
             onDelete()

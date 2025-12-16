@@ -82,6 +82,7 @@ object ProfileTestTags {
 object ProfileConstants {
   val SIZE_MEDIUM_DP = 16.dp
   val SIZE_ICON = 40.dp
+  const val ALPHA = 0.6f
 
   const val LOADING_PROFILE = "Loading profile..."
   const val NO_PROFILE_FOUND = "No profile found"
@@ -456,7 +457,8 @@ fun ModernCustomToolbar(selectedTab: ProfileTab, onTabSelected: (ProfileTab) -> 
                 Modifier.fillMaxWidth().padding(vertical = ProfileUIConstantsDefaults.Padding8),
             horizontalArrangement = Arrangement.SpaceEvenly) {
               val selectedColor = MaterialTheme.colorScheme.primary
-              val unselectedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+              val unselectedColor =
+                  MaterialTheme.colorScheme.onSurface.copy(alpha = ProfileConstants.ALPHA)
               tabs.forEach { item ->
                 val isSelected = selectedTab == item.tab
                 val color = if (isSelected) selectedColor else unselectedColor

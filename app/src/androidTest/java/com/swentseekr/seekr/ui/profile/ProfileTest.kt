@@ -160,7 +160,7 @@ class ProfileScreenTest {
   @Test
   fun profileScreen_tabBackgroundChanges() {
     val SELECTED = MaterialTheme.colorScheme.primary
-    val UNSELECTED = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+    val UNSELECTED = MaterialTheme.colorScheme.onSurface.copy(alpha = ProfileConstants.ALPHA)
     val profile =
         sampleProfile(
             myHunts = listOf(createHunt("hunt1", "My Hunt")),
