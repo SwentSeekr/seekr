@@ -90,8 +90,6 @@ fun SeekrRootApp(
     context.startActivity(intent)
   }
 
-  // Observe cached profile for offline mode. When available, this enables
-  // an offline-first experience (e.g., showing profile and hunts without network).
   val cachedProfile: Profile? by
       if (cachedProfileInitialForTest != null) {
         remember(cachedProfileInitialForTest) {
@@ -118,9 +116,7 @@ fun SeekrRootApp(
         if (profile == null) {
           emptyList()
         } else {
-          (profile.myHunts + profile.doneHunts + profile.likedHunts).distinctBy {
-            it.uid
-          } // Avoid duplicates based on unique hunt ID.
+          (profile.myHunts + profile.doneHunts + profile.likedHunts).distinctBy { it.uid }
         }
       }
 
@@ -134,7 +130,6 @@ fun SeekrRootApp(
    */
   Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
     when {
-      // OFFLINE MODE WITH CACHED DATA → offline navigation (overview/map/profile, etc.).
       !isOnline && cachedProfile != null -> {
         SeekrOfflineNavHost(
             cachedProfile = cachedProfile,
@@ -142,18 +137,12 @@ fun SeekrRootApp(
             navController = rememberNavController(),
         )
       }
-
-      // OFFLINE MODE WITHOUT ANY CACHED PROFILE → show an explanatory "offline required" screen.
       !isOnline ->
           OfflineRequiredScreen(
               modifier = Modifier.padding(innerPadding),
               onOpenSettings = openSettings,
           )
-
-      // ONLINE & AUTHENTICATED → main navigation host (full app experience).
       state.user != null -> SeekrMainNavHost(state.user)
-
-      // ONLINE & NOT AUTHENTICATED → authentication flow (login/sign-up).
       else ->
           AuthNavHost(
               credentialManager = credentialManager,

@@ -107,7 +107,13 @@ class EditProfileViewModel(
     }
   }
 
-  /** Update pseudonym and recompute flags */
+  /**
+   * Updates the pseudonym in the UI state and recomputes change-related flags.
+   *
+   * Triggers validation and determines whether the profile can be saved.
+   *
+   * @param pseudonym New pseudonym entered by the user.
+   */
   fun updatePseudonym(pseudonym: String) {
     val newState = _uiState.value.copy(pseudonym = pseudonym)
     updateChangesFlags(newState)
@@ -169,19 +175,37 @@ class EditProfileViewModel(
     }
   }
 
-  /** Update bio and recompute flags */
+  /**
+   * Updates the profile picture URI selected from gallery or camera.
+   *
+   * Used when the user selects a local image that has not yet been uploaded.
+   *
+   * @param uri URI of the selected image, or null if cleared.
+   */
   fun updateBio(bio: String) {
     val newState = _uiState.value.copy(bio = bio)
     updateChangesFlags(newState)
   }
 
-  /** Updates the profile picture URI selected from gallery or camera */
+  /**
+   * Updates the profile picture URI selected from gallery or camera.
+   *
+   * Used when the user selects a local image that has not yet been uploaded.
+   *
+   * @param uri URI of the selected image, or null if cleared.
+   */
   fun updateProfilePictureUri(uri: Uri?) {
     val newState = _uiState.value.copy(profilePictureUri = uri)
     updateChangesFlags(newState)
   }
 
-  /** Update profile picture and recompute flags */
+  /**
+   * Updates the profile picture resource identifier and recomputes change flags.
+   *
+   * Used when selecting a predefined avatar or bundled drawable.
+   *
+   * @param profilePicture Resource ID of the selected profile picture.
+   */
   fun updateProfilePicture(profilePicture: Int) {
     val newState = _uiState.value.copy(profilePicture = profilePicture)
     updateChangesFlags(newState)
@@ -262,7 +286,19 @@ class EditProfileViewModel(
     }
   }
 
-  /** Helper to compute hasChanges and canSave */
+  /**
+   * Recomputes change-tracking and validation flags for the edit-profile screen.
+   *
+   * Determines:
+   * - Whether the current UI state differs from the last saved profile
+   * - Whether the profile can be persisted based on validation rules
+   *
+   * Validation rules:
+   * - Pseudonym must be non-blank and within MAX_PSEUDONYM_LENGTH
+   * - Bio length must not exceed MAX_BIO_LENGTH
+   *
+   * @param newState Candidate UI state after a mutation.
+   */
   private fun updateChangesFlags(newState: EditProfileUIState) {
     val hasChanges =
         lastSavedProfile?.let {

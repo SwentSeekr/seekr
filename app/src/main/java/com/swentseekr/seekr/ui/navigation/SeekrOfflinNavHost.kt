@@ -63,13 +63,11 @@ fun SeekrOfflineNavHost(
     offlineHunts: List<Hunt>,
     navController: NavHostController = rememberNavController()
 ) {
-  // Track current destination (same pattern as SeekrMainNavHost).
   val navBackStackEntry by navController.currentBackStackEntryAsState()
   val currentRoute = navBackStackEntry?.destination?.route
   val currentDestination =
       SeekrDestination.all.find { it.route == currentRoute } ?: SeekrDestination.Overview
 
-  // Show the bottom bar for destinations that are part of the main tab navigation.
   val showBottomBar = SeekrDestination.all.any { it.route == currentRoute }
 
   Scaffold(
@@ -94,9 +92,6 @@ fun SeekrOfflineNavHost(
                 Modifier.fillMaxSize()
                     .padding(innerPadding)
                     .background(MaterialTheme.colorScheme.surfaceVariant)) {
-
-              // OFFLINE OVERVIEW → stored hunts, clone of original overview UI, but using
-              // offlineHunts.
               composable(SeekrDestination.Overview.route) {
                 Surface(
                     modifier =
@@ -111,22 +106,18 @@ fun SeekrOfflineNavHost(
                     }
               }
 
-              // OFFLINE MAP → map view suitable for offline context (e.g., cached tiles or
-              // locations).
               composable(SeekrDestination.Map.route) {
                 Surface(modifier = Modifier.fillMaxSize().testTag(NavigationTestTags.MAP_SCREEN)) {
                   OfflineMapScreen()
                 }
               }
 
-              // OFFLINE PROFILE → uses cached profile data when available.
               composable(SeekrDestination.Profile.route) {
                 Surface(modifier = Modifier.fillMaxSize().testTag(NavigationTestTags.PROFILE_TAB)) {
                   OfflineCachedProfileScreen(profile = cachedProfile)
                 }
               }
 
-              // OFFLINE HUNT CARD → reuse HuntCardScreen with offline-compatible behaviors.
               composable(
                   route = SeekrDestination.HuntCard.route,
                   arguments =
@@ -139,7 +130,6 @@ fun SeekrOfflineNavHost(
                             ?.getString(SeekrDestination.HuntCard.ARG_HUNT_ID)
                             .orEmpty()
 
-                    // ViewModels are resolved in this back stack entry's scope.
                     val huntCardVm: HuntCardViewModel = viewModel()
                     val reviewVm: ReviewHuntViewModel = viewModel()
 
@@ -165,7 +155,6 @@ fun SeekrOfflineNavHost(
                         navController = navController)
                   }
 
-              // REVIEW IMAGES → displays review photos (if previously cached) in offline mode.
               composable(
                   route = SeekrNavigationDefaults.REVIEW_IMAGES_ROUTE,
                   arguments =
@@ -180,9 +169,6 @@ fun SeekrOfflineNavHost(
 
                     val reviewHuntViewModel: ReviewHuntViewModel = viewModel()
 
-                    // In the online app this usually triggers a network load; offline this will
-                    // only
-                    // succeed if data is already cached by the ViewModel / repository.
                     androidx.compose.runtime.LaunchedEffect(reviewId) {
                       reviewHuntViewModel.loadReview(reviewId)
                     }

@@ -13,17 +13,25 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Offline variant of the Overview ViewModel.
+ * ViewModel backing the offline overview screen.
  *
- * It clones the filtering & search logic of [OverviewViewModel], but works on a fixed list of
- * stored hunts passed at construction time.
+ * This class mirrors the filtering and search behavior of the online OverviewViewModel, but
+ * operates exclusively on a fixed, in-memory collection of hunts supplied at construction time.
+ *
+ * Responsibilities:
+ * - Maintain UI state for offline overview
+ * - Apply search, status, and difficulty filters
+ * - Expose a reactive StateFlow for Compose UI consumption
+ *
+ * No network, repository, or persistence access occurs in this class.
+ *
+ * @param initialHunts Immutable list of hunts available offline.
  */
 class OfflineOverviewViewModel(initialHunts: List<Hunt>) {
 
   private val _uiState = MutableStateFlow(OverviewUIState())
   val uiState: StateFlow<OverviewUIState> = _uiState.asStateFlow()
 
-  // Local mutable list mirroring OverviewViewModel.huntItems
   private var huntItems: MutableList<HuntUiState> =
       initialHunts.map { HuntUiState(hunt = it) }.toMutableList()
 
@@ -34,7 +42,11 @@ class OfflineOverviewViewModel(initialHunts: List<Hunt>) {
   var searchQuery by mutableStateOf("")
     private set
 
-  /** Updates the search word and filters the hunts based on the new search term [newSearch]. */
+  /**
+   * Updates the search query and reapplies all active filters.
+   *
+   * @param newSearch New search term entered by the user.
+   */
   fun onSearchChange(newSearch: String) {
     searchQuery = newSearch
     _uiState.value = _uiState.value.copy(searchWord = newSearch)
@@ -48,7 +60,13 @@ class OfflineOverviewViewModel(initialHunts: List<Hunt>) {
     applyFilters()
   }
 
-  /** Updates the selected status filter and applies the filter to the hunt list. */
+  /**
+   * Toggles the selected hunt status filter.
+   *
+   * Selecting the same status twice clears the filter.
+   *
+   * @param status Status to apply, or null to clear the filter.
+   */
   fun onStatusFilterSelect(status: HuntStatus?) {
     val current = _uiState.value
     val newStatus = if (current.selectedStatus == status) null else status
@@ -56,7 +74,13 @@ class OfflineOverviewViewModel(initialHunts: List<Hunt>) {
     applyFilters()
   }
 
-  /** Updates the selected difficulty filter and applies the filter to the hunt list. */
+  /**
+   * Toggles the selected hunt difficulty filter.
+   *
+   * Selecting the same difficulty twice clears the filter.
+   *
+   * @param difficulty Difficulty to apply, or null to clear the filter.
+   */
   fun onDifficultyFilterSelect(difficulty: Difficulty?) {
     val current = _uiState.value
     val newDifficulty = if (current.selectedDifficulty == difficulty) null else difficulty

@@ -24,6 +24,22 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/**
+ * UI state for the Settings screen.
+ *
+ * Represents the complete, immutable state consumed by the Settings UI. Updated by the
+ * SettingsViewModel in response to user actions and permission changes.
+ *
+ * @property signedOut Indicates whether the user has been signed out.
+ * @property errorMsg Optional error message displayed to the user.
+ * @property appVersion Application version string displayed in settings.
+ * @property notificationsEnabled Whether in-app notifications are enabled.
+ * @property picturesEnabled Whether picture-related features are enabled.
+ * @property localisationEnabled Whether location-based features are enabled.
+ * @property notificationPermissionGranted Whether notification permission is granted.
+ * @property galleryPermissionGranted Whether gallery/storage permission is granted.
+ * @property locationPermissionGranted Whether location permission is granted.
+ */
 data class SettingsUIState(
     val signedOut: Boolean = false,
     val errorMsg: String? = null,
@@ -31,8 +47,6 @@ data class SettingsUIState(
     val notificationsEnabled: Boolean = false,
     val picturesEnabled: Boolean = false,
     val localisationEnabled: Boolean = false,
-
-    // Permissions
     val notificationPermissionGranted: Boolean = false,
     val galleryPermissionGranted: Boolean = false,
     val locationPermissionGranted: Boolean = false,

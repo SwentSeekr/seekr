@@ -55,7 +55,6 @@ fun OfflineOverviewHuntsScreen(
     modifier: Modifier = Modifier,
     onHuntClick: (String) -> Unit = {},
 ) {
-  // ViewModel responsible for holding query, filters, and derived UI state.
   val offlineViewModel = remember(hunts) { OfflineOverviewViewModel(hunts) }
   val uiState by offlineViewModel.uiState.collectAsState()
   val query = offlineViewModel.searchQuery
@@ -66,7 +65,6 @@ fun OfflineOverviewHuntsScreen(
         modifier = Modifier.fillMaxWidth().testTag(OverviewScreenTestTags.OVERVIEW_SCREEN),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-      // HEADER – same as online overview.
       ModernHeader()
 
       // SEARCH BAR – local, offline search.
