@@ -20,9 +20,17 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
+/* Constants used in the tests */
 private val title = "Select Hunt Points"
 private val confirmButtonText0 = "Confirm Points (0)"
 private val confirmButtonText2 = "Confirm Points (2)"
+
+/**
+ * UI tests for the Add Points map screen and point naming dialog.
+ *
+ * This test suite verifies map-based point selection, confirm/cancel behavior,
+ * point count handling, and validation logic for naming hunt points.
+ */
 
 class AddPointsMapScreenTest {
 

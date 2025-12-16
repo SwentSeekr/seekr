@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.model.profile
 
+/** Shared constants for the `ProfileRepositoryFirebaseTest`. */
 object Constants {
   const val HUNT_UID = "hunt1"
   const val HUNT_TITLE = "Sample Hunt"

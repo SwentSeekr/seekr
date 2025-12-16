@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.map
 
+/** Shared constants for the `MapScreenTest`. */
 object Constants {
   const val HUNT_UID_1 = "1"
   const val HUNT_UID_2 = "2"
