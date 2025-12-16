@@ -10,16 +10,21 @@ import androidx.compose.ui.unit.sp
  */
 object HuntCardUIConstants {
 
-  // --- Paddings ---
+  // ---------------
+  // Paddings
+  // ---------------
+
   val Padding4 = 4.dp
   val Padding6 = 6.dp
   val Padding8 = 8.dp
   val Padding10 = 10.dp
   val Padding12 = 12.dp
   val Padding16 = 16.dp
-  val Padding20 = 20.dp
 
-  // --- Margins & Layout ---
+  // ---------------
+  // Margins & Layout
+  // ---------------
+
   val CardPadding = 12.dp
   val CardWidthFraction = 0.92f
   val ImageHeight = 200.dp
@@ -27,14 +32,19 @@ object HuntCardUIConstants {
   val StatChipCorner = 12.dp
   val DifficultyBadgeCorner = 20.dp
 
-  // --- Sizes ---
+  // ---------------
+  // Sizes
+  // ---------------
   val IconSize18 = 18.dp
   val IconSize20 = 20.dp
   val IconSize24 = 24.dp
   val IconSize28 = 28.dp
   val StatIconSize = 18.dp
 
-  // --- Font sizes ---
+  // ---------------
+  //  Font sizes
+  // ---------------
+
   val TitleFont24 = 24.sp
   val AuthorFont14 = 14.sp
   val StatFont14 = 14.sp
@@ -52,7 +62,9 @@ object HuntCardUIConstants {
   val StatTextDark = Color(0xFF333333)
   val StatBackground = Color(0xFFF5F5F5)
 
-  // --- Elevations ---
+  // ---------------
+  // Elevations
+  // ---------------
   val CardElevation = 8.dp
   val BadgeElevation = 4.dp
 }

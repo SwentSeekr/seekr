@@ -48,8 +48,6 @@ fun HuntImageCarousel(
     hunt: com.swentseekr.seekr.model.hunt.Hunt,
     modifier: Modifier = Modifier,
 ) {
-  // Build the list of images once per hunt instance.
-  // The main image is first; if missing, we fall back to an empty placeholder drawable.
   val images: List<Any> =
       remember(hunt) {
         buildList {
@@ -63,13 +61,10 @@ fun HuntImageCarousel(
         }
       }
 
-  // Pager state drives the current page and offset for transforms.
   val pagerState = rememberPagerState(pageCount = { images.size })
 
-  // Local state controlling whether the full-screen dialog is visible.
   var showFullScreen by remember { mutableStateOf(false) }
 
-  // Full-screen image dialog, rendered only when requested.
   HuntImageFullScreenDialog(
       showFullScreen = showFullScreen,
       currentImage = images[pagerState.currentPage],
@@ -82,14 +77,12 @@ fun HuntImageCarousel(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-      // Main horizontal image pager with 3D transforms and overlay.
       HuntImagePager(
           images = images,
           pagerState = pagerState,
           onCurrentPageClicked = { showFullScreen = true },
       )
 
-      // Dot indicators below the pager, rendered only when multiple images are present.
       HuntImageIndicators(
           imagesCount = images.size,
           currentPage = pagerState.currentPage,
@@ -111,7 +104,6 @@ private fun HuntImageFullScreenDialog(
     currentImage: Any,
     onDismiss: () -> Unit,
 ) {
-  // Early-return to avoid composing a Dialog when not needed.
   if (!showFullScreen) return
 
   Dialog(onDismissRequest = onDismiss) {
@@ -152,7 +144,6 @@ private fun HuntImagePager(
       state = pagerState,
       modifier = Modifier.fillMaxSize().testTag(HuntCardScreenTestTags.IMAGE_PAGER),
   ) { page ->
-    // Compute animations / transforms based on current page and scroll offset.
     val transforms = rememberPageTransforms(page = page, pagerState = pagerState)
 
     HuntImagePage(
@@ -192,22 +183,18 @@ private fun rememberPageTransforms(
     page: Int,
     pagerState: PagerState,
 ): PageTransforms {
-  // Distance of this page from the currently selected page (0 = center).
   val pageOffset =
       (pagerState.currentPage - page + pagerState.currentPageOffsetFraction).absoluteValue
 
-  // Clamp offset to the expected interpolation range [0, 1].
   val clampedOffset =
       pageOffset.coerceIn(
           HuntCardScreenDefaults.IMAGE_CAROUSEL_INTERPOLATION_MIN_FRACTION,
           HuntCardScreenDefaults.IMAGE_CAROUSEL_INTERPOLATION_MAX_FRACTION,
       )
 
-  // Fraction increases as the page gets closer to the center (1f = fully centered).
   val interpolationFraction =
       HuntCardScreenDefaults.IMAGE_CAROUSEL_INTERPOLATION_MAX_FRACTION - clampedOffset
 
-  // Scale: center image is larger, side images are slightly smaller.
   val scale =
       lerp(
           start = HuntCardScreenDefaults.IMAGE_CAROUSEL_MIN_SCALE,
@@ -215,7 +202,6 @@ private fun rememberPageTransforms(
           fraction = interpolationFraction,
       )
 
-  // Rotation: pages rotate around the Y axis to create a "carousel" perspective effect.
   val sideRotation =
       if (page < pagerState.currentPage) {
         HuntCardScreenDefaults.IMAGE_CAROUSEL_SIDE_ROTATION_DEGREE
@@ -230,7 +216,6 @@ private fun rememberPageTransforms(
           fraction = interpolationFraction,
       )
 
-  // Overlay: side images are darker, center image has no overlay.
   val overlayAlpha =
       lerp(
           start = HuntCardScreenDefaults.IMAGE_CAROUSEL_OVERLAYER_MAX_ALPHA,
@@ -261,7 +246,6 @@ private fun HuntImagePage(
     transforms: PageTransforms,
     onClickCurrent: () -> Unit,
 ) {
-  // Compute camera distance in px from dp using the current density.
   val density = LocalDensity.current
   val cameraDistancePx =
       with(density) { HuntCardScreenDefaults.IMAGE_CAROUSEL_DISTANCE_FACTOR.dp.toPx() }
@@ -314,7 +298,6 @@ private fun HuntImageIndicators(
     imagesCount: Int,
     currentPage: Int,
 ) {
-  // No indicator when there is only a single image.
   if (imagesCount <= IMAGE_INDICATOR_LAST_INDEX_OFFSET) return
 
   Spacer(modifier = Modifier.height(HuntCardScreenDefaults.ImageIndicatorTopPadding))
@@ -342,7 +325,6 @@ private fun HuntImageIndicators(
                   .testTag(HuntCardScreenTestTags.IMAGE_INDICATOR_DOT_PREFIX + index),
       )
 
-      // Add spacing between dots except after the last one.
       if (index != imagesCount - IMAGE_INDICATOR_LAST_INDEX_OFFSET) {
         Spacer(modifier = Modifier.width(HuntCardScreenDefaults.ImageIndicatorDotSpacing))
       }

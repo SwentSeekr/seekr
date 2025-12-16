@@ -142,7 +142,6 @@ fun BaseReviewScreen(
             verticalArrangement = Arrangement.spacedBy(UICons.SpacerHeightSmall)) {
               Spacer(modifier = modifier.height(UICons.SpacerHeightSmall))
 
-              // --- Single header card: hunt title + author + rating ---
               Card(
                   modifier = Modifier.fillMaxWidth(),
                   shape = RoundedCornerShape(UICons.CardCornerRadius),
@@ -189,7 +188,6 @@ fun BaseReviewScreen(
                         }
                   }
 
-              // --- Comment field: more "free" and ergonomic ---
               OutlinedTextField(
                   value = reviewText,
                   onValueChange = onReviewTextChanged,
@@ -239,7 +237,6 @@ fun BaseReviewScreen(
                           focusedContainerColor = MaterialTheme.colorScheme.surface,
                           unfocusedContainerColor = MaterialTheme.colorScheme.surface))
 
-              // --- Photos: "Add photos" when empty, row with + tile when not empty ---
               if (photos.isEmpty()) {
                 FilledTonalButton(
                     onClick = onAddPhotos,
@@ -316,7 +313,6 @@ fun BaseReviewScreen(
                           }
                         }
 
-                        // trailing "+" tile to add more
                         item {
                           Box(
                               modifier =
@@ -340,7 +336,7 @@ fun BaseReviewScreen(
 
               Spacer(modifier = Modifier.height(UICons.SpacerHeightSmall))
 
-              // --- Buttons row ---
+              // Buttons row
               Row(
                   modifier = modifier.fillMaxWidth().testTag(AddReviewScreenTestTags.BUTTONS_ROW),
                   horizontalArrangement = Arrangement.spacedBy(UICons.RowHArrangement)) {

@@ -47,7 +47,13 @@ import com.swentseekr.seekr.ui.profile.ProfileScreen
 import com.swentseekr.seekr.ui.settings.SettingsScreen
 import com.swentseekr.seekr.ui.terms.TermsAndConditionsScreen
 
-// Destinations as sealed class
+/**
+ * Sealed class representing each top-level or nested navigation destination in the app.
+ *
+ * @param route unique route string for the NavController.
+ * @param label textual description used for accessibility or tab labels.
+ * @param icon vector icon displayed in the bottom navigation bar or headers.
+ */
 sealed class SeekrDestination(
     val route: String,
     val label: String,
@@ -156,7 +162,14 @@ sealed class SeekrDestination(
   }
 }
 
-// Bottom Navigation Bar
+/**
+* Bottom navigation bar for Seekr top-level destinations.
+*
+* Highlights the currently selected destination and supports click events.
+*
+* @param currentDestination currently active [SeekrDestination].
+* @param onTabSelected lambda invoked when a tab is clicked.
+*/
 @Composable
 fun SeekrNavigationBar(
     currentDestination: SeekrDestination,
@@ -221,7 +234,21 @@ fun SeekrNavigationBar(
       }
 }
 
-// Main App Scaffold
+/**
+ * Main navigation host for the Seekr app, orchestrating all screens and navigation logic.
+ *
+ * Handles:
+ * - Deep links
+ * - Onboarding flow
+ * - Bottom navigation bar visibility
+ * - Navigation between hunt, map, profile, settings, review, and terms screens
+ *
+ * @param user currently authenticated [FirebaseUser], optional.
+ * @param navController navigation controller, defaults to [rememberNavController].
+ * @param huntCardViewModelFactory optional factory for HuntCardViewModel.
+ * @param reviewViewModelFactory optional factory for ReviewHuntViewModel.
+ * @param testMode flag to toggle UI testing behaviors.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SeekrMainNavHost(

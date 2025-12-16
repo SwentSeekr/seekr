@@ -47,6 +47,19 @@ import com.swentseekr.seekr.ui.hunt.HuntUIState
 val STRINGS = PreviewHuntStrings
 val TEST_TAGS = PreviewHuntScreenTestTags
 
+/**
+ * Composable screen to preview a hunt before confirmation.
+ *
+ * Displays all hunt details including images, stats, description, map,
+ * status, and points. Reuses existing HuntCardScreen components like
+ * [HuntImageCarousel], [ModernStatCard], [ModernMapSection], and
+ * [ModernDifficultyBadge].
+ *
+ * @param viewModel ViewModel providing the [HuntUIState] to display.
+ * @param modifier Modifier for styling this composable.
+ * @param onConfirm Lambda invoked when the user confirms the preview.
+ * @param onGoBack Lambda invoked when the user navigates back.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreviewHuntScreen(
@@ -75,23 +88,12 @@ fun PreviewHuntScreen(
         Column(
             modifier = modifier.fillMaxSize().padding(innerPadding).verticalScroll(scroll),
             verticalArrangement = Arrangement.Top) {
-              // Hero Section with Image Carousel
               PreviewHeroSection(ui)
-
-              // Stats Section
-              PreviewStatsSection(ui)
-
-              // Description Section
-              PreviewDescriptionCard(ui)
-
-              // Map Section
-              PreviewMapCard(ui)
-
-              // Status and Points Section
-              PreviewStatusPointsCard(ui)
-
-              // Confirm button
-              Row(
+            PreviewStatsSection(ui)
+             PreviewDescriptionCard(ui)
+             PreviewMapCard(ui)
+             PreviewStatusPointsCard(ui)
+             Row(
                   modifier =
                       Modifier.fillMaxWidth()
                           .padding(
@@ -113,24 +115,22 @@ fun PreviewHuntScreen(
 }
 
 /**
- * Hero section with image carousel, difficulty badge, title and author. Reuses HuntImageCarousel
- * and ModernDifficultyBadge from HuntCardScreen.
+ * Hero section displaying the main image carousel, difficulty badge,
+ * title, and author.
+ *
+ * @param ui The current [HuntUIState] used to render the section.
  */
 @Composable
 private fun PreviewHeroSection(ui: HuntUIState) {
-  // Convert UIState to Hunt for the carousel
   val previewHunt = uiStateToHunt(ui)
 
   Box(modifier = Modifier.fillMaxWidth().aspectRatio(HuntCardScreenDefaults.AspectRatioHero)) {
-    // Reuse the existing HuntImageCarousel
     HuntImageCarousel(hunt = previewHunt, modifier = Modifier.fillMaxWidth())
 
-    // Difficulty badge overlay
     ModernDifficultyBadge(
         difficulty = previewHunt.difficulty,
         modifier = Modifier.align(Alignment.TopStart).padding(HuntCardScreenDefaults.Padding16))
 
-    // Title and author overlay
     Column(
         modifier =
             Modifier.align(Alignment.BottomStart).padding(HuntCardScreenDefaults.Padding20)) {
@@ -155,7 +155,10 @@ private fun PreviewHeroSection(ui: HuntUIState) {
   }
 }
 
-/** Stats section showing distance and time. Reuses ModernStatCard from HuntCardScreen. */
+/** Stats section showing distance and time. Reuses ModernStatCard from HuntCardScreen.
+ *
+ * @param ui The current [HuntUIState] used to render the section.
+ * */
 @Composable
 private fun PreviewStatsSection(ui: HuntUIState) {
   Row(
@@ -185,7 +188,11 @@ private fun PreviewStatsSection(ui: HuntUIState) {
       }
 }
 
-/** Description card. Reuses ModernDescriptionSection from HuntCardScreen. */
+/**
+ * Description card. Reuses ModernDescriptionSection from HuntCardScreen.
+ *
+ * @param ui The current [HuntUIState] used to render the section.
+ * */
 @Composable
 private fun PreviewDescriptionCard(ui: HuntUIState) {
   val descriptionText = ui.description.ifBlank { STRINGS.NO_DESCRIPTION }
@@ -219,17 +226,24 @@ private fun PreviewDescriptionCard(ui: HuntUIState) {
       }
 }
 
-/** Map preview card. Reuses ModernMapSection from HuntCardScreen if start point is available. */
+/**
+ * Map preview card. Reuses ModernMapSection from HuntCardScreen if start point is available.
+ *
+ * @param ui The current [HuntUIState] used to render the section.
+ * */
 @Composable
 private fun PreviewMapCard(ui: HuntUIState) {
-  // Only show map if there's a valid start point
   if (ui.points.isNotEmpty()) {
     val previewHunt = uiStateToHunt(ui)
     ModernMapSection(hunt = previewHunt)
   }
 }
 
-/** Status and points information card. */
+/**
+ *  Status and points information card.
+ *
+ * @param ui The current [HuntUIState] used to render the section.
+ * */
 @Composable
 private fun PreviewStatusPointsCard(ui: HuntUIState) {
   Card(
@@ -251,7 +265,6 @@ private fun PreviewStatusPointsCard(ui: HuntUIState) {
 
           Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding12))
 
-          // Status row
           Row {
             Text(
                 text = "${STRINGS.HUNT_STATUS} ",
@@ -267,7 +280,6 @@ private fun PreviewStatusPointsCard(ui: HuntUIState) {
 
           Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding8))
 
-          // Points row
           Row {
             Text(
                 text = "${STRINGS.HUNT_POINTS} ",
@@ -286,6 +298,8 @@ private fun PreviewStatusPointsCard(ui: HuntUIState) {
 /**
  * Helper function to convert HuntUIState to Hunt for reusing existing components. This creates a
  * temporary Hunt object with the preview data.
+ *
+ * @param ui The current [HuntUIState] used to render the section.
  */
 private fun uiStateToHunt(ui: HuntUIState): Hunt {
   val defaultLocation =
@@ -307,7 +321,7 @@ private fun uiStateToHunt(ui: HuntUIState): Hunt {
       start = start,
       end = end,
       middlePoints = middlePoints,
-      status = ui.status ?: HuntStatus.FUN, // fallback status for preview
+      status = ui.status ?: HuntStatus.FUN,
       title = ui.title.ifBlank { STRINGS.HUNT_TITLE_FALLBACK },
       description = ui.description.ifBlank { STRINGS.NO_DESCRIPTION },
       time = ui.time.toDoubleOrNull() ?: PreviewHuntConstantsDefault.DEFAULT_VALUE_TIME,
@@ -316,6 +330,6 @@ private fun uiStateToHunt(ui: HuntUIState): Hunt {
       authorId = PreviewHuntStrings.AUTHOR_ID,
       otherImagesUrls = ui.otherImagesUris.map { it.toString() },
       mainImageUrl = ui.mainImageUrl,
-      reviewRate = PreviewHuntConstantsDefault.DEFAULT_VALUE_RATING // preview has no real rating
+      reviewRate = PreviewHuntConstantsDefault.DEFAULT_VALUE_RATING
       )
 }
