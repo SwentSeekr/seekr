@@ -65,39 +65,38 @@ fun MapContent(
     selectedHunt: Hunt?,
     onMarkerClick: (Hunt) -> Unit,
 ) {
-    val mapUiSettings =
-        MapUiSettings(
-            myLocationButtonEnabled = hasLocationPermission,
-            scrollGesturesEnabled = true,
-            zoomGesturesEnabled = true,
-            zoomControlsEnabled = false,
-            tiltGesturesEnabled = true,
-            rotationGesturesEnabled = true)
+  val mapUiSettings =
+      MapUiSettings(
+          myLocationButtonEnabled = hasLocationPermission,
+          scrollGesturesEnabled = true,
+          zoomGesturesEnabled = true,
+          zoomControlsEnabled = false,
+          tiltGesturesEnabled = true,
+          rotationGesturesEnabled = true)
 
-    val mapProperties = MapProperties(isMyLocationEnabled = hasLocationPermission)
+  val mapProperties = MapProperties(isMyLocationEnabled = hasLocationPermission)
 
-    GoogleMap(
-        modifier =
-            Modifier.fillMaxSize().testTag(MapScreenTestTags.GOOGLE_MAP_SCREEN),
-        cameraPositionState = cameraPositionState,
-        onMapLoaded = onMapLoaded,
-        properties = mapProperties,
-        uiSettings = mapUiSettings) {
+  GoogleMap(
+      modifier = Modifier.fillMaxSize().testTag(MapScreenTestTags.GOOGLE_MAP_SCREEN),
+      cameraPositionState = cameraPositionState,
+      onMapLoaded = onMapLoaded,
+      properties = mapProperties,
+      uiSettings = mapUiSettings) {
         // Animate camera when hunt changes or becomes focused
         LaunchedEffect(mapLoaded, selectedHunt, uiState.isFocused) {
-            if (!mapLoaded) return@LaunchedEffect
-            val hunt = selectedHunt ?: return@LaunchedEffect
+          if (!mapLoaded) return@LaunchedEffect
+          val hunt = selectedHunt ?: return@LaunchedEffect
 
-            cameraPositionState.animateToHunt(hunt, uiState.isFocused)
+          cameraPositionState.animateToHunt(hunt, uiState.isFocused)
         }
 
         // Show appropriate markers
         if (uiState.isFocused && selectedHunt != null) {
-            FocusedHuntMarkers(uiState = uiState, selectedHunt = selectedHunt)
+          FocusedHuntMarkers(uiState = uiState, selectedHunt = selectedHunt)
         } else {
-            OverviewMarkers(hunts = uiState.hunts, onMarkerClick = onMarkerClick)
+          OverviewMarkers(hunts = uiState.hunts, onMarkerClick = onMarkerClick)
         }
-    }
+      }
 }
 
 /**
@@ -108,7 +107,7 @@ fun MapContent(
  */
 @Composable
 private fun OverviewMarkers(hunts: List<Hunt>, onMarkerClick: (Hunt) -> Unit) {
-    hunts.forEach { hunt -> HuntImageMarker(hunt = hunt, onMarkerClick = onMarkerClick) }
+  hunts.forEach { hunt -> HuntImageMarker(hunt = hunt, onMarkerClick = onMarkerClick) }
 }
 
 /**
@@ -124,48 +123,51 @@ private fun OverviewMarkers(hunts: List<Hunt>, onMarkerClick: (Hunt) -> Unit) {
  */
 @Composable
 private fun HuntImageMarker(hunt: Hunt, onMarkerClick: (Hunt) -> Unit) {
-    val context = LocalContext.current
-    val density = LocalDensity.current
+  val context = LocalContext.current
+  val density = LocalDensity.current
 
-    val (icon, setIcon) = remember(hunt.uid) { mutableStateOf<BitmapDescriptor?>(null) }
-    val borderColor = MaterialTheme.colorScheme.primary.toArgb()
+  val (icon, setIcon) = remember(hunt.uid) { mutableStateOf<BitmapDescriptor?>(null) }
+  val borderColor = MaterialTheme.colorScheme.primary.toArgb()
 
-    // Load the hunt’s image and create a rounded icon
-    LaunchedEffect(hunt.mainImageUrl) {
-        val imageUrl = hunt.mainImageUrl
+  // Load the hunt’s image and create a rounded icon
+  LaunchedEffect(hunt.mainImageUrl) {
+    val imageUrl = hunt.mainImageUrl
 
-        val sizePx = with(density) { MapScreenDefaults.MarkerImageSize.toPx().roundToInt() }
-        val cornerRadiusPx = with(density) { MapScreenDefaults.MarkerCornerRadius.toPx() }
+    val sizePx = with(density) { MapScreenDefaults.MarkerImageSize.toPx().roundToInt() }
+    val cornerRadiusPx = with(density) { MapScreenDefaults.MarkerCornerRadius.toPx() }
 
-        val loader = context.imageLoader
+    val loader = context.imageLoader
 
-        val request =
-            ImageRequest.Builder(context)
-                .data(imageUrl)
-                .allowHardware(false)
-                .size(sizePx)
-                .scale(Scale.FILL)
-                .build()
+    val request =
+        ImageRequest.Builder(context)
+            .data(imageUrl)
+            .allowHardware(false)
+            .size(sizePx)
+            .scale(Scale.FILL)
+            .build()
 
-        val result = loader.execute(request)
-        val drawable = result.drawable ?: return@LaunchedEffect
+    val result = loader.execute(request)
+    val drawable = result.drawable ?: return@LaunchedEffect
 
-        val roundedBitmap =
-            createRoundedMarkerBitmap(
-                drawable = drawable, sizePx = sizePx, cornerRadiusPx = cornerRadiusPx, boarderColor = borderColor)
+    val roundedBitmap =
+        createRoundedMarkerBitmap(
+            drawable = drawable,
+            sizePx = sizePx,
+            cornerRadiusPx = cornerRadiusPx,
+            boarderColor = borderColor)
 
-        setIcon(BitmapDescriptorFactory.fromBitmap(roundedBitmap))
-    }
+    setIcon(BitmapDescriptorFactory.fromBitmap(roundedBitmap))
+  }
 
-    Marker(
-        state = MarkerState(LatLng(hunt.start.latitude, hunt.start.longitude)),
-        title = hunt.title,
-        snippet = hunt.description,
-        icon = icon,
-        onClick = {
-            onMarkerClick(hunt)
-            true
-        })
+  Marker(
+      state = MarkerState(LatLng(hunt.start.latitude, hunt.start.longitude)),
+      title = hunt.title,
+      snippet = hunt.description,
+      icon = icon,
+      onClick = {
+        onMarkerClick(hunt)
+        true
+      })
 }
 
 /**
@@ -180,36 +182,38 @@ private fun HuntImageMarker(hunt: Hunt, onMarkerClick: (Hunt) -> Unit) {
  */
 @Composable
 private fun FocusedHuntMarkers(uiState: MapUIState, selectedHunt: Hunt) {
-    val context = LocalContext.current
-    val appColors = LocalAppColors.current
+  val context = LocalContext.current
+  val appColors = LocalAppColors.current
 
+  // Start marker
+  Marker(
+      state = MarkerState(LatLng(selectedHunt.start.latitude, selectedHunt.start.longitude)),
+      title = "${MapScreenStrings.StartPrefix}${selectedHunt.start.name}",
+      snippet = selectedHunt.start.description.ifBlank { null },
+      icon = bitmapDescriptorFromVector(context, R.drawable.ic_start_marker))
 
-    // Start marker
+  // Middle points
+  selectedHunt.middlePoints.forEach { point ->
     Marker(
-        state = MarkerState(LatLng(selectedHunt.start.latitude, selectedHunt.start.longitude)),
-        title = "${MapScreenStrings.StartPrefix}${selectedHunt.start.name}",
-        snippet = selectedHunt.start.description.ifBlank { null },
-        icon = bitmapDescriptorFromVector(context, R.drawable.ic_start_marker))
+        state = MarkerState(LatLng(point.latitude, point.longitude)),
+        title = point.name,
+        snippet = point.description.ifBlank { null })
+  }
 
-    // Middle points
-    selectedHunt.middlePoints.forEach { point ->
-        Marker(
-            state = MarkerState(LatLng(point.latitude, point.longitude)),
-            title = point.name,
-            snippet = point.description.ifBlank { null })
-    }
+  // End marker
+  Marker(
+      state = MarkerState(LatLng(selectedHunt.end.latitude, selectedHunt.end.longitude)),
+      title = "${MapScreenStrings.EndPrefix}${selectedHunt.end.name}",
+      snippet = selectedHunt.end.description.ifBlank { null },
+      icon = bitmapDescriptorFromVector(context, R.drawable.ic_end_marker))
 
-    // End marker
-    Marker(
-        state = MarkerState(LatLng(selectedHunt.end.latitude, selectedHunt.end.longitude)),
-        title = "${MapScreenStrings.EndPrefix}${selectedHunt.end.name}",
-        snippet = selectedHunt.end.description.ifBlank { null },
-        icon = bitmapDescriptorFromVector(context, R.drawable.ic_end_marker))
-
-    // Route polyline
-    if (uiState.route.isNotEmpty()) {
-        Polyline(points = uiState.route, width = MapScreenDefaults.RouteStrokeWidth, color = appColors.mapRoute)
-    }
+  // Route polyline
+  if (uiState.route.isNotEmpty()) {
+    Polyline(
+        points = uiState.route,
+        width = MapScreenDefaults.RouteStrokeWidth,
+        color = appColors.mapRoute)
+  }
 }
 
 /**
@@ -225,25 +229,25 @@ private fun FocusedHuntMarkers(uiState: MapUIState, selectedHunt: Hunt) {
  * @param isFocused whether the hunt is currently in detailed mode.
  */
 private suspend fun CameraPositionState.animateToHunt(hunt: Hunt, isFocused: Boolean) {
-    if (!isFocused) {
-        val target = LatLng(hunt.start.latitude, hunt.start.longitude)
-        animate(CameraUpdateFactory.newLatLngZoom(target, MapScreenDefaults.FocusedZoom))
-        return
-    }
+  if (!isFocused) {
+    val target = LatLng(hunt.start.latitude, hunt.start.longitude)
+    animate(CameraUpdateFactory.newLatLngZoom(target, MapScreenDefaults.FocusedZoom))
+    return
+  }
 
-    val points = buildList {
-        add(LatLng(hunt.start.latitude, hunt.start.longitude))
-        hunt.middlePoints.forEach { add(LatLng(it.latitude, it.longitude)) }
-        add(LatLng(hunt.end.latitude, hunt.end.longitude))
-    }
+  val points = buildList {
+    add(LatLng(hunt.start.latitude, hunt.start.longitude))
+    hunt.middlePoints.forEach { add(LatLng(it.latitude, it.longitude)) }
+    add(LatLng(hunt.end.latitude, hunt.end.longitude))
+  }
 
-    if (points.size == MapScreenDefaults.UnitPointSize) {
-        animate(CameraUpdateFactory.newLatLngZoom(points.first(), MapScreenDefaults.FocusedZoom))
-    } else {
-        val bounds = LatLngBounds.Builder().apply { points.forEach { include(it) } }.build()
+  if (points.size == MapScreenDefaults.UnitPointSize) {
+    animate(CameraUpdateFactory.newLatLngZoom(points.first(), MapScreenDefaults.FocusedZoom))
+  } else {
+    val bounds = LatLngBounds.Builder().apply { points.forEach { include(it) } }.build()
 
-        animate(CameraUpdateFactory.newLatLngBounds(bounds, MapScreenDefaults.BoundsPadding))
-    }
+    animate(CameraUpdateFactory.newLatLngBounds(bounds, MapScreenDefaults.BoundsPadding))
+  }
 }
 
 /**
@@ -266,43 +270,42 @@ private fun createRoundedMarkerBitmap(
     cornerRadiusPx: Float,
     boarderColor: Int
 ): Bitmap {
-    val output = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
-    val canvas = Canvas(output)
+  val output = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
+  val canvas = Canvas(output)
 
-    val path =
-        Path().apply {
-            addRoundRect(
-                MapScreenDefaults.ZERO_FLOAT,
-                MapScreenDefaults.ZERO_FLOAT,
-                sizePx.toFloat(),
-                sizePx.toFloat(),
-                cornerRadiusPx,
-                cornerRadiusPx,
-                Path.Direction.CW)
-        }
+  val path =
+      Path().apply {
+        addRoundRect(
+            MapScreenDefaults.ZERO_FLOAT,
+            MapScreenDefaults.ZERO_FLOAT,
+            sizePx.toFloat(),
+            sizePx.toFloat(),
+            cornerRadiusPx,
+            cornerRadiusPx,
+            Path.Direction.CW)
+      }
 
-    canvas.clipPath(path)
+  canvas.clipPath(path)
 
-    drawable.setBounds(MapScreenDefaults.ZERO_INT, MapScreenDefaults.ZERO_INT, sizePx, sizePx)
-    drawable.draw(canvas)
+  drawable.setBounds(MapScreenDefaults.ZERO_INT, MapScreenDefaults.ZERO_INT, sizePx, sizePx)
+  drawable.draw(canvas)
 
-    // Add border
-    val borderPaint =
-        Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE
-            strokeWidth = MapScreenDefaults.CustomMarkerBorderWidth
-            color = boarderColor
+  // Add border
+  val borderPaint =
+      Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        strokeWidth = MapScreenDefaults.CustomMarkerBorderWidth
+        color = boarderColor
+      }
 
-        }
+  canvas.drawRoundRect(
+      MapScreenDefaults.ZERO_FLOAT,
+      MapScreenDefaults.ZERO_FLOAT,
+      sizePx.toFloat(),
+      sizePx.toFloat(),
+      cornerRadiusPx,
+      cornerRadiusPx,
+      borderPaint)
 
-    canvas.drawRoundRect(
-        MapScreenDefaults.ZERO_FLOAT,
-        MapScreenDefaults.ZERO_FLOAT,
-        sizePx.toFloat(),
-        sizePx.toFloat(),
-        cornerRadiusPx,
-        cornerRadiusPx,
-        borderPaint)
-
-    return output
+  return output
 }

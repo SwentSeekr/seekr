@@ -28,7 +28,6 @@ import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.profile.ProfileRepositoryProvider
 
-
 /**
  * Displays all overlay controls when a hunt is in "focused" mode.
  *
@@ -57,27 +56,30 @@ fun BoxScope.FocusedHuntControls(
     onBackToAllHunts: () -> Unit,
     onShowStopHuntDialog: () -> Unit,
 ) {
-    val isHuntStarted = uiState.isHuntStarted
+  val isHuntStarted = uiState.isHuntStarted
 
-    Button(
-        onClick = { if (isHuntStarted) onShowStopHuntDialog() else onBackToAllHunts() },
-        modifier =
-            Modifier.align(Alignment.TopStart)
-                .padding(MapScreenDefaults.BackButtonPadding)
-                .testTag(MapScreenTestTags.BUTTON_BACK),
-        colors = ButtonDefaults.textButtonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)) {
+  Button(
+      onClick = { if (isHuntStarted) onShowStopHuntDialog() else onBackToAllHunts() },
+      modifier =
+          Modifier.align(Alignment.TopStart)
+              .padding(MapScreenDefaults.BackButtonPadding)
+              .testTag(MapScreenTestTags.BUTTON_BACK),
+      colors =
+          ButtonDefaults.textButtonColors(
+              containerColor = MaterialTheme.colorScheme.primary,
+              contentColor = MaterialTheme.colorScheme.onPrimary)) {
         Text(
             text =
                 if (isHuntStarted) MapScreenStrings.StopHunt else MapScreenStrings.BackToAllHunts,
             style = MaterialTheme.typography.bodyMedium)
-    }
+      }
 
-    FocusedHuntBottomCard(
-        uiState = uiState,
-        selectedHunt = selectedHunt,
-        onStartHunt = onStartHunt,
-        onValidateCurrentLocation = onValidateCurrentLocation,
-        onFinishHunt = onFinishHunt)
+  FocusedHuntBottomCard(
+      uiState = uiState,
+      selectedHunt = selectedHunt,
+      onStartHunt = onStartHunt,
+      onValidateCurrentLocation = onValidateCurrentLocation,
+      onFinishHunt = onFinishHunt)
 }
 
 /**
@@ -103,36 +105,36 @@ private fun BoxScope.FocusedHuntBottomCard(
     onValidateCurrentLocation: () -> Unit,
     onFinishHunt: ((suspend (Hunt) -> Unit)?) -> Unit,
 ) {
-    val totalPoints = selectedHunt.middlePoints.size + MapScreenDefaults.MinScore
-    val validated = uiState.validatedCount
-    val distanceToNext = uiState.currentDistanceToNextMeters
-    val currentCheckpointInfo = calculateCurrentCheckpointInfo(selectedHunt, validated)
-    var isCheckpointImageFullscreen by remember { mutableStateOf(false) }
+  val totalPoints = selectedHunt.middlePoints.size + MapScreenDefaults.MinScore
+  val validated = uiState.validatedCount
+  val distanceToNext = uiState.currentDistanceToNextMeters
+  val currentCheckpointInfo = calculateCurrentCheckpointInfo(selectedHunt, validated)
+  var isCheckpointImageFullscreen by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape =
-                RoundedCornerShape(
-                    topStart = MapScreenDefaults.CardCornerRadius,
-                    topEnd = MapScreenDefaults.CardCornerRadius),
-            elevation = CardDefaults.cardElevation(MapScreenDefaults.CardElevation)) {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(MapScreenDefaults.OverlayInnerPadding),
-                horizontalAlignment = Alignment.Start) {
+  Box(modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape =
+            RoundedCornerShape(
+                topStart = MapScreenDefaults.CardCornerRadius,
+                topEnd = MapScreenDefaults.CardCornerRadius),
+        elevation = CardDefaults.cardElevation(MapScreenDefaults.CardElevation)) {
+          Column(
+              modifier = Modifier.fillMaxWidth().padding(MapScreenDefaults.OverlayInnerPadding),
+              horizontalAlignment = Alignment.Start) {
                 ProgressSection(validated = validated, totalPoints = totalPoints)
 
                 currentCheckpointInfo?.let { (name, description, imageUrl) ->
-                    NextCheckpointSection(
-                        checkpointName = name,
-                        checkpointDescription = description,
-                        distanceToNext = distanceToNext,
-                        imageUrl = imageUrl,
-                        onImageClick = {
-                            if (!imageUrl.isNullOrBlank()) {
-                                isCheckpointImageFullscreen = true
-                            }
-                        })
+                  NextCheckpointSection(
+                      checkpointName = name,
+                      checkpointDescription = description,
+                      distanceToNext = distanceToNext,
+                      imageUrl = imageUrl,
+                      onImageClick = {
+                        if (!imageUrl.isNullOrBlank()) {
+                          isCheckpointImageFullscreen = true
+                        }
+                      })
                 }
 
                 ErrorMessage(uiState.errorMsg)
@@ -146,19 +148,19 @@ private fun BoxScope.FocusedHuntBottomCard(
                     onStartHunt = onStartHunt,
                     onValidateCurrentLocation = onValidateCurrentLocation,
                     onFinishHunt = onFinishHunt)
-            }
+              }
         }
 
-        val imageUrl = currentCheckpointInfo?.third
-        val description = currentCheckpointInfo?.second.orEmpty()
+    val imageUrl = currentCheckpointInfo?.third
+    val description = currentCheckpointInfo?.second.orEmpty()
 
-        if (isCheckpointImageFullscreen && !imageUrl.isNullOrBlank()) {
-            FullscreenCheckpointImage(
-                imageUrl = imageUrl,
-                contentDescription = description,
-                onClose = { isCheckpointImageFullscreen = false })
-        }
+    if (isCheckpointImageFullscreen && !imageUrl.isNullOrBlank()) {
+      FullscreenCheckpointImage(
+          imageUrl = imageUrl,
+          contentDescription = description,
+          onClose = { isCheckpointImageFullscreen = false })
     }
+  }
 }
 
 @Composable
@@ -167,39 +169,43 @@ internal fun FullscreenCheckpointImage(
     contentDescription: String,
     onClose: () -> Unit
 ) {
-    Dialog(onDismissRequest = onClose) {
-        Box(
-            modifier =
-                Modifier.fillMaxSize()
-                    .background(MaterialTheme.colorScheme.onTertiary.copy(alpha = MapScreenDefaults.BackgroundOpacity))) {
-            AsyncImage(
-                model = imageUrl,
-                contentDescription = contentDescription,
-                modifier =
-                    Modifier.align(Alignment.Center)
-                        .fillMaxWidth()
-                        .fillMaxHeight(MapScreenDefaults.BackgroundOpacity),
-                contentScale = ContentScale.Fit,
-                error = painterResource(R.drawable.empty_image),
-            )
+  Dialog(onDismissRequest = onClose) {
+    Box(
+        modifier =
+            Modifier.fillMaxSize()
+                .background(
+                    MaterialTheme.colorScheme.onTertiary.copy(
+                        alpha = MapScreenDefaults.BackgroundOpacity))) {
+          AsyncImage(
+              model = imageUrl,
+              contentDescription = contentDescription,
+              modifier =
+                  Modifier.align(Alignment.Center)
+                      .fillMaxWidth()
+                      .fillMaxHeight(MapScreenDefaults.BackgroundOpacity),
+              contentScale = ContentScale.Fit,
+              error = painterResource(R.drawable.empty_image),
+          )
 
-            IconButton(
-                onClick = onClose,
-                modifier =
-                    Modifier.align(Alignment.TopEnd)
-                        .padding(MapScreenDefaults.IconPadding)
-                        .size(MapScreenDefaults.IconSize)
-                        .background(
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = MapScreenDefaults.IconBackground),
-                            shape = CircleShape)
-                        .testTag(MapScreenTestTags.CLOSE_CHECKPOINT_IMAGE)) {
+          IconButton(
+              onClick = onClose,
+              modifier =
+                  Modifier.align(Alignment.TopEnd)
+                      .padding(MapScreenDefaults.IconPadding)
+                      .size(MapScreenDefaults.IconSize)
+                      .background(
+                          color =
+                              MaterialTheme.colorScheme.onBackground.copy(
+                                  alpha = MapScreenDefaults.IconBackground),
+                          shape = CircleShape)
+                      .testTag(MapScreenTestTags.CLOSE_CHECKPOINT_IMAGE)) {
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = MapScreenStrings.Cancel,
                     tint = MaterialTheme.colorScheme.onPrimary)
-            }
+              }
         }
-    }
+  }
 }
 
 /**
@@ -213,16 +219,16 @@ private fun calculateCurrentCheckpointInfo(
     selectedHunt: Hunt,
     validated: Int
 ): Triple<String, String, String?>? {
-    val ordered = buildList {
-        add(selectedHunt.start)
-        selectedHunt.middlePoints.forEach { add(it) }
-        add(selectedHunt.end)
-    }
-    val checkpoint = ordered.getOrNull(validated) ?: return null
-    val imageUrl =
-        checkpoint.imageIndex?.let { index -> selectedHunt.otherImagesUrls.getOrNull(index) }
+  val ordered = buildList {
+    add(selectedHunt.start)
+    selectedHunt.middlePoints.forEach { add(it) }
+    add(selectedHunt.end)
+  }
+  val checkpoint = ordered.getOrNull(validated) ?: return null
+  val imageUrl =
+      checkpoint.imageIndex?.let { index -> selectedHunt.otherImagesUrls.getOrNull(index) }
 
-    return Triple(checkpoint.name, checkpoint.description, imageUrl)
+  return Triple(checkpoint.name, checkpoint.description, imageUrl)
 }
 
 /**
@@ -234,8 +240,8 @@ private fun calculateCurrentCheckpointInfo(
  */
 private fun buildDistanceSuffix(distanceToNext: Int?): String =
     distanceToNext?.let {
-        "${MapScreenStrings.IN}$it${MapScreenStrings.DistanceMetersSuffix}${MapScreenStrings.SLASH}" +
-                "${MapConfig.ValidationRadiusMeters}${MapScreenStrings.DistanceMetersSuffix}"
+      "${MapScreenStrings.IN}$it${MapScreenStrings.DistanceMetersSuffix}${MapScreenStrings.SLASH}" +
+          "${MapConfig.ValidationRadiusMeters}${MapScreenStrings.DistanceMetersSuffix}"
     } ?: ""
 
 /**
@@ -246,11 +252,11 @@ private fun buildDistanceSuffix(distanceToNext: Int?): String =
  */
 @Composable
 private fun ProgressSection(validated: Int, totalPoints: Int) {
-    ProgressHeader(validated = validated, totalPoints = totalPoints)
+  ProgressHeader(validated = validated, totalPoints = totalPoints)
 
-    Spacer(Modifier.height(MapScreenDefaults.PopupSpacing))
+  Spacer(Modifier.height(MapScreenDefaults.PopupSpacing))
 
-    SegmentedProgressBar(validated = validated, totalPoints = totalPoints)
+  SegmentedProgressBar(validated = validated, totalPoints = totalPoints)
 }
 
 /**
@@ -261,16 +267,16 @@ private fun ProgressSection(validated: Int, totalPoints: Int) {
  */
 @Composable
 private fun ProgressHeader(validated: Int, totalPoints: Int) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically) {
+  Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically) {
         Text(text = MapScreenStrings.Progress, style = MaterialTheme.typography.bodyMedium)
         Text(
             modifier = Modifier.testTag(MapScreenTestTags.PROGRESS),
             text = "$validated${MapScreenStrings.SLASH}$totalPoints",
             style = MaterialTheme.typography.bodyMedium)
-    }
+      }
 }
 
 /**
@@ -281,24 +287,24 @@ private fun ProgressHeader(validated: Int, totalPoints: Int) {
  */
 @Composable
 private fun SegmentedProgressBar(validated: Int, totalPoints: Int) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        repeat(totalPoints) { index ->
-            val isCompleted = index < validated
+  Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    repeat(totalPoints) { index ->
+      val isCompleted = index < validated
 
-            Box(
-                modifier =
-                    Modifier.weight(MapScreenDefaults.ONE_FLOAT)
-                        .height(MapScreenDefaults.ProgressBarHeight)
-                        .clip(RoundedCornerShape(MapScreenDefaults.ProgressSegmentCornerRadius))
-                        .background(
-                            if (isCompleted) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.onSecondary))
+      Box(
+          modifier =
+              Modifier.weight(MapScreenDefaults.ONE_FLOAT)
+                  .height(MapScreenDefaults.ProgressBarHeight)
+                  .clip(RoundedCornerShape(MapScreenDefaults.ProgressSegmentCornerRadius))
+                  .background(
+                      if (isCompleted) MaterialTheme.colorScheme.primary
+                      else MaterialTheme.colorScheme.onSecondary))
 
-            if (index != totalPoints - 1) {
-                Spacer(Modifier.width(MapScreenDefaults.ProgressTickSpacing))
-            }
-        }
+      if (index != totalPoints - 1) {
+        Spacer(Modifier.width(MapScreenDefaults.ProgressTickSpacing))
+      }
     }
+  }
 }
 
 /**
@@ -316,34 +322,34 @@ fun NextCheckpointSection(
     imageUrl: String?,
     onImageClick: () -> Unit = {}
 ) {
+  Spacer(Modifier.height(MapScreenDefaults.PopupSpacing))
+
+  val distanceSuffix = buildDistanceSuffix(distanceToNext)
+
+  if (!imageUrl.isNullOrBlank()) {
+    AsyncImage(
+        model = imageUrl,
+        contentDescription = checkpointName + MapScreenStrings.HuntImageDescriptionSuffix,
+        modifier =
+            Modifier.fillMaxWidth()
+                .height(MapScreenDefaults.PopupImageSize)
+                .clip(RoundedCornerShape(MapScreenDefaults.PopupImageCornerRadius))
+                .clickable(onClick = onImageClick)
+                .testTag(MapScreenTestTags.NEXT_CHECKPOINT_IMAGE),
+        contentScale = ContentScale.Crop,
+        error = painterResource(R.drawable.empty_image),
+    )
+
     Spacer(Modifier.height(MapScreenDefaults.PopupSpacing))
+  }
 
-    val distanceSuffix = buildDistanceSuffix(distanceToNext)
+  Text(
+      text = "${MapScreenStrings.NextStopPrefix}$checkpointName$distanceSuffix",
+      style = MaterialTheme.typography.titleSmall)
 
-    if (!imageUrl.isNullOrBlank()) {
-        AsyncImage(
-            model = imageUrl,
-            contentDescription = checkpointName + MapScreenStrings.HuntImageDescriptionSuffix,
-            modifier =
-                Modifier.fillMaxWidth()
-                    .height(MapScreenDefaults.PopupImageSize)
-                    .clip(RoundedCornerShape(MapScreenDefaults.PopupImageCornerRadius))
-                    .clickable(onClick = onImageClick)
-                    .testTag(MapScreenTestTags.NEXT_CHECKPOINT_IMAGE),
-            contentScale = ContentScale.Crop,
-            error = painterResource(R.drawable.empty_image),
-        )
-
-        Spacer(Modifier.height(MapScreenDefaults.PopupSpacing))
-    }
-
-    Text(
-        text = "${MapScreenStrings.NextStopPrefix}$checkpointName$distanceSuffix",
-        style = MaterialTheme.typography.titleSmall)
-
-    if (checkpointDescription.isNotBlank()) {
-        Text(text = checkpointDescription, style = MaterialTheme.typography.bodySmall)
-    }
+  if (checkpointDescription.isNotBlank()) {
+    Text(text = checkpointDescription, style = MaterialTheme.typography.bodySmall)
+  }
 }
 
 /**
@@ -353,14 +359,14 @@ fun NextCheckpointSection(
  */
 @Composable
 private fun ErrorMessage(errorMsg: String?) {
-    val message = errorMsg?.takeIf { it.isNotBlank() } ?: return
+  val message = errorMsg?.takeIf { it.isNotBlank() } ?: return
 
-    Spacer(Modifier.height(MapScreenDefaults.PopupSpacing))
+  Spacer(Modifier.height(MapScreenDefaults.PopupSpacing))
 
-    Text(
-        text = message,
-        color = MaterialTheme.colorScheme.error,
-        style = MaterialTheme.typography.bodySmall)
+  Text(
+      text = message,
+      color = MaterialTheme.colorScheme.error,
+      style = MaterialTheme.typography.bodySmall)
 }
 
 /**
@@ -384,14 +390,14 @@ private fun HuntPrimaryAction(
     onValidateCurrentLocation: () -> Unit,
     onFinishHunt: ((suspend (Hunt) -> Unit)?) -> Unit,
 ) {
-    if (!isHuntStarted) {
-        StartHuntButton(onStartHunt = onStartHunt)
-    } else {
-        HuntActionsRow(
-            canFinish = validated >= totalPoints,
-            onValidateCurrentLocation = onValidateCurrentLocation,
-            onFinishHunt = onFinishHunt)
-    }
+  if (!isHuntStarted) {
+    StartHuntButton(onStartHunt = onStartHunt)
+  } else {
+    HuntActionsRow(
+        canFinish = validated >= totalPoints,
+        onValidateCurrentLocation = onValidateCurrentLocation,
+        onFinishHunt = onFinishHunt)
+  }
 }
 
 /**
@@ -401,14 +407,17 @@ private fun HuntPrimaryAction(
  */
 @Composable
 private fun StartHuntButton(onStartHunt: () -> Unit) {
-    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-        Button(
-            modifier = Modifier.testTag(MapScreenTestTags.START),
-            onClick = onStartHunt,
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary)) {
-            Text(MapScreenStrings.StartHunt)
+  Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+    Button(
+        modifier = Modifier.testTag(MapScreenTestTags.START),
+        onClick = onStartHunt,
+        colors =
+            ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary)) {
+          Text(MapScreenStrings.StartHunt)
         }
-    }
+  }
 }
 
 /**
@@ -426,38 +435,42 @@ private fun HuntActionsRow(
     onValidateCurrentLocation: () -> Unit,
     onFinishHunt: ((suspend (Hunt) -> Unit)?) -> Unit,
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically) {
+  Row(
+      modifier = Modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.SpaceEvenly,
+      verticalAlignment = Alignment.CenterVertically) {
         TextButton(
             modifier = Modifier.testTag(MapScreenTestTags.VALIDATE),
             onClick = onValidateCurrentLocation,
-            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)) {
-            Text(MapScreenStrings.Validate)
-        }
+            colors =
+                ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)) {
+              Text(MapScreenStrings.Validate)
+            }
 
         Button(
             modifier = Modifier.testTag(MapScreenTestTags.FINISH),
             onClick = {
-                onFinishHunt { finished ->
-                    try {
-                        val userId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
-                        if (userId != null) {
-                            ProfileRepositoryProvider.repository.addDoneHunt(userId, finished)
-                        }
-                    } catch (e: Exception) {
-                        android.util.Log.e(MapScreenTestTags.MAP_SCREEN, MapScreenStrings.Fail, e)
-                    }
+              onFinishHunt { finished ->
+                try {
+                  val userId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+                  if (userId != null) {
+                    ProfileRepositoryProvider.repository.addDoneHunt(userId, finished)
+                  }
+                } catch (e: Exception) {
+                  android.util.Log.e(MapScreenTestTags.MAP_SCREEN, MapScreenStrings.Fail, e)
                 }
+              }
             },
             enabled = canFinish,
             colors =
                 ButtonDefaults.buttonColors(
-                    containerColor = if (canFinish) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSecondary, contentColor = MaterialTheme.colorScheme.onPrimary)) {
-            Text(MapScreenStrings.FinishHunt)
-        }
-    }
+                    containerColor =
+                        if (canFinish) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSecondary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary)) {
+              Text(MapScreenStrings.FinishHunt)
+            }
+      }
 }
 
 /**
@@ -468,15 +481,15 @@ private fun HuntActionsRow(
  */
 @Composable
 fun StopHuntDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        modifier = Modifier.testTag(MapScreenTestTags.STOP_POPUP),
-        onDismissRequest = onDismiss,
-        title = { Text(MapScreenStrings.StopHuntTitle) },
-        text = { Text(MapScreenStrings.StopHuntMessage) },
-        confirmButton = {
-            TextButton(modifier = Modifier.testTag(MapScreenTestTags.CONFIRM), onClick = onConfirm) {
-                Text(MapScreenStrings.ConfirmStopHunt)
-            }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(MapScreenStrings.Cancel) } })
+  AlertDialog(
+      modifier = Modifier.testTag(MapScreenTestTags.STOP_POPUP),
+      onDismissRequest = onDismiss,
+      title = { Text(MapScreenStrings.StopHuntTitle) },
+      text = { Text(MapScreenStrings.StopHuntMessage) },
+      confirmButton = {
+        TextButton(modifier = Modifier.testTag(MapScreenTestTags.CONFIRM), onClick = onConfirm) {
+          Text(MapScreenStrings.ConfirmStopHunt)
+        }
+      },
+      dismissButton = { TextButton(onClick = onDismiss) { Text(MapScreenStrings.Cancel) } })
 }

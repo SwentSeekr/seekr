@@ -111,8 +111,7 @@ fun GoogleSignInButton(onSignInClick: () -> Unit) {
       colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface),
       shape = RoundedCornerShape(SignInScreenDimensions.ButtonCornerRadius),
       border =
-          BorderStroke(
-              SignInScreenDimensions.ButtonBorderWidth, MaterialTheme.colorScheme.surface),
+          BorderStroke(SignInScreenDimensions.ButtonBorderWidth, MaterialTheme.colorScheme.surface),
       modifier =
           Modifier.padding(horizontal = SignInScreenDimensions.ButtonHorizontalPadding)
               .height(SignInScreenDimensions.ButtonHeight)
@@ -132,8 +131,7 @@ fun GoogleSignInButton(onSignInClick: () -> Unit) {
               Text(
                   text = SignInScreenStrings.SignInButtonLabel,
                   color = MaterialTheme.colorScheme.onSurface,
-                  style = MaterialTheme.typography.bodyLarge
-              )
+                  style = MaterialTheme.typography.bodyLarge)
             }
       }
 }

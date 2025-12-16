@@ -1,8 +1,6 @@
 package com.swentseekr.seekr.ui.components
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 /**
  * Constants extracted from HuntCard composable to eliminate hardcoded values. UI remains strictly

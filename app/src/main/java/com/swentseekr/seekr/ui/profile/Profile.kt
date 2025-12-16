@@ -78,7 +78,7 @@ object ProfileTestTags {
 // ORIGINAL CONSTANTS
 // -------------------------
 object ProfileConstants {
-    val SIZE_MEDIUM_DP = 16.dp
+  val SIZE_MEDIUM_DP = 16.dp
   val SIZE_ICON = 40.dp
 
   const val LOADING_PROFILE = "Loading profile..."
@@ -154,7 +154,7 @@ fun ProfileScreen(
           Column(
               horizontalAlignment = Alignment.CenterHorizontally,
               verticalArrangement = Arrangement.Center) {
-                CircularProgressIndicator(color =  MaterialTheme.colorScheme.primary)
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 Text(
                     text = ProfileConstants.LOADING_PROFILE,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -166,10 +166,11 @@ fun ProfileScreen(
 
   if (uiState.errorMsg != null) {
     Box(
-        modifier =
-            Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant),
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant),
         contentAlignment = Alignment.Center) {
-          Text("Error: ${uiState.errorMsg}", color = MaterialTheme.colorScheme.error,
+          Text(
+              "Error: ${uiState.errorMsg}",
+              color = MaterialTheme.colorScheme.error,
               style = ProfileTypography.bodyLarge)
         }
     return
@@ -180,10 +181,12 @@ fun ProfileScreen(
   if (profile == null) {
     AnimatedVisibility(visible = !uiState.isLoading, enter = fadeIn(), exit = fadeOut()) {
       Box(
-          modifier =
-              Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant),
+          modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant),
           contentAlignment = Alignment.Center) {
-            Text(ProfileConstants.NO_PROFILE_FOUND, color = MaterialTheme.colorScheme.onSurfaceVariant, style = ProfileTypography.bodyLarge)
+            Text(
+                ProfileConstants.NO_PROFILE_FOUND,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = ProfileTypography.bodyLarge)
           }
     }
     return
@@ -207,8 +210,8 @@ fun ProfileScreen(
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = ProfileConstants.ADD_DESCRIPTION,
-                    modifier = Modifier.size(ProfileUIConstantsDefaults.Size28)) //AA
-              }
+                    modifier = Modifier.size(ProfileUIConstantsDefaults.Size28)) // AA
+          }
         }
       },
       containerColor = MaterialTheme.colorScheme.onPrimary,
@@ -447,14 +450,13 @@ fun ModernCustomToolbar(selectedTab: ProfileTab, onTabSelected: (ProfileTab) -> 
             modifier =
                 Modifier.fillMaxWidth().padding(vertical = ProfileUIConstantsDefaults.Padding8),
             horizontalArrangement = Arrangement.SpaceEvenly) {
-            val selectedColor = MaterialTheme.colorScheme.primary
-            val unselectedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+              val selectedColor = MaterialTheme.colorScheme.primary
+              val unselectedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
               tabs.forEach { item ->
                 val isSelected = selectedTab == item.tab
-                  val color = if (isSelected) selectedColor else unselectedColor
-                  val backgroundColor =
-                    if (isSelected) selectedColor.copy(alpha = 0.1f)
-                        else Color.Transparent
+                val color = if (isSelected) selectedColor else unselectedColor
+                val backgroundColor =
+                    if (isSelected) selectedColor.copy(alpha = 0.1f) else Color.Transparent
                 Surface(
                     modifier =
                         Modifier.weight(ProfileUIConstantsDefaults.Weight)
@@ -471,7 +473,7 @@ fun ModernCustomToolbar(selectedTab: ProfileTab, onTabSelected: (ProfileTab) -> 
                             Icon(
                                 imageVector = item.icon,
                                 contentDescription = item.tab.name,
-                                tint = if (isSelected) selectedColor else unselectedColor ,
+                                tint = if (isSelected) selectedColor else unselectedColor,
                                 modifier = Modifier.size(ProfileUIConstantsDefaults.Size24))
 
                             Spacer(modifier = Modifier.height(ProfileUIConstantsDefaults.Padding4))
@@ -486,10 +488,11 @@ fun ModernCustomToolbar(selectedTab: ProfileTab, onTabSelected: (ProfileTab) -> 
                                       ProfileTab.LIKED_HUNTS ->
                                           ProfileUIConstantsDefaults.TabLikedLabel
                                     },
-                                style = if (isSelected)
-                                    ProfileTypography.labelSmall.copy(fontWeight = FontWeight.Bold)
-                                else
-                                    ProfileTypography.labelSmall,
+                                style =
+                                    if (isSelected)
+                                        ProfileTypography.labelSmall.copy(
+                                            fontWeight = FontWeight.Bold)
+                                    else ProfileTypography.labelSmall,
                                 color = color)
                           }
                     }
@@ -515,8 +518,7 @@ fun ModernEmptyHuntsState(selectedTab: ProfileTab) {
               imageVector = icon,
               contentDescription = null,
               modifier = Modifier.size(ProfileUIConstantsDefaults.EmptyIconSize),
-              tint = MaterialTheme.colorScheme.onSurfaceVariant
-          )
+              tint = MaterialTheme.colorScheme.onSurfaceVariant)
 
           Spacer(modifier = Modifier.height(ProfileUIConstantsDefaults.Padding16))
 

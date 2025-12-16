@@ -4,8 +4,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.swentseekr.seekr.model.hunt.Hunt
-import com.swentseekr.seekr.ui.theme.EasyGreen
-import com.swentseekr.seekr.ui.theme.Green
 
 /**
  * Centralized constants used across the offline UI layer.

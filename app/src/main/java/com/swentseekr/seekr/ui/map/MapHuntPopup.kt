@@ -8,16 +8,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Difficulty
-import com.swentseekr.seekr.model.hunt.DifficultyColor
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntStatus
-import com.swentseekr.seekr.model.hunt.StatusColor
+import com.swentseekr.seekr.model.hunt.difficultyColor
+import com.swentseekr.seekr.model.hunt.statusColor
+import com.swentseekr.seekr.ui.map.MapScreenDefaults.ONE_FLOAT
+import com.swentseekr.seekr.ui.map.MapScreenDefaults.ZERO_FLOAT
 
 /**
  * Displays a popup card presenting a summary of a hunt.
@@ -57,7 +60,7 @@ fun HuntPopup(hunt: Hunt, onViewClick: () -> Unit, onDismiss: () -> Unit) {
 
               Spacer(Modifier.width(MapScreenDefaults.PopupSpacing))
 
-              Column(modifier = Modifier.weight(MapScreenDefaults.ONE_FLOAT)) {
+              Column(modifier = Modifier.weight(ONE_FLOAT)) {
                 Text(
                     hunt.title,
                     style = MaterialTheme.typography.titleMedium,
@@ -132,7 +135,7 @@ private fun HuntMetaChip(label: String, baseColor: Color) {
  */
 @Composable
 private fun StatusChip(status: HuntStatus) {
-  val baseColor = Color(StatusColor(status))
+  val baseColor = statusColor(status)
   val label = status.name.lowercase().replaceFirstChar { it.uppercase() }
 
   HuntMetaChip(label = label, baseColor = baseColor)
@@ -141,14 +144,14 @@ private fun StatusChip(status: HuntStatus) {
 /**
  * Displays a chip representing a hunt’s difficulty.
  *
- * The chip color is derived from the difficulty level using [DifficultyColor]. Text color is
+ * The chip color is derived from the difficulty level using [difficultyColor]. Text color is
  * adjusted by darkening the base color to maintain contrast.
  *
  * @param difficulty the difficulty level of the hunt.
  */
 @Composable
 private fun DifficultyChip(difficulty: Difficulty) {
-  val baseColor = DifficultyColor(difficulty)
+  val baseColor = difficultyColor(difficulty)
   val label = difficulty.name.lowercase().replaceFirstChar { it.uppercase() }
 
   HuntMetaChip(label = label, baseColor = baseColor)
@@ -160,14 +163,8 @@ private fun DifficultyChip(difficulty: Difficulty) {
  * @param factor a value between 0f and 1f; lower values result in a darker color.
  * @return a new darkened [Color] instance.
  */
-private fun Color.darken(factor: Float): Color =
-    Color(
-        red =
-            (this.red * factor).coerceIn(MapScreenDefaults.ZERO_FLOAT, MapScreenDefaults.ONE_FLOAT),
-        green =
-            (this.green * factor).coerceIn(
-                MapScreenDefaults.ZERO_FLOAT, MapScreenDefaults.ONE_FLOAT),
-        blue =
-            (this.blue * factor).coerceIn(
-                MapScreenDefaults.ZERO_FLOAT, MapScreenDefaults.ONE_FLOAT),
-        alpha = MapScreenDefaults.ONE_FLOAT)
+@Composable
+private fun Color.darken(factor: Float): Color {
+  val f = factor.coerceIn(ZERO_FLOAT, ONE_FLOAT)
+  return lerp(this, MaterialTheme.colorScheme.onBackground, ONE_FLOAT - f)
+}

@@ -413,7 +413,7 @@ fun ModernStatCard(label: String, value: String, unit: String, modifier: Modifie
               Text(
                   text = label,
                   style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
-                          color = MaterialTheme.colorScheme.onSecondary)
+                  color = MaterialTheme.colorScheme.onSecondary)
 
               Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding4))
 
@@ -455,7 +455,7 @@ fun ModernDescriptionSection(description: String) {
           Text(
               text = HuntCardScreenStrings.DESCRIPTION_LABEL,
               style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                      color = MaterialTheme.colorScheme.onSurface)
+              color = MaterialTheme.colorScheme.onSurface)
           Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding12))
 
           Text(
@@ -554,8 +554,8 @@ fun ModernActionButtons(
     buttonIcon: androidx.compose.ui.graphics.vector.ImageVector,
     onActionClick: () -> Unit
 ) {
-    val colors = LocalAppColors.current
-    Row(
+  val colors = LocalAppColors.current
+  Row(
       modifier =
           Modifier.fillMaxWidth()
               .padding(
@@ -585,8 +585,8 @@ fun ModernActionButtons(
                   text =
                       if (isCurrentId) HuntCardScreenStrings.EDIT_HUNT
                       else HuntCardScreenStrings.ADD_REVIEW,
-                  style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold)
-              )
+                  style =
+                      MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold))
             }
       }
 }
@@ -808,8 +808,7 @@ private fun ReviewCardPhotosSection(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onSurface),
         shape = RoundedCornerShape(HuntCardScreenDefaults.Padding8)) {
-          Text(
-              "See Pictures (${review.photos.size})", style = MaterialTheme.typography.bodyMedium)
+          Text("See Pictures (${review.photos.size})", style = MaterialTheme.typography.bodyMedium)
         }
   }
 }
@@ -862,7 +861,7 @@ fun LikeButton(
     huntId: String,
     modifier: Modifier = Modifier
 ) {
-    val colors = LocalAppColors.current
+  val colors = LocalAppColors.current
 
   val likedHuntsCache by huntCardViewModel.likedHuntsCache.collectAsState()
   val isLiked = likedHuntsCache.contains(huntId)
@@ -873,9 +872,7 @@ fun LikeButton(
         Icon(
             imageVector = Icons.Default.Favorite,
             contentDescription = HuntCardScreenStrings.LIKE_BUTTON,
-            tint =
-                if (isLiked) colors.liked
-                else colors.disliked,
+            tint = if (isLiked) colors.liked else colors.disliked,
             modifier = Modifier.size(HuntCardScreenDefaults.IconSize24))
       }
 }

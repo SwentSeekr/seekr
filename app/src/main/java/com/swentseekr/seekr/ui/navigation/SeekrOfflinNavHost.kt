@@ -29,7 +29,6 @@ import com.swentseekr.seekr.ui.offline.OfflineMapScreen
 import com.swentseekr.seekr.ui.offline.OfflineOverviewHuntsScreen
 import com.swentseekr.seekr.ui.overview.OverviewScreenTestTags
 import com.swentseekr.seekr.ui.profile.Profile
-import com.swentseekr.seekr.ui.theme.White
 
 /**
  * Navigation host for the offline Seekr experience.
@@ -91,7 +90,10 @@ fun SeekrOfflineNavHost(
         NavHost(
             navController = navController,
             startDestination = SeekrDestination.Overview.route,
-            modifier = Modifier.fillMaxSize().padding(innerPadding).background(MaterialTheme.colorScheme.surfaceVariant)) {
+            modifier =
+                Modifier.fillMaxSize()
+                    .padding(innerPadding)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)) {
 
               // OFFLINE OVERVIEW → stored hunts, clone of original overview UI, but using
               // offlineHunts.

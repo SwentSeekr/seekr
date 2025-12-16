@@ -1,6 +1,5 @@
 package com.swentseekr.seekr.ui.navigation
 
-
 object SeekrNavigationDefaults {
   const val IgnoredTestTag = "IGNORED"
 

@@ -63,8 +63,7 @@ fun OfflineMapScreen(modifier: Modifier = Modifier) {
                       imageVector = Icons.Default.Warning,
                       contentDescription = OfflineConstants.MAP_ICON,
                       modifier = Modifier.size(OfflineConstants.OFFLINE_ICON_SIZE),
-                      tint = MaterialTheme.colorScheme.onBackground
-                      )
+                      tint = MaterialTheme.colorScheme.onBackground)
                   Spacer(modifier = Modifier.height(OfflineConstants.ICON_SPACING))
                   Text(
                       text = OfflineConstants.OFFLINE_MAP_MESSAGE,

@@ -29,9 +29,13 @@ fun SettingsItem(title: String, value: String, modifier: Modifier = Modifier) {
       modifier = modifier.fillMaxWidth().height(SettingsScreenDefaults.ITEMS_SPACING),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically) {
-        Text(text = title, style = MaterialTheme.typography.bodyLarge,
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface)
-        Text(text = value,  style = MaterialTheme.typography.bodyLarge,
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant)
       }
 }
@@ -55,7 +59,9 @@ fun SettingsToggleItem(
       modifier = Modifier.fillMaxWidth().height(SettingsScreenDefaults.ITEMS_SPACING),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically) {
-        Text(title, style = MaterialTheme.typography.bodyLarge,
+        Text(
+            title,
+            style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface)
         Switch(checked = checked, onCheckedChange = onToggle, modifier = modifier)
       }
@@ -79,8 +85,13 @@ fun SettingsArrowItem(title: String, onClick: () -> Unit = {}, modifier: Modifie
               .padding(vertical = SettingsScreenDefaults.COMPONENTS_PADDING),
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically) {
-        Text(title, style = MaterialTheme.typography.bodyLarge,
+        Text(
+            title,
+            style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface)
-        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        Icon(
+            Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant)
       }
 }

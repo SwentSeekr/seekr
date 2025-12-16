@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import com.swentseekr.seekr.ui.theme.Green
 
 /**
  * Overview screen displayed when the user is offline.
@@ -72,8 +71,7 @@ fun OfflineOverviewScreen(
                           imageVector = Icons.Default.Warning,
                           contentDescription = OfflineConstants.OVERVIEW_ICON,
                           modifier = Modifier.size(OfflineConstants.OFFLINE_ICON_SIZE),
-                          tint = MaterialTheme.colorScheme.onBackground
-                          )
+                          tint = MaterialTheme.colorScheme.onBackground)
                       Spacer(modifier = Modifier.height(OfflineConstants.ICON_SPACING))
                       Text(
                           text = OfflineConstants.OFFLINE_OVERVIEW_MESSAGE,
@@ -91,8 +89,7 @@ fun OfflineOverviewScreen(
               colors =
                   ButtonDefaults.buttonColors(
                       containerColor = MaterialTheme.colorScheme.primary,
-                      contentColor = MaterialTheme.colorScheme.onPrimary
-                      ),
+                      contentColor = MaterialTheme.colorScheme.onPrimary),
               modifier = Modifier.fillMaxWidth(OfflineConstants.BUTTON_WIDTH_RATIO)) {
                 Text(text = OfflineConstants.SHOW_DOWNLOADED_HUNTS_BUTTON)
               }

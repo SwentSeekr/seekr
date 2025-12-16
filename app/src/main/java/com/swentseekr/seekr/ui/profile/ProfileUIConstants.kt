@@ -2,7 +2,6 @@ package com.swentseekr.seekr.ui.profile
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 /**
  * Centralized constants, strings, and test tags used across both the Profile screen and Edit
@@ -164,11 +163,6 @@ object ProfileUIConstantsDefaults {
   val Size24 = 24.dp
   val Size28 = 28.dp
   val Size70 = 70.dp
-
-
-
-
-
 
   // ---- PROFILE HEADER ----
   val ProfileHeaderGradientEnd = Color(0xFFE8847C)
