@@ -6,7 +6,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 object OverviewScreenDefaults {
-  val Alpha02: Float = 0.2f
+  const val ALPHA_02: Float = 0.2f
   val FilterItemPadding: Dp = 4.dp
   val Border2: Dp = 2.dp
   val Border1: Dp = 1.dp
@@ -55,14 +55,14 @@ object OverviewScreenDefaults {
 }
 
 object OverviewScreenStrings {
-  const val SearchPlaceholder = "Search hunts..."
-  const val SearchIconDescription = "Search Icon"
-  const val ClearIconDescription = "Clear Icon"
-  const val FilterBy = "Filter by"
+  const val SEARCH_PLACEHOLDER = "Search hunts..."
+  const val SEARCH_ICON_DESCRIPTION = "Search Icon"
+  const val CLEAR_ICON_DESCRIPTION = "Clear Icon"
+  const val FILTER_BY = "Filter by"
 
-  const val UnKnownAuthor = "Unknown Author"
-  const val Title = "Discover"
-  const val SubTitle = "Find your next adventure"
+  const val UNKNOWN_AUTHOR = "Unknown Author"
+  const val TITLE = "Discover"
+  const val SUB_TITLE = "Find your next adventure"
 }
 
 object OverviewScreenTestTags {

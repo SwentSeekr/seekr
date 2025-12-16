@@ -24,13 +24,14 @@ class HuntReviewReplyRepositoryFirestoreTest {
     val snapshot = mockk<DocumentSnapshot>()
 
     every { snapshot.id } returns "r1"
-    every { snapshot.getString("reviewId") } returns "rev123"
-    every { snapshot.getString("parentReplyId") } returns "parent1"
-    every { snapshot.getString("authorId") } returns "userA"
-    every { snapshot.getString("comment") } returns "Hi"
-    every { snapshot.getLong("createdAt") } returns 123L
-    every { snapshot.getLong("updatedAt") } returns 456L
-    every { snapshot.getBoolean("isDeleted") } returns true
+    every { snapshot.getString(HuntReviewReplyFirestoreConstants.FIELD_REVIEW_ID) } returns "rev123"
+    every { snapshot.getString(HuntReviewReplyFirestoreConstants.FIELD_PARENT_REPLY_ID) } returns
+        "parent1"
+    every { snapshot.getString(HuntReviewReplyFirestoreConstants.FIELD_AUTHOR_ID) } returns "userA"
+    every { snapshot.getString(HuntReviewReplyFirestoreConstants.FIELD_COMMENT) } returns "Hi"
+    every { snapshot.getLong(HuntReviewReplyFirestoreConstants.FIELD_CREATED_AT) } returns 123L
+    every { snapshot.getLong(HuntReviewReplyFirestoreConstants.FIELD_UPDATED_AT) } returns 456L
+    every { snapshot.getBoolean(HuntReviewReplyFirestoreConstants.FIELD_IS_DELETED) } returns true
 
     val result = repository.documentToReply(snapshot)
 
@@ -51,8 +52,8 @@ class HuntReviewReplyRepositoryFirestoreTest {
     val snapshot = mockk<DocumentSnapshot>()
 
     every { snapshot.id } returns "r1"
-    every { snapshot.getString("reviewId") } returns null
-    every { snapshot.getString("authorId") } returns "userA"
+    every { snapshot.getString(HuntReviewReplyFirestoreConstants.FIELD_REVIEW_ID) } returns null
+    every { snapshot.getString(HuntReviewReplyFirestoreConstants.FIELD_AUTHOR_ID) } returns "userA"
     val result = repository.documentToReply(snapshot)
 
     assertNull(result)
@@ -63,7 +64,8 @@ class HuntReviewReplyRepositoryFirestoreTest {
     val snapshot = mockk<DocumentSnapshot>()
 
     every { snapshot.id } returns "r1"
-    every { snapshot.getString("reviewId") } throws RuntimeException("boom")
+    every { snapshot.getString(HuntReviewReplyFirestoreConstants.FIELD_REVIEW_ID) } throws
+        RuntimeException("boom")
 
     val result = repository.documentToReply(snapshot)
 

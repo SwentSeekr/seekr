@@ -9,6 +9,7 @@ import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.hunt.HuntsRepository
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.testing.MainDispatcherRule
+import com.swentseekr.seekr.ui.hunt.BaseHuntViewModelMessages
 import com.swentseekr.seekr.ui.hunt.add.AddHuntViewModel
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment.clearEmulatorData
@@ -65,25 +66,27 @@ class AddHuntViewModelAndroidTest {
   @Test
   fun setters_updateState_andValidation() {
     viewModel.setTitle("")
-    assertEquals("Title cannot be empty", viewModel.uiState.value.invalidTitleMsg)
+    assertEquals(BaseHuntViewModelMessages.TITLE_EMPTY, viewModel.uiState.value.invalidTitleMsg)
     viewModel.setTitle("T")
     assertNull(viewModel.uiState.value.invalidTitleMsg)
     assertEquals("T", viewModel.uiState.value.title)
 
     viewModel.setDescription("")
-    assertEquals("Description cannot be empty", viewModel.uiState.value.invalidDescriptionMsg)
+    assertEquals(
+        BaseHuntViewModelMessages.DESCRIPTION_EMPTY, viewModel.uiState.value.invalidDescriptionMsg)
     viewModel.setDescription("D")
     assertNull(viewModel.uiState.value.invalidDescriptionMsg)
     assertEquals("D", viewModel.uiState.value.description)
 
     viewModel.setTime("x")
-    assertEquals("Invalid time format", viewModel.uiState.value.invalidTimeMsg)
+    assertEquals(BaseHuntViewModelMessages.INVALID_TIME, viewModel.uiState.value.invalidTimeMsg)
     viewModel.setTime("1.5")
     assertNull(viewModel.uiState.value.invalidTimeMsg)
     assertEquals("1.5", viewModel.uiState.value.time)
 
     viewModel.setDistance("y")
-    assertEquals("Invalid distance format", viewModel.uiState.value.invalidDistanceMsg)
+    assertEquals(
+        BaseHuntViewModelMessages.INVALID_DISTANCE, viewModel.uiState.value.invalidDistanceMsg)
     viewModel.setDistance("2.0")
     assertNull(viewModel.uiState.value.invalidDistanceMsg)
     assertEquals("2.0", viewModel.uiState.value.distance)
@@ -112,8 +115,7 @@ class AddHuntViewModelAndroidTest {
   fun addHunt_returnsFalse_andSetsError_whenStateInvalid() = runTest {
     val result = viewModel.submit()
     assertFalse(result)
-    assertEquals(
-        "Please fill all required fields before saving the hunt.", viewModel.uiState.value.errorMsg)
+    assertEquals(BaseHuntViewModelMessages.NOT_ALL_FIELD_FILL, viewModel.uiState.value.errorMsg)
   }
 
   @Test
@@ -123,7 +125,7 @@ class AddHuntViewModelAndroidTest {
 
     val result = viewModel.submit()
     assertFalse(result)
-    assertEquals("You must be logged in to perform this action.", viewModel.uiState.value.errorMsg)
+    assertEquals(BaseHuntViewModelMessages.MUST_LOGIN, viewModel.uiState.value.errorMsg)
   }
 
   @Test

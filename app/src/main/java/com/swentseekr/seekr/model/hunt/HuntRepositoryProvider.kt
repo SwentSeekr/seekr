@@ -10,6 +10,7 @@ import kotlinx.coroutines.runBlocking
  * purposes.
  */
 object HuntRepositoryProvider {
+  /** Firestore-backed repository lazily initialized for production use. */
   val defaultHunt =
       Hunt(
           uid = "",

@@ -253,7 +253,7 @@ class AuthViewModelTest {
         val s = vm.uiState.value
 
         assertSame(user, s.user)
-        assertTrue("New user should need onboarding", s.needsOnboarding)
+        assertTrue(AuthViewModelMessages.ONBOARDING, s.needsOnboarding)
         assertNull(s.errorMsg)
         assertFalse(s.signedOut)
       }

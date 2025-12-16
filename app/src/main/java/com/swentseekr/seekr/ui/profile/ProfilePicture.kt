@@ -45,7 +45,7 @@ fun ProfilePicture(
 
   Image(
       painter = painter,
-      contentDescription = "Profile Picture",
+      contentDescription = ProfileConstants.PROFILE_PICTURE_DESCRIPTION,
       modifier =
           modifier
               .size(PROFILE_PICTURE_SIZE_DP.dp)

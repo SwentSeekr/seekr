@@ -182,14 +182,33 @@ open class ProfileRepositoryLocal : ProfileRepository {
    * @param bio The user's biography.
    */
   override suspend fun completeOnboarding(userId: String, pseudonym: String, bio: String) {
+    // No-op in local implementation
     return
   }
 
+  /**
+   * Adds a hunt to the user's liked hunts.
+   *
+   * In this local in-memory implementation, this method does nothing.
+   *
+   * @param userId UID of the profile.
+   * @param huntId UID of the hunt to mark as liked.
+   */
   override suspend fun addLikedHunt(userId: String, huntId: String) {
+    // No-op in local implementation
     return
   }
 
+  /**
+   * Removes a hunt from the user's liked hunts.
+   *
+   * In this local in-memory implementation, this method does nothing.
+   *
+   * @param userId UID of the profile.
+   * @param huntId UID of the hunt to remove from liked hunts.
+   */
   override suspend fun removeLikedHunt(userId: String, huntId: String) {
+    // No-op in local implementation
     return
   }
 }

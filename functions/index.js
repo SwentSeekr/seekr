@@ -1,23 +1,37 @@
 /**
- * Import function triggers from their respective submodules:
+ * Firebase Cloud Functions
  *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
+ * This file contains Cloud Functions to handle notifications when a new
+ * review is added to a hunt. It uses Firestore triggers and FCM messaging.
  *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
+ * Required dependencies:
+ *   - firebase-functions
+ *   - firebase-admin
  */
 
 const {setGlobalOptions} = require("firebase-functions");
 const {onRequest} = require("firebase-functions/https");
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
+
+// Initialize Firebase Admin SDK
 if (!admin.apps.length) {
   admin.initializeApp();
 }
+
+// Configure Firestore emulator if running locally
 if (process.env.FIRESTORE_EMULATOR_HOST) {
   const [host, port] = process.env.FIRESTORE_EMULATOR_HOST.split(":");
   admin.firestore().useEmulator(host, parseInt(port, 10));
 }
+
+/**
+ * Triggered when a new review is added to the `huntsReviews` collection.
+ * Sends a notification to the owner of the hunt.
+ *
+ * @param {Object} snap Firestore snapshot of the newly created document.
+ * @param {Object} context Cloud Functions context object, contains params like reviewId.
+ */
 exports.sendReviewNotification = functions.firestore
   .document("huntsReviews/{reviewId}")
   .onCreate(async (snap, context) => {
@@ -28,7 +42,7 @@ exports.sendReviewNotification = functions.firestore
 
     console.log("New review created:", reviewId, "for hunt:", huntId);
 
-    // 1. Get hunt
+    // 1. Get the hunt document
     const huntRef = admin.firestore().collection("hunts").doc(huntId);
     const huntDoc = await huntRef.get();
 
@@ -47,7 +61,7 @@ exports.sendReviewNotification = functions.firestore
 
     console.log("Hunt owner:", ownerId);
 
-    // 2. Get owner profile
+    // 2. Get the owner's profile to retrieve FCM token
     const profileRef = admin.firestore().collection("profiles").doc(ownerId);
     const userDoc = await profileRef.get();
 
@@ -66,7 +80,7 @@ exports.sendReviewNotification = functions.firestore
 
     console.log("Sending notification to:", token);
 
-    // 3. Build message
+    // 3. Build the FCM message
     const message = {
       token: token,
       notification: {
@@ -105,30 +119,18 @@ exports.sendReviewNotification = functions.firestore
   });
 
 
-// 🔧 Helper function to log debug output for emulator tests
-async function logDebug(data) {
+/**
+ * Helper function to log debug information in Firestore.
+ *
+ * @param {Object} data Data to log in `debug_notifications` collection.
+ * @returns {Promise<FirebaseFirestore.DocumentReference>} Document reference of the added log.
+ */
+ async function logDebug(data) {
   return admin.firestore().collection("debug_notifications").add({
     ...data,
     timestamp: admin.firestore.FieldValue.serverTimestamp(),
   });
 }
 
-// For cost control, you can set the maximum number of containers that can be
-// running at the same time. This helps mitigate the impact of unexpected
-// traffic spikes by instead downgrading performance. This limit is a
-// per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
+// Set maximum concurrent instances for all functions to mitigate traffic spikes
 setGlobalOptions({ maxInstances: 10 });
-
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
-
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });

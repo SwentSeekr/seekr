@@ -105,18 +105,18 @@ class AddPointsMapScreenTest {
     }
 
     // Initially disabled
-    composeRule.onNodeWithText("Add").assertIsNotEnabled()
+    composeRule.onNodeWithText(AddTestConstants.ADD).assertIsNotEnabled()
 
     // Enter valid name should enable
     composeRule
         .onNodeWithTag(AddPointsMapScreenTestTags.POINT_NAME_FIELD)
         .performTextInput("Eiffel Tower")
-    composeRule.onNodeWithText("Add").assertIsEnabled()
+    composeRule.onNodeWithText(AddTestConstants.ADD).assertIsEnabled()
 
     // Clear name should show error and disable
     composeRule.onNodeWithTag(AddPointsMapScreenTestTags.POINT_NAME_FIELD).performTextClearance()
-    composeRule.onNodeWithText("The name cannot be empty").assertExists()
-    composeRule.onNodeWithText("Add").assertIsNotEnabled()
+    composeRule.onNodeWithText(AddTestConstants.NAME_EMPTY).assertExists()
+    composeRule.onNodeWithText(AddTestConstants.ADD).assertIsNotEnabled()
 
     // Enter another valid name and confirm
     composeRule
@@ -125,7 +125,7 @@ class AddPointsMapScreenTest {
     composeRule
         .onNodeWithTag(AddPointsMapScreenTestTags.POINT_DESCRIPTION_FIELD)
         .performTextInput("Paris Museum")
-    composeRule.onNodeWithText("Add").performClick()
+    composeRule.onNodeWithText(AddTestConstants.ADD).performClick()
 
     composeRule.waitForIdle()
     assertEquals("Louvre Museum", confirmedName)

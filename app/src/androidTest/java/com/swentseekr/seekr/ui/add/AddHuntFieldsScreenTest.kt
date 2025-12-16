@@ -22,6 +22,7 @@ import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.hunt.BaseHuntFieldsScreen
+import com.swentseekr.seekr.ui.hunt.BaseHuntViewModelMessages
 import com.swentseekr.seekr.ui.hunt.HuntFieldCallbacks
 import com.swentseekr.seekr.ui.hunt.HuntNavigationCallbacks
 import com.swentseekr.seekr.ui.hunt.HuntScreenTestTags
@@ -61,28 +62,33 @@ class AddHuntFieldsScreenTest {
                   state.value =
                       state.value.copy(
                           title = title,
-                          invalidTitleMsg = if (title.isBlank()) "Title cannot be empty" else null)
+                          invalidTitleMsg =
+                              if (title.isBlank()) BaseHuntViewModelMessages.TITLE_EMPTY else null)
                 },
                 onDescriptionChange = { desc ->
                   state.value =
                       state.value.copy(
                           description = desc,
                           invalidDescriptionMsg =
-                              if (desc.isBlank()) "Description cannot be empty" else null)
+                              if (desc.isBlank()) BaseHuntViewModelMessages.DESCRIPTION_EMPTY
+                              else null)
                 },
                 onTimeChange = { time ->
                   state.value =
                       state.value.copy(
                           time = time,
                           invalidTimeMsg =
-                              if (time.toDoubleOrNull() == null) "Invalid time format" else null)
+                              if (time.toDoubleOrNull() == null)
+                                  BaseHuntViewModelMessages.INVALID_TIME
+                              else null)
                 },
                 onDistanceChange = { distance ->
                   state.value =
                       state.value.copy(
                           distance = distance,
                           invalidDistanceMsg =
-                              if (distance.toDoubleOrNull() == null) "Invalid distance format"
+                              if (distance.toDoubleOrNull() == null)
+                                  BaseHuntViewModelMessages.INVALID_DISTANCE
                               else null)
                 },
                 onDifficultySelect = { diff -> state.value = state.value.copy(difficulty = diff) },
@@ -120,7 +126,7 @@ class AddHuntFieldsScreenTest {
     setContent()
 
     composeRule.onNodeWithText(add_hunt_text).assertExists()
-    composeRule.onNodeWithContentDescription("Back").performClick()
+    composeRule.onNodeWithContentDescription(AddTestConstants.BACK_LABEL).performClick()
     assertTrue(onGoBackCalled)
   }
 
@@ -135,37 +141,37 @@ class AddHuntFieldsScreenTest {
     composeRule
         .onNodeWithTag(HuntScreenTestTags.ERROR_MESSAGE, useUnmergedTree = true)
         .assertExists()
-        .assertTextContains("Title cannot be empty")
+        .assertTextContains(BaseHuntViewModelMessages.TITLE_EMPTY)
 
     // Fix title
     title.performTextInput("My Hunt")
-    composeRule.onNodeWithText("Title cannot be empty").assertDoesNotExist()
+    composeRule.onNodeWithText(BaseHuntViewModelMessages.TITLE_EMPTY).assertDoesNotExist()
 
     // Description error when empty
     val desc = composeRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_DESCRIPTION)
     desc.performTextInput("x")
     desc.performTextClearance()
-    composeRule.onNodeWithText("Description cannot be empty").assertExists()
+    composeRule.onNodeWithText(BaseHuntViewModelMessages.DESCRIPTION_EMPTY).assertExists()
 
     // Fix description
     desc.performTextInput("A nice description")
-    composeRule.onNodeWithText("Description cannot be empty").assertDoesNotExist()
+    composeRule.onNodeWithText(BaseHuntViewModelMessages.DESCRIPTION_EMPTY).assertDoesNotExist()
 
     // Time invalid then valid
     val time = composeRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_TIME)
     time.performTextInput("x")
-    composeRule.onNodeWithText("Invalid time format").assertExists()
+    composeRule.onNodeWithText(BaseHuntViewModelMessages.INVALID_TIME).assertExists()
     time.performTextClearance()
     time.performTextInput("1.5")
-    composeRule.onNodeWithText("Invalid time format").assertDoesNotExist()
+    composeRule.onNodeWithText(BaseHuntViewModelMessages.INVALID_TIME).assertDoesNotExist()
 
     // Distance invalid then valid
     val distance = composeRule.onNodeWithTag(HuntScreenTestTags.INPUT_HUNT_DISTANCE)
     distance.performTextInput("y")
-    composeRule.onNodeWithText("Invalid distance format").assertExists()
+    composeRule.onNodeWithText(BaseHuntViewModelMessages.INVALID_DISTANCE).assertExists()
     distance.performTextClearance()
     distance.performTextInput("2.3")
-    composeRule.onNodeWithText("Invalid distance format").assertDoesNotExist()
+    composeRule.onNodeWithText(BaseHuntViewModelMessages.INVALID_DISTANCE).assertDoesNotExist()
   }
 
   @Test

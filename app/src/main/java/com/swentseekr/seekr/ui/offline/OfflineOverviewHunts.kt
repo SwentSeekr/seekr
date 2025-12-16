@@ -103,7 +103,7 @@ fun OfflineOverviewHuntsScreen(
                   modifier =
                       modifier
                           .testTag(
-                              if (index == huntUiStates.size - 1)
+                              if (index == huntUiStates.size - OfflineConstants.ONE)
                                   OverviewScreenTestTags.LAST_HUNT_CARD
                               else OverviewScreenTestTags.HUNT_CARD)
                           .clickable { onHuntClick(hunt.uid) })

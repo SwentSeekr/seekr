@@ -23,7 +23,7 @@ class EditReviewScreenTest {
   fun screen_displays_all_elements() {
     composeRule.setContent {
       MaterialTheme {
-        EditReviewScreen(huntId = AddReviewTestConstantStings.TestHuntId, reviewId = "")
+        EditReviewScreen(huntId = AddReviewTestConstantStrings.TEST_HUNT_ID, reviewId = "")
       }
     }
 
@@ -45,7 +45,7 @@ class EditReviewScreenTest {
     composeRule.setContent {
       MaterialTheme {
         EditReviewScreen(
-            huntId = AddReviewTestConstantStings.TestHuntId,
+            huntId = AddReviewTestConstantStrings.TEST_HUNT_ID,
             reviewId = "",
             onGoBack = { backCalled = true },
             onDone = { doneCalled = true },
@@ -59,7 +59,7 @@ class EditReviewScreenTest {
     composeRule.onNodeWithTag(starTag).performClick()
     composeRule
         .onNodeWithTag(AddReviewScreenTestTags.COMMENT_TEXT_FIELD)
-        .performTextInput(AddReviewTestConstantStings.TextInput)
+        .performTextInput(AddReviewTestConstantStrings.TEXT_INPUT)
     composeRule.onNodeWithTag(AddReviewScreenTestTags.DONE_BUTTON).performClick()
 
     assertTrue(backCalled)
@@ -78,7 +78,8 @@ class EditReviewScreenTest {
             authorName = "Test Author",
             rating = 3.0,
             reviewText = "Great hunt!",
-            photos = listOf(AddReviewTestConstantStings.Photo1, AddReviewTestConstantStings.Photo2),
+            photos =
+                listOf(AddReviewTestConstantStrings.PHOTO_1, AddReviewTestConstantStrings.PHOTO_2),
             isReviewTextError = false,
             isDoneEnabled = true,
             reviewTextErrorMessage = null,

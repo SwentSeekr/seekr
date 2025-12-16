@@ -15,6 +15,14 @@ import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.profile.Profile
 import kotlinx.coroutines.tasks.await
 
+/**
+ * Firestore implementation of [ProfileRepository].
+ *
+ * @property db The Firestore instance used for storing profiles.
+ * @property auth The FirebaseAuth instance used for user authentication.
+ * @property huntsRepository Repository for managing hunts, used to fetch hunts by user.
+ * @property storage FirebaseStorage instance used for uploading and deleting profile pictures.
+ */
 class ProfileRepositoryFirestore(
     private val db: FirebaseFirestore,
     private val auth: FirebaseAuth,
@@ -23,6 +31,13 @@ class ProfileRepositoryFirestore(
 ) : ProfileRepository {
 
   companion object {
+
+    /**
+     * Converts a [Hunt] object into a [Map] suitable for Firestore storage.
+     *
+     * @param hunt The hunt to convert.
+     * @return A map containing the hunt's data.
+     */
     fun huntToMap(hunt: Hunt): Map<String, Any?> =
         mapOf(
             ProfileRepositoryConstants.HUNT_FIELD_UID to hunt.uid,
@@ -145,6 +160,12 @@ class ProfileRepositoryFirestore(
 
   private val profilesCollection = db.collection(ProfileRepositoryConstants.PROFILES_COLLECTION)
 
+  /**
+   * Creates a new profile in Firestore.
+   *
+   * @param profile The profile to create.
+   * @throws Exception if Firestore write fails.
+   */
   override suspend fun createProfile(profile: Profile) {
     try {
       profilesCollection.document(profile.uid).set(profile).await()
@@ -157,16 +178,28 @@ class ProfileRepositoryFirestore(
     }
   }
 
+  /**
+   * Fetches a profile for a given user ID. If the profile does not exist, a default profile is
+   * automatically created.
+   *
+   * @param userId The user's unique ID.
+   * @return The [Profile] object.
+   * @throws Exception if Firestore read/write fails.
+   */
   override suspend fun getProfile(userId: String): Profile? {
     val doc = profilesCollection.document(userId).get().await()
     if (doc.exists()) {
       return documentToProfile(doc)
     }
-    // Auto-create a default profile if missing
     val defaultProfile = createDefaultProfile(userId)
     return defaultProfile
   }
 
+  /**
+   * Returns a list of all pseudonyms currently used in profiles.
+   *
+   * @return List of pseudonyms.
+   */
   override suspend fun getAllPseudonyms(): List<String> {
     return try {
       val snapshot = profilesCollection.get().await()
@@ -187,6 +220,13 @@ class ProfileRepositoryFirestore(
     }
   }
 
+  /**
+   * Creates a default profile for a user if one does not exist in Firestore.
+   *
+   * @param userId The user's unique ID.
+   * @return The created [Profile] object.
+   * @throws Exception if Firestore write fails.
+   */
   private suspend fun createDefaultProfile(userId: String): Profile {
     val defaultProfile =
         Profile(
@@ -208,6 +248,12 @@ class ProfileRepositoryFirestore(
     return defaultProfile
   }
 
+  /**
+   * Updates the user's profile with new author information.
+   *
+   * @param profile The updated profile data.
+   * @throws Exception if Firestore write fails.
+   */
   override suspend fun updateProfile(profile: Profile) {
     val currentUser = auth.currentUser ?: return
     Log.i(
@@ -227,6 +273,13 @@ class ProfileRepositoryFirestore(
         .await()
   }
 
+  /**
+   * Retrieves all hunts created by the user.
+   *
+   * @param userId The user's ID.
+   * @return List of [Hunt] objects.
+   * @throws Exception if Firestore read fails.
+   */
   override suspend fun getMyHunts(userId: String): List<Hunt> {
     val snapshot =
         db.collection(ProfileRepositoryConstants.HUNTS_COLLECTION)
@@ -236,6 +289,14 @@ class ProfileRepositoryFirestore(
     return snapshot.documents.mapNotNull { documentToHunt(it) }
   }
 
+  /**
+   * Uploads a new profile picture for the user and updates the Firestore document.
+   *
+   * @param userId The user's ID.
+   * @param uri The [Uri] of the picture to upload.
+   * @return The download URL of the uploaded image.
+   * @throws Exception if storage or Firestore operations fail.
+   */
   override suspend fun uploadProfilePicture(userId: String, uri: Uri): String {
     val storageRef =
         storage.reference.child(
@@ -256,6 +317,12 @@ class ProfileRepositoryFirestore(
     }
   }
 
+  /**
+   * Deletes the current profile picture from Firebase Storage.
+   *
+   * @param userId The user's ID.
+   * @param url The URL of the profile picture to delete.
+   */
   override suspend fun deleteCurrentProfilePicture(userId: String, url: String) {
     if (url.isNotEmpty()) {
       try {
@@ -268,6 +335,12 @@ class ProfileRepositoryFirestore(
     }
   }
 
+  /**
+   * Retrieves all hunts that the user has completed.
+   *
+   * @param userId The user's ID.
+   * @return List of completed [Hunt] objects.
+   */
   override suspend fun getDoneHunts(userId: String): List<Hunt> {
     val snapshot = profilesCollection.document(userId).get().await()
 
@@ -279,6 +352,12 @@ class ProfileRepositoryFirestore(
     return doneHuntsData.mapNotNull { mapToHunt(it) }
   }
 
+  /**
+   * Retrieves all hunts liked by the user.
+   *
+   * @param userId The user's ID.
+   * @return List of liked [Hunt] objects.
+   */
   override suspend fun getLikedHunts(userId: String): List<Hunt> {
     val snapshot = profilesCollection.document(userId).get().await()
 
@@ -290,6 +369,13 @@ class ProfileRepositoryFirestore(
     return likedHuntsData.mapNotNull { mapToHunt(it) }
   }
 
+  /**
+   * Marks a hunt as completed for the user.
+   *
+   * @param userId The user's ID.
+   * @param hunt The hunt to mark as done.
+   * @throws Exception if Firestore update fails.
+   */
   override suspend fun addDoneHunt(userId: String, hunt: Hunt) {
     try {
       val userDocRef = profilesCollection.document(userId)
@@ -325,6 +411,12 @@ class ProfileRepositoryFirestore(
     }
   }
 
+  /**
+   * Converts a Firestore [DocumentSnapshot] into a [Hunt] object.
+   *
+   * @param document The Firestore document snapshot representing a hunt.
+   * @return A [Hunt] object or null if essential fields are missing or an error occurs.
+   */
   private fun documentToHunt(document: DocumentSnapshot): Hunt? {
     return try {
       val uid = document.id
@@ -390,6 +482,12 @@ class ProfileRepositoryFirestore(
     }
   }
 
+  /**
+   * Converts a Firestore [DocumentSnapshot] into a [Profile] object.
+   *
+   * @param document The Firestore document snapshot representing a user's profile.
+   * @return A [Profile] object or null if essential fields are missing.
+   */
   private suspend fun documentToProfile(document: DocumentSnapshot): Profile? {
     if (!document.exists()) return null
 
@@ -418,7 +516,6 @@ class ProfileRepositoryFirestore(
             profilePictureUrl =
                 authorMap[ProfileRepositoryConstants.PROFILE_PICTURE_URL] as? String ?: "")
 
-    // Fetch associated hunts only for this user
     val myHunts = huntsRepository.getAllHunts().filter { it.authorId == uid }.toMutableList()
     val doneHunts =
         db.collection(ProfileRepositoryConstants.USERS)
@@ -444,12 +541,26 @@ class ProfileRepositoryFirestore(
         likedHunts = likedHunts)
   }
 
+  /**
+   * Checks if the user still needs to complete onboarding.
+   *
+   * @param userId The user's ID.
+   * @return True if onboarding is needed, false otherwise.
+   */
   override suspend fun checkUserNeedsOnboarding(userId: String): Boolean {
     val profile = getProfile(userId)
 
     return !(profile?.author?.hasCompletedOnboarding ?: false)
   }
 
+  /**
+   * Completes the onboarding process for a user.
+   *
+   * @param userId The user's ID.
+   * @param pseudonym Chosen pseudonym.
+   * @param bio User bio.
+   * @throws Exception if Firestore update fails.
+   */
   override suspend fun completeOnboarding(userId: String, pseudonym: String, bio: String) {
     val updates =
         mapOf(
@@ -461,6 +572,13 @@ class ProfileRepositoryFirestore(
     profilesCollection.document(userId).update(updates).await()
   }
 
+  /**
+   * Adds a hunt to the user's liked hunts.
+   *
+   * @param userId The user's ID.
+   * @param huntId The hunt's ID.
+   * @throws Exception if Firestore update fails.
+   */
   override suspend fun addLikedHunt(userId: String, huntId: String) {
     try {
       val hunt = huntsRepository.getHunt(huntId)
@@ -494,6 +612,13 @@ class ProfileRepositoryFirestore(
     }
   }
 
+  /**
+   * Removes a hunt from the user's liked hunts.
+   *
+   * @param userId The user's ID.
+   * @param huntId The hunt's ID.
+   * @throws Exception if Firestore update fails.
+   */
   override suspend fun removeLikedHunt(userId: String, huntId: String) {
     try {
       val snapshot = profilesCollection.document(userId).get().await()

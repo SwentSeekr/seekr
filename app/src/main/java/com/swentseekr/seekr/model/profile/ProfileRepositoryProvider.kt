@@ -5,6 +5,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestore
 
+/**
+ * Provides a singleton instance of [ProfileRepository] for the application.
+ *
+ * This object lazily initializes a [ProfileRepositoryFirestore] using Firebase services.
+ */
 object ProfileRepositoryProvider {
   private val _repositoryFirestore: ProfileRepository by lazy {
     ProfileRepositoryFirestore(

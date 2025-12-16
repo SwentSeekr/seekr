@@ -6,6 +6,13 @@ import com.swentseekr.seekr.model.hunt.*
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.profile.Profile
 
+/**
+ * Utility functions to create sample [Profile], [Author], [Hunt], and [HuntReview] objects.
+ *
+ * These are used for testing, previews, and prototyping UI components.
+ */
+
+/** Returns a sample [Profile] containing one sample hunt and a sample author. */
 fun mockProfileData(): Profile {
 
   val sampleHunt =
@@ -33,6 +40,7 @@ fun mockProfileData(): Profile {
       likedHunts = mutableListOf())
 }
 
+/** Returns a sample [Author] object for testing. */
 fun sampleAuthor() =
     Author(
         pseudonym = "Spike Man",
@@ -41,6 +49,14 @@ fun sampleAuthor() =
         reviewRate = 4.5,
         sportRate = 4.8)
 
+/**
+ * Returns a sample [Profile] with custom hunt lists and a unique [uid].
+ *
+ * @param myHunts Hunts created by the user.
+ * @param doneHunts Hunts completed by the user.
+ * @param likedHunts Hunts liked by the user.
+ * @param uid Unique ID of the profile.
+ */
 fun sampleProfile(
     myHunts: List<Hunt> = emptyList(),
     doneHunts: List<Hunt> = emptyList(),
@@ -55,6 +71,12 @@ fun sampleProfile(
       likedHunts = likedHunts.toMutableList())
 }
 
+/**
+ * Returns a [Profile] with a custom pseudonym for the author.
+ *
+ * @param uid Unique ID of the profile.
+ * @param pseudonym The pseudonym of the author.
+ */
 fun sampleProfileWithPseudonym(uid: String, pseudonym: String): Profile {
   return Profile(
       uid = uid,
@@ -70,6 +92,14 @@ fun sampleProfileWithPseudonym(uid: String, pseudonym: String): Profile {
       likedHunts = mutableListOf())
 }
 
+/**
+ * Creates a simple [Hunt] object with default values for testing or mock data.
+ *
+ * @param uid The unique identifier for the hunt.
+ * @param title The title of the hunt.
+ * @return A [Hunt] instance with the provided [uid] and [title], and default values for all other
+ *   properties.
+ */
 fun createHunt(uid: String, title: String) =
     Hunt(
         uid = uid,
@@ -87,10 +117,19 @@ fun createHunt(uid: String, title: String) =
         otherImagesUrls = emptyList(),
         reviewRate = 4.0)
 
+/** Returns an empty [Profile] with no hunts. */
 fun emptyProfile(): Profile {
   return sampleProfile(myHunts = emptyList(), doneHunts = emptyList(), likedHunts = emptyList())
 }
 
+/**
+ * Creates a [Hunt] with a custom [reviewRate] and [difficulty].
+ *
+ * @param uid Hunt unique ID.
+ * @param title Hunt title.
+ * @param reviewRate Average review score.
+ * @param difficulty Hunt difficulty.
+ */
 fun createHuntWithRateAndDifficulty(
     uid: String,
     title: String,
@@ -114,6 +153,16 @@ fun createHuntWithRateAndDifficulty(
       reviewRate = reviewRate)
 }
 
+/**
+ * Creates a [HuntReview] for testing purposes.
+ *
+ * @param reviewId Review unique ID.
+ * @param authorId ID of the user who wrote the review.
+ * @param huntId ID of the hunt being reviewed.
+ * @param rating Review rating.
+ * @param comment Review text.
+ * @param photos List of photo URLs attached to the review.
+ */
 fun createReview(
     reviewId: String = "review123",
     authorId: String = "user123",
@@ -131,6 +180,15 @@ fun createReview(
       photos = photos)
 }
 
+/**
+ * Creates a [Hunt] for overview testing.
+ *
+ * @param uid Hunt unique ID.
+ * @param title Hunt title.
+ * @param description Hunt description.
+ * @param time Hunt duration in hours.
+ * @param distance Hunt distance in km.
+ */
 fun createOverviewTestHunt(
     uid: String,
     title: String,
