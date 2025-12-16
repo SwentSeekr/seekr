@@ -16,7 +16,12 @@ import com.swentseekr.seekr.utils.HuntTestConstants.TITLE_2
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-
+/**
+ * UI tests for the OfflineOverviewHuntsScreen composable.
+ *
+ * This test suite verifies that the screen correctly renders a list of hunts
+ * and handles user interactions such as clicking on hunt items.
+ */
 @RunWith(AndroidJUnit4::class)
 class OfflineOverviewHuntsScreenTest {
 

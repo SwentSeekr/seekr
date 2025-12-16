@@ -15,6 +15,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * UI tests for the HuntCardReviewScreen composable.
+ *
+ * This test suite verifies that the screen correctly displays all UI elements,
+ * handles user interactions, and conditionally shows components based on state.
+ */
 @RunWith(AndroidJUnit4::class)
 class HuntCardReviewScreenTest {
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()

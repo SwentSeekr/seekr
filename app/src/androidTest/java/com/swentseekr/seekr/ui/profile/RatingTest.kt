@@ -10,6 +10,13 @@ import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
 
+/**
+ * UI tests for the Rating composable.
+ *
+ * This test suite verifies that the Rating component displays
+ * the correct number of full, half, and empty icons based on
+ * the provided rating value and type.
+ */
 class RatingTest {
   @get:Rule val composeTestRule = createComposeRule()
 

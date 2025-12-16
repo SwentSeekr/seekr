@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.settings
 
+/** Shared constants for the `SettingsScreenTest`. */
 object SettingsScreenTestConstants {
   const val REPETITION_TIMES = 3
   const val PERMISSION_EVENTS = "_permissionEvents"

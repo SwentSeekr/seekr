@@ -30,6 +30,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * UI tests for opening a public profile from various screens.
+ *
+ * This test suite verifies that navigating to a public profile works correctly
+ * from different entry points, such as the HuntCardScreen. It checks that
+ * the profile screen opens and that navigation actions function as expected.
+ */
 @RunWith(AndroidJUnit4::class)
 class OpenPublicProfileTests {
 
