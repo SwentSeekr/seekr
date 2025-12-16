@@ -1,6 +1,5 @@
 package com.swentseekr.seekr.ui.components
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -64,36 +63,17 @@ object HuntCardScreenDefaults {
   val MapHeight250: Dp = 250.dp
   val AspectRatioHero: Float = 16f / 9f
 
-  val Alpha: Float = 0.9f
-
-  val TitleFontSize = 28.sp
-  val AuthorFontSize = 16.sp
+  const val ALPHA = 0.9f
+  const val ALPHA3 = 0.3f
+  const val ALPHA7 = 0.7f
   val LineHeight = 32.sp
 
   val CardWeight: Float = 1f
-  val MediumFontSize = 24.sp
-  val SmallFontSize = 18.sp
-  val DescriptionFontSize = 15.sp
+
   val DescriptionLineHeight = 22.sp
 
   val Zoom: Float = 12f
   val OtherLineHeight = 20.sp
-  val MinFontSize = 13.sp
-
-  val ImageIndicatorUnselectedColor: Color = Color.LightGray
-  val ImageIndicatorSelectedColor: Color = Color.DarkGray
-  val OrangeButton: Color = Color(0xFFFFA726)
-
-  val ScreenBackground: Color = Color(0xFFF8F9FA)
-  val LightGray: Color = Color(0xFFCCCCCC)
-
-  val ParagraphGray: Color = Color(0xFF444444)
-
-  val CardSoftGray: Color = Color(0xFFF5F5F5)
-
-  // Specific colors
-  val ErrorRed: Color = Color(0xFFEF5350)
-  val LikeRedStrong: Color = Color(0xFFFF5252)
 
   // New: review card visuals & logic constants
   val ReviewCardCornerRadius: Dp = 16.dp
@@ -106,6 +86,8 @@ object HuntCardScreenDefaults {
   const val END_LIST_SPACER_MULTIPLIER: Int = 2
   const val BACKGROUND_ALPHA: Float = 0.8f
   const val START: Float = 200f
+
+  val boarderStrokeWidth = 1.dp
 }
 
 object HuntCardScreenStrings {
@@ -130,6 +112,10 @@ object HuntCardScreenStrings {
   const val DISTANCE_LABEL = "Distance"
   const val DURATION_LABEL = "Duration"
 
+  const val MENU = "Menu"
+  const val EDIT = "Edit"
+  const val DELETE = "Delete"
+  const val SEE_PICTURES_STRING = "See Pictures"
   const val CURRENT_USER_INITIAL_LABEL = "Y"
 
   const val REPLIES_VIEW_MODEL_PREFIX = "replies_"

@@ -2,38 +2,38 @@ package com.swentseekr.seekr.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
-
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
-val GrassGreen = Color(0xFF4CAF50)
-val Black = Color(0xFF000000)
-val White = Color(0xFFFFFFFF)
-
+// ---- Primary & Secondary ----
 val Green = Color(0xFF059D58)
-val Blue = Color(0xFF2196F3)
-val Orange = Color(0xFFFFA64D)
-val GrayBackgound = Color(0xFFF2F2F2)
-
-val MediumYellow = Color(0xFFFFDFAD)
-val DifficultRed = Color(0xFFFFC1C1)
-
 val Salmon = Color(0xFFE8847C)
+val Blue = Color(0xFF2196F3)
+val Orange = Color(0xFFFFA726)
+val White = Color(0xFFFFFFFF)
+val Black = Color(0xFF000000)
+val Transparent = Color(0x00000000)
 
-val GrayDislike = Color(0xFF666666)
+// ---- Difficulty Colors ----
+val DifficultyEasy = Color(0xFF4CAF50)
+val DifficultyHard = Color(0xFFEF5350)
+
+// ---- Status Colors ----
+val StatusFun = Color(0xFF9C27B0)
+val StatusSport = Color(0xFFFF5722)
+val StatusDiscover = Color(0xFF2196F3)
+
+// ---- Likes / Dislikes ----
 val RedLike = Color(0xFFF90606)
+val GrayDislike = Color(0xFF666666)
+
+// ---- Background & Surface ----
+val LightGrayBackground = Color(0xFFF8F9FA)
 val EasyGreen = Color(0xFFB0D4B1)
+val StatBackground = Color(0xFFF5F5F5)
 
-val YellowStar = Color(0xFFE7CD0C)
-val GrayStar = Color(0xFF838382)
-val RedRanking = Color(0xFFFF3C00)
-val GrayRanking = Color(0xFF838382)
+// ---- Text & Icons ----
+val LoadingGray = Color(0xFF666666)
+val TabInactiveGray = Color(0xFF999999)
+val StatTextDark = Color(0xFF333333)
 
+// ---- Errors ----
 val LightError = Color(0xFFBA1A1A)
 val LightOnError = Color(0xFFFFFFFF)
-
-val DarkError = Color(0xFFFFB4AB)
-val DarkOnError = Color(0xFF690005)

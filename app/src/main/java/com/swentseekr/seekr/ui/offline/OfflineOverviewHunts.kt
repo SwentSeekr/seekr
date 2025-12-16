@@ -61,7 +61,7 @@ fun OfflineOverviewHuntsScreen(
   val query = offlineViewModel.searchQuery
   val huntUiStates = uiState.hunts
 
-  Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.onPrimary)) {
+  Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
     Column(
         modifier = Modifier.fillMaxWidth().testTag(OverviewScreenTestTags.OVERVIEW_SCREEN),
         horizontalAlignment = Alignment.CenterHorizontally,

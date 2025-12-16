@@ -52,17 +52,16 @@ import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.ALPHA_02
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Border1
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Border2
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.FilterItemPadding
-import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.Gray666
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.HorizontalPadding20
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.SearchBarCornerRadius
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.SearchBarElevation
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.SearchBarHeight
-import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.SmallFontSize
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding12
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding16
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding2
 import com.swentseekr.seekr.ui.overview.OverviewScreenDefaults.VerticalPadding8
 import com.swentseekr.seekr.ui.overview.OverviewScreenStrings.FILTER_BY
+import com.swentseekr.seekr.ui.theme.LocalAppColors
 
 /**
  * Overview screen displaying the main hunt discovery experience.
@@ -104,7 +103,7 @@ fun OverviewScreen(
       rememberPullRefreshState(
           refreshing = uiState.isRefreshing, onRefresh = { overviewViewModel.refreshUIState() })
 
-  Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.onPrimary)) {
+  Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
     Column(
         modifier = Modifier.fillMaxWidth().testTag(OverviewScreenTestTags.OVERVIEW_SCREEN),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -199,17 +198,16 @@ fun ModernHeader() {
   Column(
       modifier =
           Modifier.fillMaxWidth()
-              .background(MaterialTheme.colorScheme.onPrimary)
+              .background(MaterialTheme.colorScheme.background)
               .padding(horizontal = HorizontalPadding20, vertical = VerticalPadding16)) {
         Text(
             text = OverviewScreenStrings.TITLE,
-            fontSize = OverviewScreenDefaults.DiscoverFontSize,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.onSurface)
         Text(
             text = OverviewScreenStrings.SUB_TITLE,
-            fontSize = OverviewScreenDefaults.NextAdventureFontSize,
-            color = Gray666,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier.padding(top = FilterItemPadding))
       }
 }
@@ -249,15 +247,15 @@ fun ModernSearchBar(
       placeholder = {
         Text(
             OverviewScreenStrings.SEARCH_PLACEHOLDER,
-            color = OverviewScreenDefaults.Gray999,
+            color = MaterialTheme.colorScheme.outline,
             style = MaterialTheme.typography.bodyMedium)
       },
       leadingIcon = {
         if (query.isEmpty()) {
           Icon(
               imageVector = Icons.Default.Search,
-              contentDescription = OverviewScreenStrings.SEARCH_ICON_DESCRIPTION,
-              tint = Gray666)
+              contentDescription = OverviewScreenStrings.SEARCH_PLACEHOLDER,
+              tint = MaterialTheme.colorScheme.tertiary)
         } else null
       },
       trailingIcon = {
@@ -265,7 +263,7 @@ fun ModernSearchBar(
           Icon(
               imageVector = Icons.Default.Clear,
               contentDescription = OverviewScreenStrings.CLEAR_ICON_DESCRIPTION,
-              tint = Gray666,
+              tint = MaterialTheme.colorScheme.tertiary,
               modifier = Modifier.clickable { onClear() })
         } else null
       },
@@ -307,16 +305,15 @@ fun ModernFilterBar(
   Column(
       modifier =
           Modifier.fillMaxWidth()
-              .background(MaterialTheme.colorScheme.onPrimary)
+              .background(MaterialTheme.colorScheme.background)
               .padding(vertical = VerticalPadding12),
       horizontalAlignment = Alignment.Start,
   ) {
     // SECTION TITLE
     Text(
         text = FILTER_BY,
-        fontSize = SmallFontSize,
-        fontWeight = FontWeight.SemiBold,
-        color = Gray666,
+        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+        color = MaterialTheme.colorScheme.tertiary,
         modifier = Modifier.padding(horizontal = HorizontalPadding20, vertical = VerticalPadding8))
 
     val huntStatuses = remember { HuntStatus.values() }
@@ -386,15 +383,16 @@ fun ModernFilterChip(
       label = {
         Text(
             text = text,
-            fontSize = SmallFontSize,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium)
+            style =
+                if (isSelected) MaterialTheme.typography.bodyLarge
+                else MaterialTheme.typography.bodyMedium)
       },
       modifier = modifier,
       colors =
           FilterChipDefaults.filterChipColors(
               containerColor = MaterialTheme.colorScheme.onPrimary,
               selectedContainerColor = color.copy(alpha = ALPHA_02),
-              labelColor = Gray666,
+              labelColor = MaterialTheme.colorScheme.tertiary,
               selectedLabelColor = color),
       border =
           FilterChipDefaults.filterChipBorder(
@@ -414,11 +412,12 @@ fun ModernFilterChip(
  *
  * @param status HuntStatus value.
  */
+@Composable
 fun getStatusColor(status: HuntStatus): Color {
   return when (status) {
-    HuntStatus.FUN -> OverviewScreenDefaults.StatusFun // Purple
-    HuntStatus.DISCOVER -> OverviewScreenDefaults.StatusDiscover // Blue
-    HuntStatus.SPORT -> OverviewScreenDefaults.StatusSport // Orange-red
+    HuntStatus.FUN -> LocalAppColors.current.statusFun
+    HuntStatus.DISCOVER -> LocalAppColors.current.statusDiscover
+    HuntStatus.SPORT -> LocalAppColors.current.statusSport
   }
 }
 
@@ -429,11 +428,12 @@ fun getStatusColor(status: HuntStatus): Color {
  *
  * @param difficulty The selected difficulty.
  */
+@Composable
 fun getDifficultyColor(difficulty: Difficulty): Color {
   return when (difficulty) {
-    Difficulty.EASY -> OverviewScreenDefaults.DifficultyEasy // Green
-    Difficulty.INTERMEDIATE -> OverviewScreenDefaults.DifficultyIntermediate // Orange
-    Difficulty.DIFFICULT -> OverviewScreenDefaults.DifficultyHard // Red
+    Difficulty.EASY -> LocalAppColors.current.difficultyEasy
+    Difficulty.INTERMEDIATE -> LocalAppColors.current.difficultyIntermediate
+    Difficulty.DIFFICULT -> LocalAppColors.current.difficultyHard
   }
 }
 
@@ -467,7 +467,7 @@ fun FilterButton(
               containerColor =
                   if (isSelected) MaterialTheme.colorScheme.primary
                   else MaterialTheme.colorScheme.onSecondary),
-      modifier = modifier.padding(OverviewScreenDefaults.FilterItemPadding)) {
+      modifier = modifier.padding(FilterItemPadding)) {
         Text(text)
       }
 }

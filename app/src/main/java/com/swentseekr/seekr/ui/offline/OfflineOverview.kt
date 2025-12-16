@@ -61,7 +61,7 @@ fun OfflineOverviewScreen(
                   Modifier.fillMaxWidth(OfflineConstants.OFFLINE_CARD_WIDTH_RATIO)
                       .height(OfflineConstants.OFFLINE_CARD_HEIGHT)
                       .background(
-                          color = OfflineConstants.LIGHT_GREEN_BACKGROUND,
+                          color = MaterialTheme.colorScheme.surfaceContainer,
                           shape = OfflineConstants.CARD_SHAPE),
               contentAlignment = Alignment.Center) {
                 Column(
@@ -71,8 +71,7 @@ fun OfflineOverviewScreen(
                           imageVector = Icons.Default.Warning,
                           contentDescription = OfflineConstants.OVERVIEW_ICON,
                           modifier = Modifier.size(OfflineConstants.OFFLINE_ICON_SIZE),
-                          tint = MaterialTheme.colorScheme.onBackground // black
-                          )
+                          tint = MaterialTheme.colorScheme.onBackground)
                       Spacer(modifier = Modifier.height(OfflineConstants.ICON_SPACING))
                       Text(
                           text = OfflineConstants.OFFLINE_OVERVIEW_MESSAGE,
@@ -89,9 +88,8 @@ fun OfflineOverviewScreen(
               shape = OfflineConstants.BUTTON_SHAPE,
               colors =
                   ButtonDefaults.buttonColors(
-                      containerColor = OfflineConstants.BUTTON_CONTAINER_COLOR,
-                      contentColor = MaterialTheme.colorScheme.onPrimary // white text
-                      ),
+                      containerColor = MaterialTheme.colorScheme.primary,
+                      contentColor = MaterialTheme.colorScheme.onPrimary),
               modifier = Modifier.fillMaxWidth(OfflineConstants.BUTTON_WIDTH_RATIO)) {
                 Text(text = OfflineConstants.SHOW_DOWNLOADED_HUNTS_BUTTON)
               }

@@ -2,7 +2,6 @@ package com.swentseekr.seekr.ui.profile
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
 /**
  * Centralized constants, strings, and test tags used across both the Profile screen and Edit
@@ -167,22 +166,6 @@ object ProfileUIConstantsDefaults {
   val Size28 = 28.dp
   val Size70 = 70.dp
 
-  // ---- FONT SIZES ----
-  val Font12 = 12.sp
-  val Font14 = 14.sp
-  val Font16 = 16.sp
-
-  val Font22 = 22.sp
-
-  // ---- COLORS ----
-  val LightGrayBackground = Color(0xFFF8F9FA)
-  val LoadingGray = Color(0xFF666666)
-  val LoadingIndicatorGreen = Color(0xFF00C853)
-  val ErrorRed = Color(0xFFEF5350)
-  val ToolbarGreen = Color(0xFF00C853)
-  val TabInactiveGray = Color(0xFF999999)
-  val IconGray = Color(0xFFCCCCCC)
-
   // ---- PROFILE HEADER ----
   val ProfileHeaderGradientEnd = Color(0xFFE8847C)
 
@@ -193,7 +176,6 @@ object ProfileUIConstantsDefaults {
 
   // ---- EMPTY STATE ----
   val EmptyIconSize = 64.dp
-  val EmptyTextColor = Color(0xFF999999)
 
   // ---- ALPHA VALUES ----
   const val ALPHA_LIGHT = 0.1f

@@ -1,5 +1,7 @@
 package com.swentseekr.seekr.ui.profile
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.SemanticsMatcher
@@ -22,14 +24,10 @@ import com.swentseekr.seekr.model.profile.createHuntWithRateAndDifficulty
 import com.swentseekr.seekr.model.profile.emptyProfile
 import com.swentseekr.seekr.model.profile.sampleProfile
 import com.swentseekr.seekr.ui.components.MAX_RATING
-import com.swentseekr.seekr.ui.theme.*
 import org.junit.Rule
 import org.junit.Test
 
 const val UI_WAIT_TIMEOUT = 3_000L
-
-private val SELECTED = ProfileUIConstantsDefaults.ToolbarGreen
-private val UNSELECTED = ProfileUIConstantsDefaults.TabInactiveGray
 
 fun hasBackgroundColor(expected: Color) = SemanticsMatcher.expectValue(BackgroundColorKey, expected)
 
@@ -158,8 +156,11 @@ class ProfileScreenTest {
         visibleTag = tagFor(likedHunt), notVisibleTags = listOf(tagFor(myHunt), tagFor(doneHunt)))
   }
 
+  @Composable
   @Test
   fun profileScreen_tabBackgroundChanges() {
+    val SELECTED = MaterialTheme.colorScheme.primary
+    val UNSELECTED = MaterialTheme.colorScheme.onSurface.copy(alpha = ProfileConstants.ALPHA)
     val profile =
         sampleProfile(
             myHunts = listOf(createHunt("hunt1", "My Hunt")),

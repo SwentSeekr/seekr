@@ -40,11 +40,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontWeight.Companion.SemiBold
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
+import com.swentseekr.seekr.ui.theme.Transparent
 
 /**
  * Displays a screen allowing the user to review a list of images with a paging UI and optional
@@ -132,9 +133,7 @@ fun ReviewImagesScreen(
 
               Text(
                   text = "${index}/${photoUrls.size}",
-                  fontSize = AddReviewScreenDefaults.TitleFontSize,
-                  fontWeight = FontWeight.SemiBold,
-                  style = MaterialTheme.typography.titleMedium,
+                  style = MaterialTheme.typography.titleMedium.copy(fontWeight = SemiBold),
                   modifier =
                       Modifier.align(Alignment.CenterHorizontally)
                           .testTag(
@@ -198,11 +197,11 @@ fun FullScreenImageViewer(
                               Brush.verticalGradient(
                                   colors =
                                       listOf(
-                                          Color.Black.copy(
+                                          MaterialTheme.colorScheme.onBackground.copy(
                                               alpha =
                                                   ReviewImagesScreenConstants
                                                       .FULL_SCREEN_OVERLAY_START_ALPHA),
-                                          Color.Transparent)))
+                                          Transparent)))
                           .padding(
                               horizontal = ReviewImagesScreenConstants.FullScreenPadding,
                               vertical = ReviewImagesScreenConstants.FullScreenPadding)) {
@@ -215,13 +214,13 @@ fun FullScreenImageViewer(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription =
                                     ReviewImagesScreenConstantsStrings.CLOSE_CONTENT_DESCRIPTION,
-                                tint = Color.White)
+                                tint = MaterialTheme.colorScheme.onPrimary)
                           }
 
                           Text(
                               text = "${currentIndex}/${images.size}",
                               style = MaterialTheme.typography.bodyMedium,
-                              color = Color.White)
+                              color = MaterialTheme.colorScheme.onPrimary)
                         }
                   }
             }

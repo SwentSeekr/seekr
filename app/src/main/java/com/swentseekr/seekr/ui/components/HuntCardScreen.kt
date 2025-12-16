@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -51,7 +52,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -66,6 +66,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntReview
 import com.swentseekr.seekr.model.hunt.review.HuntReviewReplyRepositoryProvider
+import com.swentseekr.seekr.ui.components.HuntCardScreenDefaults.boarderStrokeWidth
 import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
 import com.swentseekr.seekr.ui.hunt.review.replies.ReviewRepliesSection
 import com.swentseekr.seekr.ui.hunt.review.replies.ReviewRepliesViewModel
@@ -74,6 +75,7 @@ import com.swentseekr.seekr.ui.huntcardview.HuntCardUiState
 import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import com.swentseekr.seekr.ui.profile.Profile
 import com.swentseekr.seekr.ui.profile.ProfilePicture
+import com.swentseekr.seekr.ui.theme.LocalAppColors
 
 /**
  * Main screen displaying all the details of a Hunt, including:
@@ -178,7 +180,7 @@ fun HuntCardScreen(
             }
       },
       modifier = modifier.fillMaxSize(),
-      containerColor = HuntCardScreenDefaults.ScreenBackground) { innerPadding ->
+      containerColor = MaterialTheme.colorScheme.background) { innerPadding ->
         if (hunt == null) {
           Box(
               Modifier.fillMaxSize().testTag(HuntCardScreenTestTags.CIRCULAR_PROGRESS_INDICATOR),
@@ -215,8 +217,7 @@ fun HuntCardScreen(
               item {
                 Text(
                     HuntCardScreenStrings.REVIEWS,
-                    fontSize = HuntCardScreenDefaults.SmallFontSize,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier =
                         Modifier.fillMaxWidth()
@@ -334,8 +335,7 @@ fun ModernHeroImageSection(
             Modifier.align(Alignment.BottomStart).padding(HuntCardScreenDefaults.Padding20)) {
           Text(
               text = hunt.title,
-              fontSize = HuntCardScreenDefaults.TitleFontSize,
-              fontWeight = FontWeight.Bold,
+              style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
               color = MaterialTheme.colorScheme.onPrimary,
               lineHeight = HuntCardScreenDefaults.LineHeight,
               modifier = Modifier.testTag(HuntCardScreenTestTags.TITLE_TEXT))
@@ -344,10 +344,9 @@ fun ModernHeroImageSection(
 
           Text(
               text = "${HuntCardScreenStrings.BY} $authorName",
-              fontSize = HuntCardScreenDefaults.AuthorFontSize,
+              style = MaterialTheme.typography.bodyMedium,
               color =
-                  MaterialTheme.colorScheme.onPrimary.copy(alpha = HuntCardScreenDefaults.Alpha),
-              fontWeight = FontWeight.Medium,
+                  MaterialTheme.colorScheme.onPrimary.copy(alpha = HuntCardScreenDefaults.ALPHA),
               modifier =
                   Modifier.clickable { goProfile(hunt.authorId) }
                       .testTag(HuntCardScreenTestTags.AUTHOR_TEXT))
@@ -415,21 +414,19 @@ fun ModernStatCard(label: String, value: String, unit: String, modifier: Modifie
             horizontalAlignment = Alignment.CenterHorizontally) {
               Text(
                   text = label,
-                  fontSize = HuntCardScreenDefaults.SmallFontSize,
-                  color = MaterialTheme.colorScheme.onSecondary,
-                  fontWeight = FontWeight.Medium)
+                  style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
+                  color = MaterialTheme.colorScheme.onSecondary)
 
               Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding4))
 
               Row(verticalAlignment = Alignment.Bottom) {
                 Text(
                     text = value,
-                    fontSize = HuntCardScreenDefaults.MediumFontSize,
-                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onSurface)
                 Text(
                     text = " $unit",
-                    fontSize = HuntCardScreenDefaults.AuthorFontSize,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSecondary,
                     modifier = Modifier.padding(bottom = HuntCardScreenDefaults.Padding2))
               }
@@ -459,17 +456,15 @@ fun ModernDescriptionSection(description: String) {
         Column(modifier = Modifier.padding(HuntCardScreenDefaults.Padding20)) {
           Text(
               text = HuntCardScreenStrings.DESCRIPTION_LABEL,
-              fontSize = HuntCardScreenDefaults.SmallFontSize,
-              fontWeight = FontWeight.Bold,
+              style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
               color = MaterialTheme.colorScheme.onSurface)
-
           Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding12))
 
           Text(
               text = description,
-              fontSize = HuntCardScreenDefaults.DescriptionFontSize,
+              style = MaterialTheme.typography.bodyMedium,
               lineHeight = HuntCardScreenDefaults.DescriptionLineHeight,
-              color = HuntCardScreenDefaults.ParagraphGray,
+              color = MaterialTheme.colorScheme.onTertiaryContainer,
               modifier = Modifier.testTag(HuntCardScreenTestTags.DESCRIPTION_TEXT))
         }
       }
@@ -498,8 +493,7 @@ fun ModernMapSection(hunt: Hunt) {
         Column(modifier = Modifier.padding(HuntCardScreenDefaults.Padding20)) {
           Text(
               text = HuntCardScreenStrings.START_POINT_LABEL,
-              fontSize = HuntCardScreenDefaults.SmallFontSize,
-              fontWeight = FontWeight.Bold,
+              style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
               color = MaterialTheme.colorScheme.onSurface)
 
           Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding12))
@@ -533,7 +527,7 @@ fun ModernMapSection(hunt: Hunt) {
                     Modifier.fillMaxWidth()
                         .height(HuntCardScreenDefaults.MapHeight250)
                         .clip(RoundedCornerShape(HuntCardScreenDefaults.CornerRadius))
-                        .background(Color.LightGray)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
                         .testTag(HuntCardScreenTestTags.MAP_CONTAINER))
           }
         }
@@ -562,6 +556,7 @@ fun ModernActionButtons(
     buttonIcon: androidx.compose.ui.graphics.vector.ImageVector,
     onActionClick: () -> Unit
 ) {
+  val colors = LocalAppColors.current
   Row(
       modifier =
           Modifier.fillMaxWidth()
@@ -579,7 +574,7 @@ fun ModernActionButtons(
                 ButtonDefaults.buttonColors(
                     containerColor =
                         if (isCurrentId) MaterialTheme.colorScheme.secondary
-                        else HuntCardScreenDefaults.OrangeButton),
+                        else colors.orangeButton),
             shape = RoundedCornerShape(HuntCardScreenDefaults.CornerRadius)) {
               Icon(
                   imageVector = buttonIcon,
@@ -592,8 +587,8 @@ fun ModernActionButtons(
                   text =
                       if (isCurrentId) HuntCardScreenStrings.EDIT_HUNT
                       else HuntCardScreenStrings.ADD_REVIEW,
-                  fontSize = HuntCardScreenDefaults.DescriptionFontSize,
-                  fontWeight = FontWeight.SemiBold)
+                  style =
+                      MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold))
             }
       }
 }
@@ -620,7 +615,7 @@ fun ModernEmptyReviewsState() {
               imageVector = Icons.Filled.Star,
               contentDescription = null,
               modifier = Modifier.size(HuntCardScreenDefaults.IconSize48),
-              tint = HuntCardScreenDefaults.LightGray)
+              tint = MaterialTheme.colorScheme.onTertiaryContainer)
 
           Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding12))
 
@@ -688,6 +683,9 @@ fun ModernReviewCard(
               }
               .testTag(HuntCardScreenTestTags.REVIEW_CARD),
       colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+      border =
+          BorderStroke(
+              width = boarderStrokeWidth, color = MaterialTheme.colorScheme.outlineVariant),
       elevation =
           CardDefaults.cardElevation(defaultElevation = HuntCardScreenDefaults.ZeroElevation),
       shape = RoundedCornerShape(HuntCardScreenDefaults.ReviewCardCornerRadius)) {
@@ -756,9 +754,8 @@ private fun ReviewCardHeader(
                 text =
                     if (isCurrentUser) HuntCardScreenStrings.CURRENT_USER_INITIAL_LABEL
                     else initial,
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-                color = Color.White)
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onPrimary)
           }
     }
 
@@ -767,8 +764,7 @@ private fun ReviewCardHeader(
     Column(modifier = Modifier.weight(HuntCardScreenDefaults.CardWeight)) {
       Text(
           text = authorName,
-          fontWeight = FontWeight.SemiBold,
-          fontSize = HuntCardScreenDefaults.DescriptionFontSize,
+          style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
           color = MaterialTheme.colorScheme.onSurface)
 
       Spacer(modifier = Modifier.height(HuntCardScreenDefaults.Padding4))
@@ -793,7 +789,7 @@ private fun ReviewCardComment(review: HuntReview) {
   if (review.comment.isNotBlank()) {
     Text(
         text = review.comment,
-        fontSize = HuntCardScreenDefaults.DescriptionFontSize,
+        style = MaterialTheme.typography.bodyMedium,
         lineHeight = HuntCardScreenDefaults.OtherLineHeight,
         color = MaterialTheme.colorScheme.onSurface,
         modifier = Modifier.testTag(HuntCardScreenTestTags.REVIEW_COMMENT))
@@ -814,11 +810,12 @@ private fun ReviewCardPhotosSection(
         modifier = Modifier.testTag(HuntCardScreenTestTags.SEE_PICTURES_BUTTON),
         colors =
             ButtonDefaults.buttonColors(
-                containerColor = HuntCardScreenDefaults.CardSoftGray,
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onSurface),
         shape = RoundedCornerShape(HuntCardScreenDefaults.Padding8)) {
           Text(
-              "See Pictures (${review.photos.size})", fontSize = HuntCardScreenDefaults.MinFontSize)
+              "${HuntCardScreenStrings.SEE_PICTURES_STRING} (${review.photos.size})",
+              style = MaterialTheme.typography.bodyMedium)
         }
   }
 }
@@ -830,11 +827,12 @@ fun DotMenu(onEdit: () -> Unit, onDelete: () -> Unit) {
     IconButton(
         onClick = { expanded = true },
         modifier = Modifier.testTag(HuntCardScreenTestTags.DOTBUTOON)) {
-          Icon(imageVector = Icons.Default.MoreVert, contentDescription = "Menu")
+          Icon(
+              imageVector = Icons.Default.MoreVert, contentDescription = HuntCardScreenStrings.MENU)
         }
     DropdownMenu(expanded, onDismissRequest = { expanded = false }) {
       DropdownMenuItem(
-          text = { Text("Edit") },
+          text = { Text(HuntCardScreenStrings.EDIT) },
           onClick = {
             expanded = false
             onEdit()
@@ -842,7 +840,7 @@ fun DotMenu(onEdit: () -> Unit, onDelete: () -> Unit) {
           modifier = Modifier.testTag(HuntCardScreenTestTags.EDIT_BUTTON))
 
       DropdownMenuItem(
-          text = { Text("Delete") },
+          text = { Text(HuntCardScreenStrings.DELETE) },
           onClick = {
             expanded = false
             onDelete()
@@ -871,6 +869,7 @@ fun LikeButton(
     huntId: String,
     modifier: Modifier = Modifier
 ) {
+  val colors = LocalAppColors.current
 
   val likedHuntsCache by huntCardViewModel.likedHuntsCache.collectAsState()
   val isLiked = likedHuntsCache.contains(huntId)
@@ -881,9 +880,7 @@ fun LikeButton(
         Icon(
             imageVector = Icons.Default.Favorite,
             contentDescription = HuntCardScreenStrings.LIKE_BUTTON,
-            tint =
-                if (isLiked) HuntCardScreenDefaults.LikeRedStrong
-                else HuntCardScreenDefaults.LightGray,
+            tint = if (isLiked) colors.liked else colors.disliked,
             modifier = Modifier.size(HuntCardScreenDefaults.IconSize24))
       }
 }

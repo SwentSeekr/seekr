@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 
 /**
@@ -88,7 +87,7 @@ fun TermsAndConditionsScreen(onGoBack: () -> Unit = {}) {
                       Text(
                           text = TermsScreenStrings.LAST_UPDATED,
                           style = MaterialTheme.typography.bodyMedium,
-                          color = MaterialTheme.colorScheme.onSurfaceVariant)
+                          color = MaterialTheme.colorScheme.onPrimaryContainer)
                     }
                   }
 
@@ -138,8 +137,7 @@ fun TermsSection(title: String, content: String) {
               Text(
                   text = title,
                   style = MaterialTheme.typography.titleMedium,
-                  fontWeight = FontWeight.SemiBold,
-                  color = MaterialTheme.colorScheme.primary)
+                  color = MaterialTheme.colorScheme.onSurface)
               Text(
                   text = content,
                   color = MaterialTheme.colorScheme.onSurface,

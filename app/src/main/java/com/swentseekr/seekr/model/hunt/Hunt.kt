@@ -1,7 +1,9 @@
 package com.swentseekr.seekr.model.hunt
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.swentseekr.seekr.model.map.Location
+import com.swentseekr.seekr.ui.theme.LocalAppColors
 import kotlinx.serialization.Serializable
 
 /**
@@ -72,11 +74,13 @@ enum class Difficulty {
  * @param difficulty The difficulty level.
  * @return Green for EASY, Yellow for INTERMEDIATE, Red for DIFFICULT.
  */
-fun DifficultyColor(difficulty: Difficulty): Color {
+@Composable
+fun difficultyColor(difficulty: Difficulty): Color {
+  val colors = LocalAppColors.current
   return when (difficulty) {
-    Difficulty.EASY -> Color.Green // Green
-    Difficulty.INTERMEDIATE -> Color.Yellow // Yellow
-    Difficulty.DIFFICULT -> Color.Red // Red
+    Difficulty.EASY -> colors.difficultyEasy
+    Difficulty.INTERMEDIATE -> colors.difficultyIntermediate
+    Difficulty.DIFFICULT -> colors.difficultyHard
   }
 }
 
@@ -86,10 +90,12 @@ fun DifficultyColor(difficulty: Difficulty): Color {
  * @param status The hunt status.
  * @return Green for FUN, Yellow for DISCOVER, Red for SPORT.
  */
-fun StatusColor(status: HuntStatus): Int {
+@Composable
+fun statusColor(status: HuntStatus): Color {
+  val colors = LocalAppColors.current
   return when (status) {
-    HuntStatus.FUN -> HuntConstants.FUN_COLOR // Green
-    HuntStatus.DISCOVER -> HuntConstants.DISCOVER_COLOR // Yellow
-    HuntStatus.SPORT -> HuntConstants.SPORT_COLOR // Red
+    HuntStatus.FUN -> colors.statusFun
+    HuntStatus.DISCOVER -> colors.statusDiscover
+    HuntStatus.SPORT -> colors.statusSport
   }
 }
