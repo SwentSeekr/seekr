@@ -164,6 +164,16 @@ private fun BoxScope.FocusedHuntBottomCard(
   }
 }
 
+/**
+ * Displays a full-screen checkpoint image in a dialog.
+ *
+ * This composable shows an image in full-screen mode with a semi-transparent background.
+ * A close button is provided in the top-right corner to dismiss the dialog.
+ *
+ * @param imageUrl The URL of the image to display.
+ * @param contentDescription A content description for accessibility purposes.
+ * @param onClose Lambda invoked when the user requests to close the full-screen image (e.g., tapping the close icon or dismissing the dialog).
+ */
 @Composable
 internal fun FullscreenCheckpointImage(
     imageUrl: String,

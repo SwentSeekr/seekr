@@ -17,12 +17,13 @@ import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
  *
  * The screen also provides callbacks for navigation and completion actions.
  *
- * @param huntId The ID of the hunt being reviewed.
- * @param reviewViewModel ViewModel managing the review state. Defaults to a local instance.
- * @param huntCardViewModel ViewModel managing the hunt card state. Defaults to a local instance.
- * @param onGoBack Callback invoked when the user wants to navigate back.
- * @param onDone Callback invoked when the user saves the edited review.
- * @param onCancel Callback invoked when the user cancels editing the review.
+ * @param huntId The unique identifier of the hunt associated with the review.
+ * @param reviewId The unique identifier of the review being edited.
+ * @param huntCardViewModel The [HuntCardViewModel] instance used to fetch and update review data.
+ *                          Defaults to the scoped ViewModel obtained via [viewModel()].
+ * @param onGoBack Lambda to be invoked when the user navigates back without saving changes.
+ * @param onDone Lambda to be invoked when the user successfully finishes editing the review.
+ * @param onCancel Lambda to be invoked when the user cancels editing the review.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

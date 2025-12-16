@@ -50,7 +50,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.swentseekr.seekr.model.hunt.review.HuntReviewReply
 import com.swentseekr.seekr.ui.theme.Transparent
 
-// ---------- Shared shapes ----------
+// ----------
+// Shared shapes
+// ----------
 
 private val replyCardShape = RoundedCornerShape(ReviewRepliesDimensions.ReplyCardCornerRadius)
 
@@ -62,7 +64,18 @@ private val collapsedComposerShape =
 private val expandedComposerShape =
     RoundedCornerShape(ReviewRepliesDimensions.ExpandedComposerCornerRadius)
 
-/** Aggregates callbacks used by the review replies UI to avoid long parameter lists. */
+/**
+ * Aggregates callbacks used by the review replies UI to avoid long parameter lists.
+ *
+ * @property onToggleRootReplies Invoked when the root replies section should expand/collapse.
+ * @property onRootReplyTextChanged Invoked when the root reply text changes.
+ * @property onSendRootReply Invoked when the root reply is sent.
+ * @property onReplyAction Invoked when the user wants to reply to a specific node.
+ * @property onToggleReplyThread Invoked when a threaded reply should expand/collapse.
+ * @property onReplyTextChanged Invoked when a reply text changes for a specific node.
+ * @property onSendReply Invoked when sending a reply to a specific node.
+ * @property onDeleteReply Invoked when deleting a specific reply.
+ */
 data class ReviewRepliesCallbacks(
     val onToggleRootReplies: () -> Unit,
     val onRootReplyTextChanged: (String) -> Unit,
@@ -74,14 +87,28 @@ data class ReviewRepliesCallbacks(
     val onDeleteReply: (String) -> Unit,
 )
 
-/** Represents the state of a Reddit-style reply composer. */
+/**
+ * Represents the state of a Reddit-style reply composer.
+ *
+ * @property text The current text entered in the composer.
+ * @property isExpanded Whether the composer is expanded.
+ * @property isSending Whether the composer is currently sending a reply.
+ */
 data class RedditComposerState(
     val text: String,
     val isExpanded: Boolean,
     val isSending: Boolean,
 )
 
-/** Configuration for a Reddit-style composer instance. */
+/**
+ * Configuration for a Reddit-style composer instance.
+ *
+ * @property placeholder Placeholder text for the input field.
+ * @property compact If true, the composer is rendered in compact mode.
+ * @property onTextChanged Callback for text changes.
+ * @property onSend Callback invoked when sending the reply.
+ * @property onExpandChange Optional callback invoked when the composer expands or collapses.
+ */
 data class RedditComposerConfig(
     val placeholder: String,
     val compact: Boolean,
@@ -91,10 +118,12 @@ data class RedditComposerConfig(
 )
 
 /**
- * Entry point composable for the review replies section, wired to the [ReviewRepliesViewModel].
+ * Entry point composable for the review replies section, connected to [ReviewRepliesViewModel].
  *
- * This composable subscribes to the ViewModel state and builds the UI through
- * [ReviewRepliesSectionContent].
+ * Subscribes to the ViewModel state and delegates UI rendering to [ReviewRepliesSectionContent].
+ *
+ * @param viewModel The ViewModel providing the replies state.
+ * @param modifier Optional Compose [Modifier] for styling.
  */
 @Composable
 fun ReviewRepliesSection(
@@ -135,9 +164,14 @@ fun ReviewRepliesSection(
   )
 }
 
+
 /**
- * Pure UI composable that renders the replies section based on [ReviewRepliesUiState] and
- * [ReviewRepliesCallbacks], without direct knowledge of the ViewModel.
+ * Pure UI composable for rendering replies based on [ReviewRepliesUiState] and
+ * [ReviewRepliesCallbacks]. Does not directly access the ViewModel.
+ *
+ * @param state The current state of the replies section.
+ * @param callbacks Callbacks to handle user interactions.
+ * @param modifier Optional Compose [Modifier] for styling.
  */
 @Composable
 fun ReviewRepliesSectionContent(
@@ -171,7 +205,10 @@ fun ReviewRepliesSectionContent(
 /**
  * Header displayed when the root replies are collapsed.
  *
- * Provides a summary of the number of replies and a toggle to expand the thread.
+ * Shows a summary of the number of replies and allows toggling to expand the thread.
+ *
+ * @param state The current UI state of the replies section.
+ * @param onToggleRootReplies Callback invoked when the user taps the header to expand/collapse replies.
  */
 @Composable
 fun ReviewRepliesCollapsedHeader(
@@ -208,8 +245,13 @@ fun ReviewRepliesCollapsedHeader(
 }
 
 /**
- * Expanded content of the replies section, including the root composer, errors and the threaded
- * list of replies.
+ * Expanded content of the replies section, including the root composer, error messages,
+ * and the threaded list of child replies.
+ *
+ * @param state Current state of the replies section.
+ * @param callbacks Callbacks to handle user interactions.
+ * @param rootComposerExpanded Whether the root composer is expanded.
+ * @param onRootComposerExpandedChange Callback to update the root composer expanded state.
  */
 @Composable
 fun ReviewRepliesExpandedContent(
@@ -265,9 +307,12 @@ fun ReviewRepliesExpandedContent(
 }
 
 /**
- * Reddit-style threaded list of replies.
+ * Renders a Reddit-style threaded list of replies.
  *
- * Each [ReplyNodeUiState] is rendered as a separate threaded reply item.
+ * @param items List of nodes representing replies.
+ * @param state The UI state of the replies section.
+ * @param callbacks Callbacks for user interactions.
+ * @param modifier Optional Compose [Modifier] for styling.
  */
 @Composable
 fun RedditThreadList(
@@ -290,7 +335,14 @@ fun RedditThreadList(
       }
 }
 
-/** Renders a single reply node, including thread line, card and actions. */
+/**
+ * Displays a single reply node, including its card, thread line, and actions.
+ *
+ * @param node Node containing reply data and metadata.
+ * @param replyText Text for the inline composer (if any).
+ * @param callbacks Callbacks to handle reply actions.
+ * @param modifier Optional Compose [Modifier] for styling.
+ */
 @Composable
 fun RedditReplyItem(
     node: ReplyNodeUiState,
@@ -328,7 +380,11 @@ fun RedditReplyItem(
       }
 }
 
-/** Vertical thread line used to visually connect replies in a thread. */
+/**
+ * Vertical thread line used to visually connect replies in a thread.
+ *
+ * Draws a narrow vertical line to indicate reply hierarchy.
+ */
 @Composable
 fun ReplyThreadLine() {
   Box(
@@ -345,7 +401,15 @@ fun ReplyThreadLine() {
 }
 
 /**
- * Card that displays a single reply, including header, body, actions and optional inline composer.
+ * Card displaying a single reply.
+ *
+ * Includes header, body, actions, and optionally an inline composer for replying to this node.
+ *
+ * @param node The reply node state containing the reply and metadata.
+ * @param replyText Optional text for the inline composer below this reply.
+ * @param composerExpanded Whether the inline composer is currently expanded.
+ * @param onComposerExpandedChange Callback invoked when the composer expanded state changes.
+ * @param callbacks Callbacks for handling user actions (reply, delete, toggle).
  */
 @Composable
 fun ReplyCard(
@@ -393,7 +457,12 @@ fun ReplyCard(
 }
 
 /**
- * Header section of a reply card, including avatar, author, timestamp and optional delete action.
+ * Header section of a reply card.
+ *
+ * Displays avatar, author name, timestamp, and a delete button if the reply belongs to the current user.
+ *
+ * @param node The reply node state containing reply data and metadata.
+ * @param callbacks Callbacks to handle delete action.
  */
 @Composable
 fun ReplyHeader(
@@ -440,8 +509,11 @@ fun ReplyHeader(
 }
 
 /**
- * Avatar displayed for a reply. Uses "You" for the current user, otherwise initials from the author
- * id.
+ * Avatar displayed for a reply.
+ *
+ * Shows "You" if the reply is from the current user; otherwise shows initials of the author.
+ *
+ * @param node Reply node containing author information.
  */
 @Composable
 fun ReplyAvatar(node: ReplyNodeUiState) {
@@ -467,7 +539,14 @@ fun ReplyAvatar(node: ReplyNodeUiState) {
       }
 }
 
-/** Body text of a reply, including handling for deleted replies. */
+
+/**
+ * Body text of a reply.
+ *
+ * Shows deleted message if the reply is deleted.
+ *
+ * @param reply The [HuntReviewReply] to display.
+ */
 @Composable
 fun ReplyBody(reply: HuntReviewReply) {
   Text(
@@ -481,7 +560,16 @@ fun ReplyBody(reply: HuntReviewReply) {
       lineHeight = ReviewRepliesDimensions.ReplyTextLineHeight)
 }
 
-/** Action row displayed below a reply body, including reply and expand/collapse controls. */
+/**
+ * Action row displayed below a reply.
+ *
+ * Includes "Reply" button and optional expand/collapse button for child replies.
+ *
+ * @param node Reply node containing metadata and child count.
+ * @param composerExpanded Whether the inline composer is expanded.
+ * @param onComposerExpandedChange Callback when composer expand state changes.
+ * @param callbacks Callbacks for reply and thread toggle actions.
+ */
 @Composable
 fun ReplyActions(
     node: ReplyNodeUiState,
@@ -511,7 +599,11 @@ fun ReplyActions(
       }
 }
 
-/** Button used to open the inline composer for replying to a specific message. */
+/**
+ * Button to open the inline composer for replying to a specific message.
+ *
+ * @param onClick Callback when the reply button is clicked.
+ */
 @Composable
 fun ReplyButton(onClick: () -> Unit) {
   TextButton(
@@ -532,7 +624,12 @@ fun ReplyButton(onClick: () -> Unit) {
       }
 }
 
-/** Button that toggles the visibility of child replies for a given reply node. */
+/**
+ * Button to toggle visibility of child replies for a reply node.
+ *
+ * @param node Reply node containing child replies info.
+ * @param onToggle Callback invoked when toggle button is clicked.
+ */
 @Composable
 fun RepliesToggleButton(
     node: ReplyNodeUiState,
@@ -564,7 +661,15 @@ fun RepliesToggleButton(
   }
 }
 
-/** Inline composer displayed under a specific reply to allow direct responses in the thread. */
+/**
+ * Inline composer displayed under a specific reply for direct response.
+ *
+ * @param reply The reply this inline composer responds to.
+ * @param replyText Current text in the inline composer.
+ * @param composerExpanded Whether the composer is expanded.
+ * @param onComposerExpandedChange Callback when the composer expand state changes.
+ * @param callbacks Callbacks to handle text changes and send action.
+ */
 @Composable
 fun InlineReplyComposer(
     reply: HuntReviewReply,
@@ -605,7 +710,16 @@ fun InlineReplyComposer(
   )
 }
 
-/** Generic Reddit-style composer used for both root and inline reply inputs. */
+/**
+ * Generic Reddit-style composer used for both root and inline reply inputs.
+ *
+ * Chooses between a collapsed placeholder button and the expanded text input
+ * depending on the [state] and [config].
+ *
+ * @param state Current state of the composer (text, expanded, sending).
+ * @param config Configuration for placeholder, compact mode, callbacks, and expand behavior.
+ * @param modifier Optional [Modifier] for styling and layout.
+ */
 @Composable
 fun RedditStyleComposer(
     state: RedditComposerState,
@@ -627,7 +741,16 @@ fun RedditStyleComposer(
   }
 }
 
-/** Collapsed representation of the root composer, prompting the user to start a reply. */
+/**
+ * Collapsed representation of the root composer.
+ *
+ * Displays a placeholder button prompting the user to start a reply.
+ * When clicked, it invokes [onExpand] to switch to the expanded composer.
+ *
+ * @param placeholder Text to display in the collapsed button.
+ * @param onExpand Callback invoked when the button is clicked.
+ * @param modifier Optional [Modifier] for styling and layout.
+ */
 @Composable
 fun CollapsedComposerButton(
     placeholder: String,
@@ -665,8 +788,13 @@ fun CollapsedComposerButton(
       }
 }
 
+
 /**
- * Expanded content of the composer, including the text field and send button/progress indicator.
+ * Expanded content of the composer, including the text field and send button or progress indicator.
+ *
+ * @param state Current state of the composer (text, expanded, sending).
+ * @param config Configuration for callbacks, placeholder, and compact mode.
+ * @param modifier Optional [Modifier] for styling and layout.
  */
 @Composable
 fun ExpandedComposerContent(
@@ -724,7 +852,13 @@ fun ExpandedComposerContent(
       }
 }
 
-/** Text field used in the composer to enter a reply. */
+/**
+ * Text field used in the composer to enter a reply.
+ *
+ * @param state Current state of the composer (text, sending).
+ * @param config Configuration containing placeholder text and text change callback.
+ * @param modifier Optional [Modifier] for styling and layout.
+ */
 @Composable
 fun ComposerTextField(
     state: RedditComposerState,
@@ -755,7 +889,15 @@ fun ComposerTextField(
   )
 }
 
-/** Send button used in the composer, including disabled state handling. */
+/**
+ * Send button used in the composer.
+ *
+ * Handles the disabled state if the text is blank and calls [config.onSend] when clicked.
+ * Also collapses the composer if [config.onExpandChange] is provided.
+ *
+ * @param state Current state of the composer (text, sending).
+ * @param config Configuration containing callbacks for sending and expand/collapse.
+ */
 @Composable
 fun ComposerSendButton(
     state: RedditComposerState,
@@ -795,10 +937,16 @@ fun ComposerSendButton(
       }
 }
 
-/* ---------- Pure helper functions (no Compose) ---------- */
+ // ----------
+// Helper functions
+ //----------
 
-/** Returns a localized label for the total number of replies at the root level. */
-private fun replyCountLabel(totalCount: Int): String {
+/**
+ * Returns a localized label for the total number of replies at the root level.
+ *
+ * @param totalCount Total number of replies.
+ * @return Localized reply count label.
+ */private fun replyCountLabel(totalCount: Int): String {
   return if (totalCount > ReviewRepliesValues.ROOT_DEPTH) {
     val unit =
         if (totalCount == ReviewRepliesValues.ROOT_DEPTH + ReviewRepliesValues.SINGLE_REPLY_COUNT)
@@ -810,7 +958,13 @@ private fun replyCountLabel(totalCount: Int): String {
   }
 }
 
-/** Returns a localized label for the number of child replies of a node. */
+/**
+ * Returns a localized label for the number of child replies of a node.
+ *
+ * @param isExpanded Whether the node is currently expanded.
+ * @param totalChildren Total number of child replies.
+ * @return Localized label for child replies.
+ */
 private fun childRepliesLabel(isExpanded: Boolean, totalChildren: Int): String {
   if (isExpanded) return ReviewRepliesStrings.HIDE_REPLIES
 
@@ -822,7 +976,12 @@ private fun childRepliesLabel(isExpanded: Boolean, totalChildren: Int): String {
   return "$totalChildren $unit"
 }
 
-/** Returns the display label for the reply author, including handling for the current user. */
+/**
+ * Returns the display label for the reply author.
+ *
+ * @param node Node containing reply information.
+ * @return "You" if authored by current user, otherwise "u/{authorId}".
+ */
 private fun authorLabel(node: ReplyNodeUiState): String {
   return if (node.isMine) {
     ReviewRepliesStrings.YOU

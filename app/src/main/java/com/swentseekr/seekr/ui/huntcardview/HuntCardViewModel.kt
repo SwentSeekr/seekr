@@ -73,6 +73,12 @@ open class HuntCardViewModel(
 
   open val likedHuntsCache: StateFlow<Set<String>> = _likedHuntsCache.asStateFlow()
 
+    /**
+     * Checks whether the current user has liked a specific hunt.
+     *
+     * @param huntId The unique identifier of the hunt to check.
+     * @return `true` if the hunt is in the user's liked hunts cache, `false` otherwise.
+     */
   fun isHuntLiked(huntId: String): Boolean {
     return _likedHuntsCache.value.contains(huntId)
   }
@@ -90,6 +96,12 @@ open class HuntCardViewModel(
     _uiState.value = _uiState.value.copy(errorMsg = error)
   }
 
+    /**
+     * Fetches the [Profile] associated with the given [userId].
+     *
+     * @param userId The unique identifier of the user whose profile is to be retrieved.
+     * @return The [Profile] object if found, or `null` if no profile exists for the given [userId].
+     */
   private suspend fun fetchProfile(userId: String): Profile? = profileRepository.getProfile(userId)
   /**
    * Loads the profile of the author of a hunt and updates [authorProfile].
@@ -157,6 +169,15 @@ open class HuntCardViewModel(
     }
   }
 
+    /**
+     * Loads the set of hunts liked by the user and caches them locally.
+     *
+     * This function fetches the list of liked hunts for the given [userId] from the
+     * [profileRepository], extracts their unique IDs, and updates the [_likedHuntsCache] state.
+     * Any exceptions during the fetch are caught and logged.
+     *
+     * @param userId The unique identifier of the user whose liked hunts are to be loaded.
+     */
   private fun loadLikedHuntsCache(userId: String) {
     viewModelScope.launch {
       try {
@@ -382,17 +403,14 @@ open class HuntCardViewModel(
   fun onDoneClick() {
     val currentHuntUiState = _uiState.value
     val currentUserId = _uiState.value.currentUserId
-    // This will be added to the AchivedList in the profile
     val hunt = currentHuntUiState.hunt
     if (hunt == null) {
       setErrorMsg(HuntCardViewModelConstants.ERROR_ON_DONE_LOADING)
     } else {
       viewModelScope.launch {
         try {
-          // Call the suspend function inside a coroutine
           profileRepository.addDoneHunt(currentUserId ?: "", hunt)
 
-          // Update UI state
           _uiState.value = currentHuntUiState.copy(isAchieved = true)
         } catch (e: Exception) {
           Log.e(

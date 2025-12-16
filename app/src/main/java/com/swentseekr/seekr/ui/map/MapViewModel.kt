@@ -245,6 +245,8 @@ class MapViewModel(
    * - validatedCount (if success)
    * - currentDistanceToNextMeters
    * - error message if too far
+   *
+   * @param currentLocation The current GPS location of the user as a [LatLng] object.
    */
   fun validateCurrentPoint(currentLocation: LatLng) {
     val state = _uiState.value

@@ -4,8 +4,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.unit.dp
 
 /**
- * Constants used for the bottom navigation bar UI. All values come from the original hardcoded
- * values (no visual change).
+ * Centralized constants for the Bottom Navigation UI.
+ *
+ * Provides sizes, colors, shapes, and alpha values used in the bottom navigation bar.
+ * Extracted from original hardcoded values to avoid magic numbers and maintain consistency.
  */
 object BottomNavUIConstants {
 

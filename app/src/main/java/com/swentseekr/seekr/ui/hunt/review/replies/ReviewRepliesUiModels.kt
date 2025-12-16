@@ -35,38 +35,23 @@ sealed class ReplyTarget {
  * card/replies section will render.
  */
 data class ReplyNodeUiState(
-    /** Underlying domain model for this reply. */
     val reply: HuntReviewReply,
-    /** Depth in the visual tree; 0 = direct reply to review, 1 = reply to that reply, etc. */
     val depth: Int,
-    /** True if this reply's child thread is currently expanded in the UI. */
     val isExpanded: Boolean,
-    /** True if this reply currently shows its inline reply composer. */
     val isComposerOpen: Boolean,
-    /** True if the current user is the author of this reply (show delete button). */
     val isMine: Boolean,
-    /** Number of direct + nested children under this reply (for "See X replies"). */
     val totalChildrenCount: Int,
 )
 
 /** UI state for the replies section of a single review card. This is scoped to one review. */
 data class ReviewRepliesUiState(
-    /** ID of the review whose thread is being represented. */
     val reviewId: String,
-    /** True while replies for this review are being loaded. */
     val isLoading: Boolean = false,
-    /** Flattened list of reply nodes, already ordered and with depth. */
     val replies: List<ReplyNodeUiState> = emptyList(),
-    /** True while a reply is currently being sent. */
     val isSendingReply: Boolean = false,
-    /** Current text in the inline composer for the root review. */
     val rootReplyText: String = ReviewRepliesUiModelConstants.ROOT_BASE_REPLY_TEXT,
-    /**
-     * Map from parent reply ID to current composer text for that reply. This drives the inline
-     * reply fields under each reply.
-     */
+
     val childReplyTexts: Map<String, String> = emptyMap(),
-    /** Optional error message to briefly show near the replies section. */
     val errorMessage: String? = null,
     val isRootExpanded: Boolean = false,
     val totalReplyCount: Int = ReviewRepliesUiModelConstants.TOTAL_REPLY_BASE_COUNT,

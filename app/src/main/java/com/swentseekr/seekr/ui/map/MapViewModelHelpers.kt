@@ -16,6 +16,7 @@ import org.json.JSONObject
 /**
  * Converts a domain-level [Location] model into a Google Maps [LatLng] object.
  *
+ * @receiver Location to convert.
  * @return a LatLng containing the same latitude and longitude.
  */
 fun Location.toLatLng(): LatLng = LatLng(latitude, longitude)
@@ -63,8 +64,10 @@ fun distanceMeters(from: LatLng, to: LatLng): Int? =
 /**
  * Computes the raw distance in meters (as a double) between two points.
  *
- * @throws Exception if the SphericalUtil computation fails.
- */
+ * @param from starting coordinate.
+ * @param to destination coordinate.
+ * @return distance in meters as a double.
+ * @throws Exception if the SphericalUtil computation fails. */
 fun computeDistanceMetersRaw(from: LatLng, to: LatLng): Double =
     SphericalUtil.computeDistanceBetween(from, to)
 
@@ -139,6 +142,13 @@ fun requestDirectionsPolyline(
 /**
  * Builds a full Directions API URL with origin, destination, travel mode, and waypoints.
  *
+ * @param originLat latitude of the origin.
+ * @param originLng longitude of the origin.
+ * @param destLat latitude of the destination.
+ * @param destLng longitude of the destination.
+ * @param waypoints optional list of intermediate points `(latitude, longitude)`.
+ * @param travelMode Google Directions travel mode (e.g., "walking").
+ * @param apiKey Google Maps API key.
  * @return a properly encoded [URL] ready for HTTP requests.
  */
 private fun buildDirectionsUrl(
@@ -187,9 +197,12 @@ private fun buildDirectionsUrl(
 }
 
 /**
- * Factory used for opening HTTP connections.
+ * Factory used for opening HTTP connections to a Directions API URL.
  *
- * Overridable for unit tests through dependency injection.
+ * This lambda is overridable for unit tests to provide a mock or stubbed [HttpURLConnection].
+ *
+ * @param [URL] to which the HTTP connection should be opened.
+ * @return a configured [HttpURLConnection] with GET method, timeouts, and input enabled.
  */
 @VisibleForTesting
 var directionsConnectionFactory: (URL) -> HttpURLConnection = { url ->
@@ -201,7 +214,12 @@ var directionsConnectionFactory: (URL) -> HttpURLConnection = { url ->
   }
 }
 
-/** Opens an HTTP connection to a Directions API URL. */
+/**
+ * Opens an HTTP connection to a Directions API URL using the overridable connection factory.
+ *
+ * @param url the fully built [URL] for the Directions API request.
+ * @return an [HttpURLConnection] ready for input and configured with the proper timeouts and method.
+ */
 private fun openDirectionsConnection(url: URL): HttpURLConnection = directionsConnectionFactory(url)
 
 /**
@@ -227,16 +245,17 @@ private fun parseDirectionsResponse(json: JSONObject): List<LatLng> {
   val fullPath = buildFullPath(legs)
   if (fullPath.isNotEmpty()) return fullPath
 
-  // Fallback: use overview polyline
   val overview = firstRoute.getJSONObject(JsonKeys.OVERVIEW_POLYLINE).getString(JsonKeys.POINTS)
 
   return PolyUtil.decode(overview)
 }
 
 /**
- * Ensures a Directions API JSON response has status=OK, otherwise throws exception.
+ * Ensures a Directions API JSON response has status=OK, otherwise throws an exception.
  *
- * @throws IllegalStateException if API returned an error.
+ * @param json full [JSONObject] returned by the Directions API.
+ * @return Unit. Throws [IllegalStateException] if the API returned an error or non-OK status.
+ * @throws IllegalStateException if the API response contains an error.
  */
 private fun ensureStatusOk(json: JSONObject) {
   val status = json.optString(JsonKeys.STATUS)
@@ -269,8 +288,9 @@ private fun buildFullPath(legs: JSONArray): List<LatLng> {
  *
  * Ensures no duplicate joining points by dropping the first point when extending.
  *
- * @param steps `"steps"` array containing encoded polylines.
- * @param fullPath mutable list to append coordinates to.
+ * @param steps the `"steps"` JSONArray from a Directions API leg containing encoded polylines.
+ * @param fullPath mutable list of [LatLng] coordinates to append the decoded step points to.
+ * @return Unit. The [fullPath] list is updated in-place.
  */
 private fun appendStepsToPath(steps: JSONArray, fullPath: MutableList<LatLng>) {
   for (j in 0 until steps.length()) {
@@ -279,7 +299,6 @@ private fun appendStepsToPath(steps: JSONArray, fullPath: MutableList<LatLng>) {
 
     val stepPoints = PolyUtil.decode(poly).toList()
 
-    // Avoid repeating the connection point
     if (fullPath.isNotEmpty()) {
       fullPath.addAll(stepPoints.drop(1))
     } else {

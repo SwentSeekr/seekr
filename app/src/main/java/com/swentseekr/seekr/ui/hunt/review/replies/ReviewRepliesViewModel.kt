@@ -14,7 +14,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** ViewModel managing replies for a *single* review card. */
+/**
+ * ViewModel managing replies for a single review card.
+ *
+ * Handles fetching, sending, deleting, and updating replies in a thread-like structure.
+ * Maintains UI state including expanded replies, open composers, and error messages.
+ *
+ * @param reviewId The ID of the review this ViewModel is associated with.
+ * @param replyRepository Repository used for fetching, adding, and deleting replies.
+ * @param dispatcher Coroutine dispatcher used for asynchronous operations.
+ * @param currentUserIdProvider Lambda that provides the current authenticated user's ID, or null if not signed in.
+ */
 class ReviewRepliesViewModel(
     private val reviewId: String,
     private val replyRepository: HuntReviewReplyRepository =
@@ -28,18 +38,17 @@ class ReviewRepliesViewModel(
   private val _uiState = MutableStateFlow(ReviewRepliesUiState(reviewId = reviewId))
   val uiState: StateFlow<ReviewRepliesUiState> = _uiState.asStateFlow()
 
-  /** Latest raw replies snapshot coming from the repository. */
   private var allReplies: List<HuntReviewReply> = emptyList()
-
-  /** IDs of replies whose children are currently expanded. */
   private val expandedReplyIds: MutableSet<String> = mutableSetOf()
-
-  /** IDs of replies whose inline composer is currently open. */
   private val composerOpenReplyIds: MutableSet<String> = mutableSetOf()
-
-  /** Prevents starting multiple collectors for the same ViewModel. */
   private var hasStarted: Boolean = false
 
+  /**
+   * Initializes listening for replies on this review.
+   *
+   * Sets up a coroutine to collect live updates from the repository.
+   * Updates the UI state with loading/error information.
+   */
   fun start() {
     if (hasStarted) return
     hasStarted = true
@@ -55,6 +64,12 @@ class ReviewRepliesViewModel(
     }
   }
 
+  /**
+   * Updates the reply text for a given target (root review or child reply).
+   *
+   * @param target The target reply or root review to update text for.
+   * @param newText The new text to set in the composer.
+   */
   fun onReplyTextChanged(target: ReplyTarget, newText: String) {
     _uiState.update { state ->
       when (target) {
@@ -68,6 +83,11 @@ class ReviewRepliesViewModel(
     }
   }
 
+  /**
+   * Toggles the expanded/collapsed state of a reply thread.
+   *
+   * @param parentReplyId The parent reply ID to toggle; null toggles the root review thread.
+   */
   fun onToggleReplies(parentReplyId: String?) {
     if (parentReplyId == null) {
       _uiState.update { it.copy(isRootExpanded = !it.isRootExpanded) }
@@ -79,10 +99,14 @@ class ReviewRepliesViewModel(
     rebuildFromRawReplies(allReplies)
   }
 
+  /**
+   * Toggles the inline composer visibility for a specific reply.
+   *
+   * @param target The reply target for which the composer should be toggled.
+   */
   fun onToggleComposer(target: ReplyTarget) {
     when (target) {
       is ReplyTarget.RootReview -> {
-        // Root composer is always visible in current design, ignore.
       }
       is ReplyTarget.Reply -> {
         val id = target.parentReplyId
@@ -94,6 +118,14 @@ class ReviewRepliesViewModel(
     }
   }
 
+  /**
+   * Sends a reply to the specified target (root review or child reply).
+   *
+   * Handles validation, empty text errors, and signing in checks.
+   * Updates the UI state with sending progress and resets composer text upon success.
+   *
+   * @param target The target to which the reply should be sent.
+   */
   fun sendReply(target: ReplyTarget) {
     val currentUserId = currentUserIdOrNull()
     if (currentUserId == null) {
@@ -136,7 +168,6 @@ class ReviewRepliesViewModel(
       try {
         replyRepository.addReply(newReply)
 
-        // Clear composer text for this target.
         _uiState.update { s ->
           when (target) {
             is ReplyTarget.RootReview -> s.copy(rootReplyText = "")
@@ -148,7 +179,6 @@ class ReviewRepliesViewModel(
           }
         }
 
-        // Close inline composer for this reply target.
         if (target is ReplyTarget.Reply) {
           composerOpenReplyIds.remove(target.parentReplyId)
         }
@@ -164,6 +194,11 @@ class ReviewRepliesViewModel(
     }
   }
 
+  /**
+   * Deletes a reply authored by the current user.
+   *
+   * @param replyId The ID of the reply to delete.
+   */
   fun deleteReply(replyId: String) {
     val currentUserId = currentUserIdOrNull()
     if (currentUserId == null) {
@@ -195,10 +230,14 @@ class ReviewRepliesViewModel(
     }
   }
 
-  fun clearError() {
-    _uiState.update { it.copy(errorMessage = null) }
-  }
-
+  /**
+   * Rebuilds the flattened list of [ReplyNodeUiState] from raw replies.
+   *
+   * Takes into account expanded replies, composer visibility, and calculates
+   * total children count for proper thread display.
+   *
+   * @param rawReplies The raw list of replies fetched from the repository.
+   */
   internal fun rebuildFromRawReplies(rawReplies: List<HuntReviewReply>) {
     val currentState = _uiState.value
     val rootExpanded = currentState.isRootExpanded
@@ -209,6 +248,12 @@ class ReviewRepliesViewModel(
 
     val memoChildrenCount = mutableMapOf<String, Int>()
 
+    /**
+     * Counts the total number of descendants for a given reply ID recursively.
+     *
+     * @param replyId The reply ID for which to count all descendant replies.
+     * @return The total number of descendant replies.
+     */
     fun countDescendants(replyId: String): Int {
       memoChildrenCount[replyId]?.let {
         return it
@@ -225,6 +270,14 @@ class ReviewRepliesViewModel(
     val currentUserId = currentUserIdOrNull()
     val flattened = mutableListOf<ReplyNodeUiState>()
 
+    /**
+     * Recursively traverses the reply tree to build a flattened list of [ReplyNodeUiState].
+     *
+     * Handles expanded/collapsed states, child reply counts, and composer visibility.
+     *
+     * @param parentId The parent reply ID to start traversing from (null for root-level replies).
+     * @param depth The current nesting depth for proper indentation/display.
+     */
     fun traverse(parentId: String?, depth: Int) {
       val children = childrenByParent[parentId].orEmpty()
       for (child in children) {
@@ -260,5 +313,10 @@ class ReviewRepliesViewModel(
     _uiState.update { it.copy(replies = flattened, totalReplyCount = totalReplyCount) }
   }
 
+  /**
+   * Retrieves the current user ID or null if the user is not signed in.
+   *
+   * @return The current Firebase Auth user ID or null.
+   */
   internal fun currentUserIdOrNull(): String? = currentUserIdProvider()
 }

@@ -25,7 +25,6 @@ fun EditHuntScreen(
     onDone: () -> Unit = {},
     testMode: Boolean = false,
 ) {
-  // Load hunt data when a non-blank huntId is provided.
   LaunchedEffect(huntId) {
     if (huntId.isNotBlank()) {
       editHuntViewModel.load(huntId)
@@ -45,7 +44,6 @@ fun EditHuntScreen(
           DeleteAction(
               show = true,
               onClick = {
-                // Delete the current hunt and navigate back when the operation completes.
                 scope.launch {
                   editHuntViewModel.deleteCurrentHunt()
                   onGoBack()
