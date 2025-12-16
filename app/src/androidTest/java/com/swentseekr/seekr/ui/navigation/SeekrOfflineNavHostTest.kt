@@ -25,9 +25,8 @@ import org.junit.runner.RunWith
 /**
  * UI tests for [SeekrOfflineNavHost] navigation in offline mode.
  *
- * This test suite verifies that navigating to different screens within the
- * offline navigation host works correctly, including HuntCardScreen,
- * ImageReviewScreen, and bottom bar tab navigation.
+ * This test suite verifies that navigating to different screens within the offline navigation host
+ * works correctly, including HuntCardScreen, ImageReviewScreen, and bottom bar tab navigation.
  */
 @RunWith(AndroidJUnit4::class)
 class SeekrOfflineNavHostTest {

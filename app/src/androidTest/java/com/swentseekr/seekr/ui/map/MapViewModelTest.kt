@@ -53,11 +53,9 @@ class MainDispatcherRule(val dispatcher: TestDispatcher = StandardTestDispatcher
 /**
  * Unit tests for the MapViewModel.
  *
- * This test suite verifies the functionality of the MapViewModel, including
- * initial state loading, hunt selection and focus, route computation,
- * and hunt lifecycle management.
+ * This test suite verifies the functionality of the MapViewModel, including initial state loading,
+ * hunt selection and focus, route computation, and hunt lifecycle management.
  */
-
 class MapViewModelTest {
 
   @get:Rule val mainDispatcherRule = MainDispatcherRule()

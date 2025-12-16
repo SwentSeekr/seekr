@@ -4,6 +4,7 @@ import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.HuntStatus
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.ui.hunt.HuntUIState
+
 /** Shared constants for the `Preview` tests. */
 object PreviewTestConstants {
   val exampleUiState =

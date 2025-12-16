@@ -46,8 +46,8 @@ import org.junit.runner.RunWith
 /**
  * Integration tests for EditHuntScreen and EditHuntViewModel.
  *
- * Verifies loading, editing, saving, and deleting hunts using a Firestore-backed
- * HuntsRepository in the Firebase test environment with emulator support.
+ * Verifies loading, editing, saving, and deleting hunts using a Firestore-backed HuntsRepository in
+ * the Firebase test environment with emulator support.
  */
 @RunWith(AndroidJUnit4::class)
 class EditHuntScreenTest {

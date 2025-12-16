@@ -15,11 +15,9 @@ import org.junit.Test
 /**
  * Unit tests for the ProfileRepositoryLocal class.
  *
- * This test suite verifies the functionality of adding, updating,
- * and retrieving user profiles and their associated hunts
- * in the local repository.
+ * This test suite verifies the functionality of adding, updating, and retrieving user profiles and
+ * their associated hunts in the local repository.
  */
-
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileRepositoryLocalTest {
   private lateinit var repository: ProfileRepositoryLocal

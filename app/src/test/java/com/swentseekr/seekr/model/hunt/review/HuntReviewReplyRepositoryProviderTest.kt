@@ -7,8 +7,8 @@ import org.junit.Test
 /**
  * Test suite for the HuntReviewReplyRepositoryProvider.
  *
- * This suite verifies that the repository provider correctly
- * initializes with a test override when set.
+ * This suite verifies that the repository provider correctly initializes with a test override when
+ * set.
  */
 class HuntReviewReplyRepositoryProviderTest {
 

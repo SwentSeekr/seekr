@@ -30,11 +30,10 @@ import org.junit.Test
 /**
  * Firestore integration tests for the ProfileRepository.
  *
- * This test suite validates profile creation, retrieval, updates, onboarding logic,
- * hunt associations (done, liked), image handling, and data mapping between Firestore
- * documents and domain models using the Firebase emulator.
+ * This test suite validates profile creation, retrieval, updates, onboarding logic, hunt
+ * associations (done, liked), image handling, and data mapping between Firestore documents and
+ * domain models using the Firebase emulator.
  */
-
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileRepositoryFirestoreTest {
   private lateinit var repository: ProfileRepository

@@ -34,11 +34,9 @@ import org.junit.Test
 /**
  * Unit tests for the AuthViewModel.
  *
- * This test suite verifies Google sign-in flows, error handling, cancellation cases,
- * onboarding checks, and state updates by mocking the authentication, credential,
- * and profile repositories.
+ * This test suite verifies Google sign-in flows, error handling, cancellation cases, onboarding
+ * checks, and state updates by mocking the authentication, credential, and profile repositories.
  */
-
 @OptIn(ExperimentalCoroutinesApi::class)
 class AuthViewModelTest {
 

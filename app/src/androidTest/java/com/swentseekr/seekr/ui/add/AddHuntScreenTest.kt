@@ -28,11 +28,9 @@ private val add_hunt_text = "Add your Hunt"
 /**
  * UI tests for the Add Hunt screen.
  *
- * This test suite verifies screen initialization, navigation behavior,
- * form validation, save action enablement, and ViewModel-driven state
- * handling during the hunt creation flow.
+ * This test suite verifies screen initialization, navigation behavior, form validation, save action
+ * enablement, and ViewModel-driven state handling during the hunt creation flow.
  */
-
 class AddHuntScreenTest {
 
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()

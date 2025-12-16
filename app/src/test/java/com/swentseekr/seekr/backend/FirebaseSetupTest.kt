@@ -12,8 +12,8 @@ import org.robolectric.annotation.Config
 /**
  * Unit test to verify Firebase initialization in a test environment.
  *
- * This test ensures that FirebaseApp can be initialized successfully
- * within the Robolectric testing framework.
+ * This test ensures that FirebaseApp can be initialized successfully within the Robolectric testing
+ * framework.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)

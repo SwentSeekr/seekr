@@ -28,10 +28,9 @@ private val confirmButtonText2 = "Confirm Points (2)"
 /**
  * UI tests for the Add Points map screen and point naming dialog.
  *
- * This test suite verifies map-based point selection, confirm/cancel behavior,
- * point count handling, and validation logic for naming hunt points.
+ * This test suite verifies map-based point selection, confirm/cancel behavior, point count
+ * handling, and validation logic for naming hunt points.
  */
-
 class AddPointsMapScreenTest {
 
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()

@@ -6,8 +6,7 @@ import org.junit.Test
 /**
  * Unit tests for the Point data class.
  *
- * This test suite verifies the distance calculation
- * between two Point instances.
+ * This test suite verifies the distance calculation between two Point instances.
  */
 class PointTest {
 

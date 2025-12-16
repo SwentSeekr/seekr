@@ -8,8 +8,8 @@ import org.junit.Test
 /**
  * Unit tests for the HuntReviewRepositoryLocal class.
  *
- * This test suite verifies the functionality of adding, retrieving,
- * updating, and deleting hunt reviews in the local repository.
+ * This test suite verifies the functionality of adding, retrieving, updating, and deleting hunt
+ * reviews in the local repository.
  */
 class HuntReviewRepositoryLocalTest {
   private lateinit var repository: HuntReviewRepositoryLocal

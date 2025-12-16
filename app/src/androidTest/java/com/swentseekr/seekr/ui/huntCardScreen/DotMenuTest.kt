@@ -15,8 +15,8 @@ import org.junit.Test
 /**
  * UI tests for the DotMenu component.
  *
- * This test suite verifies that the DotMenu opens correctly
- * and that the Edit and Delete actions trigger their respective callbacks.
+ * This test suite verifies that the DotMenu opens correctly and that the Edit and Delete actions
+ * trigger their respective callbacks.
  */
 class DotMenuTest {
 

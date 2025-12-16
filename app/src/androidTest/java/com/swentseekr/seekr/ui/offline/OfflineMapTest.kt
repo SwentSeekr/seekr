@@ -13,8 +13,8 @@ import org.junit.runner.RunWith
 /**
  * UI tests for the OfflineMapScreen composable.
  *
- * This test suite verifies that the offline map screen displays
- * the correct message when there is no internet connection.
+ * This test suite verifies that the offline map screen displays the correct message when there is
+ * no internet connection.
  */
 @RunWith(AndroidJUnit4::class)
 class OfflineMapTest {

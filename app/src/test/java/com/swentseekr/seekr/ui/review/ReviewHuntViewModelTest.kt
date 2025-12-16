@@ -37,10 +37,9 @@ const val HUNT = "hunt123"
 /**
  * Unit tests for the ReviewHuntViewModel.
  *
- * This test suite verifies the functionality of the ReviewHuntViewModel,
- * including loading hunts, managing review text and ratings,
- * handling photo uploads and deletions, submitting reviews,
- * and error handling.
+ * This test suite verifies the functionality of the ReviewHuntViewModel, including loading hunts,
+ * managing review text and ratings, handling photo uploads and deletions, submitting reviews, and
+ * error handling.
  */
 class ReviewHuntViewModelTest {
 

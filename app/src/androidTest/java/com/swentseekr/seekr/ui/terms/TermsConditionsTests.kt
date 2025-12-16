@@ -10,8 +10,8 @@ import org.junit.runner.RunWith
 /**
  * UI tests for the TermsAndConditionsScreen composable.
  *
- * This test suite verifies that the terms and conditions screen components are displayed
- * correctly and that user interactions, such as clicking the back button, function as expected.
+ * This test suite verifies that the terms and conditions screen components are displayed correctly
+ * and that user interactions, such as clicking the back button, function as expected.
  */
 @RunWith(AndroidJUnit4::class)
 class TermsAndConditionsScreenTest {

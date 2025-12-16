@@ -17,12 +17,13 @@ import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
 import org.junit.Test
+
 /**
  * UI tests for the PreviewHuntScreen composable.
  *
- * This test suite verifies that the preview hunt screen components are displayed
- * correctly based on various UI states and that user interactions, such as
- * clicking the back and confirm buttons, function as expected.
+ * This test suite verifies that the preview hunt screen components are displayed correctly based on
+ * various UI states and that user interactions, such as clicking the back and confirm buttons,
+ * function as expected.
  */
 class PreviewHuntScreenTest {
 

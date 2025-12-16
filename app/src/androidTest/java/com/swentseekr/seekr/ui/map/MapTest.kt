@@ -23,8 +23,8 @@ import org.junit.Test
 /**
  * UI tests for the Map screen and its interactions.
  *
- * This test suite verifies map display, hunt selection,
- * popup interactions, permission handling, and hunt starting/stopping flows.
+ * This test suite verifies map display, hunt selection, popup interactions, permission handling,
+ * and hunt starting/stopping flows.
  */
 class MapTest {
 

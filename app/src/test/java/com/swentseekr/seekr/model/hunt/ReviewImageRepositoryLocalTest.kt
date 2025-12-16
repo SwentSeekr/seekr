@@ -9,9 +9,8 @@ import org.junit.Test
 /**
  * Unit tests for the ReviewImageRepositoryLocal.
  *
- * This test suite verifies that the uploadReviewPhoto method
- * returns the expected local URL format and that the deleteReviewPhoto
- * method executes without throwing exceptions.
+ * This test suite verifies that the uploadReviewPhoto method returns the expected local URL format
+ * and that the deleteReviewPhoto method executes without throwing exceptions.
  */
 class ReviewImageRepositoryLocalTest {
   private lateinit var repository: ReviewImageRepositoryLocal

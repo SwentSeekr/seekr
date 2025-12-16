@@ -15,11 +15,9 @@ import org.junit.Test
 /**
  * Firestore-backed integration tests for the HuntReviewRepository.
  *
- * This test suite verifies CRUD operations on hunt reviews, including
- * ID generation, creation, retrieval, update, and deletion, using the
- * Firebase test environment and emulator when available.
+ * This test suite verifies CRUD operations on hunt reviews, including ID generation, creation,
+ * retrieval, update, and deletion, using the Firebase test environment and emulator when available.
  */
-
 class HuntReviewRepositoryFirestoreTest {
   private val repository: HuntReviewRepository = HuntReviewRepositoryProvider.repository
 

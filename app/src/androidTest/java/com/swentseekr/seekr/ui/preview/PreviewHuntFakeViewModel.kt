@@ -5,6 +5,7 @@ import com.swentseekr.seekr.ui.hunt.HuntUIState
 import com.swentseekr.seekr.ui.hunt.preview.PreviewHuntViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+
 /** A fake implementation of [PreviewHuntViewModel] for testing purposes. */
 class FakePreviewHuntViewModel(
     initialState: HuntUIState = PreviewTestConstants.exampleUiState,
