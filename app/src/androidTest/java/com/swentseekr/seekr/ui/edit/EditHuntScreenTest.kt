@@ -11,8 +11,8 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.text.AnnotatedString
@@ -198,7 +198,7 @@ class EditHuntScreenTest {
   }
 
   @Test
-  fun delete_via_menu_deletes_hunt_and_calls_onGoBack() = runBlocking {
+  fun delete_via_button_deletes_hunt_and_calls_onGoBack() = runBlocking {
     // 1) Create a hunt to be edited/deleted
     createHunt(title = "To Delete", description = "Will be removed")
     val allBefore = repository.getAllHunts()
@@ -208,30 +208,32 @@ class EditHuntScreenTest {
     val vm = EditHuntViewModel(repository)
     var backCalled = false
 
-    // 2) Set content with EditHuntScreen (which wires in showDeleteAction + onDeleteClick)
+    // 2) Set content
     setContent(
         huntId = id,
         vm = vm,
         onGoBack = { backCalled = true },
     )
 
-    // 3) Wait until the hunt is loaded into the view model
+    // 3) Wait until the hunt is loaded into the view model (UI ready)
     composeRule.waitUntil(timeoutMillis = 5_000) { vm.uiState.value.title.isNotEmpty() }
 
-    // 4) Initially, the delete button should not be visible
-    composeRule.onNodeWithText("Delete").assertDoesNotExist()
+    // 4) Scroll to the delete button (it's at the bottom)
+    composeRule.onNodeWithTag(HuntScreenTestTags.BUTTON_DELETE_HUNT).performScrollTo()
 
-    // 5) Click the 3-dots "More actions" icon to toggle the delete button
-    composeRule.onNodeWithContentDescription("More actions").performClick()
+    // 5) Now it should be visible and clickable
+    composeRule.onNodeWithTag(HuntScreenTestTags.BUTTON_DELETE_HUNT).assertIsDisplayed()
+    composeRule.onNodeWithTag(HuntScreenTestTags.BUTTON_DELETE_HUNT).assertIsEnabled()
 
-    // 6) Now the delete button should be visible in the top bar
-    composeRule.onNodeWithText("Delete").assertIsDisplayed()
+    // 6) Click delete (triggers deleteCurrentHunt() then onGoBack())
+    composeRule.onNodeWithTag(HuntScreenTestTags.BUTTON_DELETE_HUNT).performClick()
 
-    // 7) Click "Delete" to trigger deleteCurrentHunt() + onGoBack()
-    composeRule.onNodeWithText("Delete").performClick()
-
-    // 8) Wait until onGoBack has been called, which happens after deleteCurrentHunt()
+    // 7) Wait until navigation callback is invoked
     composeRule.waitUntil(timeoutMillis = 5_000) { backCalled }
+
+    // 8) Verify it’s gone in repo
+    val after = repository.getAllHunts()
+    assertTrue(after.none { it.uid == id })
   }
 
   // Helpers
