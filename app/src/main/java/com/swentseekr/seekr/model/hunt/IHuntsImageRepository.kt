@@ -62,5 +62,3 @@ interface IHuntsImageRepository {
    */
   suspend fun deleteImageByUrl(url: String)
 }
-
-// documentation done assisted by AI

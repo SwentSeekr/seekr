@@ -11,11 +11,30 @@ import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withTimeoutOrNull
 
+/**
+ * Firebase Storage implementation of [IHuntsImageRepository] that handles uploading and deletion of
+ * hunt-related images in Firebase Storage.
+ *
+ * Storage structure:
+ * - hunts_images/{huntId}/main_<timestamp>.jpg
+ * - hunts_images/{huntId}/other_<timestamp>_<name>.jpg
+ *
+ * @property storage The Firebase Storage instance used for image operations.
+ */
 class HuntsImageRepository(private val storage: FirebaseStorage = FirebaseStorage.getInstance()) :
     IHuntsImageRepository {
 
+  /** Root reference for all hunt images in Firebase Storage. */
   private val rootRef = storage.reference.child(HuntsImageRepositoryConstantsString.PATH)
 
+  /**
+   * Uploads the main image for a hunt that is stored under the hunt’s folder with a timestamp-based
+   * filename.
+   *
+   * @param huntId The ID of the hunt.
+   * @param imageUri The URI of the image to upload.
+   * @return The public download URL of the uploaded image.
+   */
   override suspend fun uploadMainImage(huntId: String, imageUri: Uri): String {
     val ref =
         rootRef.child(
@@ -24,6 +43,14 @@ class HuntsImageRepository(private val storage: FirebaseStorage = FirebaseStorag
     return ref.downloadUrl.await().toString()
   }
 
+  /**
+   * Uploads additional images for a hunt concurrently, with a maximum of 5 parallel uploads to
+   * avoid overwhelming network or storage resources.
+   *
+   * @param huntId The ID of the hunt.
+   * @param imageUris A list of image URIs to upload.
+   * @return A list of download URLs corresponding to the uploaded images.
+   */
   override suspend fun uploadOtherImages(huntId: String, imageUris: List<Uri>): List<String> =
       coroutineScope {
         // Limit to 5 parallel uploads at a time
@@ -50,6 +77,16 @@ class HuntsImageRepository(private val storage: FirebaseStorage = FirebaseStorag
         uploadJobs.awaitAll()
       }
 
+  /**
+   * Deletes all images associated with a hunt.
+   *
+   * Attempts to list and delete all files under the hunt’s image folder. A timeout is applied to
+   * avoid indefinite blocking.
+   *
+   * Failures are logged but do not throw exceptions.
+   *
+   * @param huntId The ID of the hunt whose images should be deleted.
+   */
   override suspend fun deleteAllHuntImages(huntId: String) {
     try {
       val folder = rootRef.child(huntId)
@@ -80,6 +117,13 @@ class HuntsImageRepository(private val storage: FirebaseStorage = FirebaseStorag
     }
   }
 
+  /**
+   * Deletes a single image using its download URL.
+   *
+   * If the deletion fails, the error is logged and the operation completes silently.
+   *
+   * @param url The Firebase Storage download URL of the image to delete.
+   */
   override suspend fun deleteImageByUrl(url: String) {
     try {
       val ref = storage.getReferenceFromUrl(url)

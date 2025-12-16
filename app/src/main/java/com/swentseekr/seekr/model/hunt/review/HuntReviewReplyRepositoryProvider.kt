@@ -2,6 +2,11 @@ package com.swentseekr.seekr.model.hunt.review
 
 import com.google.firebase.firestore.FirebaseFirestore
 
+/**
+ * Provides a singleton instance of [HuntReviewReplyRepository].
+ *
+ * By default, it uses [HuntReviewReplyRepositoryFirestore] backed by Firebase Firestore.
+ */
 object HuntReviewReplyRepositoryProvider {
 
   @Volatile private var overrideRepository: HuntReviewReplyRepository? = null
@@ -14,7 +19,11 @@ object HuntReviewReplyRepositoryProvider {
   val repository: HuntReviewReplyRepository
     get() = overrideRepository ?: defaultRepository
 
-  /** Use this in unit tests to avoid touching Firebase. */
+  /**
+   * Sets a custom repository for unit tests.
+   *
+   * @param repo The repository to use during testing.
+   */
   fun setTestRepository(repo: HuntReviewReplyRepository) {
     overrideRepository = repo
   }
