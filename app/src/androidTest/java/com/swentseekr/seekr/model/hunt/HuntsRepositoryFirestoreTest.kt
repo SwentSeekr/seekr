@@ -3,6 +3,9 @@ package com.swentseekr.seekr.model.hunt
 import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreConstantsStrings.FIELD_HUNT_ID
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreConstantsStrings.HUNT_REVIEW_REPLY_COLLECTION_PATH
+import com.swentseekr.seekr.model.hunt.review.HuntReviewReplyFirestoreConstants.FIELD_REVIEW_ID
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.utils.FakeHuntsImageRepository
 import com.swentseekr.seekr.utils.FirebaseTestEnvironment
@@ -269,5 +272,162 @@ class HuntsRepositoryFirestoreTest {
 
     repo.editHunt(
         huntID = "errorTest", newValue = updated, mainImageUri = Uri.parse("file://image"))
+  }
+
+  @Test
+  fun addHunt_uploadsOtherImages_whenProvided_andStoresUrls() = runTest {
+    val fakeImageRepo = FakeHuntsImageRepository()
+    val db = FirebaseFirestore.getInstance()
+    val repo = HuntsRepositoryFirestore(db = db, imageRepo = fakeImageRepo)
+
+    val hunt = hunt1.copy(uid = "addWithOthers", mainImageUrl = "", otherImagesUrls = emptyList())
+
+    val otherUris =
+        listOf(
+            Uri.parse("file://other1"),
+            Uri.parse("file://other2"),
+        )
+
+    repo.addHunt(hunt = hunt, mainImageUri = null, otherImageUris = otherUris)
+
+    val stored = repo.getHunt("addWithOthers")
+    assertEquals("addWithOthers", stored.uid)
+    assertTrue("Expected other image urls to be stored", stored.otherImagesUrls.isNotEmpty())
+    assertEquals(2, stored.otherImagesUrls.size)
+  }
+
+  @Test
+  fun addHunt_whenOtherUploadFails_callsCleanup_andRethrows_andDoesNotWriteDoc() = runTest {
+    val db = FirebaseFirestore.getInstance()
+    val imageRepo = FailingOnOtherUploadsImageRepo()
+    val repo = HuntsRepositoryFirestore(db = db, imageRepo = imageRepo)
+
+    val huntId = "addFailCleanup"
+    val hunt = hunt1.copy(uid = huntId)
+
+    val mainUri = Uri.parse("file://main")
+    val otherUris = listOf(Uri.parse("file://other1"))
+
+    try {
+      repo.addHunt(hunt = hunt, mainImageUri = mainUri, otherImageUris = otherUris)
+      fail("Expected exception to be rethrown")
+    } catch (_: Exception) {
+      // expected
+    }
+
+    assertTrue("Expected cleanup to be called", imageRepo.cleanupCalled)
+
+    // Ensure no Firestore document was written
+    val doc = db.collection(HUNTS_COLLECTION_PATH).document(huntId).get().await()
+    assertFalse("Hunt doc should not exist if uploads failed", doc.exists())
+  }
+
+  @Test
+  fun deleteHunt_deletesReviewsRepliesAndReviewPhotos() = runTest {
+    val db = FirebaseFirestore.getInstance()
+    val fakeImageRepo = FakeHuntsImageRepository()
+    val fakeReviewImageRepo = FakeReviewImageRepository()
+    val repo =
+        HuntsRepositoryFirestore(
+            db = db, imageRepo = fakeImageRepo, reviewImageRepo = fakeReviewImageRepo)
+
+    val huntId = "huntCascade"
+    repo.addHunt(hunt1.copy(uid = huntId))
+
+    val reviewId = "review1"
+    val photo1 = "gs://bucket/rev_photo1.jpg"
+    val photo2 = "gs://bucket/rev_photo2.jpg"
+
+    val reviewData: Map<String, Any> =
+        mapOf(FIELD_HUNT_ID to huntId, "photos" to listOf(photo1, photo2))
+    db.collection(HUNT_REVIEW_COLLECTION_PATH).document(reviewId).set(reviewData).await()
+
+    val replyData: Map<String, Any> = mapOf(FIELD_REVIEW_ID to reviewId)
+    db.collection(HuntsRepositoryFirestoreConstantsStrings.HUNT_REVIEW_REPLY_COLLECTION_PATH)
+        .document("reply1")
+        .set(replyData)
+        .await()
+    db.collection(HuntsRepositoryFirestoreConstantsStrings.HUNT_REVIEW_REPLY_COLLECTION_PATH)
+        .document("reply2")
+        .set(replyData)
+        .await()
+
+    repo.deleteHunt(huntId)
+
+    assertEquals(listOf(photo1, photo2), fakeReviewImageRepo.deleted)
+
+    val reviewDoc = db.collection(HUNT_REVIEW_COLLECTION_PATH).document(reviewId).get().await()
+    assertFalse(reviewDoc.exists())
+
+    val repliesRemaining =
+        db.collection(HuntsRepositoryFirestoreConstantsStrings.HUNT_REVIEW_REPLY_COLLECTION_PATH)
+            .whereEqualTo(FIELD_REVIEW_ID, reviewId)
+            .get()
+            .await()
+    assertTrue(repliesRemaining.isEmpty)
+  }
+
+  @Test
+  fun getAllHunts_skipsInvalidDocuments_andCoversDocumentToHuntCatch() = runTest {
+    val db = FirebaseFirestore.getInstance()
+    val repo = HuntsRepositoryFirestore(db = db, imageRepo = FakeHuntsImageRepository())
+
+    // Insert a malformed hunt doc (invalid status)
+    db.collection(HUNTS_COLLECTION_PATH)
+        .document("badDoc")
+        .set(
+            mapOf(
+                HuntsRepositoryFirestoreConstantsStrings.STATUS to "NOT_A_REAL_STATUS",
+                HuntsRepositoryFirestoreConstantsStrings.TITLE to "x",
+                HuntsRepositoryFirestoreConstantsStrings.DESCRIPTION to "x",
+                HuntsRepositoryFirestoreConstantsStrings.TIME to 1.0,
+                HuntsRepositoryFirestoreConstantsStrings.DISTANCE to 1.0,
+                HuntsRepositoryFirestoreConstantsStrings.DIFFICULTY to "EASY",
+                HuntsRepositoryFirestoreConstantsStrings.AUTHOR_ID to "a",
+                HuntsRepositoryFirestoreConstantsStrings.RATING_REVIEW to 1.0))
+        .await()
+
+    val hunts = repo.getAllHunts()
+    assertTrue(
+        "Malformed docs should be skipped (documentToHunt returns null)",
+        hunts.none { it.uid == "badDoc" })
+  }
+}
+
+private class FakeReviewImageRepository : IReviewImageRepository {
+  val deleted = mutableListOf<String>()
+
+  override suspend fun uploadReviewPhoto(userId: String, uri: Uri): String {
+    TODO("Not yet implemented")
+  }
+
+  override suspend fun deleteReviewPhoto(url: String) {
+    deleted += url
+  }
+}
+
+/**
+ * Image repo that:
+ * - succeeds main upload
+ * - fails other-images upload
+ * - records whether cleanup deleteAllHuntImages was called
+ */
+private class FailingOnOtherUploadsImageRepo : IHuntsImageRepository {
+  var cleanupCalled = false
+
+  override suspend fun uploadMainImage(huntId: String, uri: Uri): String {
+    return "fake://main/$huntId"
+  }
+
+  override suspend fun uploadOtherImages(huntId: String, uris: List<Uri>): List<String> {
+    throw RuntimeException("boom on other uploads")
+  }
+
+  override suspend fun deleteAllHuntImages(huntId: String) {
+    cleanupCalled = true
+  }
+
+  override suspend fun deleteImageByUrl(url: String) {
+    // no-op
   }
 }
