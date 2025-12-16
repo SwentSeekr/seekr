@@ -46,6 +46,7 @@ import com.swentseekr.seekr.ui.profile.ProfileReviewsScreen
 import com.swentseekr.seekr.ui.profile.ProfileScreen
 import com.swentseekr.seekr.ui.settings.SettingsScreen
 import com.swentseekr.seekr.ui.terms.TermsAndConditionsScreen
+import com.swentseekr.seekr.ui.theme.Transparent
 
 // Destinations as sealed class
 sealed class SeekrDestination(
@@ -216,7 +217,7 @@ fun SeekrNavigationBar(
                       unselectedIconColor = iconColor,
                       selectedTextColor = iconColor,
                       unselectedTextColor = iconColor,
-                      indicatorColor = BottomNavUIConstants.IndicatorColorTransparent))
+                      indicatorColor = Transparent))
         }
       }
 }
@@ -275,7 +276,7 @@ fun SeekrMainNavHost(
 
   Scaffold(
       modifier = Modifier.fillMaxSize(),
-      containerColor = SeekrNavigationDefaults.ScaffoldContainerColor,
+      containerColor = MaterialTheme.colorScheme.surface,
       bottomBar = {
         if (showBottomBar) {
           SeekrNavigationBar(

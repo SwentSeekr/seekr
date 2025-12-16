@@ -1,6 +1,5 @@
 package com.swentseekr.seekr.ui.overview
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,27 +24,10 @@ object OverviewScreenDefaults {
   val SearchBarElevation: Dp = 4.dp
 
   // Font sizes
-  val DiscoverFontSize = 32.sp
-  val NextAdventureFontSize = 16.sp
   val SmallFontSize = 14.sp
-
-  // Placeholder / Icon gray
-  val Gray666 = Color(0xFF666666)
-  val Gray999 = Color(0xFF999999)
 
   val FilterChipCornerRadius = 12.dp
   val DifficultyFilterOffset = 3
-
-  // Status colors
-  val StatusFun = Color(0xFF9C27B0)
-  val StatusDiscover = Color(0xFF2196F3) // matches theme Blue but used differently → keep
-  val StatusSport = Color(0xFFFF5722)
-
-  // Difficulty colors
-
-  val DifficultyEasy = Color(0xFF4CAF50)
-  val DifficultyIntermediate = Color(0xFFFFA726)
-  val DifficultyHard = Color(0xFFEF5350)
 
   // Refresh indicator
   val RefreshIndicatorWeight = 1f

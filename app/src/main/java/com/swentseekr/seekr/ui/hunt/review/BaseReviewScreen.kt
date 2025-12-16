@@ -107,12 +107,7 @@ fun BaseReviewScreen(
   Scaffold(
       topBar = {
         TopAppBar(
-            title = {
-              Text(
-                  text = title,
-                  style = MaterialTheme.typography.headlineSmall,
-                  fontWeight = FontWeight.Bold)
-            },
+            title = { Text(text = title, style = MaterialTheme.typography.headlineSmall) },
             navigationIcon = {
               IconButton(
                   modifier = modifier.testTag(AddReviewScreenTestTags.GO_BACK_BUTTON),

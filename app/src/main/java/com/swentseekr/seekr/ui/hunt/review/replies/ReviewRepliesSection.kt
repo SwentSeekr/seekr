@@ -43,13 +43,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.times
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.swentseekr.seekr.model.hunt.review.HuntReviewReply
-import com.swentseekr.seekr.ui.theme.Green
+import com.swentseekr.seekr.ui.theme.Transparent
 
 // ---------- Shared shapes ----------
 
@@ -184,7 +183,7 @@ fun ReviewRepliesCollapsedHeader(
           Modifier.fillMaxWidth()
               .clickable { onToggleRootReplies() }
               .testTag(ReviewRepliesTestTags.ROOT_SEE_REPLIES),
-      color = Color.Transparent) {
+      color = Transparent) {
         Row(
             modifier =
                 Modifier.padding(
@@ -203,7 +202,6 @@ fun ReviewRepliesCollapsedHeader(
               Text(
                   text = replyCountLabel(state.totalReplyCount),
                   style = MaterialTheme.typography.bodyMedium,
-                  fontWeight = FontWeight.Medium,
                   color = MaterialTheme.colorScheme.primary)
             }
       }
@@ -363,7 +361,7 @@ fun ReplyCard(
       modifier =
           Modifier.fillMaxWidth()
               .background(
-                  MaterialTheme.colorScheme.surface,
+                  MaterialTheme.colorScheme.surfaceVariant,
                   shape = replyCardShape,
               )
               .padding(ReviewRepliesDimensions.ReplyCardPadding)) {
@@ -411,8 +409,7 @@ fun ReplyHeader(
 
     Text(
         text = authorLabel(node),
-        style = MaterialTheme.typography.bodyMedium,
-        fontWeight = FontWeight.SemiBold,
+        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
         color = MaterialTheme.colorScheme.onSurface)
 
     Text(
@@ -464,9 +461,9 @@ fun ReplyAvatar(node: ReplyNodeUiState) {
         Text(
             text = avatarText,
             style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-            color = if (node.isMine) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = ReviewRepliesDimensions.ReplyAvatarFontSize)
+            color =
+                if (node.isMine) MaterialTheme.colorScheme.onPrimary
+                else MaterialTheme.colorScheme.onSurfaceVariant)
       }
 }
 
@@ -531,10 +528,7 @@ fun ReplyButton(onClick: () -> Unit) {
             contentDescription = ReviewRepliesStrings.REPLY_CONTENT_DESCRIPTION,
             modifier = Modifier.size(ReviewRepliesDimensions.ReplyButtonIconSize))
         Spacer(modifier = Modifier.width(ReviewRepliesDimensions.ReplyButtonIconSpacing))
-        Text(
-            text = ReviewRepliesStrings.REPLY,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Medium)
+        Text(text = ReviewRepliesStrings.REPLY, style = MaterialTheme.typography.labelLarge)
       }
 }
 
@@ -566,8 +560,7 @@ fun RepliesToggleButton(
     Spacer(modifier = Modifier.width(ReviewRepliesDimensions.ReplyButtonIconSpacing))
     Text(
         text = childRepliesLabel(node.isExpanded, node.totalChildrenCount),
-        style = MaterialTheme.typography.labelLarge,
-        fontWeight = FontWeight.Medium)
+        style = MaterialTheme.typography.labelLarge)
   }
 }
 
@@ -650,7 +643,7 @@ fun CollapsedComposerButton(
               .height(ReviewRepliesDimensions.CollapsedComposerHeight),
       colors =
           ButtonDefaults.outlinedButtonColors(
-              containerColor = MaterialTheme.colorScheme.surface,
+              containerColor = MaterialTheme.colorScheme.surfaceVariant,
               contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
       border =
           BorderStroke(
@@ -755,10 +748,10 @@ fun ComposerTextField(
       textStyle = MaterialTheme.typography.bodyMedium,
       colors =
           OutlinedTextFieldDefaults.colors(
-              focusedBorderColor = Color.Transparent,
-              unfocusedBorderColor = Color.Transparent,
-              focusedContainerColor = Color.Transparent,
-              unfocusedContainerColor = Color.Transparent),
+              focusedBorderColor = Transparent,
+              unfocusedBorderColor = Transparent,
+              focusedContainerColor = Transparent,
+              unfocusedContainerColor = Transparent),
   )
 }
 
@@ -792,7 +785,7 @@ fun ComposerSendButton(
                     imageVector = Icons.AutoMirrored.Filled.Send,
                     contentDescription = ReviewRepliesStrings.SEND_CONTENT_DESCRIPTION,
                     tint =
-                        if (isActive) Green
+                        if (isActive) MaterialTheme.colorScheme.onPrimary
                         else
                             MaterialTheme.colorScheme.onSurfaceVariant.copy(
                                 alpha = ReviewRepliesAlphas.INACTIVE_SEND_ICON),

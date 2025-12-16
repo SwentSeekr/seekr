@@ -3,8 +3,6 @@ package com.swentseekr.seekr.ui.offline
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
 import com.swentseekr.seekr.model.hunt.Hunt
-import com.swentseekr.seekr.ui.theme.EasyGreen
-import com.swentseekr.seekr.ui.theme.Green
 
 /**
  * Centralized constants used across the offline UI layer.
@@ -64,8 +62,6 @@ object OfflineConstants {
   val DEFAULT_HUNT_LIST: List<Hunt> = emptyList()
 
   // --- Card styling ---
-  // Use themed "easy" green for offline card background
-  val LIGHT_GREEN_BACKGROUND = EasyGreen
   val OFFLINE_CARD_HEIGHT = 450.dp
   const val OFFLINE_CARD_WIDTH_RATIO = 0.8f
   val CARD_SHAPE = RoundedCornerShape(16.dp)
@@ -80,5 +76,4 @@ object OfflineConstants {
   val BUTTON_SHAPE = RoundedCornerShape(50)
   const val BUTTON_WIDTH_RATIO = 0.7f
   // Use primary green from theme for the offline CTA button
-  val BUTTON_CONTAINER_COLOR = Green
 }

@@ -36,7 +36,6 @@ object AddReviewScreenDefaults {
   val IconSize: Dp = 20.dp
   val IconBig: Dp = 40.dp
 
-  val SpacerHeightExtraSmall: Dp = 4.dp
   val SpacerHeightSmall: Dp = 8.dp
   val SpacerHeightMedium: Dp = 16.dp
 

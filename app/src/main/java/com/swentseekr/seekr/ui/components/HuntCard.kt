@@ -8,23 +8,22 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.hunt.Difficulty
 import com.swentseekr.seekr.model.hunt.Hunt
+import com.swentseekr.seekr.ui.components.HuntCardScreenDefaults.ALPHA3
+import com.swentseekr.seekr.ui.components.HuntCardScreenDefaults.ALPHA7
+import com.swentseekr.seekr.ui.theme.LocalAppColors
 
 /**
  * Displays a modern, image-focused card preview of a Hunt.
@@ -52,12 +51,13 @@ fun HuntCard(
     onLikeClick: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+  val colors = LocalAppColors.current
   Card(
       modifier =
           modifier
               .padding(HuntCardUIConstants.CardPadding)
               .fillMaxWidth(HuntCardUIConstants.CardWidthFraction),
-      colors = CardDefaults.cardColors(containerColor = Color.White),
+      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
       elevation = CardDefaults.cardElevation(defaultElevation = HuntCardUIConstants.CardElevation),
       shape = RoundedCornerShape(HuntCardUIConstants.CornerRadius)) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -87,8 +87,10 @@ fun HuntCard(
                                 Brush.verticalGradient(
                                     colors =
                                         listOf(
-                                            HuntCardUIConstants.Black30,
-                                            HuntCardUIConstants.Black70))))
+                                            MaterialTheme.colorScheme.onBackground.copy(
+                                                alpha = ALPHA3),
+                                            MaterialTheme.colorScheme.onBackground.copy(
+                                                alpha = ALPHA7)))))
 
                 // DIFFICULTY BADGE (top-left)
                 ModernDifficultyBadge(
@@ -106,9 +108,7 @@ fun HuntCard(
                       Icon(
                           imageVector = Icons.Filled.Favorite,
                           contentDescription = HuntCardScreenStrings.LIKE_BUTTON,
-                          tint =
-                              if (isLiked) HuntCardUIConstants.LikeRed
-                              else HuntCardScreenDefaults.LightGray,
+                          tint = if (isLiked) colors.liked else colors.disliked,
                           modifier = Modifier.size(HuntCardUIConstants.IconSize28))
                     }
 
@@ -119,18 +119,16 @@ fun HuntCard(
                             .padding(HuntCardUIConstants.Padding16)) {
                       Text(
                           text = hunt.title,
-                          fontSize = HuntCardUIConstants.TitleFont24,
-                          fontWeight = FontWeight.Bold,
-                          color = HuntCardUIConstants.White,
-                          lineHeight = 28.sp)
+                          style = MaterialTheme.typography.titleLarge,
+                          color = MaterialTheme.colorScheme.onPrimary)
                       Spacer(modifier = Modifier.height(HuntCardUIConstants.Padding4))
                       Text(
                           text = "${HuntCardScreenStrings.BY} " + authorName,
-                          fontSize = HuntCardUIConstants.AuthorFont14,
+                          style = MaterialTheme.typography.labelSmall,
                           color =
-                              HuntCardUIConstants.White.copy(
+                              MaterialTheme.colorScheme.onPrimary.copy(
                                   alpha = HuntCardScreenDefaults.TEXT_COLOR_FACTOR),
-                          fontWeight = FontWeight.Medium)
+                      )
                     }
               }
 
@@ -174,12 +172,13 @@ fun HuntCard(
  */
 @Composable
 fun ModernDifficultyBadge(difficulty: Difficulty, modifier: Modifier = Modifier) {
+  val colors = LocalAppColors.current
   val (bg, textColor) =
       when (difficulty) {
-        Difficulty.EASY -> HuntCardUIConstants.DifficultyEasy to HuntCardUIConstants.White
+        Difficulty.EASY -> colors.difficultyEasy to MaterialTheme.colorScheme.onPrimary
         Difficulty.INTERMEDIATE ->
-            HuntCardUIConstants.DifficultyIntermediate to HuntCardUIConstants.White
-        Difficulty.DIFFICULT -> HuntCardUIConstants.DifficultyHard to HuntCardUIConstants.White
+            colors.difficultyIntermediate to MaterialTheme.colorScheme.onPrimary
+        Difficulty.DIFFICULT -> colors.difficultyHard to MaterialTheme.colorScheme.onPrimary
       }
 
   Surface(
@@ -193,8 +192,7 @@ fun ModernDifficultyBadge(difficulty: Difficulty, modifier: Modifier = Modifier)
                 Modifier.padding(
                     horizontal = HuntCardUIConstants.Padding12,
                     vertical = HuntCardUIConstants.Padding6),
-            fontSize = HuntCardUIConstants.DifficultyFont12,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.labelSmall,
             color = textColor)
       }
 }
@@ -239,7 +237,7 @@ fun ModernStatChip(icon: StatIcon, value: String, unit: String, modifier: Modifi
   Surface(
       modifier = modifier,
       shape = RoundedCornerShape(HuntCardUIConstants.StatChipCorner),
-      color = HuntCardUIConstants.StatBackground) {
+      color = MaterialTheme.colorScheme.tertiaryContainer) {
         Row(
             modifier =
                 Modifier.padding(
@@ -252,13 +250,13 @@ fun ModernStatChip(icon: StatIcon, value: String, unit: String, modifier: Modifi
                     Icon(
                         imageVector = icon.icon,
                         contentDescription = null,
-                        tint = HuntCardUIConstants.StatIconGray,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(HuntCardUIConstants.StatIconSize))
                 is StatIcon.PainterIcon ->
                     Icon(
                         painter = icon.painter,
                         contentDescription = null,
-                        tint = HuntCardUIConstants.StatIconGray,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(HuntCardUIConstants.StatIconSize))
               }
 
@@ -266,9 +264,8 @@ fun ModernStatChip(icon: StatIcon, value: String, unit: String, modifier: Modifi
 
               Text(
                   text = "$value $unit",
-                  fontSize = HuntCardUIConstants.StatFont14,
-                  fontWeight = FontWeight.SemiBold,
-                  color = HuntCardUIConstants.StatTextDark)
+                  style = MaterialTheme.typography.bodyLarge,
+                  color = MaterialTheme.colorScheme.onTertiaryContainer)
             }
       }
 }
