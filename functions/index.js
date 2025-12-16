@@ -9,9 +9,8 @@
  *   - firebase-admin
  */
 
-const {setGlobalOptions} = require("firebase-functions");
-const {onRequest} = require("firebase-functions/https");
-const functions = require("firebase-functions");
+const { setGlobalOptions } = require("firebase-functions/v2");
+const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const admin = require("firebase-admin");
 
 // Initialize Firebase Admin SDK
@@ -32,13 +31,19 @@ if (process.env.FIRESTORE_EMULATOR_HOST) {
  * @param {Object} snap Firestore snapshot of the newly created document.
  * @param {Object} context Cloud Functions context object, contains params like reviewId.
  */
-exports.sendReviewNotification = functions.firestore
-  .document("huntsReviews/{reviewId}")
-  .onCreate(async (snap, context) => {
+exports.sendReviewNotification = onDocumentCreated(
+  "huntsReviews/{reviewId}",
+  async (event) => {
+    const review = event.data?.data();
+    const reviewId = event.params.reviewId;
 
-    const review = snap.data();
+    if (!review) {
+      console.log("Missing review payload for", reviewId);
+      await logDebug({ status: "missing_review", reviewId });
+      return;
+    }
+
     const huntId = review.huntId;
-    const reviewId = context.params.reviewId;
 
     console.log("New review created:", reviewId, "for hunt:", huntId);
 
@@ -51,7 +56,7 @@ exports.sendReviewNotification = functions.firestore
       await logDebug({
         status: "hunt_not_found",
         reviewId,
-        huntId
+        huntId,
       });
       return;
     }
@@ -73,7 +78,7 @@ exports.sendReviewNotification = functions.firestore
         status: "no_token",
         reviewId,
         huntId,
-        ownerId
+        ownerId,
       });
       return;
     }
@@ -105,7 +110,6 @@ exports.sendReviewNotification = functions.firestore
         ownerId,
         token,
       });
-
     } catch (err) {
       console.error("Error sending notification:", err);
       await logDebug({
@@ -116,8 +120,8 @@ exports.sendReviewNotification = functions.firestore
         error: err.message,
       });
     }
-  });
-
+  }
+);
 
 /**
  * Helper function to log debug information in Firestore.
@@ -125,11 +129,14 @@ exports.sendReviewNotification = functions.firestore
  * @param {Object} data Data to log in `debug_notifications` collection.
  * @returns {Promise<FirebaseFirestore.DocumentReference>} Document reference of the added log.
  */
- async function logDebug(data) {
-  return admin.firestore().collection("debug_notifications").add({
-    ...data,
-    timestamp: admin.firestore.FieldValue.serverTimestamp(),
-  });
+async function logDebug(data) {
+  return admin
+    .firestore()
+    .collection("debug_notifications")
+    .add({
+      ...data,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    });
 }
 
 // Set maximum concurrent instances for all functions to mitigate traffic spikes
