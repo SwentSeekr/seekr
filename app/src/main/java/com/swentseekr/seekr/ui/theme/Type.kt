@@ -6,10 +6,17 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// Set of Material typography styles to start with
+/**
+ * Global Material typography definitions for the application.
+ *
+ * This typography set is applied through [MaterialTheme] and defines default text styles used
+ * across all screens unless overridden.
+ *
+ * Based on Material 3 typography scale with app-specific adjustments.
+ */
 val Typography =
     Typography(
-        // For Very large text app name in sign in screen
+        /** Very large text, used for app name on the sign-in screen. */
         displayLarge =
             TextStyle(
                 fontFamily = FontFamily.Default,
@@ -18,7 +25,7 @@ val Typography =
                 lineHeight = 64.sp,
                 letterSpacing = -0.25.sp),
 
-        // Headlines
+        //         /** Primary section headers (e.g., screen titles). */
         headlineLarge =
             TextStyle(
                 fontFamily = FontFamily.Default,
@@ -26,6 +33,7 @@ val Typography =
                 fontSize = 32.sp,
                 lineHeight = 40.sp,
                 letterSpacing = 0.sp),
+        /** Secondary section headers. */
         headlineMedium =
             TextStyle(
                 fontFamily = FontFamily.Default,
@@ -33,6 +41,7 @@ val Typography =
                 fontSize = 28.sp,
                 lineHeight = 36.sp,
                 letterSpacing = 0.sp),
+        /** Tertiary headers and emphasized titles. */
         headlineSmall =
             TextStyle(
                 fontFamily = FontFamily.Default,
@@ -41,7 +50,7 @@ val Typography =
                 lineHeight = 32.sp,
                 letterSpacing = 0.sp),
 
-        // Titles
+        /** Large titles for cards and prominent UI elements. */
         titleLarge =
             TextStyle(
                 fontFamily = FontFamily.Default,
@@ -49,6 +58,7 @@ val Typography =
                 fontSize = 22.sp,
                 lineHeight = 28.sp,
                 letterSpacing = 0.sp),
+        /** Medium titles for list items and dialogs. */
         titleMedium =
             TextStyle(
                 fontFamily = FontFamily.Default,
@@ -56,6 +66,7 @@ val Typography =
                 fontSize = 18.sp,
                 lineHeight = 24.sp,
                 letterSpacing = 0.sp),
+        /** Small titles for secondary emphasis. */
         titleSmall =
             TextStyle(
                 fontFamily = FontFamily.Default,
@@ -64,7 +75,7 @@ val Typography =
                 lineHeight = 22.sp,
                 letterSpacing = 0.sp),
 
-        // Body text
+        /** Primary body text for paragraphs and main content. */
         bodyLarge =
             TextStyle(
                 fontFamily = FontFamily.Default,
@@ -72,6 +83,7 @@ val Typography =
                 fontSize = 16.sp,
                 lineHeight = 24.sp,
                 letterSpacing = 0.5.sp),
+        /** Secondary body text for supporting information. */
         bodyMedium =
             TextStyle(
                 fontFamily = FontFamily.Default,
@@ -79,6 +91,7 @@ val Typography =
                 fontSize = 14.sp,
                 lineHeight = 20.sp,
                 letterSpacing = 0.25.sp),
+        /** Tertiary body text for captions or dense content. */
         bodySmall =
             TextStyle(
                 fontFamily = FontFamily.Default,
@@ -87,7 +100,7 @@ val Typography =
                 lineHeight = 16.sp,
                 letterSpacing = 0.4.sp),
 
-        // Labels
+        /** Labels for buttons and interactive elements. */
         labelLarge =
             TextStyle(
                 fontFamily = FontFamily.Default,
@@ -95,6 +108,7 @@ val Typography =
                 fontSize = 14.sp,
                 lineHeight = 20.sp,
                 letterSpacing = 0.1.sp),
+        /** Labels for secondary actions and metadata. */
         labelMedium =
             TextStyle(
                 fontFamily = FontFamily.Default,
@@ -102,6 +116,7 @@ val Typography =
                 fontSize = 12.sp,
                 lineHeight = 16.sp,
                 letterSpacing = 0.5.sp),
+        /** Labels for captions and auxiliary information. */
         labelSmall =
             TextStyle(
                 fontFamily = FontFamily.Default,
@@ -110,9 +125,15 @@ val Typography =
                 lineHeight = 16.sp,
                 letterSpacing = 0.5.sp))
 
+/**
+ * Typography overrides specific to the Profile screen.
+ *
+ * This typography set intentionally diverges from the global Material typography to emphasize
+ * profile-related content such as usernames, statistics, and bios.
+ */
 val ProfileTypography =
     Typography(
-        // For profile names
+        /** Profile pseudonym / username. */
         titleLarge =
             TextStyle(
                 fontFamily = FontFamily.Default,
@@ -120,7 +141,8 @@ val ProfileTypography =
                 fontSize = 22.sp,
                 lineHeight = 28.sp,
                 letterSpacing = 0.sp),
-        // For profile stats values
+
+        /** Numeric values for profile statistics (ratings, counts). */
         bodyLarge =
             TextStyle(
                 fontFamily = FontFamily.Default,
@@ -128,7 +150,7 @@ val ProfileTypography =
                 fontSize = 16.sp,
                 lineHeight = 24.sp,
                 letterSpacing = 0.5.sp),
-        // For profile stats labels
+        /** Labels for profile statistics. */
         labelSmall =
             TextStyle(
                 fontFamily = FontFamily.Default,
@@ -136,7 +158,7 @@ val ProfileTypography =
                 fontSize = 12.sp,
                 lineHeight = 16.sp,
                 letterSpacing = 0.5.sp),
-        // For profile bio and Loading screen
+        /** Profile bio text and loading screen messages. */
         bodyMedium =
             TextStyle(
                 fontFamily = FontFamily.Default,

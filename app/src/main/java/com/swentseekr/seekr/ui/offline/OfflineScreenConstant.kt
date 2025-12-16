@@ -24,15 +24,23 @@ import com.swentseekr.seekr.model.hunt.Hunt
  */
 object OfflineConstants {
 
-  // --- Generic offline / required screen strings ---
+  // -----------
+  // Generic offline / required screen strings
+  // -----------
   const val OFFLINE_TITLE = "You're offline"
   const val OFFLINE_MESSAGE = "Connect to the internet at least one time to continue."
   const val OPEN_SETTINGS_BUTTON = "Open settings"
 
+  // -----------
   // ContentDescription for the warning icon on the required screen
+  // -----------
+
   const val OFFLINE_REQUIRED_ICON_DESCRIPTION = "Offline warning icon"
 
-  // --- Map / overview strings ---
+  // -----------
+  // Map / overview strings
+  // -----------
+
   const val OFFLINE_MAP_MESSAGE = "Map is unavailable while you're offline."
   const val OFFLINE_OVERVIEW_MESSAGE =
       "No internet? No problem. You can still access your saved hunts."
@@ -40,40 +48,56 @@ object OfflineConstants {
   const val MAP_ICON = "Offline Map Icon"
   const val OVERVIEW_ICON = "Offline Overview Icon"
 
-  // --- Shared layout spacing ---
+  // -----------
+  // Shared layout spacing
+  // -----------
+
   val ICON_SPACING = 16.dp
   val MESSAGE_SPACING = 8.dp
   val BUTTON_SPACING = 24.dp
   val SCREEN_PADDING = 24.dp
 
-  // --- Profile screen paddings & layout (from OfflineProfileConstants) ---
+  // -----------
+  // Profile screen paddings and layout (from OfflineProfileConstants)
+  // -----------
   val PROFILE_SCREEN_HORIZONTAL_PADDING = 16.dp
   val PROFILE_SCREEN_VERTICAL_PADDING = 8.dp
 
-  // --- Profile text strings ---
+  // -----------
+  // Profile text strings
+  // -----------
   const val OFFLINE_NO_PROFILE = "Offline – no cached profile available"
 
-  // --- Numeric defaults ---
+  // -----------
+  // Numeric defaults
+  // -----------
   const val DEFAULT_INT = 0
   const val DEFAULT_DOUBLE = 0.0
   const val ONE = 1
 
-  // --- Empty list default (typed for Hunt) ---
+  // -----------
+  // Empty list default (typed for Hunt)
+  // -----------
   val DEFAULT_HUNT_LIST: List<Hunt> = emptyList()
 
-  // --- Card styling ---
+  // -----------
+  // Card styling
+  // -----------
   val OFFLINE_CARD_HEIGHT = 450.dp
   const val OFFLINE_CARD_WIDTH_RATIO = 0.8f
   val CARD_SHAPE = RoundedCornerShape(16.dp)
   val OFFLINE_ICON_SIZE = 48.dp
 
-  // --- Offline overview layout spacings ---
+  // -----------
+  // Offline overview layout spacings
+  // -----------
   val OVERVIEW_TOP_SPACER_HEIGHT = 64.dp
   val OVERVIEW_BUTTON_TOP_SPACER_HEIGHT = 100.dp
   val OVERVIEW_BUTTON_BOTTOM_SPACER_HEIGHT = 50.dp
 
-  // --- Button styling ---
+  // -----------
+  // Button styling
+  // -----------
   val BUTTON_SHAPE = RoundedCornerShape(50)
   const val BUTTON_WIDTH_RATIO = 0.7f
-  // Use primary green from theme for the offline CTA button
 }

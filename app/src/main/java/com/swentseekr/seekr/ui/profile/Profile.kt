@@ -49,9 +49,15 @@ import com.swentseekr.seekr.ui.profile.ProfileUIConstantsDefaults.ALPHA_LIGHT
 import com.swentseekr.seekr.ui.theme.ProfileTypography
 import kotlinx.serialization.Serializable
 
-// -------------------------
-// TEST TAGS
-// -------------------------
+/**
+ * Semantic test tags for the Profile screen and its subcomponents.
+ *
+ * Used exclusively for Compose UI testing to provide stable node lookup. Tags cover:
+ * - Screen states (loading, empty, populated)
+ * - Header elements
+ * - Tabs and hunt cards
+ * - Action buttons
+ */
 object ProfileTestTags {
   const val PROFILE_SCREEN = "PROFILE_SCREEN"
   const val PROFILE_LOADING = "PROFILE_LOADING"
@@ -76,9 +82,12 @@ object ProfileTestTags {
   fun getTestTagForHuntCard(hunt: Hunt, index: Int): String = "HUNT_CARD_${hunt.uid}"
 }
 
-// -------------------------
-// ORIGINAL CONSTANTS
-// -------------------------
+/**
+ * Static UI constants used by the Profile screen.
+ *
+ * Groups layout sizes, alpha values, string literals, and content descriptions to avoid magic
+ * values.
+ */
 object ProfileConstants {
   val SIZE_MEDIUM_DP = 16.dp
   val SIZE_ICON = 40.dp
@@ -94,17 +103,29 @@ object ProfileConstants {
   const val PROFILE_PICTURE_DESCRIPTION = "Profile Picture"
 }
 
-// -------------------------
-// SEMANTICS
-// -------------------------
 val BackgroundColorKey = SemanticsPropertyKey<Color>("BackgroundColor")
 var SemanticsPropertyReceiver.backgroundColor by BackgroundColorKey
 
-// -------------------------
-// DATA CLASSES
-// -------------------------
+/**
+ * Represents a single tab entry in the profile toolbar.
+ *
+ * @property tab Logical tab identifier.
+ * @property testTag Semantic test tag associated with the tab.
+ * @property icon Icon displayed for the tab.
+ */
 data class TabItem(val tab: ProfileTab, val testTag: String, val icon: ImageVector)
 
+/**
+ * Serializable domain model representing a user profile.
+ *
+ * Used by both online and offline profile flows.
+ *
+ * @property uid Unique identifier of the profile owner.
+ * @property author Author metadata (pseudonym, avatar, bio, ratings).
+ * @property myHunts Hunts created by the user.
+ * @property doneHunts Hunts completed by the user.
+ * @property likedHunts Hunts liked/bookmarked by the user.
+ */
 @Serializable
 data class Profile(
     val uid: String = "",
@@ -114,15 +135,23 @@ data class Profile(
     val likedHunts: MutableList<Hunt> = mutableListOf(),
 )
 
+/**
+ * Tabs available on the Profile screen.
+ *
+ * Determines which hunt list is displayed.
+ */
 enum class ProfileTab {
+
+  /** Hunts created by the user. */
   MY_HUNTS,
+
+  /** Hunts completed by the user. */
   DONE_HUNTS,
+
+  /** Hunts liked or bookmarked by the user. */
   LIKED_HUNTS
 }
 
-// -------------------------
-// MAIN SCREEN COMPOSABLE
-// -------------------------
 /**
  * Main screen displaying a user's profile.
  *
@@ -612,9 +641,6 @@ fun ModernEmptyHuntsState(selectedTab: ProfileTab) {
       }
 }
 
-// --------------------------------------------------------
-// LEGACY TOOLBAR (kept for compatibility if still referenced)
-// --------------------------------------------------------
 /**
  * Legacy toolbar for profile tabs. Kept for backward compatibility.
  *

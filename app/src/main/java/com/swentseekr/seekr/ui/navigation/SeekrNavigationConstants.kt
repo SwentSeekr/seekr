@@ -1,45 +1,96 @@
 package com.swentseekr.seekr.ui.navigation
 
+/**
+ * Centralized definition of navigation routes, paths, labels, and argument keys.
+ *
+ * This object is the single source of truth for:
+ * - NavHost route strings
+ * - Path prefixes used by route builders
+ * - Argument names passed through navigation
+ * - Screen labels used in UI components
+ *
+ * No navigation string should be hardcoded outside this object.
+ */
 object SeekrNavigationDefaults {
   const val IGNORED_TEST_TAG = "IGNORED"
 
-  // --- Offline / shared extra routes ---
-  // Route + arg name for the review images screen (used online & offline)
+  // -----------
+  // Offline / shared routes
+  // -----------
   const val REVIEW_IMAGES_ROUTE = "reviewImages/{reviewId}"
   const val REVIEW_IMAGES_REVIEW_ID_ARG = "reviewId"
   const val HUNT_ID = "huntId"
 
   const val OVERVIEW_ROUTE = "overview"
   const val OVERVIEW_LABEL = "Overview"
+
+  // -----------
+  // Map
+  // -----------
   const val MAP_ROUTE = "map"
   const val MAP_LABEL = "Map"
+
+  // -----------
+  // Profile
+  // -----------
   const val PROFILE_ROUTE = "profile"
   const val PROFILE_LABEL = "Profile"
   const val PROFILE_PATH = "profile/"
   const val REVIEWS_PATH = "/reviews"
   const val PROFILE_REVIEWS_LABEL = "Profile Reviews"
+
+  // -----------
+  // Hunt
+  // -----------
   const val HUNT_CARD_ROUTE = "hunt/{huntId}"
   const val HUNT_CARD_LABEL = "Hunt"
   const val HUNT_PATH = "hunt/"
+
+  // -----------
+  // Edit Hunt
+  // -----------
   const val EDIT_HUNT_ROUTE = "edit_hunt/{huntId}"
   const val EDIT_HUNT_LABEL = "Edit Hunt"
   const val EDIT_HUNT_PATH = "edit_hunt/"
+
+  // -----------
+  // Review
+  // -----------
   const val ADD_REVIEW_ROUTE = "add_review/{huntId}"
   const val ADD_REVIEW_LABEL = "Add Review"
   const val ADD_REVIEW_PATH = "add_review/"
   const val EDIT_REVIEW_ROUTE = "edit_review/{huntId}/{reviewId}"
   const val EDIT_REVIEW_LABEL = "Edit Review"
   const val EDIT_REVIEW_PATH = "edit_review/"
+
+  // -----------
+  // Add Hunt
+  // -----------
   const val ADD_HUNT_ROUTE = "add_hunt"
   const val ADD_HUNT_LABEL = "Add Hunt"
+
+  // -----------
+  // Settings
+  // -----------
   const val SETTINGS_ROUTE = "settings"
   const val SETTINGS_LABEL = "Settings"
+
+  // -----------
+  // Legal
+  // -----------
   const val TERMS_AND_CONDITION_ROUTE = "terms_conditions"
   const val TERMS_AND_CONDITION_LABEL = "Terms & Conditions"
+
+  // -----------
+  // Profile Editing
+  // -----------
   const val EDIT_PROFILE_ROUTE = "edit_profile"
   const val EDIT_PROFILE_LABEL = "Edit Profile"
   const val PROFILE_REVIEWS_ROUTE = "profile/{userId}/reviews"
 
+  // -----------
+  // Argument keys
+  // -----------
   const val USER_ID = "userId"
 }
 
@@ -49,10 +100,18 @@ object SeekrNavigationDefaults {
  * Used in instrumented and UI tests to find elements using `composeTestRule.onNodeWithTag(...)`.
  */
 object NavigationTestTags {
+
+  // -----------
+  // Navigation UI
+  // -----------
   const val BOTTOM_NAVIGATION_MENU = "BOTTOM_NAVIGATION_MENU"
   const val OVERVIEW_TAB = "OVERVIEW_TAB"
   const val MAP_TAB = "MAP_TAB"
   const val PROFILE_TAB = "PROFILE_TAB"
+
+  // -----------
+  // Screens
+  // -----------
   const val HUNTCARD_SCREEN = "HUNTCARD_SCREEN"
   const val ADD_HUNT_SCREEN = "ADD_HUNT_SCREEN"
   const val MAP_SCREEN = "MAP_SCREEN"
@@ -64,6 +123,8 @@ object NavigationTestTags {
   const val TERMS_CONDITIONS_SCREEN = "TERMS_CONDITIONS_SCREEN"
   const val EDIT_PROFILE_SCREEN = "EDIT_PROFILE_SCREEN"
 
-  // --- review images screen test tag (used by offline nav) ---
+  // -----------
+  // Review images
+  // -----------
   const val IMAGE_REVIEW_SCREEN = "IMAGE_REVIEW_SCREEN"
 }
