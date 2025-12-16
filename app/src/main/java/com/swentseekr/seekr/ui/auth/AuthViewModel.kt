@@ -32,6 +32,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/**
+ * Represents the UI state for authentication operations.
+ *
+ * @property isLoading Indicates if an authentication operation is in progress.
+ * @property user The currently signed-in Firebase user, if any.
+ * @property errorMsg Any error message to display in the UI.
+ * @property signedOut True if the user is signed out.
+ * @property needsOnboarding True if the signed-in user still needs to complete onboarding.
+ */
 data class AuthUIState(
     val isLoading: Boolean = false,
     val user: FirebaseUser? = null,
@@ -40,6 +49,13 @@ data class AuthUIState(
     val needsOnboarding: Boolean = false
 )
 
+/**
+ * ViewModel responsible for handling user authentication and onboarding state.
+ *
+ * @param repository Repository used for authentication operations.
+ * @param profileRepository Repository used for profile and onboarding operations.
+ * @param auth FirebaseAuth instance for managing authentication state.
+ */
 class AuthViewModel(
     private val repository: AuthRepository = AuthRepositoryFirebase(),
     private val profileRepository: ProfileRepository =
@@ -60,7 +76,6 @@ class AuthViewModel(
       }
 
   init {
-    // Seed from current session in case user is already signed in
     _uiState.update { it.copy(user = auth.currentUser, signedOut = (auth.currentUser == null)) }
     auth.addAuthStateListener(authListener)
   }
@@ -70,7 +85,8 @@ class AuthViewModel(
     super.onCleared()
   }
 
-  fun clearErrorMsg() {
+    /** Clears the current error message in the UI state. */
+    fun clearErrorMsg() {
     _uiState.update { it.copy(errorMsg = null) }
   }
 
@@ -82,12 +98,34 @@ class AuthViewModel(
   private fun signInRequest(signInOptions: GetSignInWithGoogleOption) =
       GetCredentialRequest.Builder().addCredentialOption(signInOptions).build()
 
+    /**
+     * Retrieves a credential using the provided [CredentialManager] and [GetCredentialRequest].
+     *
+     * @param context Android context.
+     * @param request Credential request configuration.
+     * @param credentialManager CredentialManager instance.
+     * @return The retrieved credential.
+     * @throws GetCredentialCancellationException If the user cancels the sign-in flow.
+     * @throws NoCredentialException If no credential is available.
+     * @throws GetCredentialException For other credential retrieval failures.
+     */
   private suspend fun getCredential(
       context: Context,
       request: GetCredentialRequest,
       credentialManager: CredentialManager
   ) = credentialManager.getCredential(context, request).credential
 
+    /**
+     * Initiates Google sign-in for the user.
+     *
+     * Updates [uiState] to reflect loading, success, or failure states.
+     *
+     * @param context Android context.
+     * @param credentialManager CredentialManager instance for retrieving credentials.
+     * @throws GetCredentialCancellationException If the user cancels the sign-in flow.
+     * @throws NoCredentialException If no credential is available.
+     * @throws GetCredentialException For other credential retrieval failures.
+     */
   fun signIn(context: Context, credentialManager: CredentialManager) {
     if (_uiState.value.isLoading) return
 
@@ -147,6 +185,13 @@ class AuthViewModel(
     }
   }
 
+    /**
+     * Completes the onboarding process for a user.
+     *
+     * @param userId The UID of the user completing onboarding.
+     * @param pseudonym The pseudonym to set for the user.
+     * @param bio The bio to set for the user.
+     */
   override fun completeOnboarding(userId: String, pseudonym: String, bio: String) {
     viewModelScope.launch {
       profileRepository.completeOnboarding(userId, pseudonym, bio)
