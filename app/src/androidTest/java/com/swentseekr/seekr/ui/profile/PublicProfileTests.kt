@@ -113,7 +113,7 @@ class OpenPublicProfileTests {
   }
 
   @Test
-  fun opensHuntCardChecksButton() {
+  fun opensHuntCardChecksbutton() {
 
     val myProfile =
         sampleProfileWithPseudonym(
