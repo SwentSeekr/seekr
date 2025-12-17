@@ -92,7 +92,7 @@ class EditHuntScreenTest {
   }
 
   @Test
-  fun back_navigates_from_edit_screen() = runBlocking {
+  fun backNavigatesFromEditScreen() = runBlocking {
     createHunt()
     val all = repository.getAllHunts()
     assertTrue(all.isNotEmpty())
@@ -109,7 +109,7 @@ class EditHuntScreenTest {
   }
 
   @Test
-  fun load_populates_fields_from_firebase_and_enables_save() = runBlocking {
+  fun loadPopulatesFieldsFromFirebaseAndEnablesSave() = runBlocking {
     createHunt(
         title = "T",
         description = "D",
@@ -148,7 +148,7 @@ class EditHuntScreenTest {
   }
 
   @Test
-  fun save_updates_repository_and_calls_onDone() = runBlocking {
+  fun saveUpdatesRepositoryAndCallsOnDone() = runBlocking {
     createHunt(title = "Old", description = "Desc", time = "1.0", distance = "1.0")
 
     val all = repository.getAllHunts()
@@ -198,7 +198,7 @@ class EditHuntScreenTest {
   }
 
   @Test
-  fun delete_via_menu_deletes_hunt_and_calls_onGoBack() = runBlocking {
+  fun deleteViaMenuDeletesHuntAndCallOnGoBack() = runBlocking {
     // 1) Create a hunt to be edited/deleted
     createHunt(title = "To Delete", description = "Will be removed")
     val allBefore = repository.getAllHunts()

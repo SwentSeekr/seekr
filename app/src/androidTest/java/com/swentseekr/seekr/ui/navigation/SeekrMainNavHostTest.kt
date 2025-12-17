@@ -153,7 +153,7 @@ class SeekrNavigationTest {
   }
 
   @Test
-  fun tabsBar_and_tabs_are_visible_on_start() {
+  fun tabsBarAndTabsAreVisibleOnStart() {
     node(NavigationTestTags.BOTTOM_NAVIGATION_MENU).assertIsDisplayed()
     node(NavigationTestTags.OVERVIEW_TAB).assertIsDisplayed()
     node(NavigationTestTags.MAP_TAB).assertIsDisplayed()
@@ -162,7 +162,7 @@ class SeekrNavigationTest {
   }
 
   @Test
-  fun can_switch_between_tabs_and_reselect_without_crash() {
+  fun canSwitchBetweenTabsAndReselectWithoutCrash() {
     node(NavigationTestTags.OVERVIEW_TAB).performClick()
     node(NavigationTestTags.MAP_TAB).performClick()
     compose.waitForIdle()
@@ -179,7 +179,7 @@ class SeekrNavigationTest {
   // (Removed a dedicated "map_tab_shows_tagged_map_screen" test since the above already covers it.)
 
   @Test
-  fun profile_fab_navigates_to_add_hunt_then_back_restores_bar() {
+  fun profileFabNavigatesToAddHuntThenBackRestoresBar() {
     goToProfileTab()
 
     // FAB to AddHunt
@@ -201,7 +201,7 @@ class SeekrNavigationTest {
   }
 
   @Test
-  fun profile_click_my_hunt_opens_hunt_card_screen() {
+  fun profileClickMyHuntOpensHuntCardScreen() {
     // Go to the profile tab (first time)
     goToProfileTab()
 
@@ -230,7 +230,7 @@ class SeekrNavigationTest {
   }
 
   @Test
-  fun huntCard_clickEditButton_navigatesToEditHuntScreen() {
+  fun huntCardClickEditButtonNavigatesToEditHuntScreen() {
     // Use "fakeUser123" to match what FakeHuntCardViewModel.loadCurrentUserID() sets
     val currentUserId = "fakeUser123"
 
@@ -325,7 +325,7 @@ class SeekrNavigationTest {
   }
 
   @Test
-  fun add_hunt_on_done_navigates_back_to_tabs_and_shows_bar() {
+  fun addHuntOnDoneNavigatesBackToTabsAndShowsBar() {
     // Go to Profile → open AddHunt
     goToProfileTab()
     node(ProfileTestTags.ADD_HUNT).performClick()
@@ -385,7 +385,7 @@ class SeekrNavigationTest {
   }
 
   @Test
-  fun profile_settings_hides_bar_and_back_restores() {
+  fun profileSettingsHidesBarAndBackRestores() {
     goToProfileTab()
     node(ProfileTestTags.SETTINGS).performClick()
     node(NavigationTestTags.SETTINGS_SCREEN).assertIsDisplayed()
@@ -395,7 +395,7 @@ class SeekrNavigationTest {
   }
 
   @Test
-  fun settings_inScreen_back_invokes_onGoBack_and_restores_bottom_bar() {
+  fun settingsInScreenBackInvokesOnGoBackAndRestoresBottomBar() {
     // Profile → Settings
     goToProfileTab()
     node(ProfileTestTags.SETTINGS).performClick()
@@ -413,7 +413,7 @@ class SeekrNavigationTest {
   }
 
   @Test
-  fun overview_click_navigates_to_huntcard_with_passed_id_using_fake_repo() {
+  fun overviewClickNavigatesToHuntcardWithPassedIdUsingFakeRepo() {
     // Use createHunt() to seed repository
     val hunt = createHunt(uid = "fake-123", title = "Paris Discovery")
     val fakeHuntRepo = FakeRepoSuccess(listOf(hunt))
@@ -457,7 +457,7 @@ class SeekrNavigationTest {
   }
 
   @Test
-  fun settings_editProfile_navigates_to_edit_profile_and_back_restores_bottom_bar() {
+  fun settingsEditProfileNavigatesToEditProfileAndBackRestoresBottomBar() {
     // Profile → Settings
     goToProfileTab()
     node(ProfileTestTags.SETTINGS).assertIsDisplayed().performClick()
@@ -519,7 +519,7 @@ class SeekrNavigationTest {
   }
 
   @Test
-  fun huntcard_addReview_navigates_to_add_review_and_back_restores_huntcard() {
+  fun huntcardAddReviewNavigatesToAddReviewAndBackRestoresHuntcard() {
     // Seed repo with a single hunt that will appear in Overview and then in HuntCard.
     val hunt = createHunt(uid = "review-123", title = "Reviewable Hunt")
     val authorId = NavHostPublicProfileTestConstants.EXAMPLE_AUTHOR_ID
@@ -610,7 +610,7 @@ class SeekrNavigationTest {
   }
 
   @Test
-  fun huntcard_click_author_navigates_to_author_profile() {
+  fun huntcardClickAuthorNavigatesToAuthorProfile() {
     // Seed repo with a hunt that has a specific author
     val authorId = NavHostPublicProfileTestConstants.EXAMPLE_AUTHOR_ID
     val hunt =
@@ -680,7 +680,7 @@ class SeekrNavigationTest {
   }
 
   @Test
-  fun huntcard_beginHunt_callback_can_be_invoked() {
+  fun huntcardBeginHuntCallbackCanBeInvoked() {
     val hunt = createHunt(uid = "begin-hunt-123", title = "Beginnable Hunt")
     val authorId = NavHostPublicProfileTestConstants.EXAMPLE_AUTHOR_ID
     val fakeHuntRepo = FakeRepoSuccess(listOf(hunt))
@@ -729,7 +729,7 @@ class SeekrNavigationTest {
   }
 
   @Test
-  fun reviewImages_screen_navigates_and_displays_photos() {
+  fun reviewImagesScreenNavigatesAndDisplaysPhotos() {
     val reviewId = "review-images-123"
 
     compose.runOnUiThread {
@@ -764,7 +764,7 @@ class SeekrNavigationTest {
   }
 
   @Test
-  fun profile_reviews_route_with_userId_navigates_correctly() {
+  fun profileReviewsRouteWithUserIdNavigatesCorrectly() {
     val userId = "user-with-reviews-123"
 
     compose.runOnUiThread {
@@ -796,7 +796,7 @@ class SeekrNavigationTest {
   }
 
   @Test
-  fun navigation_bar_item_colors_and_styling_applied_correctly() {
+  fun navigationBarItemColorsAndStylingAppliedCorrectly() {
     goToProfileTab()
 
     // Verify navigation bar is displayed with correct styling
@@ -822,7 +822,7 @@ class SeekrNavigationTest {
   }
 
   @Test
-  fun huntcard_goProfile_navigates_to_clicked_user_profile() {
+  fun huntcardGoProfileNavigatesToClickedUserProfile() {
     val authorId = "different-author-456"
     val hunt =
         createHunt(uid = "hunt-profile-nav", title = "Hunt for Profile Nav")
@@ -879,7 +879,7 @@ class SeekrNavigationTest {
   }
 
   @Test
-  fun goProfile_opensSettings_opensTerms() {
+  fun goProfileOpensSettingsOpensTerms() {
     // Profile → Settings
     goToProfileTab()
 
@@ -892,7 +892,7 @@ class SeekrNavigationTest {
   }
 
   @Test
-  fun deepLink_navigates_to_huntCard_and_removes_intent_extra() {
+  fun deepLinkNavigatesToHuntCardAndRemovesIntentExtra() {
     val deepLinkId = DEEP_LINK_ID
     compose.activityRule.scenario.onActivity { activity ->
       activity.intent.putExtra(SeekrNavigationDefaults.HUNT_ID, deepLinkId)

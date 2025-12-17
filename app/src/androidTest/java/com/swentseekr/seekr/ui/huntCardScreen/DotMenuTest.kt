@@ -17,7 +17,7 @@ class DotMenuTest {
   @get:Rule val composeRule = createComposeRule()
 
   @Test
-  fun dotMenu_opens_and_triggers_edit() {
+  fun dotMenuOpensAndTriggersEdit() {
     var editClicked = false
 
     composeRule.setContent { DotMenu(onEdit = { editClicked = true }, onDelete = {}) }
@@ -32,7 +32,7 @@ class DotMenuTest {
   }
 
   @Test
-  fun dotMenu_opens_and_triggers_delete() {
+  fun dotMenuOpensAndTriggersDelete() {
     var deleteClicked = false
 
     composeRule.setContent { DotMenu(onEdit = {}, onDelete = { deleteClicked = true }) }
@@ -50,7 +50,7 @@ class DotMenuTest {
   }
 
   @Test
-  fun dotMenu_open_and_triggers_edit() {
+  fun dotMenuOpenAndTriggersEdit() {
     var editClicked = false
     composeRule.setContent { DotMenu(onEdit = { editClicked = true }, onDelete = {}) }
 
@@ -64,7 +64,7 @@ class DotMenuTest {
   }
 
   @Test
-  fun dotMenu_in_reviewCardHeader_for_currentUser_triggers_edit_and_delete() {
+  fun dotMenuInReviewCardHeaderForCurrentUserTriggersEditAndDelete() {
     var editClicked = false
     var deleteClicked = false
 

@@ -41,7 +41,7 @@ class AddHuntScreenTest {
   }
 
   @Test
-  fun starts_with_fields_and_back_navigates() {
+  fun startsWithFieldsAndBackNavigates() {
     val vm = AddHuntViewModel()
     var backCalled = false
     setContent(vm, onGoBack = { backCalled = true })
@@ -53,7 +53,7 @@ class AddHuntScreenTest {
   }
 
   @Test
-  fun save_enabled_when_state_valid_and_not_logged_in_shows_error_and_does_not_call_onDone() {
+  fun saveEnabledWhenStateValidAndNotLoggedInShowsErrorAndDoesNotCallOnDone() {
     val vm = AddHuntViewModel()
     var doneCalled = false
     setContent(vm, onDone = { doneCalled = true })
@@ -92,7 +92,7 @@ class AddHuntScreenTest {
   }
 
   @Test
-  fun invalid_state_triggered_error_is_cleared_by_effect() {
+  fun invalidStateTriggeredErrorIsClearedByEffect() {
     val vm = AddHuntViewModel()
     setContent(vm)
 

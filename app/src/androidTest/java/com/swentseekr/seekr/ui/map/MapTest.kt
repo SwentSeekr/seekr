@@ -254,7 +254,7 @@ class MapTest {
   }
 
   @Test
-  fun fullscreenCheckpointImage_closesWhenCloseButtonClicked() {
+  fun fullscreenCheckpointImageClosesWhenCloseButtonClicked() {
     composeRule.setContent {
       var isOpen by remember { mutableStateOf(true) }
 
@@ -273,7 +273,7 @@ class MapTest {
   }
 
   @Test
-  fun nextCheckpointSection_showsImage_and_isClickable_whenImageUrlPresent() {
+  fun nextCheckpointSectionShowsImageAndIsClickableWhenImageUrlPresent() {
     var imageClicked = false
 
     composeRule.setContent {

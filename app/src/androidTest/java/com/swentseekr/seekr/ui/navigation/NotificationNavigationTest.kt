@@ -84,7 +84,7 @@ class NotificationNavigationTest {
   }
 
   @Test
-  fun deepLink_withHuntId_navigatesToHuntCardScreen() {
+  fun deepLinkWithHuntIdNavigatesToHuntCardScreen() {
     val testHuntId = HUNT_123
     val hunt = createHunt(uid = testHuntId, title = TITLE_DEEPLINK_HUNT)
 
@@ -120,7 +120,7 @@ class NotificationNavigationTest {
   }
 
   @Test
-  fun deepLink_fromIntent_navigatesToCorrectHunt() {
+  fun deepLinkFromIntentNavigatesToCorrectHunt() {
     val huntIdFromNotification = NOTIFICATION_HUNT_456
     val huntTitle = TITLE_NOTIFICATION_HUNT
     val hunt = createHunt(uid = huntIdFromNotification, title = huntTitle)
@@ -166,7 +166,7 @@ class NotificationNavigationTest {
   }
 
   @Test
-  fun deepLink_removesHuntIdFromIntent_afterNavigation() {
+  fun deepLinkRemovesHuntIdFromIntentAfterNavigation() {
     val huntId = REMOVE_AFTER_NAV_HUNT
     val hunt = createHunt(uid = huntId, title = TITLE_REMOVE_TEST_HUNT)
 
@@ -209,7 +209,7 @@ class NotificationNavigationTest {
   }
 
   @Test
-  fun deepLink_navigatesWithLaunchSingleTop() {
+  fun deepLinkNavigatesWithLaunchSingleTop() {
     val huntId = SINGLE_TOP_HUNT
     val hunt = createHunt(uid = huntId, title = TITLE_SINGLE_TOP_HUNT)
 
@@ -247,7 +247,7 @@ class NotificationNavigationTest {
   }
 
   @Test
-  fun deepLink_fromNotification_canNavigateBackToOverview() {
+  fun deepLinkFromNotificationCanNavigateBackToOverview() {
     val huntId = BACK_TO_OVERVIEW_HUNT
     val hunt = createHunt(uid = huntId, title = TITLE_BACK_TEST_HUNT)
 
@@ -297,7 +297,7 @@ class NotificationNavigationTest {
   }
 
   @Test
-  fun deepLink_withSpecialCharacters_handlesCorrectly() {
+  fun deepLinkWithSpecialCharactersHandlesCorrectly() {
     val huntId = SPECIAL_CHARS_HUNT
     val hunt = createHunt(uid = huntId, title = TITLE_SPECIAL_CHARS_HUNT)
 
@@ -332,7 +332,7 @@ class NotificationNavigationTest {
   }
 
   @Test
-  fun deepLink_afterAppKilled_navigatesCorrectly() {
+  fun deepLinkAfterAppKilledNavigatesCorrectly() {
     val huntId = KILLED_APP_HUNT
     val hunt = createHunt(uid = huntId, title = TITLE_KILLED_APP_HUNT)
 
@@ -375,7 +375,7 @@ class NotificationNavigationTest {
   }
 
   @Test
-  fun huntCardRoute_createdWithCorrectFormat() {
+  fun huntCardRouteCreatedWithCorrectFormat() {
     val huntId = TEST_ROUTE_HUNT
     val expectedRoute = "hunt/$huntId"
     val actualRoute = SeekrDestination.HuntCard.createRoute(huntId)

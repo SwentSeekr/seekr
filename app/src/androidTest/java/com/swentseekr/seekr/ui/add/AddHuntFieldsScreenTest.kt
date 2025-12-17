@@ -122,7 +122,7 @@ class AddHuntFieldsScreenTest {
   }
 
   @Test
-  fun renders_topBar_and_backButton_triggers() {
+  fun rendersTopBarAndBackButtonTriggers() {
     setContent()
 
     composeRule.onNodeWithText(add_hunt_text).assertExists()
@@ -131,7 +131,7 @@ class AddHuntFieldsScreenTest {
   }
 
   @Test
-  fun textInputs_show_validation_errors_and_clear_when_valid() {
+  fun textInputsShowValidationErrorsAndClearWhenValid() {
     setContent()
 
     // Title error when empty
@@ -175,7 +175,7 @@ class AddHuntFieldsScreenTest {
   }
 
   @Test
-  fun dropdowns_select_status_and_difficulty() {
+  fun dropdownsSelectStatusAndDifficulty() {
     setContent()
 
     // Open and pick first status
@@ -194,7 +194,7 @@ class AddHuntFieldsScreenTest {
   }
 
   @Test
-  fun selectLocations_button_updates_label_with_point_count_and_invokes_callback() {
+  fun selectLocationsButtonUpdatesLabelWithPointCountAndInvokesCallback() {
     setContent()
 
     val selectBtn = composeRule.onNodeWithTag(HuntScreenTestTags.BUTTON_SELECT_LOCATION)
@@ -220,7 +220,7 @@ class AddHuntFieldsScreenTest {
   }
 
   @Test
-  fun saveButton_enabled_only_when_state_is_valid_and_invokes_onSave() {
+  fun saveButtonEnabledOnlyWhenStateIsValidAndInvokesOnSave() {
     setContent()
 
     val saveBtn = composeRule.onNodeWithTag(HuntScreenTestTags.HUNT_SAVE)
@@ -254,7 +254,7 @@ class AddHuntFieldsScreenTest {
   }
 
   @Test
-  fun otherImages_areDisplayed_andRemoveCallbacksTriggered() {
+  fun otherImagesAreDisplayedAndRemoveCallbacksTriggered() {
     var removedExisting: String? = null
     var removedUri: Uri? = null
 

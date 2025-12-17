@@ -44,7 +44,7 @@ class AuthNavHostTest {
   }
 
   @Test
-  fun clickingSignIn_withFakeAuthEmulator_triggersSignedInState() = runBlocking {
+  fun clickingSignInWithFakeAuthEmulatorTriggersSignedInState() = runBlocking {
     val fakeToken = FakeJwtGenerator.createFakeGoogleIdToken()
     FakeAuthEmulator.signInWithFakeGoogleToken(fakeToken)
 

@@ -93,7 +93,7 @@ class SeekrRootAppTest {
   }
 
   @Test
-  fun loggedInUser_opensAppAndGoesDirectlyToMain() {
+  fun loggedInUserOpensAppAndGoesDirectlyToMain() {
     // Ensure we have an authenticated user (no-op if already signed in).
     ensureSignedIn()
     NetworkTestUtils.goOnline()
@@ -112,7 +112,7 @@ class SeekrRootAppTest {
   }
 
   @Test
-  fun offlineWithoutCachedProfile_showsOfflineRequired_andOpenSettingsClickable() {
+  fun offlineWithoutCachedProfileShowsOfflineRequiredAndOpenSettingsClickable() {
     // No network or auth hacks needed; overrides control everything.
     composeTestRule.setContent {
       SeekrRootApp(
@@ -137,7 +137,7 @@ class SeekrRootAppTest {
   }
 
   @Test
-  fun offlineWithCachedProfile_usesOfflineNavHost_andBuildsOfflineHunts() {
+  fun offlineWithCachedProfileUsesOfflineNavHostAndBuildsOfflineHunts() {
     val cachedProfile = createOfflineCachedProfileForTest()
 
     composeTestRule.setContent {

@@ -68,7 +68,7 @@ class EditHuntViewModelAndroidTest {
   }
 
   @Test
-  fun load_populates_state_and_buildHunt_uses_loaded_id() = runTest {
+  fun loadPopulatesStateAndBuildHuntUsesLoadedId() = runTest {
     createHunt()
     advanceUntilIdle()
 
@@ -104,7 +104,7 @@ class EditHuntViewModelAndroidTest {
   }
 
   @Test
-  fun buildHunt_throws_if_no_hunt_loaded() {
+  fun buildHuntThrowsIfNoHuntLoaded() {
     val ex =
         assertThrows(IllegalArgumentException::class.java) {
           editVM.buildHunt(editVM.uiState.value)
@@ -113,7 +113,7 @@ class EditHuntViewModelAndroidTest {
   }
 
   @Test
-  fun submit_returnsFalse_andSetsError_whenStateInvalid() = runTest {
+  fun submitReturnsFalseAndSetsErrorWhenStateInvalid() = runTest {
     createHunt()
     advanceUntilIdle()
     val id = repository.getAllHunts().first().uid
@@ -133,7 +133,7 @@ class EditHuntViewModelAndroidTest {
   }
 
   @Test
-  fun submit_returnsFalse_andSetsError_whenNotLoggedIn() = runTest {
+  fun submitReturnsFalseAndSetsErrorWhenNotLoggedIn() = runTest {
     createHunt()
     advanceUntilIdle()
     val id = repository.getAllHunts().first().uid
@@ -154,7 +154,7 @@ class EditHuntViewModelAndroidTest {
   }
 
   @Test
-  fun submit_returnsTrue_updatesRepository_andClearsError_onSuccess() = runTest {
+  fun submitReturnsTrueUpdatesRepositoryAndClearsErrorOnSuccess() = runTest {
     createHunt()
     advanceUntilIdle()
     val id = repository.getAllHunts().first().uid
@@ -200,7 +200,7 @@ class EditHuntViewModelAndroidTest {
   }
 
   @Test
-  fun load_invalidId_setsErrorMsg() = runTest {
+  fun loadInvalidIdSetsErrorMsg() = runTest {
     editVM.load("non-existent-id-123")
     advanceUntilIdle()
     delay(200)
@@ -211,7 +211,7 @@ class EditHuntViewModelAndroidTest {
   }
 
   @Test
-  fun clearErrorMsg_setsNull() = runTest {
+  fun clearErrorMsgSetsNull() = runTest {
     editVM.load("non-existent")
     advanceUntilIdle()
     delay(200)
@@ -222,7 +222,7 @@ class EditHuntViewModelAndroidTest {
   }
 
   @Test
-  fun otherImages_add_and_remove_work_in_viewModel() = runTest {
+  fun otherImagesAddAndRemoveWorkInViewModel() = runTest {
     createHunt()
     advanceUntilIdle()
     val id = repository.getAllHunts().first().uid
@@ -257,7 +257,7 @@ class EditHuntViewModelAndroidTest {
   }
 
   @Test
-  fun removeMainImage_savesUrlForDeletion_andClearsMainImageUrl() = runTest {
+  fun removeMainImageSavesUrlForDeletionAndClearsMainImageUrl() = runTest {
     // Arrange: create and load a hunt with a main image
     createHunt()
     advanceUntilIdle()

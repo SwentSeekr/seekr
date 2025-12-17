@@ -62,7 +62,7 @@ class OnboardingFlowScreenTest {
   // 1. Welcome dialog is shown first
   // -------------------------------------------------------------
   @Test
-  fun initialScreen_showsWelcomeDialog() {
+  fun initialScreenShowsWelcomeDialog() {
     setContent("user1", FakeOnboardingHandler())
 
     composeTestRule.onNodeWithTag(WELCOME_DIALOG).assertIsDisplayed()
@@ -73,7 +73,7 @@ class OnboardingFlowScreenTest {
   // 2. Continue button transitions to Terms dialog
   // -------------------------------------------------------------
   @Test
-  fun clickingContinue_showsTermsDialog() {
+  fun clickingContinueShowsTermsDialog() {
     setContent("user1", FakeOnboardingHandler())
 
     composeTestRule.onNodeWithTag(CONTINUE_BUTTON).performClick()
@@ -87,7 +87,7 @@ class OnboardingFlowScreenTest {
   // 3. Agree button only enabled after checking checkbox
   // -------------------------------------------------------------
   @Test
-  fun termsDialog_agreeEnabled_onlyAfterCheckingBox() {
+  fun termsDialogAgreeEnabledOnlyAfterCheckingBox() {
     setContent("user1", FakeOnboardingHandler())
 
     composeTestRule.onNodeWithTag(CONTINUE_BUTTON).performClick()
@@ -103,7 +103,7 @@ class OnboardingFlowScreenTest {
   // 4. Agree → Profile setup dialog
   // -------------------------------------------------------------
   @Test
-  fun clickingAgree_showsProfileSetupDialog() {
+  fun clickingAgreeShowsProfileSetupDialog() {
     setContent("user1", FakeOnboardingHandler())
 
     composeTestRule.onNodeWithTag(CONTINUE_BUTTON).performClick()
@@ -118,7 +118,7 @@ class OnboardingFlowScreenTest {
   // 5. Enter pseudonym → Finish enabled
   // -------------------------------------------------------------
   @Test
-  fun enteringPseudonym_enablesFinish() {
+  fun enteringPseudonymEnablesFinish() {
     setContent("user1", FakeOnboardingHandler())
 
     composeTestRule.onNodeWithTag(CONTINUE_BUTTON).performClick()
@@ -136,7 +136,7 @@ class OnboardingFlowScreenTest {
   // 6. Full onboarding triggers handler callback
   // -------------------------------------------------------------
   @Test
-  fun fullFlow_callsOnboardingHandler() {
+  fun fullFlowCallsOnboardingHandler() {
     val handler = FakeOnboardingHandler()
     val userId = "newUserABC"
 
@@ -170,7 +170,7 @@ class OnboardingFlowScreenTest {
   // 7. Bio optional: finish still works
   // -------------------------------------------------------------
   @Test
-  fun bioOptional_finishStillCallsHandler() {
+  fun bioOptionalFinishStillCallsHandler() {
     val handler = FakeOnboardingHandler()
 
     setContent("userX", handler)
@@ -192,7 +192,7 @@ class OnboardingFlowScreenTest {
   // 8. Finishing removes all dialogs
   // -------------------------------------------------------------
   @Test
-  fun afterFinish_noDialogsRemainVisible() {
+  fun afterFinishNoDialogsRemainVisible() {
     val handler = FakeOnboardingHandler()
     var done = false
     var showFlow by mutableStateOf(true)
@@ -234,7 +234,7 @@ class OnboardingFlowScreenTest {
   // 9. Clicks on Terms link, opens new dialog, comes back
   // -------------------------------------------------------------
   @Test
-  fun clickingTermsLink_opensAndClosesTermsDialog() {
+  fun clickingTermsLinkOpensAndClosesTermsDialog() {
     setContent("user1", FakeOnboardingHandler())
 
     composeTestRule.onNodeWithTag(CONTINUE_BUTTON).performClick()
