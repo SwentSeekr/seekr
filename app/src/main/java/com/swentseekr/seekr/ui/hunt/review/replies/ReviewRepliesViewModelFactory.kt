@@ -18,6 +18,12 @@ class ReviewRepliesViewModelFactory(
   /**
    * Creates a new [ReviewRepliesViewModel] for the given [modelClass], preconfigured with
    * [reviewId] and [repository].
+   *
+   * @param T The type of [ViewModel] being requested.
+   * @param modelClass The [Class] object of the [ViewModel] type.
+   * @return A new instance of [ReviewRepliesViewModel].
+   * @throws IllegalArgumentException if [modelClass] is not assignable from
+   *   [ReviewRepliesViewModel].
    */
   override fun <T : ViewModel> create(modelClass: Class<T>): T {
     if (modelClass.isAssignableFrom(ReviewRepliesViewModel::class.java)) {

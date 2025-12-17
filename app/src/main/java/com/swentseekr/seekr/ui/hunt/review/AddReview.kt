@@ -30,7 +30,6 @@ val UICons = AddReviewScreenDefaults
  * - Submit, cancel, or go back.
  *
  * @param huntId The unique ID of the hunt being reviewed.
- * @param reviewViewModel The ViewModel responsible for managing review-related UI state.
  * @param huntCardViewModel The ViewModel responsible for fetching hunt and author details.
  * @param onGoBack Callback triggered when the user presses the "Go Back" button.
  * @param onDone Callback triggered when the user successfully submits the review.
@@ -61,8 +60,7 @@ fun AddReviewScreen(
  * A reusable composable for displaying a row of selectable stars. Supports interactive rating with
  * animations.
  *
- * @param maxStars Maximum number of stars in the rating bar. Defaults to
- *   [AddReviewScreenDefaults.MaxStars].
+ * @param maxStars Maximum number of stars in the rating bar.
  * @param rating Current rating value (0 means no stars selected). Defaults to 0.
  * @param onRatingChanged Callback invoked when the user taps a star. Provides the updated rating
  *   value.

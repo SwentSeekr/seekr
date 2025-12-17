@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.hunt.edit
 
+/** Contains constant string values used in the Edit Hunt UI. */
 object EditHuntConstantsStrings {
   const val TITLE = "Edit your Hunt"
   const val FAIL_LOADING = "Failed to load hunt:"
@@ -9,6 +10,7 @@ object EditHuntConstantsStrings {
   const val FAIL_DELETE = "Failed to delete hunt:"
 }
 
+/** Contains other numeric constants used in the Edit Hunt feature. */
 object EditHuntConstants {
   const val DROP = 1
 }

@@ -3,25 +3,65 @@ package com.swentseekr.seekr.ui.terms
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+/**
+ * UI constants used by the Terms & Conditions screen.
+ *
+ * Centralizes layout dimensions, spacing, alpha values, and typography-related constants to avoid
+ * hardcoded values.
+ */
 object TermsScreenConstants {
+
+  // -----------
+  // Alpha
+  // -----------
   val ALPHA = 0.3f
+
+  // -----------
+  // Layout & spacing
+  // -----------
+
   val SCREEN_PADDING = 20.dp
+
   val SECTION_SPACING = 16.dp
-  val CARD_CORNER_RADIUS = 20.dp
-  val CARD_PADDING = 20.dp
-  val CARD_ELEVATION = 2.dp
-  val ELEVATION = 0.dp
+
   val TEXT_SPACING = 12.dp
-  val LINE_HEIGHT = 24.sp
+
   val TOP_SPACER = 8.dp
 
   val BOTTOM_SPACER = 24.dp
+  val LINE_HEIGHT = 24.sp
+
+  // -----------
+  // Card styling
+  // -----------
+
+  val CARD_CORNER_RADIUS = 20.dp
+
+  val CARD_PADDING = 20.dp
+
+  val CARD_ELEVATION = 2.dp
+
+  val ELEVATION = 0.dp
 }
 
+/**
+ * Static text content displayed on the Terms & Conditions screen.
+ *
+ * Contains titles, section headers, and legal text.
+ */
 object TermsScreenStrings {
+
+  // -----------
+  // Header
+  // -----------
+
   const val TITLE = "Terms & Conditions"
   const val BACK_DESCRIPTION = "Go back"
   const val LAST_UPDATED = "Last updated: December 2024"
+
+  // -----------
+  // Sections
+  // -----------
 
   const val SECTION_1_TITLE = "1. Acceptance of Terms"
   const val SECTION_1_CONTENT =
@@ -48,9 +88,23 @@ object TermsScreenStrings {
       "Seekr is provided on an 'as is' and 'as available' basis. We make no warranties or representations about the accuracy or completeness of the content. We shall not be liable for any damages arising from your use of the application."
 }
 
+/**
+ * Semantic test tags for the Terms & Conditions screen.
+ *
+ * Used in Compose UI tests for deterministic element lookup.
+ */
 object TermsScreenTestTags {
+  // -----------
+  // Screen structure
+  // -----------
+
   const val SCREEN = "TERMS_SCREEN"
-  const val BACK_BUTTON = "TERMS_BACK_BUTTON"
   const val CONTENT_COLUMN = "TERMS_CONTENT_COLUMN"
   const val LAST_SPACER = "TERMS_LAST_SPACER"
+
+  // -----------
+  // Navigation
+  // -----------
+
+  const val BACK_BUTTON = "TERMS_BACK_BUTTON"
 }

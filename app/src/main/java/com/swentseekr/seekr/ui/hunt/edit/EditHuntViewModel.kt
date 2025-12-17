@@ -146,7 +146,6 @@ class EditHuntViewModel(
       pendingMainImageDeletionUrl = currentUrl
     }
 
-    // Remove from UI
     updateMainImageUri(null)
   }
 

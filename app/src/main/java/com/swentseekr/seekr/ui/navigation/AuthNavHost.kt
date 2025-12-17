@@ -11,10 +11,25 @@ import androidx.navigation.compose.rememberNavController
 import com.swentseekr.seekr.ui.auth.AuthViewModel
 import com.swentseekr.seekr.ui.auth.SignInScreen
 
+/** Enumeration of authentication screens used in [AuthNavHost]. */
 enum class AuthScreen {
+  /** Sign-in screen for user authentication. */
   SIGN_IN
 }
 
+/**
+ * Sets up the navigation host for authentication-related screens.
+ *
+ * Observes the [AuthViewModel] state and triggers [onSignedIn] callback when a user successfully
+ * signs in.
+ *
+ * @param credentialManager the [CredentialManager] used for handling platform credentials.
+ * @param viewModel the [AuthViewModel] instance, defaults to Compose's `viewModel()`.
+ * @param onSignedIn callback invoked when a user successfully signs in.
+ * @param navController the [NavHostController] to manage navigation; defaults to a new
+ *   [rememberNavController].
+ * @param modifier optional [Modifier] for styling the NavHost container.
+ */
 @Composable
 fun AuthNavHost(
     credentialManager: CredentialManager,
@@ -25,7 +40,6 @@ fun AuthNavHost(
 ) {
   val uiState by viewModel.uiState.collectAsState()
 
-  // If already authenticated, go to next screen
   LaunchedEffect(uiState.user) {
     if (uiState.user != null) {
       onSignedIn()

@@ -48,8 +48,15 @@ import com.swentseekr.seekr.R
 import com.swentseekr.seekr.ui.theme.Transparent
 
 /**
- * Displays a screen allowing the user to review a list of images with a paging UI and optional
+ * Displays a screen showing a list of review images in a horizontal pager, with optional
  * full-screen viewing.
+ *
+ * The user can scroll through images, see the current index, and tap an image to view it in
+ * full-screen mode.
+ *
+ * @param photoUrls List of image URLs to display.
+ * @param onGoBack Callback invoked when the user taps the back button in the top app bar.
+ * @param modifier Optional [Modifier] for styling or layout customization.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -147,7 +154,16 @@ fun ReviewImagesScreen(
   }
 }
 
-/** Displays a full-screen dialog that allows the user to swipe through a collection of images. */
+/**
+ * Displays a full-screen dialog with a horizontal pager to view images.
+ *
+ * Includes a top overlay with a close button and the current image index. Swiping horizontally
+ * navigates between images.
+ *
+ * @param images List of image URLs to display in full-screen mode.
+ * @param startIndex The initial image index to display when the viewer opens.
+ * @param onClose Callback invoked when the user dismisses the full-screen viewer.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FullScreenImageViewer(

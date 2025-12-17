@@ -36,8 +36,14 @@ import com.swentseekr.seekr.ui.profile.ProfileTab
  * offline-only variants.
  */
 enum class OfflineProfileTab {
+
+  /** Hunts created by the user. */
   MY_HUNTS,
+
+  /** Hunts completed by the user. */
   DONE_HUNTS,
+
+  /** Hunts liked or bookmarked by the user. */
   LIKED_HUNTS
 }
 
@@ -79,9 +85,8 @@ fun OfflineCachedProfileScreen(profile: Profile?, modifier: Modifier = Modifier)
 
   Surface(
       modifier = modifier.fillMaxSize(),
-      color = MaterialTheme.colorScheme.onPrimary, // from theme (White)
+      color = MaterialTheme.colorScheme.onPrimary,
   ) {
-    // If there is no cached profile, show a centered offline message and bail out early.
     if (currentProfile == null) {
       Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(
@@ -95,7 +100,6 @@ fun OfflineCachedProfileScreen(profile: Profile?, modifier: Modifier = Modifier)
     val selectedOfflineTab = offlineViewModel.selectedTab
     val huntsToDisplay: List<Hunt> = offlineViewModel.huntsToDisplay
 
-    // Map OfflineProfileTab -> ProfileTab so we can reuse ModernCustomToolbar & empty state.
     val selectedProfileTab: ProfileTab =
         when (selectedOfflineTab) {
           OfflineProfileTab.MY_HUNTS -> ProfileTab.MY_HUNTS
