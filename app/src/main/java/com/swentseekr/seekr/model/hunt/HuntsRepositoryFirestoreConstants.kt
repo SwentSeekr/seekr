@@ -26,6 +26,10 @@ object HuntsRepositoryFirestoreConstantsStrings {
   const val ERROR_CONVERTING = "Error converting document to Hunt"
   const val HUNT_REVIEW_REPLY_COLLECTION_PATH = "huntReviewReplies"
   const val FIELD_HUNT_ID = "huntId"
+  const val FIRESTORE_PHOTOS_FIELD = "photos"
+  const val FAILED_REVIEW_PHOTO_DELETION = "Failed to delete review photo: "
+  const val FIELD_HUNT_IMAGE_DELETION = "Failed to delete hunt images for hunt ID= "
+  const val HUNTS_COLLECTION_PATH = "hunts"
 }
 
 object HuntsRepositoryFirestoreConstantsDefault {
