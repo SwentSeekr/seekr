@@ -59,7 +59,7 @@ class AddHuntViewModelAndroidTest {
   }
 
   @Test
-  fun initialState_isEmptyAndInvalid() {
+  fun initialStateIsEmptyAndInvalid() {
     val s = viewModel.uiState.value
     assertEquals("", s.title)
     assertEquals("", s.description)
@@ -71,7 +71,7 @@ class AddHuntViewModelAndroidTest {
   }
 
   @Test
-  fun setters_updateState_andValidation() {
+  fun settersUpdateStateAndValidation() {
     viewModel.setTitle("")
     assertEquals(BaseHuntViewModelMessages.TITLE_EMPTY, viewModel.uiState.value.invalidTitleMsg)
     viewModel.setTitle("T")
@@ -113,20 +113,20 @@ class AddHuntViewModelAndroidTest {
   }
 
   @Test
-  fun isValid_true_whenAllFieldsSet() {
+  fun isValidTrueWhenAllFieldsSet() {
     setValidState(points = listOf(Location(0.0, 0.0, "A"), Location(1.0, 1.0, "B")))
     assertTrue(viewModel.uiState.value.isValid)
   }
 
   @Test
-  fun addHunt_returnsFalse_andSetsError_whenStateInvalid() = runTest {
+  fun addHuntReturnsFalseAndSetsErrorWhenStateInvalid() = runTest {
     val result = viewModel.submit()
     assertFalse(result)
     assertEquals(BaseHuntViewModelMessages.NOT_ALL_FIELD_FILL, viewModel.uiState.value.errorMsg)
   }
 
   @Test
-  fun addHunt_returnsFalse_andSetsError_whenNotLoggedIn() = runTest {
+  fun addHuntReturnsFalseAndSetsErrorWhenNotLoggedIn() = runTest {
     setValidState(points = listOf(Location(0.0, 0.0, "A"), Location(1.0, 1.0, "B")))
     FirebaseAuth.getInstance().signOut()
 
@@ -136,7 +136,7 @@ class AddHuntViewModelAndroidTest {
   }
 
   @Test
-  fun clearErrorMsg_setsNull() {
+  fun clearErrorMsgSetsNull() {
     viewModel.submit()
     assertNotNull(viewModel.uiState.value.errorMsg)
     viewModel.clearErrorMsg()
@@ -144,7 +144,7 @@ class AddHuntViewModelAndroidTest {
   }
 
   @Test
-  fun imageHandlers_updateStateCorrectly() = runTest {
+  fun imageHandlersUpdateStateCorrectly() = runTest {
     val main = Uri.parse("file://main.png")
     viewModel.updateMainImageUri(main)
 
@@ -170,7 +170,7 @@ class AddHuntViewModelAndroidTest {
   }
 
   @Test
-  fun checkpointImages_areAttachedAndStateUpdated() {
+  fun checkpointImagesAreAttachedAndStateUpdated() {
     val existing = Uri.parse("file://existing.png")
     viewModel.updateOtherImagesUris(listOf(existing))
 
@@ -195,7 +195,7 @@ class AddHuntViewModelAndroidTest {
   }
 
   @Test
-  fun checkpointImages_ignoreNullUri_andBufferIsClearedAfterAttach() {
+  fun checkpointImagesIgnoreNullUriAndBufferIsClearedAfterAttach() {
     val a = Location(0.0, 0.0, "A")
     val uriA = Uri.parse("file://checkpoint_a.png")
 
@@ -221,7 +221,7 @@ class AddHuntViewModelAndroidTest {
   }
 
   @Test
-  fun removeMainImage_clearsMainImageUrl_andMainImageUri() = runTest {
+  fun removeMainImageClearsMainImageUrlAndMainImageUri() = runTest {
     // Arrange: set a main image
     val uri = Uri.parse("file://main-to-remove.png")
     viewModel.updateMainImageUri(uri)

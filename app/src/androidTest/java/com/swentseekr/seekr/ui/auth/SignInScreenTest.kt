@@ -28,7 +28,7 @@ class SignInScreenTest {
   }
 
   @Test
-  fun signInScreen_componentsAreDisplayed() {
+  fun signInScreenComponentsAreDisplayed() {
     composeTestRule.setContent { SignInScreen() }
 
     composeTestRule.onNodeWithTag(APP_LOGO).assertIsDisplayed()
@@ -36,7 +36,7 @@ class SignInScreenTest {
   }
 
   @Test
-  fun clickingLoginButton_isAvailable() {
+  fun clickingLoginButtonIsAvailable() {
     composeTestRule.setContent { SignInScreen() }
 
     composeTestRule.onNodeWithTag(LOGIN_BUTTON).assertIsDisplayed().performClick()
