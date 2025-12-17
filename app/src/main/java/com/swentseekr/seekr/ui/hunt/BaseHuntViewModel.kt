@@ -15,6 +15,7 @@ import com.swentseekr.seekr.ui.map.MapConfig
 import com.swentseekr.seekr.ui.map.computeDistanceMetersRaw
 import com.swentseekr.seekr.ui.map.requestDirectionsPolyline
 import java.util.Locale
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -88,7 +89,8 @@ data class HuntUIState(
  * @param repository The [HuntsRepository] used to persist and retrieve Hunt data. Defaults to [HuntRepositoryProvider.repository].
  */
 abstract class BaseHuntViewModel(
-    protected val repository: HuntsRepository = HuntRepositoryProvider.repository
+    protected val repository: HuntsRepository = HuntRepositoryProvider.repository,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : ViewModel() {
 
   protected val _uiState = MutableStateFlow(HuntUIState())
@@ -435,7 +437,7 @@ abstract class BaseHuntViewModel(
     viewModelScope.launch {
       val polyline: List<LatLng> =
           try {
-            withContext(Dispatchers.IO) {
+            withContext(ioDispatcher) {
               requestDirectionsPolyline(
                   originLat = origin.latitude,
                   originLng = origin.longitude,
