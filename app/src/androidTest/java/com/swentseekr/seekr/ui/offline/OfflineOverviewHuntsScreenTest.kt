@@ -29,7 +29,7 @@ class OfflineOverviewHuntsScreenTest {
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()
 
   @Test
-  fun offlineOverviewHuntsScreen_rendersAndHandlesHuntClick_forNonEmptyList() {
+  fun offlineOverviewHuntsScreenRendersAndHandlesHuntClickForNonEmptyList() {
     // Build a small list of hunts using the existing factory.
     val hunts =
         listOf(
