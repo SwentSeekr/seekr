@@ -5,11 +5,16 @@ import android.util.Log
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreConstantsDefault.ZERO
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreConstantsStrings.FAILED_REVIEW_PHOTO_DELETION
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreConstantsStrings.FIELD_HUNT_ID
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreConstantsStrings.FIELD_HUNT_IMAGE_DELETION
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreConstantsStrings.FIRESTORE_PHOTOS_FIELD
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreConstantsStrings.HUNTS_COLLECTION_PATH
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreConstantsStrings.HUNT_REVIEW_REPLY_COLLECTION_PATH
+import com.swentseekr.seekr.model.hunt.review.HuntReviewReplyFirestoreConstants.FIELD_REVIEW_ID
 import com.swentseekr.seekr.model.map.Location
 import kotlin.String
 import kotlinx.coroutines.tasks.await
-
-const val HUNTS_COLLECTION_PATH = "hunts"
 
 /**
  * Firestore implementation of [HuntsRepository] that manages persistence of [Hunt] objects in
@@ -20,7 +25,8 @@ const val HUNTS_COLLECTION_PATH = "hunts"
  */
 class HuntsRepositoryFirestore(
     private val db: FirebaseFirestore,
-    private val imageRepo: IHuntsImageRepository = HuntsImageRepository()
+    private val imageRepo: IHuntsImageRepository = HuntsImageRepository(),
+    private val reviewImageRepo: IReviewImageRepository = ReviewImageRepository()
 ) : HuntsRepository {
 
   /**
@@ -170,8 +176,58 @@ class HuntsRepositoryFirestore(
    * @param huntID The ID of the hunt to delete.
    */
   override suspend fun deleteHunt(huntID: String) {
-    imageRepo.deleteAllHuntImages(huntID)
+
+    val reviewsSnapshot =
+        db.collection(HUNT_REVIEW_COLLECTION_PATH).whereEqualTo(FIELD_HUNT_ID, huntID).get().await()
+
+    val reviews =
+        reviewsSnapshot.documents.mapNotNull { doc ->
+          val reviewId = doc.id
+          val photos =
+              (doc[FIRESTORE_PHOTOS_FIELD] as? List<*>)?.filterIsInstance<String>().orEmpty()
+          reviewId to photos
+        }
+
+    for ((reviewId, photoUrls) in reviews) {
+      deleteRepliesForReview(reviewId)
+
+      photoUrls.forEach { url ->
+        runCatching { reviewImageRepo.deleteReviewPhoto(url) }
+            .onFailure {
+              Log.w(
+                  HuntsRepositoryFirestoreConstantsStrings.TAG,
+                  FAILED_REVIEW_PHOTO_DELETION + url,
+                  it)
+            }
+      }
+      db.collection(HUNT_REVIEW_COLLECTION_PATH).document(reviewId).delete().await()
+    }
+
+    runCatching { imageRepo.deleteAllHuntImages(huntID) }
+        .onFailure {
+          Log.w(
+              HuntsRepositoryFirestoreConstantsStrings.TAG, FIELD_HUNT_IMAGE_DELETION + huntID, it)
+        }
+
     db.collection(HUNTS_COLLECTION_PATH).document(huntID).delete().await()
+  }
+
+  private suspend fun deleteRepliesForReview(reviewId: String) {
+    val query =
+        db.collection(HUNT_REVIEW_REPLY_COLLECTION_PATH).whereEqualTo(FIELD_REVIEW_ID, reviewId)
+
+    var snapshot = query.get().await()
+
+    while (!snapshot.isEmpty) {
+      val batch = db.batch()
+
+      // Firestore batch hard limit is 500 writes; chunk to be safe
+      snapshot.documents.take(450).forEach { doc -> batch.delete(doc.reference) }
+
+      batch.commit().await()
+
+      snapshot = query.get().await()
+    }
   }
 
   /**

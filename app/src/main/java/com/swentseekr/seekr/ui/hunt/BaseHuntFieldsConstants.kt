@@ -95,6 +95,8 @@ object BaseHuntFieldsUi {
   val FieldCornerRadius: Dp = 16.dp
   val ChangeAlpha: Float = 0.5f
   val Alpha03: Float = 0.3f
+  val DeleteContainerAlpha: Float = 0.1f
+  val DeleteBorderAlpha: Float = 0.5f
   val WeightTextField: Float = 1f
   val DescriptionHeight: Dp = 140.dp
 
@@ -196,4 +198,5 @@ object HuntScreenTestTags {
   // -------------------
   const val ADD_HUNT_SCREEN = "AddHuntScreen"
   const val COLLUMN_HUNT_FIELDS = "ColumnHuntFields"
+  const val BUTTON_DELETE_HUNT = "buttonDeleteHunt"
 }
