@@ -103,11 +103,11 @@ class MyFirebaseMessagingServiceTest {
     val mockTask = mockk<com.google.android.gms.tasks.Task<Void>>()
     every { NotificationTokenService.persistToken(UID, TOKEN) } returns mockTask
     every { mockTask.addOnSuccessListener(any()) } answers
-            {
-              val listener = firstArg<com.google.android.gms.tasks.OnSuccessListener<Void>>()
-              listener.onSuccess(null)
-              mockTask
-            }
+        {
+          val listener = firstArg<com.google.android.gms.tasks.OnSuccessListener<Void>>()
+          listener.onSuccess(null)
+          mockTask
+        }
     every { mockTask.addOnFailureListener(any()) } returns mockTask
 
     service.onNewToken(TOKEN)
@@ -123,11 +123,11 @@ class MyFirebaseMessagingServiceTest {
     every { NotificationTokenService.persistToken(UID, TOKEN) } returns mockTask
     every { mockTask.addOnSuccessListener(any()) } returns mockTask
     every { mockTask.addOnFailureListener(any()) } answers
-            {
-              val listener = firstArg<com.google.android.gms.tasks.OnFailureListener>()
-              listener.onFailure(Exception("fail"))
-              mockTask
-            }
+        {
+          val listener = firstArg<com.google.android.gms.tasks.OnFailureListener>()
+          listener.onFailure(Exception("fail"))
+          mockTask
+        }
 
     service.onNewToken(TOKEN)
 
