@@ -4,7 +4,25 @@ import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreConstantsStrings.FIELD_HUNT_ID
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreConstantsStrings.HUNTS_COLLECTION_PATH
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreConstantsStrings.HUNT_REVIEW_REPLY_COLLECTION_PATH
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreTestConstants.ADD_FAIL_CLEANUP_HUNT_ID
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreTestConstants.ADD_WITH_OTHERS_HUNT_ID
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreTestConstants.BAD_DOC_ID
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreTestConstants.EDIT_TEST_HUNT_ID
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreTestConstants.ERROR_TEST_HUNT_ID
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreTestConstants.FILE_MAIN
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreTestConstants.FILE_OTHER_1
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreTestConstants.FILE_OTHER_2
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreTestConstants.HUNT_CASCADE_ID
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreTestConstants.IMAGE_URI
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreTestConstants.PHOTO_1
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreTestConstants.PHOTO_2
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreTestConstants.REPLY_ID_1
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreTestConstants.REPLY_ID_2
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreTestConstants.REVIEW_ID_1
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreTestConstants.SECOND_HUNT_TITLE
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreTestConstants.SHOULD_FAIL_TITLE
 import com.swentseekr.seekr.model.hunt.review.HuntReviewReplyFirestoreConstants.FIELD_REVIEW_ID
 import com.swentseekr.seekr.model.map.Location
 import com.swentseekr.seekr.utils.FakeHuntsImageRepository
@@ -69,8 +87,8 @@ class HuntsRepositoryFirestoreTest {
   @Test
   fun getNewUidReturnsUniqueIDs() = runTest {
     val numberIDs = 100
-    val uids = (0 until 100).toSet<Int>().map { repository.getNewUid() }.toSet()
-    assertEquals(uids.size, numberIDs)
+    val uids = (0 until numberIDs).map { repository.getNewUid() }.toSet()
+    assertEquals(numberIDs, uids.size)
   }
 
   @Test
@@ -169,7 +187,7 @@ class HuntsRepositoryFirestoreTest {
   @Test
   fun canEditAHuntByIDWithMultipleHunts() = runTest {
     repository.addHunt(hunt1)
-    val hunt2 = hunt1.copy(uid = HuntTestConstants.HUNT_UID_2, title = "Second Hunt")
+    val hunt2 = hunt1.copy(uid = HuntTestConstants.HUNT_UID_2, title = SECOND_HUNT_TITLE)
     repository.addHunt(hunt2)
     val hunt3 = hunt1.copy(uid = HuntTestConstants.HUNT_UID_3, title = HuntTestConstants.TITLE_3)
     repository.addHunt(hunt3)
@@ -193,7 +211,7 @@ class HuntsRepositoryFirestoreTest {
   @Test
   fun canDeleteAHuntByIDWithMultipleHunts() = runTest {
     repository.addHunt(hunt1)
-    val hunt2 = hunt1.copy(uid = HuntTestConstants.HUNT_UID_2, title = "Second Hunt")
+    val hunt2 = hunt1.copy(uid = HuntTestConstants.HUNT_UID_2, title = SECOND_HUNT_TITLE)
     repository.addHunt(hunt2)
     val hunt3 = hunt1.copy(uid = HuntTestConstants.HUNT_UID_3, title = HuntTestConstants.TITLE_3)
     repository.addHunt(hunt3)
@@ -208,8 +226,8 @@ class HuntsRepositoryFirestoreTest {
 
   @Test
   fun editHunt_updatesImagesCorrectly_withDeletion_andAddition() = runTest {
-    val fakeImageRepo = com.swentseekr.seekr.utils.FakeHuntsImageRepository()
-    val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+    val fakeImageRepo = FakeHuntsImageRepository()
+    val db = FirebaseFirestore.getInstance()
     val repo = HuntsRepositoryFirestore(db, fakeImageRepo)
 
     val original =
@@ -233,7 +251,7 @@ class HuntsRepositoryFirestoreTest {
     val removed = listOf(HuntTestConstants.OLD_URL_1)
 
     repo.editHunt(
-        huntID = "editTest",
+        huntID = EDIT_TEST_HUNT_ID,
         newValue = updatedHunt,
         mainImageUri = newMainUri,
         addedOtherImages = newOtherUris,
@@ -241,11 +259,11 @@ class HuntsRepositoryFirestoreTest {
 
     advanceUntilIdle()
 
-    val stored = repo.getHunt("editTest")
+    val stored = repo.getHunt(EDIT_TEST_HUNT_ID)
 
     assertTrue(
         HuntTestConstants.ASSERT_MAIN_IMAGE_MESSAGE,
-        stored.mainImageUrl.startsWith("fake://main_image_url_for_editTest"))
+        stored.mainImageUrl.startsWith("fake://main_image_url_for_$EDIT_TEST_HUNT_ID"))
 
     assertFalse(stored.otherImagesUrls.contains(HuntTestConstants.OLD_URL_1))
     assertTrue(stored.otherImagesUrls.contains(HuntTestConstants.OLD_URL_2))
@@ -265,13 +283,13 @@ class HuntsRepositoryFirestoreTest {
     val db = FirebaseFirestore.getInstance()
     val repo = HuntsRepositoryFirestore(db, imageRepo)
 
-    val hunt = hunt1.copy(uid = "errorTest")
+    val hunt = hunt1.copy(uid = ERROR_TEST_HUNT_ID)
     repo.addHunt(hunt)
 
-    val updated = hunt.copy(title = "Should fail")
+    val updated = hunt.copy(title = SHOULD_FAIL_TITLE)
 
     repo.editHunt(
-        huntID = "errorTest", newValue = updated, mainImageUri = Uri.parse("file://image"))
+        huntID = ERROR_TEST_HUNT_ID, newValue = updated, mainImageUri = Uri.parse(IMAGE_URI))
   }
 
   @Test
@@ -280,18 +298,19 @@ class HuntsRepositoryFirestoreTest {
     val db = FirebaseFirestore.getInstance()
     val repo = HuntsRepositoryFirestore(db = db, imageRepo = fakeImageRepo)
 
-    val hunt = hunt1.copy(uid = "addWithOthers", mainImageUrl = "", otherImagesUrls = emptyList())
+    val hunt =
+        hunt1.copy(uid = ADD_WITH_OTHERS_HUNT_ID, mainImageUrl = "", otherImagesUrls = emptyList())
 
     val otherUris =
         listOf(
-            Uri.parse("file://other1"),
-            Uri.parse("file://other2"),
+            Uri.parse(FILE_OTHER_1),
+            Uri.parse(FILE_OTHER_2),
         )
 
     repo.addHunt(hunt = hunt, mainImageUri = null, otherImageUris = otherUris)
 
-    val stored = repo.getHunt("addWithOthers")
-    assertEquals("addWithOthers", stored.uid)
+    val stored = repo.getHunt(ADD_WITH_OTHERS_HUNT_ID)
+    assertEquals(ADD_WITH_OTHERS_HUNT_ID, stored.uid)
     assertTrue("Expected other image urls to be stored", stored.otherImagesUrls.isNotEmpty())
     assertEquals(2, stored.otherImagesUrls.size)
   }
@@ -302,11 +321,11 @@ class HuntsRepositoryFirestoreTest {
     val imageRepo = FailingOnOtherUploadsImageRepo()
     val repo = HuntsRepositoryFirestore(db = db, imageRepo = imageRepo)
 
-    val huntId = "addFailCleanup"
+    val huntId = ADD_FAIL_CLEANUP_HUNT_ID
     val hunt = hunt1.copy(uid = huntId)
 
-    val mainUri = Uri.parse("file://main")
-    val otherUris = listOf(Uri.parse("file://other1"))
+    val mainUri = Uri.parse(FILE_MAIN)
+    val otherUris = listOf(Uri.parse(FILE_OTHER_1))
 
     try {
       repo.addHunt(hunt = hunt, mainImageUri = mainUri, otherImageUris = otherUris)
@@ -331,26 +350,20 @@ class HuntsRepositoryFirestoreTest {
         HuntsRepositoryFirestore(
             db = db, imageRepo = fakeImageRepo, reviewImageRepo = fakeReviewImageRepo)
 
-    val huntId = "huntCascade"
+    val huntId = HUNT_CASCADE_ID
     repo.addHunt(hunt1.copy(uid = huntId))
 
-    val reviewId = "review1"
-    val photo1 = "gs://bucket/rev_photo1.jpg"
-    val photo2 = "gs://bucket/rev_photo2.jpg"
+    val reviewId = REVIEW_ID_1
+    val photo1 = PHOTO_1
+    val photo2 = PHOTO_2
 
     val reviewData: Map<String, Any> =
         mapOf(FIELD_HUNT_ID to huntId, "photos" to listOf(photo1, photo2))
     db.collection(HUNT_REVIEW_COLLECTION_PATH).document(reviewId).set(reviewData).await()
 
     val replyData: Map<String, Any> = mapOf(FIELD_REVIEW_ID to reviewId)
-    db.collection(HuntsRepositoryFirestoreConstantsStrings.HUNT_REVIEW_REPLY_COLLECTION_PATH)
-        .document("reply1")
-        .set(replyData)
-        .await()
-    db.collection(HuntsRepositoryFirestoreConstantsStrings.HUNT_REVIEW_REPLY_COLLECTION_PATH)
-        .document("reply2")
-        .set(replyData)
-        .await()
+    db.collection(HUNT_REVIEW_REPLY_COLLECTION_PATH).document(REPLY_ID_1).set(replyData).await()
+    db.collection(HUNT_REVIEW_REPLY_COLLECTION_PATH).document(REPLY_ID_2).set(replyData).await()
 
     repo.deleteHunt(huntId)
 
@@ -360,7 +373,7 @@ class HuntsRepositoryFirestoreTest {
     assertFalse(reviewDoc.exists())
 
     val repliesRemaining =
-        db.collection(HuntsRepositoryFirestoreConstantsStrings.HUNT_REVIEW_REPLY_COLLECTION_PATH)
+        db.collection(HUNT_REVIEW_REPLY_COLLECTION_PATH)
             .whereEqualTo(FIELD_REVIEW_ID, reviewId)
             .get()
             .await()
@@ -374,7 +387,7 @@ class HuntsRepositoryFirestoreTest {
 
     // Insert a malformed hunt doc (invalid status)
     db.collection(HUNTS_COLLECTION_PATH)
-        .document("badDoc")
+        .document(BAD_DOC_ID)
         .set(
             mapOf(
                 HuntsRepositoryFirestoreConstantsStrings.STATUS to "NOT_A_REAL_STATUS",
@@ -390,15 +403,18 @@ class HuntsRepositoryFirestoreTest {
     val hunts = repo.getAllHunts()
     assertTrue(
         "Malformed docs should be skipped (documentToHunt returns null)",
-        hunts.none { it.uid == "badDoc" })
+        hunts.none { it.uid == BAD_DOC_ID })
   }
 }
 
 private class FakeReviewImageRepository : IReviewImageRepository {
   val deleted = mutableListOf<String>()
+  val uploaded = mutableListOf<String>()
 
   override suspend fun uploadReviewPhoto(userId: String, uri: Uri): String {
-    TODO("Not yet implemented")
+    val url = "fake://review_photo/$userId/${uri.lastPathSegment ?: "photo"}"
+    uploaded += url
+    return url
   }
 
   override suspend fun deleteReviewPhoto(url: String) {
