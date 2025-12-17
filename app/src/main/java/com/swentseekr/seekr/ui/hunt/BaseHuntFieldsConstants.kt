@@ -50,9 +50,9 @@ object BaseHuntFieldsStrings {
   const val LABEL_DIFFICULTY = "Difficulty"
   const val EXPAND_DIFFICULTY_DESC = "Expand Difficulty"
   const val LABEL_TIME = "Estimated Time (hours)"
-  const val PLACEHOLDER_TIME = "e.g., 1.5"
+  const val PLACEHOLDER_TIME = "(leave empty for suggested time)"
   const val LABEL_DISTANCE = "Distance (km)"
-  const val PLACEHOLDER_DISTANCE = "e.g., 2.3"
+  const val PLACEHOLDER_DISTANCE = "(leave empty for suggested distance)"
 
   // Screens
   const val TITLE_DEFAULT = "Add your Hunt"
@@ -148,6 +148,12 @@ object BaseHuntConstantsDefault {
   const val DEFAULT_LONGITUDE_2: Double = 1.0
   const val POLYLINE = 2
   const val ONE = 1
+  const val EMPTY_DISTANCE = 0.0
+  const val FUN_SPEED = 4.0
+  const val DISCOVER_SPEED = 4.5
+  const val SPORT_SPEED = 6.5
+  const val DEFAULT_SPEED = 5.0
+  const val KILOMETER = 1000.0
 }
 
 object HuntScreenTestTags {
