@@ -66,7 +66,7 @@ class InternetConnectivityObserverTest {
   }
 
   @Test
-  fun initial_online_when_network_valid() {
+  fun initialOnlineWhenNetworkValid() {
     every { mockConnectivityManager.activeNetwork } returns mockNetwork
     every { mockConnectivityManager.getNetworkCapabilities(mockNetwork) } returns
         networkCapabilities
@@ -82,7 +82,7 @@ class InternetConnectivityObserverTest {
   }
 
   @Test
-  fun initial_offline_when_no_network() {
+  fun initialOfflineWhenNoNetwork() {
     every { mockConnectivityManager.activeNetwork } returns null
 
     val observer = InternetConnectivityObserver(mockContext)
@@ -91,7 +91,7 @@ class InternetConnectivityObserverTest {
   }
 
   @Test
-  fun start_registers_callback_and_updates_state() {
+  fun startRegistersCallbackAndUpdatesState() {
     every { mockConnectivityManager.activeNetwork } returns null
 
     val observer = InternetConnectivityObserver(mockContext)
@@ -116,7 +116,7 @@ class InternetConnectivityObserverTest {
   }
 
   @Test
-  fun onAvailable_sets_online() {
+  fun onAvailableSetsOnline() {
     every { mockConnectivityManager.activeNetwork } returns null
 
     val observer = InternetConnectivityObserver(mockContext)
@@ -137,7 +137,7 @@ class InternetConnectivityObserverTest {
   }
 
   @Test
-  fun onLost_sets_offline() {
+  fun onLostSetsOffline() {
     every { mockConnectivityManager.activeNetwork } returns mockNetwork
     every { mockConnectivityManager.getNetworkCapabilities(mockNetwork) } returns
         networkCapabilities
@@ -159,7 +159,7 @@ class InternetConnectivityObserverTest {
   }
 
   @Test
-  fun onCapabilitiesChanged_updates_state() {
+  fun onCapabilitiesChangedUpdatesState() {
     every { mockConnectivityManager.activeNetwork } returns null
 
     val observer = InternetConnectivityObserver(mockContext)
@@ -180,7 +180,7 @@ class InternetConnectivityObserverTest {
   }
 
   @Test
-  fun onUnavailable_sets_offline() {
+  fun onUnavailableSetsOffline() {
     every { mockConnectivityManager.activeNetwork } returns null
 
     val observer = InternetConnectivityObserver(mockContext)
@@ -192,7 +192,7 @@ class InternetConnectivityObserverTest {
   }
 
   @Test
-  fun stop_unregisters_callback() {
+  fun stopUnregistersCallback() {
     every { mockConnectivityManager.activeNetwork } returns null
 
     val observer = InternetConnectivityObserver(mockContext)
@@ -204,7 +204,7 @@ class InternetConnectivityObserverTest {
   }
 
   @Test
-  fun stop_swallow_exception() {
+  fun stopSwallowException() {
     every { mockConnectivityManager.activeNetwork } returns null
 
     val observer = InternetConnectivityObserver(mockContext)

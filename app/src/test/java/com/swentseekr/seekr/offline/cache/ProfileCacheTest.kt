@@ -47,14 +47,14 @@ class ProfileCacheTest {
   @After fun tearDown() = runTest { ProfileCache.clear(context) }
 
   @Test
-  fun observeProfile_whenEmpty_returnsNull() = runTest {
+  fun observeProfileWhenEmptyReturnsNull() = runTest {
     val result = ProfileCache.observeProfile(context).first()
 
     assertNull(NO_PROFILE_IF_CACHE, result)
   }
 
   @Test
-  fun saveProfile_thenObserve_returnsSameProfile() = runTest {
+  fun saveProfileThenObserveReturnsSameProfile() = runTest {
     val profile = sampleProfile()
 
     ProfileCache.saveProfile(context, profile)
@@ -66,7 +66,7 @@ class ProfileCacheTest {
   }
 
   @Test
-  fun clear_removesSavedProfile() = runTest {
+  fun clearRemovesSavedProfile() = runTest {
     val profile = sampleProfile()
     ProfileCache.saveProfile(context, profile)
 
@@ -80,7 +80,7 @@ class ProfileCacheTest {
   }
 
   @Test
-  fun observeProfile_withInvalidJson_returnsNull() = runTest {
+  fun observeProfileWithInvalidJsonReturnsNull() = runTest {
     context.profileDataStore.edit { prefs -> prefs[ProfileCache.PROFILE_JSON] = "not a valid json" }
 
     val result = ProfileCache.observeProfile(context).first()

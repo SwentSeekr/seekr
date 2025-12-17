@@ -25,7 +25,7 @@ class MapViewModelHelpersTest {
   }
 
   @Test
-  fun `toLatLng maps Location fields correctly`() {
+  fun toLatLngMapsLocationFieldsCorrectly() {
     val loc = Location(latitude = 46.5, longitude = 6.6, name = "Lausanne")
 
     val latLng = loc.toLatLng()
@@ -35,7 +35,7 @@ class MapViewModelHelpersTest {
   }
 
   @Test
-  fun `orderedPointsFor returns start, all middle points, then end`() {
+  fun orderedPointsForReturnsStartAllMiddlePointsThenEnd() {
     val start = Location(1.0, 1.0, "start")
     val middle1 = Location(2.0, 2.0, "m1")
     val middle2 = Location(3.0, 3.0, "m2")
@@ -56,7 +56,7 @@ class MapViewModelHelpersTest {
   }
 
   @Test
-  fun `nextPointFor returns correct next point and handles null hunt`() {
+  fun nextPointForReturnsCorrectNextPointAndHandlesNullHunt() {
     val start = Location(1.0, 1.0, "start")
     val m1 = Location(2.0, 2.0, "m1")
     val end = Location(3.0, 3.0, "end")
@@ -78,7 +78,7 @@ class MapViewModelHelpersTest {
   }
 
   @Test
-  fun `distanceMeters returns positive distance for valid points`() {
+  fun distanceMetersReturnsPositiveDistanceForValidPoints() {
     val a = LatLng(46.5191, 6.6338)
     val b = LatLng(46.5200, 6.6320)
 
@@ -89,7 +89,7 @@ class MapViewModelHelpersTest {
   }
 
   @Test
-  fun `computeDistanceMetersRaw and distanceMeters are consistent within rounding`() {
+  fun computeDistanceMetersRawAndDistanceMetersAreConsistentWithinRounding() {
     val a = LatLng(46.5191, 6.6338)
     val b = LatLng(46.5200, 6.6320)
 
@@ -101,7 +101,7 @@ class MapViewModelHelpersTest {
   }
 
   @Test
-  fun `computeDistanceToNextPoint returns null when there is no next point`() {
+  fun computeDistanceToNextPointReturnsNullWhenThereIsNoNextPoint() {
     val start = Location(1.0, 1.0, "start")
     val end = Location(2.0, 2.0, "end")
 
@@ -118,7 +118,7 @@ class MapViewModelHelpersTest {
   }
 
   @Test
-  fun `computeDistanceToNextPoint returns distance to next checkpoint`() {
+  fun computeDistanceToNextPointReturnsDistanceToNextCheckpoint() {
     val start = Location(0.0, 0.001, "start")
     val end = Location(0.0, 0.002, "end")
 
@@ -136,7 +136,7 @@ class MapViewModelHelpersTest {
   }
 
   @Test
-  fun `isHuntFullyValidated returns true only when all points validated or more`() {
+  fun isHuntFullyValidatedReturnsTrueOnlyWhenAllPointsValidatedOrMore() {
     val hunt = mockk<Hunt>()
     every { hunt.middlePoints } returns listOf(Location(0.0, 0.0, "m1"), Location(0.0, 0.0, "m2"))
 

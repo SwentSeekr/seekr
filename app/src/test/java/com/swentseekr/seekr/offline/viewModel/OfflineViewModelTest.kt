@@ -15,7 +15,7 @@ import org.junit.Test
 class OfflineViewModelTest {
 
   @Test
-  fun `initial state uses provided profile and defaults to MY_HUNTS`() {
+  fun initialStateUsesProvidedProfileAndDefaultsToMyHunts() {
     // Given
     val profile = mockProfileData()
 
@@ -36,7 +36,7 @@ class OfflineViewModelTest {
   }
 
   @Test
-  fun `selectTab switches huntsToDisplay between my, done, and liked hunts`() {
+  fun selectTabSwitchesHuntsToDisplayBetweenMyDoneAndLikedHunts() {
     // Given
     val profile = mockProfileData()
     val viewModel = OfflineViewModel(profile)
@@ -55,7 +55,7 @@ class OfflineViewModelTest {
   }
 
   @Test
-  fun `null initial profile exposes empty-safe defaults`() {
+  fun nullInitialProfileExposesEmptySafeDefaults() {
     // Given
     val viewModel = OfflineViewModel(initialProfile = null)
 
@@ -73,7 +73,7 @@ class OfflineViewModelTest {
   }
 
   @Test
-  fun `selectTab still updates selectedTab even with null profile`() {
+  fun selectTabStillUpdatesSelectedTabEvenWithNullProfile() {
     // Given
     val viewModel = OfflineViewModel(initialProfile = null)
 
