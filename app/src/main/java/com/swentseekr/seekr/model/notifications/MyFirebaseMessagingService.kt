@@ -5,7 +5,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.swentseekr.seekr.model.notifications.NotificationConstants.HUNT_ID
-import com.swentseekr.seekr.model.notifications.NotificationTokenService
 
 /** Firebase Messaging Service to handle incoming FCM messages and token updates. */
 class MyFirebaseMessagingService : FirebaseMessagingService() {
@@ -32,8 +31,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
    */
   override fun onNewToken(token: String) {
     val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-    NotificationTokenService
-        .persistToken(uid, token)
+    NotificationTokenService.persistToken(uid, token)
         .addOnSuccessListener {
           Log.d(NotificationConstants.TAG_FCM, NotificationConstants.LOG_TOKEN_SAVED)
         }
