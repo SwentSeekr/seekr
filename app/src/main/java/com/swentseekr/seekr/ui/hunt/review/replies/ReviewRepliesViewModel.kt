@@ -107,7 +107,9 @@ class ReviewRepliesViewModel(
    */
   fun onToggleComposer(target: ReplyTarget) {
     when (target) {
-      is ReplyTarget.RootReview -> {}
+      is ReplyTarget.RootReview -> {
+        // Root composer is always visible in current design, ignore.
+      }
       is ReplyTarget.Reply -> {
         val id = target.parentReplyId
         if (!composerOpenReplyIds.add(id)) {
