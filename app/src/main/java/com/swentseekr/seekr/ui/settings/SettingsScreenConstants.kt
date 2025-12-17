@@ -50,8 +50,6 @@ object SettingsScreenStrings {
 
 object SettingsScreenTestTags {
   const val SETTINGS_SCREEN = "settingsScreen"
-  const val LOGOUT_BUTTON = "logoutButton"
-  const val APP_VERSION_TEXT = "appVersionText"
   const val BACK_BUTTON = "backButton"
   const val EDIT_PROFILE_BUTTON = "editProfileButton"
 
