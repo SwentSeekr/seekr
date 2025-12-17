@@ -57,7 +57,7 @@ class PreviewHuntScreenTest {
    * - Scrolls down to ensure all sections are actually composed and displayed
    */
   @Test
-  fun previewScreen_showsAllSections_withScrolling_whenStateValid() {
+  fun previewScreenShowsAllSectionsWithScrollingWhenStateValid() {
     val validState = createValidUiState()
     val vm = createFakeVM(validState)
 
@@ -104,7 +104,7 @@ class PreviewHuntScreenTest {
    * - Scrolls to confirm button before clicking it.
    */
   @Test
-  fun previewScreen_backAndConfirmCallbacks_areInvoked() {
+  fun previewScreenBackAndConfirmCallbacksAreInvoked() {
     val validState = createValidUiState()
     val vm = createFakeVM(validState)
 

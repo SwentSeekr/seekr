@@ -79,7 +79,7 @@ class OpenPublicProfileTests {
   }
 
   @Test
-  fun opensProfile_checks_button() {
+  fun opensProfileChecksButton() {
     tearDown()
 
     val myProfile =
@@ -113,7 +113,7 @@ class OpenPublicProfileTests {
   }
 
   @Test
-  fun opensHuntCard_checks_button() {
+  fun opensHuntCardChecksButton() {
 
     val myProfile =
         sampleProfileWithPseudonym(

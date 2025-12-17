@@ -20,7 +20,7 @@ class RatingTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   @Test
-  fun rating_starDisplaysCorrectly() {
+  fun ratingStarDisplaysCorrectly() {
     composeTestRule.setContent { Rating(3.5, RatingType.STAR) }
     repeat(3) { index ->
       composeTestRule.onNodeWithTag(RatingTestTags.full(index, RatingType.STAR)).assertIsDisplayed()
@@ -30,7 +30,7 @@ class RatingTest {
   }
 
   @Test
-  fun rating_sportDisplaysCorrectly() {
+  fun ratingSportDisplaysCorrectly() {
     composeTestRule.setContent { Rating(2.0, RatingType.SPORT) }
 
     repeat(2) { index ->
@@ -47,7 +47,7 @@ class RatingTest {
   }
 
   @Test
-  fun rating_throwsException_onInvalidRating() {
+  fun ratingThrowsExceptionOnInvalidRating() {
     assertThrows(IllegalStateException::class.java) {
       composeTestRule.setContent { Rating(6.0, RatingType.STAR) }
     }

@@ -33,7 +33,7 @@ class ReviewImagesScreenTest {
   }
 
   @Test
-  fun reviewImagesScreen_displaysCorrectly() {
+  fun reviewImagesScreenDisplaysCorrectly() {
     val photos =
         listOf(
             ReviewImagesScreenConstantStrings.PHOTO_1,
@@ -77,7 +77,7 @@ class ReviewImagesScreenTest {
   }
 
   @Test
-  fun reviewImagesScreen_swipingChangesImageIndex() {
+  fun reviewImagesScreenSwipingChangesImageIndex() {
     val photos =
         listOf(
             ReviewImagesScreenConstantStrings.PHOTO_1,
@@ -117,7 +117,7 @@ class ReviewImagesScreenTest {
   }
 
   @Test
-  fun reviewImagesScreen_displaysSingleImage() {
+  fun reviewImagesScreenDisplaysSingleImage() {
     val photos = listOf(ReviewImagesScreenConstantStrings.PHOTO_1)
 
     composeRule.setContent { ReviewImagesScreen(photoUrls = photos, onGoBack = {}) }
@@ -135,7 +135,7 @@ class ReviewImagesScreenTest {
   }
 
   @Test
-  fun reviewImagesScreen_fullscreenOpensAtCorrectIndex() {
+  fun reviewImagesScreenFullscreenOpensAtCorrectIndex() {
     val photos =
         listOf(
             ReviewImagesScreenConstantStrings.PHOTO_1,

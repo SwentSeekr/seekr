@@ -24,7 +24,7 @@ class OfflineOverviewTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   @Test
-  fun offlineOverviewScreen_displaysOverviewMessageAndButton() {
+  fun offlineOverviewScreenDisplaysOverviewMessageAndButton() {
     composeTestRule.setContent { TestOfflineOverviewScreen(onShowDownloadedHunts = {}) }
 
     // Check main info text
@@ -37,7 +37,7 @@ class OfflineOverviewTest {
   }
 
   @Test
-  fun offlineOverviewScreen_clickingButtonTriggersCallback() {
+  fun offlineOverviewScreenClickingButtonTriggersCallback() {
     var clicked = false
 
     composeTestRule.setContent {

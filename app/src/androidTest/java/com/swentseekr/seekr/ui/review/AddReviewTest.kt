@@ -26,7 +26,7 @@ class HuntCardReviewScreenTest {
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()
 
   @Test
-  fun screen_displays_all_elements() {
+  fun screenDisplaysAllElements() {
     composeRule.setContent {
       MaterialTheme { AddReviewScreen(huntId = AddReviewTestConstantStrings.TEST_HUNT_ID) }
     }
@@ -41,7 +41,7 @@ class HuntCardReviewScreenTest {
   }
 
   @Test
-  fun clicking_buttons_triggers_callbacks() {
+  fun clickingButtonsTriggersCallbacks() {
     var backCalled = false
     var doneCalled = false
     var cancelCalled = false
@@ -71,7 +71,7 @@ class HuntCardReviewScreenTest {
   }
 
   @Test
-  fun photos_lazyRow_isDisplayed_whenPhotosExist() {
+  fun photosLazyRowIsDisplayedWhenPhotosExist() {
     composeRule.setContent {
       MaterialTheme {
         // Use BaseReviewScreen directly to control the state
@@ -101,7 +101,7 @@ class HuntCardReviewScreenTest {
   }
 
   @Test
-  fun addPhotoButton_isDisplayed_whenPhotosEmpty() {
+  fun addPhotoButtonIsDisplayedWhenPhotosEmpty() {
     composeRule.setContent {
       MaterialTheme {
         BaseReviewScreen(

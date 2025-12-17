@@ -20,7 +20,7 @@ class OfflineRequiredScreenTest {
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()
 
   @Test
-  fun offlineRequiredScreen_displaysAllTexts_andInvokesCallbackOnClick() {
+  fun offlineRequiredScreenDisplaysAllTextsAndInvokesCallbackOnClick() {
     var callbackInvoked = false
 
     composeRule.setContent {

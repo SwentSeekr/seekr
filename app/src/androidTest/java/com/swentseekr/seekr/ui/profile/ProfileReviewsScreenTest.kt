@@ -64,7 +64,7 @@ class ProfileReviewsScreenTest {
   }
 
   @Test
-  fun testProfileReviewsScreen_displaysAllElements() {
+  fun testProfileReviewsScreenDisplaysAllElements() {
     setContent()
     composeTestRule.onNodeWithTag(ProfileReviewsTestTags.TOP_BAR).assertIsDisplayed()
     composeTestRule.onNodeWithTag(ProfileReviewsTestTags.BACK_BUTTON).assertIsDisplayed()
@@ -82,7 +82,7 @@ class ProfileReviewsScreenTest {
   }
 
   @Test
-  fun testBackButton_clickable() {
+  fun testBackButtonClickable() {
     var backClicked = false
     composeTestRule.setContent {
       val navController = rememberNavController()
@@ -107,7 +107,7 @@ class ProfileReviewsScreenTest {
   }
 
   @Test
-  fun testLoadingState_whenProfileNull() {
+  fun testLoadingStateWhenProfileNull() {
     composeTestRule.setContent {
       val navController = rememberNavController()
       ProfileReviewsScreen(
@@ -126,7 +126,7 @@ class ProfileReviewsScreenTest {
   }
 
   @Test
-  fun testRatingText_singularReview() {
+  fun testRatingTextSingularReview() {
     val singularReviewProfile =
         sampleProfile.copy(author = sampleProfile.author.copy(reviewRate = 4.5))
 
@@ -137,7 +137,7 @@ class ProfileReviewsScreenTest {
   }
 
   @Test
-  fun testRatingText_multipleReviews() {
+  fun testRatingTextMultipleReviews() {
     val multipleReviewsProfile =
         sampleProfile.copy(author = sampleProfile.author.copy(reviewRate = 4.2))
 
@@ -254,7 +254,7 @@ class ProfileReviewsScreenTest {
   }
 
   @Test
-  fun reviewCard_shows_edit_menu_for_current_user() {
+  fun reviewCardShowsEditMenuForCurrentUser() {
     val currentUserId = "user123"
     val review =
         HuntReview(

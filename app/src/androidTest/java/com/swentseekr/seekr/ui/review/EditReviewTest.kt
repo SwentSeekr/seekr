@@ -26,7 +26,7 @@ class EditReviewScreenTest {
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()
   // Test
   @Test
-  fun screen_displays_all_elements() {
+  fun screenDisplaysAllElements() {
     composeRule.setContent {
       MaterialTheme {
         EditReviewScreen(huntId = AddReviewTestConstantStrings.TEST_HUNT_ID, reviewId = "")
@@ -43,7 +43,7 @@ class EditReviewScreenTest {
   }
 
   @Test
-  fun clicking_buttons_triggers_callbacks() {
+  fun clickingButtonsTriggersCallbacks() {
     var backCalled = false
     var doneCalled = false
     var cancelCalled = false
@@ -74,7 +74,7 @@ class EditReviewScreenTest {
   }
 
   @Test
-  fun photos_lazyRow_isDisplayed_whenPhotosExist() {
+  fun photosLazyRowIsDisplayedWhenPhotosExist() {
     composeRule.setContent {
       MaterialTheme {
         // Use BaseReviewScreen directly to control the state
@@ -104,7 +104,7 @@ class EditReviewScreenTest {
   }
 
   @Test
-  fun addPhotoButton_isDisplayed_whenPhotosEmpty() {
+  fun addPhotoButtonIsDisplayedWhenPhotosEmpty() {
     composeRule.setContent {
       MaterialTheme {
         BaseReviewScreen(
