@@ -204,7 +204,7 @@ class HuntsRepositoryFirestoreTest {
   }
 
   @Test
-  fun editHunt_updatesImagesCorrectly_withDeletion_andAddition() = runTest {
+  fun editHuntUpdatesImagesCorrectlyWithDeletionAndAddition() = runTest {
     val fakeImageRepo = com.swentseekr.seekr.utils.FakeHuntsImageRepository()
     val db = com.google.firebase.firestore.FirebaseFirestore.getInstance()
     val repo = HuntsRepositoryFirestore(db, fakeImageRepo)
@@ -257,7 +257,7 @@ class HuntsRepositoryFirestoreTest {
   }
 
   @Test(expected = Exception::class)
-  fun editHunt_fails_when_image_repo_fails() = runTest {
+  fun editHuntFailsWhenImageRepoFails() = runTest {
     val imageRepo = FakeHuntsImageRepository(shouldFail = true)
     val db = FirebaseFirestore.getInstance()
     val repo = HuntsRepositoryFirestore(db, imageRepo)

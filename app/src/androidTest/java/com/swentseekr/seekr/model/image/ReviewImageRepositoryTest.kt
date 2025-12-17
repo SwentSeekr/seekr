@@ -59,7 +59,7 @@ class ReviewImageRepositoryTest {
   }
 
   @Test
-  fun uploadReviewPhoto_returnsValidUrl() = runBlocking {
+  fun uploadReviewPhotoReturnsValidUrl() = runBlocking {
     val uri = createTempUri("main")
     val url = repository.uploadReviewPhoto(userId, uri)
 
@@ -71,7 +71,7 @@ class ReviewImageRepositoryTest {
   }
 
   @Test
-  fun deleteReviewPhoto_removesUploadedPhoto_firebase() = runBlocking {
+  fun deleteReviewPhotoRemovesUploadedPhotoFirebase() = runBlocking {
     val storage = FirebaseStorage.getInstance()
     val repository = ReviewImageRepository(storage)
     val uri = createTempUri("photo")
@@ -94,7 +94,7 @@ class ReviewImageRepositoryTest {
   }
 
   @Test
-  fun deleteReviewPhoto_multipleTimes_doesNotCrash() = runBlocking {
+  fun deleteReviewPhotoMultipleTimesDoesNotCrash() = runBlocking {
     val uri1 = createTempUri("img1")
     val uri2 = createTempUri("img2")
     val urls =
@@ -117,7 +117,7 @@ class ReviewImageRepositoryTest {
   }
 
   @Test
-  fun multipleUploads_generateUniqueUrls() = runBlocking {
+  fun multipleUploadsGenerateUniqueUrls() = runBlocking {
     val uri1 = createTempUri("img1")
     val uri2 = createTempUri("img2")
 
@@ -128,7 +128,7 @@ class ReviewImageRepositoryTest {
   }
 
   @Test
-  fun uploadReviewPhoto_invalidUri_throwsException() = runBlocking {
+  fun uploadReviewPhotoInvalidUriThrowsException() = runBlocking {
     val badUri = Uri.fromFile(File("/does/not/exist.jpg"))
 
     try {

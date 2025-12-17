@@ -62,7 +62,7 @@ class HuntsImageRepositoryTest {
   }
 
   @Test
-  fun uploadMainImage_returnsValidUrl() = runBlocking {
+  fun uploadMainImageReturnsValidUrl() = runBlocking {
     val tempUri = createTempImageFile("main")
     val url = repository.uploadMainImage(huntId, tempUri)
 
@@ -76,7 +76,7 @@ class HuntsImageRepositoryTest {
   }
 
   @Test
-  fun uploadOtherImages_returnsValidUrls() = runBlocking {
+  fun uploadOtherImagesReturnsValidUrls() = runBlocking {
     val uris =
         listOf(
             createTempImageFile("img_1"),
@@ -89,14 +89,14 @@ class HuntsImageRepositoryTest {
   }
 
   @Test
-  fun deleteAllHuntImages_completesWithoutError() = runBlocking {
+  fun deleteAllHuntImagesCompletesWithoutError() = runBlocking {
     // Should not throw even if no folder exists
     repository.deleteAllHuntImages("non_existent_hunt")
     assertTrue(true)
   }
 
   @Test
-  fun deleteAllHuntImages_removesUploadedFiles() = runBlocking {
+  fun deleteAllHuntImagesRemovesUploadedFiles() = runBlocking {
     val uris = listOf(createTempImageFile("delete_1"), createTempImageFile("delete_2"))
 
     repository.uploadOtherImages(huntId, uris)
