@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.model.notifications
 
+/** Shared constants for the `Notification` tests. */
 object NotificationTestConstants {
   const val EMULATOR_HOST = "10.0.2.2"
 

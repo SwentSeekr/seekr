@@ -6,6 +6,7 @@ import com.swentseekr.seekr.ui.hunt.review.ReviewHuntViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+/** A fake implementation of [ReviewHuntViewModel] for testing purposes. */
 class FakeReviewHuntViewModel : ReviewHuntViewModel() {
 
   private val _uiState = MutableStateFlow(ReviewHuntUIState())

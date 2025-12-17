@@ -4,6 +4,12 @@ import org.junit.After
 import org.junit.Assert.*
 import org.junit.Test
 
+/**
+ * Test suite for the HuntReviewReplyRepositoryProvider.
+ *
+ * This suite verifies that the repository provider correctly initializes with a test override when
+ * set.
+ */
 class HuntReviewReplyRepositoryProviderTest {
 
   @After

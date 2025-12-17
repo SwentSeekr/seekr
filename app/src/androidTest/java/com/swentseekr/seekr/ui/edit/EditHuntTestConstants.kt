@@ -1,5 +1,5 @@
 package com.swentseekr.seekr.ui.edit
-
+/** Shared constants for the `EditHuntTest`. */
 object EditHuntTestConstants {
   const val BACK_LABEL = "Back"
   const val DELETE = "Delete"

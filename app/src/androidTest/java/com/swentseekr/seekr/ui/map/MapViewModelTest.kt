@@ -32,6 +32,12 @@ import org.junit.Test
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
+/**
+ * JUnit test rule that sets the Main dispatcher to a TestDispatcher for coroutine testing.
+ *
+ * This rule allows tests to run coroutines in a controlled environment by replacing
+ * Dispatchers.Main with a TestDispatcher, enabling deterministic execution and timing control.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainDispatcherRule(val dispatcher: TestDispatcher = StandardTestDispatcher()) :
     TestWatcher() {
@@ -44,6 +50,12 @@ class MainDispatcherRule(val dispatcher: TestDispatcher = StandardTestDispatcher
   }
 }
 
+/**
+ * Unit tests for the MapViewModel.
+ *
+ * This test suite verifies the functionality of the MapViewModel, including initial state loading,
+ * hunt selection and focus, route computation, and hunt lifecycle management.
+ */
 class MapViewModelTest {
 
   @get:Rule val mainDispatcherRule = MainDispatcherRule()

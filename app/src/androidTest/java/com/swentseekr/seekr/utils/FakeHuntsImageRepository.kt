@@ -3,6 +3,7 @@ package com.swentseekr.seekr.utils
 import android.net.Uri
 import com.swentseekr.seekr.model.hunt.IHuntsImageRepository
 
+/** A fake implementation of [IHuntsImageRepository] for testing purposes. */
 class FakeHuntsImageRepository(var shouldFail: Boolean = false) : IHuntsImageRepository {
 
   val uploadedMainImages = mutableMapOf<String, String>()

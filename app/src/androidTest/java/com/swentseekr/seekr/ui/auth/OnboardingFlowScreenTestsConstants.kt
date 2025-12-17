@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.auth
 
+/** Shared constants for the `OnboardingFlowScreenTests`. */
 object OnboardingFlowScreenTestsConstants {
   const val PSEUDONYM = "Pseudonym"
   const val BIO = "Bio"

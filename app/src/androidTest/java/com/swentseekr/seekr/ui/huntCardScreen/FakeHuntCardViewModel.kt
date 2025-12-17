@@ -7,6 +7,7 @@ import com.swentseekr.seekr.ui.huntcardview.HuntCardViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+/* A fake implementation of HuntCardViewModel for testing purposes. */
 class FakeHuntCardViewModel(
     hunt: Hunt?,
     private val onDeleteReviewCallback:

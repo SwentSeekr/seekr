@@ -6,6 +6,12 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
+/**
+ * Unit tests for the HuntReviewReplyRepositoryLocal class.
+ *
+ * This test suite verifies the functionality of adding, updating, deleting, and retrieving hunt
+ * review replies in the local repository.
+ */
 class HuntReviewReplyRepositoryLocalTest {
 
   private lateinit var repository: HuntReviewReplyRepositoryLocal

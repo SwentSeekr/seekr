@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.profile
 
+/** Shared constants for the `ProfileScreenTest`. */
 object ProfileTestsConstants {
   const val EXAMPLE_MY_USER_ID = "current-user"
   const val EXAMPLE_MY_PSEUDONYM = "Me"

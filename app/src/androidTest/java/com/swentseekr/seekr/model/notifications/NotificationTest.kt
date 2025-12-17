@@ -33,6 +33,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * Integration tests for notification-related features.
+ *
+ * This test suite verifies Firebase-backed notification behavior, including FCM token storage,
+ * notification preference updates, intent and PendingIntent handling, and notification dispatch
+ * logic using the Firebase emulator.
+ */
 @RunWith(AndroidJUnit4::class)
 class NotificationTest {
 

@@ -32,6 +32,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * Android integration tests for the EditHuntViewModel.
+ *
+ * This test suite verifies the functionality of loading, editing, and submitting hunts using the
+ * EditHuntViewModel, in conjunction with a Firestore-backed HuntsRepository and Firebase
+ * Authentication.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class EditHuntViewModelAndroidTest {

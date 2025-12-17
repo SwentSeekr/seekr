@@ -34,8 +34,16 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
+// Label for the Add Hunt screen
 private val add_hunt_text = "Add your Hunt"
 
+/**
+ * UI tests for the Add Hunt fields screen.
+ *
+ * This test suite validates user interactions and state handling for hunt creation, including text
+ * input validation, dropdown selection, location selection, image management, navigation actions,
+ * and save button enablement.
+ */
 class AddHuntFieldsScreenTest {
 
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()

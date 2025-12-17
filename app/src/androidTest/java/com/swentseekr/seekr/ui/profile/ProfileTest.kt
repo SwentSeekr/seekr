@@ -27,10 +27,18 @@ import com.swentseekr.seekr.ui.components.MAX_RATING
 import org.junit.Rule
 import org.junit.Test
 
+// Timeout for waiting for UI changes
 const val UI_WAIT_TIMEOUT = 3_000L
 
+// Semantics key for background color
 fun hasBackgroundColor(expected: Color) = SemanticsMatcher.expectValue(BackgroundColorKey, expected)
 
+/**
+ * UI tests for the ProfileScreen composable.
+ *
+ * This test suite verifies the correct display and behavior of the ProfileScreen, including profile
+ * information, hunt lists, tab switching, and empty states.
+ */
 class ProfileScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 

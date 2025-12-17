@@ -11,6 +11,12 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
+/**
+ * Unit tests for MapViewModelHelpers functions.
+ *
+ * This test suite verifies the correctness of mapping functions, distance calculations, and point
+ * ordering related to hunts and locations.
+ */
 class MapViewModelHelpersTest {
 
   @Before
