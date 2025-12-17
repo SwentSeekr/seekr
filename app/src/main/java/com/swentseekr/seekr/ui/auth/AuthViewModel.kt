@@ -163,6 +163,18 @@ class AuthViewModel(
     }
   }
 
+  /**
+   * Synchronizes the current device's Firebase Cloud Messaging (FCM) token with the authenticated
+   * user's profile document.
+   *
+   * This function retrieves the latest FCM registration token for the device and persists it to
+   * Firestore, ensuring the backend can reliably deliver push notifications to this user.
+   *
+   * It is safe to call multiple times and should typically be invoked after user authentication or
+   * when restoring a session.
+   *
+   * @throws Exception If token retrieval or Firestore persistence fails.
+   */
   private fun syncNotificationToken(user: FirebaseUser) {
     viewModelScope.launch {
       try {

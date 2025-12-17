@@ -26,7 +26,6 @@ object NotificationTokenService {
    * @param token The Firebase Cloud Messaging registration token for the device.
    * @return A [Task] that completes when the token has been written to Firestore.
    */
-  @Suppress("KotlinUnitInsteadOfVoid")
   fun persistToken(userId: String, token: String): Task<Void> {
     val payload =
         mapOf(

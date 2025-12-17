@@ -14,6 +14,8 @@ const val NEW_NOTIFICATION = "New Notification"
 const val HELLO = "Hello"
 const val WORLD = "World"
 const val EMPTY_STRING = ""
+const val TOKEN = "token123"
+const val UID = "uid123"
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MyFirebaseMessagingServiceTest {
@@ -70,30 +72,29 @@ class MyFirebaseMessagingServiceTest {
 
   @Test
   fun onNewToken_updates_firestore_when_user_exists() {
-    every { mockFirebaseUser.uid } returns "uid123"
-    every { NotificationTokenService.persistToken("uid123", "token123") } returns
-        mockk(relaxed = true)
+    every { mockFirebaseUser.uid } returns UID
+    every { NotificationTokenService.persistToken(UID, TOKEN) } returns mockk(relaxed = true)
 
-    service.onNewToken("token123")
+    service.onNewToken(TOKEN)
 
-    verify { NotificationTokenService.persistToken("uid123", "token123") }
+    verify { NotificationTokenService.persistToken(UID, TOKEN) }
   }
 
   @Test
   fun onNewToken_does_nothing_when_user_is_null() {
     every { mockFirebaseAuth.currentUser } returns null
 
-    service.onNewToken("token123")
+    service.onNewToken(TOKEN)
 
     verify(exactly = 0) { NotificationTokenService.persistToken(any(), any()) }
   }
 
   @Test
   fun onNewToken_logs_success_when_firestore_update_succeeds() {
-    every { mockFirebaseUser.uid } returns "uid123"
+    every { mockFirebaseUser.uid } returns UID
 
     val mockTask = mockk<com.google.android.gms.tasks.Task<Void>>()
-    every { NotificationTokenService.persistToken("uid123", "token123") } returns mockTask
+    every { NotificationTokenService.persistToken(UID, TOKEN) } returns mockTask
     every { mockTask.addOnSuccessListener(any()) } answers
         {
           val listener = firstArg<com.google.android.gms.tasks.OnSuccessListener<Void>>()
@@ -102,17 +103,17 @@ class MyFirebaseMessagingServiceTest {
         }
     every { mockTask.addOnFailureListener(any()) } returns mockTask
 
-    service.onNewToken("token123")
+    service.onNewToken(TOKEN)
 
     verify { Log.d(NotificationConstants.TAG_FCM, NotificationConstants.LOG_TOKEN_SAVED) }
   }
 
   @Test
   fun onNewToken_logs_error_when_firestore_update_fails() {
-    every { mockFirebaseUser.uid } returns "uid123"
+    every { mockFirebaseUser.uid } returns UID
 
     val mockTask = mockk<com.google.android.gms.tasks.Task<Void>>()
-    every { NotificationTokenService.persistToken("uid123", "token123") } returns mockTask
+    every { NotificationTokenService.persistToken(UID, TOKEN) } returns mockTask
     every { mockTask.addOnSuccessListener(any()) } returns mockTask
     every { mockTask.addOnFailureListener(any()) } answers
         {
@@ -121,7 +122,7 @@ class MyFirebaseMessagingServiceTest {
           mockTask
         }
 
-    service.onNewToken("token123")
+    service.onNewToken(TOKEN)
 
     verify { Log.e(NotificationConstants.TAG_FCM, NotificationConstants.LOG_TOKEN_FAILED, any()) }
   }
