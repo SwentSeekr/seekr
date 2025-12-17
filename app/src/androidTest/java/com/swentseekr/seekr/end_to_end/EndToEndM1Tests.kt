@@ -49,7 +49,7 @@ class EndToEndM1Tests {
   }
 
   @Test
-  fun addHunt_validFlow_selectsPointsOnMap_andNavigatesBackToOverview() {
+  fun addHuntValidFlowSelectsPointsOnMapAndNavigatesBackToOverview() {
     // Step 1 – Launch the full navigation host in test mode (bypasses Firebase & repo)
     composeTestRule.setContent { SeekrMainNavHost(testMode = true) }
 
