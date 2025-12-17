@@ -240,7 +240,8 @@ fun SettingsContent(
                               MaterialTheme.colorScheme.background,
                               MaterialTheme.colorScheme.surfaceVariant.copy(
                                   alpha = UI_SET.ALPHA_CHANGE))))
-              .padding(UI_SET.PADDING_MID)) {
+              .padding(UI_SET.PADDING_MID)
+              .testTag(SettingsScreenTestTags.SETTINGS_SCREEN)) {
         LazyColumn(modifier = Modifier.weight(COLUMN_WEIGHT)) {
           item {
             Text(

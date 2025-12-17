@@ -21,6 +21,12 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
+/**
+ * Unit tests for the EditProfileViewModel.
+ *
+ * This test suite verifies profile loading, updating, saving, error handling, and state management
+ * by mocking the ProfileRepository and FirebaseAuth dependencies.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 class EditProfileViewModelTest {
   companion object {

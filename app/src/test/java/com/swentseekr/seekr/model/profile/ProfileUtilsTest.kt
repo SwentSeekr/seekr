@@ -10,6 +10,12 @@ import com.swentseekr.seekr.ui.profile.Profile
 import org.junit.Assert.*
 import org.junit.Test
 
+/**
+ * Test suite for the ProfileUtils class.
+ *
+ * This suite verifies the correctness of various utility functions related to profile management,
+ * including validation and updates.
+ */
 class ProfileUtilsTest {
 
   private val utils = ProfileUtils()

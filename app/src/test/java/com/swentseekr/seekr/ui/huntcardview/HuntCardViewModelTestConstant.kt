@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.huntcardview
 
+/** Constants used in HuntCardViewModel tests. */
 object HuntCardViewModelTestConstantsString {
   const val TEST_HUNT_ID = "hunt123"
   const val TEST_AUTHOR_ID = "author123"

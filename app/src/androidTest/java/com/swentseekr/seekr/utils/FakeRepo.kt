@@ -5,6 +5,7 @@ import com.swentseekr.seekr.model.hunt.Hunt
 import com.swentseekr.seekr.model.hunt.HuntsRepository
 import com.swentseekr.seekr.ui.profile.Profile
 
+/** A fake implementation of [HuntsRepository] that always succeeds. */
 class FakeRepoSuccess(
     private val hunts: List<Hunt>,
     private val profiles: List<Profile> = emptyList()

@@ -40,6 +40,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/** Test tags used in multiple tests. */
 object TestTags {
   const val HUNT_CARD = "HUNT_CARD_hunt123"
   const val PROFILE_REVIEW_SCREEN = "PROFILE_REVIEWS_SCREEN"
@@ -48,6 +49,12 @@ object TestTags {
   const val DONE = "DONE_BUTTON"
 }
 
+/**
+ * UI tests for SeekrMainNavHost navigation behavior.
+ *
+ * This test suite verifies navigation between tabs and screens, bottom bar visibility, and
+ * interaction flows using fake repositories to provide controlled data for hunts and profiles.
+ */
 @RunWith(AndroidJUnit4::class)
 class SeekrNavigationTest {
 

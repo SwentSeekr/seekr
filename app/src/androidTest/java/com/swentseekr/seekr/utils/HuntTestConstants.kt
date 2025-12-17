@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.utils
 
+/** Shared constants for Hunt-related tests. */
 object HuntTestConstants {
 
   const val HUNT_UID_1 = "hunt1"

@@ -24,6 +24,13 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * Android integration tests for the AddHuntViewModel.
+ *
+ * This test suite verifies state management, validation logic, image handling, checkpoint image
+ * attachment, and submission behavior when interacting with the HuntsRepository and Firebase
+ * authentication layer.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class AddHuntViewModelAndroidTest {

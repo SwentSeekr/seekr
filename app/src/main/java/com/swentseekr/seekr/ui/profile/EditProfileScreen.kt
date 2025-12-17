@@ -115,7 +115,10 @@ fun EditProfileScreen(
   }
 
   LaunchedEffect(Unit) {
-    if (!testMode && userId != null) editProfileViewModel.loadProfile()
+    // Always load profile if we have a user
+    if (testMode || userId != null) {
+      editProfileViewModel.loadProfile()
+    }
     editProfileViewModel.uiState.collect { if (it.success) onDone() }
   }
 

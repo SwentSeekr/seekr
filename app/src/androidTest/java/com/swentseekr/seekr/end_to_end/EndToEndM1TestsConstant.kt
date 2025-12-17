@@ -1,5 +1,11 @@
 package com.swentseekr.seekr.end_to_end
 
+/**
+ * Constants dedicated to the `EndToEndM1Tests` scenario.
+ *
+ * Keeping these values centralized ensures the UI assertions and the supporting fake repositories
+ * always rely on the exact same literals (title, description, coordinates, etc.).
+ */
 object EndToEndM1TestsConstant {
   const val TEST_E2E = "E2E Test Hunt"
   const val SENTENCE = "This hunt is added during an end-to-end test."

@@ -36,6 +36,14 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * Instrumented tests for notification deep link navigation to HuntCardScreen.
+ *
+ * This test suite verifies that deep links containing hunt IDs navigate correctly to the
+ * HuntCardScreen, both from app launch and while the app is running. It also checks that the hunt
+ * ID is removed from the intent after navigation to prevent repeated navigation on subsequent
+ * launches.
+ */
 @RunWith(AndroidJUnit4::class)
 class NotificationNavigationTest {
 

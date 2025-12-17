@@ -31,6 +31,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * UI tests for the ReviewRepliesSectionContent composable and its subcomponents.
+ *
+ * This test suite verifies that the review replies section displays headers, reply items,
+ * composers, and handles user interactions correctly.
+ */
 @RunWith(AndroidJUnit4::class)
 class ReviewRepliesUiTest {
 

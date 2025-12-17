@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.review
 
+/** Shared constants for the `AddReviewScreenTest`. */
 object AddReviewTestConstantStrings {
   const val TEST_HUNT_ID = "hunt123"
   const val COMMENT_TEXT = "Great hunt!"

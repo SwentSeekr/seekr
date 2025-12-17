@@ -8,6 +8,12 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
+/**
+ * Unit tests for HuntReviewReplyRepositoryFirestore document mapping.
+ *
+ * This test suite verifies correct parsing of Firestore DocumentSnapshot into reply domain models,
+ * including handling of missing fields and exception safety during deserialization.
+ */
 class HuntReviewReplyRepositoryFirestoreTest {
 
   private lateinit var firestore: FirebaseFirestore
