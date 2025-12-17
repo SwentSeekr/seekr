@@ -5,6 +5,7 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.storage.FirebaseStorage
 import com.swentseekr.seekr.model.author.Author
 import com.swentseekr.seekr.model.hunt.Difficulty
@@ -168,7 +169,7 @@ class ProfileRepositoryFirestore(
    */
   override suspend fun createProfile(profile: Profile) {
     try {
-      profilesCollection.document(profile.uid).set(profile).await()
+      profilesCollection.document(profile.uid).set(profile, SetOptions.merge()).await()
     } catch (e: Exception) {
       Log.e(
           ProfileRepositoryConstants.FIRESTORE_WRITE_FAILED_LOG_TAG,
@@ -244,7 +245,7 @@ class ProfileRepositoryFirestore(
             myHunts = mutableListOf(),
             doneHunts = mutableListOf(),
             likedHunts = mutableListOf())
-    profilesCollection.document(userId).set(defaultProfile).await()
+    profilesCollection.document(userId).set(defaultProfile, SetOptions.merge()).await()
     return defaultProfile
   }
 

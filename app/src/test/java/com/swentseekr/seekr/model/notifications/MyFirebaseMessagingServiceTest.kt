@@ -3,8 +3,6 @@ package com.swentseekr.seekr.model.notifications
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.RemoteMessage
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -17,6 +15,8 @@ const val NEW_NOTIFICATION = "New Notification"
 const val HELLO = "Hello"
 const val WORLD = "World"
 const val EMPTY_STRING = ""
+const val TOKEN = "token123"
+const val UID = "uid123"
 
 /**
  * Unit tests for [MyFirebaseMessagingService].
@@ -29,8 +29,6 @@ class MyFirebaseMessagingServiceTest {
   private lateinit var service: MyFirebaseMessagingService
   private val mockFirebaseAuth = mockk<FirebaseAuth>(relaxed = true)
   private val mockFirebaseUser = mockk<FirebaseUser>()
-  private val mockFirestore = mockk<FirebaseFirestore>(relaxed = true)
-  private val mockDocRef = mockk<DocumentReference>(relaxed = true)
 
   @Before
   fun setup() {
@@ -40,9 +38,7 @@ class MyFirebaseMessagingServiceTest {
     every { FirebaseAuth.getInstance() } returns mockFirebaseAuth
     every { mockFirebaseAuth.currentUser } returns mockFirebaseUser
 
-    mockkStatic(FirebaseFirestore::class)
-    every { FirebaseFirestore.getInstance() } returns mockFirestore
-    every { mockFirestore.collection("profiles").document(any()) } returns mockDocRef
+    mockkObject(NotificationTokenService)
 
     mockkStatic(Log::class)
     every { Log.d(any(), any()) } returns 0
@@ -54,6 +50,7 @@ class MyFirebaseMessagingServiceTest {
 
   @After
   fun tearDown() {
+    unmockkObject(NotificationTokenService)
     unmockkAll()
   }
 
@@ -81,35 +78,35 @@ class MyFirebaseMessagingServiceTest {
   }
 
   @Test
+  fun onNewToken_updates_firestore_when_user_exists() {
+    every { mockFirebaseUser.uid } returns UID
+    every { NotificationTokenService.persistToken(UID, TOKEN) } returns mockk(relaxed = true)
   fun onNewTokenUpdatesFirestoreWhenUserExists() {
     every { mockFirebaseUser.uid } returns "uid123"
     every { mockDocRef.update("author.fcmToken", "token123") } returns mockk(relaxed = true)
 
-    service.onNewToken("token123")
+    service.onNewToken(TOKEN)
 
-    verify { mockDocRef.update("author.fcmToken", "token123") }
+    verify { NotificationTokenService.persistToken(UID, TOKEN) }
   }
 
   @Test
   fun onNewTokenDoesNothingWhenUserIsNull() {
     every { mockFirebaseAuth.currentUser } returns null
 
-    service.onNewToken("token123")
+    service.onNewToken(TOKEN)
 
-    verify(exactly = 0) {
-      mockFirestore
-          .collection(any<String>())
-          .document(any<String>())
-          .update(any<String>(), any<Any>())
-    }
+    verify(exactly = 0) { NotificationTokenService.persistToken(any(), any()) }
   }
 
   @Test
+  fun onNewToken_logs_success_when_firestore_update_succeeds() {
+    every { mockFirebaseUser.uid } returns UID
   fun onNewTokenLogsSuccessWhenFirestoreUpdateSucceeds() {
     every { mockFirebaseUser.uid } returns "uid123"
 
     val mockTask = mockk<com.google.android.gms.tasks.Task<Void>>()
-    every { mockDocRef.update("author.fcmToken", "token123") } returns mockTask
+    every { NotificationTokenService.persistToken(UID, TOKEN) } returns mockTask
     every { mockTask.addOnSuccessListener(any()) } answers
         {
           val listener = firstArg<com.google.android.gms.tasks.OnSuccessListener<Void>>()
@@ -118,17 +115,19 @@ class MyFirebaseMessagingServiceTest {
         }
     every { mockTask.addOnFailureListener(any()) } returns mockTask
 
-    service.onNewToken("token123")
+    service.onNewToken(TOKEN)
 
     verify { Log.d(NotificationConstants.TAG_FCM, NotificationConstants.LOG_TOKEN_SAVED) }
   }
 
   @Test
+  fun onNewToken_logs_error_when_firestore_update_fails() {
+    every { mockFirebaseUser.uid } returns UID
   fun onNewTokenLogsErrorWhenFirestoreUpdateFails() {
     every { mockFirebaseUser.uid } returns "uid123"
 
     val mockTask = mockk<com.google.android.gms.tasks.Task<Void>>()
-    every { mockDocRef.update("author.fcmToken", "token123") } returns mockTask
+    every { NotificationTokenService.persistToken(UID, TOKEN) } returns mockTask
     every { mockTask.addOnSuccessListener(any()) } returns mockTask
     every { mockTask.addOnFailureListener(any()) } answers
         {
@@ -137,7 +136,7 @@ class MyFirebaseMessagingServiceTest {
           mockTask
         }
 
-    service.onNewToken("token123")
+    service.onNewToken(TOKEN)
 
     verify { Log.e(NotificationConstants.TAG_FCM, NotificationConstants.LOG_TOKEN_FAILED, any()) }
   }

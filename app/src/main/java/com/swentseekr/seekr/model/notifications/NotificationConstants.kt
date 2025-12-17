@@ -12,7 +12,9 @@ object NotificationConstants {
   // MyFirebaseMessagingService constants
   // -------------------------------
   const val COLLECTION_PROFILES = "profiles"
-  const val FIELD_AUTHOR_FCM_TOKEN = "author.fcmToken"
+  const val FIELD_AUTHOR = "author"
+  const val FIELD_FCM_TOKEN = "fcmToken"
+  const val FIELD_AUTHOR_FCM_TOKEN = "$FIELD_AUTHOR.$FIELD_FCM_TOKEN"
   const val DEFAULT_NOTIFICATION_TITLE = "New Notification"
   const val DEFAULT_NOTIFICATION_BODY = ""
   const val TAG_FCM = "FCM"

@@ -1,6 +1,7 @@
 package com.swentseekr.seekr.ui.auth
 
 import android.content.Context
+import android.util.Log
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialCancellationException
@@ -19,6 +20,8 @@ import com.swentseekr.seekr.R
 import com.swentseekr.seekr.model.authentication.AuthRepository
 import com.swentseekr.seekr.model.authentication.AuthRepositoryFirebase
 import com.swentseekr.seekr.model.authentication.OnboardingHandler
+import com.swentseekr.seekr.model.notifications.NotificationConstants
+import com.swentseekr.seekr.model.notifications.NotificationTokenService
 import com.swentseekr.seekr.model.profile.ProfileRepository
 import com.swentseekr.seekr.model.profile.ProfileRepositoryFirestore
 import com.swentseekr.seekr.ui.auth.AuthViewModelMessages.DEFAULT_SIGN_IN_FAILURE
@@ -63,7 +66,8 @@ class AuthViewModel(
             db = FirebaseFirestore.getInstance(),
             auth = FirebaseAuth.getInstance(),
             storage = FirebaseStorage.getInstance()),
-    private val auth: FirebaseAuth = Firebase.auth
+    private val auth: FirebaseAuth = Firebase.auth,
+    private val notificationTokenService: NotificationTokenService = NotificationTokenService
 ) : ViewModel(), OnboardingHandler {
 
   private val _uiState = MutableStateFlow(AuthUIState())
@@ -72,12 +76,16 @@ class AuthViewModel(
   private val authListener =
       FirebaseAuth.AuthStateListener { firebaseAuth ->
         val current = firebaseAuth.currentUser
+        if (current != null) {
+          syncNotificationToken(current)
+        }
         _uiState.update { it.copy(user = current, signedOut = (current == null)) }
       }
 
   init {
     _uiState.update { it.copy(user = auth.currentUser, signedOut = (auth.currentUser == null)) }
     auth.addAuthStateListener(authListener)
+    auth.currentUser?.let { syncNotificationToken(it) }
   }
 
   override fun onCleared() {
@@ -142,6 +150,7 @@ class AuthViewModel(
           _uiState.update {
             it.copy(isLoading = false, user = user, errorMsg = null, signedOut = false)
           }
+          syncNotificationToken(user)
 
           user.uid.let { uid ->
             viewModelScope.launch {
@@ -196,6 +205,28 @@ class AuthViewModel(
     viewModelScope.launch {
       profileRepository.completeOnboarding(userId, pseudonym, bio)
       _uiState.update { it.copy(needsOnboarding = false) }
+    }
+  }
+
+  /**
+   * Synchronizes the current device's Firebase Cloud Messaging (FCM) token with the authenticated
+   * user's profile document.
+   *
+   * This function retrieves the latest FCM registration token for the device and persists it to
+   * Firestore, ensuring the backend can reliably deliver push notifications to this user.
+   *
+   * It is safe to call multiple times and should typically be invoked after user authentication or
+   * when restoring a session.
+   *
+   * @throws Exception If token retrieval or Firestore persistence fails.
+   */
+  private fun syncNotificationToken(user: FirebaseUser) {
+    viewModelScope.launch {
+      try {
+        notificationTokenService.syncCurrentToken(user.uid)
+      } catch (e: Exception) {
+        Log.w(NotificationConstants.TAG_FCM, NotificationConstants.LOG_TOKEN_FAILED, e)
+      }
     }
   }
 }
