@@ -5,14 +5,16 @@ import android.util.Log
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreConstantsDefault.ZERO
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreConstantsStrings.FAILED_REVIEW_PHOTO_DELETION
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreConstantsStrings.FIELD_HUNT_ID
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreConstantsStrings.FIELD_HUNT_IMAGE_DELETION
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreConstantsStrings.FIRESTORE_PHOTOS_FIELD
+import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreConstantsStrings.HUNTS_COLLECTION_PATH
 import com.swentseekr.seekr.model.hunt.HuntsRepositoryFirestoreConstantsStrings.HUNT_REVIEW_REPLY_COLLECTION_PATH
 import com.swentseekr.seekr.model.hunt.review.HuntReviewReplyFirestoreConstants.FIELD_REVIEW_ID
 import com.swentseekr.seekr.model.map.Location
 import kotlin.String
 import kotlinx.coroutines.tasks.await
-
-const val HUNTS_COLLECTION_PATH = "hunts"
 
 /**
  * Firestore implementation of [HuntsRepository] that manages persistence of [Hunt] objects in
@@ -174,34 +176,39 @@ class HuntsRepositoryFirestore(
    * @param huntID The ID of the hunt to delete.
    */
   override suspend fun deleteHunt(huntID: String) {
-    // 1) Load all reviews for this hunt
+
     val reviewsSnapshot =
         db.collection(HUNT_REVIEW_COLLECTION_PATH).whereEqualTo(FIELD_HUNT_ID, huntID).get().await()
 
-    // Map to structured data so we can delete storage photos too
     val reviews =
         reviewsSnapshot.documents.mapNotNull { doc ->
           val reviewId = doc.id
-          val photos = (doc["photos"] as? List<*>)?.filterIsInstance<String>().orEmpty()
+          val photos =
+              (doc[FIRESTORE_PHOTOS_FIELD] as? List<*>)?.filterIsInstance<String>().orEmpty()
           reviewId to photos
         }
 
-    // 2) For each review: delete replies, delete review photos, delete review doc
     for ((reviewId, photoUrls) in reviews) {
-      // 2a) delete replies belonging to this review
       deleteRepliesForReview(reviewId)
 
-      // 2b) delete review photos in storage
-      photoUrls.forEach { url -> reviewImageRepo.deleteReviewPhoto(url) }
-
-      // 2c) delete review document itself
+      photoUrls.forEach { url ->
+        runCatching { reviewImageRepo.deleteReviewPhoto(url) }
+            .onFailure {
+              Log.w(
+                  HuntsRepositoryFirestoreConstantsStrings.TAG,
+                  FAILED_REVIEW_PHOTO_DELETION + url,
+                  it)
+            }
+      }
       db.collection(HUNT_REVIEW_COLLECTION_PATH).document(reviewId).delete().await()
     }
 
-    // 3) delete hunt images in storage
-    imageRepo.deleteAllHuntImages(huntID)
+    runCatching { imageRepo.deleteAllHuntImages(huntID) }
+        .onFailure {
+          Log.w(
+              HuntsRepositoryFirestoreConstantsStrings.TAG, FIELD_HUNT_IMAGE_DELETION + huntID, it)
+        }
 
-    // 4) delete hunt document
     db.collection(HUNTS_COLLECTION_PATH).document(huntID).delete().await()
   }
 
