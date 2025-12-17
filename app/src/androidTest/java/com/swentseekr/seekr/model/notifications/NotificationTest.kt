@@ -95,7 +95,7 @@ class NotificationTest {
   }
 
   @Test
-  fun fcmToken_isSavedToFirestore() = runBlocking {
+  fun fcmTokenIsSavedToFirestore() = runBlocking {
     val uid = auth.currentUser?.uid ?: return@runBlocking
     val testToken = TEST_FCM_TOKEN_PREFIX + System.currentTimeMillis()
 
@@ -116,7 +116,7 @@ class NotificationTest {
   }
 
   @Test
-  fun settingsViewModel_updatesNotificationPreference() = runBlocking {
+  fun settingsViewModelUpdatesNotificationPreference() = runBlocking {
     val uid = auth.currentUser?.uid ?: return@runBlocking
     db.collection(SETTINGS_COLLECTION)
         .document(uid)
@@ -129,7 +129,7 @@ class NotificationTest {
   }
 
   @Test
-  fun notificationHelper_createsIntentWithHuntId() {
+  fun notificationHelperCreatesIntentWithHuntId() {
     val testHuntId = TEST_HUNT_ID
 
     val intent =
@@ -144,7 +144,7 @@ class NotificationTest {
   }
 
   @Test
-  fun notificationHelper_sendsNotificationWithHuntId() = runBlocking {
+  fun notificationHelperSendsNotificationWithHuntId() = runBlocking {
     NotificationHelper.createNotificationChannel(context)
 
     val testHuntId = NotificationTestConstants.TEST_HUNT_ID_456
@@ -156,7 +156,7 @@ class NotificationTest {
   }
 
   @Test
-  fun notificationHelper_sendsNotificationWithNullHuntId() = runBlocking {
+  fun notificationHelperSendsNotificationWithNullHuntId() = runBlocking {
     NotificationHelper.createNotificationChannel(context)
 
     val testTitle = NotificationTestConstants.GENERAL_NOTIFICATION
@@ -168,7 +168,7 @@ class NotificationTest {
   }
 
   @Test
-  fun notificationHelper_createsPendingIntentWithCorrectFlags() {
+  fun notificationHelperCreatesPendingIntentWithCorrectFlags() {
     val testHuntId = NotificationTestConstants.TEST_HUNT_ID_789
 
     val intent =
@@ -188,7 +188,7 @@ class NotificationTest {
   }
 
   @Test
-  fun firebaseMessaging_handlesRemoteMessageWithHuntId() {
+  fun firebaseMessagingHandlesRemoteMessageWithHuntId() {
 
     val data = mapOf(EXTRA_HUNT_ID to HUNT_REMOTE)
 
@@ -197,7 +197,7 @@ class NotificationTest {
   }
 
   @Test
-  fun intent_preservesHuntIdAcrossRecreation() {
+  fun intentPreservesHuntIdAcrossRecreation() {
     val originalHuntId = HUNT_PRESERVE
 
     val intent =
@@ -209,7 +209,7 @@ class NotificationTest {
   }
 
   @Test
-  fun intent_canRemoveHuntIdExtra() {
+  fun intentCanRemoveHuntIdExtra() {
     val testHuntId = HUNT_REMOVE
 
     val intent =
@@ -223,13 +223,13 @@ class NotificationTest {
   }
 
   @Test
-  fun notificationChannel_isCreatedSuccessfully() {
+  fun notificationChannelIsCreatedSuccessfully() {
     NotificationHelper.createNotificationChannel(context)
     assertTrue(true)
   }
 
   @Test
-  fun remoteMessage_extractsHuntIdFromData() {
+  fun remoteMessageExtractsHuntIdFromData() {
     val remoteMessageData =
         mapOf(
             EXTRA_HUNT_ID to HUNT_FCM,
@@ -243,7 +243,7 @@ class NotificationTest {
   }
 
   @Test
-  fun notification_usesDefaultValuesWhenMissing() {
+  fun notificationUsesDefaultValuesWhenMissing() {
     val title = null ?: NotificationConstants.DEFAULT_NOTIFICATION_TITLE
     val body = null ?: NotificationConstants.DEFAULT_NOTIFICATION_BODY
 
@@ -252,7 +252,7 @@ class NotificationTest {
   }
 
   @Test
-  fun pendingIntent_hasCorrectImmutableFlag() {
+  fun pendingIntentHasCorrectImmutableFlag() {
     val intent = Intent(context, MainActivity::class.java)
 
     val pendingIntent =
@@ -266,7 +266,7 @@ class NotificationTest {
   }
 
   @Test
-  fun multipleNotifications_haveUniqueIds() {
+  fun multipleNotificationsHaveUniqueIds() {
     val time1 = System.currentTimeMillis()
     Thread.sleep(NotificationTestConstants.THREAD_SLEEP_TIME.toLong())
     val time2 = System.currentTimeMillis()
@@ -278,7 +278,7 @@ class NotificationTest {
   }
 
   @Test
-  fun intentExtras_handleEmptyHuntId() {
+  fun intentExtrasHandleEmptyHuntId() {
     val intent =
         Intent(context, MainActivity::class.java).apply { putExtra(EXTRA_HUNT_ID, EMPTY_STRING) }
 
@@ -289,7 +289,7 @@ class NotificationTest {
   }
 
   @Test
-  fun intentExtras_handleSpecialCharactersInHuntId() {
+  fun intentExtrasHandleSpecialCharactersInHuntId() {
     val specialHuntId = HUNT_SPECIAL_CHAR
     val intent =
         Intent(context, MainActivity::class.java).apply { putExtra(EXTRA_HUNT_ID, specialHuntId) }

@@ -74,7 +74,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun createProfile_successfully() = runTest {
+  fun createProfileSuccessfully() = runTest {
     val uid = auth.currentUser!!.uid
     val profile =
         Profile(
@@ -101,7 +101,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun current_user_not_null() = runTest {
+  fun currentUserNotNull() = runTest {
     val currentUser = auth.currentUser
     assertNotNull(Constants.FIREBASE_USER_NOT_NULL, currentUser)
   }
@@ -138,7 +138,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun updateProfile_reflectsChanges() = runTest {
+  fun updateProfileReflectsChanges() = runTest {
     val uid = auth.currentUser!!.uid
     val profile =
         Profile(
@@ -165,7 +165,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun getProfile_autoCreatesDefault_whenMissing() = runTest {
+  fun getProfileAutoCreatesDefaultWhenMissing() = runTest {
     val missingUid = "unknown_user"
     val profile = repository.getProfile(missingUid)
     assertNotNull(Constants.DEFAULT_PROFILE_CREATION, profile)
@@ -174,7 +174,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun getDoneHunts_returns_completed_hunts() = runTest {
+  fun getDoneHuntsReturnsCompletedHunts() = runTest {
     val uid = auth.currentUser!!.uid
 
     val doneHunts = repository.getDoneHunts(uid)
@@ -183,7 +183,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun getLikedHunts_returns_liked_hunts() = runTest {
+  fun getLikedHuntsReturnsLikedHunts() = runTest {
     val uid = auth.currentUser!!.uid
 
     val likedHunts = repository.getLikedHunts(uid)
@@ -192,7 +192,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun getProfile_handles_complete_profile_data() = runTest {
+  fun getProfileHandlesCompleteProfileData() = runTest {
     val uid = auth.currentUser!!.uid
     val profile =
         Profile(
@@ -221,7 +221,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun updateProfile_uses_current_auth_user() = runTest {
+  fun updateProfileUsesCurrentAuthUser() = runTest {
     val uid = auth.currentUser!!.uid
     val profile =
         Profile(
@@ -249,7 +249,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun updateProfile_preservesProfilePictureUrl() = runTest {
+  fun updateProfilePreservesProfilePictureUrl() = runTest {
     val uid = auth.currentUser!!.uid
     val profile =
         Profile(
@@ -282,7 +282,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun documentToProfile_returnsNull_whenDocumentMissingAuthor() = runTest {
+  fun documentToProfileReturnsNullWhenDocumentMissingAuthor() = runTest {
     val uid = auth.currentUser!!.uid
     val db = FirebaseFirestore.getInstance()
     val docRef = db.collection("profiles").document(uid)
@@ -294,7 +294,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun getMyHunts_returnsList_ofHunts() = runTest {
+  fun getMyHuntsReturnsListOfHunts() = runTest {
     val uid = auth.currentUser!!.uid
     val db = FirebaseFirestore.getInstance()
     val huntsCol = db.collection("hunts")
@@ -328,7 +328,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun documentToHunt_returnsNull_onInvalidData() = runTest {
+  fun documentToHuntReturnsNullOnInvalidData() = runTest {
     val db = FirebaseFirestore.getInstance()
     val docRef = db.collection(Constants.PATH_HUNT).document("invalidHunt")
     docRef.set(mapOf("title" to null)).await()
@@ -339,7 +339,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun toLocation_handlesMissingFields() = runTest {
+  fun toLocationHandlesMissingFields() = runTest {
     val companion = ProfileRepositoryFirestore.Companion
     val map = mapOf<String, Any>()
     val locationMethod =
@@ -461,7 +461,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun deleteCurrentProfilePicture_withEmptyUrl_doesNothing() = runTest {
+  fun deleteCurrentProfilePictureWithEmptyUrlDoesNothing() = runTest {
     val uid = auth.currentUser!!.uid
     repository.deleteCurrentProfilePicture(uid, "")
 
@@ -471,7 +471,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun checkUserNeedsOnboarding_returnsTrue_whenProfileMissingOrNotCompleted() = runTest {
+  fun checkUserNeedsOnboardingReturnsTrueWhenProfileMissingOrNotCompleted() = runTest {
     val uid = "new_user_test"
 
     val needs = repository.checkUserNeedsOnboarding(uid)
@@ -485,7 +485,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun completeOnboarding_updatesFirestoreFieldsCorrectly() = runTest {
+  fun completeOnboardingUpdatesFirestoreFieldsCorrectly() = runTest {
     val uid = auth.currentUser!!.uid
 
     val profile = repository.getProfile(uid)
@@ -504,7 +504,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun uploadProfilePicture_withInvalidUri_throwsException() = runTest {
+  fun uploadProfilePictureWithInvalidUriThrowsException() = runTest {
     val uid = auth.currentUser!!.uid
     val invalidUri = Uri.parse("content://invalid/path.jpg")
 
@@ -517,7 +517,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun deleteCurrentProfilePicture_withNonExistentFile_logsError() = runTest {
+  fun deleteCurrentProfilePictureWithNonExistentFileLogsError() = runTest {
     val uid = auth.currentUser!!.uid
     val fakeUrl = "https://firebasestorage.googleapis.com/v0/b/fakebucket/o/nonexistent.jpg"
 
@@ -529,7 +529,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun addLikedHunt_doesNotDuplicate() = runTest {
+  fun addLikedHuntDoesNotDuplicate() = runTest {
     val uid = auth.currentUser!!.uid
     db.collection("hunts")
         .document(hunt.uid)
@@ -576,7 +576,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun removeLikedHunt_removesHuntSuccessfully() = runTest {
+  fun removeLikedHuntRemovesHuntSuccessfully() = runTest {
     val uid = auth.currentUser!!.uid
     val huntMap = huntToMap(hunt)
     db.collection(PROFILES).document(uid).set(mapOf(LIKED_HUNTS to listOf(huntMap))).await()
@@ -589,7 +589,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun removeLikedHunt_doesNothingIfNotLiked() = runTest {
+  fun removeLikedHuntDoesNothingIfNotLiked() = runTest {
     val uid = auth.currentUser!!.uid
     db.collection(Constants.PATH_PROFILE)
         .document(uid)
@@ -603,7 +603,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun addLikedHunt_firestoreFailure_hitsCatchBlock() = runTest {
+  fun addLikedHuntFirestoreFailureHitsCatchBlock() = runTest {
     val uid = auth.currentUser!!.uid
 
     val brokenDb = FirebaseFirestore.getInstance().apply { terminate() }
@@ -619,7 +619,7 @@ class ProfileRepositoryFirestoreTest {
   }
 
   @Test
-  fun removeLikedHunt_firestoreFailure_hitsCatchBlock() = runTest {
+  fun removeLikedHuntFirestoreFailureHitsCatchBlock() = runTest {
     val uid = auth.currentUser!!.uid
 
     val brokenDb = FirebaseFirestore.getInstance().apply { terminate() }

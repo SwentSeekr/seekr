@@ -118,7 +118,7 @@ class EndToEndEditProfileTest {
    * - Verify updated pseudonym on Profile screen
    */
   @Test
-  fun editProfile_fromSettings_updatesPseudonymOnProfile() {
+  fun editProfileFromSettingsUpdatesPseudonymOnProfile() {
     openProfileTab()
     openSettingsFromProfile()
     openEditProfileFromSettings()
