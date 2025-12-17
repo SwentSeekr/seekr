@@ -19,6 +19,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * UI tests for the HuntCard composable.
+ *
+ * This test suite verifies that the HuntCard displays hunt information correctly, handles like
+ * button interactions, and reflects the liked state visually.
+ */
 @RunWith(AndroidJUnit4::class)
 class HuntCardTest {
 

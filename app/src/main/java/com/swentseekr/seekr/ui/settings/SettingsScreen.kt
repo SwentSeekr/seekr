@@ -43,6 +43,23 @@ import kotlinx.coroutines.launch
 
 val UI_SET = SettingsScreenDefaults
 
+/**
+ * Main entry composable for the Settings screen.
+ *
+ * Features:
+ * - Top app bar with back navigation
+ * - Reactive UI state collection from the ViewModel
+ * - Handles sign-out side effects and navigation
+ * - Delegates permission handling to a dedicated composable
+ * - Displays the settings content with sections and actions
+ *
+ * @param viewModel ViewModel managing the settings state and logic.
+ * @param onSignedOut Callback invoked when the user has successfully signed out.
+ * @param onGoBack Callback invoked when the back button is pressed.
+ * @param onEditProfile Callback invoked when the user selects “Edit Profile”.
+ * @param onViewTerms Callback invoked when the user selects “Terms & Conditions”.
+ * @param credentialManager Credential manager used to clear stored credentials on logout.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -98,6 +115,18 @@ fun SettingsScreen(
       }
 }
 
+/**
+ * Handles runtime permission requests and results for the Settings screen.
+ *
+ * Responsibilities:
+ * - Registers permission launchers for notifications, gallery, and location
+ * - Listens to permission request events emitted by the ViewModel
+ * - Dispatches permission results back to the ViewModel
+ * - Triggers side effects such as sending a notification when permission is granted
+ * - Refreshes permission state on first composition
+ *
+ * @param viewModel ViewModel emitting permission events and receiving results.
+ */
 @Composable
 private fun HandlePermissions(viewModel: SettingsViewModel) {
   val context = LocalContext.current
@@ -211,7 +240,8 @@ fun SettingsContent(
                               MaterialTheme.colorScheme.background,
                               MaterialTheme.colorScheme.surfaceVariant.copy(
                                   alpha = UI_SET.ALPHA_CHANGE))))
-              .padding(UI_SET.PADDING_MID)) {
+              .padding(UI_SET.PADDING_MID)
+              .testTag(SettingsScreenTestTags.SETTINGS_SCREEN)) {
         LazyColumn(modifier = Modifier.weight(COLUMN_WEIGHT)) {
           item {
             Text(

@@ -15,6 +15,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+/**
+ * UI tests for the EditReviewScreen composable.
+ *
+ * This test suite verifies that the EditReviewScreen displays all necessary UI elements, handles
+ * user interactions correctly, and conditionally shows components based on state.
+ */
 @RunWith(AndroidJUnit4::class)
 class EditReviewScreenTest {
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()

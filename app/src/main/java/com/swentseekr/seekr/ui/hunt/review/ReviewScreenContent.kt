@@ -40,7 +40,6 @@ fun ReviewScreenContent(
   val uiState by reviewViewModel.uiState.collectAsState()
   val uiStateHuntCard by huntCardViewModel.uiState.collectAsState()
   LaunchedEffect(huntId) { reviewViewModel.loadHunt(huntId) }
-  // Only load review if reviewId is not empty (edit mode)
   LaunchedEffect(reviewId) {
     if (reviewId.isNotEmpty()) {
       reviewViewModel.loadReview(reviewId)

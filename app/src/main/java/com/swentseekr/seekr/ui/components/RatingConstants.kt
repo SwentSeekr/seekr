@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.components
 
+/** Contains constant string values used in the rating UI components. */
 object RatingConstantsStrings {
   const val FULL = "_FULL_"
   const val HALF = "_HALF"
@@ -11,6 +12,7 @@ object RatingConstantsStrings {
   const val EMPTY_RATING = "Empty Rating"
 }
 
+/** Contains default numeric constants used in the rating UI components. */
 object RatingConstantsDefault {
   const val HALF: Double = 0.5
   const val HAS_STAR_HALF: Int = 1

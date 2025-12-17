@@ -123,6 +123,18 @@ fun TermsAndConditionsScreen(onGoBack: () -> Unit = {}) {
       }
 }
 
+/**
+ * Displays a single section of the Terms & Conditions.
+ *
+ * Features:
+ * - Card container with rounded corners and elevation
+ * - Section title styled for emphasis
+ * - Body text with increased line height for readability
+ * - Consistent spacing and padding
+ *
+ * @param title Title of the terms section.
+ * @param content Text content displayed under the section title.
+ */
 @Composable
 fun TermsSection(title: String, content: String) {
   Card(

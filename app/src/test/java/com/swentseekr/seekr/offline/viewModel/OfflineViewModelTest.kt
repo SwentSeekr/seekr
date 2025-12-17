@@ -6,6 +6,12 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+/**
+ * Unit tests for the OfflineViewModel class.
+ *
+ * This test suite verifies the correct initialization and behavior of the OfflineViewModel,
+ * including tab selection and data exposure.
+ */
 class OfflineViewModelTest {
 
   @Test

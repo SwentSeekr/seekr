@@ -252,13 +252,29 @@ open class ReviewHuntViewModel(
     }
   }
 
-  /** Updates an existing review in the repository. */
+  /**
+   * Updates an existing review in the repository with the current UI state values.
+   *
+   * This function constructs a [HuntReview] object using the current rating, comment, and photos
+   * from the UI state, and updates the corresponding review in the repository. Optionally, it can
+   * send a notification to the user upon successful update.
+   *
+   * Any errors during the update are logged, and the UI state is updated with an error message and
+   * a failure flag.
+   *
+   * @param reviewId The unique identifier of the review to update.
+   * @param hunt The [Hunt] object associated with the review, used to retrieve the hunt ID.
+   * @param context Optional [Context] used to send a success notification; if null, no notification
+   *   is sent.
+   * @throws Exception Any exceptions thrown by the repository update are caught internally and
+   *   logged; the function does not propagate them.
+   */
   private fun updateReviewInRepository(reviewId: String, hunt: Hunt, context: Context?) {
     viewModelScope.launch {
       try {
         val updatedReview =
             HuntReview(
-                reviewId = reviewId, // Use existing review ID
+                reviewId = reviewId,
                 authorId =
                     FirebaseAuth.getInstance().currentUser?.uid ?: AddReviewScreenStrings.USER_0,
                 huntId = hunt.uid,

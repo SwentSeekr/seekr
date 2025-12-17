@@ -29,10 +29,18 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
+// Constants for test strings used in ReviewHuntViewModelTest
 const val NEW_REVIEW = "New review added"
 const val NEW_REVIEW_MESSAGE = "You added a new review!"
 const val HUNT = "hunt123"
 
+/**
+ * Unit tests for the ReviewHuntViewModel.
+ *
+ * This test suite verifies the functionality of the ReviewHuntViewModel, including loading hunts,
+ * managing review text and ratings, handling photo uploads and deletions, submitting reviews, and
+ * error handling.
+ */
 class ReviewHuntViewModelTest {
 
   private lateinit var fakeHuntsRepository: HuntsRepositoryLocal

@@ -12,6 +12,13 @@ import com.swentseekr.seekr.ui.hunt.review.ReviewImagesScreenConstantsStrings
 import org.junit.Rule
 import org.junit.Test
 
+/**
+ * UI tests for the ReviewImagesScreen composable.
+ *
+ * This test suite verifies that the review images screen components are displayed correctly and
+ * that user interactions, such as swiping through images and clicking the back button, function as
+ * expected.
+ */
 class ReviewImagesScreenTest {
 
   val time: Long = 500

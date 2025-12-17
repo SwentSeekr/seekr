@@ -784,6 +784,17 @@ private fun ReviewCardHeader(
   }
 }
 
+/**
+ * Displays the textual comment of a hunt review.
+ *
+ * This composable renders the review comment only if it is not blank. The text uses the screen’s
+ * description typography settings and adapts automatically to the current Material theme
+ * (light/dark).
+ *
+ * @param review The [HuntReview] containing the comment to display.
+ * @throws IllegalStateException This composable assumes that [review] is non-null and provided by a
+ *   valid review source.
+ */
 @Composable
 private fun ReviewCardComment(review: HuntReview) {
   if (review.comment.isNotBlank()) {
@@ -796,6 +807,18 @@ private fun ReviewCardComment(review: HuntReview) {
   }
 }
 
+/**
+ * Displays a button allowing the user to view photos attached to a review.
+ *
+ * The button is shown only if the review contains at least one photo. When clicked, it triggers the
+ * provided callback, typically used to navigate to a photo gallery screen.
+ *
+ * @param review The [HuntReview] containing the list of photo references.
+ * @param navController The [NavHostController] used for navigation.
+ * @param onSeePhotosClick Callback invoked when the "See Pictures" button is clicked.
+ * @throws IllegalStateException If the navigation action triggered by [onSeePhotosClick] is invalid
+ *   or the navigation graph is misconfigured.
+ */
 @Composable
 private fun ReviewCardPhotosSection(
     review: HuntReview,
@@ -820,6 +843,21 @@ private fun ReviewCardPhotosSection(
   }
 }
 
+/**
+ * Displays a contextual overflow menu with edit and delete actions.
+ *
+ * This composable shows a three-dot icon button that opens a dropdown menu. The menu provides two
+ * actions:
+ * - Edit
+ * - Delete
+ *
+ * The menu automatically dismisses itself after an action is selected.
+ *
+ * @param onEdit Callback invoked when the user selects the "Edit" action.
+ * @param onDelete Callback invoked when the user selects the "Delete" action.
+ * @throws IllegalStateException If either callback performs an invalid state transition (e.g.,
+ *   deleting a non-existent item).
+ */
 @Composable
 fun DotMenu(onEdit: () -> Unit, onDelete: () -> Unit) {
   var expanded by remember { mutableStateOf(false) }

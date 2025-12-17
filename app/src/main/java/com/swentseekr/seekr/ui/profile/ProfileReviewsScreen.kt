@@ -54,6 +54,36 @@ import com.swentseekr.seekr.ui.profile.ProfileReviewsScreenConstant.SINGLE_REVIE
 import com.swentseekr.seekr.ui.profile.ProfileReviewsScreenConstant.SPACER_HEIGHT
 import com.swentseekr.seekr.ui.profile.ProfileReviewsScreenConstant.STRING_FORMAT
 
+/**
+ * Screen displaying all reviews written for a user's hunts.
+ *
+ * Features:
+ * - Top app bar with back navigation
+ * - Summary section showing average rating and total number of reviews
+ * - Grouped list of reviews by hunt
+ * - Clickable hunt headers navigating to hunt details
+ * - Individual review cards with edit and delete actions
+ * - Loading state when profile data is not yet available
+ * - Full support for UI testing through test tags
+ *
+ * Data handling:
+ * - Loads the user profile and associated reviews
+ * - Fetches related hunts and author profiles for each review
+ * - Reacts to state updates from ProfileViewModel and ReviewHuntViewModel
+ *
+ * Test support:
+ * - Allows injection of profile, reviews, hunts, and view models for testing
+ *
+ * @param userId ID of the user whose reviews are displayed.
+ * @param profileViewModel ViewModel providing profile and review data.
+ * @param onGoBack Callback invoked when the back button is pressed.
+ * @param editReview Callback invoked when editing a review.
+ * @param navController Navigation controller used for navigating to hunt details.
+ * @param testProfile Optional profile used for testing or previews.
+ * @param testReviews Optional list of reviews used for testing or previews.
+ * @param reviewHuntViewModel ViewModel managing review-related operations.
+ * @param testHuntsById Optional map of hunts indexed by ID for testing.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileReviewsScreen(

@@ -13,6 +13,12 @@ import com.swentseekr.seekr.ui.profile.Profile
 import org.junit.Rule
 import org.junit.Test
 
+/**
+ * UI tests for the OfflineCachedProfileScreen composable.
+ *
+ * This test suite verifies the correct display of offline profile information, including handling
+ * of null profiles, profiles without hunts, and blank bios.
+ */
 class OfflineCachedProfileScreenTest {
 
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()

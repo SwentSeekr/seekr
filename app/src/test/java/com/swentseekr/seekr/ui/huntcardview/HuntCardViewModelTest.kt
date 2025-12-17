@@ -24,6 +24,12 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
+/**
+ * Unit tests for HuntCardViewModel.
+ *
+ * Covers hunt loading, likes, completion state, reviews handling, author profile loading, and error
+ * scenarios.
+ */
 class HuntCardViewModelTest {
   private lateinit var viewModel: HuntCardViewModel
   private lateinit var fakeRepository: HuntsRepositoryLocal

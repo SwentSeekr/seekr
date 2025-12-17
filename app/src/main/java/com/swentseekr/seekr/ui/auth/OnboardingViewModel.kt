@@ -11,9 +11,20 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/** Step increment used in onboarding navigation. */
 const val STEP = 1
+
+/** Total number of steps in the onboarding flow. */
 const val TOTAL_STEPS = 4
 
+/**
+ * Holds the current state of the onboarding flow.
+ *
+ * @property step Current step index (1-based).
+ * @property showingFullTerms True if the full terms dialog is being displayed.
+ * @property pseudonymError Error message for the pseudonym field, or null if valid.
+ * @property isCheckingPseudonym True if pseudonym availability check is in progress.
+ */
 data class OnboardingState(
     val step: Int = 1,
     val showingFullTerms: Boolean = false,
@@ -21,6 +32,14 @@ data class OnboardingState(
     val isCheckingPseudonym: Boolean = false
 )
 
+/**
+ * ViewModel managing the onboarding flow and pseudonym validation.
+ *
+ * Handles step progression, pseudonym validation, availability checks, and final onboarding
+ * completion.
+ *
+ * @param profileRepository Repository used for profile operations and pseudonym checks.
+ */
 class OnboardingViewModel(
     private val profileRepository: ProfileRepository = ProfileRepositoryProvider.repository
 ) : ViewModel(), OnboardingHandler {
@@ -121,6 +140,6 @@ class OnboardingViewModel(
    * @param bio User’s bio text.
    */
   override fun completeOnboarding(userId: String, pseudonym: String, bio: String) {
-    // call your real handler
+    // Implementation can call repository or handler to save the user profile
   }
 }

@@ -52,6 +52,22 @@ import com.swentseekr.seekr.ui.profile.EditProfileStrings.SUCCESS_UPDATE
 
 val UI_C = EditProfileNumberConstants
 
+/**
+ * Main screen composable for editing the user's profile.
+ *
+ * Handles:
+ * - Loading user data
+ * - Profile picture selection (camera/gallery/remove)
+ * - Pseudonym and bio editing with validation
+ * - Error and success feedback
+ * - Cancel and Save actions
+ *
+ * @param userId Optional user ID to load profile from backend.
+ * @param editProfileViewModel ViewModel managing profile state and actions.
+ * @param onGoBack Callback invoked when the user cancels editing.
+ * @param onDone Callback invoked when profile is successfully saved.
+ * @param testMode If true, disables backend calls for UI testing.
+ */
 @Composable
 fun EditProfileScreen(
     userId: String? = null,
@@ -99,7 +115,10 @@ fun EditProfileScreen(
   }
 
   LaunchedEffect(Unit) {
-    if (!testMode && userId != null) editProfileViewModel.loadProfile()
+    // Always load profile if we have a user
+    if (testMode || userId != null) {
+      editProfileViewModel.loadProfile()
+    }
     editProfileViewModel.uiState.collect { if (it.success) onDone() }
   }
 
@@ -201,6 +220,14 @@ fun EditProfileScreen(
       profilePictureUri = uiState.profilePictureUri)
 }
 
+/**
+ * Creates a new empty image URI in the MediaStore.
+ *
+ * Used for capturing a photo from the camera and storing it temporarily.
+ *
+ * @param context Context required to access ContentResolver.
+ * @return Uri of the newly created image, or null if creation failed.
+ */
 fun createImageUri(context: Context): Uri? {
   val contentValues =
       ContentValues().apply {

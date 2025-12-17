@@ -48,37 +48,76 @@ import com.swentseekr.seekr.ui.settings.SettingsScreen
 import com.swentseekr.seekr.ui.terms.TermsAndConditionsScreen
 import com.swentseekr.seekr.ui.theme.Transparent
 
-// Destinations as sealed class
+/**
+ * Sealed class representing each top-level or nested navigation destination in the app.
+ *
+ * @param route unique route string for the NavController.
+ * @param label textual description used for accessibility or tab labels.
+ * @param icon vector icon displayed in the bottom navigation bar or headers.
+ */
 sealed class SeekrDestination(
     val route: String,
     val label: String,
     val icon: androidx.compose.ui.graphics.vector.ImageVector
 ) {
+  /**
+   * Top-level destination showing the main overview feed.
+   *
+   * Entry point after app launch. Displays hunts list and discovery content.
+   */
   object Overview :
       SeekrDestination(
           SeekrNavigationDefaults.OVERVIEW_ROUTE,
           SeekrNavigationDefaults.OVERVIEW_LABEL,
           Icons.AutoMirrored.Filled.List)
 
+  /**
+   * Top-level destination displaying the interactive map.
+   *
+   * Used for hunt exploration, navigation, and active hunt tracking.
+   */
   object Map :
       SeekrDestination(
           SeekrNavigationDefaults.MAP_ROUTE, SeekrNavigationDefaults.MAP_LABEL, Icons.Filled.Place)
 
+  /**
+   * Navigation destination representing a user profile.
+   *
+   * Encapsulates route constants, argument keys, and route builders related to profile navigation.
+   */
   object Profile :
       SeekrDestination(
           SeekrNavigationDefaults.PROFILE_ROUTE,
           SeekrNavigationDefaults.PROFILE_LABEL,
           Icons.Filled.Person) {
+
+    /**
+     * Builds the navigation route for a user profile screen.
+     *
+     * @param userId Unique identifier of the user whose profile is displayed.
+     * @return Route string resolving to the profile destination.
+     */
     fun createRoute(userId: String) = "${SeekrNavigationDefaults.PROFILE_PATH}$userId"
 
     const val ARG_USER_ID = "userId"
 
+    /**
+     * Nested destination displaying reviews for a specific user profile.
+     *
+     * Requires a userId path argument.
+     */
     object Reviews :
         SeekrDestination(
             route =
                 "${SeekrNavigationDefaults.PROFILE_PATH}{${ARG_USER_ID}}${SeekrNavigationDefaults.REVIEWS_PATH}",
             label = SeekrNavigationDefaults.PROFILE_REVIEWS_LABEL,
             icon = Icons.AutoMirrored.Filled.List) {
+      /**
+       * Builds the navigation route for a user's profile reviews screen.
+       *
+       * @param userId Unique identifier of the user whose reviews are displayed.
+       * @return Route string resolving to the profile reviews destination.
+       */
       fun createRoute(userId: String) =
           "${SeekrNavigationDefaults.PROFILE_PATH}$userId${SeekrNavigationDefaults.REVIEWS_PATH}"
 
@@ -86,41 +125,86 @@ sealed class SeekrDestination(
     }
   }
 
+  /**
+   * Destination displaying details for a single hunt.
+   *
+   * Shows hunt description, creator, reviews, and actions. Requires a huntId path argument.
+   */
   object HuntCard :
       SeekrDestination(
           SeekrNavigationDefaults.HUNT_CARD_ROUTE,
           SeekrNavigationDefaults.HUNT_CARD_LABEL,
           Icons.AutoMirrored.Filled.List) {
+    /**
+     * Builds the navigation route for a hunt details (hunt card) screen.
+     *
+     * @param huntId Unique identifier of the hunt.
+     * @return Route string resolving to the hunt card destination.
+     */
     fun createRoute(huntId: String) = "${SeekrNavigationDefaults.HUNT_PATH}$huntId"
 
     const val ARG_HUNT_ID = "huntId"
   }
 
+  /**
+   * Destination allowing the creator to edit an existing hunt.
+   *
+   * Requires a huntId path argument.
+   */
   object EditHunt :
       SeekrDestination(
           SeekrNavigationDefaults.EDIT_HUNT_ROUTE,
           SeekrNavigationDefaults.EDIT_HUNT_LABEL,
           Icons.AutoMirrored.Filled.List) {
+    /**
+     * Builds the navigation route for the edit-hunt screen.
+     *
+     * @param huntId Unique identifier of the hunt to edit.
+     * @return Route string resolving to the edit-hunt destination.
+     */
     fun createRoute(huntId: String) = "${SeekrNavigationDefaults.EDIT_HUNT_PATH}$huntId"
 
     const val ARG_HUNT_ID = "huntId"
   }
 
+  /**
+   * Destination for adding a new review to a hunt.
+   *
+   * Requires a huntId path argument.
+   */
   object AddReview :
       SeekrDestination(
           SeekrNavigationDefaults.ADD_REVIEW_ROUTE,
           SeekrNavigationDefaults.ADD_REVIEW_LABEL,
           Icons.AutoMirrored.Filled.List) {
+    /**
+     * Builds the navigation route for adding a review to a hunt.
+     *
+     * @param huntId Unique identifier of the hunt being reviewed.
+     * @return Route string resolving to the add-review destination.
+     */
     fun createRoute(huntId: String) = "${SeekrNavigationDefaults.ADD_REVIEW_PATH}$huntId"
 
     const val ARG_HUNT_ID = "huntId"
   }
 
+  /**
+   * Destination for editing an existing review.
+   *
+   * Requires both huntId and reviewId path arguments.
+   */
   object EditReview :
       SeekrDestination(
           SeekrNavigationDefaults.EDIT_REVIEW_ROUTE,
           SeekrNavigationDefaults.EDIT_REVIEW_LABEL,
           Icons.AutoMirrored.Filled.List) {
+    /**
+     * Builds the navigation route for editing an existing review.
+     *
+     * @param huntId Unique identifier of the hunt associated with the review.
+     * @param reviewId Unique identifier of the review to edit.
+     * @return Route string resolving to the edit-review destination.
+     */
     fun createRoute(huntId: String, reviewId: String) =
         "${SeekrNavigationDefaults.EDIT_REVIEW_PATH}$huntId/$reviewId"
 
@@ -128,24 +212,44 @@ sealed class SeekrDestination(
     const val ARG_REVIEW_ID = "reviewId"
   }
 
+  /**
+   * Destination for creating a new hunt.
+   *
+   * Accessible from the profile screen.
+   */
   object AddHunt :
       SeekrDestination(
           SeekrNavigationDefaults.ADD_HUNT_ROUTE,
           SeekrNavigationDefaults.ADD_HUNT_LABEL,
           Icons.AutoMirrored.Filled.List)
 
+  /**
+   * Destination displaying application settings.
+   *
+   * Includes profile editing, terms access, and preferences.
+   */
   object Settings :
       SeekrDestination(
           SeekrNavigationDefaults.SETTINGS_ROUTE,
           SeekrNavigationDefaults.SETTINGS_LABEL,
           Icons.AutoMirrored.Filled.List)
 
+  /**
+   * Destination displaying terms and conditions.
+   *
+   * Read-only legal information screen.
+   */
   object TermsConditions :
       SeekrDestination(
           SeekrNavigationDefaults.TERMS_AND_CONDITION_ROUTE,
           SeekrNavigationDefaults.TERMS_AND_CONDITION_LABEL,
           Icons.Filled.Info)
 
+  /**
+   * Destination allowing the current user to edit their profile.
+   *
+   * Accessible from settings.
+   */
   object EditProfile :
       SeekrDestination(
           SeekrNavigationDefaults.EDIT_PROFILE_ROUTE,
@@ -157,7 +261,14 @@ sealed class SeekrDestination(
   }
 }
 
-// Bottom Navigation Bar
+/**
+ * Bottom navigation bar for Seekr top-level destinations.
+ *
+ * Highlights the currently selected destination and supports click events.
+ *
+ * @param currentDestination currently active [SeekrDestination].
+ * @param onTabSelected lambda invoked when a tab is clicked.
+ */
 @Composable
 fun SeekrNavigationBar(
     currentDestination: SeekrDestination,
@@ -222,7 +333,21 @@ fun SeekrNavigationBar(
       }
 }
 
-// Main App Scaffold
+/**
+ * Main navigation host for the Seekr app, orchestrating all screens and navigation logic.
+ *
+ * Handles:
+ * - Deep links
+ * - Onboarding flow
+ * - Bottom navigation bar visibility
+ * - Navigation between hunt, map, profile, settings, review, and terms screens
+ *
+ * @param user currently authenticated [FirebaseUser], optional.
+ * @param navController navigation controller, defaults to [rememberNavController].
+ * @param huntCardViewModelFactory optional factory for HuntCardViewModel.
+ * @param reviewViewModelFactory optional factory for ReviewHuntViewModel.
+ * @param testMode flag to toggle UI testing behaviors.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SeekrMainNavHost(
@@ -250,6 +375,14 @@ fun SeekrMainNavHost(
     }
   }
 
+  /**
+   * Navigates to the reviews section of a user's profile.
+   *
+   * No navigation occurs if the userId is null or blank.
+   *
+   * @param userId ID of the user whose reviews should be shown.
+   * @receiver NavHostController performing the navigation.
+   */
   fun NavHostController.goToProfileReviews(userId: String?) {
     if (!userId.isNullOrBlank()) {
       navigate(SeekrDestination.Profile.Reviews.createRoute(userId))

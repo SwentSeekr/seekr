@@ -15,7 +15,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 
-/** Dialog composable extracted for easier testing and cleaner code. */
+/**
+ * A dialog for entering a point name and an optional description.
+ *
+ * This composable shows an [AlertDialog] with:
+ * - A title explaining the purpose of the dialog.
+ * - A required text field for the point name with validation.
+ * - An optional text field for the point description.
+ * - Confirm and cancel buttons.
+ *
+ * @param show Whether the dialog should be visible.
+ * @param onDismiss Lambda invoked when the dialog is dismissed (e.g., cancel or outside tap).
+ * @param onConfirm Lambda invoked when the user confirms the dialog with valid input. Receives two
+ *   parameters:
+ *     - The entered point name (String)
+ *     - The entered point description (String)
+ */
 @Composable
 fun PointNameDialog(show: Boolean, onDismiss: () -> Unit, onConfirm: (String, String) -> Unit) {
   if (!show) return

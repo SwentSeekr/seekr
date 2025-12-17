@@ -7,6 +7,13 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
+/**
+ * Unit tests for the HuntsRepositoryLocal class.
+ *
+ * This test suite verifies the functionality of adding, retrieving, editing, and deleting Hunt
+ * items in the local repository. It ensures that the repository behaves as expected under various
+ * scenarios.
+ */
 class HuntsRepositoryLocalTest {
   private lateinit var huntsRepositoryLocal: HuntsRepositoryLocal
 

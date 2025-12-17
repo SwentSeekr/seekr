@@ -1,5 +1,6 @@
 package com.swentseekr.seekr.ui.navigation
 
+/** Shared constants for the `NavigationTest`. */
 object NavigationTestConstants {
   // --- Hunt IDs used in tests ---
   const val HUNT_123 = "hunt_123"

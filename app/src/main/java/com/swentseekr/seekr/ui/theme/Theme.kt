@@ -13,6 +13,12 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
+/**
+ * Light color scheme definition for the application.
+ *
+ * Maps semantic Material colors to the app’s brand palette. This scheme is used by the global
+ * [MaterialTheme].
+ */
 private val LightColorScheme =
     lightColorScheme(
         primary = Green,
@@ -36,6 +42,14 @@ private val LightColorScheme =
         tertiaryContainer = StatBackground,
         onTertiaryContainer = StatTextDark)
 
+/**
+ * Custom color palette extending Material colors.
+ *
+ * Holds domain-specific colors that do not fit into the Material color scheme (statuses, difficulty
+ * levels, map overlays).
+ *
+ * Marked as [Stable] to avoid unnecessary recompositions.
+ */
 @Stable
 class AppColors(
     val statusFun: Color,
@@ -50,6 +64,12 @@ class AppColors(
     val orangeButton: Color
 )
 
+/**
+ * CompositionLocal providing access to [AppColors].
+ *
+ * Allows any composable in the hierarchy to access domain-specific colors via
+ * `LocalAppColors.current`.
+ */
 val LocalAppColors = staticCompositionLocalOf {
   AppColors(
       statusFun = StatusFun,
@@ -64,6 +84,16 @@ val LocalAppColors = staticCompositionLocalOf {
       orangeButton = Orange)
 }
 
+/**
+ * Root theme composable for the application.
+ *
+ * Responsibilities:
+ * - Apply the Material color scheme and typography
+ * - Provide [AppColors] through CompositionLocal
+ * - Configure system UI (status bar color and appearance)
+ *
+ * @param content Root composable content of the app.
+ */
 @Composable
 fun SampleAppTheme(content: @Composable () -> Unit) {
   val colorScheme = LightColorScheme

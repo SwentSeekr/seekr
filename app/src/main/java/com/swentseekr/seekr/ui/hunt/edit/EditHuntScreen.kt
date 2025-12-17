@@ -25,7 +25,6 @@ fun EditHuntScreen(
     onDone: () -> Unit = {},
     testMode: Boolean = false,
 ) {
-  // Load hunt data when a non-blank huntId is provided.
   LaunchedEffect(huntId) {
     if (huntId.isNotBlank()) {
       editHuntViewModel.load(huntId)

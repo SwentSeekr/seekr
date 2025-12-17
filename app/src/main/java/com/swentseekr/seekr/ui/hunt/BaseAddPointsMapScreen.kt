@@ -10,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -72,6 +71,7 @@ fun BaseAddPointsMapScreen(
   val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
 
   var mapLoaded by remember { mutableStateOf(false) }
+  var shouldLaunchImagePicker by remember { mutableStateOf(false) }
 
   val permissionLauncher =
       rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
@@ -104,7 +104,7 @@ fun BaseAddPointsMapScreen(
   var showNameDialog by remember { mutableStateOf(false) }
   var tempLatLng by remember { mutableStateOf<LatLng?>(null) }
 
-  var pendingLocation by rememberSaveable { mutableStateOf<Location?>(null) }
+  var pendingLocation by remember { mutableStateOf<Location?>(null) }
 
   val imagePickerLauncher =
       rememberLauncherForActivityResult(
@@ -116,6 +116,13 @@ fun BaseAddPointsMapScreen(
             }
             pendingLocation = null
           })
+
+  LaunchedEffect(shouldLaunchImagePicker) {
+    if (shouldLaunchImagePicker) {
+      imagePickerLauncher.launch(BaseHuntFieldsStrings.IMAGE_LAUNCH)
+      shouldLaunchImagePicker = false
+    }
+  }
 
   if (testMode) {
     LaunchedEffect(Unit) {
@@ -196,7 +203,7 @@ fun BaseAddPointsMapScreen(
           val newLocation = Location(latLng.latitude, latLng.longitude, name, description)
           points = points + newLocation
           pendingLocation = newLocation
-          imagePickerLauncher.launch(BaseHuntFieldsStrings.IMAGE_LAUNCH)
+          shouldLaunchImagePicker = true
         }
         showNameDialog = false
       })
