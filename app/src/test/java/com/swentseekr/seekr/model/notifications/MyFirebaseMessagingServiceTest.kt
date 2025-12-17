@@ -55,7 +55,7 @@ class MyFirebaseMessagingServiceTest {
   }
 
   @Test
-  fun onMessageReceived_sends_notification_with_title_and_body() {
+  fun onMessageReceivedSendsNotificationWithTitleAndBody() {
     val remoteMessage = mockk<RemoteMessage>(relaxed = true)
     val notification = mockk<RemoteMessage.Notification>()
     every { notification.title } returns HELLO
@@ -68,7 +68,7 @@ class MyFirebaseMessagingServiceTest {
   }
 
   @Test
-  fun onMessageReceived_sends_notification_with_default_title_when_null() {
+  fun onMessageReceivedSendsNotificationWithDefaultTitleWhenNull() {
     val remoteMessage = mockk<RemoteMessage>(relaxed = true)
     every { remoteMessage.notification } returns null
 
@@ -78,7 +78,7 @@ class MyFirebaseMessagingServiceTest {
   }
 
   @Test
-  fun onNewToken_updates_firestore_when_user_exists() {
+  fun onNewTokenUpdatesFirestoreWhenUserExists() {
     every { mockFirebaseUser.uid } returns UID
     every { NotificationTokenService.persistToken(UID, TOKEN) } returns mockk(relaxed = true)
 
@@ -88,7 +88,7 @@ class MyFirebaseMessagingServiceTest {
   }
 
   @Test
-  fun onNewToken_does_nothing_when_user_is_null() {
+  fun onNewTokenDoesNothingWhenUserIsNull() {
     every { mockFirebaseAuth.currentUser } returns null
 
     service.onNewToken(TOKEN)
@@ -97,7 +97,7 @@ class MyFirebaseMessagingServiceTest {
   }
 
   @Test
-  fun onNewToken_logs_success_when_firestore_update_succeeds() {
+  fun onNewTokenLogsSuccessWhenFirestoreUpdateSucceeds() {
     every { mockFirebaseUser.uid } returns UID
 
     val mockTask = mockk<com.google.android.gms.tasks.Task<Void>>()
@@ -116,7 +116,7 @@ class MyFirebaseMessagingServiceTest {
   }
 
   @Test
-  fun onNewToken_logs_error_when_firestore_update_fails() {
+  fun onNewTokenLogsErrorWhenFirestoreUpdateFails() {
     every { mockFirebaseUser.uid } returns UID
 
     val mockTask = mockk<com.google.android.gms.tasks.Task<Void>>()

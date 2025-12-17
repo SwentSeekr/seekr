@@ -38,14 +38,14 @@ class HuntReviewRepositoryLocalTest {
   }
 
   @Test
-  fun getNewUid_generatesUniqueIds() {
+  fun getNewUidGeneratesUniqueIds() {
     val id1 = repository.getNewUid()
     val id2 = repository.getNewUid()
     assertNotEquals(id1, id2)
   }
 
   @Test
-  fun addReviewHunt_addsSuccessfully() = runTest {
+  fun addReviewHuntAddsSuccessfully() = runTest {
     repository.addReviewHunt(review1)
     val reviews = repository.getHuntReviews("hunt123")
     assertEquals(1, reviews.size)
@@ -53,7 +53,7 @@ class HuntReviewRepositoryLocalTest {
   }
 
   @Test
-  fun getReviewHunt_returnsCorrectReview() = runTest {
+  fun getReviewHuntReturnsCorrectReview() = runTest {
     repository.addReviewHunt(review1)
     repository.addReviewHunt(review2)
     val result = repository.getReviewHunt("1")
@@ -61,12 +61,12 @@ class HuntReviewRepositoryLocalTest {
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun getReviewHunt_invalidId_throwsException() = runTest {
+  fun getReviewHuntInvalidIdThrowsException() = runTest {
     repository.getReviewHunt("does_not_exist")
   }
 
   @Test
-  fun updateReviewHunt_updatesSuccessfully() = runTest {
+  fun updateReviewHuntUpdatesSuccessfully() = runTest {
     repository.addReviewHunt(review1)
     val updatedReview = review1.copy(comment = "Updated Comment", rating = 5.0)
     repository.updateReviewHunt("1", updatedReview)
@@ -77,12 +77,12 @@ class HuntReviewRepositoryLocalTest {
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun updateReviewHunt_invalidId_throwsException() = runTest {
+  fun updateReviewHuntInvalidIdThrowsException() = runTest {
     repository.updateReviewHunt("not_found", review1)
   }
 
   @Test
-  fun deleteReviewHunt_removesSuccessfully() = runTest {
+  fun deleteReviewHuntRemovesSuccessfully() = runTest {
     repository.addReviewHunt(review1)
     assertEquals(1, repository.getHuntReviews("hunt123").size)
 
@@ -93,12 +93,12 @@ class HuntReviewRepositoryLocalTest {
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun deleteReviewHunt_invalidId_throwsException() = runTest {
+  fun deleteReviewHuntInvalidIdThrowsException() = runTest {
     repository.deleteReviewHunt("nonexistent")
   }
 
   @Test
-  fun getHuntReviews_returnsCorrectList() = runTest {
+  fun getHuntReviewsReturnsCorrectList() = runTest {
     val reviewOtherHunt = review1.copy(reviewId = "3", huntId = "hunt999")
     repository.addReviewHunt(review1)
     repository.addReviewHunt(review2)

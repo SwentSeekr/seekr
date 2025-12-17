@@ -94,7 +94,7 @@ class OverviewViewModelTest {
    * not refreshing afterwards.
    */
   @Test
-  fun initial_state_loads_hunts_from_repository_and_stops_refreshing() = runTest {
+  fun initialStateLoadsHuntsFromRepositoryAndStopsRefreshing() = runTest {
     advanceUntilIdle()
     val state = viewModel.uiState.value
 
@@ -107,7 +107,7 @@ class OverviewViewModelTest {
 
   /** Test that calling refreshUIState reloads hunts and resets the refreshing flag. */
   @Test
-  fun refreshUIState_reloads_hunts_and_stops_refreshing() = runTest {
+  fun refreshUIStateReloadsHuntsAndStopsRefreshing() = runTest {
     // When: we trigger a manual refresh
     viewModel.refreshUIState()
 
@@ -122,7 +122,7 @@ class OverviewViewModelTest {
 
   /** Test that changing the search term filters the hunts correctly based on the search input. */
   @Test
-  fun onSearchChange_filters_by_search() = runTest {
+  fun onSearchChangeFiltersBySearch() = runTest {
     viewModel = OverviewViewModel(fakeRepository, fakeProfileRepo)
     advanceUntilIdle()
 
@@ -136,7 +136,7 @@ class OverviewViewModelTest {
 
   /** Test that clicking the like button toggles the liked status of a hunt item. */
   @Test
-  fun onLikeClick_toggles_liked_status() = runTest {
+  fun onLikeClickTogglesLikedStatus() = runTest {
     val huntId = "1"
 
     viewModel.onLikeClick(huntId)
@@ -152,7 +152,7 @@ class OverviewViewModelTest {
 
   /** Test that clearing the search resets the filtered list to show all hunts. */
   @Test
-  fun onClearSearch_resets_filtered_list() = runTest {
+  fun onClearSearchResetsFilteredList() = runTest {
     viewModel.onSearchChange("sport")
     val filteredState = viewModel.uiState.value
     assertEquals(1, filteredState.hunts.size)
@@ -165,7 +165,7 @@ class OverviewViewModelTest {
 
   /** Test that selecting a status filter correctly filters the hunts by the selected status. */
   @Test
-  fun onStatusFilterSelect_filters_by_status() = runTest {
+  fun onStatusFilterSelectFiltersByStatus() = runTest {
     viewModel.onStatusFilterSelect(HuntStatus.SPORT)
     val state = viewModel.uiState.value
 
@@ -178,7 +178,7 @@ class OverviewViewModelTest {
    * Test that selecting a difficulty filter correctly filters the hunts by the selected difficulty.
    */
   @Test
-  fun onDifficultyFilterSelect_filters_by_difficulty() = runTest {
+  fun onDifficultyFilterSelectFiltersByDifficulty() = runTest {
     viewModel.onDifficultyFilterSelect(Difficulty.DIFFICULT)
     val state = viewModel.uiState.value
 

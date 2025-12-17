@@ -24,6 +24,7 @@ import org.junit.Test
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileViewModelTest {
+
   companion object {
     private const val PROFILE_NOT_FOUND = "Profile not found"
     private const val USER_NOT_LOGIN = "User not logged in"
@@ -32,6 +33,7 @@ class ProfileViewModelTest {
   private lateinit var repository: ProfileRepositoryLocal
   private lateinit var viewModel: ProfileViewModel
   private val testDispatcher = StandardTestDispatcher()
+
   private val profileAlice =
       Profile(
           uid = "user1",
@@ -62,7 +64,7 @@ class ProfileViewModelTest {
   }
 
   @Test
-  fun loadProfile_success_and_failure() = runTest {
+  fun loadProfileSuccessAndFailure() = runTest {
     viewModel.loadProfile("user1")
     advanceUntilIdle()
     assertEquals("Alice", viewModel.uiState.value.profile?.author?.pseudonym)
@@ -75,7 +77,7 @@ class ProfileViewModelTest {
   }
 
   @Test
-  fun loadProfile_sets_error_for_non_existent_profile() = runTest {
+  fun loadProfileSetsErrorForNonExistentProfile() = runTest {
     viewModel.loadProfile("ghost")
     advanceUntilIdle()
     val state = viewModel.uiState.value
@@ -84,7 +86,7 @@ class ProfileViewModelTest {
   }
 
   @Test
-  fun updateProfile_updates_existing_profile() = runTest {
+  fun updateProfileUpdatesExistingProfile() = runTest {
     val updated = profileAlice.copy(author = profileAlice.author.copy(bio = "Updated Bio"))
     viewModel.updateProfile(updated)
     advanceUntilIdle()
@@ -94,7 +96,7 @@ class ProfileViewModelTest {
   }
 
   @Test
-  fun updateProfile_sets_error_when_user_not_logged_in() = runTest {
+  fun updateProfileSetsErrorWhenUserNotLoggedIn() = runTest {
     val viewModelWithoutUid = ProfileViewModel(repository)
     val fake = profileAlice.copy(uid = "ghost")
     viewModelWithoutUid.updateProfile(fake)
@@ -104,7 +106,7 @@ class ProfileViewModelTest {
   }
 
   @Test
-  fun refreshUIState_reloads_existing_profile() = runTest {
+  fun refreshUIStateReloadsExistingProfile() = runTest {
     viewModel.loadProfile("user1")
     advanceUntilIdle()
     viewModel.refreshUIState()
@@ -114,7 +116,7 @@ class ProfileViewModelTest {
   }
 
   @Test
-  fun loadProfile_with_null_userId_uses_currentUid() = runTest {
+  fun loadProfileWithNullUserIdUsesCurrentUid() = runTest {
     viewModel.loadProfile(null)
     advanceUntilIdle()
     val state = viewModel.uiState.value
@@ -123,7 +125,7 @@ class ProfileViewModelTest {
   }
 
   @Test
-  fun loadProfile_sets_isMyProfile_correctly() = runTest {
+  fun loadProfileSetsIsMyProfileCorrectly() = runTest {
     viewModel.loadProfile("user1")
     advanceUntilIdle()
     assertTrue(viewModel.uiState.value.isMyProfile)
@@ -135,14 +137,15 @@ class ProfileViewModelTest {
                 Author(
                     hasCompletedOnboarding = true,
                     hasAcceptedTerms = true,
-                    "Bob",
-                    "Bio",
-                    0,
-                    4.0,
-                    3.5),
+                    pseudonym = "Bob",
+                    bio = "Bio",
+                    profilePicture = 0,
+                    reviewRate = 4.0,
+                    sportRate = 3.5),
             myHunts = mutableListOf(),
             doneHunts = mutableListOf(),
             likedHunts = mutableListOf())
+
     repository.addProfile(profileBob)
 
     viewModel.loadProfile("user2")
@@ -151,7 +154,7 @@ class ProfileViewModelTest {
   }
 
   @Test
-  fun loadHunts_sets_error_on_failure() = runTest {
+  fun loadHuntsSetsErrorOnFailure() = runTest {
     viewModel.loadProfile("user1")
     advanceUntilIdle()
 
@@ -163,12 +166,12 @@ class ProfileViewModelTest {
   }
 
   @Test
-  fun currentUid_returns_injected_uid() {
+  fun currentUidReturnsInjectedUid() {
     assertEquals("user1", viewModel.currentUid)
   }
 
   @Test
-  fun loadProfile_without_logged_in_user_shows_error() = runTest {
+  fun loadProfileWithoutLoggedInUserShowsError() = runTest {
     val viewModelNoUid = ProfileViewModel(repository)
     viewModelNoUid.loadProfile(null)
     advanceUntilIdle()
@@ -177,11 +180,12 @@ class ProfileViewModelTest {
   }
 
   @Test
-  fun buildComputedProfile_calculatesCorrectReviewAndSportRates() = runTest {
+  fun buildComputedProfileCalculatesCorrectReviewAndSportRates() = runTest {
     val myHunts =
         listOf(
             createHuntWithRateAndDifficulty("hunt1", "Hunt 1", reviewRate = 3.0),
             createHuntWithRateAndDifficulty("hunt2", "Hunt 2", reviewRate = 5.0))
+
     val doneHunts =
         listOf(
             createHuntWithRateAndDifficulty("done1", "Done 1", difficulty = Difficulty.EASY),
@@ -197,7 +201,7 @@ class ProfileViewModelTest {
   }
 
   @Test
-  fun loadEmptyHunts_computesZeroRates() = runTest {
+  fun loadEmptyHuntsComputesZeroRates() = runTest {
     val profile = sampleProfile(myHunts = emptyList(), doneHunts = emptyList(), uid = "user1")
     repository.addProfile(profile)
 
@@ -211,7 +215,7 @@ class ProfileViewModelTest {
   }
 
   @Test
-  fun repositoryFailure_doesNotCrashViewModel() = runTest {
+  fun repositoryFailureDoesNotCrashViewModel() = runTest {
     viewModel.loadProfile("nonexistent_user")
     advanceUntilIdle()
 
@@ -219,7 +223,7 @@ class ProfileViewModelTest {
   }
 
   @Test
-  fun toggleLikedHunt_addsHuntToLikedHunts() = runTest {
+  fun toggleLikedHuntAddsHuntToLikedHunts() = runTest {
     viewModel.loadProfile("user1")
     advanceUntilIdle()
 
@@ -231,19 +235,17 @@ class ProfileViewModelTest {
     advanceUntilIdle()
 
     val likedHunts = viewModel.uiState.value.profile!!.likedHunts
-
     assertEquals(1, likedHunts.size)
     assertEquals("hunt1", likedHunts.first().uid)
   }
 
   @Test
-  fun toggleLikedHunt_removesHuntFromLikedHunts() = runTest {
+  fun toggleLikedHuntRemovesHuntFromLikedHunts() = runTest {
     val hunt =
         createHuntWithRateAndDifficulty(
             uid = "hunt1", title = "Test Hunt", reviewRate = 4.0, difficulty = Difficulty.EASY)
 
     val profileWithLike = profileAlice.copy(likedHunts = mutableListOf(hunt))
-
     repository.updateProfile(profileWithLike)
 
     viewModel.loadProfile("user1")

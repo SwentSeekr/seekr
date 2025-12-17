@@ -36,7 +36,7 @@ class EditHuntViewModelTest {
   }
 
   @Test
-  fun deleteCurrentHunt_withLoadedHunt_callsRepositoryAndNoError() = runTest {
+  fun deleteCurrentHuntWithLoadedHuntCallsRepositoryAndNoError() = runTest {
     // Given a loaded hunt
     val huntId = "hunt123"
     setHuntId(huntId)
@@ -53,7 +53,7 @@ class EditHuntViewModelTest {
   }
 
   @Test
-  fun deleteCurrentHunt_repositoryThrows_setsErrorMsg() = runTest {
+  fun deleteCurrentHuntRepositoryThrowsSetsErrorMsg() = runTest {
     val huntId = "hunt123"
     setHuntId(huntId)
 
@@ -66,7 +66,7 @@ class EditHuntViewModelTest {
   }
 
   @Test
-  fun deleteCurrentHunt_withoutLoadedHunt_throws() = runTest {
+  fun deleteCurrentHuntWithoutLoadedHuntThrows() = runTest {
     // No hunt loaded → huntId = null
     setHuntId(null)
 

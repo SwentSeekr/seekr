@@ -46,7 +46,7 @@ class OfflineOverviewViewModelTest {
   }
 
   @Test
-  fun initialState_containsAllHunts_andSearchIsEmpty() {
+  fun initialStateContainsAllHuntsAndSearchIsEmpty() {
     val hunts =
         listOf(
             fakeHunt("1", "Alpha", HuntStatus.FUN, Difficulty.EASY),
@@ -63,7 +63,7 @@ class OfflineOverviewViewModelTest {
   }
 
   @Test
-  fun onSearchChange_updatesSearchQuery_andFiltersByTitle() {
+  fun onSearchChangeUpdatesSearchQueryAndFiltersByTitle() {
     val hunts =
         listOf(
             fakeHunt("1", "My Hunt One", HuntStatus.FUN, Difficulty.EASY),
@@ -86,7 +86,7 @@ class OfflineOverviewViewModelTest {
   }
 
   @Test
-  fun onClearSearch_resetsSearchAndRestoresAllHunts() {
+  fun onClearSearchResetsSearchAndRestoresAllHunts() {
     val hunts =
         listOf(
             fakeHunt("1", "First", HuntStatus.FUN, Difficulty.EASY),
@@ -109,7 +109,7 @@ class OfflineOverviewViewModelTest {
   }
 
   @Test
-  fun onStatusFilterSelect_togglesSameStatusOnAndOff() {
+  fun onStatusFilterSelectTogglesSameStatusOnAndOff() {
     val hunts =
         listOf(
             fakeHunt("1", "A", HuntStatus.FUN, Difficulty.EASY),
@@ -130,7 +130,7 @@ class OfflineOverviewViewModelTest {
   }
 
   @Test
-  fun onDifficultyFilterSelect_togglesSameDifficultyOnAndOff() {
+  fun onDifficultyFilterSelectTogglesSameDifficultyOnAndOff() {
     val hunts =
         listOf(
             fakeHunt("1", "A", HuntStatus.FUN, Difficulty.EASY),
@@ -152,7 +152,7 @@ class OfflineOverviewViewModelTest {
   }
 
   @Test
-  fun applyFilters_combinesSearch_status_andDifficulty() {
+  fun applyFiltersCombinesSearchStatusAndDifficulty() {
     val hunts =
         listOf(
             // Matches everything

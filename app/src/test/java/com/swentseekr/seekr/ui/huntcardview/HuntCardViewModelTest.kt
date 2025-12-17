@@ -85,7 +85,7 @@ class HuntCardViewModelTest {
 
   /** Test that the hunt is correctly loaded */
   @Test
-  fun loadHunt_correctly() = runTest {
+  fun loadHuntCorrectly() = runTest {
     viewModel.loadHunt(testHunt.uid)
     advanceUntilIdle()
 
@@ -99,7 +99,7 @@ class HuntCardViewModelTest {
 
   /** Test in case of non existing hunt laoded */
   @Test
-  fun loadHunt_withInvalidId_logsError() = runTest {
+  fun loadHuntWithInvalidIdLogsError() = runTest {
     viewModel.loadHunt(HuntCardViewModelTestConstantsString.INVALID_ID)
     advanceUntilIdle()
 
@@ -111,7 +111,7 @@ class HuntCardViewModelTest {
 
   /** Test that loading a valid author profile works correctly */
   @Test
-  fun loadAuthorProfile_success() = runTest {
+  fun loadAuthorProfileSuccess() = runTest {
     fakeProRepository.addProfile(
         Profile(
             uid = TEST_AUTHOR_ID,
@@ -131,7 +131,7 @@ class HuntCardViewModelTest {
 
   /** Test that setErrorMsg and clearErrorMsg work correctly */
   @Test
-  fun setErrorMsg_and_clearErrorMsg() = runTest {
+  fun setErrorMsgAndClearErrorMsg() = runTest {
     viewModel.setErrorMsg(HuntCardViewModelTestConstantsString.ERROR_MESSAGE)
     assertEquals(
         HuntCardViewModelTestConstantsString.ERROR_MESSAGE, viewModel.uiState.value.errorMsg)
@@ -142,7 +142,7 @@ class HuntCardViewModelTest {
 
   /** Test that the default state has a hunt not null, no like and not achieved */
   @Test
-  fun initialUiState_isDefault() {
+  fun initialUiStateIsDefault() {
     val state = viewModel.uiState.value
     assertNull(state.hunt)
     assertFalse(state.isLiked)
@@ -150,7 +150,7 @@ class HuntCardViewModelTest {
   }
 
   @Test
-  fun loadHunt_withUserDoneHunts_marksAchieved() = runTest {
+  fun loadHuntWithUserDoneHuntsMarksAchieved() = runTest {
     val userId = "user_done"
     fakeProRepository.addProfile(Profile(uid = userId))
     fakeProRepository.addDoneHunt(userId, testHunt)
@@ -165,7 +165,7 @@ class HuntCardViewModelTest {
 
   /** Test that loadOtherReview correctly loads reviews */
   @Test
-  fun loadOtherReview_populatesReviews() = runTest {
+  fun loadOtherReviewPopulatesReviews() = runTest {
     val review1 =
         HuntReview(
             HuntCardViewModelTestConstantsString.REVIEW_ID_1,
@@ -194,7 +194,7 @@ class HuntCardViewModelTest {
 
   /** Test that loadOtherReview handles empty review list */
   @Test
-  fun loadOtherReview_emptyList() = runTest {
+  fun loadOtherReviewEmptyList() = runTest {
     viewModel.loadOtherReview(TEST_HUNT_ID)
     advanceUntilIdle()
 
@@ -204,7 +204,7 @@ class HuntCardViewModelTest {
 
   /** Test that deleteReview deletes photos and review, and handles exceptions */
   @Test
-  fun deleteReview_repositoryThrows_setsErrorMsg() = runTest {
+  fun deleteReviewRepositoryThrowsSetsErrorMsg() = runTest {
     // Arrange: review with photo
     val review =
         HuntReview(
@@ -241,7 +241,7 @@ class HuntCardViewModelTest {
 
   /** Test that deleteReview handles non-existing review */
   @Test
-  fun deleteReview_reviewRepositoryThrows_setsErrorMsg() = runTest {
+  fun deleteReviewReviewRepositoryThrowsSetsErrorMsg() = runTest {
     viewModel =
         HuntCardViewModel(
             fakeRepository, fakeRevRepository, fakeProRepository, ReviewImageRepositoryLocal())
@@ -263,7 +263,7 @@ class HuntCardViewModelTest {
 
   /** Test that check the change of the hunt state from dislike to like and from like to dislike */
   @Test
-  fun onLikeClick_isLiked() = runTest {
+  fun onLikeClickIsLiked() = runTest {
     val userId = "test_user"
 
     fakeProRepository.addProfile(Profile(uid = userId))
@@ -283,7 +283,7 @@ class HuntCardViewModelTest {
 
   /** Test that onDoneClick with null hunt sets error message */
   @Test
-  fun onDoneClick_with_null_hunt_sets_error_message() = runTest {
+  fun onDoneClickWithNullHuntSetsErrorMessage() = runTest {
     viewModel.onDoneClick()
     advanceUntilIdle() // wait for coroutines
 
@@ -295,7 +295,7 @@ class HuntCardViewModelTest {
 
   /** Test that check that the hunt is marked as achieved */
   @Test
-  fun onDoneClick_marks_hunt_as_achieved() = runTest {
+  fun onDoneClickMarksHuntAsAchieved() = runTest {
     val userId = HuntCardViewModelTestConstantsString.TEST_USER_ID
     fakeProRepository.addProfile(Profile(uid = userId))
     viewModel.initialize(userId, testHunt)
@@ -309,7 +309,7 @@ class HuntCardViewModelTest {
 
   /** Test that check that the hunt is deleted */
   @Test
-  fun onDeleteClick_deletesHunt() = runTest {
+  fun onDeleteClickDeletesHunt() = runTest {
     viewModel.deleteHunt(testHunt.uid)
     advanceUntilIdle()
 
@@ -326,7 +326,7 @@ class HuntCardViewModelTest {
 
   /** Test that check no delete if not valid hunt id */
   @Test
-  fun deleteHunt_withInvalidId_logsError() = runTest {
+  fun deleteHuntWithInvalidIdLogsError() = runTest {
     viewModel.deleteHunt(HuntCardViewModelTestConstantsString.NON_EXISTING_ID)
     advanceUntilIdle()
 
@@ -334,7 +334,7 @@ class HuntCardViewModelTest {
   }
 
   @Test
-  fun deleteReview_userOwnsReview_deletesSuccessfully() = runTest {
+  fun deleteReviewUserOwnsReviewDeletesSuccessfully() = runTest {
     val review =
         HuntReview(
             reviewId = HuntCardViewModelTestConstantsString.REVIEW_ID_1,
@@ -356,7 +356,7 @@ class HuntCardViewModelTest {
   }
 
   @Test
-  fun deleteReview_wrongUser_setsError() = runTest {
+  fun deleteReviewWrongUserSetsError() = runTest {
     val review =
         HuntReview(
             reviewId = HuntCardViewModelTestConstantsString.REVIEW_ID_1,
@@ -396,7 +396,7 @@ class HuntCardViewModelTest {
 
   /** Test that check that there is an error with not a valid hunt */
   @Test
-  fun editHunt_withInvalidId_logsError() = runTest {
+  fun editHuntWithInvalidIdLogsError() = runTest {
     val newHunt =
         testHunt.copy(
             uid = HuntCardViewModelTestConstantsString.NON_EXISTING_ID,
@@ -415,7 +415,7 @@ class HuntCardViewModelTest {
 
   /** Test that onLikeClick with null currentUserId returns early */
   @Test
-  fun onLikeClick_withNullUserId_returnsEarly() = runTest {
+  fun onLikeClickWithNullUserIdReturnsEarly() = runTest {
     viewModel.onLikeClick(TEST_HUNT_ID)
     advanceUntilIdle()
 
@@ -426,7 +426,7 @@ class HuntCardViewModelTest {
 
   /** Test that onLikeClick toggles like state multiple times */
   @Test
-  fun onLikeClick_multipleTimes_togglesCorrectly() = runTest {
+  fun onLikeClickMultipleTimesTogglesCorrectly() = runTest {
     val userId = "test_user"
 
     fakeProRepository.addProfile(Profile(uid = userId))
