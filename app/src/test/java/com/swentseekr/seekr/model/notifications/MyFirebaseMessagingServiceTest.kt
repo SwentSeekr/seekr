@@ -78,12 +78,9 @@ class MyFirebaseMessagingServiceTest {
   }
 
   @Test
-  fun onNewToken_updates_firestore_when_user_exists() {
+  fun onNewTokenUpdatesFirestoreWhenUserExists() {
     every { mockFirebaseUser.uid } returns UID
     every { NotificationTokenService.persistToken(UID, TOKEN) } returns mockk(relaxed = true)
-  fun onNewTokenUpdatesFirestoreWhenUserExists() {
-    every { mockFirebaseUser.uid } returns "uid123"
-    every { mockDocRef.update("author.fcmToken", "token123") } returns mockk(relaxed = true)
 
     service.onNewToken(TOKEN)
 
@@ -100,19 +97,17 @@ class MyFirebaseMessagingServiceTest {
   }
 
   @Test
-  fun onNewToken_logs_success_when_firestore_update_succeeds() {
-    every { mockFirebaseUser.uid } returns UID
   fun onNewTokenLogsSuccessWhenFirestoreUpdateSucceeds() {
-    every { mockFirebaseUser.uid } returns "uid123"
+    every { mockFirebaseUser.uid } returns UID
 
     val mockTask = mockk<com.google.android.gms.tasks.Task<Void>>()
     every { NotificationTokenService.persistToken(UID, TOKEN) } returns mockTask
     every { mockTask.addOnSuccessListener(any()) } answers
-        {
-          val listener = firstArg<com.google.android.gms.tasks.OnSuccessListener<Void>>()
-          listener.onSuccess(null)
-          mockTask
-        }
+            {
+              val listener = firstArg<com.google.android.gms.tasks.OnSuccessListener<Void>>()
+              listener.onSuccess(null)
+              mockTask
+            }
     every { mockTask.addOnFailureListener(any()) } returns mockTask
 
     service.onNewToken(TOKEN)
@@ -121,20 +116,18 @@ class MyFirebaseMessagingServiceTest {
   }
 
   @Test
-  fun onNewToken_logs_error_when_firestore_update_fails() {
-    every { mockFirebaseUser.uid } returns UID
   fun onNewTokenLogsErrorWhenFirestoreUpdateFails() {
-    every { mockFirebaseUser.uid } returns "uid123"
+    every { mockFirebaseUser.uid } returns UID
 
     val mockTask = mockk<com.google.android.gms.tasks.Task<Void>>()
     every { NotificationTokenService.persistToken(UID, TOKEN) } returns mockTask
     every { mockTask.addOnSuccessListener(any()) } returns mockTask
     every { mockTask.addOnFailureListener(any()) } answers
-        {
-          val listener = firstArg<com.google.android.gms.tasks.OnFailureListener>()
-          listener.onFailure(Exception("fail"))
-          mockTask
-        }
+            {
+              val listener = firstArg<com.google.android.gms.tasks.OnFailureListener>()
+              listener.onFailure(Exception("fail"))
+              mockTask
+            }
 
     service.onNewToken(TOKEN)
 
