@@ -231,7 +231,7 @@ class AuthViewModelTest {
       }
 
   @Test
-  fun signInSuccess_setsNeedsOnboardingTrue_forNewUser() =
+  fun signInSuccessSetsNeedsOnboardingTrueForNewUser() =
       runTest(dispatcher) {
         val cred = mockk<Credential>()
         val user = mockk<FirebaseUser>()

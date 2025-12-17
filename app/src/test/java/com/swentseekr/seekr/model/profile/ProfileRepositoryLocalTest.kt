@@ -20,20 +20,23 @@ import org.junit.Test
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileRepositoryLocalTest {
+
   private lateinit var repository: ProfileRepositoryLocal
   private val sampleHunt = createHunt("hunt0", "City Exploration")
   private val done = createHunt("done1", "Completed 1")
   private val liked = createHunt("liked1", "Completed 1")
+
   private val profileBob =
-      sampleProfileWithPseudonym(
-          uid = "user2",
-          pseudonym = "Bob",
-      )
+    sampleProfileWithPseudonym(
+      uid = "user2",
+      pseudonym = "Bob",
+    )
+
   private val profileAlice =
-      sampleProfileWithPseudonym(
-          uid = "user1",
-          pseudonym = "Alice",
-      )
+    sampleProfileWithPseudonym(
+      uid = "user1",
+      pseudonym = "Alice",
+    )
 
   @Before
   fun setup() {
@@ -43,67 +46,63 @@ class ProfileRepositoryLocalTest {
   }
 
   @Test
-  fun getProfile_returns_correct_profile() = runTest {
+  fun testGetProfileReturnsCorrectProfile() = runTest {
     val profile = repository.getProfile("user1")
     assertEquals("Alice", profile.author.pseudonym)
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun `getProfile throws exception for non-existent user`() = runTest {
+  fun testGetProfileThrowsExceptionForNonExistentUser() = runTest {
     repository.getProfile("nonExistent")
   }
 
   @Test
-  fun updateProfile_updates_existing_profile() = runTest {
+  fun testUpdateProfileUpdatesExistingProfile() = runTest {
     val updatedProfile = profileAlice.copy(author = profileAlice.author.copy(bio = "Updated bio"))
-
     repository.updateProfile(updatedProfile)
     val result = repository.getProfile("user1")
-
     assertEquals("Updated bio", result.author.bio)
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun updateProfile_throws_for_non_existent_user() = runTest {
+  fun testUpdateProfileThrowsForNonExistentUser() = runTest {
     val fake = profileAlice.copy(uid = "ghost")
     repository.updateProfile(fake)
   }
 
   @Test
-  fun getMyHunts_returns_correct_list() = runTest {
+  fun testGetMyHuntsReturnsCorrectList() = runTest {
     profileAlice.myHunts.add(sampleHunt)
-
     val hunts = repository.getMyHunts("user1")
     assertEquals(1, hunts.size)
     assertEquals("hunt0", hunts[0].uid)
   }
 
   @Test
-  fun getDoneHunts_and_getLikedHunts_work_correctly() = runTest {
+  fun testGetDoneHuntsAndGetLikedHuntsWorkCorrectly() = runTest {
     profileAlice.doneHunts.add(done)
     profileAlice.likedHunts.add(liked)
-
     assertEquals(1, repository.getDoneHunts("user1").size)
     assertEquals(1, repository.getLikedHunts("user1").size)
   }
 
   @Test
-  fun addProfile_increases_repository_size() = runTest {
+  fun testAddProfileIncreasesRepositorySize() = runTest {
     val initialSize = repository.size()
 
     val newProfile =
-        Profile(
-            uid = "user3",
-            author =
-                Author(
-                    pseudonym = "Charlie",
-                    bio = "A new challenger",
-                    profilePicture = 1,
-                    reviewRate = 5.0,
-                    sportRate = 4.5),
-            myHunts = mutableListOf(),
-            doneHunts = mutableListOf(),
-            likedHunts = mutableListOf())
+      Profile(
+        uid = "user3",
+        author =
+          Author(
+            pseudonym = "Charlie",
+            bio = "A new challenger",
+            profilePicture = 1,
+            reviewRate = 5.0,
+            sportRate = 4.5),
+        myHunts = mutableListOf(),
+        doneHunts = mutableListOf(),
+        likedHunts = mutableListOf())
 
     repository.addProfile(newProfile)
 
@@ -113,9 +112,8 @@ class ProfileRepositoryLocalTest {
   }
 
   @Test
-  fun updateProfile_replaces_existing_profile_not_duplicates() = runTest {
+  fun testUpdateProfileReplacesExistingProfileNotDuplicates() = runTest {
     val initialSize = repository.size()
-
     val updated = profileAlice.copy(author = profileAlice.author.copy(bio = "Replaced"))
     repository.updateProfile(updated)
 
@@ -125,9 +123,9 @@ class ProfileRepositoryLocalTest {
   }
 
   @Test
-  fun getProfile_is_case_sensitive() = runTest {
+  fun testGetProfileIsCaseSensitive() = runTest {
     try {
-      repository.getProfile("User1") // capital U
+      repository.getProfile("User1")
       throw AssertionError("Expected exception for mismatched case")
     } catch (e: IllegalArgumentException) {
       assertEquals("Profile with ID User1 not found", e.message)
@@ -135,39 +133,34 @@ class ProfileRepositoryLocalTest {
   }
 
   @Test
-  fun profiles_are_isolated_between_users() = runTest {
+  fun testProfilesAreIsolatedBetweenUsers() = runTest {
     profileAlice.myHunts.add(sampleHunt)
     assertEquals(1, repository.getMyHunts("user1").size)
     assertEquals(0, repository.getMyHunts("user2").size)
   }
 
-  @Test fun repository_size_returns_correct_count() = runTest { assertEquals(2, repository.size()) }
+  @Test
+  fun testRepositorySizeReturnsCorrectCount() = runTest {
+    assertEquals(2, repository.size())
+  }
 
   @Test
-  fun addProfile_can_add_multiple_profiles_without_conflict() = runTest {
-    val p4 =
-        sampleProfileWithPseudonym(
-            uid = "user4",
-            pseudonym = "Diana",
-        )
-    val p5 =
-        sampleProfileWithPseudonym(
-            uid = "user5",
-            pseudonym = "Eve",
-        )
+  fun testAddProfileCanAddMultipleProfilesWithoutConflict() = runTest {
+    val p4 = sampleProfileWithPseudonym(uid = "user4", pseudonym = "Diana")
+    val p5 = sampleProfileWithPseudonym(uid = "user5", pseudonym = "Eve")
     repository.addProfile(p4)
     repository.addProfile(p5)
     assertEquals(4, repository.size())
   }
 
   @Test
-  fun getMyHunts_returns_empty_list_for_new_profile() = runTest {
+  fun testGetMyHuntsReturnsEmptyListForNewProfile() = runTest {
     val hunts = repository.getMyHunts("user2")
     assertTrue(hunts.isEmpty())
   }
 
   @Test
-  fun updateProfile_preserves_hunts() = runTest {
+  fun testUpdateProfilePreservesHunts() = runTest {
     profileAlice.myHunts.add(sampleHunt)
     val updated = profileAlice.copy(author = profileAlice.author.copy(bio = "Preserve hunts"))
     repository.updateProfile(updated)
@@ -177,19 +170,19 @@ class ProfileRepositoryLocalTest {
   }
 
   @Test
-  fun getDoneHunts_returns_empty_list_for_user_with_no_done_hunts() = runTest {
+  fun testGetDoneHuntsReturnsEmptyListForUserWithNoDoneHunts() = runTest {
     val result = repository.getDoneHunts("user2")
     assertTrue(result.isEmpty())
   }
 
   @Test
-  fun getLikedHunts_returns_empty_list_for_user_with_no_liked_hunts() = runTest {
+  fun testGetLikedHuntsReturnsEmptyListForUserWithNoLikedHunts() = runTest {
     val result = repository.getLikedHunts("user2")
     assertTrue(result.isEmpty())
   }
 
   @Test
-  fun addDoneHuntAddsHuntWhenNotAlreadyInList() = runTest {
+  fun testAddDoneHuntAddsHuntWhenNotAlreadyInList() = runTest {
     val profile = sampleProfileWithPseudonym(uid = "user1", pseudonym = "Alice")
     val hunt = createHunt(uid = "hunt1", title = "New City Exploration")
     repository.addProfile(profile)
@@ -201,7 +194,7 @@ class ProfileRepositoryLocalTest {
   }
 
   @Test
-  fun addDoneHuntDoesNotAddHuntIfAlreadyInList() = runTest {
+  fun testAddDoneHuntDoesNotAddHuntIfAlreadyInList() = runTest {
     val profile = sampleProfileWithPseudonym(uid = "user1", pseudonym = "Alice")
     val hunt = createHunt(uid = "hunt1", title = "New City Exploration")
     repository.addProfile(profile)
@@ -213,13 +206,13 @@ class ProfileRepositoryLocalTest {
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun addDoneHuntThrowsExceptionIfProfileNotFound() = runTest {
+  fun testAddDoneHuntThrowsExceptionIfProfileNotFound() = runTest {
     val hunt = createHunt(uid = "hunt1", title = "New City Exploration")
     repository.addDoneHunt("nonExistentUser", hunt)
   }
 
   @Test
-  fun createProfile_adds_new_profile_successfully() = runTest {
+  fun testCreateProfileAddsNewProfileSuccessfully() = runTest {
     val newProfile = sampleProfileWithPseudonym("user10", "Frank")
     repository.createProfile(newProfile)
     val result = repository.getProfile("user10")
@@ -227,12 +220,13 @@ class ProfileRepositoryLocalTest {
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun createProfile_throws_for_duplicate_uid() = runTest { repository.createProfile(profileAlice) }
+  fun testCreateProfileThrowsForDuplicateUid() = runTest {
+    repository.createProfile(profileAlice)
+  }
 
   @Test
-  fun uploadProfilePicture_updates_profile_and_returns_url() = runTest {
+  fun testUploadProfilePictureUpdatesProfileAndReturnsUrl() = runTest {
     val fakeUri = mockk<Uri>(relaxed = true)
-
     val url = repository.uploadProfilePicture("user1", fakeUri)
     val updatedProfile = repository.getProfile("user1")
 
@@ -241,14 +235,13 @@ class ProfileRepositoryLocalTest {
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun uploadProfilePicture_throws_for_non_existent_user() = runTest {
+  fun testUploadProfilePictureThrowsForNonExistentUser() = runTest {
     val fakeUri = mockk<Uri>(relaxed = true)
-
     repository.uploadProfilePicture("ghostUser", fakeUri)
   }
 
   @Test
-  fun deleteCurrentProfilePicture_resets_to_default() = runTest {
+  fun testDeleteCurrentProfilePictureResetsToDefault() = runTest {
     val fakeUri = mockk<Uri>(relaxed = true)
 
     repository.uploadProfilePicture("user1", fakeUri)
@@ -263,7 +256,7 @@ class ProfileRepositoryLocalTest {
   }
 
   @Test
-  fun deleteCurrentProfilePicture_does_nothing_if_url_does_not_match() = runTest {
+  fun testDeleteCurrentProfilePictureDoesNothingIfUrlDoesNotMatch() = runTest {
     val profileBefore = repository.getProfile("user1")
     repository.deleteCurrentProfilePicture("user1", "wrong-url")
     val profileAfter = repository.getProfile("user1")
@@ -271,7 +264,7 @@ class ProfileRepositoryLocalTest {
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun deleteCurrentProfilePicture_throws_for_non_existent_user() = runTest {
+  fun testDeleteCurrentProfilePictureThrowsForNonExistentUser() = runTest {
     repository.deleteCurrentProfilePicture("ghostUser", "url")
   }
 }

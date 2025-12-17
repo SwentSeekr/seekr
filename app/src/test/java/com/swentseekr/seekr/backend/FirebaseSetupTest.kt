@@ -19,7 +19,7 @@ import org.robolectric.annotation.Config
 @Config(manifest = Config.NONE)
 class FirebaseSetupTest {
   @Test
-  fun firebase_shouldInitializeSuccessfully() {
+  fun firebaseShouldInitializeSuccessfully() {
     val context = ApplicationProvider.getApplicationContext<Context>()
     val app =
         try {

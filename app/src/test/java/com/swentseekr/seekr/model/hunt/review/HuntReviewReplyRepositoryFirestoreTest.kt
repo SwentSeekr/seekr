@@ -26,7 +26,7 @@ class HuntReviewReplyRepositoryFirestoreTest {
   }
 
   @Test
-  fun documentToReply_parsesFieldsCorrectly() {
+  fun documentToReplyParsesFieldsCorrectly() {
     val snapshot = mockk<DocumentSnapshot>()
 
     every { snapshot.id } returns "r1"
@@ -54,7 +54,7 @@ class HuntReviewReplyRepositoryFirestoreTest {
   }
 
   @Test
-  fun documentToReply_missingRequiredFields_returnsNull() {
+  fun documentToReplyMissingRequiredFieldsReturnsNull() {
     val snapshot = mockk<DocumentSnapshot>()
 
     every { snapshot.id } returns "r1"
@@ -66,7 +66,7 @@ class HuntReviewReplyRepositoryFirestoreTest {
   }
 
   @Test
-  fun documentToReply_handlesException_andReturnsNull() {
+  fun documentToReplyHandlesExceptionAndReturnsNull() {
     val snapshot = mockk<DocumentSnapshot>()
 
     every { snapshot.id } returns "r1"

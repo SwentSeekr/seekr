@@ -44,14 +44,14 @@ class HuntReviewReplyRepositoryLocalTest {
   }
 
   @Test
-  fun getNewReplyId_generatesUniqueIds() {
+  fun getNewReplyIdGeneratesUniqueIds() {
     val id1 = repository.getNewReplyId()
     val id2 = repository.getNewReplyId()
     assertNotEquals(id1, id2)
   }
 
   @Test
-  fun addReply_addsSuccessfully() = runTest {
+  fun addReplyAddsSuccessfully() = runTest {
     repository.addReply(reply1)
 
     val replies = repository.getRepliesForReview("rev123")
@@ -60,13 +60,13 @@ class HuntReviewReplyRepositoryLocalTest {
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun addReply_blankId_throwsException() = runTest {
+  fun addReplyBlankIdThrowsException() = runTest {
     val invalid = reply1.copy(replyId = "")
     repository.addReply(invalid)
   }
 
   @Test
-  fun getRepliesForReview_filtersByReviewId() = runTest {
+  fun getRepliesForReviewFiltersByReviewId() = runTest {
     val otherReview = reply1.copy(replyId = "r3", reviewId = "rev999")
 
     repository.addReply(reply1)
@@ -82,13 +82,13 @@ class HuntReviewReplyRepositoryLocalTest {
   }
 
   @Test
-  fun getRepliesForReview_returnsEmptyList_whenNone() = runTest {
+  fun getRepliesForReviewReturnsEmptyListWhenNone() = runTest {
     val replies = repository.getRepliesForReview("nope")
     assertTrue(replies.isEmpty())
   }
 
   @Test
-  fun updateReply_updatesSuccessfully() = runTest {
+  fun updateReplyUpdatesSuccessfully() = runTest {
     repository.addReply(reply1)
 
     val updated = reply1.copy(comment = "Updated", isDeleted = true)
@@ -101,12 +101,12 @@ class HuntReviewReplyRepositoryLocalTest {
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun updateReply_invalidId_throwsException() = runTest {
+  fun updateReplyInvalidIdThrowsException() = runTest {
     repository.updateReply("does_not_exist", reply1)
   }
 
   @Test
-  fun deleteReply_removesSuccessfully() = runTest {
+  fun deleteReplyRemovesSuccessfully() = runTest {
     repository.addReply(reply1)
     assertEquals(1, repository.getRepliesForReview("rev123").size)
 
@@ -117,10 +117,10 @@ class HuntReviewReplyRepositoryLocalTest {
   }
 
   @Test(expected = IllegalArgumentException::class)
-  fun deleteReply_invalidId_throwsException() = runTest { repository.deleteReply("does_not_exist") }
+  fun deleteReplyInvalidId_throwsException() = runTest { repository.deleteReply("does_not_exist") }
 
   @Test
-  fun listenToReplies_emitsCurrentStateOnce() = runTest {
+  fun listenToRepliesEmitsCurrentStateOnce() = runTest {
     repository.addReply(reply1)
     repository.addReply(reply2)
 

@@ -12,7 +12,7 @@ import org.junit.Test
 class HuntReviewReplyTest {
 
   @Test
-  fun constructor_setsFieldsCorrectly() {
+  fun constructorSetsFieldsCorrectly() {
     val reply =
         HuntReviewReply(
             replyId = "r1",
@@ -36,7 +36,7 @@ class HuntReviewReplyTest {
   }
 
   @Test
-  fun copyAndEquals_behaveAsExpected() {
+  fun copyAndEqualsBehaveAsExpected() {
     val base = HuntReviewReply(replyId = "r1", reviewId = "rev1", comment = "Hi")
     val copy = base.copy(comment = "Hi again")
 

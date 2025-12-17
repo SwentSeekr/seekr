@@ -18,7 +18,7 @@ class HuntReviewReplyRepositoryProviderTest {
   }
 
   @Test
-  fun repository_isInitialized_withTestOverride() {
+  fun repositoryIsInitializedWithTestOverride() {
     val fakeRepo = HuntReviewReplyRepositoryLocal()
 
     HuntReviewReplyRepositoryProvider.setTestRepository(fakeRepo)

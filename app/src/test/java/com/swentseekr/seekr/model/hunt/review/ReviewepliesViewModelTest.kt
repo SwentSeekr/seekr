@@ -57,7 +57,7 @@ class ReviewRepliesViewModelTest {
   }
 
   @Test
-  fun onReplyTextChanged_updatesRootAndChildTexts() =
+  fun onReplyTextChangedUpdatesRootAndChildTexts() =
       runTest(mainDispatcherRule.testDispatcher) {
         val vm = createViewModel(currentUserId = "user-1")
 
@@ -79,7 +79,7 @@ class ReviewRepliesViewModelTest {
       }
 
   @Test
-  fun sendReply_withoutLoggedInUser_setsSignInError() =
+  fun sendReplyWithoutLoggedInUserSetsSignInError() =
       runTest(mainDispatcherRule.testDispatcher) {
         val vm = createViewModel(currentUserId = null)
 
@@ -99,7 +99,7 @@ class ReviewRepliesViewModelTest {
       }
 
   @Test
-  fun sendReply_withBlankText_setsEmptyReplyError() =
+  fun sendReplyWithBlankTextSetsEmptyReplyError() =
       runTest(mainDispatcherRule.testDispatcher) {
         val vm = createViewModel(currentUserId = "user-1")
 
@@ -117,7 +117,7 @@ class ReviewRepliesViewModelTest {
       }
 
   @Test
-  fun sendReply_rootReply_success_addsReplyAndClearsText() =
+  fun sendReplyRootReplySuccessAddsReplyAndClearsText() =
       runTest(mainDispatcherRule.testDispatcher) {
         val vm = createViewModel(currentUserId = "user-1")
 
@@ -142,7 +142,7 @@ class ReviewRepliesViewModelTest {
       }
 
   @Test
-  fun deleteReply_notOwner_setsError() =
+  fun deleteReplyNotOwnerSetsError() =
       runTest(mainDispatcherRule.testDispatcher) {
         val vm = createViewModel(currentUserId = "user-1")
 
@@ -173,7 +173,7 @@ class ReviewRepliesViewModelTest {
       }
 
   @Test
-  fun deleteReply_owner_callsRepository() =
+  fun deleteReplyOwnerCallsRepository() =
       runTest(mainDispatcherRule.testDispatcher) {
         val vm = createViewModel(currentUserId = "user-1")
 
@@ -203,7 +203,7 @@ class ReviewRepliesViewModelTest {
   // ---------- NEW TESTS FOR TOGGLE LOGIC ----------
 
   @Test
-  fun onToggleReplies_null_togglesRootExpansionAndRebuilds() =
+  fun onToggleRepliesNullTogglesRootExpansionAndRebuilds() =
       runTest(mainDispatcherRule.testDispatcher) {
         val vm = createViewModel(currentUserId = "user-1")
 
@@ -245,7 +245,7 @@ class ReviewRepliesViewModelTest {
       }
 
   @Test
-  fun onToggleReplies_nonNull_togglesChildExpansion() =
+  fun onToggleRepliesNonNullTogglesChildExpansion() =
       runTest(mainDispatcherRule.testDispatcher) {
         val vm = createViewModel(currentUserId = "user-1")
 
@@ -298,7 +298,7 @@ class ReviewRepliesViewModelTest {
       }
 
   @Test
-  fun onToggleComposer_handlesRootNoop_andTogglesChildComposer() =
+  fun onToggleComposerHandlesRootNoopAndTogglesChildComposer() =
       runTest(mainDispatcherRule.testDispatcher) {
         val vm = createViewModel(currentUserId = "user-1")
 

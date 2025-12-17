@@ -50,7 +50,7 @@ class HuntsRepositoryLocalTest {
   }
   /** This test verifies that getNewUid increments the ID correctly on each call. */
   @Test
-  fun getNewUid_incrementsCorrectly() {
+  fun getNewUidIncrementsCorrectly() {
     val id1 = huntsRepositoryLocal.getNewUid()
     val id2 = huntsRepositoryLocal.getNewUid()
     val id3 = huntsRepositoryLocal.getNewUid()
@@ -65,7 +65,7 @@ class HuntsRepositoryLocalTest {
    * tests that getAllHunts and getHunt successfully retrieve the hunts.
    */
   @Test
-  fun addHunt_succeeds() = runTest {
+  fun addHuntSucceeds() = runTest {
     huntsRepositoryLocal.addHunt(sampleHunt)
 
     val hunts = huntsRepositoryLocal.getAllHunts()
@@ -78,7 +78,7 @@ class HuntsRepositoryLocalTest {
 
   /** This test verifies that getAllHunts returns all hunts added to the repository. */
   @Test
-  fun getAllHunts_returnAllHunts() = runTest {
+  fun getAllHuntsReturnAllHunts() = runTest {
     huntsRepositoryLocal.addHunt(sampleHunt)
     val hunt2 = sampleHunt.copy(uid = "1", title = "Hunt 2")
     huntsRepositoryLocal.addHunt(hunt2)
@@ -95,7 +95,7 @@ class HuntsRepositoryLocalTest {
    * This test verifies that getAllMyHunts returns only the hunts created by the specified author.
    */
   @Test
-  fun getAllMyHunts_returnOnlyAuthorHunts() = runTest {
+  fun getAllMyHuntsReturnOnlyAuthorHunts() = runTest {
     huntsRepositoryLocal.addHunt(sampleHunt)
     val hunt2 = sampleHunt.copy(uid = "1", title = "Hunt 2")
     huntsRepositoryLocal.addHunt(hunt2)
@@ -127,7 +127,7 @@ class HuntsRepositoryLocalTest {
    * successfully. It checks that all added Hunts are present in the retrieved list.
    */
   @Test
-  fun addMultipleHunts_retrievesAll() = runBlocking {
+  fun addMultipleHuntsRetrievesAll() = runBlocking {
     val hunt1 = sampleHunt.copy(uid = "1", title = "Hunt 1")
     val hunt2 = sampleHunt.copy(uid = "2", title = "Hunt 2")
 
@@ -167,7 +167,7 @@ class HuntsRepositoryLocalTest {
    * no longer present after deletion.
    */
   @Test
-  fun deleteHunt_removesSuccessfully() = runBlocking {
+  fun deleteHuntRemovesSuccessfully() = runBlocking {
     huntsRepositoryLocal.addHunt(sampleHunt)
     huntsRepositoryLocal.deleteHunt(sampleHunt.uid)
     val hunts = huntsRepositoryLocal.getAllHunts()
@@ -176,7 +176,7 @@ class HuntsRepositoryLocalTest {
 
   /** This test verifies that attempting to delete a non-existent Hunt throws an exception */
   @Test(expected = IllegalArgumentException::class)
-  fun deleteHunt_notFound_throws() = runBlocking {
+  fun deleteHuntNotFoundThrows() = runBlocking {
     huntsRepositoryLocal.deleteHunt("non-existent-id")
   }
 }

@@ -47,7 +47,7 @@ class BaseHuntViewModelSuggestionsTest {
   }
 
   @Test
-  fun AutoSuggestionsUsesDirectionsAndCachesDistanceWhenStatusChanges() = runTest {
+  fun autoSuggestionsUsesDirectionsAndCachesDistanceWhenStatusChanges() = runTest {
     val points =
         listOf(
             Location(latitude = 46.0, longitude = 6.0, ""),
@@ -96,7 +96,7 @@ class BaseHuntViewModelSuggestionsTest {
   }
 
   @Test
-  fun AutoSuggestionsNotAppliedWhenPolylineIsTooShort() = runTest {
+  fun autoSuggestionsNotAppliedWhenPolylineIsTooShort() = runTest {
     val points =
         listOf(
             Location(latitude = 46.0, longitude = 6.0, ""),
@@ -118,7 +118,7 @@ class BaseHuntViewModelSuggestionsTest {
   }
 
   @Test
-  fun AutoSuggestionsNotAppliedWhenComputedDistanceIsZero() = runTest {
+  fun autoSuggestionsNotAppliedWhenComputedDistanceIsZero() = runTest {
     val points =
         listOf(
             Location(latitude = 46.0, longitude = 6.0, ""),
@@ -139,7 +139,7 @@ class BaseHuntViewModelSuggestionsTest {
   }
 
   @Test
-  fun AutoSuggestionsDoesNotOverrideUserEnteredTimeOrDistance() = runTest {
+  fun autoSuggestionsDoesNotOverrideUserEnteredTimeOrDistance() = runTest {
     val points =
         listOf(
             Location(latitude = 46.0, longitude = 6.0, ""),
