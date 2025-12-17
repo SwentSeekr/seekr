@@ -324,8 +324,10 @@ abstract class BaseHuntViewModel(
     updateMainImageUri(null)
   }
 
-  /** Removes an existing other image (default no-op). Override in subclasses. */
-  open fun removeExistingOtherImage(url: String) {}
+  /** Removes an existing other image. Override in subclasses. */
+  open fun removeExistingOtherImage(url: String) {
+    // default, no operations needed
+  }
 
   /**
    * Updates the selecting points mode.
