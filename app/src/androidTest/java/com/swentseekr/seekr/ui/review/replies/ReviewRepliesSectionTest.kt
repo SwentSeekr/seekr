@@ -91,7 +91,7 @@ class ReviewRepliesUiTest {
   // ---------- Tests for root header / collapsed state ----------
 
   @Test
-  fun collapsedHeader_showsBeTheFirstToReply_whenNoReplies() {
+  fun collapsedHeaderShowsBeTheFirstToReplyWhenNoReplies() {
     val state =
         ReviewRepliesUiState(
             reviewId = "review-1",
