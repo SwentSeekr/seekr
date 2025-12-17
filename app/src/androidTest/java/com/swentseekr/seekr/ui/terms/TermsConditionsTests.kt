@@ -19,21 +19,21 @@ class TermsAndConditionsScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   @Test
-  fun termsScreen_isDisplayed() {
+  fun termsScreenIsDisplayed() {
     composeTestRule.setContent { TermsAndConditionsScreen() }
 
     composeTestRule.onNodeWithTag(TermsScreenTestTags.SCREEN).assertIsDisplayed()
   }
 
   @Test
-  fun topBar_displaysCorrectTitle() {
+  fun topBarDisplaysCorrectTitle() {
     composeTestRule.setContent { TermsAndConditionsScreen() }
 
     composeTestRule.onNodeWithText(TermsScreenStrings.TITLE).assertIsDisplayed()
   }
 
   @Test
-  fun backButton_isDisplayed() {
+  fun backButtonIsDisplayed() {
     composeTestRule.setContent { TermsAndConditionsScreen() }
 
     composeTestRule
@@ -43,7 +43,7 @@ class TermsAndConditionsScreenTest {
   }
 
   @Test
-  fun backButton_triggersCallback_whenClicked() {
+  fun backButtonTriggersCallbackWhenClicked() {
     var backPressed = false
     composeTestRule.setContent { TermsAndConditionsScreen(onGoBack = { backPressed = true }) }
 
@@ -53,21 +53,21 @@ class TermsAndConditionsScreenTest {
   }
 
   @Test
-  fun contentColumn_isDisplayed() {
+  fun contentColumnIsDisplayed() {
     composeTestRule.setContent { TermsAndConditionsScreen() }
 
     composeTestRule.onNodeWithTag(TermsScreenTestTags.CONTENT_COLUMN).assertIsDisplayed()
   }
 
   @Test
-  fun lastUpdated_isDisplayed() {
+  fun lastUpdatedIsDisplayed() {
     composeTestRule.setContent { TermsAndConditionsScreen() }
 
     composeTestRule.onNodeWithText(TermsScreenStrings.LAST_UPDATED).assertIsDisplayed()
   }
 
   @Test
-  fun section1_titleAndContent_areDisplayed() {
+  fun section1TitleAndContentAreDisplayed() {
     composeTestRule.setContent { TermsAndConditionsScreen() }
 
     composeTestRule.onNodeWithText(TermsScreenStrings.SECTION_1_TITLE).assertIsDisplayed()
@@ -77,7 +77,7 @@ class TermsAndConditionsScreenTest {
   }
 
   @Test
-  fun section2_titleAndContent_areDisplayed() {
+  fun section2TitleAndContentAreDisplayed() {
     composeTestRule.setContent { TermsAndConditionsScreen() }
 
     composeTestRule.onNodeWithText(TermsScreenStrings.SECTION_2_TITLE).assertIsDisplayed()
@@ -87,7 +87,7 @@ class TermsAndConditionsScreenTest {
   }
 
   @Test
-  fun section3_titleAndContent_areDisplayed() {
+  fun section3TitleAndContentAreDisplayed() {
     composeTestRule.setContent { TermsAndConditionsScreen() }
 
     composeTestRule.onNodeWithText(TermsScreenStrings.SECTION_3_TITLE).assertIsDisplayed()
@@ -97,7 +97,7 @@ class TermsAndConditionsScreenTest {
   }
 
   @Test
-  fun section4_titleAndContent_areDisplayed() {
+  fun section4TitleAndContentAreDisplayed() {
     composeTestRule.setContent { TermsAndConditionsScreen() }
 
     composeTestRule.onNodeWithText(TermsScreenStrings.SECTION_4_TITLE).assertIsDisplayed()
@@ -107,7 +107,7 @@ class TermsAndConditionsScreenTest {
   }
 
   @Test
-  fun section5_titleAndContent_areDisplayed() {
+  fun section5TitleAndContentAreDisplayed() {
     composeTestRule.setContent { TermsAndConditionsScreen() }
 
     composeTestRule.onNodeWithTag(TermsScreenTestTags.LAST_SPACER).performScrollTo()
@@ -119,7 +119,7 @@ class TermsAndConditionsScreenTest {
   }
 
   @Test
-  fun section6_titleAndContent_areDisplayed() {
+  fun section6TitleAndContentAreDisplayed() {
     composeTestRule.setContent { TermsAndConditionsScreen() }
 
     composeTestRule.onNodeWithTag(TermsScreenTestTags.LAST_SPACER).performScrollTo()
@@ -132,7 +132,7 @@ class TermsAndConditionsScreenTest {
   }
 
   @Test
-  fun allSections_areDisplayed() {
+  fun allSectionsAreDisplayed() {
     composeTestRule.setContent { TermsAndConditionsScreen() }
 
     // Verifies all section titles are displayed
@@ -151,7 +151,7 @@ class TermsAndConditionsScreenTest {
   }
 
   @Test
-  fun contentColumn_isScrollable() {
+  fun contentColumnIsScrollable() {
     composeTestRule.setContent { TermsAndConditionsScreen() }
 
     // Verifies the column can be scrolled to the last section
@@ -164,7 +164,7 @@ class TermsAndConditionsScreenTest {
   }
 
   @Test
-  fun termsSection_displaysCorrectly() {
+  fun termsSectionDisplaysCorrectly() {
     val testTitle = "Test Title"
     val testContent = "Test content for the section"
 
@@ -175,7 +175,7 @@ class TermsAndConditionsScreenTest {
   }
 
   @Test
-  fun backButton_hasCorrectContentDescription() {
+  fun backButtonHasCorrectContentDescription() {
     composeTestRule.setContent { TermsAndConditionsScreen() }
 
     composeTestRule
@@ -184,7 +184,7 @@ class TermsAndConditionsScreenTest {
   }
 
   @Test
-  fun termsScreen_withNoCallback_doesNotCrash() {
+  fun termsScreenWithNoCallbackDoesNotCrash() {
     // Test that screen works even without callback
     composeTestRule.setContent { TermsAndConditionsScreen(onGoBack = {}) }
 

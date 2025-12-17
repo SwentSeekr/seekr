@@ -91,7 +91,7 @@ class ReviewRepliesUiTest {
   // ---------- Tests for root header / collapsed state ----------
 
   @Test
-  fun collapsedHeader_showsBeTheFirstToReply_whenNoReplies() {
+  fun collapsedHeaderShowsBeTheFirstToReplyWhenNoReplies() {
     val state =
         ReviewRepliesUiState(
             reviewId = "review-1",
@@ -120,7 +120,7 @@ class ReviewRepliesUiTest {
   }
 
   @Test
-  fun collapsedHeader_showsReplyCount_whenRepliesExist() {
+  fun collapsedHeaderShowsReplyCountWhenRepliesExist() {
     val state =
         ReviewRepliesUiState(
             reviewId = "review-1",
@@ -150,7 +150,7 @@ class ReviewRepliesUiTest {
   // ---------- Tests for expanded root content / thread list ----------
 
   @Test
-  fun expandedRoot_showsComposer_threadList_andReplyItem() {
+  fun expandedRootShowsComposerThreadListAndReplyItem() {
     val reply = sampleReply(replyId = "reply-42", authorId = "bob", comment = "Nice hunt!")
     val node =
         sampleNode(
@@ -209,7 +209,7 @@ class ReviewRepliesUiTest {
   // ---------- Tests for reply actions & toggles ----------
 
   @Test
-  fun replyButton_clicks_triggerOnReplyActionCallback() {
+  fun replyButtonClicksTriggerOnReplyActionCallback() {
     val reply = sampleReply(replyId = "reply-777")
     val node =
         sampleNode(
@@ -246,7 +246,7 @@ class ReviewRepliesUiTest {
   }
 
   @Test
-  fun repliesToggleButton_showHideLabel_usesChildRepliesLabel() {
+  fun repliesToggleButtonShowHideLabelUsesChildRepliesLabel() {
     val reply = sampleReply(replyId = "reply-9000")
     val node =
         sampleNode(
@@ -297,7 +297,7 @@ class ReviewRepliesUiTest {
   // ---------- Tests for inline composer / RedditStyleComposer ----------
 
   @Test
-  fun inlineReplyComposer_showsTextFieldAndSendButton() {
+  fun inlineReplyComposerShowsTextFieldAndSendButton() {
     val reply = sampleReply(replyId = "reply-inline")
     val callbacks = emptyCallbacks()
 
@@ -323,7 +323,7 @@ class ReviewRepliesUiTest {
   }
 
   @Test
-  fun composerSendButton_disabledWhenTextBlank_enabledWhenTextNotBlank() {
+  fun composerSendButtonDisabledWhenTextBlankEnabledWhenTextNotBlank() {
     // Text inside the composer is driven by state, so we can update it without calling setContent
     // again
     val textState = mutableStateOf("")
@@ -365,7 +365,7 @@ class ReviewRepliesUiTest {
   // ---------- Tiny sanity-check around dimensions/constants (cheap coverage) ----------
 
   @Test
-  fun dimensions_areNonZero_forKeyValues() {
+  fun dimensionsAreNonZeroForKeyValues() {
     // These asserts are intentionally shallow; they just ping lines in the constants file.
     assert(ReviewRepliesDimensions.RootHeaderVerticalPadding.value > 0f)
     assert(ReviewRepliesDimensions.RootHeaderIconSize.value > 0f)

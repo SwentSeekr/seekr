@@ -47,7 +47,7 @@ class HuntCardTest {
           reviewRate = 4.5)
 
   @Test
-  fun huntCard_displaysTitleAndAuthor() {
+  fun huntCardDisplaysTitleAndAuthor() {
     val hunt = createFakeHunt()
     composeTestRule.setContent {
       HuntCard(hunt, authorName = "Alice", modifier = Modifier.Companion.padding(2.dp))
@@ -58,7 +58,7 @@ class HuntCardTest {
   }
 
   @Test
-  fun huntCard_displaysDistanceDifficultyAndTime() {
+  fun huntCardDisplaysDistanceDifficultyAndTime() {
     val hunt = createFakeHunt()
     composeTestRule.setContent { HuntCard(hunt, modifier = Modifier.Companion.padding(2.dp)) }
 
@@ -68,7 +68,7 @@ class HuntCardTest {
   }
 
   @Test
-  fun huntCard_displaysFavoriteIcon() {
+  fun huntCardDisplaysFavoriteIcon() {
     val hunt = createFakeHunt()
     composeTestRule.setContent { HuntCard(hunt, modifier = Modifier.Companion.padding(2.dp)) }
 
@@ -79,7 +79,7 @@ class HuntCardTest {
   }
 
   @Test
-  fun huntCard_likeButton_clickTriggersCallback() {
+  fun huntCardLikeButtonClickTriggersCallback() {
     val hunt = createFakeHunt()
     var clickedHuntId: String? = null
 
@@ -99,7 +99,7 @@ class HuntCardTest {
   }
 
   @Test
-  fun huntCard_likeButton_tintChangesWhenLiked() {
+  fun huntCardLikeButtonTintChangesWhenLiked() {
     val hunt = createFakeHunt()
 
     composeTestRule.setContent {

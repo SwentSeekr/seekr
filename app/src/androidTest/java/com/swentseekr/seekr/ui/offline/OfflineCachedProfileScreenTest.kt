@@ -24,14 +24,14 @@ class OfflineCachedProfileScreenTest {
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()
 
   @Test
-  fun showsOfflineMessage_whenProfileIsNull() {
+  fun showsOfflineMessageWhenProfileIsNull() {
     composeRule.setContent { MaterialTheme { OfflineCachedProfileScreen(profile = null) } }
 
     composeRule.onNodeWithText(OfflineConstants.OFFLINE_NO_PROFILE).assertExists()
   }
 
   @Test
-  fun showsProfileAndNoHuntsMessage_whenProfileHasNoHunts() {
+  fun showsProfileAndNoHuntsMessageWhenProfileHasNoHunts() {
     val profile =
         sampleProfile(
             pseudonym = "OfflineUser",
@@ -50,7 +50,7 @@ class OfflineCachedProfileScreenTest {
   }
 
   @Test
-  fun hidesBio_whenBlank() {
+  fun hidesBioWhenBlank() {
     val profile =
         sampleProfile(
             pseudonym = "NoBioUser",

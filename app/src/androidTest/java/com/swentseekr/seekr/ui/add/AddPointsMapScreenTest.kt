@@ -48,7 +48,7 @@ class AddPointsMapScreenTest {
   }
 
   @Test
-  fun initial_empty_showsTitle_cancel_andConfirmDisabled() {
+  fun initialEmptyShowsTitleCancelAndConfirmDisabled() {
     var canceled = false
     setContent(onCancel = { canceled = true })
 
@@ -71,7 +71,7 @@ class AddPointsMapScreenTest {
   }
 
   @Test
-  fun initPoints_two_enablesConfirm_andConfirmPassesPoints() {
+  fun initPointsTwoEnablesConfirmAndConfirmPassesPoints() {
     val p1 = Location(0.0, 0.0, "A")
     val p2 = Location(1.0, 1.0, "B")
     var received: List<Location>? = null
@@ -95,7 +95,7 @@ class AddPointsMapScreenTest {
   }
 
   @Test
-  fun pointNameDialog_validationLogic_works() {
+  fun pointNameDialogValidationLogicWorks() {
     var confirmedName: String? = null
     var confirmedDescription: String? = null
 

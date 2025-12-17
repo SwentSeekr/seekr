@@ -225,7 +225,7 @@ class HuntCardScreenTest {
   }
 
   @Test
-  fun huntCardScreen_showsDotsWhenMultipleImages() {
+  fun huntCardScreenShowsDotsWhenMultipleImages() {
     val huntWithImages =
         createFakeHunt()
             .copy(
@@ -248,7 +248,7 @@ class HuntCardScreenTest {
   }
 
   @Test
-  fun huntCardScreen_noDotsWhenSingleImage() {
+  fun huntCardScreenNoDotsWhenSingleImage() {
     val singleImageHunt =
         createFakeHunt()
             .copy(
@@ -269,7 +269,7 @@ class HuntCardScreenTest {
   }
 
   @Test
-  fun huntCardScreen_tapCenterImageOpensFullscreen() {
+  fun huntCardScreenTapCenterImageOpensFullscreen() {
     val huntWithImage =
         createFakeHunt()
             .copy(
@@ -311,7 +311,7 @@ class HuntCardScreenTest {
   }
 
   @Test
-  fun likeButton_reflectsLikedHuntsCacheInitially() {
+  fun likeButtonReflectsLikedHuntsCacheInitially() {
     val fakeVm = FakeHuntCardViewModel(createFakeHunt())
     fakeVm.setLiked(true)
 
@@ -326,7 +326,7 @@ class HuntCardScreenTest {
   }
 
   @Test
-  fun likeButton_togglesStateAndUi_onClick() {
+  fun likeButtonTogglesStateAndUiOnClick() {
     val fakeVm = FakeHuntCardViewModel(createFakeHunt())
 
     composeTestRule.setContent {
@@ -348,7 +348,7 @@ class HuntCardScreenTest {
   }
 
   @Test
-  fun likeButton_updatesUiBasedOnLikedHuntsCache() {
+  fun likeButtonUpdatesUiBasedOnLikedHuntsCache() {
     val fakeVm = FakeHuntCardViewModel(createFakeHunt())
     fakeVm.setLikedHunts(setOf(HuntCardScreenConstantStrings.TEST_HUNT_ID))
 
@@ -369,7 +369,7 @@ class HuntCardScreenTest {
   }
 
   @Test
-  fun launchedEffects_loadCurrentUserAndHunt() {
+  fun launchedEffectsLoadCurrentUserAndHunt() {
     val fakeVm = FakeHuntCardViewModel(createFakeHunt())
 
     composeTestRule.setContent {
@@ -386,7 +386,7 @@ class HuntCardScreenTest {
   }
 
   @Test
-  fun addReviewButton_isNotShown_whenCurrentUserAlreadyReviewed() {
+  fun addReviewButtonIsNotShownWhenCurrentUserAlreadyReviewed() {
     // Given: a hunt where the current user is NOT the author
     val hunt = createFakeHunt().copy(authorId = HuntCardScreenConstantStrings.OTHER_AUTHOR_ID)
 

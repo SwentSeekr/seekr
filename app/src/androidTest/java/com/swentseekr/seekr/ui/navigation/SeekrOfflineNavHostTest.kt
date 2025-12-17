@@ -36,7 +36,7 @@ class SeekrOfflineNavHostTest {
   @Before fun setup() = runBlocking { FirebaseTestEnvironment.setup() }
 
   @Test
-  fun navigateToHuntCard_displaysHuntCardScreen() {
+  fun navigateToHuntCardDisplaysHuntCardScreen() {
     lateinit var navController: NavHostController
 
     composeTestRule.setContent {
@@ -61,7 +61,7 @@ class SeekrOfflineNavHostTest {
   }
 
   @Test
-  fun navigateToReviewImages_displaysImageReviewScreen() {
+  fun navigateToReviewImagesDisplaysImageReviewScreen() {
     lateinit var navController: NavHostController
 
     composeTestRule.setContent {
@@ -92,7 +92,7 @@ class SeekrOfflineNavHostTest {
    * }
    */
   @Test
-  fun clickingOverviewHunt_navigatesViaOnHuntClick_toHuntCard() {
+  fun clickingOverviewHuntNavigatesViaOnHuntClickToHuntCard() {
     val offlineHunt =
         createOverviewTestHunt(
             uid = "offline-hunt-id",
@@ -127,7 +127,7 @@ class SeekrOfflineNavHostTest {
    * and to render the Map and Profile surfaces.
    */
   @Test
-  fun bottomBarTabs_navigateToMapAndProfile_andRenderScreens() {
+  fun bottomBarTabsNavigateToMapAndProfileAndRenderScreens() {
     val cachedProfile =
         sampleProfile(
             myHunts = emptyList(),

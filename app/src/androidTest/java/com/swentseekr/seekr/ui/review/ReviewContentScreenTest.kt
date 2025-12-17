@@ -23,7 +23,7 @@ class ReviewContentScreenTest {
   @get:Rule val composeRule = createAndroidComposeRule<ComponentActivity>()
 
   @Test
-  fun loadReview_called_when_reviewId_notEmpty() {
+  fun loadReviewCalledWhenReviewIdNotEmpty() {
     val fakeHunt =
         Hunt(
             uid = "hunt1",

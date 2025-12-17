@@ -92,7 +92,7 @@ class OverviewScreenTest {
   // ---------------- Filter bar tests ----------------
 
   @Test
-  fun filterBar_displaysAllFilterButtons() {
+  fun filterBarDisplaysAllFilterButtons() {
     composeTestRule.setContent {
       ModernFilterBar(
           selectedStatus = null,
@@ -118,7 +118,7 @@ class OverviewScreenTest {
   }
 
   @Test
-  fun filterButton_click_triggersCallback() {
+  fun filterButtonClickTriggersCallback() {
     var clicked = false
     val index = 4
 
@@ -140,7 +140,7 @@ class OverviewScreenTest {
   // ---------------- HuntCard tests (stateless) ----------------
 
   @Test
-  fun huntCard_displaysLikeButton() {
+  fun huntCardDisplaysLikeButton() {
     composeTestRule.setContent {
       HuntCard(hunt = testHunt, authorName = "Alice", isLiked = false, onLikeClick = {})
     }
@@ -152,7 +152,7 @@ class OverviewScreenTest {
   }
 
   @Test
-  fun huntCard_likeButton_triggersCallback() {
+  fun huntCardLikeButtonTriggersCallback() {
     var clickedHuntId: String? = null
 
     composeTestRule.setContent {
@@ -169,7 +169,7 @@ class OverviewScreenTest {
   }
 
   @Test
-  fun huntCard_likedHunt_showsRedHeart() {
+  fun huntCardLikedHuntShowsRedHeart() {
     composeTestRule.setContent { HuntCard(hunt = testHunt, isLiked = true, onLikeClick = {}) }
 
     composeTestRule
@@ -180,7 +180,7 @@ class OverviewScreenTest {
   }
 
   @Test
-  fun huntCard_unlikedHunt_showsGrayHeart() {
+  fun huntCardUnlikedHuntShowsGrayHeart() {
     composeTestRule.setContent { HuntCard(hunt = testHunt, isLiked = false, onLikeClick = {}) }
 
     composeTestRule
@@ -193,7 +193,7 @@ class OverviewScreenTest {
   // ---------------- HuntCard + ViewModel integration ----------------
 
   @Test
-  fun huntCard_withViewModel_togglesLikeState() {
+  fun huntCardWithViewModelTogglesLikeState() {
     val userId = "test_user"
     fakeProfileRepository.addProfile(Profile(uid = userId))
 
@@ -219,7 +219,7 @@ class OverviewScreenTest {
   }
 
   @Test
-  fun viewModel_isHuntLiked_returnsCorrectValue() {
+  fun viewModelIsHuntLikedReturnsCorrectValue() {
     val userId = "test_user"
     fakeProfileRepository.addProfile(Profile(uid = userId))
 
@@ -240,7 +240,7 @@ class OverviewScreenTest {
   // ---------------- LazyColumn + HuntCard list ----------------
 
   @Test
-  fun lazyColumn_onLikeClick_dynamicList_isCovered() {
+  fun lazyColumnOnLikeClickDynamicListIsCovered() {
     val hunts =
         listOf(
             createHunt(uid = "hunt_1", title = "Hunt One"),
@@ -271,7 +271,7 @@ class OverviewScreenTest {
   // ---------------- OverviewScreen + pull-to-refresh ----------------
 
   @Test
-  fun overviewScreen_displaysHeaderSearchFiltersAndList() {
+  fun overviewScreenDisplaysHeaderSearchFiltersAndList() {
     // Given an OverviewViewModel backed by the fake repository
     val overviewViewModel = OverviewViewModel(fakeHuntRepository)
 
@@ -293,7 +293,7 @@ class OverviewScreenTest {
   }
 
   @Test
-  fun overviewScreen_showsHuntCardsFromRepository_inLazyList() {
+  fun overviewScreenShowsHuntCardsFromRepositoryInLazyList() {
     val overviewViewModel = OverviewViewModel(fakeHuntRepository, fakeProfileRepository)
 
     composeTestRule.setContent {
@@ -317,7 +317,7 @@ class OverviewScreenTest {
   }
 
   @Test
-  fun overviewScreen_containsPullToRefreshIndicatorInsideListContainer() {
+  fun overviewScreenContainsPullToRefreshIndicatorInsideListContainer() {
     val overviewViewModel = OverviewViewModel(fakeHuntRepository)
 
     composeTestRule.setContent {

@@ -46,7 +46,7 @@ class SettingsScreenTest {
   // ----------------------------------------------------------------------------------------------
 
   @Test
-  fun screen_displays_all_main_elements() {
+  fun screenDisplaysAllMainElements() {
     composeRule.setContent { MaterialTheme { SettingsScreen() } }
 
     composeRule.onNodeWithTag(SettingsScreenTestTags.BACK_BUTTON).assertExists()
@@ -60,14 +60,14 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun top_bar_title_is_displayed() {
+  fun topBarTitleIsDisplayed() {
     composeRule.setContent { MaterialTheme { SettingsScreen() } }
 
     composeRule.onNodeWithText(SettingsScreenStrings.TOP_BAR_TITLE).assertExists()
   }
 
   @Test
-  fun clicking_back_button_triggers_callback() {
+  fun clickingBackButtonTriggersCallback() {
     var backPressed = false
 
     composeRule.setContent { MaterialTheme { SettingsScreen(onGoBack = { backPressed = true }) } }
@@ -77,7 +77,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun settingsScreen_toggles_reflect_viewModel_state() {
+  fun settingsScreenTogglesReflectViewModelState() {
     val viewModel = SettingsViewModel()
 
     composeRule.setContent {
@@ -102,7 +102,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun settingsScreen_app_version_uses_viewModel_state_and_handles_null() {
+  fun settingsScreenAppVersionUsesViewModelStateAndHandlesNull() {
     val viewModel = SettingsViewModel()
 
     // version explicitly set
@@ -134,7 +134,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun settingsScreen_clicking_edit_profile_button_triggers_callback() {
+  fun settingsScreenClickingEditProfileButtonTriggersCallback() {
     var editProfileTriggered = false
     val viewModel = SettingsViewModel()
 
@@ -150,7 +150,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun when_signedOut_true_onSignedOut_callback_is_called_initially() {
+  fun whenSignedOutTrueOnSignedOutCallbackIsCalledInitially() {
     val viewModel = SettingsViewModel()
     setUiState(
         viewModel,
@@ -170,7 +170,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun when_signedOut_changes_from_false_to_true_onSignedOut_called_once() {
+  fun whenSignedOutChangesFromFalseToTrueOnSignedOutCalledOnce() {
     val viewModel = SettingsViewModel()
     // Start with signedOut = false
     setUiState(
@@ -204,7 +204,7 @@ class SettingsScreenTest {
   // ----------------------------------------------------------------------------------------------
 
   @Test
-  fun clicking_callbacks_work_in_SettingsContent() {
+  fun clickingCallbacksWorkInSettingsContent() {
     var editProfileClicked = false
     var logoutClicked = false
     var notificationsToggled = false
@@ -246,7 +246,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun clicking_edit_profile_button_triggers_callback() {
+  fun clickingEditProfileButtonTriggersCallback() {
     var editProfileTriggered = false
 
     val uiState = SettingsUIState(appVersion = SettingsScreenStrings.APP_VERSION_1)
@@ -265,7 +265,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun clicking_logout_button_triggers_callback() {
+  fun clickingLogoutButtonTriggersCallback() {
     var logoutTriggered = false
 
     val uiState = SettingsUIState(appVersion = SettingsScreenStrings.APP_VERSION_1)
@@ -282,7 +282,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun app_version_is_displayed_correctly() {
+  fun appVersionIsDisplayedCorrectly() {
     val expectedVersion = SettingsScreenStrings.APP_VERSION_2
     val uiState = SettingsUIState(appVersion = expectedVersion)
 
@@ -297,7 +297,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun app_version_is_unknown_when_null() {
+  fun appVersionIsUnknownWhenNull() {
     val uiState = SettingsUIState(appVersion = null)
 
     composeRule.setContent {
@@ -311,7 +311,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun toggles_reflect_initial_ui_state() {
+  fun togglesReflectInitialUiState() {
     val uiState =
         SettingsUIState(
             appVersion = SettingsScreenStrings.APP_VERSION_1,
@@ -331,7 +331,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun toggles_call_callbacks_with_false_when_initially_true() {
+  fun togglesCallCallbacksWithFalseWhenInitiallyTrue() {
     var notificationsValue: Boolean? = null
     var picturesValue: Boolean? = null
     var localisationValue: Boolean? = null
@@ -366,7 +366,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun app_condition_button_is_present_in_SettingsContent() {
+  fun appConditionButtonIsPresentInSettingsContent() {
     val uiState =
         SettingsUIState(
             appVersion = SettingsScreenStrings.APP_VERSION_1,
@@ -385,7 +385,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun settingsContent_toggles_with_default_callbacks_do_not_crash() {
+  fun settingsContentTogglesWithDefaultCallbacksDoNotCrash() {
     val uiState =
         SettingsUIState(
             appVersion = SettingsScreenStrings.APP_VERSION_1,
@@ -407,7 +407,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun handlePermissions_processes_gallery_and_location_events() {
+  fun handlePermissionsProcessesGalleryAndLocationEvents() {
     val viewModel = SettingsViewModel()
 
     composeRule.setContent {
@@ -435,7 +435,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun handlePermissions_processes_notification_event() {
+  fun handlePermissionsProcessesNotificationEvent() {
     val viewModel = SettingsViewModel()
 
     composeRule.setContent {
@@ -458,7 +458,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun handlePermissions_processes_permission_events() {
+  fun handlePermissionsProcessesPermissionEvents() {
     val viewModel = SettingsViewModel()
 
     composeRule.setContent {
@@ -486,7 +486,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun clicking_edit_profile_with_default_callback_does_not_crash() {
+  fun clickingEditProfileWithDefaultCallbackDoesNotCrash() {
     val viewModel = SettingsViewModel()
 
     composeRule.setContent {
@@ -501,7 +501,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun settingsScreen_allows_custom_credentialManager() {
+  fun settingsScreenAllowsCustomCredentialManager() {
     val viewModel = SettingsViewModel()
     val activity = composeRule.activity
     val credentialManager = CredentialManager.create(activity)
@@ -517,7 +517,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun handlePermissions_collects_permission_events() {
+  fun handlePermissionsCollectsPermissionEvents() {
     val viewModel = SettingsViewModel()
 
     composeRule.setContent { MaterialTheme { SettingsScreen(viewModel = viewModel) } }
@@ -542,7 +542,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun notification_permission_launcher_executes_when_permission_granted() {
+  fun notificationPermissionLauncherExecutesWhenPermissionGranted() {
     val viewModel = SettingsViewModel()
 
     composeRule.setContent {
@@ -556,7 +556,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun notification_permission_executes_else_block_and_updates_state() {
+  fun notificationPermissionExecutesElseBlockAndUpdatesState() {
     val viewModel = SettingsViewModel()
 
     composeRule.setContent {
@@ -578,7 +578,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun all_permission_grants_update_all_ui_states_correctly() {
+  fun allPermissionGrantsUpdateAllUiStatesCorrectly() {
     val viewModel = SettingsViewModel()
 
     composeRule.setContent {
@@ -616,7 +616,7 @@ class SettingsScreenTest {
   }
 
   @Test
-  fun multiple_notification_permission_grants_remain_consistent() {
+  fun multipleNotificationPermissionGrantsRemainConsistent() {
     val viewModel = SettingsViewModel()
 
     composeRule.setContent { MaterialTheme { SettingsScreen(viewModel = viewModel) } }

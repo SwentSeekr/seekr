@@ -232,7 +232,7 @@ class HuntsRepositoryFirestoreTest {
   }
 
   @Test
-  fun editHunt_updatesImagesCorrectly_withDeletion_andAddition() = runTest {
+  fun editHuntUpdatesImagesCorrectlyWithDeletionAndAddition() = runTest {
     val fakeImageRepo = FakeHuntsImageRepository()
     val db = FirebaseFirestore.getInstance()
     val repo = HuntsRepositoryFirestore(db, fakeImageRepo)
@@ -285,7 +285,7 @@ class HuntsRepositoryFirestoreTest {
   }
 
   @Test(expected = Exception::class)
-  fun editHunt_fails_when_image_repo_fails() = runTest {
+  fun editHuntFailsWhenImageRepoFails() = runTest {
     val imageRepo = FakeHuntsImageRepository(shouldFail = true)
     val db = FirebaseFirestore.getInstance()
     val repo = HuntsRepositoryFirestore(db, imageRepo)
@@ -300,7 +300,7 @@ class HuntsRepositoryFirestoreTest {
   }
 
   @Test
-  fun addHunt_uploadsOtherImages_whenProvided_andStoresUrls() = runTest {
+  fun addHuntUploadsOtherImagesWhenProvidedAndStoresUrls() = runTest {
     val fakeImageRepo = FakeHuntsImageRepository()
     val db = FirebaseFirestore.getInstance()
     val repo = HuntsRepositoryFirestore(db = db, imageRepo = fakeImageRepo)
@@ -323,7 +323,7 @@ class HuntsRepositoryFirestoreTest {
   }
 
   @Test
-  fun addHunt_whenOtherUploadFails_callsCleanup_andRethrows_andDoesNotWriteDoc() = runTest {
+  fun addHuntWhenOtherUploadFailsCallsCleanupAndRethrowsAndDoesNotWriteDoc() = runTest {
     val db = FirebaseFirestore.getInstance()
     val imageRepo = FailingOnOtherUploadsImageRepo()
     val repo = HuntsRepositoryFirestore(db = db, imageRepo = imageRepo)
@@ -349,7 +349,7 @@ class HuntsRepositoryFirestoreTest {
   }
 
   @Test
-  fun deleteHunt_deletesReviewsRepliesAndReviewPhotos() = runTest {
+  fun deleteHuntDeletesReviewsRepliesAndReviewPhotos() = runTest {
     val db = FirebaseFirestore.getInstance()
     val fakeImageRepo = FakeHuntsImageRepository()
     val fakeReviewImageRepo = FakeReviewImageRepository()
@@ -388,7 +388,7 @@ class HuntsRepositoryFirestoreTest {
   }
 
   @Test
-  fun getAllHunts_skipsInvalidDocuments_andCoversDocumentToHuntCatch() = runTest {
+  fun getAllHuntsSkipsInvalidDocumentsAndCoversDocumentToHuntCatch() = runTest {
     val db = FirebaseFirestore.getInstance()
     val repo = HuntsRepositoryFirestore(db = db, imageRepo = FakeHuntsImageRepository())
 

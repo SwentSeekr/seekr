@@ -81,7 +81,7 @@ class ProfileScreenTest {
   }
 
   @Test
-  fun profileScreen_displaysProfileInfo() {
+  fun profileScreenDisplaysProfileInfo() {
     setProfileScreen(sampleProfile())
 
     composeTestRule.onNodeWithTag(ProfileTestTags.PROFILE_PICTURE).assertIsDisplayed()
@@ -100,7 +100,7 @@ class ProfileScreenTest {
   }
 
   @Test
-  fun profileScreen_profilePictureFallback() {
+  fun profileScreenProfilePictureFallback() {
     val profile = sampleProfile()
     composeTestRule.setContent {
       ProfileScreen(
@@ -112,14 +112,14 @@ class ProfileScreenTest {
   }
 
   @Test
-  fun profileScreen_addHuntButton_visibilityDependsOnProfile_notDisplayed() {
+  fun profileScreenAddHuntButtonVisibilityDependsOnProfileNotDisplayed() {
     composeTestRule.setContent { ProfileScreen(userId = "otherUser", testMode = false) }
 
     composeTestRule.onNodeWithTag(ProfileTestTags.ADD_HUNT).assertIsNotDisplayed()
   }
 
   @Test
-  fun profileScreen_displaysHuntsInLazyColumn() {
+  fun profileScreenDisplaysHuntsInLazyColumn() {
     val myHunts = List(3) { createHunt("hunt$it", "My Hunt $it") }
     setProfileScreen(sampleProfile(myHunts = myHunts))
 
@@ -137,7 +137,7 @@ class ProfileScreenTest {
   }
 
   @Test
-  fun profileScreen_tabSwitchingShowsCorrectHunts() {
+  fun profileScreenTabSwitchingShowsCorrectHunts() {
 
     val myHunt = createHunt("hunt1", "My Hunt")
     val doneHunt = createHunt("hunt2", "Done Hunt")
@@ -166,7 +166,7 @@ class ProfileScreenTest {
 
   @Composable
   @Test
-  fun profileScreen_tabBackgroundChanges() {
+  fun profileScreenTabBackgroundChanges() {
     val SELECTED = MaterialTheme.colorScheme.primary
     val UNSELECTED = MaterialTheme.colorScheme.onSurface.copy(alpha = ProfileConstants.ALPHA)
     val profile =
@@ -203,29 +203,29 @@ class ProfileScreenTest {
   }
 
   @Test
-  fun profileScreen_displaysEmptyMessage_whenMyHuntsEmpty() {
+  fun profileScreenDisplaysEmptyMessageWhenMyHuntsEmpty() {
     assertEmptyStateForTab()
   }
 
   @Test
-  fun profileScreen_displaysEmptyMessage_whenDoneHuntsEmpty() {
+  fun profileScreenDisplaysEmptyMessageWhenDoneHuntsEmpty() {
     assertEmptyStateForTab(ProfileTestTags.TAB_DONE_HUNTS)
   }
 
   @Test
-  fun profileScreen_displaysEmptyMessage_whenLikedHuntsEmpty() {
+  fun profileScreenDisplaysEmptyMessageWhenLikedHuntsEmpty() {
     assertEmptyStateForTab(ProfileTestTags.TAB_LIKED_HUNTS)
   }
 
   @Test
-  fun profileScreen_settingsButton_visibilityDependsOnProfile_notDisplayed() {
+  fun profileScreenSettingsButtonVisibilityDependsOnProfileNotDisplayed() {
     composeTestRule.setContent { ProfileScreen(userId = "otherUser", testMode = false) }
 
     composeTestRule.onNodeWithTag(ProfileTestTags.SETTINGS).assertIsNotDisplayed()
   }
 
   @Test
-  fun profileScreen_displaysCorrectCalculatedRatings() {
+  fun profileScreenDisplaysCorrectCalculatedRatings() {
     val myHunts =
         listOf(
             createHuntWithRateAndDifficulty("hunt1", "Hunt 1", reviewRate = 2.0),
@@ -256,7 +256,7 @@ class ProfileScreenTest {
   }
 
   @Test
-  fun profileScreen_displaysCorrectReviewCountAndHuntsDone_withoutRepository() {
+  fun profileScreenDisplaysCorrectReviewCountAndHuntsDoneWithoutRepository() {
     val myHunts =
         listOf(
             createHuntWithRateAndDifficulty("hunt1", "Hunt 1"),
@@ -286,7 +286,7 @@ class ProfileScreenTest {
   }
 
   @Test
-  fun profileScreen_likedHuntsTab_displaysLikedHunts() {
+  fun profileScreenLikedHuntsTabDisplaysLikedHunts() {
     val likedHunts = List(3) { createHunt("liked$it", "Liked Hunt $it") }
     val profile = sampleProfile(likedHunts = likedHunts)
     setProfileScreen(profile)
@@ -306,7 +306,7 @@ class ProfileScreenTest {
   }
 
   @Test
-  fun profileScreen_likedHuntsTab_showsEmptyMessage_whenNoLikedHunts() {
+  fun profileScreenLikedHuntsTabShowsEmptyMessageWhenNoLikedHunts() {
     val profile = sampleProfile(likedHunts = emptyList())
     setProfileScreen(profile)
 

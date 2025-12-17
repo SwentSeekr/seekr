@@ -31,7 +31,7 @@ class BaseReviewScreenTest {
   private val fakePhotos = listOf("uri1", "uri2")
 
   @Test
-  fun screen_displays_all_elements() {
+  fun screenDisplaysAllElements() {
     composeRule.setContent {
       MaterialTheme {
         BaseReviewScreen(
@@ -59,7 +59,7 @@ class BaseReviewScreenTest {
   }
 
   @Test
-  fun star_rating_can_be_selected() {
+  fun starRatingCanBeSelected() {
     var newRating = 0
 
     composeRule.setContent {
@@ -85,7 +85,7 @@ class BaseReviewScreenTest {
   }
 
   @Test
-  fun clicking_buttons_triggers_callbacks() {
+  fun clickingButtonsTriggersCallbacks() {
     var backCalled = false
     var doneCalled = false
     var cancelCalled = false
@@ -123,7 +123,7 @@ class BaseReviewScreenTest {
   }
 
   @Test
-  fun clicking_add_photos_calls_callback() {
+  fun clickingAddPhotosCallsCallback() {
     var addPhotoCalled = false
 
     composeRule.setContent {
@@ -149,7 +149,7 @@ class BaseReviewScreenTest {
   }
 
   @Test
-  fun lazyRow_isVisible_when_photos_exist() {
+  fun lazyRowIsVisibleWhenPhotosExist() {
     composeRule.setContent {
       MaterialTheme {
         BaseReviewScreen(

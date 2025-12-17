@@ -22,7 +22,7 @@ class OfflineMapTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   @Test
-  fun offlineMapScreen_displaysOfflineMapMessage() {
+  fun offlineMapScreenDisplaysOfflineMapMessage() {
     composeTestRule.setContent { TestOfflineMapScreen() }
 
     composeTestRule.onNodeWithText(OfflineConstants.OFFLINE_MAP_MESSAGE).assertIsDisplayed()

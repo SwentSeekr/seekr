@@ -82,7 +82,7 @@ class EditProfileScreenTest {
       onNodeWithTag(EditProfileTestTags.PROFILE_PICTURE).performClick()
 
   @Test
-  fun clickingProfilePicture_opensDialog() {
+  fun clickingProfilePictureOpensDialog() {
     var showDialog by mutableStateOf(false)
     composeTestRule.setContent {
       SampleAppTheme {
@@ -115,7 +115,7 @@ class EditProfileScreenTest {
   }
 
   @Test
-  fun saveButton_showsSavingText_whenIsSaving() {
+  fun saveButtonShowsSavingTextWhenIsSaving() {
     setContent(uiState = EditProfileUIState(canSave = true, isSaving = true))
     composeTestRule
         .onNodeWithTag(EditProfileTestTags.SAVE_BUTTON)
@@ -123,13 +123,13 @@ class EditProfileScreenTest {
   }
 
   @Test
-  fun saveButton_showsSuccessMessage() {
+  fun saveButtonShowsSuccessMessage() {
     setContent(uiState = EditProfileUIState(success = true))
     composeTestRule.onNodeWithTag(EditProfileTestTags.SUCCESS_MESSAGE).assertIsDisplayed()
   }
 
   @Test
-  fun clickProfilePicture_triggersDialog() {
+  fun clickProfilePictureTriggersDialog() {
 
     composeTestRule.setContent {
       SampleAppTheme { EditProfileScreen(testMode = true, onGoBack = {}, onDone = {}) }
@@ -139,7 +139,7 @@ class EditProfileScreenTest {
   }
 
   @Test
-  fun saveButtonEnabled_whenErrorDisplayed() {
+  fun saveButtonEnabledWhenErrorDisplayed() {
     setContent(
         uiState =
             EditProfileUIState(
@@ -149,19 +149,19 @@ class EditProfileScreenTest {
   }
 
   @Test
-  fun editProfileContent_saveButton_disabled_whenIsSaving() {
+  fun editProfileContentSaveButtonDisabledWhenIsSaving() {
     setContent(uiState = EditProfileUIState(isSaving = true, canSave = true))
     composeTestRule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).assertIsNotEnabled()
   }
 
   @Test
-  fun editProfileContent_saveButton_disabled_whenIsSavingOrCannotSave() {
+  fun editProfileContentSaveButtonDisabledWhenIsSavingOrCannotSave() {
     setContent(uiState = EditProfileUIState(canSave = false, isSaving = false))
     composeTestRule.onNodeWithTag(EditProfileTestTags.SAVE_BUTTON).assertIsNotEnabled()
   }
 
   @Test
-  fun bioTooLong_showsError() {
+  fun bioTooLongShowsError() {
 
     var bio by mutableStateOf(EditProfileStrings.EMPTY_STRING)
     setContent(pseudonymChange = { bio = it })
@@ -172,7 +172,7 @@ class EditProfileScreenTest {
   }
 
   @Test
-  fun profilePicture_whenNoneSelected_isDefault() {
+  fun profilePictureWhenNoneSelectedIsDefault() {
     val state = EditProfileUIState()
 
     setContent(uiState = state)
@@ -182,14 +182,14 @@ class EditProfileScreenTest {
   }
 
   @Test
-  fun profilePictureUrl_displayedFromUiState() {
+  fun profilePictureUrlDisplayedFromUiState() {
     val testUrl = "https://example.com/profile.jpg"
     setContent(uiState = EditProfileUIState(profilePictureUrl = testUrl))
     composeTestRule.onNodeWithTag(EditProfileTestTags.PROFILE_PICTURE).assertIsDisplayed()
   }
 
   @Test
-  fun loadingState_disablesAllInputs() {
+  fun loadingStateDisablesAllInputs() {
     setContent(uiState = EditProfileUIState(isLoading = true))
     composeTestRule.onNodeWithTag(EditProfileTestTags.PSEUDONYM_FIELD).assertIsNotEnabled()
     composeTestRule.onNodeWithTag(EditProfileTestTags.BIO_FIELD).assertIsNotEnabled()
@@ -198,7 +198,7 @@ class EditProfileScreenTest {
   }
 
   @Test
-  fun notLoadingState_enablesAllInputs() {
+  fun notLoadingStateEnablesAllInputs() {
     setContent(uiState = EditProfileUIState(isLoading = false, canSave = true))
     composeTestRule.onNodeWithTag(EditProfileTestTags.PSEUDONYM_FIELD).assertIsEnabled()
     composeTestRule.onNodeWithTag(EditProfileTestTags.BIO_FIELD).assertIsEnabled()
@@ -206,7 +206,7 @@ class EditProfileScreenTest {
   }
 
   @Test
-  fun profilePicture_uriTakesPrecedenceOverUrl() {
+  fun profilePictureUriTakesPrecedenceOverUrl() {
     val testUri = Uri.parse("content://test/new.jpg")
     val testUrl = "https://example.com/old.jpg"
     setContent(
@@ -216,7 +216,7 @@ class EditProfileScreenTest {
   }
 
   @Test
-  fun profilePictureDialog_cancelButton_closesDialog() {
+  fun profilePictureDialogCancelButtonClosesDialog() {
 
     composeTestRule.setContent {
       SampleAppTheme { EditProfileScreen(testMode = true, onGoBack = {}, onDone = {}) }
@@ -227,7 +227,7 @@ class EditProfileScreenTest {
   }
 
   @Test
-  fun editProfileContent_localError_overridesUiStateError_andSuccess() {
+  fun editProfileContentLocalErrorOverridesUiStateErrorAndSuccess() {
     var pseudonymChanged = EditProfileStrings.EMPTY_STRING
     composeTestRule.setContent {
       EditProfileContent(
@@ -253,7 +253,7 @@ class EditProfileScreenTest {
   }
 
   @Test
-  fun cameraButton_triggersLaunchCheckedByDisappearingDialog() {
+  fun cameraButtonTriggersLaunchCheckedByDisappearingDialog() {
     var cameraLaunched = false
     var showDialog by mutableStateOf(true)
 
@@ -292,7 +292,7 @@ class EditProfileScreenTest {
   }
 
   @Test
-  fun pseudonymAndBioChange_updatesFieldsAndEnablesSave() {
+  fun pseudonymAndBioChangeUpdatesFieldsAndEnablesSave() {
     var pseudonym by mutableStateOf(EditProfileStrings.EMPTY_STRING)
     var bio by mutableStateOf(EditProfileStrings.EMPTY_STRING)
     var uiState by
@@ -328,14 +328,14 @@ class EditProfileScreenTest {
   }
 
   @Test
-  fun createImageUri_success_returnsUri() {
+  fun createImageUriSuccessReturnsUri() {
     val context = ApplicationProvider.getApplicationContext<Context>()
     val uri = createImageUri(context)
     assert(uri != null)
   }
 
   @Test
-  fun galleryLauncher_nullUri_doesNothing() {
+  fun galleryLauncherNullUriDoesNothing() {
     composeTestRule.setContent { EditProfileScreen(testMode = true) }
     composeTestRule.onNodeWithTag(EditProfileTestTags.PROFILE_PICTURE).performClick()
     composeTestRule.onNodeWithTag(EditProfileTestTags.GALLERY_BUTTON).performClick()
@@ -344,7 +344,7 @@ class EditProfileScreenTest {
   }
 
   @Test
-  fun clickingGalleryButton_closesDialog() {
+  fun clickingGalleryButtonClosesDialog() {
     composeTestRule.setContent { EditProfileScreen(testMode = true) }
 
     composeTestRule.clickProfilePicture()
@@ -353,7 +353,7 @@ class EditProfileScreenTest {
   }
 
   @Test
-  fun removeProfilePictureButton_shown_whenProfileNotDefault() {
+  fun removeProfilePictureButtonShownWhenProfileNotDefault() {
 
     var showDialog by mutableStateOf(false)
     composeTestRule.setContent {
